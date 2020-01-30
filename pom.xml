@@ -119,6 +119,7 @@
         <module>loader</module>
         <module>gateway</module>
         <module>timeseries</module>
+        <module>logisland-timeseries</module>
     </modules>
 
 
