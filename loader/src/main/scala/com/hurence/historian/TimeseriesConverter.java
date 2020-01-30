@@ -107,7 +107,7 @@ public class TimeseriesConverter extends AbstractProcessor {
     public byte[] serialize(TimeSeriesRecord tsRecord) {
 
         // has Id
-        final String hashString = DigestUtils.sha256Hex(tsRecord.getField(FieldDictionary.CHUNK_VALUE).asBytes());
+        final String hashString = DigestUtils.sha256Hex(tsRecord.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes());
         tsRecord.setId(hashString);
 
 
@@ -125,7 +125,7 @@ public class TimeseriesConverter extends AbstractProcessor {
                 byte[] content = f.asBytes();
                 if (content != null) {
                     try {
-                        tsRecord.setStringField(FieldDictionary.CHUNK_VALUE, BinaryEncodingUtils.encode(content));
+                        tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, BinaryEncodingUtils.encode(content));
                     } catch (Exception e) {
                         tsRecord.addError("PROCESSING ERROR", getLogger(),
                                 "Unable to encode field '{}' : {}",
