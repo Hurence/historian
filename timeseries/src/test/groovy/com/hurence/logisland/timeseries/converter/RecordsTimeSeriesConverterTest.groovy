@@ -18,6 +18,7 @@ package com.hurence.logisland.timeseries.converter
 import com.hurence.logisland.record.FieldDictionary
 import com.hurence.logisland.record.FieldType
 import com.hurence.logisland.record.StandardRecord
+import com.hurence.logisland.record.TimeSeriesRecord
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
 import spock.lang.Specification
 
@@ -65,8 +66,8 @@ class RecordsTimeSeriesConverterTest extends Specification {
         then:
         chunkRecord != null
         chunkRecord.getAllFields().size() == 11
-        chunkRecord.getField(FieldDictionary.CHUNK_START).asLong() == start
-        chunkRecord.getField(FieldDictionary.CHUNK_END).asLong() == end
+        chunkRecord.getField(TimeSeriesRecord.CHUNK_START).asLong() == start
+        chunkRecord.getField(TimeSeriesRecord.CHUNK_END).asLong() == end
         chunkRecord.getField(FieldDictionary.RECORD_NAME).asString() == name
         chunkRecord.getTimeSeries().attributes().get("host") == host
 
