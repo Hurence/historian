@@ -1,5 +1,6 @@
 package com.hurence.historian;
 
+import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.processor.AbstractProcessor;
@@ -114,7 +115,7 @@ public class TimeseriesConverter extends AbstractProcessor {
 
 
         // encode chunk_value to base64
-        Field f = tsRecord.getField(FieldDictionary.CHUNK_VALUE);
+        Field f = tsRecord.getField(TimeSeriesRecord.CHUNK_VALUE);
         if (f != null) {
             if (!(f.getType() == FieldType.BYTES || f.getType() == FieldType.NULL)) {
                 tsRecord.addError("FIELD TYPE", getLogger(),
