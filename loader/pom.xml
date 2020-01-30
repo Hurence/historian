@@ -1,19 +1,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.hurence.historian</groupId>
+    <parent>
+        <artifactId>historian</artifactId>
+        <groupId>com.hurence.historian</groupId>
+        <version>1.3.0</version>
+    </parent>
     <artifactId>loader</artifactId>
-    <version>1.1</version>
-    <name>${project.artifactId}</name>
-    <description>My wonderfull scala app</description>
-    <inceptionYear>2010</inceptionYear>
-    <licenses>
-        <license>
-            <name>My License</name>
-            <url>http://....</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -76,8 +69,8 @@
 
 
         <dependency>
-            <groupId>com.hurence.logisland</groupId>
-            <artifactId>logisland-timeseries</artifactId>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>timeseries</artifactId>
             <version>1.3.0</version>
         </dependency>
         <!--  <dependency>
