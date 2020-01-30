@@ -108,24 +108,24 @@ public class ConvertToTimeseriesTest {
         testRunner.assertOutputRecordsCount(1);
 
         MockRecord out = testRunner.getOutputRecords().get(0);
-        out.assertFieldExists(FieldDictionary.CHUNK_START);
-        out.assertFieldExists(FieldDictionary.CHUNK_END);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_START);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_END);
         out.assertFieldExists(FieldDictionary.RECORD_NAME);
         out.assertFieldExists(FieldDictionary.RECORD_TYPE);
-        out.assertFieldExists(FieldDictionary.CHUNK_VALUE);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_VALUE);
 
-        out.assertFieldEquals(FieldDictionary.CHUNK_START, 1000000);
-        out.assertFieldEquals(FieldDictionary.CHUNK_END, 1001999);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_START, 1000000);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_END, 1001999);
         out.assertFieldEquals(FieldDictionary.RECORD_NAME, "cpu.load");
         out.assertFieldEquals(FieldDictionary.RECORD_TYPE, SAMPLED_RECORD);
-        out.assertFieldTypeEquals(FieldDictionary.CHUNK_VALUE, FieldType.BYTES);
-        out.assertFieldEquals(FieldDictionary.CHUNK_SIZE, 2000);
-        out.assertFieldEquals(FieldDictionary.CHUNK_SIZE_BYTES, 8063);
+        out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8063);
 
         out.assertRecordSizeEquals(7);
 
 
-        byte[] binaryTimeseries = out.getField(FieldDictionary.CHUNK_VALUE).asBytes();
+        byte[] binaryTimeseries = out.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes();
 
 
         BinaryCompactionConverter.Builder builder = new BinaryCompactionConverter.Builder();
@@ -161,19 +161,19 @@ public class ConvertToTimeseriesTest {
 
         MockRecord out = testRunner.getOutputRecords().get(0);
 
-        out.assertFieldExists(FieldDictionary.CHUNK_MIN);
-        out.assertFieldExists(FieldDictionary.CHUNK_MAX);
-        out.assertFieldExists(FieldDictionary.CHUNK_AVG);
-        out.assertFieldExists(FieldDictionary.CHUNK_TREND);
-        out.assertFieldExists(FieldDictionary.CHUNK_OUTLIER);
-        out.assertFieldExists(FieldDictionary.CHUNK_SAX);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_MIN);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_MAX);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_AVG);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_TREND);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_OUTLIER);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_SAX);
 
-        out.assertFieldEquals(FieldDictionary.CHUNK_MIN, -1.0);
-        out.assertFieldEquals(FieldDictionary.CHUNK_MAX, 1.0);
-        out.assertFieldEquals(FieldDictionary.CHUNK_AVG, 0.0);
-        out.assertFieldEquals(FieldDictionary.CHUNK_TREND, false);
-        out.assertFieldEquals(FieldDictionary.CHUNK_OUTLIER, false);
-        out.assertFieldEquals(FieldDictionary.CHUNK_SAX, "gijigdbabdgijigdbabd");
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_MIN, -1.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_MAX, 1.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_AVG, 0.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_TREND, false);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_OUTLIER, false);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SAX, "gijigdbabdgijigdbabd");
         out.assertRecordSizeEquals(13);
 
     }
@@ -200,9 +200,9 @@ public class ConvertToTimeseriesTest {
 
         MockRecord out = testRunner.getOutputRecords().get(0);
 
-        out.assertFieldEquals(FieldDictionary.CHUNK_SIZE, 3);
-        out.assertFieldEquals(FieldDictionary.CHUNK_SUM, 5.5);
-        out.assertFieldEquals(FieldDictionary.CHUNK_FIRST_VALUE, 0.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 3);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SUM, 5.5);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_FIRST_VALUE, 0.0);
         out.assertRecordSizeEquals(9);
 
     }
