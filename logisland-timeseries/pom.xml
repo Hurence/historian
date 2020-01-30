@@ -14,10 +14,6 @@
 
     <name>Timeseries processors bundle</name>
 
-    <properties>
-        <protobuf.version>2.6.1</protobuf.version>
-        <logisland.version>1.2.0</logisland.version>
-    </properties>
 
     <dependencies>
         <dependency>

@@ -89,8 +89,8 @@
         <org.slf4j.version>1.7.16</org.slf4j.version>
         <org.log4j.version>1.2.16</org.log4j.version>
 
-        <logisland.version>${project.version}</logisland.version>
-
+        <protobuf.version>2.6.1</protobuf.version>
+        <logisland.version>1.2.0</logisland.version>
         <hadoop.version>2.7.1</hadoop.version>
         <hadoop.guava.version>18.0</hadoop.guava.version>
         <protobuf.version>2.5.0</protobuf.version>
