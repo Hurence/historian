@@ -36,8 +36,8 @@
 
         <!--        LOGISLAND-->
         <dependency>
-            <groupId>com.hurence.logisland</groupId>
-            <artifactId>logisland-timeseries</artifactId>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>timeseries</artifactId>
             <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
