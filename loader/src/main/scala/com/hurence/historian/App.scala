@@ -8,10 +8,21 @@ import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionCon
 import org.apache.commons.cli.{CommandLine, GnuParser, Option, OptionBuilder, Options, Parser}
 import org.apache.spark.sql.{Encoder, Encoders, Row, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
+import org.slf4j.{Logger, LoggerFactory}
 
 import scala.collection.JavaConversions._
 
-case class EvoaMeasure(tagname: String, timestamp: Long, value: Double, quality: Double)
+case class EvoaMeasure(name: String,
+                       codeInstall: String,
+                       sensor: String,
+                       value: Double,
+                       quality: Double,
+                       timestamp: String,
+                       timeMs: Long,
+                       year: Int,
+                       month: Int,
+                       day: Int,
+                       filePath: String)
 
 
 object LoaderMode extends Enumeration {
@@ -19,9 +30,10 @@ object LoaderMode extends Enumeration {
 
   val PRELOAD = Value("preload")
   val CHUNK = Value("chunk")
+  val CHUNK_BY_FILE = Value("chunk_by_file")
 }
 
-case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, saxAlphabetSize:Int, saxStringLength: Int, useKerberos: Boolean)
+case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, saxAlphabetSize: Int, saxStringLength: Int, useKerberos: Boolean)
 
 
 /**
@@ -29,6 +41,7 @@ case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: Stri
   */
 object App {
 
+  private val logger = LoggerFactory.getLogger(classOf[App])
 
   val DEFAULT_CHUNK_SIZE = 2000
   val DEFAULT_SAX_ALPHABET_SIZE = 7
@@ -147,6 +160,7 @@ object App {
     val appName = loadingMode match {
       case LoaderMode.PRELOAD => "EvoaPreloader"
       case LoaderMode.CHUNK => "EvoaChunker"
+      case LoaderMode.CHUNK_BY_FILE => "EvoaChunkerByFile"
       case _ => throw new IllegalArgumentException(s"unknown $loadingMode mode")
     }
 
@@ -191,7 +205,7 @@ object App {
         .withColumn("numeric_type", regexp_extract($"tagname", csvRegexp, 4))
         .select("name", "value", "quality", "code_install", "sensor", "numeric_type", "description", "engunits", "timestamp", "time_ms", "year", "month", "day")
         .sort(asc("name"), asc("time_ms"))
-        .dropDuplicates()
+      // .dropDuplicates()
     } else {
 
       rawMeasuresDF
@@ -204,8 +218,8 @@ object App {
         .withColumn("sensor", regexp_extract($"tagname", csvRegexp, 3))
         .withColumn("numeric_type", regexp_extract($"tagname", csvRegexp, 4))
         .select("name", "value", "quality", "code_install", "sensor", "timestamp", "time_ms", "year", "month", "day")
-        .sort(asc("name"), asc("time_ms"))
-        .dropDuplicates()
+        //  .dropDuplicates()
+        .orderBy(asc("name"), asc("time_ms"))
     }
 
     // save this to output path
@@ -221,7 +235,7 @@ object App {
     println("Preloading done")
   }
 
-  def chunk(options: LoaderOptions, spark: SparkSession) : Unit = {
+  def chunk(options: LoaderOptions, spark: SparkSession): Unit = {
 
     import spark.implicits._
 
@@ -234,7 +248,6 @@ object App {
 
 
     val n = testDF.agg(countDistinct($"name")).collect().head.getLong(0).toInt
-
 
 
     implicit val enc: Encoder[TimeSeriesRecord] = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
@@ -264,7 +277,7 @@ object App {
 
 
     // Write this chunk dataframe to Kafka
-    if(options.useKerberos){
+    if (options.useKerberos) {
       tsDF
         .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
         .write
@@ -274,7 +287,7 @@ object App {
         .option("kafka.sasl.kerberos.service.name", "kafka")
         .option("topic", options.out)
         .save()
-    }else{
+    } else {
       tsDF
         .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
         .write
@@ -287,11 +300,121 @@ object App {
 
   }
 
+
+  def chunkByFile(options: LoaderOptions, spark: SparkSession): Unit = {
+
+    import spark.implicits._
+
+
+    val pattern = "(.+):((.+)\\/year=(.+)\\/month=(.+)\\/code_install=(.+)\\/name=(.+)\\/(.+))".r
+    val tsDF = spark.sparkContext.wholeTextFiles(options.in).map(r => {
+
+
+      try {
+        val filePath = r._1
+        val pathTokens = pattern.findAllIn(filePath).matchData.toList.head
+
+        logger.info(s"processing $filePath")
+        //  .foreach {  m => println(m.group(4) + " " + m.group(5) + " " + m.group(6) + " " + m.group(7) + " " + m.group(8))     }
+
+        val year = pathTokens.group(4).toInt
+        val month = pathTokens.group(5).toInt
+        val codeInstall = pathTokens.group(6)
+        val name = pathTokens.group(7)
+
+        val measures = r._2
+          .split("\n")
+          .tail
+          .map(line => {
+            try {
+              val lineTokens = line.split(",")
+              val value = lineTokens(0).toDouble
+              val quality = lineTokens(1).toDouble
+              val sensor = lineTokens(2)
+              val timestamp = lineTokens(3)
+              val timeMs = lineTokens(4).toLong
+              val day = lineTokens(5).toInt
+
+              Some(EvoaMeasure(name, codeInstall, sensor, value, quality, timestamp, timeMs, year, month, day, filePath))
+            } catch {
+              case _: Throwable => None
+            }
+
+          })
+          .filter(_.isDefined)
+          .map(_.get)
+          .sortBy(_.timeMs)
+
+        Some((name, measures))
+      } catch {
+        case _: Throwable => None
+      }
+
+
+    })
+      .filter(_.isDefined)
+      .map(_.get)
+      .flatMap(m => {
+
+        val name = m._1
+        val measures = m._2
+
+        // Init the Timeserie processor
+        val tsProcessor = new TimeseriesConverter()
+        val context = new StandardProcessContext(tsProcessor, "")
+        context.setProperty(TimeseriesConverter.GROUPBY.getName, "name")
+        context.setProperty(TimeseriesConverter.METRIC.getName,
+          s"first;sum;min;max;avg;trend;outlier;sax:${options.saxAlphabetSize},0.005,${options.saxStringLength}")
+        tsProcessor.init(context)
+
+        // Slide over each group
+        measures.sliding(options.chunkSize, options.chunkSize)
+          .map(subGroup => tsProcessor.fromMeasurestoTimeseriesRecord(subGroup.toList))
+          .map(ts => (ts.getId, tsProcessor.serialize(ts)))
+      })
+      .toDF("key", "value")
+
+
+    // Write this chunk dataframe to Kafka
+    if (options.useKerberos) {
+      tsDF
+        .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+        .write
+        .format("kafka")
+        .option("kafka.bootstrap.servers", options.brokers.get)
+        .option("kafka.security.protocol", "SASL_PLAINTEXT")
+        .option("kafka.sasl.kerberos.service.name", "kafka")
+        .option("topic", options.out)
+        .save()
+    } else {
+      tsDF
+        .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+        .write
+        .format("kafka")
+        .option("kafka.bootstrap.servers", options.brokers.get)
+        .option("topic", options.out)
+        .save()
+    }
+
+
+  }
+
+
   /**
     *
     * @param args
     */
   def main(args: Array[String]): Unit = {
+
+
+    val line = "file:/Users/tom/Documents/workspace/ifpen/data-historian/data/preload/year=2019/month=6/code_install=067_PI01/name=067_PI01/part-00000-55cad8b2-8f82-42be-ad77-2872a9082f53.c000.csv"
+
+    val pattern = "^(.*):(.*)$".r
+
+
+    val tokens = pattern.findAllMatchIn(line).toList
+
+    pattern.findAllIn(line).matchData foreach { m => println(m.group(1)) }
 
     // get arguments
     val options = parseCommandLine(args)
@@ -306,6 +429,7 @@ object App {
     options.mode match {
       case LoaderMode.PRELOAD => preload(options, spark)
       case LoaderMode.CHUNK => chunk(options, spark)
+      case LoaderMode.CHUNK_BY_FILE => chunkByFile(options, spark)
       case _ => println(s"unknown loader mode : $LoaderMode")
     }
   }
