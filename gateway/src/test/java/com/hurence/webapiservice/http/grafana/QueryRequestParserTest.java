@@ -10,10 +10,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.IntStream;
 
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD;
 import static com.hurence.webapiservice.http.grafana.modele.QueryRequestParam.DEFAULT_BUCKET_SIZE;
 import static com.hurence.webapiservice.http.grafana.modele.QueryRequestParam.DEFAULT_SAMPLING_ALGORITHM;
-import static com.hurence.webapiservice.timeseries.BucketUtils.calculBucketSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryRequestParserTest {

@@ -97,17 +97,12 @@
                 <version>2.15.2</version>
                 <executions>
                     <execution>
+                        <id>scala-compile-first</id>
+                        <phase>process-resources</phase>git
                         <goals>
+                            <goal>add-source</goal>
                             <goal>compile</goal>
-                            <goal>testCompile</goal>
                         </goals>
-                        <configuration>
-                            <args>
-                                <!--  <arg>-make:transitive</arg>
-                                  <arg>-dependencyfile</arg>
-                                  <arg>${project.build.directory}/.scala_dependencies</arg>-->
-                            </args>
-                        </configuration>
                     </execution>
                 </executions>
             </plugin>

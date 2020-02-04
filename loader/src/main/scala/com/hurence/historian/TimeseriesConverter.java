@@ -27,6 +27,7 @@ import java.io.IOException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import com.hurence.historian.EvoaMeasure;
 
 public class TimeseriesConverter extends AbstractProcessor {
 
@@ -162,77 +163,82 @@ public class TimeseriesConverter extends AbstractProcessor {
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
         for (Row r : rows) {
-            long time = r.getLong(r.fieldIndex("time_ms"));
-
-            double value=Double.MAX_VALUE;
             try {
-                value = r.getDouble(r.fieldIndex("value"));
-            } catch (Exception e) {
+                long time = r.getLong(r.fieldIndex("time_ms"));
+
+                double value = Double.MAX_VALUE;
                 try {
-                    value = Double.parseDouble(r.getString(r.fieldIndex("value")));
-                } catch (Exception e2) {
-                    logger.error("unable to parse value for row : " + r.toString());
+                    value = r.getDouble(r.fieldIndex("value"));
+                } catch (Exception e) {
+                    try {
+                        value = Double.parseDouble(r.getString(r.fieldIndex("value")));
+                    } catch (Exception e2) {
+                        logger.error("unable to parse value for row : " + r.toString());
+                    }
+
                 }
 
-            }
-
-            double quality=Double.MAX_VALUE;
-            try {
-                quality = r.getDouble(r.fieldIndex("quality"));
-            } catch (Exception e) {
+                double quality = Double.MAX_VALUE;
                 try {
-                    quality = Double.parseDouble(r.getString(r.fieldIndex("quality")));
-                } catch (Exception e2) {
-                    logger.error("unable to parse quality for row : " + r.toString());
+                    quality = r.getDouble(r.fieldIndex("quality"));
+                } catch (Exception e) {
+                    try {
+                        quality = Double.parseDouble(r.getString(r.fieldIndex("quality")));
+                    } catch (Exception e2) {
+                        logger.error("unable to parse quality for row : " + r.toString());
+                    }
                 }
+
+                String name = r.getString(r.fieldIndex("name"));
+                String codeInstall = "";
+                try {
+                    codeInstall = r.getString(r.fieldIndex("code_install"));
+                } catch (Exception ex) {
+                    //do nothing
+                }
+                String sensor = "";
+                try {
+                    sensor = r.getString(r.fieldIndex("sensor"));
+                } catch (Exception ex) {
+                    //do nothing
+                }
+
+                String year = "";
+                try {
+                    year = String.valueOf(r.getInt(r.fieldIndex("year")));
+                } catch (Exception ex) {
+                    //do nothing
+                }
+                String month = "";
+                try {
+                    month = String.valueOf(r.getInt(r.fieldIndex("month")));
+                } catch (Exception ex) {
+                    //do nothing
+                }
+                String day = "";
+                try {
+                    day = String.valueOf(r.getInt(r.fieldIndex("day")));
+                } catch (Exception ex) {
+                    //do nothing
+                }
+
+                Record record = new StandardRecord(RecordDictionary.TIMESERIES)
+                        .setStringField(FieldDictionary.RECORD_NAME, metricName)
+                        .setDoubleField(FieldDictionary.RECORD_VALUE, value)
+                        .setDoubleField("quality", quality)
+                        .setStringField("name", name)
+                        .setStringField("year", year)
+                        .setStringField("month", month)
+                        .setStringField("day", day)
+                        .setStringField("code_install", codeInstall)
+                        .setStringField("sensor", sensor)
+                        .setTime(time);
+
+                groupedRecords.add(record);
+            }catch (Exception e){
+                logger.error("unable to parse row : " + r.toString());
             }
 
-            String name = r.getString(r.fieldIndex("name"));
-            String codeInstall = "";
-            try {
-                codeInstall = r.getString(r.fieldIndex("code_install"));
-            } catch (Exception ex) {
-                //do nothing
-            }
-            String sensor = "";
-            try {
-                sensor = r.getString(r.fieldIndex("sensor"));
-            } catch (Exception ex) {
-                //do nothing
-            }
-
-            String year = "";
-            try {
-                year = String.valueOf(r.getInt(r.fieldIndex("year")));
-            } catch (Exception ex) {
-                //do nothing
-            }
-            String month = "";
-            try {
-                month = String.valueOf(r.getInt(r.fieldIndex("month")));
-            } catch (Exception ex) {
-                //do nothing
-            }
-            String day = "";
-            try {
-                day = String.valueOf(r.getInt(r.fieldIndex("day")));
-            } catch (Exception ex) {
-                //do nothing
-            }
-
-            Record record = new StandardRecord(RecordDictionary.TIMESERIES)
-                    .setStringField(FieldDictionary.RECORD_NAME, metricName)
-                    .setDoubleField(FieldDictionary.RECORD_VALUE, value)
-                    .setDoubleField("quality", quality)
-                    .setStringField("name", name)
-                    .setStringField("year", year)
-                    .setStringField("month", month)
-                    .setStringField("day", day)
-                    .setStringField("code_install", codeInstall)
-                    .setStringField("sensor", sensor)
-                    .setTime(time);
-
-            groupedRecords.add(record);
         }
 
 
@@ -268,5 +274,68 @@ public class TimeseriesConverter extends AbstractProcessor {
         return tsRecord;
     }
 
+    /**
+     * Converts a list of measures to a timeseries chunk
+     *
+     * @param measures
+     * @return
+     */
+    public TimeSeriesRecord fromMeasurestoTimeseriesRecord(List<EvoaMeasure> measures) {
 
+        // Convert first to logisland records
+        List<Record> groupedRecords = new ArrayList<>();
+        for (EvoaMeasure measure : measures) {
+            try {
+                Record record = new StandardRecord(RecordDictionary.TIMESERIES)
+                        .setStringField(FieldDictionary.RECORD_NAME, measure.name())
+                        .setDoubleField(FieldDictionary.RECORD_VALUE, measure.value())
+                        .setDoubleField("quality", measure.quality())
+                        .setStringField("name", measure.name())
+                        .setIntField("year", measure.year())
+                        .setIntField("month", measure.month())
+                        .setIntField("day", measure.day())
+                        .setStringField("code_install", measure.codeInstall())
+                        .setStringField("sensor", measure.sensor())
+                        .setStringField("file_path", measure.filePath())
+                        .setTime(measure.timeMs());
+
+                groupedRecords.add(record);
+            }catch (Exception e){
+                logger.error("unable to parse row : " + measure.toString());
+            }
+
+        }
+
+
+        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+        MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
+
+        functionValueMap.resetValues();
+
+        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
+        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
+        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
+        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
+
+        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
+            String name = functionValueMap.getAggregation(i).getQueryName();
+            double value = functionValueMap.getAggregationValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.DOUBLE, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
+            String name = functionValueMap.getAnalysis(i).getQueryName();
+            boolean value = functionValueMap.getAnalysisValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.BOOLEAN, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
+            String name = functionValueMap.getEncoding(i).getQueryName();
+            String value = functionValueMap.getEncodingValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.STRING, value);
+        }
+
+
+        return tsRecord;
+    }
 }
