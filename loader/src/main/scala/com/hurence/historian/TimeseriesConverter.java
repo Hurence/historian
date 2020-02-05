@@ -298,6 +298,7 @@ public class TimeseriesConverter extends AbstractProcessor {
                         .setStringField("name", measure.name())
                         .setIntField("year", measure.year())
                         .setIntField("month", measure.month())
+                        .setIntField("week", measure.week())
                         .setIntField("day", measure.day())
                         .setStringField("code_install", measure.codeInstall())
                         .setStringField("sensor", measure.sensor())
