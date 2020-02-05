@@ -189,22 +189,6 @@ object App {
 
   }
 
-  def getType(raw: String): DataType = {
-    raw match {
-      case "ByteType" => ByteType
-      case "ShortType" => ShortType
-      case "IntegerType" => IntegerType
-      case "LongType" => LongType
-      case "FloatType" => FloatType
-      case "DoubleType" => DoubleType
-      case "BooleanType" => BooleanType
-      case "TimestampType" => TimestampType
-      case _ => StringType
-    }
-  }
-  val mandatoryFields = List("value", "timestamp", "name")
-
-
   def preload_IFPEN(options: LoaderOptions, spark: SparkSession): Unit = {
 
     import spark.implicits._
@@ -270,14 +254,32 @@ object App {
     println("IFPEN Preloading done")
   }
 
+
+  def getType(raw: String): DataType = {
+    raw match {
+      case "ByteType" => ByteType
+      case "ShortType" => ShortType
+      case "IntegerType" => IntegerType
+      case "LongType" => LongType
+      case "FloatType" => FloatType
+      case "DoubleType" => DoubleType
+      case "BooleanType" => BooleanType
+      case "TimestampType" => TimestampType
+      case _ => StringType
+    }
+  }
+  val mandatoryFields = List("value", "timestamp", "name")
+
+
   // Generic
   def preload(options: LoaderOptions, spark: SparkSession): Unit = {
 
     var structure = new StructType()
-    Source.fromFile("/home/hurence/Documents/Hurence/Git/historian/loader/src/main/resources/Input/schemaFile.txt").getLines().toList
+    Source.fromFile(options.schema.get).getLines().toList
       .flatMap(_.split(",")).map(_.replaceAll("\"", "").split(" "))
-      .map(x => { if (mandatoryFields.contains(x(0))) structure = structure.add(x(0), getType(x(1)), false) else structure = structure.add(x(0), getType(x(1)), true) })
+      .foreach(x => { if (mandatoryFields.contains(x(0))) structure = structure.add(x(0), getType(x(1)), false) else structure = structure.add(x(0), getType(x(1)), true) })
       //.map(x => structure = structure.add(x(0), getType(x(1)), true))
+
 
     import spark.implicits._
 
@@ -298,11 +300,6 @@ object App {
       .withColumn("year", year(to_date(to_timestamp($"timestamp"))))
       .withColumn("month", month(to_date(to_timestamp($"timestamp"))))
       .withColumn("day", dayofmonth(to_date(to_timestamp($"timestamp"))))
-      //.withColumn("name", $"metric_name")
-      //.withColumn("code_install", regexp_extract($"metric_id", csvRegexp, 1))
-      //.withColumn("sensor", regexp_extract($"metric_id", csvRegexp, 2))
-      //.withColumn("numeric_type", regexp_extract($"metric_id", csvRegexp, 3))
-      //.withColumn("quality", $"warn")
       .select(colsToSelect.head, colsToSelect.tail:_*)
       .sort(asc("name"), asc("time_ms"))
       .dropDuplicates()
