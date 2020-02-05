@@ -1,0 +1,1 @@
+"metric_id StringType","timestamp LongType","value DoubleType","name StringType","warn DoubleType","crit DoubleType","min DoubleType","max DoubleType"

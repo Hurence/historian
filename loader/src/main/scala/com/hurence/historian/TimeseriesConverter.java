@@ -1,5 +1,6 @@
 package com.hurence.historian;
 
+import com.hurence.logisland.processor.ProcessException;
 import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
@@ -19,6 +20,8 @@ import com.hurence.logisland.validator.StandardValidators;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.types.StructField;
+import org.apache.spark.sql.types.StructType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,6 +30,8 @@ import java.io.IOException;
 
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static org.apache.spark.sql.types.DataTypes.StringType;
 
 public class TimeseriesConverter extends AbstractProcessor {
 
@@ -157,7 +162,7 @@ public class TimeseriesConverter extends AbstractProcessor {
      * @param rows
      * @return
      */
-    public TimeSeriesRecord toTimeseriesRecord(String metricName, List<Row> rows) {
+    public TimeSeriesRecord toTimeseriesRecordOld(String metricName, List<Row> rows) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
@@ -268,5 +273,95 @@ public class TimeseriesConverter extends AbstractProcessor {
         return tsRecord;
     }
 
+
+    List<String> mandatoryFields = Arrays.asList("value", "timestamp", "name");
+
+    /**
+     * Converts a list of rows to a timeseries chunk
+     *
+     * @param metricName
+     * @param structure (dataframe structure)
+     * @param rows
+     * @return
+     */
+    public TimeSeriesRecord toTimeseriesRecord(String metricName, StructType structure, List<Row> rows) throws ProcessException {
+
+        // Convert first to logisland records
+        List<Record> groupedRecords = new ArrayList<>();
+        for (Row r : rows) {
+            Record record = new StandardRecord(RecordDictionary.TIMESERIES);
+
+            for (StructField field : structure.fields()) {
+                // Set metric name
+                record.setStringField(FieldDictionary.RECORD_NAME, metricName);
+
+                try {
+                    switch (field.dataType().typeName()) {
+                        case "string":
+                            if ((field.name().equals("name"))) {
+                                // name already added
+                            } else {
+                                record.setStringField(field.name(), r.getString(r.fieldIndex(field.name())));
+                            }
+                            break;
+                        case "long":
+                            if ((field.name().equals("time_ms"))) {
+                                record.setTime(r.getLong(r.fieldIndex(field.name())));
+                            } else {
+                                record.setLongField(field.name(), r.getLong(r.fieldIndex(field.name())));
+                            }
+                            break;
+                        case "double":
+                            if ((field.name().equals("value"))) {
+                                record.setDoubleField(FieldDictionary.RECORD_VALUE, r.getDouble(r.fieldIndex(field.name())));
+                            } else {
+                                record.setDoubleField(field.name(), r.getDouble(r.fieldIndex(field.name())));
+                            }
+                            break;
+                        case "integer":
+                            record.setIntField(field.name(), r.getInt(r.fieldIndex(field.name())));
+                            break;
+                        default:
+                            break;
+                    }
+                } catch (NullPointerException npe) {
+                    // Do nothing
+                    // Arrive with null values
+                }
+            }
+
+            groupedRecords.add(record);
+        }
+
+        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+        MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
+
+        functionValueMap.resetValues();
+
+        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
+        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
+        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
+        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
+
+        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
+            String name = functionValueMap.getAggregation(i).getQueryName();
+            double value = functionValueMap.getAggregationValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.DOUBLE, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
+            String name = functionValueMap.getAnalysis(i).getQueryName();
+            boolean value = functionValueMap.getAnalysisValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.BOOLEAN, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
+            String name = functionValueMap.getEncoding(i).getQueryName();
+            String value = functionValueMap.getEncodingValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.STRING, value);
+        }
+
+        return tsRecord;
+    }
 
 }

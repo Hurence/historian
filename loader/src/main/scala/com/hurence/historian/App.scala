@@ -1,15 +1,20 @@
 package com.hurence.historian
 
 
+import java.util.Calendar
+
 import com.hurence.historian.LoaderMode.LoaderMode
+import com.hurence.historian.SchemaAnalysis.getType
 import com.hurence.logisland.processor.StandardProcessContext
 import com.hurence.logisland.record.{FieldDictionary, Record, RecordDictionary, StandardRecord, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
 import org.apache.commons.cli.{CommandLine, GnuParser, Option, OptionBuilder, Options, Parser}
 import org.apache.spark.sql.{Encoder, Encoders, Row, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
+import org.apache.spark.sql.types.{BooleanType, ByteType, DataType, DoubleType, FloatType, IntegerType, LongType, ShortType, StringType, StructType, TimestampType}
 
 import scala.collection.JavaConversions._
+import scala.io.Source
 
 case class EvoaMeasure(tagname: String, timestamp: Long, value: Double, quality: Double)
 
@@ -21,7 +26,7 @@ object LoaderMode extends Enumeration {
   val CHUNK = Value("chunk")
 }
 
-case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, saxAlphabetSize:Int, saxStringLength: Int, useKerberos: Boolean)
+case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, schema: scala.Option[String], saxAlphabetSize:Int, saxStringLength: Int, useKerberos: Boolean)
 
 
 /**
@@ -33,6 +38,8 @@ object App {
   val DEFAULT_CHUNK_SIZE = 2000
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 100
+
+  val format = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
 
   def parseCommandLine(args: Array[String]): LoaderOptions = {
     // Commande lien management
@@ -104,6 +111,14 @@ object App {
     val chunk = OptionBuilder.create("chunks")
     options.addOption(chunk)
 
+    // Input data schema file (for preload only)
+    OptionBuilder.withArgName("schema")
+    OptionBuilder.withLongOpt("schema-path")
+    OptionBuilder.hasArg
+    OptionBuilder.withDescription("Path to the data schema file (for preload only)")
+    val schema = OptionBuilder.create("schema")
+    options.addOption(schema)
+
     // SAX Alphabet size
     OptionBuilder.withArgName("sa")
     OptionBuilder.withLongOpt("sax-alphabet-size")
@@ -137,12 +152,16 @@ object App {
     val lookupPath = if (line.hasOption("lookup")) Some(line.getOptionValue("lookup")) else None
     val kafkaBrokers = if (line.hasOption("brokers")) Some(line.getOptionValue("brokers")) else None
     val chunksSize = if (line.hasOption("chunks")) line.getOptionValue("chunks").toInt else DEFAULT_CHUNK_SIZE
+    val schemaPath = if (line.hasOption("schema")) Some(line.getOptionValue("schema")) else None
     val alphabetSize = if (line.hasOption("sa")) line.getOptionValue("sa").toInt else DEFAULT_SAX_ALPHABET_SIZE
     val saxStringLength = if (line.hasOption("sl")) line.getOptionValue("sl").toInt else DEFAULT_SAX_STRING_LENGTH
 
 
-    if (loadingMode == LoaderMode.CHUNK && kafkaBrokers.isEmpty)
-      throw new IllegalArgumentException(s"kafka broker must not be empty with $loadingMode mode")
+    /*if (loadingMode == LoaderMode.CHUNK && kafkaBrokers.isEmpty)
+      throw new IllegalArgumentException(s"kafka broker must not be empty with $loadingMode mode")*/
+    // add mandatory schema for preload
+    /*if (loadingMode == LoaderMode.PRELOAD && schemaPath.isEmpty)
+      throw new IllegalArgumentException(s"input schema structure must not be empty with $loadingMode mode")*/
 
     val appName = loadingMode match {
       case LoaderMode.PRELOAD => "EvoaPreloader"
@@ -150,13 +169,28 @@ object App {
       case _ => throw new IllegalArgumentException(s"unknown $loadingMode mode")
     }
 
-    LoaderOptions(loadingMode, inputPath, outputPath, sparkMaster, appName, kafkaBrokers, lookupPath, chunksSize, alphabetSize, saxStringLength, useKerberos)
+    LoaderOptions(loadingMode, inputPath, outputPath, sparkMaster, appName, kafkaBrokers, lookupPath, chunksSize, schemaPath, alphabetSize, saxStringLength, useKerberos)
 
 
   }
 
+  def getType(raw: String): DataType = {
+    raw match {
+      case "ByteType" => ByteType
+      case "ShortType" => ShortType
+      case "IntegerType" => IntegerType
+      case "LongType" => LongType
+      case "FloatType" => FloatType
+      case "DoubleType" => DoubleType
+      case "BooleanType" => BooleanType
+      case "TimestampType" => TimestampType
+      case _ => StringType
+    }
+  }
+  val mandatoryFields = List("value", "timestamp", "name")
 
-  def preload(options: LoaderOptions, spark: SparkSession): Unit = {
+
+  def preload_IFPEN(options: LoaderOptions, spark: SparkSession): Unit = {
 
     import spark.implicits._
 
@@ -218,6 +252,58 @@ object App {
       .save(options.out)
 
 
+    println("IFPEN Preloading done")
+  }
+
+  // Generic
+  def preload(options: LoaderOptions, spark: SparkSession): Unit = {
+
+    var structure = new StructType()
+    Source.fromFile("/home/hurence/Documents/Hurence/Git/historian/loader/src/main/resources/Input/schemaFile.txt").getLines().toList
+      .flatMap(_.split(",")).map(_.replaceAll("\"", "").split(" "))
+      .map(x => { if (mandatoryFields.contains(x(0))) structure = structure.add(x(0), getType(x(1)), false) else structure = structure.add(x(0), getType(x(1)), true) })
+      //.map(x => structure = structure.add(x(0), getType(x(1)), true))
+
+    import spark.implicits._
+
+    // Load raw data
+    val rawMeasuresDF = spark.read.format("csv")
+      .option("sep", ";")
+      //.option("inferSchema", "true")
+      .option("header", "true")
+      .schema(structure)
+      .load(options.in)
+
+    var colsToSelect = structure.fieldNames
+    colsToSelect = colsToSelect :+ "time_ms" :+ "year" :+ "month" :+ "day"
+
+    // Then sort and split columns
+    val measuresDF = rawMeasuresDF
+      .withColumn("time_ms", unix_timestamp(to_timestamp($"timestamp")) * 1000)
+      .withColumn("year", year(to_date(to_timestamp($"timestamp"))))
+      .withColumn("month", month(to_date(to_timestamp($"timestamp"))))
+      .withColumn("day", dayofmonth(to_date(to_timestamp($"timestamp"))))
+      //.withColumn("name", $"metric_name")
+      //.withColumn("code_install", regexp_extract($"metric_id", csvRegexp, 1))
+      //.withColumn("sensor", regexp_extract($"metric_id", csvRegexp, 2))
+      //.withColumn("numeric_type", regexp_extract($"metric_id", csvRegexp, 3))
+      //.withColumn("quality", $"warn")
+      .select(colsToSelect.head, colsToSelect.tail:_*)
+      .sort(asc("name"), asc("time_ms"))
+      .dropDuplicates()
+
+    measuresDF.show()
+
+    // save this to output path
+    measuresDF
+      .write
+      .mode("overwrite")
+      .partitionBy("year", "month", "day", "name")
+      .format("csv")
+      .option("header", "true")
+      .save(options.out)
+
+
     println("Preloading done")
   }
 
@@ -232,15 +318,15 @@ object App {
       .load(options.in)
       .cache()
 
+    val chunkStructure = testDF.schema
 
-    val n = testDF.agg(countDistinct($"name")).collect().head.getLong(0).toInt
-
-
+    println("BEGINNING OF PROCESSING : ", format.format(Calendar.getInstance().getTime()))
 
     implicit val enc: Encoder[TimeSeriesRecord] = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
 
-    val tsDF = testDF.repartition(n, $"name")
-      .sortWithinPartitions($"name", $"time_ms")
+
+    val tsDF = testDF.repartition($"name")
+      //.sortWithinPartitions($"name", $"time_ms")
       .mapPartitions(partition => {
 
         // Init the Timeserie processor
@@ -256,7 +342,7 @@ object App {
           .groupBy(row => row.getString(row.fieldIndex("name")))
           .flatMap(group => group._2
             .sliding(options.chunkSize, options.chunkSize)
-            .map(subGroup => tsProcessor.toTimeseriesRecord(group._1, subGroup.toList))
+            .map(subGroup => tsProcessor.toTimeseriesRecord(group._1, chunkStructure, subGroup.toList))
             .map(ts => (ts.getId, tsProcessor.serialize(ts)))
           )
           .iterator
@@ -264,7 +350,7 @@ object App {
 
 
     // Write this chunk dataframe to Kafka
-    if(options.useKerberos){
+    /*if(options.useKerberos){
       tsDF
         .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
         .write
@@ -282,8 +368,24 @@ object App {
         .option("kafka.bootstrap.servers", options.brokers.get)
         .option("topic", options.out)
         .save()
-    }
+    }*/
 
+    println("Write to CSV")
+
+    // Write to csv
+    tsDF
+      .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+      .write
+      .mode("overwrite")
+      .format("csv")
+      .option("header", "true")
+      .option("delimiter", ",")
+      .option("encoding", "UTF-8")
+      .save(options.out)
+
+    tsDF.show();
+
+    println("END OF PROCESSING : ",  format.format(Calendar.getInstance().getTime()))
 
   }
 
@@ -299,7 +401,8 @@ object App {
     // setup spark session
     val spark = SparkSession.builder
       .appName(options.appName)
-      .master(options.master)
+      //.master(options.master)
+      .master("local[*]")
       .getOrCreate()
 
     // process
