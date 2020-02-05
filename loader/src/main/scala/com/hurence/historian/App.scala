@@ -21,6 +21,7 @@ case class EvoaMeasure(name: String,
                        timeMs: Long,
                        year: Int,
                        month: Int,
+                       week: Int,
                        day: Int,
                        filePath: String)
 
@@ -31,6 +32,7 @@ object LoaderMode extends Enumeration {
   val PRELOAD = Value("preload")
   val CHUNK = Value("chunk")
   val CHUNK_BY_FILE = Value("chunk_by_file")
+  val TAG_CHUNK = Value("tag_chunk")
 }
 
 case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, saxAlphabetSize: Int, saxStringLength: Int, useKerberos: Boolean)
@@ -161,6 +163,7 @@ object App {
       case LoaderMode.PRELOAD => "EvoaPreloader"
       case LoaderMode.CHUNK => "EvoaChunker"
       case LoaderMode.CHUNK_BY_FILE => "EvoaChunkerByFile"
+      case LoaderMode.TAG_CHUNK => "TagChunk"
       case _ => throw new IllegalArgumentException(s"unknown $loadingMode mode")
     }
 
@@ -213,11 +216,12 @@ object App {
         .withColumn("year", year(to_date($"timestamp", dateFmt)))
         .withColumn("month", month(to_date($"timestamp", dateFmt)))
         .withColumn("day", dayofmonth(to_date($"timestamp", dateFmt)))
+        .withColumn("week", weekofyear(to_date($"timestamp", dateFmt)))
         .withColumn("name", regexp_extract($"tagname", csvRegexp, 1))
         .withColumn("code_install", regexp_extract($"tagname", csvRegexp, 2))
         .withColumn("sensor", regexp_extract($"tagname", csvRegexp, 3))
         .withColumn("numeric_type", regexp_extract($"tagname", csvRegexp, 4))
-        .select("name", "value", "quality", "code_install", "sensor", "timestamp", "time_ms", "year", "month", "day")
+        .select("name", "value", "quality", "code_install", "sensor", "timestamp", "time_ms", "year", "month", "week", "day")
         //  .dropDuplicates()
         .orderBy(asc("name"), asc("time_ms"))
     }
@@ -226,7 +230,7 @@ object App {
     measuresDF
       .write
       .mode(SaveMode.Append)
-      .partitionBy("year", "month", "code_install", "name")
+      .partitionBy("year", "month", "week", "code_install", "name")
       .format("csv")
       .option("header", "true")
       .save(options.out)
@@ -306,7 +310,7 @@ object App {
     import spark.implicits._
 
 
-    val pattern = "(.+):((.+)\\/year=(.+)\\/month=(.+)\\/code_install=(.+)\\/name=(.+)\\/(.+))".r
+    val pattern = "(.+):((.+)\\/year=(.+)\\/month=(.+)\\/week=(.+)\\/code_install=(.+)\\/name=(.+)\\/(.+))".r
     val tsDF = spark.sparkContext.wholeTextFiles(options.in).map(r => {
 
 
@@ -315,12 +319,12 @@ object App {
         val pathTokens = pattern.findAllIn(filePath).matchData.toList.head
 
         logger.info(s"processing $filePath")
-        //  .foreach {  m => println(m.group(4) + " " + m.group(5) + " " + m.group(6) + " " + m.group(7) + " " + m.group(8))     }
 
         val year = pathTokens.group(4).toInt
         val month = pathTokens.group(5).toInt
-        val codeInstall = pathTokens.group(6)
-        val name = pathTokens.group(7)
+        val week = pathTokens.group(6).toInt
+        val codeInstall = pathTokens.group(7)
+        val name = pathTokens.group(8)
 
         val measures = r._2
           .split("\n")
@@ -335,7 +339,7 @@ object App {
               val timeMs = lineTokens(4).toLong
               val day = lineTokens(5).toInt
 
-              Some(EvoaMeasure(name, codeInstall, sensor, value, quality, timestamp, timeMs, year, month, day, filePath))
+              Some(EvoaMeasure(name, codeInstall, sensor, value, quality, timestamp, timeMs, year, month, week, day, filePath))
             } catch {
               case _: Throwable => None
             }
@@ -406,16 +410,6 @@ object App {
     */
   def main(args: Array[String]): Unit = {
 
-
-    val line = "file:/Users/tom/Documents/workspace/ifpen/data-historian/data/preload/year=2019/month=6/code_install=067_PI01/name=067_PI01/part-00000-55cad8b2-8f82-42be-ad77-2872a9082f53.c000.csv"
-
-    val pattern = "^(.*):(.*)$".r
-
-
-    val tokens = pattern.findAllMatchIn(line).toList
-
-    pattern.findAllIn(line).matchData foreach { m => println(m.group(1)) }
-
     // get arguments
     val options = parseCommandLine(args)
 
@@ -430,6 +424,9 @@ object App {
       case LoaderMode.PRELOAD => preload(options, spark)
       case LoaderMode.CHUNK => chunk(options, spark)
       case LoaderMode.CHUNK_BY_FILE => chunkByFile(options, spark)
+      case LoaderMode.TAG_CHUNK =>
+        val tagger = new ChunkTagger()
+        tagger.process(options, spark)
       case _ => println(s"unknown loader mode : $LoaderMode")
     }
   }
