@@ -22,7 +22,7 @@ import static com.hurence.webapiservice.historian.HistorianFields.*;
 public class TimeSeriesExtracterUtil {
     public final static String TIMESERIES_TIMESTAMPS = "timestamps";
     public final static String TIMESERIES_VALUES = "values";
-    public final static SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.FIRST_ITEM;
+    public final static SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.AVERAGE;
     private static final Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterUtil.class);
 
 

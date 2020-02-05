@@ -97,17 +97,24 @@
                 <version>2.15.2</version>
                 <executions>
                     <execution>
+                        <id>compile</id>
                         <goals>
                             <goal>compile</goal>
+                        </goals>
+                        <phase>compile</phase>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <goals>
                             <goal>testCompile</goal>
                         </goals>
-                        <configuration>
-                            <args>
-                                <!--  <arg>-make:transitive</arg>
-                                  <arg>-dependencyfile</arg>
-                                  <arg>${project.build.directory}/.scala_dependencies</arg>-->
-                            </args>
-                        </configuration>
+                        <phase>test-compile</phase>
+                    </execution>
+                    <execution>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>

@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public class QueryRequestParam implements TimeSeriesRequest {
 
     public static final int DEFAULT_BUCKET_SIZE = 1;//will be recomputed later by historian if necessary depending on maxDataPoints
-    public static final SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.NONE;
+    public static final SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.AVERAGE;
 
     private List<Target> targets;
     private long from;

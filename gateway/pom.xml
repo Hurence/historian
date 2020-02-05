@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>gateway</artifactId>
+    <artifactId>historian-gateway</artifactId>
 
     <properties>
         <main.verticle>com.hurence.webapiservice.WebApiServiceMainVerticle</main.verticle>
