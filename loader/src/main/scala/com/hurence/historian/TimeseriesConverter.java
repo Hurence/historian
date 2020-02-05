@@ -354,8 +354,6 @@ public class TimeseriesConverter extends AbstractProcessor {
      * @return
      */
     public TimeSeriesRecord toTimeseriesRecord(String metricName, StructType structure, List<Row> rows) throws ProcessException {
-        System.out.println("METRIC NAME = " + metricName);
-
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
         for (Row r : rows) {
