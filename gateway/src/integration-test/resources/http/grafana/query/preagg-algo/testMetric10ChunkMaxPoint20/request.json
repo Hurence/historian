@@ -22,5 +22,12 @@
     }
   ],
   "format": "json",
-  "maxDataPoints": 20
+  "maxDataPoints": 20,
+  "adhocFilters": [
+    {
+      "key": "Algo",
+      "operator": "=",
+      "value": "FIRST_ITEM"
+    }
+  ]
 }
