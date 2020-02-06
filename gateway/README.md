@@ -50,6 +50,15 @@ java -jar <jar_path> -cluster -conf <conf_path>
 ```
 
 #RUN TEST
+
+## In terminal
+
+```shell script
+mvn clean install -Pintegration-tests
+``` 
+
+## with your IDE
+
 mark the folder ./src/integration-test/java as source test code in your IDE.
 mark the folder ./src/integration-test/resources as resources test in your IDE.
 
