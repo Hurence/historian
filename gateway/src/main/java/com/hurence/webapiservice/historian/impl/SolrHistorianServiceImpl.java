@@ -231,7 +231,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        SolrQuery query = new SolrQuery("*:*");
+        String queryString = RESPONSE_METRIC_NAME_FIELD+":*\""+params.getString(RESPONSE_METRIC_NAME_FIELD)+"\"*";
+        SolrQuery query = new SolrQuery(queryString);
         //TODO search a syntax for metric
         query.setRows(0);//we only need distinct values of metrics
 //    query.setFacet(true);

@@ -46,7 +46,8 @@ public class GrafanaApiImpl implements GrafanaApi {
     @Override
     public void search(RoutingContext context) {
         //TODO parse request body to filter query of metrics ?
-        final JsonObject getMetricsParam = new JsonObject();
+        //final JsonObject getMetricsParam = new JsonObject();
+        final JsonObject getMetricsParam = context.getBodyAsJson();
 
 
 
