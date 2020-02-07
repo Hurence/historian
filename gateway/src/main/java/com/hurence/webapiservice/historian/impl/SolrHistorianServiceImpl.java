@@ -41,7 +41,7 @@ import java.util.stream.Collectors;
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.PAGE_SIZE;
-import static com.hurence.webapiservice.http.grafana.GrafanaApiImpl.GrafanaHistorianDatasourceFields;
+import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -229,7 +229,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        String name = params.getString(GrafanaHistorianDatasourceFields);
+        String name = params.getString(TARGET);
         String queryString = RESPONSE_METRIC_NAME_FIELD+":*";
         if (name!=null) {
             queryString = RESPONSE_METRIC_NAME_FIELD + ":*" + name + "*";

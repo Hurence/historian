@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
-import static com.hurence.webapiservice.http.grafana.GrafanaApiImpl.GrafanaHistorianDatasourceFields;
+import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -97,7 +97,7 @@ public class HistorianSearchVerticleIT {
     @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void getMetricsNameTest (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
-                .put (GrafanaHistorianDatasourceFields, "per");
+                .put (TARGET, "per");
         historian.rxGetMetricsName (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
