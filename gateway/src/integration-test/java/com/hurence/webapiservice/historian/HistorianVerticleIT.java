@@ -16,10 +16,8 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest;
 import org.apache.solr.client.solrj.response.SolrResponseBase;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.client.solrj.response.schema.SchemaRepresentation;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
-import org.apache.solr.common.SolrInputDocument;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
@@ -32,7 +30,6 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
@@ -99,36 +96,6 @@ public class HistorianVerticleIT {
                 ));
         injectorTempA.addChunk(injectorTempB);
         injectorTempA.injectChunks(client);
-        final SolrInputDocument doc = new SolrInputDocument();
-        doc.addField("id", UUID.randomUUID().toString());
-        doc.addField("name", "Amazon Kindle Paperwhite");
-        final UpdateResponse updateResponse = client.add(COLLECTION, doc);
-        final SolrInputDocument doc1 = new SolrInputDocument();
-        doc1.addField("id", UUID.randomUUID().toString());
-        doc1.addField("name", "upper_50");
-        final UpdateResponse updateResponse1 = client.add(COLLECTION, doc1);
-        final SolrInputDocument doc2 = new SolrInputDocument();
-        doc2.addField("id", UUID.randomUUID().toString());
-        doc2.addField("name", "Amazon");
-        final UpdateResponse updateResponse2 = client.add(COLLECTION, doc2);
-        final SolrInputDocument doc3 = new SolrInputDocument();
-        doc3.addField("id", UUID.randomUUID().toString());
-        doc3.addField("name", "Amazon Kindle Paperblack");
-        final UpdateResponse updateResponse3 = client.add(COLLECTION, doc3);
-        final SolrInputDocument doc4 = new SolrInputDocument();
-        doc4.addField("id", UUID.randomUUID().toString());
-        doc4.addField("name", "upper_75");
-        final UpdateResponse updateResponse4 = client.add(COLLECTION, doc4);
-        final SolrInputDocument doc5 = new SolrInputDocument();
-        doc5.addField("id", UUID.randomUUID().toString());
-        doc5.addField("name", "upper_90");
-        final UpdateResponse updateResponse5 = client.add(COLLECTION, doc5);
-        final SolrInputDocument doc6 = new SolrInputDocument();
-        doc6.addField("id", UUID.randomUUID().toString());
-        doc6.addField("name", "up");
-        final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
-        client.commit(COLLECTION);
-
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
     }
 
@@ -290,26 +257,6 @@ public class HistorianVerticleIT {
                     });
                 })
                 .subscribe();
-    }
-    @Test
-        // @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
-    void getMetricsNameTest (VertxTestContext testContext) {
-        JsonObject params = new JsonObject ()
-                .put (RESPONSE_METRIC_NAME_FIELD, "per");
-        historian.rxGetMetricsName (params)
-                .doOnError (testContext :: failNow)
-                .doOnSuccess (rsp -> {
-                    testContext.verify (() -> {
-                        long totalHit = rsp.getLong (RESPONSE_TOTAL_FOUND);
-                        LOGGER.info("docs {} ",rsp);
-                        assertEquals (5, totalHit);
-                        JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
-                        LOGGER.info("docs {}",docs);
-                        assertEquals (3, docs.size ());
-                        testContext.completeNow ();
-                    });
-                })
-                .subscribe ();
     }
 
     private static void assertValidSchemaResponse(SolrResponseBase schemaResponse) {
