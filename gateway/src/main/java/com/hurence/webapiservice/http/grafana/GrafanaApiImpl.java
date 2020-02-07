@@ -30,7 +30,6 @@ public class GrafanaApiImpl implements GrafanaApi {
     public final static String ALGO_TAG_KEY = "Algo";
     public final static String BUCKET_SIZE_TAG_KEY = "Bucket size";
     public final static String FILTER_TAG_KEY = "Tag";
-    public final static String GrafanaHistorianDatasourceFields = "target";
 
 
     public GrafanaApiImpl(HistorianService service) {
