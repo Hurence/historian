@@ -56,6 +56,7 @@ public class HistorianVerticle extends AbstractVerticle {
   public static final String CONFIG_SOLR_STREAM_ENDPOINT = "stream_url";
   public static final String CONFIG_SOLR_SLEEP_BETWEEEN_TRY = "sleep_milli_between_connection_attempt";
   public static final String CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT = "number_of_connection_attempt";
+  public static final String MAX_NUMBER_OF_TARGET_RETURNED = "max_number_of_target_returned";
 
   private SolrClient client;
 
@@ -114,6 +115,7 @@ public class HistorianVerticle extends AbstractVerticle {
     historianConf.limitNumberOfChunks = limitNumberOfChunks;
     historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);;
     historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);;
+    historianConf.maxNumberOfTargetReturned = slrConfig.getInteger(MAX_NUMBER_OF_TARGET_RETURNED, 10);
 
     HistorianService.create(vertx, historianConf, ready -> {
       if (ready.succeeded()) {
