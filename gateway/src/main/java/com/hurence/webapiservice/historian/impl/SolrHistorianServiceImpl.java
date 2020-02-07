@@ -41,6 +41,7 @@ import java.util.stream.Collectors;
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.PAGE_SIZE;
+import static com.hurence.webapiservice.http.grafana.GrafanaApiImpl.GrafanaHistorianDatasourceFields;
 import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -228,25 +229,21 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        String queryString = RESPONSE_METRIC_NAME_FIELD+":*"+params.getString(RESPONSE_METRIC_NAME_FIELD)+"*";
+        String name = params.getString(GrafanaHistorianDatasourceFields);
+        String queryString = RESPONSE_METRIC_NAME_FIELD+":*";
+        if (name!=null) {
+            queryString = RESPONSE_METRIC_NAME_FIELD + ":*" + name + "*";
+        }
         SolrQuery query = new SolrQuery(queryString);
         int max = solrHistorianConf.maxNumberOfTargetReturned;
         LOGGER.debug("max limit:" + max);
         query.setRows(max);
         query.addField(RESPONSE_METRIC_NAME_FIELD);
-        //  EXECUTE REQUEST
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
-                /*FacetField facetField = response.getFacetField(RESPONSE_METRIC_NAME_FIELD);*/
                 SolrDocumentList solrDocuments = response.getResults();
                 LOGGER.debug("Found " + response.getRequestUrl() + response + " result" + solrDocuments);
-                /*FacetField.Count count = facetField.getValues().get(0);
-                count.getCount();
-                count.getName();
-                count.getAsFilterQuery();
-                count.getFacetField();*/
-//                LOGGER.debug("Found " + facetField.getValueCount() + " different values");
                 JsonArray metrics = new JsonArray(solrDocuments.stream()
                         .map(SolrDocument::getFieldValuesMap)
                         .map(stringCollectionMap -> stringCollectionMap.get(RESPONSE_METRIC_NAME_FIELD))
