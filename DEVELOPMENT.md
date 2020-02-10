@@ -25,6 +25,7 @@ git submodule update --remote
 ```
 
 It will automatically pull the last commit of the project in this repository.
+Then do not forget to commit the differences !
 
 ## install plugin in grafana
 
