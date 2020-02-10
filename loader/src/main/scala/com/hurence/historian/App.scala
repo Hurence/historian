@@ -173,11 +173,11 @@ object App {
     val saxStringLength = if (line.hasOption("sl")) line.getOptionValue("sl").toInt else DEFAULT_SAX_STRING_LENGTH
 
 
-    /*if (loadingMode == LoaderMode.CHUNK && kafkaBrokers.isEmpty)
-      throw new IllegalArgumentException(s"kafka broker must not be empty with $loadingMode mode")*/
+    if (loadingMode == LoaderMode.CHUNK && kafkaBrokers.isEmpty)
+      throw new IllegalArgumentException(s"kafka broker must not be empty with $loadingMode mode")
     // add mandatory schema for preload
-    /*if (loadingMode == LoaderMode.PRELOAD && schemaPath.isEmpty)
-      throw new IllegalArgumentException(s"input schema structure must not be empty with $loadingMode mode")*/
+    if (loadingMode == LoaderMode.PRELOAD && schemaPath.isEmpty)
+      throw new IllegalArgumentException(s"input schema structure must not be empty with $loadingMode mode")
 
     val appName = loadingMode match {
       case LoaderMode.PRELOAD => "EvoaPreloader"
