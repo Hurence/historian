@@ -10,11 +10,12 @@ public class SolrHistorianConf {
     public long limitNumberOfChunks;
     public long sleepDurationBetweenTry;
     public int numberOfRetryToConnect;
+    public int maxNumberOfTargetReturned;
 
     public SolrHistorianConf() {
     }
 
-    public SolrHistorianConf(SolrClient client, String collection, String streamEndPoint, long limitNumberOfPoint, long limitNumberOfChunks, long sleepDurationBetweenTry, int numberOfRetryToConnect) {
+    public SolrHistorianConf(SolrClient client, String collection, String streamEndPoint, long limitNumberOfPoint, long limitNumberOfChunks, long sleepDurationBetweenTry, int numberOfRetryToConnect, int maxNumberOfTargetReturned) {
         this.client = client;
         this.collection = collection;
         this.streamEndPoint = streamEndPoint;
@@ -22,6 +23,7 @@ public class SolrHistorianConf {
         this.limitNumberOfChunks = limitNumberOfChunks;
         this.sleepDurationBetweenTry = sleepDurationBetweenTry;
         this.numberOfRetryToConnect = numberOfRetryToConnect;
+        this.maxNumberOfTargetReturned = maxNumberOfTargetReturned;
     }
 
 
