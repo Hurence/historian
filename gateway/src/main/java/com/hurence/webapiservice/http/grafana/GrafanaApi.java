@@ -8,6 +8,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 
 public interface GrafanaApi {
 
+    String TARGET = "target";
     default Router getGraphanaRouter(Vertx vertx) {
         Router router = Router.router(vertx);
         router.get("/").handler(this::root);

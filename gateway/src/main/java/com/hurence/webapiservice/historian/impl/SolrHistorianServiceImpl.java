@@ -35,15 +35,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.PAGE_SIZE;
+import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -231,30 +229,30 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        SolrQuery query = new SolrQuery("*:*");
-        //TODO search a syntax for metric
-        query.setRows(0);//we only need distinct values of metrics
-//    query.setFacet(true);
-//    query.setFacetSort("index");
-//    query.setFacetLimit(0);
-        query.addFacetField(RESPONSE_METRIC_NAME_FIELD);
-        //  EXECUTE REQUEST
+        String name = params.getString(TARGET);
+        String queryString = RESPONSE_METRIC_NAME_FIELD+":*";
+        if (name!=null && !name.isEmpty()) {
+            queryString = RESPONSE_METRIC_NAME_FIELD + ":*" + name + "*";
+        }
+        SolrQuery query = new SolrQuery(queryString);
+        int max = solrHistorianConf.maxNumberOfTargetReturned;
+        LOGGER.debug("max limit:" + max);
+        query.setRows(max);
+        query.addField(RESPONSE_METRIC_NAME_FIELD);
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
-                FacetField facetField = response.getFacetField(RESPONSE_METRIC_NAME_FIELD);
-                FacetField.Count count = facetField.getValues().get(0);
-                count.getCount();
-                count.getName();
-                count.getAsFilterQuery();
-                count.getFacetField();
-                LOGGER.debug("Found " + facetField.getValueCount() + " different values");
-                JsonArray metrics = new JsonArray(facetField.getValues().stream()
-                        .map(FacetField.Count::getName)
+                SolrDocumentList solrDocuments = response.getResults();
+                LOGGER.debug("Found " + response.getRequestUrl() + response + " result" + solrDocuments);
+                JsonArray metrics = new JsonArray(solrDocuments.stream()
+                        .map(SolrDocument::getFieldValuesMap)
+                        .map(stringCollectionMap -> stringCollectionMap.get(RESPONSE_METRIC_NAME_FIELD))
+                        .map(objects -> objects.toArray()[0].toString())
                         .collect(Collectors.toList())
                 );
+                LOGGER.debug("mertics :: "+ metrics);
                 p.complete(new JsonObject()
-                        .put(RESPONSE_TOTAL_FOUND, facetField.getValueCount())
+                        .put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
                         .put(RESPONSE_METRICS, metrics)
                 );
             } catch (IOException | SolrServerException e) {
