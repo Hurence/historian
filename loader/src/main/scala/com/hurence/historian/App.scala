@@ -4,10 +4,8 @@ package com.hurence.historian
 import java.util.Calendar
 
 import com.hurence.historian.LoaderMode.LoaderMode
-import com.hurence.historian.SchemaAnalysis.getType
 import com.hurence.logisland.processor.StandardProcessContext
 import com.hurence.logisland.record.{FieldDictionary, Record, RecordDictionary, StandardRecord, TimeSeriesRecord}
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
 import org.apache.commons.cli.{CommandLine, GnuParser, Option, OptionBuilder, Options, Parser}
 import org.apache.spark.sql.{Encoder, Encoders, Row, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
