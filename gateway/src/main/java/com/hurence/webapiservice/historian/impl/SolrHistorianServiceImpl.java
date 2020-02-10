@@ -231,7 +231,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
         String name = params.getString(TARGET);
         String queryString = RESPONSE_METRIC_NAME_FIELD+":*";
-        if (name!=null) {
+        if (name!=null && !name.isEmpty()) {
             queryString = RESPONSE_METRIC_NAME_FIELD + ":*" + name + "*";
         }
         SolrQuery query = new SolrQuery(queryString);
