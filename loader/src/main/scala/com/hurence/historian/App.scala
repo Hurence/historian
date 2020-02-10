@@ -258,6 +258,71 @@ object App {
     println("IFPEN Preloading done")
   }
 
+  def chunk_IFPEN(options: LoaderOptions, spark: SparkSession): Unit = {
+
+    import spark.implicits._
+
+    val testDF = spark.read.format("csv")
+      .option("sep", ",")
+      .option("inferSchema", "true")
+      .option("header", "true")
+      .load(options.in)
+      .cache()
+
+
+    val n = testDF.agg(countDistinct($"name")).collect().head.getLong(0).toInt
+
+
+    implicit val enc: Encoder[TimeSeriesRecord] = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+
+    val tsDF = testDF.repartition(n, $"name")
+      .sortWithinPartitions($"name", $"time_ms")
+      .mapPartitions(partition => {
+
+        // Init the Timeserie processor
+        val tsProcessor = new TimeseriesConverter()
+        val context = new StandardProcessContext(tsProcessor, "")
+        context.setProperty(TimeseriesConverter.GROUPBY.getName, "name")
+        context.setProperty(TimeseriesConverter.METRIC.getName,
+          s"min;max;avg;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
+        tsProcessor.init(context)
+
+        // Slide over each group
+        partition.toList
+          .groupBy(row => row.getString(row.fieldIndex("name")))
+          .flatMap(group => group._2
+            .sliding(options.chunkSize, options.chunkSize)
+            .map(subGroup => tsProcessor.toTimeseriesRecordOld(group._1, subGroup.toList))
+            .map(ts => (ts.getId, tsProcessor.serialize(ts)))
+          )
+          .iterator
+      }).toDF("key", "value")
+
+
+    // Write this chunk dataframe to Kafka
+    if (options.useKerberos) {
+      tsDF
+        .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+        .write
+        .format("kafka")
+        .option("kafka.bootstrap.servers", options.brokers.get)
+        .option("kafka.security.protocol", "SASL_PLAINTEXT")
+        .option("kafka.sasl.kerberos.service.name", "kafka")
+        .option("topic", options.out)
+        .save()
+    } else {
+      tsDF
+        .selectExpr("CAST(key AS STRING)", "CAST(value AS STRING)")
+        .write
+        .format("kafka")
+        .option("kafka.bootstrap.servers", options.brokers.get)
+        .option("topic", options.out)
+        .save()
+    }
+
+
+  }
+
 
   def getType(raw: String): DataType = {
     raw match {
