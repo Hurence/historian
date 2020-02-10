@@ -53,6 +53,37 @@ The run this command in root of this project
 mvn clean install -DskipTests
 ```
 
+# Install datasource plugin in your grafana instance
+
+## Requirement
+
+Run this command to be sure to be up to date. 
+
+```
+git submodule update
+```
+
+If you modified the plugin, working on his own repository and you want to upgrade the datasource in this project run this instead :
+
+```
+git submodule update --remote
+```
+
+And do not forget to commit the results so that others will got the updated version as well.
+
+## install plugin
+
+You just need to copy the plugin folder **./grafana-historian-dataosurce** folder of the plugin into the plugin folder of your grafana instances.
+Look at your grafana.ini file, by default the path is **./data/plugins/**.
+
+So you could do something like
+ 
+ ``` shell script
+cp -r ./grafana-historian-dataosurce ${GRAFANA_HOME}/data/plugins/
+```
+
+You need to restart your grafana server so that the changes are taking in account.
+
 # Development
 
 Please see our documentation [here](DEVELOPMENT.md)
