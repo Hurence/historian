@@ -46,7 +46,8 @@ public class GrafanaApiImpl implements GrafanaApi {
     @Override
     public void search(RoutingContext context) {
         //TODO parse request body to filter query of metrics ?
-        final JsonObject getMetricsParam = new JsonObject();
+        //final JsonObject getMetricsParam = new JsonObject();
+        final JsonObject getMetricsParam = context.getBodyAsJson();
 
 
 
@@ -222,7 +223,7 @@ public class GrafanaApiImpl implements GrafanaApi {
         return new JsonArray()
                 .add(new JsonObject().put("text", SamplingAlgorithm.NONE))
                 .add(new JsonObject().put("text", SamplingAlgorithm.AVERAGE))
-   //             .add(new JsonObject().put("text", SamplingAlgorithm.FIRST_ITEM))
+                .add(new JsonObject().put("text", SamplingAlgorithm.FIRST_ITEM))
                 .add(new JsonObject().put("text", SamplingAlgorithm.MIN))
                 .add(new JsonObject().put("text", SamplingAlgorithm.MAX));
     }

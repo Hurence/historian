@@ -17,7 +17,8 @@
       "zookeeper_urls": ["localhost:2181"],
       "collection": "historian",
       "stream_url": "http://localhost:8983/solr/historian",
-      "urls": ["http://localhost:8983/solr"]
+      "urls": ["http://localhost:8983/solr"],
+      "max_number_of_target_returned": 10
     }
   }
 }
