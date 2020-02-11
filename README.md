@@ -54,3 +54,17 @@ mvn clean install -DskipTests
 ```
 
 
+
+weekly team 10/02/2020
+
+- loader : 
+    - BENOIT / PR du chargement des données coservit en mode générique
+    - TOM / review PR & merge
+    - TOM / chargement 1 mois de data pour démo
+- gateway : 
+    - GREG / merge PR du filtrage du nom des métriques
+    - FEIZ / implem de la recherche des annotations
+- analytic :
+    - MEJD / intég de la fonction de seuil SAX dans la lib timeseries + unit tests
+    - MEJD / integ de la lib grammar viz
+    - TOM / utilisation de la fonction seuils SAX pour indexer des annotations

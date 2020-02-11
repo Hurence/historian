@@ -22,6 +22,7 @@ import com.hurence.logisland.timeseries.MetricTimeSeries;
  */
 public class TimeSeriesRecord extends StandardRecord {
 
+    public static final String CHUNK_ORIGIN = "chunk_origin";
     private MetricTimeSeries timeSeries;
 
     public static final String RECORD_CHUNK_COMPRESSED_POINTS = "record_chunk_compressed_points";
