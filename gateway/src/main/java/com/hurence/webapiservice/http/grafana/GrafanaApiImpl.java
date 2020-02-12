@@ -5,6 +5,7 @@ import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
+import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.*;
@@ -144,7 +145,58 @@ public class GrafanaApiImpl implements GrafanaApi {
 
     @Override
     public void annotations(RoutingContext context) {
-        throw new UnsupportedOperationException("Not implemented yet");//TODO
+        //throw new UnsupportedOperationException("Not implemented yet");//TODO
+        final long startRequest = System.currentTimeMillis();
+        final AnnotationRequestParam request;
+        try {
+            JsonObject requestBody = context.getBodyAsJson();
+            /*
+                When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
+                at initialization (did not successfully reproduced this in a unit test).//TODO
+             */
+            request = new AnnotationRequestParser().parseAnnotationRequest(requestBody);
+        } catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
+
+        final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
+
+        service
+                .rxGetTimeSeries(getTimeSeriesChunkParams)
+                .map(sampledTimeSeries -> {
+                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES_RESPONSE_FIELD);
+                    if (LOGGER.isDebugEnabled()) {
+                        timeseries.forEach(metric -> {
+                            JsonObject el = (JsonObject) metric;
+                            String metricName = el.getString(TimeSeriesExtracterImpl.TIMESERIE_NAME);
+                            int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
+                            LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
+                                    request.getRequestId(),size, metricName);
+                        });
+                        LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
+                                request.getRequestId(),
+                                sampledTimeSeries.getLong(TOTAL_POINTS_RESPONSE_FIELD, 0L),
+                                System.currentTimeMillis() - startRequest);
+                    }
+                    return timeseries;
+                })
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(timeseries -> {
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(timeseries.encode());
+
+                }).subscribe();
     }
 
     /**
