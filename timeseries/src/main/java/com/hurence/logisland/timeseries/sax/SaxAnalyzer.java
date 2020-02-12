@@ -72,10 +72,4 @@ public class SaxAnalyzer {
 
     }
 
-
-
-    public static void main(String []args){
-        String str = "saxsaxsaxsaxsaxsaxsaxsaxsaxsaxsaxsaxsaxsaxsaxsaxsaxh";
-        System.out.println(anomalyDetect(str , saxThreshold(str)));
-    }
 }
