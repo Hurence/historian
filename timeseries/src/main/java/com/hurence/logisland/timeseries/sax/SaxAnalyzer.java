@@ -115,8 +115,4 @@ public class SaxAnalyzer {
 
         return finalResult;
     }
-//    public static void main (String[] args) {
-//    String str = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaabaaaaaaaaaaaaaaaaa";
-//        System.out.println(saxThreshold(str));
-//    }
 }
