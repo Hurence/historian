@@ -102,17 +102,31 @@ public interface HistorianService {
 
     /**
      * @param params        as a json object, it is ignored at the moment TODO
-     * @param resultHandler return chunks of timeseries as an array of
+     * @param resultHandler return names of metrics as an array of
      *                      <pre>
      *                      {
      *                          {@value HistorianFields#RESPONSE_METRICS} : "all metric name matching the query",
-     *                          {@value HistorianFields#RESPONSE_TOTAL_FOUND} : "total chunk matching query"
+     *                          {@value HistorianFields#RESPONSE_TOTAL_FOUND} : "total metric names matching query"
      *                      }
      *                      </pre>
      * @return himself
      */
     @Fluent
     HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
+
+    /**
+     * @param params        as a json object, it contients the parametres found in the request
+     * @param resultHandler return annotations as an array of
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#RESPONSE_ANNOTATIONS} : "all annotation matching the query",
+     *                          {@value HistorianFields#RESPONSE_TOTAL_FOUND} : "total annotations matching query"
+     *                      }
+     *                      </pre>
+     * @return himself
+     */
+    @Fluent
+    HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
 
 
 }

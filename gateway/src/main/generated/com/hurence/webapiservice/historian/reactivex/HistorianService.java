@@ -121,7 +121,7 @@ public class HistorianService {
 
   /**
    * @param params as a json object, it is ignored at the moment TODO
-   * @param resultHandler return chunks of timeseries as an array of <pre> {  : "all metric name matching the query",  : "total chunk matching query" } </pre>
+   * @param resultHandler return names of metrics as an array of <pre> {  : "all metric name matching the query",  : "total metric names matching query" } </pre>
    * @return himself
    */
   public com.hurence.webapiservice.historian.reactivex.HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { 
@@ -136,6 +136,26 @@ public class HistorianService {
   public Single<JsonObject> rxGetMetricsName(JsonObject params) { 
     return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
       getMetricsName(params, handler);
+    });
+  }
+
+  /**
+   * @param params as a json object, it contients the parametres found in the request
+   * @param resultHandler return annotations as an array of <pre> {  : "all annotation matching the query",  : "total annotations matching query" } </pre>
+   * @return himself
+   */
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { 
+    delegate.getAnnotations(params, resultHandler);
+    return this;
+  }
+
+  /**
+   * @param params as a json object, it contients the parametres found in the request
+   * @return himself
+   */
+  public Single<JsonObject> rxGetAnnotations(JsonObject params) { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getAnnotations(params, handler);
     });
   }
 
