@@ -143,6 +143,32 @@ public class GrafanaApiImpl implements GrafanaApi {
                 .put(MAX_POINT_BY_METRIC_REQUEST_FIELD, samplingConf.getMaxPoint());
     }
 
+    private JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
+
+        JsonArray fieldsToFetch = new JsonArray()
+                .add(RESPONSE_CHUNK_VALUE_FIELD)
+                .add(RESPONSE_CHUNK_START_FIELD)  // put here the request fields as list
+                .add(RESPONSE_CHUNK_END_FIELD)
+                .add(RESPONSE_CHUNK_SIZE_FIELD)
+                .add(RESPONSE_METRIC_NAME_FIELD);
+        SamplingConf samplingConf = request.getSamplingConf();
+        return new JsonObject()
+                .put(FROM_REQUEST_FIELD, request.getFrom())
+                .put(TO_REQUEST_FIELD, request.getTo())
+                /*.put(FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD, fieldsToFetch)
+                .put(METRIC_NAMES_AS_LIST_REQUEST_FIELD, request.getMetricNames())
+                .put(TAGS_TO_FILTER_ON_REQUEST_FIELD, request.getTags())
+                .put(SAMPLING_ALGO_REQUEST_FIELD, samplingConf.getAlgo())
+                .put(BUCKET_SIZE_REQUEST_FIELD, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC_REQUEST_FIELD, samplingConf.getMaxPoint());*/
+                .put("FromRaw",request.getFromRaw()) // you should not hard code this
+                .put("ToRaw", request.getToRaw())
+                .put("Tags", request.getTag())
+                .put("MaxAnnotation", request.getMaxAnnotation())
+                .put("MatchAny", request.getMatchAny())
+                .put("Type", request.getType());
+    }
+
     @Override
     public void annotations(RoutingContext context) {
         //throw new UnsupportedOperationException("Not implemented yet");//TODO
@@ -164,10 +190,10 @@ public class GrafanaApiImpl implements GrafanaApi {
             return;
         }
 
-        final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
+        final JsonObject getAnnotationParams = buildHistorianAnnotationRequest(request);
 
         service
-                .rxGetTimeSeries(getTimeSeriesChunkParams)
+                .rxGetTimeSeries(getAnnotationParams)
                 .map(sampledTimeSeries -> {
                     JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES_RESPONSE_FIELD);
                     if (LOGGER.isDebugEnabled()) {
@@ -175,13 +201,13 @@ public class GrafanaApiImpl implements GrafanaApi {
                             JsonObject el = (JsonObject) metric;
                             String metricName = el.getString(TimeSeriesExtracterImpl.TIMESERIE_NAME);
                             int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
-                            LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
-                                    request.getRequestId(),size, metricName);
+                            /*LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
+                                    request.getRequestId(),size, metricName);*/
                         });
-                        LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
+                        /*LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
                                 request.getRequestId(),
                                 sampledTimeSeries.getLong(TOTAL_POINTS_RESPONSE_FIELD, 0L),
-                                System.currentTimeMillis() - startRequest);
+                                System.currentTimeMillis() - startRequest);*/
                     }
                     return timeseries;
                 })

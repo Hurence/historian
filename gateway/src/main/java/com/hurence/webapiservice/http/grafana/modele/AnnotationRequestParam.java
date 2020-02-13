@@ -2,13 +2,16 @@ package com.hurence.webapiservice.http.grafana.modele;
 
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
+import com.hurence.webapiservice.timeseries.AnnotationRequest;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
 
 import java.util.List;
 
-public class AnnotationRequestParam implements TimeSeriesRequest {
+public class AnnotationRequestParam implements AnnotationRequest {
 
-    private List<String> tags;
+    private JsonArray tags;
     private long from;
     private long to;
     private long fromRaw;
@@ -20,7 +23,7 @@ public class AnnotationRequestParam implements TimeSeriesRequest {
 
     private AnnotationRequestParam() { }
 
-    public void setTags(List<String> tags) {
+    public void setTags(JsonArray tags) {
         this.tags = tags;
     }
 
@@ -52,7 +55,7 @@ public class AnnotationRequestParam implements TimeSeriesRequest {
         this.type = type;
     }
 
-    public List<String> getTags() {
+    public JsonArray getTag() { // i need to use this getTags without the one in the TimeSeriesRquest
         return tags;
     }
 
@@ -60,10 +63,6 @@ public class AnnotationRequestParam implements TimeSeriesRequest {
         return from;
     }
 
-    @Override
-    public List<AGG> getAggs() {
-        return null;
-    }
 
     public long getTo() {
         return to;
@@ -76,6 +75,11 @@ public class AnnotationRequestParam implements TimeSeriesRequest {
 
     @Override
     public List<String> getMetricNames() {
+        return null;
+    }
+
+    @Override
+    public List<String> getTags() {
         return null;
     }
 
@@ -101,7 +105,7 @@ public class AnnotationRequestParam implements TimeSeriesRequest {
 
 
     public static final class Builder {
-        private List<String> tags;
+        private JsonArray tags;
         private long from;
         private long to;
         private long fromRaw;
@@ -112,7 +116,7 @@ public class AnnotationRequestParam implements TimeSeriesRequest {
 
         public Builder() { }
 
-        public AnnotationRequestParam.Builder withTags(List<String> tags) {
+        public AnnotationRequestParam.Builder withTags(JsonArray tags) {
             this.tags = tags;
             return this;
         }

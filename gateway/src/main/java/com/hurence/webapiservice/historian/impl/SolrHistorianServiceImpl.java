@@ -13,6 +13,7 @@ import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos;
 import org.apache.lucene.search.MatchAllDocsQuery;
 import org.apache.lucene.search.Query;
 import org.apache.solr.client.solrj.SolrClient;
@@ -185,7 +186,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         StringBuilder queryBuilder = new StringBuilder();
         if (params.getLong(TO_REQUEST_FIELD) != null) {
             LOGGER.trace("requesting timeseries to {}", params.getLong(TO_REQUEST_FIELD));
-            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO_REQUEST_FIELD)).append("]");
+            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO_REQUEST_FIELD)).append("]"); // i think we should inverse this
         }
         if (params.getLong(FROM_REQUEST_FIELD) != null) {
             LOGGER.trace("requesting timeseries from {}", params.getLong(FROM_REQUEST_FIELD));
@@ -211,6 +212,50 @@ public class SolrHistorianServiceImpl implements HistorianService {
         query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
         query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
         query.setRows(params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE_REQUEST_FIELD, 50000));
+        return query;
+    }
+    private SolrQuery buildAnnotationQuery(JsonObject params) {
+        StringBuilder queryBuilder = new StringBuilder();
+        if (params.getLong(TO_REQUEST_FIELD) != null) {
+            LOGGER.trace("requesting annotation with time to {}", params.getLong(TO_REQUEST_FIELD));
+            queryBuilder.append("time").append(":[* TO ").append(params.getLong(TO_REQUEST_FIELD)).append("]"); // should not hard code this
+        }
+        if (params.getLong(FROM_REQUEST_FIELD) != null) {
+            LOGGER.trace("requesting timeseries from {}", params.getLong(FROM_REQUEST_FIELD));
+            if (queryBuilder.length() != 0)
+                queryBuilder.append(" AND ");
+            queryBuilder.append("time").append(":[").append(params.getLong(FROM_REQUEST_FIELD)).append(" TO *]"); // should not hard code this
+        }
+        //
+        List<String> tags = params.getJsonArray("Tags").getList();
+        StringBuilder stringQuery = new StringBuilder();
+        String operator = "";
+        SolrQuery query = new SolrQuery();
+        if (params.getString("type", "all") == "tags") {
+            queryBuilder.append(" AND ");
+            if (!params.getBoolean("MatchAny", true)) {
+                operator = " AND ";
+            } else {
+                operator = " OR ";
+            }
+            for (String tag : tags.subList(0,tags.size()-1)) {
+                stringQuery.append(tag).append(operator);
+            }
+            stringQuery.append(tags.get(tags.size()));
+            queryBuilder.append("tags").append(":").append("(").append(stringQuery.toString()).append(")");
+        }
+        if (queryBuilder.length() != 0)
+            query.setQuery(queryBuilder.toString());
+        query.setRows(params.getInteger("limit", 100));
+        //    FIELDS_TO_FETCH
+        query.setFields("time", // shoun not hard code this
+                "timeEnd",
+                "text",
+                "tags");
+        /*//    SORT
+        query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
+        query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setRows(params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE_REQUEST_FIELD, 50000));*/
         return query;
     }
 
@@ -263,6 +308,34 @@ public class SolrHistorianServiceImpl implements HistorianService {
             }
         };
         vertx.executeBlocking(getMetricsNameHandler, resultHandler);
+        return this;
+    }
+
+    //@Override
+    public HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { // i need to create this in the services
+        SolrQuery query = buildAnnotationQuery(params);
+        Handler<Promise<JsonObject>> getAnnoationsHandler = p -> {
+            try {
+                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
+                SolrDocumentList solrDocuments = response.getResults();
+                LOGGER.debug("Found " + response.getRequestUrl() + response + " result" + solrDocuments);
+                JsonArray annoatation = new JsonArray(new ArrayList<>(solrDocuments)
+                );
+                LOGGER.debug("annotations found : "+ annoatation);
+                p.complete(new JsonObject()
+                        /*.put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
+                        .put(RESPONSE_METRICS, annoatation)*/
+                        .put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
+                        .put("Annotations", annoatation)  // should not hard code this
+                );
+            } catch (IOException | SolrServerException e) {
+                p.fail(e);
+            } catch (Exception e) {
+                LOGGER.error("unexpected exception");
+                p.fail(e);
+            }
+        };
+        vertx.executeBlocking(getAnnoationsHandler, resultHandler);
         return this;
     }
 
