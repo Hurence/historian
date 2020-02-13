@@ -193,34 +193,17 @@ public class GrafanaApiImpl implements GrafanaApi {
         final JsonObject getAnnotationParams = buildHistorianAnnotationRequest(request);
 
         service
-                .rxGetTimeSeries(getAnnotationParams)
-                .map(sampledTimeSeries -> {
-                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES_RESPONSE_FIELD);
-                    if (LOGGER.isDebugEnabled()) {
-                        timeseries.forEach(metric -> {
-                            JsonObject el = (JsonObject) metric;
-                            String metricName = el.getString(TimeSeriesExtracterImpl.TIMESERIE_NAME);
-                            int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
-                            /*LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
-                                    request.getRequestId(),size, metricName);*/
-                        });
-                        /*LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
-                                request.getRequestId(),
-                                sampledTimeSeries.getLong(TOTAL_POINTS_RESPONSE_FIELD, 0L),
-                                System.currentTimeMillis() - startRequest);*/
-                    }
-                    return timeseries;
-                })
+                .rxGetAnnotations(getAnnotationParams)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
                     context.response().setStatusCode(500);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(ex.getMessage());
                 })
-                .doOnSuccess(timeseries -> {
+                .doOnSuccess(annotations -> {
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(timeseries.encode());
+                    context.response().end(annotations.encode());
 
                 }).subscribe();
     }

@@ -319,14 +319,14 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
                 SolrDocumentList solrDocuments = response.getResults();
                 LOGGER.debug("Found " + response.getRequestUrl() + response + " result" + solrDocuments);
-                JsonArray annoatation = new JsonArray(new ArrayList<>(solrDocuments)
+                JsonArray annotation = new JsonArray(new ArrayList<>(solrDocuments)
                 );
-                LOGGER.debug("annotations found : "+ annoatation);
+                LOGGER.debug("annotations found : "+ annotation);
                 p.complete(new JsonObject()
                         /*.put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
                         .put(RESPONSE_METRICS, annoatation)*/
                         .put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
-                        .put("Annotations", annoatation)  // should not hard code this
+                        .put(RESPONSE_ANNOTATIONS, annotation)  // should not hard code this
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
