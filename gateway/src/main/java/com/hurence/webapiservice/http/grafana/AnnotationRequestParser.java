@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.grafana;
 
 import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;
@@ -10,7 +11,6 @@ import org.slf4j.LoggerFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -41,7 +41,7 @@ public class AnnotationRequestParser {
         builder.toRaw(toRaw);
         int maxAnnotations = parseMaxAnnotations(requestBody);;
         builder.withMaxAnnotation(maxAnnotations);
-        List<String> tags = parseTags(requestBody);;
+        JsonArray tags = parseTags(requestBody);;
         builder.withTags(tags);
         Boolean matchAny = parseMatchAny(requestBody);;
         builder.withMatchAny(matchAny);
@@ -58,11 +58,8 @@ public class AnnotationRequestParser {
         return parseDate(requestBody, "/rangeRaw/to");
     }
 
-    private List<String> parseTags(JsonObject requestBody) {
-        return requestBody.getJsonArray("tags").stream()
-                .map(JsonObject.class::cast)
-                .map(JsonObject::encode)
-                .collect(Collectors.toList());
+    private JsonArray parseTags(JsonObject requestBody) {
+        return requestBody.getJsonArray("tags");
     }
 
     private long parseFrom(JsonObject requestBody) {
