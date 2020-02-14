@@ -24,6 +24,15 @@ public class HistorianFields {
     public static String SAMPLING_ALGO_REQUEST_FIELD = "sampling_algo";
     public static String BUCKET_SIZE_REQUEST_FIELD = "bucket_size";
     public static String MAX_POINT_BY_METRIC_REQUEST_FIELD = "max_points_to_return_by_metric";
+    public static String TIME_REQUEST_FIELD = "time";
+    public static String TIME_END_REQUEST_FIELD = "timeEnd";
+    public static String TEXT_REQUEST_FIELD = "text";
+    public static String TAGS_REQUEST_FIELD = "tags";
+    public static String MAX_ANNOTATION_REQUEST_FIELD = "max_annotation";
+    public static String MATCH_ANY_REQUEST_FIELD = "match_any";
+    public static String TYPE_REQUEST_FIELD = "type";
+    public static String FROM_RAW_REQUEST_FIELD = "fromRaw";
+    public static String TO_RAW_REQUEST_FIELD = "toRaw";
 
     //Response fields
     public static String TOTAL_POINTS_RESPONSE_FIELD = "total_points";
