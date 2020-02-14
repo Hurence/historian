@@ -2,9 +2,7 @@ package com.hurence.webapiservice.http.grafana;
 
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.historian.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
 import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -14,10 +12,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
@@ -145,39 +139,24 @@ public class GrafanaApiImpl implements GrafanaApi {
 
     private JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
 
-        JsonArray fieldsToFetch = new JsonArray()
-                .add(RESPONSE_CHUNK_VALUE_FIELD)
-                .add(RESPONSE_CHUNK_START_FIELD)  // put here the request fields as list
-                .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_SIZE_FIELD)
-                .add(RESPONSE_METRIC_NAME_FIELD);
-        SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
                 .put(FROM_REQUEST_FIELD, request.getFrom())
                 .put(TO_REQUEST_FIELD, request.getTo())
-                /*.put(FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD, fieldsToFetch)
-                .put(METRIC_NAMES_AS_LIST_REQUEST_FIELD, request.getMetricNames())
-                .put(TAGS_TO_FILTER_ON_REQUEST_FIELD, request.getTags())
-                .put(SAMPLING_ALGO_REQUEST_FIELD, samplingConf.getAlgo())
-                .put(BUCKET_SIZE_REQUEST_FIELD, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC_REQUEST_FIELD, samplingConf.getMaxPoint());*/
-                .put("FromRaw",request.getFromRaw()) // you should not hard code this
-                .put("ToRaw", request.getToRaw())
-                .put("Tags", request.getTag())
-                .put("MaxAnnotation", request.getMaxAnnotation())
-                .put("MatchAny", request.getMatchAny())
-                .put("Type", request.getType());
+                .put(FROM_RAW_REQUEST_FIELD,request.getFromRaw())
+                .put(TO_RAW_REQUEST_FIELD, request.getToRaw())
+                .put(TAGS_REQUEST_FIELD, request.getTagsAsJsonArray())
+                .put(MAX_ANNOTATION_REQUEST_FIELD, request.getMaxAnnotation())
+                .put(MATCH_ANY_REQUEST_FIELD, request.getMatchAny())
+                .put(TYPE_REQUEST_FIELD, request.getType());
     }
 
     @Override
     public void annotations(RoutingContext context) {
-        //throw new UnsupportedOperationException("Not implemented yet");//TODO
-        final long startRequest = System.currentTimeMillis();
         final AnnotationRequestParam request;
         try {
             JsonObject requestBody = context.getBodyAsJson();
             /*
-                When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
+                When declaring AnnotationRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
             request = new AnnotationRequestParser().parseAnnotationRequest(requestBody);

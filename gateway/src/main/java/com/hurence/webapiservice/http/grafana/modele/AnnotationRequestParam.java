@@ -55,7 +55,7 @@ public class AnnotationRequestParam implements AnnotationRequest {
         this.type = type;
     }
 
-    public JsonArray getTag() { // i need to use this getTags without the one in the TimeSeriesRquest
+    public JsonArray getTagsAsJsonArray() { // i need to use this getTags without the one in the TimeSeriesRquest
         return tags;
     }
 

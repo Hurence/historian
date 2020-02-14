@@ -186,7 +186,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         StringBuilder queryBuilder = new StringBuilder();
         if (params.getLong(TO_REQUEST_FIELD) != null) {
             LOGGER.trace("requesting timeseries to {}", params.getLong(TO_REQUEST_FIELD));
-            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO_REQUEST_FIELD)).append("]"); // i think we should inverse this
+            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO_REQUEST_FIELD)).append("]");
         }
         if (params.getLong(FROM_REQUEST_FIELD) != null) {
             LOGGER.trace("requesting timeseries from {}", params.getLong(FROM_REQUEST_FIELD));
@@ -216,22 +216,16 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
     private SolrQuery buildAnnotationQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        if (params.getLong(TO_REQUEST_FIELD) != null) {
-            LOGGER.trace("requesting annotation with time to {}", params.getLong(TO_REQUEST_FIELD));
-            queryBuilder.append("time").append(":[* TO ").append(params.getLong(TO_REQUEST_FIELD)).append("]"); // should not hard code this
+        if (params.getLong(TO_REQUEST_FIELD) != null && params.getLong(FROM_REQUEST_FIELD) != null) {
+            LOGGER.trace("requesting annotation with time from {} to time {} ", params.getLong(FROM_REQUEST_FIELD), params.getLong(TO_REQUEST_FIELD));
+            queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(params.getLong(FROM_REQUEST_FIELD)).append(params.getLong(TO_REQUEST_FIELD)).append("]");
         }
-        if (params.getLong(FROM_REQUEST_FIELD) != null) {
-            LOGGER.trace("requesting timeseries from {}", params.getLong(FROM_REQUEST_FIELD));
-            if (queryBuilder.length() != 0)
-                queryBuilder.append(" AND ");
-            queryBuilder.append("time").append(":[").append(params.getLong(FROM_REQUEST_FIELD)).append(" TO *]"); // should not hard code this
-        }
-        //
+        //   FILTER
         List<String> tags = params.getJsonArray("Tags").getList();
         StringBuilder stringQuery = new StringBuilder();
         String operator = "";
         SolrQuery query = new SolrQuery();
-        if (params.getString("type", "all") == "tags") {
+        if (params.getString("type").equals("tags")) {
             queryBuilder.append(" AND ");
             if (!params.getBoolean("MatchAny", true)) {
                 operator = " AND ";
@@ -241,21 +235,17 @@ public class SolrHistorianServiceImpl implements HistorianService {
             for (String tag : tags.subList(0,tags.size()-1)) {
                 stringQuery.append(tag).append(operator);
             }
-            stringQuery.append(tags.get(tags.size()));
+            stringQuery.append(tags.get(tags.size()-1));
             queryBuilder.append("tags").append(":").append("(").append(stringQuery.toString()).append(")");
         }
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
-        query.setRows(params.getInteger("limit", 100));
+        query.setRows(params.getInteger("limit"));
         //    FIELDS_TO_FETCH
-        query.setFields("time", // shoun not hard code this
-                "timeEnd",
-                "text",
-                "tags");
-        /*//    SORT
-        query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
-        query.setRows(params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE_REQUEST_FIELD, 50000));*/
+        query.setFields(TIME_REQUEST_FIELD,
+                TIME_END_REQUEST_FIELD,
+                TEXT_REQUEST_FIELD,
+                TAGS_REQUEST_FIELD);
         return query;
     }
 
@@ -311,8 +301,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    //@Override
-    public HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { // i need to create this in the services
+    @Override
+    public HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
         SolrQuery query = buildAnnotationQuery(params);
         Handler<Promise<JsonObject>> getAnnoationsHandler = p -> {
             try {
@@ -323,10 +313,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 );
                 LOGGER.debug("annotations found : "+ annotation);
                 p.complete(new JsonObject()
-                        /*.put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
-                        .put(RESPONSE_METRICS, annoatation)*/
                         .put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
-                        .put(RESPONSE_ANNOTATIONS, annotation)  // should not hard code this
+                        .put(RESPONSE_ANNOTATIONS, annotation)
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);

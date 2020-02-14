@@ -23,7 +23,7 @@ public interface AnnotationRequest {
 
     List<String> getTags();
 
-    JsonArray getTag();
+    JsonArray getTagsAsJsonArray();
 
     int getMaxAnnotation();
 
