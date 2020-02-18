@@ -44,7 +44,7 @@ public class HistorianAnnotationVerticleIT {
                             context.completeNow();
                         },
                         t -> context.failNow(t));
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_ANNOTATTION);
+        LOGGER.info("Indexing some documents in {} collection", COLLECTION);
 
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("time", 1581648194);
@@ -83,7 +83,7 @@ public class HistorianAnnotationVerticleIT {
         final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
         client.commit(COLLECTION);
 
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_ANNOTATTION);
+        LOGGER.info("Indexed some documents in {} collection", COLLECTION);
     }
 
     @AfterAll
@@ -98,7 +98,9 @@ public class HistorianAnnotationVerticleIT {
 
     @Test
     /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
-    void getAnnotattionsTest (VertxTestContext testContext) {
+    void getAnnotattionsTest (VertxTestContext testContext) throws InterruptedException {
+        LOGGER.info("hi");
+        Thread.sleep(10000);
         JsonObject params = new JsonObject ()
                 .put (FROM_REQUEST_FIELD, "2020-2-14T04:43:14.070Z")
                 .put(TO_REQUEST_FIELD, "2020-2-14T07:43:14.070Z")
