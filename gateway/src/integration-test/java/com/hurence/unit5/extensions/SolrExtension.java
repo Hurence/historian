@@ -108,6 +108,7 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
         try (SolrZkClient zkClient = new SolrZkClient(zkUrl, 15000)) {
             ZkConfigManager manager = new ZkConfigManager(zkClient);
             manager.uploadConfigDir(Paths.get(getClass().getResource("/solr/configsets/historian/conf").getFile()), "historian");
+            manager.uploadConfigDir(Paths.get(getClass().getResource("/solr/configsets/annotation/conf").getFile()), "annotation");
         } catch (IOException ex) {
             logger.error("error copying conf of solr" ,ex);
         } catch (Exception ex) {
