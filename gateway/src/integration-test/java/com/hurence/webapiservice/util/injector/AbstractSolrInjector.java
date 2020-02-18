@@ -14,12 +14,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
-
 public abstract class AbstractSolrInjector implements SolrInjector {
 
     protected int ddcThreshold = 0;
-    private static String COLLECTION = HistorianSolrITHelper.COLLECTION;
+    private static String COLLECTION = HistorianSolrITHelper.COLLECTION_HISTORIAN;
     private List<ChunkModele> extraCustomChunks = new ArrayList<>();
 
     protected byte[] compressPoints(List<Point> pointsChunk) {
