@@ -45,3 +45,26 @@ docker logs -f x8j3c5bytsj2_solr1_1
 ```
 
 Check for any error and reason while the collection creation or injection failed.
+
+
+# TESTS
+
+## Architecture resources dans integration-test
+
+* historian-conf : contient la conf pour la gateway lancer par le docker-compose 'docker-compose-for-grafana-tests.yml'
+* http : Contient des requêtes http et réponse pour les tests d'intégration
+* scripts : contient des script pour injecter des données dans la gateway lancer par le docker-compose 'docker-compose-for-grafana-tests.yml'
+* solr : contient la conf pour les collection solr nécessair a la gateway, c'est utiliser pour les tests d'intégrations ET
+  par le docker-compose 'docker-compose-for-grafana-tests.yml'
+* docker-compose-for-grafana-tests.yml : Utiliser pour lancer la gateway avec des données d'exemple. A utiliser principalement 
+pour tester du développement sur grafana avec des données et une gateway fonctionnel, comme des plugins de datasource ou de panel.
+* docker-compose-test.yml : Utilisé pour lancer les tests d'intégrations
+
+## Run gateway with docker-compose
+
+go into the resources and then run the docker-compose file :
+
+```shell script
+cd ./src/integration-test/resources
+docker-compose -f docker-compose-for-grafana-tests.yml up -d
+```
