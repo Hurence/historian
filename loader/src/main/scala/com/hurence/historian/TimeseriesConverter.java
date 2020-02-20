@@ -5,7 +5,6 @@ import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.processor.AbstractProcessor;
 import com.hurence.logisland.processor.ProcessContext;
-import com.hurence.logisland.processor.Processor;
 import com.hurence.logisland.record.*;
 import com.hurence.logisland.serializer.KryoSerializer;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
@@ -27,7 +26,6 @@ import java.io.IOException;
 
 import java.util.*;
 import java.util.stream.Collectors;
-import com.hurence.historian.EvoaMeasure;
 
 public class TimeseriesConverter extends AbstractProcessor {
 
@@ -36,7 +34,7 @@ public class TimeseriesConverter extends AbstractProcessor {
             .description("The field the chunk should be grouped by")
             .required(false)
             .addValidator(StandardValidators.COMMA_SEPARATED_LIST_VALIDATOR)
-            .defaultValue("")
+            .defaultValue("name")
             .build();
 
 
@@ -111,10 +109,6 @@ public class TimeseriesConverter extends AbstractProcessor {
         final String hashString = DigestUtils.sha256Hex(tsRecord.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes());
         tsRecord.setId(hashString);
 
-
-        // add technical fields
-
-
         // encode chunk_value to base64
         Field f = tsRecord.getField(TimeSeriesRecord.CHUNK_VALUE);
         if (f != null) {
@@ -151,6 +145,72 @@ public class TimeseriesConverter extends AbstractProcessor {
     }
 
 
+
+
+
+    public TimeSeriesRecord computeValue( TimeSeriesRecord tsRecord) {
+
+        try{
+            byte[] bytes = converter.serializeTimeseries(tsRecord.getTimeSeries());
+            String chunkValueBase64 = BinaryEncodingUtils.encode(bytes);
+            tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, chunkValueBase64);
+            tsRecord.setIntField(TimeSeriesRecord.CHUNK_SIZE_BYTES,  bytes.length);
+        }catch (Exception ex){
+            tsRecord.addError("PROCESSING ERROR", getLogger(),
+                    "Unable to convert chunk_vlaue to base64 : {}",
+                    new Object[]{ex.getMessage()});
+        }
+
+        return tsRecord;
+    }
+
+    /**
+     * Converts a list of records to a timeseries chunk
+     *
+     * @return
+     */
+    public TimeSeriesRecord computeMetrics( TimeSeriesRecord tsRecord) {
+
+        MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
+        functionValueMap.resetValues();
+
+        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
+        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
+        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
+        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
+
+        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
+            String name = functionValueMap.getAggregation(i).getQueryName();
+            double value = functionValueMap.getAggregationValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.DOUBLE, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
+            String name = functionValueMap.getAnalysis(i).getQueryName();
+            boolean value = functionValueMap.getAnalysisValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.BOOLEAN, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
+            String name = functionValueMap.getEncoding(i).getQueryName();
+            String value = functionValueMap.getEncodingValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.STRING, value);
+        }
+
+
+        return tsRecord;
+    }
+
+    /**
+     * Converts a list of records to a timeseries chunk
+     *
+     * @return
+     */
+    public TimeSeriesRecord fromRecords(List<Record> groupedRecords) {
+        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+        return computeMetrics(tsRecord);
+    }
+
     /**
      * Converts a list of rows to a timeseries chunk
      *
@@ -158,7 +218,7 @@ public class TimeseriesConverter extends AbstractProcessor {
      * @param rows
      * @return
      */
-    public TimeSeriesRecord toTimeseriesRecord(String metricName, List<Row> rows) {
+    public TimeSeriesRecord fromRecords(String metricName, List<Row> rows) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
@@ -235,43 +295,14 @@ public class TimeseriesConverter extends AbstractProcessor {
                         .setTime(time);
 
                 groupedRecords.add(record);
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error("unable to parse row : " + r.toString());
             }
 
         }
 
 
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
-        MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
-
-        functionValueMap.resetValues();
-
-        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
-        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
-        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
-        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
-
-        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
-            String name = functionValueMap.getAggregation(i).getQueryName();
-            double value = functionValueMap.getAggregationValue(i);
-            tsRecord.setField("chunk_" + name, FieldType.DOUBLE, value);
-        }
-
-        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
-            String name = functionValueMap.getAnalysis(i).getQueryName();
-            boolean value = functionValueMap.getAnalysisValue(i);
-            tsRecord.setField("chunk_" + name, FieldType.BOOLEAN, value);
-        }
-
-        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
-            String name = functionValueMap.getEncoding(i).getQueryName();
-            String value = functionValueMap.getEncodingValue(i);
-            tsRecord.setField("chunk_" + name, FieldType.STRING, value);
-        }
-
-
-        return tsRecord;
+        return fromRecords(groupedRecords);
     }
 
     /**
@@ -301,7 +332,7 @@ public class TimeseriesConverter extends AbstractProcessor {
                         .setTime(measure.timeMs());
 
                 groupedRecords.add(record);
-            }catch (Exception e){
+            } catch (Exception e) {
                 logger.error("unable to parse row : " + measure.toString());
             }
 

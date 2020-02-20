@@ -4,9 +4,9 @@
     <parent>
         <artifactId>historian</artifactId>
         <groupId>com.hurence.historian</groupId>
-        <version>1.3.0</version>
+        <version>1.3.2</version>
     </parent>
-    <artifactId>historian-loader</artifactId>
+    <artifactId>loader</artifactId>
 
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
@@ -72,6 +72,20 @@
             <groupId>com.hurence.historian</groupId>
             <artifactId>timeseries</artifactId>
             <version>${project.version}</version>
+        </dependency>
+
+
+        <dependency>
+            <groupId>com.lucidworks.spark</groupId>
+            <artifactId>spark-solr</artifactId>
+            <version>3.6.6</version>
+            <exclusions>
+                <exclusion>
+                    <!-- use the jackson libraries specified by solr dependencies -->
+                    <groupId>com.fasterxml.jackson.core</groupId>
+                    <artifactId>jackson-core</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--  <dependency>
             <groupId>org.scala-tools.testing</groupId>
@@ -149,6 +163,13 @@
                                     <mainClass>com.hurence.historian.App</mainClass>
                                 </transformer>
                             </transformers>
+                            <artifactSet>
+                                <excludes>
+                                    <exclude>org.eclipse.jetty:*</exclude>
+                                    <exclude>org.codehaus.groovy:*</exclude>
+                                </excludes>
+                            </artifactSet>
+
                             <filters>
                                 <filter>
                                     <artifact>*:*</artifact>
