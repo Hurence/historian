@@ -68,7 +68,7 @@ class RecordsTimeSeriesConverterTest extends Specification {
         chunkRecord.getAllFields().size() == 11
         chunkRecord.getField(TimeSeriesRecord.CHUNK_START).asLong() == start
         chunkRecord.getField(TimeSeriesRecord.CHUNK_END).asLong() == end
-        chunkRecord.getField(FieldDictionary.RECORD_NAME).asString() == name
+        chunkRecord.getField(TimeSeriesRecord.METRIC_NAME).asString() == name
         chunkRecord.getTimeSeries().attributes().get("host") == host
 
         revertedRecords.size() == 3
