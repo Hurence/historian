@@ -10,6 +10,8 @@ import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtractorUsingPreAgg;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
+
+import  com.hurence.webapiservice.http.grafana.AnnotationRequestParser.*;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -43,6 +45,7 @@ import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.*;
 import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.PAGE_SIZE;
 import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
+import static com.hurence.webapiservice.http.grafana.util.DateRequestParserUtil.parseDate;
 import static java.lang.String.join;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -58,7 +61,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         this.vertx = vertx;
         this.solrHistorianConf = solrHistorianConf;
         LOGGER.debug("SolrHistorianServiceImpl with params:");
-        LOGGER.debug("collection : {}", solrHistorianConf.collection);
+        LOGGER.debug("collections : {} for chunks and {} for annotations", solrHistorianConf.chunkCollection, solrHistorianConf.annotationCollection);
         LOGGER.debug("streamEndPoint : {}", solrHistorianConf.streamEndPoint);
         LOGGER.debug("limitNumberOfPoint : {}", solrHistorianConf.limitNumberOfPoint);
         LOGGER.debug("limitNumberOfChunks : {}", solrHistorianConf.limitNumberOfChunks);
@@ -95,7 +98,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     private Integer pingSolrServer(long sleepDurationMilli, int numberOfRetry) throws IOException, SolrServerException {
         try {
-            final SolrRequest request = CollectionAdminRequest.collectionStatus(solrHistorianConf.collection);
+            final SolrRequest request = CollectionAdminRequest.collectionStatus(solrHistorianConf.chunkCollection);
             final NamedList<Object> rsp = solrHistorianConf.client.request(request);
             final NamedList<Object> responseHeader = (NamedList<Object>) rsp.get("responseHeader");
             int status = (int) responseHeader.get("status");
@@ -126,7 +129,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         //  EXECUTE REQUEST
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
             try {
-                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
+                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
                 final SolrDocumentList documents = response.getResults();
                 LOGGER.debug("Found " + documents.getNumFound() + " documents");
                 JsonArray docs = new JsonArray(documents.stream()
@@ -157,7 +160,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             try {
 
 
-                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
+                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
                 final SolrDocumentList documents = response.getResults();
 
                 LOGGER.debug("Found " + documents.getNumFound() + " documents");
@@ -216,17 +219,19 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
     private SolrQuery buildAnnotationQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        if (params.getLong(TO_REQUEST_FIELD) != null && params.getLong(FROM_REQUEST_FIELD) != null) {
-            LOGGER.trace("requesting annotation with time from {} to time {} ", params.getLong(FROM_REQUEST_FIELD), params.getLong(TO_REQUEST_FIELD));
-            queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(params.getLong(FROM_REQUEST_FIELD)).append(params.getLong(TO_REQUEST_FIELD)).append("]");
+        if (params.getJsonObject(RANGE_REQUEST_FIELD) != null && params.getJsonObject(RANGE_REQUEST_FIELD).getLong(FROM_REQUEST_FIELD) != null && params.getJsonObject(RANGE_REQUEST_FIELD).getLong(TO_REQUEST_FIELD) != null) {
+            long from = parseDate(params, "/range/from");
+            long to = parseDate(params, "/range/to");
+            LOGGER.trace("requesting annotation with time from {} which is {} to time {} which is {} ", params.getString(FROM_REQUEST_FIELD), from, params.getString(TO_REQUEST_FIELD), to);
+            queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append(to).append("]");
         }
         //   FILTER
-        List<String> tags = params.getJsonArray("Tags").getList();
+        List<String> tags = params.getJsonArray("tags").getList();
         StringBuilder stringQuery = new StringBuilder();
         String operator = "";
         SolrQuery query = new SolrQuery();
         if (params.getString("type").equals("tags")) {
-            queryBuilder.append(" AND ");
+            queryBuilder.append(" && ");
             if (!params.getBoolean("MatchAny", true)) {
                 operator = " AND ";
             } else {
@@ -239,6 +244,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             queryBuilder.append("tags").append(":").append("(").append(stringQuery.toString()).append(")");
         }
         if (queryBuilder.length() != 0)
+            LOGGER.info("query is : {}",queryBuilder.toString());
             query.setQuery(queryBuilder.toString());
         query.setRows(params.getInteger("limit"));
         //    FIELDS_TO_FETCH
@@ -276,7 +282,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         query.addField(RESPONSE_METRIC_NAME_FIELD);
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
-                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
+                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
                 SolrDocumentList solrDocuments = response.getResults();
                 LOGGER.debug("Found " + response.getRequestUrl() + response + " result" + solrDocuments);
                 JsonArray metrics = new JsonArray(solrDocuments.stream()
@@ -306,7 +312,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         SolrQuery query = buildAnnotationQuery(params);
         Handler<Promise<JsonObject>> getAnnoationsHandler = p -> {
             try {
-                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
+                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.annotationCollection, query);
                 SolrDocumentList solrDocuments = response.getResults();
                 LOGGER.debug("Found " + response.getRequestUrl() + response + " result" + solrDocuments);
                 JsonArray annotation = new JsonArray(new ArrayList<>(solrDocuments)
@@ -497,7 +503,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     private JsonStream queryStream(SolrQuery query) {
-        StringBuilder exprBuilder = new StringBuilder("search(").append(solrHistorianConf.collection).append(",")
+        StringBuilder exprBuilder = new StringBuilder("search(").append(solrHistorianConf.chunkCollection).append(",")
                 .append("q=\"").append(query.getQuery()).append("\",");
         if (query.getFilterQueries() != null) {
             for (String filterQuery : query.getFilterQueries()) {
@@ -554,7 +560,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     private MetricsSizeInfo getNumberOfPointsByMetricInRequest(SolrQuery query) throws IOException {//TODO better handling of exception
 //        String cexpr = "rollup(search(historian, q=\"*:*\", fl=\"chunk_size, name\", qt=\"/export\", sort=\"name asc\"),\n" +
 //                "\t\t\t\t over=\"name\", sum(chunk_size))";
-        StringBuilder exprBuilder = new StringBuilder("rollup(search(").append(solrHistorianConf.collection)
+        StringBuilder exprBuilder = new StringBuilder("rollup(search(").append(solrHistorianConf.chunkCollection)
                 .append(",q=\"").append(query.getQuery()).append("\"");
         if (query.getFilterQueries() != null) {
             for (String filterQuery : query.getFilterQueries()) {

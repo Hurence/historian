@@ -120,10 +120,11 @@ public class HistorianSolrITHelper {
                 container.getServicePort(SOLR1_SERVICE_NAME, SOLR_1_PORT);
 
         JsonObject solrConf = new JsonObject()
-                .put(HistorianVerticle.CONFIG_SOLR_COLLECTION, COLLECTION_HISTORIAN)
+                .put(HistorianVerticle.CONFIG_SOLR_CHUNK_COLLECTION, COLLECTION_HISTORIAN)
+                .put(HistorianVerticle.CONFIG_SOLR_ANNOTATION_COLLECTION, COLLECTION_ANNOTATTION)
                 .put(HistorianVerticle.CONFIG_SOLR_USE_ZOOKEEPER, true)
                 .put(HistorianVerticle.CONFIG_SOLR_ZOOKEEPER_URLS, new JsonArray().add(zkUrl))
-                .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://" + slr1Url + "/solr/" + COLLECTION_HISTORIAN) // maybe add here collection_annotation
+                .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://" + slr1Url + "/solr/" + COLLECTION_HISTORIAN)
                 .put(HistorianVerticle.MAX_NUMBER_OF_TARGET_RETURNED, 3);
         return new JsonObject()
                 .put(HistorianVerticle.CONFIG_ROOT_SOLR, solrConf)
