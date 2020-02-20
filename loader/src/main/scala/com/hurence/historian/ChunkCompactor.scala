@@ -17,6 +17,11 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable.{ArrayBuffer, ListBuffer}
+import org.apache.solr.client.solrj.SolrQuery
+import org.apache.solr.client.solrj.response.QueryResponse
+import java.util.stream.Collectors
+
+import org.apache.solr.common.params.MapSolrParams
 
 class ChunkCompactor extends Serializable {
 
@@ -150,13 +155,13 @@ class ChunkCompactor extends Serializable {
   }
 
 
-  def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions): Dataset[TimeSeriesRecord] = {
+  def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions, codeInstall:String): Dataset[TimeSeriesRecord] = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
       "collection" -> options.collectionName,
       "fields" -> "id,name,chunk_value,chunk_start,chunk_end",
-      "filters" -> s"chunk_origin:logisland AND year:${options.year} AND month:${options.month} AND day:${options.day}"
+      "filters" -> s"chunk_origin:logisland AND year:${options.year} AND month:${options.month} AND day:${options.day} AND code_install:$codeInstall"
     )
 
     logger.info(s"$solrOpts")
@@ -245,6 +250,38 @@ class ChunkCompactor extends Serializable {
     logger.info(s"done saving new chunks : ${response.toString}")
 
     savedDF
+  }
+
+  def getCodeInstallList(queryFilter: String,options: ChunkCompactorOptions) = {
+    logger.info(s"first looking for code_install to loop on")
+    // Explicit commit to make sure all docs are visible
+    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+
+    val query = new SolrQuery
+    query.setRows(0)
+    query.setFacet(true)
+    query.addFacetField("code_install")
+    query.setFacetLimit(-1)
+    query.setFacetMinCount(1)
+    query.setQuery(null)
+
+    val queryParamMap = new util.HashMap[String, String]()
+    queryParamMap.put("q", "*:*")
+    queryParamMap.put("fq", queryFilter)
+    queryParamMap.put("facet","on")
+    queryParamMap.put("facet.field","code_install")
+    queryParamMap.put("facet.limit","-1")
+    queryParamMap.put("facet.mincount","1")
+
+    val queryParams = new MapSolrParams(queryParamMap)
+
+    val result = solrCloudClient.query(options.collectionName, queryParams)
+    val facetResult = result.getFacetField("code_install")
+
+    logger.info(result.toString)
+    logger.info(facetResult.toString)
+
+    facetResult.getValues.asScala.map( r => r.getName).toList
   }
 
   def removeChunksFromSolR(queryFilter: String, options: ChunkCompactorOptions) = {
@@ -411,19 +448,29 @@ object ChunkCompactor {
       .getOrCreate()
 
 
-    // load raw chunks
-    val timeseriesDS = compactor.loadDataFromSolR(spark, options).cache()
+    val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
 
-
-    // merge those chunks for the given day
-    val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
 
     // remove previous compacted chunks from the same day
-    compactor.removeChunksFromSolR(s"year:${options.year} AND month:${options.month} day:${options.day}", options)
+    compactor.removeChunksFromSolR(queryFilter, options)
 
-    val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
-    /*
-        compactor.removeUselessChunksFromSolR(timeseriesDS, options)*/
+
+    compactor.getCodeInstallList(queryFilter, options)
+      .foreach( codeInstall => {
+
+
+      // load raw chunks
+      val timeseriesDS = compactor.loadDataFromSolR(spark, options, codeInstall)
+
+      // merge those chunks for the given day
+      val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
+
+      val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
+      /*
+          compactor.removeUselessChunksFromSolR(timeseriesDS, options)*/
+    })
+
+
     spark.close()
   }
 
