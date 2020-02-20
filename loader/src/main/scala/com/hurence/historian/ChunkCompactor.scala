@@ -155,12 +155,12 @@ class ChunkCompactor extends Serializable {
   }
 
 
-  def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions, codeInstall:String): Dataset[TimeSeriesRecord] = {
+  def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions, codeInstall: String): Dataset[TimeSeriesRecord] = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
       "collection" -> options.collectionName,
-      "fields" -> "id,name,chunk_value,chunk_start,chunk_end",
+      "fields" -> "name,chunk_value,chunk_start,chunk_end",
       "filters" -> s"chunk_origin:logisland AND year:${options.year} AND month:${options.month} AND day:${options.day} AND code_install:$codeInstall"
     )
 
@@ -171,7 +171,6 @@ class ChunkCompactor extends Serializable {
       .options(solrOpts)
       .load
       .map(r => new TimeSeriesRecord("evoa_measure",
-        r.getAs[String]("id"),
         r.getAs[String]("name"),
         r.getAs[String]("chunk_value"),
         r.getAs[Long]("chunk_start"),
@@ -238,7 +237,6 @@ class ChunkCompactor extends Serializable {
         TimeSeriesRecord.CHUNK_SAX,
         TimeSeriesRecord.CHUNK_ORIGIN)
 
-
     savedDF.write
       .format("solr")
       .options(solrOpts)
@@ -252,7 +250,7 @@ class ChunkCompactor extends Serializable {
     savedDF
   }
 
-  def getCodeInstallList(queryFilter: String,options: ChunkCompactorOptions) = {
+  def getCodeInstallList(queryFilter: String, options: ChunkCompactorOptions) = {
     logger.info(s"first looking for code_install to loop on")
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
@@ -268,20 +266,19 @@ class ChunkCompactor extends Serializable {
     val queryParamMap = new util.HashMap[String, String]()
     queryParamMap.put("q", "*:*")
     queryParamMap.put("fq", queryFilter)
-    queryParamMap.put("facet","on")
-    queryParamMap.put("facet.field","code_install")
-    queryParamMap.put("facet.limit","-1")
-    queryParamMap.put("facet.mincount","1")
+    queryParamMap.put("facet", "on")
+    queryParamMap.put("facet.field", "code_install")
+    queryParamMap.put("facet.limit", "-1")
+    queryParamMap.put("facet.mincount", "1")
 
     val queryParams = new MapSolrParams(queryParamMap)
 
     val result = solrCloudClient.query(options.collectionName, queryParams)
     val facetResult = result.getFacetField("code_install")
 
-    logger.info(result.toString)
     logger.info(facetResult.toString)
 
-    facetResult.getValues.asScala.map( r => r.getName).toList
+    facetResult.getValues.asScala.map(r => r.getName).toList
   }
 
   def removeChunksFromSolR(queryFilter: String, options: ChunkCompactorOptions) = {
@@ -359,8 +356,6 @@ class ChunkCompactor extends Serializable {
       /**
         * now we're done and we can build our
         */
-
-
       val tsRecord = new TimeSeriesRecord(tsBuilder.build())
 
       tsRecord
@@ -369,58 +364,61 @@ class ChunkCompactor extends Serializable {
     timeseriesDS
       .groupByKey(_.getMetricName)
       .reduceGroups((g1, g2) => merge(g1, g2))
-      .map(r => r._2)
-      .repartition(10)
       .mapPartitions(p => {
-        // Init the Timeserie processor
-        val tsProcessor = new TimeseriesConverter()
-        val context = new StandardProcessContext(tsProcessor, "")
-        context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeSeriesRecord.METRIC_NAME)
-        context.setProperty(TimeseriesConverter.METRIC.getName,
-          s"first;min;max;count;sum;avg;count;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
 
-        tsProcessor.init(context)
+        if(p.nonEmpty ){
+          // Init the Timeserie processor
+          val tsProcessor = new TimeseriesConverter()
+          val context = new StandardProcessContext(tsProcessor, "")
+          context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeSeriesRecord.METRIC_NAME)
+          context.setProperty(TimeseriesConverter.METRIC.getName,
+            s"first;min;max;count;sum;avg;count;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
 
-        p.flatMap(mergedRecord => {
+          tsProcessor.init(context)
 
-          val splittedRecords = new ListBuffer[TimeSeriesRecord]()
-          if (mergedRecord.getChunkSize <= options.chunkSize) {
-            splittedRecords += mergedRecord
-          } else {
+          p.flatMap(mergedRecord => {
 
-            val timestamps = mergedRecord.getTimeSeries.getTimestamps.toArray
-            val values = mergedRecord.getTimeSeries.getValues.toArray
-            val numChunks = 1 + (timestamps.length / options.chunkSize)
+            val splittedRecords = new ListBuffer[TimeSeriesRecord]()
+            if (mergedRecord._2.getChunkSize <= options.chunkSize) {
+              splittedRecords += mergedRecord._2
+            } else {
 
-            for (a <- 0 until numChunks) {
-              val chunkTimestamps = new LongList(options.chunkSize)
-              chunkTimestamps.addAll(ArrayUtils.subarray(timestamps, a * options.chunkSize, (a + 1) * options.chunkSize))
+              val timestamps = mergedRecord._2.getTimeSeries.getTimestamps.toArray
+              val values = mergedRecord._2.getTimeSeries.getValues.toArray
+              val numChunks = 1 + (timestamps.length / options.chunkSize)
 
-              val chunkValues = new DoubleList(options.chunkSize)
-              chunkValues.addAll(ArrayUtils.subarray(values, a * options.chunkSize, (a + 1) * options.chunkSize))
+              for (a <- 0 until numChunks) {
+                val chunkTimestamps = new LongList(options.chunkSize)
+                chunkTimestamps.addAll(ArrayUtils.subarray(timestamps, a * options.chunkSize, (a + 1) * options.chunkSize))
 
-              val timeseries = new MetricTimeSeries.Builder(mergedRecord.getMetricName, mergedRecord.getType)
-                .attributes(mergedRecord.getTimeSeries.attributes())
-                .points(chunkTimestamps, chunkValues)
-                .build()
+                val chunkValues = new DoubleList(options.chunkSize)
+                chunkValues.addAll(ArrayUtils.subarray(values, a * options.chunkSize, (a + 1) * options.chunkSize))
 
-              val tsRecord = new TimeSeriesRecord(timeseries)
-              logger.info(s"${mergedRecord.getMetricName} ($a/$numChunks) : new record size ${tsRecord.getChunkSize}, start ${tsRecord.getTimeSeries.getStart} - end ${tsRecord.getTimeSeries.getEnd} ")
-              splittedRecords += tsRecord
+                val timeseries = new MetricTimeSeries.Builder(mergedRecord._2.getMetricName, mergedRecord._2.getType)
+                  .attributes(mergedRecord._2.getTimeSeries.attributes())
+                  .points(chunkTimestamps, chunkValues)
+                  .build()
+
+                val tsRecord = new TimeSeriesRecord(timeseries)
+                logger.info(s"${mergedRecord._2.getMetricName} ($a/$numChunks) : new record size ${tsRecord.getChunkSize}, start ${tsRecord.getTimeSeries.getStart} - end ${tsRecord.getTimeSeries.getEnd} ")
+                splittedRecords += tsRecord
+              }
             }
-          }
 
-          splittedRecords.foreach(record => {
-            tsProcessor.computeValue(record)
-            tsProcessor.computeMetrics(record)
-            EvoaUtils.setChunkOrigin(record, TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR)
-            EvoaUtils.setBusinessFields(record)
-            EvoaUtils.setDateFields(record)
-            EvoaUtils.setHashId(record)
+            splittedRecords.foreach(record => {
+              tsProcessor.computeValue(record)
+              tsProcessor.computeMetrics(record)
+              EvoaUtils.setChunkOrigin(record, TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR)
+              EvoaUtils.setBusinessFields(record)
+              EvoaUtils.setDateFields(record)
+              EvoaUtils.setHashId(record)
+            })
+
+            splittedRecords
           })
+        }else
+          Iterator.empty
 
-          splittedRecords
-        })
       })
 
 
@@ -440,6 +438,7 @@ object ChunkCompactor {
 
     // get arguments
     val options = compactor.parseCommandLine(args)
+    val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
 
     // setup spark session
     val spark = SparkSession.builder
@@ -447,28 +446,21 @@ object ChunkCompactor {
       .master(options.master)
       .getOrCreate()
 
-
-    val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
-
-
-    // remove previous compacted chunks from the same day
     compactor.removeChunksFromSolR(queryFilter, options)
 
-
     compactor.getCodeInstallList(queryFilter, options)
-      .foreach( codeInstall => {
+    //  .map(codeInstall => {
 
+        val timeseriesDS = compactor.loadDataFromSolR(spark, options, "*")
+        val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
+        val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
 
-      // load raw chunks
-      val timeseriesDS = compactor.loadDataFromSolR(spark, options, codeInstall)
-
-      // merge those chunks for the given day
-      val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
-
-      val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
-      /*
-          compactor.removeUselessChunksFromSolR(timeseriesDS, options)*/
-    })
+        timeseriesDS.unpersist()
+        mergedTimeseriesDS.unpersist()
+        savedDS.unpersist()
+        /*
+            compactor.removeUselessChunksFromSolR(timeseriesDS, options)*/
+    //  })
 
 
     spark.close()

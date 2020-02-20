@@ -76,15 +76,13 @@ public class TimeSeriesRecord extends StandardRecord {
         });
     }
 
-    public TimeSeriesRecord(String type, String id, String name, String chunkValue, long chunkStart, long chunkEnd) {
+    public TimeSeriesRecord(String type, String name, String chunkValue, long chunkStart, long chunkEnd) {
         super(type);
 
-        setId(id);
         setStringField(METRIC_NAME, name);
         setStringField(CHUNK_VALUE, chunkValue);
         setField(CHUNK_START, FieldType.LONG, chunkStart);
         setField(CHUNK_END, FieldType.LONG, chunkEnd);
-
 
         try {
             byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);

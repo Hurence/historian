@@ -19,22 +19,22 @@
     </properties>
 
 
-      <repositories>
+    <repositories>
         <repository>
-          <id>repo.hortonworks.com</id>
-          <name>hdp</name>
-          <url>https://repo.hortonworks.com/content/repositories/releases/</url>
+            <id>repo.hortonworks.com</id>
+            <name>hdp</name>
+            <url>https://repo.hortonworks.com/content/repositories/releases/</url>
         </repository>
-      </repositories>
- <!--
-      <pluginRepositories>
-        <pluginRepository>
-          <id>scala-tools.org</id>
-          <name>Scala-Tools Maven2 Repository</name>
-          <url>http://scala-tools.org/repo-releases</url>
-        </pluginRepository>
-      </pluginRepositories>
-    -->
+    </repositories>
+    <!--
+         <pluginRepositories>
+           <pluginRepository>
+             <id>scala-tools.org</id>
+             <name>Scala-Tools Maven2 Repository</name>
+             <url>http://scala-tools.org/repo-releases</url>
+           </pluginRepository>
+         </pluginRepositories>
+       -->
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -167,6 +167,8 @@
                                 <excludes>
                                     <exclude>org.eclipse.jetty:*</exclude>
                                     <exclude>org.codehaus.groovy:*</exclude>
+                                    <exclude>org.glassfish.*:*</exclude>
+                                    <exclude>org.junit.*:*</exclude>
                                 </excludes>
                             </artifactSet>
 
