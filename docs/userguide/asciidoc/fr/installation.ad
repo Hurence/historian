@@ -1,11 +1,11 @@
-== Installation ==
+== Installation
 
 Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d'installation n'est pas décrite ici par simplification car elle concerne des experts en urbanisation d'infrastructures Big Data. 
 
 [NOTE]
 Hurence propose de l'accompagnement pour installer le data historian pour des volumétries importantes.
 
-== Pre-requis pour une installation mono serveur ==
+=== Pre-requis pour une installation mono serveur
 
 La configuration minimale du serveur pour une installation mono serveur du data historian est:
 

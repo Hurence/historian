@@ -1,8 +1,13 @@
-----
 = Manuel utilisateur
-Hurence, <contact@hurence.com>
-version 1.0, Février 2020:(C) Hurence 2020
-----
-include::tableofcontent.ad
-include::introduction.ad
-include::installation.ad
+:subtitle: Data Historian 1.0
+:doctype: book
+:title-logo-image: image:../../resources/images/logo.png[pdfwidth=3.5in,align=center]
+:author: (C)Hurence
+:email: contact@hurence.com
+:revnumber: v1.0
+:revdate: 18.02.2020
+:revremark: First draft
+
+include::./introduction.ad[]
+
+include::./installation.ad[]
