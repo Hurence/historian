@@ -33,6 +33,7 @@ object LoaderMode extends Enumeration {
   val CHUNK = Value("chunk")
   val CHUNK_BY_FILE = Value("chunk_by_file")
   val TAG_CHUNK = Value("tag_chunk")
+  val MERGE_CHUNKS = Value("merge_chunks")
 }
 
 case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, saxAlphabetSize: Int, saxStringLength: Int, useKerberos: Boolean)
@@ -273,7 +274,7 @@ object App {
           .groupBy(row => row.getString(row.fieldIndex("name")))
           .flatMap(group => group._2
             .sliding(options.chunkSize, options.chunkSize)
-            .map(subGroup => tsProcessor.toTimeseriesRecord(group._1, subGroup.toList))
+            .map(subGroup => tsProcessor.fromRecords(group._1, subGroup.toList))
             .map(ts => (ts.getId, tsProcessor.serialize(ts)))
           )
           .iterator

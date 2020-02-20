@@ -35,6 +35,7 @@ import com.hurence.logisland.annotation.documentation.CapabilityDescription;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
+import com.hurence.logisland.record.EvoaUtils;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.TimeSeriesRecord;
 
@@ -62,59 +63,16 @@ public class AddEvoaTags extends AbstractProcessor {
 
     }
 
+
     @Override
     public Collection<Record> process(ProcessContext context, Collection<Record> records) {
 
         records.forEach(record -> {
-
-            /**
-             * set some data metas
-             */
-            if (record.hasField(TimeSeriesRecord.CHUNK_START)) {
-                try {
-                    Instant instant = Instant.ofEpochMilli(record.getField(TimeSeriesRecord.CHUNK_START).asLong());
-                    LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
-                    int month = localDate.getMonthValue();
-                    int day = localDate.getDayOfMonth();
-                    int year = localDate.getYear();
-                    int week = localDate.get( WeekFields.ISO.weekOfWeekBasedYear() ) ;
-
-                    record.setIntField("month", month);
-                    record.setIntField("day", day);
-                    record.setIntField("year", year);
-                    record.setIntField("week", week);
-                } catch (Exception ex) {
-                    //do nothing
-                }
-            }
-
-            /**
-             * set some specific fields
-             */
-            if (record.hasField("name")) {
-
-                try {
-
-
-                    Matcher m = csvRegexp.matcher(record.getField("name").asString());
-// lancement de la recherche de toutes les occurrences
-                    boolean b = m.matches();
-// si recherche fructueuse
-                    if (b) {
-                        record.setStringField("code_install", m.group(1));
-                        record.setStringField("sensor", m.group(2));
-                    }
-
-
-                    record.setStringField(TimeSeriesRecord.CHUNK_ORIGIN, "logisland");
-                } catch (Exception ex) {
-                    //do nothing
-                }
-            }
-
-
+            EvoaUtils.setDateFields(record);
+            EvoaUtils.setBusinessFields(record);
+            EvoaUtils.setChunkOrigin(record, TimeSeriesRecord.CHUNK_ORIGIN_LOGISLAND);
+            EvoaUtils.setHashId(record);
         });
-
 
         return records;
     }
