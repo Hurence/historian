@@ -1,23 +1,29 @@
 {
   "web.verticles.instance.number": 2,
   "historian.verticles.instance.number": 1,
-  "server" : {
-    "host": "0.0.0.0",
+  "http_server" : {
+    "host": "localhost",
     "port" : 8080,
     "historian.address": "historian",
-    "default" : {
-      "page" : 1,
-      "size" : 10
+    "api" : {
+      "grafana" : {
+        "search" : {
+          "default_size": 10
+        },
+        "annotations" : {
+          "limit": 100
+        }
+      }
     }
   },
   "historian": {
     "address" : "historian",
     "solr" : {
-      "use_zookeeper": true,
-      "zookeeper_urls": ["zookeeper:2181"],
-      "collection": "historian",
-      "stream_url": "http://solr1:8983/solr/historian/stream",
-      "urls": ["http://solr1:8983/solr","http://solr2:8983/solr"]
+      "use_zookeeper": false,
+      "zookeeper_urls": ["localhost:2181"],
+      "stream_url": "http://localhost:8983/solr/historian",
+      "chunk_collection": "historian",
+      "annotation_collection": "annotation"
     }
   }
 }
