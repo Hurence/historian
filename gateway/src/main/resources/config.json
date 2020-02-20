@@ -18,11 +18,14 @@
   },
   "historian": {
     "address" : "historian",
+    "limit_number_of_point_before_using_pre_agg" : 50000,
+    "limit_number_of_chunks_before_using_solr_partition" : 50000,
+    "sleep_milli_between_connection_attempt" : 10000,
+    "number_of_connection_attempt" : 3,
     "solr" : {
       "use_zookeeper": false,
       "zookeeper_urls": ["localhost:2181"],
       "stream_url": "http://localhost:8983/solr/historian",
-      "urls": ["http://localhost:8983/solr"],
       "chunk_collection": "historian",
       "annotation_collection": "annotation"
     }
