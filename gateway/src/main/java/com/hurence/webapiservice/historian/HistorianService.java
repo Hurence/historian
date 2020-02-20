@@ -115,7 +115,17 @@ public interface HistorianService {
     HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
 
     /**
-     * @param params        as a json object, it contients the parametres found in the request
+     * @param params        as a json object
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#FROM_REQUEST_FIELD} : "start of the date range",
+     *                          {@value HistorianFields#TO_REQUEST_FIELD} : "end of the date range",
+     *                          {@value HistorianFields#TYPE_REQUEST_FIELD} : either "all" either "tags",
+     *                          {@value HistorianFields#TAGS_TO_FILTER_ON_REQUEST_FIELD} : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,
+     *                          {@value HistorianFields#MAX_ANNOTATION_REQUEST_FIELD} : the max number of annotation to return,
+     *                          {@value HistorianFields#MATCH_ANY_REQUEST_FIELD} : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags,
+     *                      }
+     *                      </pre>
      * @param resultHandler return annotations as an array of
      *                      <pre>
      *                      {

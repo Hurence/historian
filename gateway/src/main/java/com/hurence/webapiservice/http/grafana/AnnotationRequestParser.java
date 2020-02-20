@@ -23,10 +23,6 @@ public class AnnotationRequestParser {
         builder.from(from);
         long to = parseTo(requestBody);
         builder.to(to);
-        long fromRaw = parseFromRaw(requestBody);
-        builder.fromRaw(fromRaw);
-        long toRaw = parseToRaw(requestBody);
-        builder.toRaw(toRaw);
         int maxAnnotations = parseMaxAnnotations(requestBody);;
         builder.withMaxAnnotation(maxAnnotations);
         JsonArray tags = parseTags(requestBody);;
