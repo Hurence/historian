@@ -138,12 +138,9 @@ public class GrafanaApiImpl implements GrafanaApi {
     }
 
     private JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
-
         return new JsonObject()
                 .put(FROM_REQUEST_FIELD, request.getFrom())
                 .put(TO_REQUEST_FIELD, request.getTo())
-                .put(FROM_RAW_REQUEST_FIELD,request.getFromRaw())
-                .put(TO_RAW_REQUEST_FIELD, request.getToRaw())
                 .put(TAGS_REQUEST_FIELD, request.getTagsAsJsonArray())
                 .put(MAX_ANNOTATION_REQUEST_FIELD, request.getMaxAnnotation())
                 .put(MATCH_ANY_REQUEST_FIELD, request.getMatchAny())

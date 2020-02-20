@@ -219,18 +219,16 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
     private SolrQuery buildAnnotationQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        if (params.getJsonObject(RANGE_REQUEST_FIELD) != null && params.getJsonObject(RANGE_REQUEST_FIELD).getLong(FROM_REQUEST_FIELD) != null && params.getJsonObject(RANGE_REQUEST_FIELD).getLong(TO_REQUEST_FIELD) != null) {
-            long from = parseDate(params, "/range/from");
-            long to = parseDate(params, "/range/to");
-            LOGGER.trace("requesting annotation with time from {} which is {} to time {} which is {} ", params.getString(FROM_REQUEST_FIELD), from, params.getString(TO_REQUEST_FIELD), to);
-            queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append(to).append("]");
-        }
-        //   FILTER
-        List<String> tags = params.getJsonArray("tags").getList();
+        long from = params.getLong(FROM_REQUEST_FIELD);
+        long to = params.getLong(TO_REQUEST_FIELD);
+        LOGGER.trace("requesting annotation with time from {} to time {}", from, to);
+        queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append(to).append("]");
+        //FILTER
+        List<String> tags = params.getJsonArray(TAGS_REQUEST_FIELD).getList();
         StringBuilder stringQuery = new StringBuilder();
         String operator = "";
         SolrQuery query = new SolrQuery();
-        if (params.getString("type").equals("tags")) {
+        if (params.getString(TYPE_REQUEST_FIELD).equals("tags")) {
             queryBuilder.append(" && ");
             if (!params.getBoolean("MatchAny", true)) {
                 operator = " AND ";
@@ -241,12 +239,12 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 stringQuery.append(tag).append(operator);
             }
             stringQuery.append(tags.get(tags.size()-1));
-            queryBuilder.append("tags").append(":").append("(").append(stringQuery.toString()).append(")");
+            queryBuilder.append(TAGS_TO_FILTER_ON_REQUEST_FIELD).append(":").append("(").append(stringQuery.toString()).append(")");
         }
         if (queryBuilder.length() != 0)
             LOGGER.info("query is : {}",queryBuilder.toString());
             query.setQuery(queryBuilder.toString());
-        query.setRows(params.getInteger("limit"));
+        query.setRows(params.getInteger(MAX_ANNOTATION_REQUEST_FIELD, 1000));
         //    FIELDS_TO_FETCH
         query.setFields(TIME_REQUEST_FIELD,
                 TIME_END_REQUEST_FIELD,

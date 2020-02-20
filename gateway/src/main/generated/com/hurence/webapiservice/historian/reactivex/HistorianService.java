@@ -140,7 +140,7 @@ public class HistorianService {
   }
 
   /**
-   * @param params as a json object, it contients the parametres found in the request
+   * @param params as a json object <pre> {  : "start of the date range",  : "end of the date range",  : either "all" either "tags",  : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,  : the max number of annotation to return,  : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags, } </pre>
    * @param resultHandler return annotations as an array of <pre> {  : "all annotation matching the query",  : "total annotations matching query" } </pre>
    * @return himself
    */
@@ -150,7 +150,7 @@ public class HistorianService {
   }
 
   /**
-   * @param params as a json object, it contients the parametres found in the request
+   * @param params as a json object <pre> {  : "start of the date range",  : "end of the date range",  : either "all" either "tags",  : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,  : the max number of annotation to return,  : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags, } </pre>
    * @return himself
    */
   public Single<JsonObject> rxGetAnnotations(JsonObject params) { 
