@@ -52,9 +52,8 @@ public class HistorianVerticle extends AbstractVerticle {
   public static final String CONFIG_SOLR_ZOOKEEPER_URLS = "zookeeper_urls";
   public static final String CONFIG_SOLR_CONNECTION_TIMEOUT = "connection_timeout";
   public static final String CONFIG_SOLR_SOCKET_TIMEOUT = "socket_timeout";
-  public static final String CONFIG_SOLR_COLLECTION = "collection";
-  public static final String CONFIG_SOLR_CHUNK_COLLECTION = "collection";
-  public static final String CONFIG_SOLR_ANNOTATION_COLLECTION = "collection";
+  public static final String CONFIG_SOLR_CHUNK_COLLECTION = "chunk_collection";
+  public static final String CONFIG_SOLR_ANNOTATION_COLLECTION = "annotation_collection";
   public static final String CONFIG_SOLR_STREAM_ENDPOINT = "stream_url";
   public static final String CONFIG_SOLR_SLEEP_BETWEEEN_TRY = "sleep_milli_between_connection_attempt";
   public static final String CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT = "number_of_connection_attempt";
