@@ -17,6 +17,7 @@ public class HistorianFields {
     //Request fields
     public static String FROM_REQUEST_FIELD = "from";
     public static String TO_REQUEST_FIELD = "to";
+    public static String RANGE_REQUEST_FIELD = "range";
     public static String FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD = "fields";
     public static String TAGS_TO_FILTER_ON_REQUEST_FIELD = "tags";
     public static String METRIC_NAMES_AS_LIST_REQUEST_FIELD = "names";
@@ -25,7 +26,6 @@ public class HistorianFields {
     public static String BUCKET_SIZE_REQUEST_FIELD = "bucket_size";
     public static String MAX_POINT_BY_METRIC_REQUEST_FIELD = "max_points_to_return_by_metric";
     public static String TIME_REQUEST_FIELD = "time";
-    public static String TIME_END_REQUEST_FIELD = "timeEnd";   //this is in the response
     public static String TEXT_REQUEST_FIELD = "text";
     public static String TAGS_REQUEST_FIELD = "tags";
     public static String MAX_ANNOTATION_REQUEST_FIELD = "limit";
@@ -59,4 +59,5 @@ public class HistorianFields {
     public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeSeriesRecord.CHUNK_WINDOW_MS;
     public static String RESPONSE_CHUNK_TREND_FIELD = TimeSeriesRecord.CHUNK_TREND;
     public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = TimeSeriesRecord.CHUNK_SIZE_BYTES;
+    public static String TIME_END_REQUEST_FIELD = "timeEnd";
 }
