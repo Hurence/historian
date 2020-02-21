@@ -219,8 +219,10 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
     private SolrQuery buildAnnotationQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        long from = params.getLong(FROM_REQUEST_FIELD);
-        long to = params.getLong(TO_REQUEST_FIELD);
+        /*Long from = parseDate(params, "/range/from");
+        Long to = parseDate(params, "/range/to");*/
+        Long from = params.getLong(FROM_REQUEST_FIELD);
+        Long to = params.getLong(TO_REQUEST_FIELD);
         LOGGER.trace("requesting annotation with time from {} to time {}", from, to);
         queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append(to).append("]");
         //FILTER
@@ -317,7 +319,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 );
                 LOGGER.debug("annotations found : "+ annotation);
                 p.complete(new JsonObject()
-                        .put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
+                        /*.put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())*/
                         .put(RESPONSE_ANNOTATIONS, annotation)
                 );
             } catch (IOException | SolrServerException e) {

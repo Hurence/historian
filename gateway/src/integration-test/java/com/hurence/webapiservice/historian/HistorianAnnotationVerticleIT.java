@@ -30,7 +30,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HistorianAnnotationVerticleIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(HistorianVerticleIT.class);
-    private static String COLLECTION = HistorianSolrITHelper.COLLECTION_ANNOTATTION;
+    private static String COLLECTION = HistorianSolrITHelper.COLLECTION_ANNOTATION;
 
     private static com.hurence.webapiservice.historian.reactivex.HistorianService historian;
 
@@ -104,18 +104,18 @@ public class HistorianAnnotationVerticleIT {
         JsonObject params = new JsonObject ()
                 .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T04:43:14.070Z") // 1581655394070
                 .put(TO_REQUEST_FIELD, "2020-2-14T07:43:14.070Z")) // 1581666194070
-                .put(MAX_ANNOTATION_REQUEST_FIELD, 10)
-                .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1"))
-                .put(MATCH_ANY_REQUEST_FIELD, false)
-                .put(TYPE_REQUEST_FIELD, "tags");
+                .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
+                .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY_REQUEST_FIELD, true)
+                .put(TYPE_REQUEST_FIELD, "all");
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getLong (RESPONSE_TOTAL_FOUND);
+                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
                         LOGGER.info("annotations {} ",rsp);
-                        assertEquals (1, totalHit);
+                        assertEquals (4, totalHit);
                         testContext.completeNow ();
                     });
                 })

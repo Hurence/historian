@@ -1,0 +1,17 @@
+[
+  {
+    "time": 1581648194070,
+    "text": "annotation 1",
+    "tags": ["tag1","tag2"]
+  },
+  {
+    "time": 1581655394070,
+    "text": "annotation 3",
+    "tags": ["tag1","tag3"]
+  },
+  {
+    "time": 1581662594070,
+    "text": "annotation 5",
+    "tags": ["tag3","tag4"]
+  }
+]

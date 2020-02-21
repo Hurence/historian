@@ -52,17 +52,17 @@ public class HistorianSolrITHelper {
 
     private static Logger LOGGER = LoggerFactory.getLogger(HistorianSolrITHelper.class);
     public static String COLLECTION_HISTORIAN = "historian";
-    public static String COLLECTION_ANNOTATTION = "annotation";
+    public static String COLLECTION_ANNOTATION = "annotation";
     public static String HISTORIAN_ADRESS = "historian_service";
 
     public static void initHistorianSolr(SolrClient client) throws IOException, SolrServerException {
         LOGGER.debug("creating collection {}", COLLECTION_HISTORIAN);
         createHistorianCollection(client);
-        LOGGER.debug("creating collection {}", COLLECTION_ANNOTATTION);
+        LOGGER.debug("creating collection {}", COLLECTION_ANNOTATION);
         createAnnotationCollection(client);
-        LOGGER.debug("verify collection {} exist and is ready", COLLECTION_HISTORIAN);
+        LOGGER.debug("verify collections {} and {} exist and are ready", COLLECTION_HISTORIAN, COLLECTION_ANNOTATION);
         checkCollectionsHasBeenCreated(client);
-        LOGGER.debug("printing conf {}", COLLECTION_HISTORIAN);
+        LOGGER.debug("printing conf {} and {}", COLLECTION_HISTORIAN, COLLECTION_ANNOTATION);
         checkCollectionsSchema(client);
     }
 
@@ -121,7 +121,7 @@ public class HistorianSolrITHelper {
 
         JsonObject solrConf = new JsonObject()
                 .put(HistorianVerticle.CONFIG_SOLR_CHUNK_COLLECTION, COLLECTION_HISTORIAN)
-                .put(HistorianVerticle.CONFIG_SOLR_ANNOTATION_COLLECTION, COLLECTION_ANNOTATTION)
+                .put(HistorianVerticle.CONFIG_SOLR_ANNOTATION_COLLECTION, COLLECTION_ANNOTATION)
                 .put(HistorianVerticle.CONFIG_SOLR_USE_ZOOKEEPER, true)
                 .put(HistorianVerticle.CONFIG_SOLR_ZOOKEEPER_URLS, new JsonArray().add(zkUrl))
                 .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://" + slr1Url + "/solr/" + COLLECTION_HISTORIAN)
@@ -146,9 +146,9 @@ public class HistorianSolrITHelper {
 
     private static void checkAnnotationSchema(SolrClient client) throws SolrServerException, IOException {
         SchemaRequest schemaRequest = new SchemaRequest();
-        SchemaResponse schemaResponse = schemaRequest.process(client, COLLECTION_ANNOTATTION);
+        SchemaResponse schemaResponse = schemaRequest.process(client, COLLECTION_ANNOTATION);
         List<Map<String, Object>> schema = schemaResponse.getSchemaRepresentation().getFields();
-        LOGGER.debug(COLLECTION_ANNOTATTION + "schema is {}", new JsonArray(schema).encodePrettily());
+        LOGGER.debug(COLLECTION_ANNOTATION + "schema is {}", new JsonArray(schema).encodePrettily());
     }
 
     private static void checkHistorianCollectionHasBeenCreated(SolrClient client) throws SolrServerException, IOException {
@@ -163,14 +163,14 @@ public class HistorianSolrITHelper {
     }
 
     private static void checkAnnotationCollectionHasBeenCreated(SolrClient client) throws SolrServerException, IOException {
-        final SolrRequest request = CollectionAdminRequest.collectionStatus(COLLECTION_ANNOTATTION);
+        final SolrRequest request = CollectionAdminRequest.collectionStatus(COLLECTION_ANNOTATION);
         final NamedList<Object> rsp = client.request(request);
         final NamedList<Object> responseHeader = (NamedList<Object>) rsp.get("responseHeader");
         int status = (int) responseHeader.get("status");
         if (status != 0) {
-            throw new RuntimeException(String.format("collection %s is not ready or does not exist !", COLLECTION_ANNOTATTION));
+            throw new RuntimeException(String.format("collection %s is not ready or does not exist !", COLLECTION_ANNOTATION));
         }
-        LOGGER.info("collection {} is up and running !", COLLECTION_ANNOTATTION);
+        LOGGER.info("collection {} is up and running !", COLLECTION_ANNOTATION);
     }
 
     private static void createHistorianCollection(SolrClient client) throws SolrServerException, IOException {
@@ -178,7 +178,7 @@ public class HistorianSolrITHelper {
         client.request(createrequest);
     }
     private static void createAnnotationCollection(SolrClient client) throws SolrServerException, IOException {
-        final SolrRequest createrequest = CollectionAdminRequest.createCollection(COLLECTION_ANNOTATTION, SOLR_CONF_TEMPLATE_ANNOTATION, 2, 1);
+        final SolrRequest createrequest = CollectionAdminRequest.createCollection(COLLECTION_ANNOTATION, SOLR_CONF_TEMPLATE_ANNOTATION, 2, 1);
         client.request(createrequest);
     }
 }
