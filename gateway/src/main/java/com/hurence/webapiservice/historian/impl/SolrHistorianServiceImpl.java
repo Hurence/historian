@@ -219,14 +219,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
     private SolrQuery buildAnnotationQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        Long from =null;
-        Long to = null;
-        if (params.getJsonObject(RANGE_REQUEST_FIELD,new JsonObject("{}")).getString(FROM_REQUEST_FIELD, null) != null)
-            from = parseDate(params, "/range/from");
-        if (params.getJsonObject(RANGE_REQUEST_FIELD,new JsonObject("{}")).getString(TO_REQUEST_FIELD, null) != null)
-            to = parseDate(params, "/range/to");
-        /*Long from = params.getLong(FROM_REQUEST_FIELD, null);
-        Long to = params.getLong(TO_REQUEST_FIELD, null);*/
+        Long from = params.getLong(FROM_REQUEST_FIELD, null);
+        Long to = params.getLong(TO_REQUEST_FIELD, null);
         if (to == null && from != null) {
             LOGGER.trace("requesting annotation with from time {}", from);
             queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append("*]");
