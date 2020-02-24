@@ -11,15 +11,10 @@ public interface AnnotationRequest {
 
     long getTo();
 
-    long getFromRaw();
-
-    long getToRaw();
 
     SamplingConf getSamplingConf();
 
     String getType();
-
-    List<String> getMetricNames();
 
     List<String> getTags();
 

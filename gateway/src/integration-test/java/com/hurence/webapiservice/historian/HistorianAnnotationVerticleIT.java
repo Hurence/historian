@@ -79,7 +79,7 @@ public class HistorianAnnotationVerticleIT {
         final SolrInputDocument doc6 = new SolrInputDocument();
         doc6.addField("time", 1581669794070L);
         doc6.addField("text", "annotattion 7");
-        doc.addField("tags", new JsonArray().add("tag2").add("tag3"));
+        doc6.addField("tags", new JsonArray().add("tag2").add("tag3"));
         final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
         client.commit(COLLECTION);
 
@@ -98,7 +98,7 @@ public class HistorianAnnotationVerticleIT {
 
     @Test
     /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
-    void getAnnotattionsTest (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithTypeEqualsAll (VertxTestContext testContext) throws InterruptedException {
         LOGGER.info("hi");
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
@@ -121,6 +121,123 @@ public class HistorianAnnotationVerticleIT {
                 })
                 .subscribe ();
     }
+    @Test
+        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    void testAnnotationWithMatchAnyEqualsTrue (VertxTestContext testContext) throws InterruptedException {
+        Thread.sleep(10000);
+        JsonObject params = new JsonObject ()
+                .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T01:43:14.070Z") // 1581655394070
+                        .put(TO_REQUEST_FIELD, "2020-2-14T06:50:14.070Z")) // 1581666194070
+                .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
+                .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY_REQUEST_FIELD, true)
+                .put(TYPE_REQUEST_FIELD, "tags");
+        LOGGER.debug("params json is : {} ", params);
+        historian.rxGetAnnotations (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        LOGGER.info("annotations {} ",rsp);
+                        assertEquals (4, totalHit);
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+
+
+    @Test
+        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    void testAnnotationWithMatchAnyEqualsFalse (VertxTestContext testContext) throws InterruptedException {
+        Thread.sleep(10000);
+        JsonObject params = new JsonObject ()
+                .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T01:43:14.070Z") // 1581655394070
+                        .put(TO_REQUEST_FIELD, "2020-2-14T06:50:14.070Z")) // 1581666194070
+                .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
+                .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY_REQUEST_FIELD, false)
+                .put(TYPE_REQUEST_FIELD, "tags");
+        LOGGER.debug("params json is : {} ", params);
+        historian.rxGetAnnotations (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        LOGGER.info("annotations {} ",rsp);
+                        assertEquals (1, totalHit);
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+    @Test
+        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    void testAnnotationWithLimit (VertxTestContext testContext) throws InterruptedException {
+        Thread.sleep(10000);
+        JsonObject params = new JsonObject ()
+                .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T01:43:14.070Z") // 1581655394070
+                        .put(TO_REQUEST_FIELD, "2020-2-14T06:50:14.070Z")) // 1581666194070
+                .put(MAX_ANNOTATION_REQUEST_FIELD, 2)
+                .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY_REQUEST_FIELD, true)
+                .put(TYPE_REQUEST_FIELD, "tags");
+        LOGGER.debug("params json is : {} ", params);
+        historian.rxGetAnnotations (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        LOGGER.info("annotations {} ",rsp);
+                        assertEquals (2, totalHit);
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+
+    @Test
+        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    void testAnnotationWithNoTime (VertxTestContext testContext) throws InterruptedException {
+        Thread.sleep(10000);
+        JsonObject params = new JsonObject ()
+                .put(MAX_ANNOTATION_REQUEST_FIELD, 10)
+                .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY_REQUEST_FIELD, true)
+                .put(TYPE_REQUEST_FIELD, "tags");
+        LOGGER.debug("params json is : {} ", params);
+        historian.rxGetAnnotations (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        LOGGER.info("annotations {} ",rsp);
+                        assertEquals (5, totalHit);
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+
+    @Test
+        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    void testAnnotationWithNoQuery (VertxTestContext testContext) throws InterruptedException {
+        Thread.sleep(10000);
+        JsonObject params = new JsonObject ("{}");
+        LOGGER.debug("params json is : {} ", params);
+        historian.rxGetAnnotations (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        LOGGER.info("annotations {} ",rsp);
+                        assertEquals (7, totalHit);
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+
 
 }
 

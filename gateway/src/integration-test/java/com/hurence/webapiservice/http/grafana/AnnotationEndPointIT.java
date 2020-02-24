@@ -82,7 +82,7 @@ public class AnnotationEndPointIT {
     }
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    /*@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)*/
     public void testAnnotationWithTypeEqualsAll(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/annotation/extract-algo/test1/request.json",
@@ -94,7 +94,7 @@ public class AnnotationEndPointIT {
     public void testAnnotationWithMatchAnyEqualsTrue(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/annotation/extract-algo/test2/request.json",
-                "http/grafana/annotation/extract-algo/test2/expectedResponse.json");
+                "/http/grafana/annotation/extract-algo/test2/expectedResponse.json");
     }
 
     @Test
@@ -102,7 +102,7 @@ public class AnnotationEndPointIT {
     public void testAnnotationWithMatchAnyEqualsFalse(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/annotation/extract-algo/test3/request.json",
-                "http/grafana/annotation/extract-algo/test3/expectedResponse.json");
+                "/http/grafana/annotation/extract-algo/test3/expectedResponse.json");
     }
 
 
