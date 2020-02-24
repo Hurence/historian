@@ -102,8 +102,8 @@ public class HistorianAnnotationVerticleIT {
         LOGGER.info("hi");
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
-                .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T04:43:14.070Z") // 1581655394070
-                .put(TO_REQUEST_FIELD, "2020-2-14T07:43:14.070Z")) // 1581666194070
+                .put (FROM_REQUEST_FIELD, 1581651394000L)
+                .put(TO_REQUEST_FIELD, 1581666194000L)
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, true)
@@ -126,8 +126,8 @@ public class HistorianAnnotationVerticleIT {
     void testAnnotationWithMatchAnyEqualsTrue (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
-                .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T01:43:14.070Z") // 1581655394070
-                        .put(TO_REQUEST_FIELD, "2020-2-14T06:50:14.070Z")) // 1581666194070
+                .put (FROM_REQUEST_FIELD, 1581644594000L)
+                .put(TO_REQUEST_FIELD, 1581663014000L)
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, true)
@@ -152,8 +152,8 @@ public class HistorianAnnotationVerticleIT {
     void testAnnotationWithMatchAnyEqualsFalse (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
-                .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T01:43:14.070Z") // 1581655394070
-                        .put(TO_REQUEST_FIELD, "2020-2-14T06:50:14.070Z")) // 1581666194070
+                .put (FROM_REQUEST_FIELD, 1581644594000L)
+                .put(TO_REQUEST_FIELD, 1581663014000L)
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, false)
@@ -176,8 +176,8 @@ public class HistorianAnnotationVerticleIT {
     void testAnnotationWithLimit (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
-                .put("range",new JsonObject().put (FROM_REQUEST_FIELD, "2020-2-14T01:43:14.070Z") // 1581655394070
-                        .put(TO_REQUEST_FIELD, "2020-2-14T06:50:14.070Z")) // 1581666194070
+                .put (FROM_REQUEST_FIELD, 1581644594000L)
+                .put(TO_REQUEST_FIELD, 1581663014000L)
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 2)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, true)
