@@ -219,20 +219,37 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
     private SolrQuery buildAnnotationQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        /*Long from = parseDate(params, "/range/from");
-        Long to = parseDate(params, "/range/to");*/
-        Long from = params.getLong(FROM_REQUEST_FIELD);
-        Long to = params.getLong(TO_REQUEST_FIELD);
-        LOGGER.trace("requesting annotation with time from {} to time {}", from, to);
-        queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append(to).append("]");
+        Long from =null;
+        Long to = null;
+        if (params.getJsonObject(RANGE_REQUEST_FIELD,new JsonObject("{}")).getString(FROM_REQUEST_FIELD, null) != null)
+            from = parseDate(params, "/range/from");
+        if (params.getJsonObject(RANGE_REQUEST_FIELD,new JsonObject("{}")).getString(TO_REQUEST_FIELD, null) != null)
+            to = parseDate(params, "/range/to");
+        /*Long from = params.getLong(FROM_REQUEST_FIELD, null);
+        Long to = params.getLong(TO_REQUEST_FIELD, null);*/
+        if (to == null && from != null) {
+            LOGGER.trace("requesting annotation with from time {}", from);
+            queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append("*]");
+        } else if (from == null && to != null) {
+            LOGGER.trace("requesting annotation with to time {}", to);
+            queryBuilder.append(TIME_REQUEST_FIELD).append(":[*").append(" TO ").append(to).append("]");
+        } else if (from != null) {
+            LOGGER.trace("requesting annotation with time from {} to time {}", from, to);
+            queryBuilder.append(TIME_REQUEST_FIELD).append(":[").append(from).append(" TO ").append(to).append("]");
+        } else {
+            LOGGER.trace("requesting annotation with all times existing");
+            queryBuilder.append("*:*");
+        }
         //FILTER
-        List<String> tags = params.getJsonArray(TAGS_REQUEST_FIELD).getList();
+        List<String> tags = null;
+        if (params.getJsonArray(TAGS_REQUEST_FIELD, null) != null)
+            tags = params.getJsonArray(TAGS_REQUEST_FIELD).getList();
         StringBuilder stringQuery = new StringBuilder();
         String operator = "";
         SolrQuery query = new SolrQuery();
-        if (params.getString(TYPE_REQUEST_FIELD).equals("tags")) {
+        if (params.getString(TYPE_REQUEST_FIELD, "all").equals("tags")) {
             queryBuilder.append(" && ");
-            if (!params.getBoolean("MatchAny", true)) {
+            if (!params.getBoolean(MATCH_ANY_REQUEST_FIELD, true)) {
                 operator = " AND ";
             } else {
                 operator = " OR ";
@@ -243,15 +260,16 @@ public class SolrHistorianServiceImpl implements HistorianService {
             stringQuery.append(tags.get(tags.size()-1));
             queryBuilder.append(TAGS_TO_FILTER_ON_REQUEST_FIELD).append(":").append("(").append(stringQuery.toString()).append(")");
         }
-        if (queryBuilder.length() != 0)
-            LOGGER.info("query is : {}",queryBuilder.toString());
+        if (queryBuilder.length() != 0 ) {
+            LOGGER.info("query is : {}", queryBuilder.toString());
             query.setQuery(queryBuilder.toString());
-        query.setRows(params.getInteger(MAX_ANNOTATION_REQUEST_FIELD, 1000));
-        //    FIELDS_TO_FETCH
-        query.setFields(TIME_REQUEST_FIELD,
-                TIME_END_REQUEST_FIELD,
-                TEXT_REQUEST_FIELD,
-                TAGS_REQUEST_FIELD);
+            query.setRows(params.getInteger(MAX_ANNOTATION_REQUEST_FIELD, 1000));
+            //    FIELDS_TO_FETCH
+            query.setFields(TIME_REQUEST_FIELD,
+                    TIME_END_REQUEST_FIELD,
+                    TEXT_REQUEST_FIELD,
+                    TAGS_REQUEST_FIELD);
+        }
         return query;
     }
 
@@ -309,7 +327,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        SolrQuery query = buildAnnotationQuery(params);
+        final SolrQuery query = buildAnnotationQuery(params);
         Handler<Promise<JsonObject>> getAnnoationsHandler = p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.annotationCollection, query);
@@ -319,8 +337,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 );
                 LOGGER.debug("annotations found : "+ annotation);
                 p.complete(new JsonObject()
-                        /*.put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())*/
                         .put(RESPONSE_ANNOTATIONS, annotation)
+                        .put(RESPONSE_TOTAL_FOUND, annotation.size())
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);

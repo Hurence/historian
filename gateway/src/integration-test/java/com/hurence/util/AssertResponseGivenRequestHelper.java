@@ -1,6 +1,7 @@
 package com.hurence.util;
 
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.VertxTestContext;
@@ -25,12 +26,12 @@ public class AssertResponseGivenRequestHelper {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post(endpoint)
-                .as(BodyCodec.jsonArray())
+                .as(BodyCodec.jsonObject())
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());
-                        JsonArray body = rsp.body();
+                        JsonArray body = rsp.body().getJsonArray("annotations");
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                         JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
                         assertEquals(expectedBody, body);

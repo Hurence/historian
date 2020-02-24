@@ -35,13 +35,6 @@ public class AnnotationRequestParser {
 
     }
 
-    private long parseFromRaw(JsonObject requestBody) {
-        return parseDate(requestBody, "/rangeRaw/from");
-    }
-
-    private long parseToRaw(JsonObject requestBody) {
-        return parseDate(requestBody, "/rangeRaw/to");
-    }
 
     private JsonArray parseTags(JsonObject requestBody) {
         return requestBody.getJsonArray("tags");
@@ -57,7 +50,7 @@ public class AnnotationRequestParser {
 
     private String parseType(JsonObject requestBody) {
         return requestBody.getString("type");
-    }
+    }    // i should put the defaults here
 
     private int parseMaxAnnotations(JsonObject requestBody) {
         return requestBody.getInteger("limit");
