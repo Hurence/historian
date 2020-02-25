@@ -99,7 +99,7 @@ public class AnnotationEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsTrue(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
+        assertRequestGiveResponseFromFileWithNoOrder(vertx, testContext,
                 "/http/grafana/annotation/extract-algo/test2/request.json",
                 "/http/grafana/annotation/extract-algo/test2/expectedResponse.json");
     }
@@ -115,7 +115,7 @@ public class AnnotationEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithLimit(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
+        assertRequestGiveResponseFromFileWithLimit(vertx, testContext,
                 "/http/grafana/annotation/extract-algo/test4/request.json",
                 "/http/grafana/annotation/extract-algo/test4/expectedResponse.json");
     }
@@ -123,7 +123,7 @@ public class AnnotationEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithNoTime(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
+        assertRequestGiveResponseFromFileWithNoOrder(vertx, testContext,
                 "/http/grafana/annotation/extract-algo/test6/request.json",
                 "/http/grafana/annotation/extract-algo/test6/expectedResponse.json");
     }
@@ -140,5 +140,13 @@ public class AnnotationEndPointIT {
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
         assertHelper.assertRequestGiveResponseFromFile(vertx, testContext, requestFile, responseFile);
+    }
+    public void assertRequestGiveResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
+                                                  String requestFile, String responseFile) {
+        assertHelper.assertRequestGiveResponseFromFileWithNoOrder(vertx, testContext, requestFile, responseFile);
+    }
+    public void assertRequestGiveResponseFromFileWithLimit(Vertx vertx, VertxTestContext testContext,
+                                                  String requestFile, String responseFile) {
+        assertHelper.assertRequestGiveResponseFromFileWithLimit(vertx, testContext, requestFile, responseFile);
     }
 }
