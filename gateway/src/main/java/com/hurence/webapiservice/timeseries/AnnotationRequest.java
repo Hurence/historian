@@ -1,15 +1,14 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 
 import java.util.List;
 
 public interface AnnotationRequest {
-    long getFrom();
+    Long getFrom();
 
-    long getTo();
+    Long getTo();
 
 
     SamplingConf getSamplingConf();

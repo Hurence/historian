@@ -1,10 +1,7 @@
 package com.hurence.webapiservice.http.grafana.modele;
 
-import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.AnnotationRequest;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 
 import java.util.List;
@@ -12,8 +9,8 @@ import java.util.List;
 public class AnnotationRequestParam implements AnnotationRequest {
 
     private JsonArray tags;
-    private long from;
-    private long to;
+    private Long from;
+    private Long to;
     private int maxAnnotation;
     private Boolean matchAny;
     private String type;
@@ -23,11 +20,11 @@ public class AnnotationRequestParam implements AnnotationRequest {
         this.tags = tags;
     }
 
-    public void setFrom(long from) {
+    public void setFrom(Long from) {
         this.from = from;
     }
 
-    public void setTo(long to) {
+    public void setTo(Long to) {
         this.to = to;
     }
 
@@ -48,12 +45,12 @@ public class AnnotationRequestParam implements AnnotationRequest {
         return tags;
     }
 
-    public long getFrom() {
+    public Long getFrom() {
         return from;
     }
 
 
-    public long getTo() {
+    public Long getTo() {
         return to;
     }
 
@@ -86,8 +83,8 @@ public class AnnotationRequestParam implements AnnotationRequest {
 
     public static final class Builder {
         private JsonArray tags;
-        private long from;
-        private long to;
+        private Long from;
+        private Long to;
         private int maxAnnotation;
         private Boolean matchAny;
         private String type;
@@ -99,12 +96,12 @@ public class AnnotationRequestParam implements AnnotationRequest {
             return this;
         }
 
-        public AnnotationRequestParam.Builder from(long from) {
+        public AnnotationRequestParam.Builder from(Long from) {
             this.from = from;
             return this;
         }
 
-        public AnnotationRequestParam.Builder to(long to) {
+        public AnnotationRequestParam.Builder to(Long to) {
             this.to = to;
             return this;
         }

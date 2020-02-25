@@ -221,7 +221,7 @@ public class HistorianAnnotationVerticleIT {
 
     @Test
         /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
-    void testAnnotationWithNoQuery (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithEmptyQuery (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ("{}");
         LOGGER.debug("params json is : {} ", params);
