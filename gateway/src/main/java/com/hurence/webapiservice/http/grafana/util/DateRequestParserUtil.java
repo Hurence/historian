@@ -26,10 +26,12 @@ public class DateRequestParserUtil {
         return dateFormat;
     }
 
-    public static long parseDate(JsonObject requestBody, String pointer) {
+    public static Long parseDate(JsonObject requestBody, String pointer) {
         LOGGER.debug("trying to parse pointer {}", pointer);
         JsonPointer jsonPointer = JsonPointer.from(pointer);
         Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
         if (fromObj instanceof String) {
             String fromStr = (String) fromObj;
             try {

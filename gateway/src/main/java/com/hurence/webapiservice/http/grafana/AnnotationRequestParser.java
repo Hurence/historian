@@ -19,13 +19,13 @@ public class AnnotationRequestParser {
     public AnnotationRequestParam parseAnnotationRequest(JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse annotation requestBody : {}", requestBody);
         AnnotationRequestParam.Builder builder = new AnnotationRequestParam.Builder();
-        long from = parseFrom(requestBody);
+        Long from = parseFrom(requestBody);
         builder.from(from);
-        long to = parseTo(requestBody);
+        Long to = parseTo(requestBody);
         builder.to(to);
-        int maxAnnotations = parseMaxAnnotations(requestBody);;
+        int maxAnnotations = parseMaxAnnotations(requestBody);
         builder.withMaxAnnotation(maxAnnotations);
-        JsonArray tags = parseTags(requestBody);;
+        JsonArray tags = parseTags(requestBody);
         builder.withTags(tags);
         Boolean matchAny = parseMatchAny(requestBody);;
         builder.withMatchAny(matchAny);
@@ -37,27 +37,27 @@ public class AnnotationRequestParser {
 
 
     private JsonArray parseTags(JsonObject requestBody) {
-        return requestBody.getJsonArray("tags");
+        return requestBody.getJsonArray("tags", null);
     }
 
-    private long parseFrom(JsonObject requestBody) {
+    private Long parseFrom(JsonObject requestBody) {
         return parseDate(requestBody, "/range/from");
     }
 
-    private long parseTo(JsonObject requestBody) {
+    private Long parseTo(JsonObject requestBody) {
         return parseDate(requestBody, "/range/to");
     }
 
     private String parseType(JsonObject requestBody) {
-        return requestBody.getString("type");
+        return requestBody.getString("type", "all");
     }    // i should put the defaults here
 
     private int parseMaxAnnotations(JsonObject requestBody) {
-        return requestBody.getInteger("limit");
+        return requestBody.getInteger("limit", 1000);
     }
 
     private Boolean parseMatchAny(JsonObject requestBody) {
-        return requestBody.getBoolean("matchAny", false);
+        return requestBody.getBoolean("matchAny", true);
     }
 
 }

@@ -262,7 +262,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
             query.setFields(TIME_REQUEST_FIELD,
                     TIME_END_REQUEST_FIELD,
                     TEXT_REQUEST_FIELD,
-                    TAGS_REQUEST_FIELD);
+                    TAGS_REQUEST_FIELD, "score");
+            query.addSort("score", SolrQuery.ORDER.desc);
+            query.addSort(TIME_REQUEST_FIELD, SolrQuery.ORDER.desc);
         }
         return query;
     }
