@@ -5,6 +5,7 @@ import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.solr.client.solrj.SolrClient;
@@ -22,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -97,7 +99,7 @@ public class HistorianAnnotationVerticleIT {
 
 
     @Test
-    /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithTypeEqualsAll (VertxTestContext testContext) throws InterruptedException {
         LOGGER.info("hi");
         Thread.sleep(10000);
@@ -113,7 +115,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        int totalHit = rsp.getInteger(RESPONSE_TOTAL_FOUND);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (4, totalHit);
                         testContext.completeNow ();
@@ -122,7 +124,7 @@ public class HistorianAnnotationVerticleIT {
                 .subscribe ();
     }
     @Test
-        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithMatchAnyEqualsTrue (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
@@ -137,7 +139,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        int totalHit = rsp.getInteger(RESPONSE_TOTAL_FOUND);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (4, totalHit);
                         testContext.completeNow ();
@@ -148,7 +150,7 @@ public class HistorianAnnotationVerticleIT {
 
 
     @Test
-        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithMatchAnyEqualsFalse (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
@@ -163,7 +165,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        int totalHit = rsp.getInteger(RESPONSE_TOTAL_FOUND);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (1, totalHit);
                         testContext.completeNow ();
@@ -172,7 +174,7 @@ public class HistorianAnnotationVerticleIT {
                 .subscribe ();
     }
     @Test
-        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithLimit (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
@@ -187,7 +189,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        int totalHit = rsp.getInteger(RESPONSE_TOTAL_FOUND);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (2, totalHit);
                         testContext.completeNow ();
@@ -197,7 +199,7 @@ public class HistorianAnnotationVerticleIT {
     }
 
     @Test
-        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithNoTime (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ()
@@ -210,7 +212,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        int totalHit = rsp.getInteger(RESPONSE_TOTAL_FOUND);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (5, totalHit);
                         testContext.completeNow ();
@@ -220,7 +222,7 @@ public class HistorianAnnotationVerticleIT {
     }
 
     @Test
-        /*@ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithEmptyQuery (VertxTestContext testContext) throws InterruptedException {
         Thread.sleep(10000);
         JsonObject params = new JsonObject ("{}");
@@ -229,7 +231,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getJsonArray(RESPONSE_ANNOTATIONS).size();
+                        int totalHit = rsp.getInteger(RESPONSE_TOTAL_FOUND);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (7, totalHit);
                         testContext.completeNow ();

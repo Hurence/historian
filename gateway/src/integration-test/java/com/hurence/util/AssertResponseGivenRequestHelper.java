@@ -15,6 +15,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_ANNOTATIONS;
+import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_TOTAL_FOUND;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class AssertResponseGivenRequestHelper {
@@ -27,8 +29,26 @@ public class AssertResponseGivenRequestHelper {
         this.endpoint = endpoint;
     }
 
-    public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
-                                                         String requestFile, String responseFile) {
+    public void assertRequestGiveArrayResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                       String requestFile, String responseFile) {
+        final FileSystem fs = vertx.fileSystem();
+        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
+        webClient.post(endpoint)
+                .as(BodyCodec.jsonArray())
+                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                    testContext.verify(() -> {
+                        assertEquals(200, rsp.statusCode());
+                        assertEquals("OK", rsp.statusMessage());
+                        JsonArray body = rsp.body();
+                        Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
+                        JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
+                        assertEquals(expectedBody, body);
+                        testContext.completeNow();
+                    });
+                }));
+    }
+    public void assertRequestGiveObjectResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                        String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post(endpoint)
@@ -37,15 +57,16 @@ public class AssertResponseGivenRequestHelper {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());
-                        JsonArray body = rsp.body().getJsonArray("annotations");
+                        JsonObject body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
+                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
                         assertEquals(expectedBody, body);
                         testContext.completeNow();
                     });
                 }));
     }
-    public void assertRequestGiveResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
+
+    public void assertRequestGiveObjectResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
@@ -55,13 +76,17 @@ public class AssertResponseGivenRequestHelper {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());
-                        JsonArray body = rsp.body().getJsonArray("annotations");
+                        JsonObject body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
+                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
+                        int totalExpected = expectedBody.getInteger(RESPONSE_TOTAL_FOUND);
+                        int total = body.getInteger(RESPONSE_TOTAL_FOUND);
+                        JsonArray annotationExpected = expectedBody.getJsonArray(RESPONSE_ANNOTATIONS);
+                        JsonArray annotations = body.getJsonArray(RESPONSE_ANNOTATIONS);
                         boolean isEqual = true;
-                        for (Object je1 : body) {
+                        for (Object je1 : annotations) {
                             boolean flag = false;
-                            for(Object je2 : expectedBody){
+                            for(Object je2 : annotationExpected){
                                 flag = je1.equals(je2);
                                 if(flag){
                                     break;
@@ -70,26 +95,10 @@ public class AssertResponseGivenRequestHelper {
                             isEqual = isEqual && flag;
                         }
                         assertTrue(isEqual);
+                        assertEquals(totalExpected, total);
                         testContext.completeNow();
                     });
                 }));
     }
-    public void assertRequestGiveResponseFromFileWithLimit(Vertx vertx, VertxTestContext testContext,
-                                                  String requestFile, String responseFile) {
-        final FileSystem fs = vertx.fileSystem();
-        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post(endpoint)
-                .as(BodyCodec.jsonObject())
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
-                    testContext.verify(() -> {
-                        assertEquals(200, rsp.statusCode());
-                        assertEquals("OK", rsp.statusMessage());
-                        JsonArray body = rsp.body().getJsonArray("annotations");
-                        Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
-                        assertEquals(expectedBody.size(), body.size());
-                        testContext.completeNow();
-                    });
-                }));
-    }
+
 }
