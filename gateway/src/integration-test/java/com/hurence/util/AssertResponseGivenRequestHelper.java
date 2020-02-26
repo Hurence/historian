@@ -66,39 +66,4 @@ public class AssertResponseGivenRequestHelper {
                 }));
     }
 
-    public void assertRequestGiveObjectResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
-                                                  String requestFile, String responseFile) {
-        final FileSystem fs = vertx.fileSystem();
-        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post(endpoint)
-                .as(BodyCodec.jsonObject())
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
-                    testContext.verify(() -> {
-                        assertEquals(200, rsp.statusCode());
-                        assertEquals("OK", rsp.statusMessage());
-                        JsonObject body = rsp.body();
-                        Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
-                        int totalExpected = expectedBody.getInteger(RESPONSE_TOTAL_FOUND);
-                        int total = body.getInteger(RESPONSE_TOTAL_FOUND);
-                        JsonArray annotationExpected = expectedBody.getJsonArray(RESPONSE_ANNOTATIONS);
-                        JsonArray annotations = body.getJsonArray(RESPONSE_ANNOTATIONS);
-                        boolean isEqual = true;
-                        for (Object je1 : annotations) {
-                            boolean flag = false;
-                            for(Object je2 : annotationExpected){
-                                flag = je1.equals(je2);
-                                if(flag){
-                                    break;
-                                }
-                            }
-                            isEqual = isEqual && flag;
-                        }
-                        assertTrue(isEqual);
-                        assertEquals(totalExpected, total);
-                        testContext.completeNow();
-                    });
-                }));
-    }
-
 }
