@@ -24,8 +24,7 @@ import org.apache.solr.client.solrj.io.stream.SolrStream;
 import org.apache.solr.client.solrj.io.stream.StreamContext;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.*;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -239,20 +238,33 @@ public class SolrHistorianServiceImpl implements HistorianService {
         LOGGER.debug("max limit:" + max);
         query.setRows(max);
         query.addField(RESPONSE_METRIC_NAME_FIELD);
+        query.set("group", "true");
+        query.set("group.field", RESPONSE_METRIC_NAME_FIELD);
+        query.set("group.ngroups", "true");
+        query.set("group.limit", "-1");
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.collection, query);
-                SolrDocumentList solrDocuments = response.getResults();
-                LOGGER.debug("Found " + response.getRequestUrl() + response + " result" + solrDocuments);
-                JsonArray metrics = new JsonArray(solrDocuments.stream()
-                        .map(SolrDocument::getFieldValuesMap)
-                        .map(stringCollectionMap -> stringCollectionMap.get(RESPONSE_METRIC_NAME_FIELD))
-                        .map(objects -> objects.toArray()[0].toString())
-                        .collect(Collectors.toList())
-                );
+                GroupResponse solrDocumentsGroup = response.getGroupResponse();
+                List<GroupCommand> results = solrDocumentsGroup.getValues();
+                JsonArray metrics = new JsonArray();
+                int totalMetricsFound = 0;
+                int totalNamesFound = 0;
+                for (GroupCommand gc : results) {
+                    totalMetricsFound = gc.getMatches();
+                    totalNamesFound = gc.getValues().size();
+                    List<Group> groups = gc.getValues();
+                    for(Group group : groups) {
+                        group.getGroupValue();
+                        LOGGER.debug(group.getGroupValue());
+                        metrics.add(group.getGroupValue());
+                        }
+                    }
+                LOGGER.debug("Found " + response.getRequestUrl() + response + " result : " + metrics);
                 LOGGER.debug("mertics :: "+ metrics);
                 p.complete(new JsonObject()
-                        .put(RESPONSE_TOTAL_FOUND, solrDocuments.getNumFound())
+                        .put(RESPONSE_TOTAL_METRICS_FOUND, totalMetricsFound)
+                        .put(RESPONSE_TOTAL_NAMES_FOUND, totalNamesFound)
                         .put(RESPONSE_METRICS, metrics)
                 );
             } catch (IOException | SolrServerException e) {
