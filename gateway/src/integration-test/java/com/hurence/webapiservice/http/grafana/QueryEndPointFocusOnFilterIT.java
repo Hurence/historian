@@ -106,7 +106,7 @@ public class QueryEndPointFocusOnFilterIT {
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveResponseFromFile(vertx, testContext, requestFile, responseFile);
+        assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
 
 }

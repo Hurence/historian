@@ -2,7 +2,6 @@ package com.hurence.webapiservice.http.grafana;
 
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.json.JsonArray;
@@ -89,64 +88,60 @@ public class AnnotationEndPointIT {
     }
 
     @Test
-    /*@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithTypeEqualsAll(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/extract-algo/test1/request.json",
-                "/http/grafana/annotation/extract-algo/test1/expectedResponse.json");
+        assertRequestGiveObjectResponseFromFile(vertx, testContext,
+                "/http/grafana/annotation/test1/request.json",
+                "/http/grafana/annotation/test1/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsTrue(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/annotation/extract-algo/test2/request.json",
-                "/http/grafana/annotation/extract-algo/test2/expectedResponse.json");
+                "/http/grafana/annotation/test2/request.json",
+                "/http/grafana/annotation/test2/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsFalse(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/extract-algo/test3/request.json",
-                "/http/grafana/annotation/extract-algo/test3/expectedResponse.json");
+        assertRequestGiveObjectResponseFromFile(vertx, testContext,
+                "/http/grafana/annotation/test3/request.json",
+                "/http/grafana/annotation/test3/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithLimit(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFileWithLimit(vertx, testContext,
-                "/http/grafana/annotation/extract-algo/test4/request.json",
-                "/http/grafana/annotation/extract-algo/test4/expectedResponse.json");
+        assertRequestGiveObjectResponseFromFile(vertx, testContext,
+                "/http/grafana/annotation/test4/request.json",
+                "/http/grafana/annotation/test4/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithNoTime(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/annotation/extract-algo/test6/request.json",
-                "/http/grafana/annotation/extract-algo/test6/expectedResponse.json");
+                "/http/grafana/annotation/test6/request.json",
+                "/http/grafana/annotation/test6/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithEmptyQuery(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/extract-algo/test5/request.json",
-                "/http/grafana/annotation/extract-algo/test5/expectedResponse.json");
+        assertRequestGiveObjectResponseFromFile(vertx, testContext,
+                "/http/grafana/annotation/test5/request.json",
+                "/http/grafana/annotation/test5/expectedResponse.json");
     }
 
 
-    public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
+    public void assertRequestGiveObjectResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveResponseFromFile(vertx, testContext, requestFile, responseFile);
+        assertHelper.assertRequestGiveObjectResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
     public void assertRequestGiveResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveResponseFromFileWithNoOrder(vertx, testContext, requestFile, responseFile);
-    }
-    public void assertRequestGiveResponseFromFileWithLimit(Vertx vertx, VertxTestContext testContext,
-                                                  String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveResponseFromFileWithLimit(vertx, testContext, requestFile, responseFile);
+        assertHelper.assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext, requestFile, responseFile);
     }
 }
