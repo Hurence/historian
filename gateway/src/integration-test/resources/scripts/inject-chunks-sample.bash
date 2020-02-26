@@ -13,11 +13,11 @@ curl -X POST -H 'Content-Type: application/json' 'http://solr1:8983/solr/histori
     "chunk_end": '"${ts}"',
     "chunk_max": 1,
     "chunk_min": 1,
-    "chunk_sum": 1,
+    "chunk_sum": 40,
     "chunk_sax": "aaa",
-    "chunk_size": "1",
+    "chunk_size": "40",
     "chunk_start": '"$(("${ts}" - 50000))"',
-    "chunk_value": "aa"
+    "chunk_value": "H4sIAAAAAAAAAOPi1GQAgw/2XCwKjAYMXEyDELMIAF0mwAAAJ4X9oq0AAAA="
   },
   {
     "name" : "temp_b",
@@ -26,10 +26,10 @@ curl -X POST -H 'Content-Type: application/json' 'http://solr1:8983/solr/histori
     "chunk_end": '"${ts}"',
     "chunk_max": 1,
     "chunk_min": 1,
-    "chunk_sum": 1,
+    "chunk_sum": 40,
     "chunk_sax": "aaa",
-    "chunk_size": "1",
+    "chunk_size": "10",
     "chunk_start": '"$(("${ts}" - 50000))"',
-    "chunk_value": "aa"
+    "chunk_value": "H4sIAAAAAAAAAOPi1GQAgw/2XCwKjAYMXEyDELMIAF0mwAAAJ4X9oq0AAAA="
   }
 ]'
