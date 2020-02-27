@@ -1,6 +1,6 @@
 package com.hurence.historian
 
-import com.hurence.historian.App.logger
+import com.hurence.historian.App.{EvoaMeasure, LoaderOptions, logger}
 import com.hurence.logisland.processor.StandardProcessContext
 import com.hurence.logisland.record.{FieldDictionary, TimeSeriesRecord}
 import org.apache.spark.sql.{SaveMode, SparkSession}
