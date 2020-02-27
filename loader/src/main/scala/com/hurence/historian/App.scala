@@ -1,54 +1,52 @@
 package com.hurence.historian
 
 
-import com.hurence.historian.LoaderMode.LoaderMode
+import com.hurence.historian.App.LoaderMode.LoaderMode
 import com.hurence.logisland.processor.StandardProcessContext
-import com.hurence.logisland.record.{FieldDictionary, Record, RecordDictionary, StandardRecord, TimeSeriesRecord}
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
-import org.apache.commons.cli.{CommandLine, GnuParser, Option, OptionBuilder, Options, Parser}
-import org.apache.spark.sql.{Encoder, Encoders, Row, SaveMode, SparkSession}
+import com.hurence.logisland.record.TimeSeriesRecord
+import org.apache.commons.cli.{GnuParser, Option, OptionBuilder, Options}
 import org.apache.spark.sql.functions._
-import org.slf4j.{Logger, LoggerFactory}
+import org.apache.spark.sql.{Encoder, SaveMode, SparkSession}
+import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions._
-
-case class EvoaMeasure(name: String,
-                       codeInstall: String,
-                       sensor: String,
-                       value: Double,
-                       quality: Double,
-                       timestamp: String,
-                       timeMs: Long,
-                       year: Int,
-                       month: Int,
-                       week: Int,
-                       day: Int,
-                       filePath: String)
-
-
-object LoaderMode extends Enumeration {
-  type LoaderMode = Value
-
-  val PRELOAD = Value("preload")
-  val CHUNK = Value("chunk")
-  val CHUNK_BY_FILE = Value("chunk_by_file")
-  val TAG_CHUNK = Value("tag_chunk")
-  val MERGE_CHUNKS = Value("merge_chunks")
-}
-
-case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, saxAlphabetSize: Int, saxStringLength: Int, useKerberos: Boolean)
-
 
 /**
   * @author Thomas Bailet @Hurence
   */
 object App {
+  case class EvoaMeasure(name: String,
+                         codeInstall: String,
+                         sensor: String,
+                         value: Double,
+                         quality: Double,
+                         timestamp: String,
+                         timeMs: Long,
+                         year: Int,
+                         month: Int,
+                         week: Int,
+                         day: Int,
+                         filePath: String)
 
-  private val logger = LoggerFactory.getLogger(classOf[App])
+
+  object LoaderMode extends Enumeration {
+    type LoaderMode = Value
+
+    val PRELOAD = Value("preload")
+    val CHUNK = Value("chunk")
+    val CHUNK_BY_FILE = Value("chunk_by_file")
+    val TAG_CHUNK = Value("tag_chunk")
+    val MERGE_CHUNKS = Value("merge_chunks")
+  }
+
+  case class LoaderOptions(mode: LoaderMode, in: String, out: String, master: String, appName: String, brokers: scala.Option[String], lookup: scala.Option[String], chunkSize: Int, saxAlphabetSize: Int, saxStringLength: Int, useKerberos: Boolean)
 
   val DEFAULT_CHUNK_SIZE = 2000
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 100
+
+
+  private val logger = LoggerFactory.getLogger(classOf[App])
 
   def parseCommandLine(args: Array[String]): LoaderOptions = {
     // Commande lien management
@@ -274,7 +272,7 @@ object App {
           .groupBy(row => row.getString(row.fieldIndex("name")))
           .flatMap(group => group._2
             .sliding(options.chunkSize, options.chunkSize)
-            .map(subGroup => tsProcessor.fromRecords(group._1, subGroup.toList))
+            .map(subGroup => tsProcessor.fromRows(group._1, subGroup.toList))
             .map(ts => (ts.getId, tsProcessor.serialize(ts)))
           )
           .iterator

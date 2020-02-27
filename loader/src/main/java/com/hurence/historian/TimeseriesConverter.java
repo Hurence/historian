@@ -37,7 +37,6 @@ public class TimeseriesConverter extends AbstractProcessor {
             .defaultValue("name")
             .build();
 
-
     public static final PropertyDescriptor METRIC = new PropertyDescriptor.Builder()
             .name("metric")
             .description("The chronix metric to calculate for the chunk")
@@ -218,7 +217,7 @@ public class TimeseriesConverter extends AbstractProcessor {
      * @param rows
      * @return
      */
-    public TimeSeriesRecord fromRecords(String metricName, List<Row> rows) {
+    public TimeSeriesRecord fromRows(String metricName, List<Row> rows) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
@@ -301,7 +300,6 @@ public class TimeseriesConverter extends AbstractProcessor {
 
         }
 
-
         return fromRecords(groupedRecords);
     }
 
@@ -311,11 +309,11 @@ public class TimeseriesConverter extends AbstractProcessor {
      * @param measures
      * @return
      */
-    public TimeSeriesRecord fromMeasurestoTimeseriesRecord(List<EvoaMeasure> measures) {
+    public TimeSeriesRecord fromMeasurestoTimeseriesRecord(List<App.EvoaMeasure> measures) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
-        for (EvoaMeasure measure : measures) {
+        for (App.EvoaMeasure measure : measures) {
             try {
                 Record record = new StandardRecord(RecordDictionary.TIMESERIES)
                         .setStringField(FieldDictionary.RECORD_NAME, measure.name())
