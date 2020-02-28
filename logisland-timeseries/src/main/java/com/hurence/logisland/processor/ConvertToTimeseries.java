@@ -36,12 +36,11 @@ import com.hurence.logisland.annotation.documentation.CapabilityDescription;
 import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.PropertyDescriptor;
-import com.hurence.logisland.component.SaxEncodingValidators;
 import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;
@@ -87,7 +86,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
     private List<ChronixEncoding> encodings = Collections.emptyList();
     private FunctionValueMap functionValueMap = new FunctionValueMap(0, 0, 0, 0);
 
-    private BinaryCompactionConverter converter;
+    private BinaryCompactionConverterOfRecord converter;
     private List<String> groupBy;
 
     @Override
@@ -99,7 +98,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
         groupBy = Arrays.stream(groupByArray)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toList());
-        BinaryCompactionConverter.Builder builder = new BinaryCompactionConverter.Builder();
+        BinaryCompactionConverterOfRecord.Builder builder = new BinaryCompactionConverterOfRecord.Builder();
         converter = builder.build();
 
         // init metric functions

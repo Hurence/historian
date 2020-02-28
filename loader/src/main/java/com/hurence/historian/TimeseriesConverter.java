@@ -8,7 +8,7 @@ import com.hurence.logisland.processor.ProcessContext;
 import com.hurence.logisland.record.*;
 import com.hurence.logisland.serializer.KryoSerializer;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;
@@ -59,7 +59,7 @@ public class TimeseriesConverter extends AbstractProcessor {
     private List<ChronixEncoding> encodings = Collections.emptyList();
     private FunctionValueMap functionValueMap = new FunctionValueMap(0, 0, 0, 0);
 
-    private BinaryCompactionConverter converter;
+    private BinaryCompactionConverterOfRecord binaryCompactor;
     private List<String> groupBy;
     private final KryoSerializer serializer = new KryoSerializer(true);
 
@@ -73,8 +73,8 @@ public class TimeseriesConverter extends AbstractProcessor {
         groupBy = Arrays.stream(groupByArray)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toList());
-        BinaryCompactionConverter.Builder builder = new BinaryCompactionConverter.Builder();
-        converter = builder.build();
+        BinaryCompactionConverterOfRecord.Builder builder = new BinaryCompactionConverterOfRecord.Builder();
+        binaryCompactor = builder.build();
 
         // init metric functions
         if (context.getPropertyValue(METRIC).isSet()) {
@@ -150,7 +150,7 @@ public class TimeseriesConverter extends AbstractProcessor {
     public TimeSeriesRecord computeValue( TimeSeriesRecord tsRecord) {
 
         try{
-            byte[] bytes = converter.serializeTimeseries(tsRecord.getTimeSeries());
+            byte[] bytes = binaryCompactor.serializeTimeseries(tsRecord.getTimeSeries());
             String chunkValueBase64 = BinaryEncodingUtils.encode(bytes);
             tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, chunkValueBase64);
             tsRecord.setIntField(TimeSeriesRecord.CHUNK_SIZE_BYTES,  bytes.length);
@@ -168,36 +168,8 @@ public class TimeseriesConverter extends AbstractProcessor {
      *
      * @return
      */
-    public TimeSeriesRecord computeMetrics( TimeSeriesRecord tsRecord) {
-
-        MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
-        functionValueMap.resetValues();
-
-        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
-        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
-        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
-        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
-
-        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
-            String name = functionValueMap.getAggregation(i).getQueryName();
-            double value = functionValueMap.getAggregationValue(i);
-            tsRecord.setField("chunk_" + name, FieldType.DOUBLE, value);
-        }
-
-        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
-            String name = functionValueMap.getAnalysis(i).getQueryName();
-            boolean value = functionValueMap.getAnalysisValue(i);
-            tsRecord.setField("chunk_" + name, FieldType.BOOLEAN, value);
-        }
-
-        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
-            String name = functionValueMap.getEncoding(i).getQueryName();
-            String value = functionValueMap.getEncodingValue(i);
-            tsRecord.setField("chunk_" + name, FieldType.STRING, value);
-        }
-
-
-        return tsRecord;
+    public TimeSeriesRecord computeMetrics(TimeSeriesRecord tsRecord) {
+        return computeMetricsTimeSeriesRecord(tsRecord);
     }
 
     /**
@@ -206,7 +178,7 @@ public class TimeseriesConverter extends AbstractProcessor {
      * @return
      */
     public TimeSeriesRecord fromRecords(List<Record> groupedRecords) {
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+        TimeSeriesRecord tsRecord = binaryCompactor.chunk(groupedRecords);
         return computeMetrics(tsRecord);
     }
 
@@ -335,9 +307,11 @@ public class TimeseriesConverter extends AbstractProcessor {
             }
 
         }
+        TimeSeriesRecord tsRecord = binaryCompactor.chunk(groupedRecords);
+        return computeMetricsTimeSeriesRecord(tsRecord);
+    }
 
-
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+    private TimeSeriesRecord computeMetricsTimeSeriesRecord(TimeSeriesRecord tsRecord) {
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
 
         functionValueMap.resetValues();
