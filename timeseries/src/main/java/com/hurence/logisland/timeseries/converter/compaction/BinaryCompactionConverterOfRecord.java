@@ -29,18 +29,15 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BinaryCompactionConverter implements Serializable {
+public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSeriesRecord>, Serializable {
 
+    private static Logger LOGGER = LoggerFactory.getLogger(BinaryCompactionConverterOfRecord.class.getName());
 
-    private static Logger LOGGER = LoggerFactory.getLogger(BinaryCompactionConverter.class.getName());
+    private int ddcThreshold = BinaryCompactionUtil.DEFAULT_DDC_THRESHOLD;
 
-    private int ddcThreshold = 0;
-
-    private BinaryCompactionConverter(int ddcThreshold) {
+    private BinaryCompactionConverterOfRecord(int ddcThreshold) {
         this.ddcThreshold = ddcThreshold;
     }
-
-
 
     /**
      * Compact a related list of records a single chunked one
@@ -49,7 +46,8 @@ public class BinaryCompactionConverter implements Serializable {
      * @return
      * @throws ProcessException
      */
-    public TimeSeriesRecord chunk(List<Record> records) throws ProcessException {
+    @Override
+    public TimeSeriesRecord chunk(List<Record> records) {
 
         if (records.isEmpty())
             throw new ProcessException("not enough records to build a timeseries, should contain at least 1 records ");
@@ -66,12 +64,10 @@ public class BinaryCompactionConverter implements Serializable {
     }
 
     public byte[] serializeTimeseries(final MetricTimeSeries timeSeries) {
-        byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(timeSeries.points().iterator(), ddcThreshold);
-        return Compression.compress(serializedPoints);
+        return BinaryCompactionUtil.serializeTimeseries(timeSeries, ddcThreshold);
     }
 
-
-    public MetricTimeSeries buildTimeSeries(final List<Record> records) {
+    private MetricTimeSeries buildTimeSeries(final List<Record> records) {
         final Record first = records.get(0);
         final Record last = records.get(records.size() - 1);
         final String metricType = first.getType();
@@ -107,11 +103,12 @@ public class BinaryCompactionConverter implements Serializable {
      * @return
      * @throws ProcessException
      */
+    @Override
     public List<Record> unchunk(final TimeSeriesRecord record) throws IOException {
 
         final long start = record.getTimeSeries().getStart();
         final long end = record.getTimeSeries().getEnd();
-        return unCompressPoints(record.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes(), start, end).stream()
+        return BinaryCompactionUtil.unCompressPoints(record.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes(), start, end).stream()
                 .map(m -> {
 
                     long timestamp = m.getTimestamp();
@@ -131,37 +128,6 @@ public class BinaryCompactionConverter implements Serializable {
                 }).collect(Collectors.toList());
     }
 
-    /**
-     *
-     * @param chunkOfPoints the compressed points
-     * @param chunkStart timestamp of the first point in the chunk (required)
-     * @param chunkEnd timestamp of the last point in the chunk
-     * @return
-     * @throws IOException
-     */
-    public List<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd) throws IOException {
-        try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
-            return ProtoBufMetricTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, chunkStart, chunkEnd);
-        }
-    }
-
-    /**
-     * return uncompressed points
-     * @param chunkOfPoints the compressed points
-     * @param chunkStart the timestamp of the first point of the chunk (needed to uncompress points)
-     * @param chunkEnd timestamp of the last point in the chunk
-     * @param requestedFrom filter out points with timestamp lower than requestedFrom
-     * @param requestedEnd filter out points with timestamp higher than requestedEnd
-     * @return
-     * @throws IOException
-     */
-    public List<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd,
-                                        long requestedFrom, long requestedEnd) throws IOException {
-        try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
-            return ProtoBufMetricTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd);
-        }
-    }
-
     public static final class Builder {
 
         private int ddcThreshold = 0;
@@ -174,8 +140,8 @@ public class BinaryCompactionConverter implements Serializable {
         /**
          * @return a BinaryCompactionConverter as configured
          */
-        public BinaryCompactionConverter build() {
-            return new BinaryCompactionConverter(ddcThreshold);
+        public BinaryCompactionConverterOfRecord build() {
+            return new BinaryCompactionConverterOfRecord(ddcThreshold);
         }
     }
 }
