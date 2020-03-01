@@ -125,7 +125,7 @@ public class HistorianSolrITHelper {
                 .put(HistorianVerticle.CONFIG_SOLR_USE_ZOOKEEPER, true)
                 .put(HistorianVerticle.CONFIG_SOLR_ZOOKEEPER_URLS, new JsonArray().add(zkUrl))
                 .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://" + slr1Url + "/solr/" + COLLECTION_HISTORIAN)
-                .put(HistorianVerticle.MAX_NUMBER_OF_TARGET_RETURNED, 3);
+                .put(HistorianVerticle.MAX_NUMBER_OF_TARGET_RETURNED, 100);
         return new JsonObject()
                 .put(HistorianVerticle.CONFIG_ROOT_SOLR, solrConf)
                 .put(HistorianVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS);
