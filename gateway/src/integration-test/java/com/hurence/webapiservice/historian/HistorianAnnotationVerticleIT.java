@@ -102,7 +102,6 @@ public class HistorianAnnotationVerticleIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithTypeEqualsAll (VertxTestContext testContext) throws InterruptedException {
         LOGGER.info("hi");
-        Thread.sleep(10000);
         JsonObject params = new JsonObject ()
                 .put (FROM_REQUEST_FIELD, 1581651394000L)
                 .put(TO_REQUEST_FIELD, 1581666194000L)
@@ -126,7 +125,6 @@ public class HistorianAnnotationVerticleIT {
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithMatchAnyEqualsTrue (VertxTestContext testContext) throws InterruptedException {
-        Thread.sleep(10000);
         JsonObject params = new JsonObject ()
                 .put (FROM_REQUEST_FIELD, 1581644594000L)
                 .put(TO_REQUEST_FIELD, 1581663014000L)
@@ -152,7 +150,6 @@ public class HistorianAnnotationVerticleIT {
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithMatchAnyEqualsFalse (VertxTestContext testContext) throws InterruptedException {
-        Thread.sleep(10000);
         JsonObject params = new JsonObject ()
                 .put (FROM_REQUEST_FIELD, 1581644594000L)
                 .put(TO_REQUEST_FIELD, 1581663014000L)
@@ -176,7 +173,6 @@ public class HistorianAnnotationVerticleIT {
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithLimit (VertxTestContext testContext) throws InterruptedException {
-        Thread.sleep(10000);
         JsonObject params = new JsonObject ()
                 .put (FROM_REQUEST_FIELD, 1581644594000L)
                 .put(TO_REQUEST_FIELD, 1581663014000L)
@@ -201,7 +197,6 @@ public class HistorianAnnotationVerticleIT {
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithNoTime (VertxTestContext testContext) throws InterruptedException {
-        Thread.sleep(10000);
         JsonObject params = new JsonObject ()
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 10)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
@@ -224,7 +219,6 @@ public class HistorianAnnotationVerticleIT {
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithEmptyQuery (VertxTestContext testContext) throws InterruptedException {
-        Thread.sleep(10000);
         JsonObject params = new JsonObject ("{}");
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)

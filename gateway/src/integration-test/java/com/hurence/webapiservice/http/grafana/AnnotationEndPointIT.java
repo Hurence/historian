@@ -27,13 +27,13 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_ANNOTATIONS;
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_TOTAL_FOUND;
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.COLLECTION_ANNOTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 
@@ -99,48 +99,48 @@ public class AnnotationEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithTypeEqualsAll(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/test1/request.json",
-                "/http/grafana/annotation/test1/expectedResponse.json");
+                "/http/grafana/annotation/testWithTypeEqualsAll/request.json",
+                "/http/grafana/annotation/testWithTypeEqualsAll/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsTrue(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/annotation/test2/request.json",
-                "/http/grafana/annotation/test2/expectedResponse.json");
+                "/http/grafana/annotation/testMatchAnyEqualsTrue/request.json",
+                "/http/grafana/annotation/testMatchAnyEqualsTrue/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsFalse(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/test3/request.json",
-                "/http/grafana/annotation/test3/expectedResponse.json");
+                "/http/grafana/annotation/testMatchAnyEqualsFalse/request.json",
+                "/http/grafana/annotation/testMatchAnyEqualsFalse/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithLimit(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/test4/request.json",
-                "/http/grafana/annotation/test4/expectedResponse.json");
+                "/http/grafana/annotation/testLimitNumberOfTags/request.json",
+                "/http/grafana/annotation/testLimitNumberOfTags/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithNoTime(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/annotation/test6/request.json",
-                "/http/grafana/annotation/test6/expectedResponse.json");
+                "/http/grafana/annotation/testRequestWithNoTime/request.json",
+                "/http/grafana/annotation/testRequestWithNoTime/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithEmptyQuery(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/test5/request.json",
-                "/http/grafana/annotation/test5/expectedResponse.json");
+                "/http/grafana/annotation/testEmptyQuery/request.json",
+                "/http/grafana/annotation/testEmptyQuery/expectedResponse.json");
     }
 
 
@@ -162,23 +162,17 @@ public class AnnotationEndPointIT {
                         JsonObject body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                         JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
-                        int totalExpected = expectedBody.getInteger(RESPONSE_TOTAL_FOUND);
-                        int total = body.getInteger(RESPONSE_TOTAL_FOUND);
                         JsonArray annotationExpected = expectedBody.getJsonArray(RESPONSE_ANNOTATIONS);
                         JsonArray annotations = body.getJsonArray(RESPONSE_ANNOTATIONS);
-                        boolean isEqual = true;
-                        for (Object je1 : annotations) {
-                            boolean flag = false;
-                            for(Object je2 : annotationExpected){
-                                flag = je1.equals(je2);
-                                if(flag){
-                                    break;
-                                }
-                            }
-                            isEqual = isEqual && flag;
+                        Set expectedSet = new HashSet();
+                        Set set = new HashSet();
+                        for (Object object : annotations) {
+                            set.add(object);
                         }
-                        assertTrue(isEqual);
-                        assertEquals(totalExpected, total);
+                        for(Object object : annotationExpected){
+                            expectedSet.add(object);
+                        }
+                        assertEquals(expectedSet, set);
                         testContext.completeNow();
                     });
                 }));

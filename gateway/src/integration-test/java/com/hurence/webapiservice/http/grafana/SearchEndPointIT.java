@@ -5,10 +5,7 @@ import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import com.hurence.webapiservice.util.injector.SolrInjector;
-import com.hurence.webapiservice.util.injector.SolrInjectorDifferentMetricNames;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.Timeout;
@@ -30,12 +27,12 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class SearchEndPointIT {
@@ -113,18 +110,15 @@ public class SearchEndPointIT {
                         JsonArray body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                         JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
-                        boolean isEqual = true;
-                        for (Object je1 : body) {
-                            boolean flag = false;
-                            for(Object je2 : expectedBody){
-                                flag = je1.equals(je2);
-                                if(flag){
-                                    break;
-                                }
-                            }
-                            isEqual = isEqual && flag;
+                        Set expectedSet = new HashSet();
+                        Set set = new HashSet();
+                        for (Object object : body) {
+                            set.add(object);
                         }
-                        assertTrue(isEqual);
+                        for(Object object : expectedBody){
+                            expectedSet.add(object);
+                        }
+                        assertEquals(expectedSet, set);
                         testContext.completeNow();
                     });
                 }));
