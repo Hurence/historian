@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -116,18 +118,15 @@ public class SearchEndPointIT {
                             JsonArray body = rsp.body();
                             Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                             JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
-                            boolean isEqual = true;
-                            for (Object je1 : body) {
-                                boolean flag = false;
-                                for(Object je2 : expectedBody){
-                                    flag = je1.equals(je2);
-                                    if(flag){
-                                        break;
-                                    }
-                                }
-                                isEqual = isEqual && flag;
+                            Set expectedSet = new HashSet();
+                            Set set = new HashSet();
+                            for (Object object : body) {
+                                set.add(object);
                             }
-                            assertTrue(isEqual);
+                            for(Object object : expectedBody){
+                                expectedSet.add(object);
+                            }
+                            assertEquals(expectedSet, set);
                             testContext.completeNow();
                         });
                     }));
