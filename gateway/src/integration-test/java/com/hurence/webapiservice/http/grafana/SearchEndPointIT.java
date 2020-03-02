@@ -78,6 +78,10 @@ public class SearchEndPointIT {
         doc6.addField("id", UUID.randomUUID().toString());
         doc6.addField("name", "up");
         final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
+        final SolrInputDocument doc7 = new SolrInputDocument();
+        doc7.addField("id", UUID.randomUUID().toString());
+        doc7.addField("name", "upper_50");
+        final UpdateResponse updateResponse7 = client.add(COLLECTION, doc7);
         client.commit(COLLECTION);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
         webClient = HttpITHelper.buildWebClient(vertx);
@@ -92,7 +96,7 @@ public class SearchEndPointIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testSearch(Vertx vertx, VertxTestContext testContext) {
+    public void testSearchWithNoDuplication(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
                 "/http/grafana/search/test1/request.json",
                 "/http/grafana/search/test1/expectedResponse.json");
@@ -144,7 +148,6 @@ public class SearchEndPointIT {
                         JsonArray body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                         JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
-                        /*assertEquals(body.size(), expectedBody.size());*/
                         assertEquals(expectedBody.size(), body.size());
                         testContext.completeNow();
                     });
