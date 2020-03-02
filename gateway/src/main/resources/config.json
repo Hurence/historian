@@ -15,7 +15,7 @@
     "api" : {
       "grafana" : {
         "search" : {
-          "default_size": 10
+          "default_size": 2
         },
         "annotations" : {
           "limit": 100

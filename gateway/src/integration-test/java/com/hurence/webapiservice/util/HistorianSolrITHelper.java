@@ -107,14 +107,15 @@ public class HistorianSolrITHelper {
                 container.getServicePort(SOLR1_SERVICE_NAME, SOLR_1_PORT);
 
         JsonObject solrConf = new JsonObject()
-                .put(HistorianVerticle.CONFIG_SOLR_COLLECTION, COLLECTION)
+                .put(HistorianVerticle.CONFIG_SOLR_CHUNK_COLLECTION, COLLECTION)
                 .put(HistorianVerticle.CONFIG_SOLR_USE_ZOOKEEPER, true)
                 .put(HistorianVerticle.CONFIG_SOLR_ZOOKEEPER_URLS, new JsonArray().add(zkUrl))
-                .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://" + slr1Url + "/solr/" + COLLECTION)
-                .put(HistorianVerticle.MAX_NUMBER_OF_TARGET_RETURNED, 100);
+                .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://" + slr1Url + "/solr/" + COLLECTION);
+        JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
         return new JsonObject()
                 .put(HistorianVerticle.CONFIG_ROOT_SOLR, solrConf)
-                .put(HistorianVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS);
+                .put(HistorianVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
+                .put(HistorianVerticle.CONFIG_API_HISTORAIN, grafana);
     }
 
     public static DeploymentOptions getDeploymentOptions(DockerComposeContainer container,
