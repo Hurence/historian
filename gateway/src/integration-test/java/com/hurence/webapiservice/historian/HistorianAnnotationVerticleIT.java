@@ -101,7 +101,6 @@ public class HistorianAnnotationVerticleIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithTypeEqualsAll (VertxTestContext testContext) throws InterruptedException {
-        LOGGER.info("hi");
         JsonObject params = new JsonObject ()
                 .put (FROM_REQUEST_FIELD, 1581651394000L)
                 .put(TO_REQUEST_FIELD, 1581666194000L)
