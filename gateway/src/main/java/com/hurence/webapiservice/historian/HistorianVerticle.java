@@ -43,6 +43,10 @@ public class HistorianVerticle extends AbstractVerticle {
   public static final String CONFIG_HISTORIAN_ADDRESS = "address";
   public static final String CONFIG_LIMIT_NUMBER_OF_POINT = "limit_number_of_point_before_using_pre_agg";
   public static final String CONFIG_LIMIT_NUMBER_OF_CHUNK = "limit_number_of_chunks_before_using_solr_partition";
+  public static final String CONFIG_API_HISTORAIN = "api";
+  public static final String CONFIG_SEARCH_HISTORAIN = "search";
+  public static final String CONFIG_DEFAULT_SIZE_HISTORAIN = "default_size";
+  public static final String CONFIG_GRAFANA_HISTORAIN = "grafana";
   public static final String CONFIG_ROOT_SOLR = "solr";
 
   //solr conf
@@ -67,6 +71,7 @@ public class HistorianVerticle extends AbstractVerticle {
     final String address = config().getString(CONFIG_HISTORIAN_ADDRESS, "historian");
     final long limitNumberOfPoint = config().getLong(CONFIG_LIMIT_NUMBER_OF_POINT, 50000L);
     final long limitNumberOfChunks = config().getLong(CONFIG_LIMIT_NUMBER_OF_CHUNK, 50000L);
+    final JsonObject grafana = config().getJsonObject(CONFIG_API_HISTORAIN).getJsonObject(CONFIG_GRAFANA_HISTORAIN);
     //solr conf
     final JsonObject slrConfig = config().getJsonObject(CONFIG_ROOT_SOLR);
     final int connectionTimeout = slrConfig.getInteger(CONFIG_SOLR_CONNECTION_TIMEOUT, 10000);
@@ -115,7 +120,7 @@ public class HistorianVerticle extends AbstractVerticle {
     historianConf.limitNumberOfChunks = limitNumberOfChunks;
     historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);;
     historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);;
-    historianConf.maxNumberOfTargetReturned = slrConfig.getInteger(MAX_NUMBER_OF_TARGET_RETURNED, 10);
+    historianConf.maxNumberOfTargetReturned = grafana.getJsonObject(CONFIG_SEARCH_HISTORAIN).getInteger(CONFIG_DEFAULT_SIZE_HISTORAIN, 100);
 
     HistorianService.create(vertx, historianConf, ready -> {
       if (ready.succeeded()) {
