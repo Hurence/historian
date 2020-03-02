@@ -48,7 +48,7 @@ public class HistorianSearchVerticleIT {
                             context.completeNow();
                         },
                         t -> context.failNow(t));
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
 
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("id", UUID.randomUUID().toString());
@@ -80,7 +80,7 @@ public class HistorianSearchVerticleIT {
         final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
         client.commit(COLLECTION);
 
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
     @AfterAll
@@ -107,7 +107,7 @@ public class HistorianSearchVerticleIT {
                         assertEquals (5, totalHit);
                         JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
                         LOGGER.info("docs {}",docs);
-                        assertEquals (3, docs.size ());
+                        assertEquals (5, docs.size ());
                         testContext.completeNow ();
                     });
                 })
