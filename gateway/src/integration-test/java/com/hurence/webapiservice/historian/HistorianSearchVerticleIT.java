@@ -107,7 +107,7 @@ public class HistorianSearchVerticleIT {
                         assertEquals (5, totalHit);
                         JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
                         LOGGER.info("docs {}",docs);
-                        assertEquals (3, docs.size ());
+                        assertEquals (5, docs.size ());
                         testContext.completeNow ();
                     });
                 })
