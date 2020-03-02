@@ -14,7 +14,10 @@ import com.hurence.logisland.record.TimeSeriesRecord;
  */
 public class HistorianFields {
     private HistorianFields() {}
+
     //Request fields
+    public static String METRIC_NAME_REQUEST_FIELD = "name";
+    public static String POINTS_REQUEST_FIELD = "points";
     public static String FROM_REQUEST_FIELD = "from";
     public static String TO_REQUEST_FIELD = "to";
     public static String FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD = "fields";
