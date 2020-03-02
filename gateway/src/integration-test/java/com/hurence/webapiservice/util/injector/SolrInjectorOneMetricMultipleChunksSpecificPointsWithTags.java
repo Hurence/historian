@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.util.injector;
 
 import com.hurence.logisland.record.Point;
-import com.hurence.util.modele.ChunkModele;
+import com.hurence.util.modele.ChunkModeleForTest;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,16 +22,16 @@ public class SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags extends A
     }
 
     @Override
-    protected List<ChunkModele> buildListOfChunks() {
-        List<ChunkModele> chunks = IntStream
+    protected List<ChunkModeleForTest> buildListOfChunks() {
+        List<ChunkModeleForTest> chunks = IntStream
                 .range(0, Math.min(tags.size(), pointsByChunk.size()))
                 .mapToObj(this::buildChunk)
                 .collect(Collectors.toList());
         return chunks;
     }
 
-    private ChunkModele buildChunk(int index) {
-        ChunkModele chunk = ChunkModele.fromPoints(metricName, pointsByChunk.get(index));
+    private ChunkModeleForTest buildChunk(int index) {
+        ChunkModeleForTest chunk = ChunkModeleForTest.fromPoints(metricName, pointsByChunk.get(index));
         chunk.tags = tags.get(index);
         return chunk;
     }

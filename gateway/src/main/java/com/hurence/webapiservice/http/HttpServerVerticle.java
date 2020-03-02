@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http;
 
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.grafana.GrafanaApiImpl;
+import com.hurence.webapiservice.http.ingestion.IngestionApiImpl;
 import io.vertx.core.Promise;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpServer;
@@ -36,11 +37,16 @@ public class HttpServerVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
 
 //    router.route().handler(CookieHandler.create());
-        router.route().handler(BodyHandler.create());
-//    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
+        router.route().handler(BodyHandler.create()
+                .setDeleteUploadedFilesOnEnd(true)
+        );
 
+//    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
         Router graphanaApi = new GrafanaApiImpl(historianService).getGraphanaRouter(vertx);
         router.mountSubRouter("/api/grafana", graphanaApi);
+
+        Router importApi = new IngestionApiImpl().getImportRouter(vertx);
+        router.mountSubRouter("/historian-server/ingestion", importApi);
 //    router.get("/doc/similarTo/:id").handler(this::getSimilarDoc);
 
         int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);

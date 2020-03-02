@@ -2,18 +2,16 @@ package com.hurence.webapiservice.timeseries;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.util.modele.ChunkModele;
+import com.hurence.util.modele.ChunkModeleForTest;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.json.simple.JSONArray;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class TimeSeriesExtracterImplTest {
 
@@ -21,7 +19,7 @@ public class TimeSeriesExtracterImplTest {
 
 
     JsonObject getChunk1() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleForTest chunk = ChunkModeleForTest.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477895624866L, 1),
                 new Point(0, 1477916224866L, 2),
                 new Point(0, 1477917224866L, 3)
@@ -31,7 +29,7 @@ public class TimeSeriesExtracterImplTest {
 
 
     JsonObject getChunk2() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleForTest chunk = ChunkModeleForTest.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477916224866L, 4),
                 new Point(0, 1477916224867L, 5),
                 new Point(0, 1477916224868L, 6)

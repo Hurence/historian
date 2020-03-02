@@ -2,9 +2,7 @@ package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
-import com.hurence.webapiservice.http.compaction.LazyCompactor;
-import com.hurence.webapiservice.http.compaction.LazyDocumentLoader;
-import com.hurence.webapiservice.http.compaction.SolrFacetService;
+import com.hurence.webapiservice.http.ingestion.JsonObjectToChunk;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -13,9 +11,6 @@ import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.Query;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -24,7 +19,6 @@ import org.apache.solr.client.solrj.io.stream.SolrStream;
 import org.apache.solr.client.solrj.io.stream.StreamContext;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
-import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
@@ -35,15 +29,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
-import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.*;
-import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.PAGE_SIZE;
 import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
-import static java.lang.String.join;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SolrHistorianServiceImpl implements HistorianService {
 
@@ -264,6 +257,24 @@ public class SolrHistorianServiceImpl implements HistorianService {
         };
         vertx.executeBlocking(getMetricsNameHandler, resultHandler);
         return this;
+    }
+
+    @Override
+    public HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<Void>> resultHandler) {
+//        timeseries.forEach(this::addTimeSerie);
+//        JsonArray metrics = timeseries.get
+//TODO each jsonobject into chunkTimeSerie
+        
+        //buildChunk(metricName, points);
+        return null;
+    }
+
+    private SolrDocument chunkTimeSerie(JsonObject timeserie) {
+        String metricName = timeserie.getString(METRIC_NAME_REQUEST_FIELD);
+        JsonArray points = timeserie.getJsonArray(POINTS_REQUEST_FIELD);
+        JsonObjectToChunk aa = new JsonObjectToChunk();
+        SolrDocument doc = aa.chunkIntoSolrDocument(timeserie);
+        return doc;
     }
 
     /**

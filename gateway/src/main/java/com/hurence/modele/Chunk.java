@@ -1,4 +1,4 @@
-package com.hurence.util.modele;
+package com.hurence.modele;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.converter.common.Compression;
@@ -11,7 +11,7 @@ import java.util.List;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 
-public class ChunkModeleForTest {
+public class Chunk {
     private static int ddcThreshold = 0;
 
     public List<Point> points;
@@ -28,21 +28,21 @@ public class ChunkModeleForTest {
     public String sax;
     public List<String> tags;
 
-public static ChunkModeleForTest fromPoints(String metricName, List<Point> points) {
-    ChunkModeleForTest chunk = new ChunkModeleForTest();
-    chunk.points = points;
-    chunk.compressedPoints = compressPoints(chunk.points);
-    chunk.start = chunk.points.stream().mapToLong(Point::getTimestamp).min().getAsLong();
-    chunk.end = chunk.points.stream().mapToLong(Point::getTimestamp).max().getAsLong();;
-    chunk.sum = chunk.points.stream().mapToDouble(Point::getValue).sum();
-    chunk.avg = chunk.sum / chunk.points.size();
-    chunk.min = chunk.points.stream().mapToDouble(Point::getValue).min().getAsDouble();
-    chunk.max = chunk.points.stream().mapToDouble(Point::getValue).max().getAsDouble();
-    chunk.name = metricName;
-    chunk.sax = "edeebcccdf";
-    chunk.firstValue = points.get(0).getValue();
-    return chunk;
-}
+    public static Chunk fromPoints(String metricName, List<Point> points) {
+        Chunk chunk = new Chunk();
+        chunk.points = points;
+        chunk.compressedPoints = compressPoints(chunk.points);
+        chunk.start = chunk.points.stream().mapToLong(Point::getTimestamp).min().getAsLong();
+        chunk.end = chunk.points.stream().mapToLong(Point::getTimestamp).max().getAsLong();
+        chunk.sum = chunk.points.stream().mapToDouble(Point::getValue).sum();
+        chunk.avg = chunk.sum / chunk.points.size();
+        chunk.min = chunk.points.stream().mapToDouble(Point::getValue).min().getAsDouble();
+        chunk.max = chunk.points.stream().mapToDouble(Point::getValue).max().getAsDouble();
+        chunk.name = metricName;
+        chunk.sax = "edeebcccdf";
+        chunk.firstValue = points.get(0).getValue();
+        return chunk;
+    }
 
     protected static byte[] compressPoints(List<Point> pointsChunk) {
         byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
