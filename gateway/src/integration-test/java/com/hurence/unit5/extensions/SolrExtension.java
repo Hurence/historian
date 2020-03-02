@@ -49,6 +49,8 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
     public final static String ZOOKEEPER_SERVICE_NAME = "zookeeper_1";
     public final static int ZOOKEEPER_PORT = 2181;
     private final static String IMAGE = "solr:8";
+    public final static String SOLR_CONF_TEMPLATE_HISTORIAN = "historian";
+    public final static String SOLR_CONF_TEMPLATE_ANNOTATION = "annotation";
 
     private static final HashSet<Class> INJECTABLE_TYPES = new HashSet<Class>() {
         {
@@ -107,7 +109,8 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
 
         try (SolrZkClient zkClient = new SolrZkClient(zkUrl, 15000)) {
             ZkConfigManager manager = new ZkConfigManager(zkClient);
-            manager.uploadConfigDir(Paths.get(getClass().getResource("/solr/configsets/historian/conf").getFile()), "historian");
+            manager.uploadConfigDir(Paths.get(getClass().getResource("/solr/configsets/historian/conf").getFile()), SOLR_CONF_TEMPLATE_HISTORIAN);
+            manager.uploadConfigDir(Paths.get(getClass().getResource("/solr/configsets/annotation/conf").getFile()), SOLR_CONF_TEMPLATE_ANNOTATION);
         } catch (IOException ex) {
             logger.error("error copying conf of solr" ,ex);
         } catch (Exception ex) {

@@ -53,7 +53,7 @@ public class HistorianVerticleIT {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempA = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_a",
                 Arrays.asList(
@@ -96,7 +96,7 @@ public class HistorianVerticleIT {
                 ));
         injectorTempA.addChunk(injectorTempB);
         injectorTempA.injectChunks(client);
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
     @AfterAll
