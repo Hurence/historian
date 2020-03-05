@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import java.util
 import java.util.Date
 
-import com.hurence.historian.ChunkCompactor.{options, _}
+import com.hurence.historian.ChunkCompactorJob.{options, _}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.common.{DoubleList, LongList}
@@ -21,9 +21,9 @@ import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 
-object ChunkCompactor extends Serializable {
+object ChunkCompactorJob extends Serializable {
 
-  private val logger = LoggerFactory.getLogger(classOf[ChunkCompactor])
+  private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJob])
 
   val DEFAULT_CHUNK_SIZE = 1440
   val DEFAULT_SAX_ALPHABET_SIZE = 7
@@ -59,17 +59,17 @@ object ChunkCompactor extends Serializable {
       .master(options.master)
       .getOrCreate()
 
-    val compactor = new ChunkCompactor(options)
-    val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
-    compactor.removeChunksFromSolR(queryFilter, options)
+    val compactor = new ChunkCompactorJob(options)
 
-    compactor.getMetricNameList(queryFilter, options)
+    compactor.removeChunksFromSolR()
+
+    compactor.getMetricNameList()
 
       .foreach(name => {
 
-        val timeseriesDS = compactor.loadDataFromSolR(spark, options, s"name:$name")
-        val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
-        val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
+        val timeseriesDS = compactor.loadDataFromSolR(spark, s"name:$name")
+        val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS)
+        val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS)
         // TODO remove old logisland chunks
         timeseriesDS.unpersist()
         mergedTimeseriesDS.unpersist()
@@ -115,7 +115,7 @@ object ChunkCompactor extends Serializable {
       .longOpt("chunks-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default ${ChunkCompactor.DEFAULT_CHUNK_SIZE}")
+      .desc(s"num points in a chunk, default ${ChunkCompactorJob.DEFAULT_CHUNK_SIZE}")
       .build()
     )
 
@@ -123,7 +123,7 @@ object ChunkCompactor extends Serializable {
       .longOpt("sax-alphabet-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"size of alphabet, default ${ChunkCompactor.DEFAULT_SAX_ALPHABET_SIZE}")
+      .desc(s"size of alphabet, default ${ChunkCompactorJob.DEFAULT_SAX_ALPHABET_SIZE}")
       .build()
     )
 
@@ -131,7 +131,7 @@ object ChunkCompactor extends Serializable {
       .longOpt("sax-string-length")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default ${ChunkCompactor.DEFAULT_SAX_STRING_LENGTH}")
+      .desc(s"num points in a chunk, default ${ChunkCompactorJob.DEFAULT_SAX_STRING_LENGTH}")
       .build()
     )
 
@@ -156,9 +156,9 @@ object ChunkCompactor extends Serializable {
     val useKerberos = if (line.hasOption("kb")) true else false
     val zkHosts = if (line.hasOption("zk")) line.getOptionValue("zk") else "localhost:2181"
     val collectionName = if (line.hasOption("col")) line.getOptionValue("col") else "historian"
-    val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else ChunkCompactor.DEFAULT_CHUNK_SIZE
-    val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else ChunkCompactor.DEFAULT_SAX_ALPHABET_SIZE
-    val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else ChunkCompactor.DEFAULT_SAX_STRING_LENGTH
+    val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else ChunkCompactorJob.DEFAULT_CHUNK_SIZE
+    val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else ChunkCompactorJob.DEFAULT_SAX_ALPHABET_SIZE
+    val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else ChunkCompactorJob.DEFAULT_SAX_STRING_LENGTH
     val dateTokens = if (line.hasOption("date")) {
       line.getOptionValue("date").split("-")
     } else {
@@ -188,15 +188,16 @@ object ChunkCompactor extends Serializable {
 
 }
 
-class ChunkCompactor(options: ChunkCompactorOptions) extends Serializable {
+class ChunkCompactorJob(options: ChunkCompactorOptions) extends Serializable {
 
   implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+  val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
 
   def this() {
-    this(ChunkCompactor.options)
+    this(ChunkCompactorJob.options)
   }
 
-  def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions, filterQuery: String): Dataset[TimeSeriesRecord] = {
+  def loadDataFromSolR(spark: SparkSession, filterQuery: String): Dataset[TimeSeriesRecord] = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -223,7 +224,7 @@ class ChunkCompactor(options: ChunkCompactorOptions) extends Serializable {
 
   }
 
-  def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord], options: ChunkCompactorOptions) = {
+  def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
 
 
     import timeseriesDS.sparkSession.implicits._
@@ -295,7 +296,7 @@ class ChunkCompactor(options: ChunkCompactorOptions) extends Serializable {
     savedDF
   }
 
-  def getCodeInstallList(queryFilter: String, options: ChunkCompactorOptions) = {
+  def getCodeInstallList() = {
     logger.info(s"first looking for code_install to loop on")
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
@@ -326,7 +327,7 @@ class ChunkCompactor(options: ChunkCompactorOptions) extends Serializable {
     facetResult.getValues.asScala.map(r => r.getName).toList
   }
 
-  def getMetricNameList(queryFilter: String, options: ChunkCompactorOptions) = {
+  def getMetricNameList() = {
     logger.info(s"first looking for name to loop on")
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
@@ -357,7 +358,7 @@ class ChunkCompactor(options: ChunkCompactorOptions) extends Serializable {
     facetResult.getValues.asScala.map(r => r.getName).toList
   }
 
-  def removeChunksFromSolR(queryFilter: String, options: ChunkCompactorOptions) = {
+  def removeChunksFromSolR() = {
 
 
     // Explicit commit to make sure all docs are visible
@@ -372,7 +373,7 @@ class ChunkCompactor(options: ChunkCompactorOptions) extends Serializable {
   }
 
 
-  def mergeChunks(timeseriesDS: Dataset[TimeSeriesRecord], options: ChunkCompactorOptions): Dataset[TimeSeriesRecord] = {
+  def mergeChunks(timeseriesDS: Dataset[TimeSeriesRecord]): Dataset[TimeSeriesRecord] = {
 
     import timeseriesDS.sparkSession.implicits._
 
