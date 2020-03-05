@@ -51,12 +51,10 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
     private final static String IMAGE = "solr:8";
     public final static String SOLR_CONF_TEMPLATE_HISTORIAN = "historian";
     public final static String SOLR_CONF_TEMPLATE_ANNOTATION = "annotation";
-
     private static final HashSet<Class> INJECTABLE_TYPES = new HashSet<Class>() {
         {
             add(SolrClient.class);
             add(DockerComposeContainer.class);
-//            add(GenericContainer.class);
         }
     };
     /**
@@ -81,7 +79,7 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         this.dockerComposeContainer = new DockerComposeContainer(
-                new File(getClass().getResource("/docker-compose-test.yml").getFile())
+                new File(getClass().getResource("/shared-resources/docker-compose-test.yml").getFile())
         )
                 .withExposedService(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT, Wait.forListeningPort())
                 .withExposedService(SOLR1_SERVICE_NAME, SOLR_1_PORT, Wait.forListeningPort());
