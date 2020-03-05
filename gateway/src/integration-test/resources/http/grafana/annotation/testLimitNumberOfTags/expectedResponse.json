@@ -1,0 +1,15 @@
+{
+  "annotations" : [
+    {
+      "time": 1581666194070,
+      "text": "annotation 6",
+      "tags": ["tag3","tag5"]
+    },
+    {
+      "time": 1581662594070,
+      "text": "annotation 5",
+      "tags": ["tag3","tag4"]
+    }
+  ],
+  "total_hit" : 2
+}

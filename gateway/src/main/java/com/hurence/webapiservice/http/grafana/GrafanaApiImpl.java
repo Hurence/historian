@@ -2,9 +2,8 @@ package com.hurence.webapiservice.http.grafana;
 
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.historian.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
+import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.*;
@@ -13,10 +12,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
@@ -142,9 +137,51 @@ public class GrafanaApiImpl implements GrafanaApi {
                 .put(MAX_POINT_BY_METRIC_REQUEST_FIELD, samplingConf.getMaxPoint());
     }
 
+    private JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
+        return new JsonObject()
+                .put(FROM_REQUEST_FIELD, request.getFrom())
+                .put(TO_REQUEST_FIELD, request.getTo())
+                .put(TAGS_REQUEST_FIELD, request.getTagsAsJsonArray())
+                .put(MAX_ANNOTATION_REQUEST_FIELD, request.getMaxAnnotation())
+                .put(MATCH_ANY_REQUEST_FIELD, request.getMatchAny())
+                .put(TYPE_REQUEST_FIELD, request.getType());
+    }
+
     @Override
     public void annotations(RoutingContext context) {
-        throw new UnsupportedOperationException("Not implemented yet");//TODO
+        final AnnotationRequestParam request;
+        try {
+            JsonObject requestBody = context.getBodyAsJson();
+            /*
+                When declaring AnnotationRequestParser as a static variable, There is a problem parsing parallel requests
+                at initialization (did not successfully reproduced this in a unit test).//TODO
+             */
+            request = new AnnotationRequestParser().parseAnnotationRequest(requestBody);
+        } catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
+
+        final JsonObject getAnnotationParams = buildHistorianAnnotationRequest(request);
+
+        service
+                .rxGetAnnotations(getAnnotationParams)
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(annotations -> {
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(annotations.encode());
+
+                }).subscribe();
     }
 
     /**

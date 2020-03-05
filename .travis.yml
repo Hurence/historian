@@ -1,0 +1,37 @@
+sudo: required
+#dist: trusty
+
+cache:
+  directories:
+    - $HOME/.m2/repository
+    - $HOME/.sbt
+    - $HOME/.ivy2
+
+language: java
+
+script:
+  # Build
+  # use travis_wait so it does not time_out after 10 minutes without output (unfortunately that seems to not work)
+  # use -q so there's not too much output for travis (4Mb max)
+  - mvn clean install -Pintegration-tests
+
+jdk:
+  - openjdk8
+
+install:
+  - sudo sysctl -w vm.max_map_count=262144
+
+notifications:
+  email:
+    - bailet.thomas@gmail.com
+    - s.h.gregoire@gmail.com
+    - mathieu.rossignol@hurence.com 
+
+  webhooks:
+    on_success: change  # options: [always|never|change] default: always
+    on_failure: always  # options: [always|never|change] default: always
+    on_start: never     # options: [always|never|change] default: always
+
+
+
+

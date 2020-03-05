@@ -17,18 +17,12 @@ import java.util.List;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
+import static com.hurence.webapiservice.http.grafana.util.DateRequestParserUtil.parseDate;
+
 public class QueryRequestParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRequestParser.class);
-    private SimpleDateFormat dateFormat = createDateFormat();
 
-    private static SimpleDateFormat createDateFormat() {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
-        TimeZone myTimeZone = TimeZone.getTimeZone(ZoneId.of("UTC"));
-        dateFormat.setTimeZone(myTimeZone);
-        dateFormat.setLenient(false);
-        return dateFormat;
-    }
 
     public QueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse requestBody : {}", requestBody);
@@ -67,24 +61,7 @@ public class QueryRequestParser {
         return parseDate(requestBody, "/range/to");
     }
 
-    private long parseDate(JsonObject requestBody, String pointer) {
-        LOGGER.debug("trying to parse pointer {}", pointer);
-        JsonPointer jsonPointer = JsonPointer.from(pointer);
-        Object fromObj = jsonPointer.queryJson(requestBody);
-        if (fromObj instanceof String) {
-            String fromStr = (String) fromObj;
-            try {
-                return dateFormat.parse(fromStr).getTime();
-            } catch (ParseException e) {
-                throw new IllegalArgumentException(
-                        String.format("'%s' json pointer value '%s' could not be parsed as a valid date !",
-                                pointer, fromObj), e);
-            }
-        }
-        throw new IllegalArgumentException(
-                String.format("'%s' json pointer value '%s' is not a string !",
-                        pointer, fromObj));
-    }
+
 
     private String parseFormat(JsonObject requestBody) {
         return requestBody.getString("format");

@@ -40,7 +40,7 @@ public class QueryEndPointFocusOnFilterIT {
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HttpWithHistorianSolrITHelper
                 .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "metric_to_filter",
                 Arrays.asList(
@@ -69,7 +69,7 @@ public class QueryEndPointFocusOnFilterIT {
                         )
                 ));
         injector.injectChunks(client);
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
     }
@@ -106,7 +106,7 @@ public class QueryEndPointFocusOnFilterIT {
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveResponseFromFile(vertx, testContext, requestFile, responseFile);
+        assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
 
 }
