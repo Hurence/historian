@@ -104,9 +104,9 @@
         </dependency>
         <!--        TEST-->
         <dependency>
-            <groupId>org.testcontainers</groupId>
-            <artifactId>testcontainers</artifactId>
-            <version>${test.containers}</version>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>integration-tests</artifactId>
+            <version>${project.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -243,6 +243,35 @@
                         <argument>${main.verticle}</argument>
                     </arguments>
                 </configuration>
+            </plugin>
+            <!--
+
+            we need to copy a resource from integration-tests so that solr can properly be initialized.
+            This way solr configuration in centralized in integration-tests module. Any module that needs
+            the historian solr for test should add this plugin to his pom.
+            -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources-for-integration-tests</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>src/integration-test/resources/shared-resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../integration-tests/src/main/resources/shared-resources</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>
