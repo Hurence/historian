@@ -15,7 +15,7 @@
         <main.verticle>com.hurence.webapiservice.WebApiServiceMainVerticle</main.verticle>
         <vertx.version>3.8.1</vertx.version>
         <vertx-swagger-router.version>1.5.0</vertx-swagger-router.version>
-        <solr.version>8.4.1</solr.version>
+        <solr.version>8.2.0</solr.version>
         <test.containers>1.12.2</test.containers>
     </properties>
 
