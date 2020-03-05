@@ -69,6 +69,9 @@ mvn clean install -Pbuild-integration-tests
 
 to build integration tests source class ! Then you can run the test in your IDE.
 
+# CONTRIBUTE
+
+Please read DEVELOPMENT.md
 
 #TROUBLESHOOT
 

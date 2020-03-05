@@ -16,7 +16,7 @@ copy paste jar and conf file
 
 ```shell script
 cd ./docker
-cp ../target/logisland-gateway-historian-1.2.0-fat.jar .
+cp ../target/historian-gateway-1.3.0-fat.jar .
 cp ../target/classes/config.json .
 ```  
   
