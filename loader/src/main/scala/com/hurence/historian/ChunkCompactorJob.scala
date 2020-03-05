@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import java.util
 import java.util.Date
 
-import com.hurence.historian.ChunkCompactorJob.{options, _}
+import com.hurence.historian.ChunkCompactorJob.{ChunkCompactorOptions, DEFAULT_CHUNK_SIZE, DEFAULT_SAX_ALPHABET_SIZE, DEFAULT_SAX_STRING_LENGTH}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.common.{DoubleList, LongList}
@@ -42,7 +42,7 @@ object ChunkCompactorJob extends Serializable {
                                    day: Int)
 
 
-  val options = ChunkCompactorOptions("local[*]", "zookeeper:2181", "historian", "", 1440, 7, 100, false, 2019, 6, 19)
+  val defaultOptions = ChunkCompactorOptions("local[*]", "zookeeper:2181", "historian", "", 1440, 7, 100, false, 2019, 6, 19)
 
   /**
    *
@@ -190,11 +190,13 @@ object ChunkCompactorJob extends Serializable {
 
 class ChunkCompactorJob(options: ChunkCompactorOptions) extends Serializable {
 
+  private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJob])
+
   implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
   val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
 
   def this() {
-    this(ChunkCompactorJob.options)
+    this(ChunkCompactorJob.defaultOptions)
   }
 
   def loadDataFromSolR(spark: SparkSession, filterQuery: String): Dataset[TimeSeriesRecord] = {
