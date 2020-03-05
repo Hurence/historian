@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat
 import java.util
 import java.util.Date
 
+import com.hurence.historian.ChunkCompactor.{options, _}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.common.{DoubleList, LongList}
@@ -19,16 +20,14 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
-class ChunkCompactor extends Serializable {
+
+object ChunkCompactor extends Serializable {
 
   private val logger = LoggerFactory.getLogger(classOf[ChunkCompactor])
 
   val DEFAULT_CHUNK_SIZE = 1440
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 100
-
-
-  implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
 
   case class ChunkCompactorOptions(master: String,
                                    zkHosts: String,
@@ -42,7 +41,44 @@ class ChunkCompactor extends Serializable {
                                    month: Int,
                                    day: Int)
 
+
   val options = ChunkCompactorOptions("local[*]", "zookeeper:2181", "historian", "", 1440, 7, 100, false, 2019, 6, 19)
+
+  /**
+   *
+   *
+   * @param args
+   */
+  def main(args: Array[String]): Unit = {
+    // get arguments
+    val options = parseCommandLine(args)
+
+    // setup spark session
+    val spark = SparkSession.builder
+      .appName(options.appName)
+      .master(options.master)
+      .getOrCreate()
+
+    val compactor = new ChunkCompactor(options)
+    val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
+    compactor.removeChunksFromSolR(queryFilter, options)
+
+    compactor.getMetricNameList(queryFilter, options)
+
+      .foreach(name => {
+
+        val timeseriesDS = compactor.loadDataFromSolR(spark, options, s"name:$name")
+        val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
+        val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
+        // TODO remove old logisland chunks
+        timeseriesDS.unpersist()
+        mergedTimeseriesDS.unpersist()
+        savedDS.unpersist()
+      })
+
+
+    spark.close()
+  }
 
   def parseCommandLine(args: Array[String]): ChunkCompactorOptions = {
 
@@ -79,7 +115,7 @@ class ChunkCompactor extends Serializable {
       .longOpt("chunks-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default $DEFAULT_CHUNK_SIZE")
+      .desc(s"num points in a chunk, default ${ChunkCompactor.DEFAULT_CHUNK_SIZE}")
       .build()
     )
 
@@ -87,7 +123,7 @@ class ChunkCompactor extends Serializable {
       .longOpt("sax-alphabet-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"size of alphabet, default $DEFAULT_SAX_ALPHABET_SIZE")
+      .desc(s"size of alphabet, default ${ChunkCompactor.DEFAULT_SAX_ALPHABET_SIZE}")
       .build()
     )
 
@@ -95,7 +131,7 @@ class ChunkCompactor extends Serializable {
       .longOpt("sax-string-length")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
+      .desc(s"num points in a chunk, default ${ChunkCompactor.DEFAULT_SAX_STRING_LENGTH}")
       .build()
     )
 
@@ -120,9 +156,9 @@ class ChunkCompactor extends Serializable {
     val useKerberos = if (line.hasOption("kb")) true else false
     val zkHosts = if (line.hasOption("zk")) line.getOptionValue("zk") else "localhost:2181"
     val collectionName = if (line.hasOption("col")) line.getOptionValue("col") else "historian"
-    val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else DEFAULT_CHUNK_SIZE
-    val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else DEFAULT_SAX_ALPHABET_SIZE
-    val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else DEFAULT_SAX_STRING_LENGTH
+    val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else ChunkCompactor.DEFAULT_CHUNK_SIZE
+    val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else ChunkCompactor.DEFAULT_SAX_ALPHABET_SIZE
+    val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else ChunkCompactor.DEFAULT_SAX_STRING_LENGTH
     val dateTokens = if (line.hasOption("date")) {
       line.getOptionValue("date").split("-")
     } else {
@@ -150,6 +186,15 @@ class ChunkCompactor extends Serializable {
     opts
   }
 
+}
+
+class ChunkCompactor(options: ChunkCompactorOptions) extends Serializable {
+
+  implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+
+  def this() {
+    this(ChunkCompactor.options)
+  }
 
   def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions, filterQuery: String): Dataset[TimeSeriesRecord] = {
 
@@ -456,47 +501,6 @@ class ChunkCompactor extends Serializable {
       }).toDS()
 
 
-  }
-
-}
-
-object ChunkCompactor {
-  /**
-    *
-    *
-    * @param args
-    */
-  def main(args: Array[String]): Unit = {
-
-    val compactor = new ChunkCompactor()
-
-    // get arguments
-    val options = compactor.parseCommandLine(args)
-    val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
-
-    // setup spark session
-    val spark = SparkSession.builder
-      .appName(options.appName)
-      .master(options.master)
-      .getOrCreate()
-
-    compactor.removeChunksFromSolR(queryFilter, options)
-
-    compactor.getMetricNameList(queryFilter, options)
-
-      .foreach(name => {
-
-        val timeseriesDS = compactor.loadDataFromSolR(spark, options, s"name:$name")
-        val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
-        val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
-        // TODO remove old logisland chunks
-        timeseriesDS.unpersist()
-        mergedTimeseriesDS.unpersist()
-        savedDS.unpersist()
-      })
-
-
-    spark.close()
   }
 
 }
