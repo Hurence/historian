@@ -34,12 +34,16 @@
     <dependencies>
 
 
-        <!--        LOGISLAND-->
+        <!-- historian modules -->
         <dependency>
             <groupId>com.hurence.historian</groupId>
             <artifactId>timeseries</artifactId>
             <version>${project.version}</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>historian-modele</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!--        VERTX-->
         <dependency>
@@ -67,13 +71,11 @@
             <groupId>io.vertx</groupId>
             <artifactId>vertx-rx-java2</artifactId>
             <version>3.8.1</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-rx-java2-gen</artifactId>
             <version>${vertx.version}</version>
-            <scope>compile</scope>
         </dependency>
         <!--SOLR IMPLEMENTATION OF HISTORIAN DEPENDENCIES-->
         <dependency>
@@ -87,20 +89,27 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${org.slf4j.version}</version>
-            <scope>compile</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
             <version>${org.slf4j.version}</version>
-            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
-            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.lucene</groupId>
+            <artifactId>lucene-core</artifactId>
+            <version>${solr.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-core</artifactId>
+            <version>${solr.version}</version>
         </dependency>
         <!--        TEST-->
         <dependency>
@@ -126,18 +135,6 @@
             <artifactId>vertx-web-client</artifactId>
             <version>${vertx.version}</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.lucene</groupId>
-            <artifactId>lucene-core</artifactId>
-            <version>${solr.version}</version>
-            <scope>compile</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.solr</groupId>
-            <artifactId>solr-core</artifactId>
-            <version>${solr.version}</version>
-            <scope>compile</scope>
         </dependency>
     </dependencies>
 

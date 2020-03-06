@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.webapiservice.historian.HistorianFields;
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

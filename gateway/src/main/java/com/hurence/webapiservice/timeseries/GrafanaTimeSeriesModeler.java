@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
 import com.hurence.logisland.record.Point;
-import com.hurence.webapiservice.http.grafana.GrafanaApiImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
@@ -12,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 
 public class GrafanaTimeSeriesModeler implements TimeSeriesModeler {
     private static String TIMESERIE_NAME = "target";
