@@ -2,7 +2,7 @@ package com.hurence.historian
 
 import com.hurence.historian.ChunkCompactorJob.ChunkCompactorOptions
 import com.hurence.logisland.record.TimeSeriesRecord
-import com.hurence.unit5.extensions.SolrExtension
+import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
 import org.apache.solr.client.solrj.SolrClient
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.junit.jupiter.api.Test
@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith
 import org.slf4j.{Logger, LoggerFactory}
 import org.junit.jupiter.api.Assertions._
 
-@ExtendWith(Array(classOf[SolrExtension]))
+@ExtendWith(Array(classOf[SolrExtension], classOf[SparkExtension]))
 class ChunkCompactorJobTest {
     private val LOGGER = LoggerFactory.getLogger(classOf[ChunkCompactorJobTest])
 
