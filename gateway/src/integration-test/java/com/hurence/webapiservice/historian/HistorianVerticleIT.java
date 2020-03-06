@@ -3,7 +3,7 @@ package com.hurence.webapiservice.historian;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
-import com.hurence.webapiservice.util.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

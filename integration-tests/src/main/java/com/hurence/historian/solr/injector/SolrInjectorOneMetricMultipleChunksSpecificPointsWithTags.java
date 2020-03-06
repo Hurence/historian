@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.util.injector;
+package com.hurence.historian.solr.injector;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.historian.modele.ChunkModele;
