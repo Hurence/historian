@@ -27,26 +27,26 @@ class ChunkCompactorJobTest {
         assertTrue(true)
     }
 
-//    @Test
-//    def testLoading(sparkSession: SparkSession) = {
+    @Test
+    def testLoading(sparkSession: SparkSession) = {
 //        loadedFromSolr = compactor.loadDataFromSolR(sparkSession, s"name:*")
-//        //TODO test it
-//        assertTrue(true)
-//    }
+        //TODO test it
+        assertTrue(true)
+    }
 
-//    @Test
-//    def testChunking() = {
+    @Test
+    def testChunking() = {
 //        chunked = compactor.mergeChunks(loadedFromSolr)
-//        //TODO test it
-//        assertTrue(true)
-//    }
-//
-//    @Test
-//    def testTransformingAndSavingIntoSolr() = {
+        //TODO test it
+        assertTrue(true)
+    }
+
+    @Test
+    def testTransformingAndSavingIntoSolr() = {
 //        val savedDf = compactor.saveNewChunksToSolR(chunked)
-//        //TODO test it
-//        assertTrue(true)
-//    }
+        //TODO test it
+        assertTrue(true)
+    }
 }
 
 
