@@ -13,10 +13,8 @@
 
     <properties>
         <spark.version>2.3.2.3.1.4.0-315</spark.version>
-        <scala.version>2.11.12</scala.version>
-        <scala.compat.version>2.11.12</scala.compat.version>
         <scala.binary.version>2.11</scala.binary.version>
-        <solr.version>8.2.0</solr.version>
+        <solr.version>8.1.0</solr.version>
         <test.containers>1.12.2</test.containers>
     </properties>
 
