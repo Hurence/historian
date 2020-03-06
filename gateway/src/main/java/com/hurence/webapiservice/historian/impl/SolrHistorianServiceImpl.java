@@ -240,14 +240,13 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 List<GroupCommand> results = solrDocumentsGroup.getValues();
                 JsonArray metrics = new JsonArray();
                 int totalMetricsFound = 0;
-                int totalNamesFound = 0;
+                int totalMetricsReturned = 0;
                 for (GroupCommand gc : results) {
-                    totalMetricsFound = gc.getMatches();
-                    totalNamesFound = gc.getValues().size();
+                    totalMetricsFound = gc.getNGroups();
+                    totalMetricsReturned = gc.getValues().size();
                     List<Group> groups = gc.getValues();
                     for(Group group : groups) {
                         group.getGroupValue();
-                        LOGGER.debug(group.getGroupValue());
                         metrics.add(group.getGroupValue());
                         }
                     }
@@ -255,7 +254,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 LOGGER.debug("metrics :: "+ metrics);
                 p.complete(new JsonObject()
                         .put(RESPONSE_TOTAL_METRICS_FOUND, totalMetricsFound)
-                        .put(RESPONSE_TOTAL_METRICS_RETURNED, totalNamesFound)
+                        .put(RESPONSE_TOTAL_METRICS_RETURNED, totalMetricsReturned)
                         .put(RESPONSE_METRICS, metrics)
                 );
             } catch (IOException | SolrServerException e) {
