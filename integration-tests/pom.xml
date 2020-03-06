@@ -29,6 +29,17 @@
     </repositories>
 
     <dependencies>
+        <!-- HISTORIAN modules -->
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>historian-modele</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>timeseries</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
@@ -65,22 +76,11 @@
 <!--            <scope>provided</scope>-->
 <!--        </dependency>-->
         <!--Timeseries-->
-        <dependency>
-            <groupId>com.hurence.historian</groupId>
-            <artifactId>timeseries</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!--        VERTX-->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
             <version>${vertx.version}</version>
-        </dependency>
-        <!-- HISTORIAN modele -->
-        <dependency>
-            <groupId>com.hurence.historian</groupId>
-            <artifactId>historian-modele</artifactId>
-            <version>${project.version}</version>
         </dependency>
         <!--    To use junit5 framework -->
         <dependency>
