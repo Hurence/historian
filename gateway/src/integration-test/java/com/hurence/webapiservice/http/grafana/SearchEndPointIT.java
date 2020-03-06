@@ -35,7 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_METRICS;
+import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -107,8 +107,8 @@ public class SearchEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSearchWithDefaultSize(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
-                "/http/grafana/search/test1/request.json",
-                "/http/grafana/search/test1/expectedResponse.json");
+                "/http/grafana/search/testWithLimit/request.json",
+                "/http/grafana/search/testWithLimit/expectedResponse.json");
     }
 
     public void assertRequestGiveObjectResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
@@ -135,6 +135,8 @@ public class SearchEndPointIT {
                                 expectedSet.add(object);
                             }
                             assertEquals(expectedSet, set);
+                            assertEquals(expectedBody.getInteger(RESPONSE_TOTAL_METRICS_FOUND), body.getInteger(RESPONSE_TOTAL_METRICS_FOUND));
+                            assertEquals(expectedBody.getInteger(RESPONSE_TOTAL_METRICS_RETURNED), body.getInteger(RESPONSE_TOTAL_METRICS_RETURNED));
                             testContext.completeNow();
                         });
                     }));
@@ -152,7 +154,11 @@ public class SearchEndPointIT {
                         JsonObject body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                         JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
-                        assertEquals(expectedBody.size(), body.size());
+                        JsonArray metrics = body.getJsonArray(RESPONSE_METRICS);
+                        JsonArray expectedMetrics = expectedBody.getJsonArray(RESPONSE_METRICS);
+                        assertEquals(expectedMetrics.size(), metrics.size());
+                        assertEquals(expectedBody.getInteger(RESPONSE_TOTAL_METRICS_FOUND), body.getInteger(RESPONSE_TOTAL_METRICS_FOUND));
+                        assertEquals(expectedBody.getInteger(RESPONSE_TOTAL_METRICS_RETURNED), body.getInteger(RESPONSE_TOTAL_METRICS_RETURNED));
                         testContext.completeNow();
                     });
                 }));
