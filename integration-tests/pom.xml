@@ -12,9 +12,21 @@
     <packaging>jar</packaging>
 
     <properties>
+        <spark.version>2.3.2.3.1.4.0-315</spark.version>
+        <scala.version>2.11.12</scala.version>
+        <scala.compat.version>2.11.12</scala.compat.version>
+        <scala.binary.version>2.11</scala.binary.version>
         <solr.version>8.2.0</solr.version>
         <test.containers>1.12.2</test.containers>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>repo.hortonworks.com</id>
+            <name>hdp</name>
+            <url>https://repo.hortonworks.com/content/repositories/releases/</url>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -32,6 +44,43 @@
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
             <version>${solr.version}</version>
+        </dependency>
+        <!--SPARK-->
+<!--        <dependency>-->
+<!--            <groupId>org.apache.spark</groupId>-->
+<!--            <artifactId>spark-core_${scala.binary.version}</artifactId>-->
+<!--            <version>${spark.version}</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>org.apache.spark</groupId>
+            <artifactId>spark-sql_${scala.binary.version}</artifactId>
+            <version>${spark.version}</version>
+            <scope>provided</scope>
+        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.apache.spark</groupId>-->
+<!--            <artifactId>spark-sql-kafka-0-10_2.11</artifactId>-->
+<!--            <version>${spark.version}</version>-->
+<!--            <scope>provided</scope>-->
+<!--        </dependency>-->
+        <!--Timeseries-->
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>timeseries</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!--        VERTX-->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+        <!-- HISTORIAN modele -->
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>historian-modele</artifactId>
+            <version>${project.version}</version>
         </dependency>
         <!--    To use junit5 framework -->
         <dependency>

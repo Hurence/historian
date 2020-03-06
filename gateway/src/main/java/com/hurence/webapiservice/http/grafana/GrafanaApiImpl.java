@@ -13,7 +13,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.Codes.NOT_FOUND;
 

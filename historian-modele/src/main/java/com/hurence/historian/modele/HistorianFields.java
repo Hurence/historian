@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.historian;
+package com.hurence.historian.modele;
 
 import com.hurence.logisland.record.FieldDictionary;
 import com.hurence.logisland.record.TimeSeriesRecord;

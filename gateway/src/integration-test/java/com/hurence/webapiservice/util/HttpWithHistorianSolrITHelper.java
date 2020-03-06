@@ -83,7 +83,7 @@ public abstract class HttpWithHistorianSolrITHelper {
                 t -> context.failNow(t));
     }
 
-    private static Single<String> deployHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, JsonObject historianConf) {
+    public static Single<String> deployHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, JsonObject historianConf) {
         JsonObject httpConf = new JsonObject()
                 .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, PORT)
                 .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
