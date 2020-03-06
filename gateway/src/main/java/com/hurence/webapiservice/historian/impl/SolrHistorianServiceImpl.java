@@ -2,9 +2,6 @@ package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
-import com.hurence.webapiservice.http.compaction.LazyCompactor;
-import com.hurence.webapiservice.http.compaction.LazyDocumentLoader;
-import com.hurence.webapiservice.http.compaction.SolrFacetService;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -13,9 +10,6 @@ import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.lucene.search.MatchAllDocsQuery;
-import org.apache.lucene.search.Query;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -38,11 +32,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
-import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.*;
-import static com.hurence.webapiservice.http.compaction.CompactionHandlerParams.PAGE_SIZE;
 import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 import static java.lang.String.join;
-import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class SolrHistorianServiceImpl implements HistorianService {
 
@@ -261,10 +252,10 @@ public class SolrHistorianServiceImpl implements HistorianService {
                         }
                     }
                 LOGGER.debug("Found " + response.getRequestUrl() + response + " result : " + metrics);
-                LOGGER.debug("mertics :: "+ metrics);
+                LOGGER.debug("metrics :: "+ metrics);
                 p.complete(new JsonObject()
                         .put(RESPONSE_TOTAL_METRICS_FOUND, totalMetricsFound)
-                        .put(RESPONSE_TOTAL_NAMES_FOUND, totalNamesFound)
+                        .put(RESPONSE_TOTAL_METRICS_RETURNED, totalNamesFound)
                         .put(RESPONSE_METRICS, metrics)
                 );
             } catch (IOException | SolrServerException e) {

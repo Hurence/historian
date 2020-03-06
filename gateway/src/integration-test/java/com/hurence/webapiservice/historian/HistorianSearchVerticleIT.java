@@ -107,7 +107,7 @@ public class HistorianSearchVerticleIT {
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (5, rsp.getLong(RESPONSE_TOTAL_NAMES_FOUND));
+                        assertEquals (5, rsp.getLong(RESPONSE_TOTAL_METRICS_RETURNED));
                         assertEquals (6, rsp.getLong(RESPONSE_TOTAL_METRICS_FOUND));
                         JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
                         LOGGER.info("docs {}",docs);

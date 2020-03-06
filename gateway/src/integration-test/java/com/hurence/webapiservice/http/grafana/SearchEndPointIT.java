@@ -8,6 +8,7 @@ import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import com.hurence.webapiservice.util.injector.SolrInjector;
 import com.hurence.webapiservice.util.injector.SolrInjectorDifferentMetricNames;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.Timeout;
@@ -34,6 +35,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_METRICS;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -114,20 +116,22 @@ public class SearchEndPointIT {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
-                .as(BodyCodec.jsonArray()) // why JsonArray works ?
+                .as(BodyCodec.jsonObject())
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                         testContext.verify(() -> {
                             assertEquals(200, rsp.statusCode());
                             assertEquals("OK", rsp.statusMessage());
-                            JsonArray body = rsp.body();
+                            JsonObject body = rsp.body();
                             Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                            JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
+                            JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
+                            JsonArray metrics = body.getJsonArray(RESPONSE_METRICS);
+                            JsonArray expectedMetrics = expectedBody.getJsonArray(RESPONSE_METRICS);
                             Set expectedSet = new HashSet();
                             Set set = new HashSet();
-                            for (Object object : body) {
+                            for (Object object : metrics) {
                                 set.add(object);
                             }
-                            for(Object object : expectedBody){
+                            for(Object object : expectedMetrics){
                                 expectedSet.add(object);
                             }
                             assertEquals(expectedSet, set);
@@ -140,14 +144,14 @@ public class SearchEndPointIT {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
-                .as(BodyCodec.jsonArray())
+                .as(BodyCodec.jsonObject())
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());
-                        JsonArray body = rsp.body();
+                        JsonObject body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonArray expectedBody = new JsonArray(fileContent.getDelegate());
+                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
                         assertEquals(expectedBody.size(), body.size());
                         testContext.completeNow();
                     });
