@@ -472,6 +472,10 @@
   <field name="chunk_start" type="plong"/>
   <field name="chunk_trend" type="boolean"/>
   <field name="chunk_value" type="string"/>
+  <field name="chunk_origin" type="string"/>
+  <field name="year" type="pint"/>
+  <field name="month" type="pint"/>
+  <field name="day" type="pint"/>
   <field name="chunk_window_ms" type="plong"/>
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
   <field name="tagname" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
