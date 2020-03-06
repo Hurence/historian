@@ -32,8 +32,8 @@ public class HistorianFields {
     public static String RESPONSE_CHUNKS = "chunks";
     public static String RESPONSE_METRICS = "metrics";
     public static String RESPONSE_TOTAL_FOUND = "total_hit";
-    public static String RESPONSE_TOTAL_NAMES_FOUND = "total_names";
-    public static String RESPONSE_TOTAL_METRICS_FOUND = "total_metrics";
+    public static String RESPONSE_TOTAL_METRICS_RETURNED = "total_returned";
+    public static String RESPONSE_TOTAL_METRICS_FOUND = "total";
     public static String RESPONSE_METRIC_NAME_FIELD = "name";
     public static String RESPONSE_TAG_NAME_FIELD = "tagname";
     public static String RESPONSE_CHUNK_ID_FIELD = "id";
