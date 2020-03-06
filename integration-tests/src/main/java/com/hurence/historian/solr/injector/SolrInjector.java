@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.util.injector;
+package com.hurence.historian.solr.injector;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;

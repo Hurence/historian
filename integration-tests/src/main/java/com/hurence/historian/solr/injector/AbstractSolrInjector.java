@@ -1,10 +1,10 @@
-package com.hurence.webapiservice.util.injector;
+package com.hurence.historian.solr.injector;
 
+import com.hurence.historian.modele.ChunkModele;
+import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.converter.common.Compression;
 import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
-import com.hurence.historian.modele.ChunkModele;
-import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.UpdateResponse;
@@ -17,7 +17,7 @@ import java.util.List;
 public abstract class AbstractSolrInjector implements SolrInjector {
 
     protected int ddcThreshold = 0;
-    private static String COLLECTION = HistorianSolrITHelper.COLLECTION_HISTORIAN;
+    private static String COLLECTION = SolrITHelper.COLLECTION_HISTORIAN;
     private List<ChunkModele> extraCustomChunks = new ArrayList<>();
 
     protected byte[] compressPoints(List<Point> pointsChunk) {
