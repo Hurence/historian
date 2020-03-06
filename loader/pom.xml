@@ -14,9 +14,10 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
         <spark.version>2.3.2.3.1.4.0-315</spark.version>
+        <spark.solr>3.6.6</spark.solr>
         <scala.version>2.11.12</scala.version>
-        <scala.compat.version>2.11.12</scala.compat.version>
         <scala.binary.version>2.11</scala.binary.version>
+        <jackson.version>2.9.10</jackson.version>
     </properties>
 
 
@@ -45,16 +46,26 @@
                 <artifactId>guava</artifactId>
                 <version>28.2-jre</version>
             </dependency>
-            <dependency>
-                <groupId>org.scala-lang</groupId>
-                <artifactId>scala-library</artifactId>
-                <version>${scala.version}</version>
-            </dependency>
             <!--        <dependency>-->
             <!--            <groupId>com.google.guava</groupId>-->
             <!--            <artifactId>guava</artifactId>-->
             <!--            <version>11.0.2</version>-->
             <!--        </dependency>-->
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+<!--            <dependency>-->
+<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
+<!--                <artifactId>jackson-databind</artifactId>-->
+<!--                <version>${jackson.version}</version>-->
+<!--            </dependency>-->
+<!--            <dependency>-->
+<!--                <groupId>com.fasterxml.jackson.module</groupId>-->
+<!--                <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>-->
+<!--                <version>${jackson.version}</version>-->
+<!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -63,7 +74,6 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
-
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.binary.version}</artifactId>
@@ -92,7 +102,7 @@
         <dependency>
             <groupId>com.lucidworks.spark</groupId>
             <artifactId>spark-solr</artifactId>
-            <version>3.5.8</version>
+            <version>${spark.solr}</version>
             <exclusions>
                 <exclusion>
                     <!-- use the jackson libraries specified by solr dependencies -->
