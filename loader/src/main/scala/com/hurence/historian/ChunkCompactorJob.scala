@@ -5,7 +5,7 @@ import java.text.SimpleDateFormat
 import java.util
 import java.util.Date
 
-import com.hurence.historian.ChunkCompactorJob.{ChunkCompactorOptions, DEFAULT_CHUNK_SIZE, DEFAULT_SAX_ALPHABET_SIZE, DEFAULT_SAX_STRING_LENGTH}
+import com.hurence.historian.ChunkCompactorJob.{ChunkCompactorConf, ChunkCompactorJobOptions, DEFAULT_CHUNK_SIZE, DEFAULT_SAX_ALPHABET_SIZE, DEFAULT_SAX_STRING_LENGTH}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.common.{DoubleList, LongList}
@@ -29,20 +29,22 @@ object ChunkCompactorJob extends Serializable {
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 100
 
-  case class ChunkCompactorOptions(master: String,
-                                   zkHosts: String,
-                                   collectionName: String,
-                                   appName: String,
-                                   chunkSize: Int,
-                                   saxAlphabetSize: Int,
-                                   saxStringLength: Int,
-                                   useKerberos: Boolean,
-                                   year: Int,
-                                   month: Int,
-                                   day: Int)
+  case class ChunkCompactorConf(zkHosts: String,
+                                collectionName: String,
+                                chunkSize: Int,
+                                saxAlphabetSize: Int,
+                                saxStringLength: Int,
+                                year: Int,
+                                month: Int,
+                                day: Int)
 
+  case class ChunkCompactorJobOptions(master: String,
+                                      appName: String,
+                                      useKerberos: Boolean,
+                                      compactorConf: ChunkCompactorConf)
 
-  val defaultOptions = ChunkCompactorOptions("local[*]", "zookeeper:2181", "historian", "", 1440, 7, 100, false, 2019, 6, 19)
+  val defaultConf = ChunkCompactorConf("zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
+  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, defaultConf)
 
   /**
    *
@@ -59,7 +61,7 @@ object ChunkCompactorJob extends Serializable {
       .master(options.master)
       .getOrCreate()
 
-    val compactor = new ChunkCompactorJob(options)
+    val compactor = new ChunkCompactorJob(options.compactorConf)
 
     compactor.removeChunksFromSolR()
 
@@ -80,7 +82,7 @@ object ChunkCompactorJob extends Serializable {
     spark.close()
   }
 
-  def parseCommandLine(args: Array[String]): ChunkCompactorOptions = {
+  def parseCommandLine(args: Array[String]): ChunkCompactorJobOptions = {
 
     val parser = new DefaultParser
     val options = new Options
@@ -169,17 +171,20 @@ object ChunkCompactorJob extends Serializable {
     }
 
     // build the option handler
-    val opts = ChunkCompactorOptions(sparkMaster,
-      zkHosts,
-      collectionName,
+    val opts = ChunkCompactorJobOptions(sparkMaster,
       "ChunkCompactor",
-      chunksSize,
-      alphabetSize,
-      saxStringLength,
       useKerberos,
-      dateTokens(0).toInt,
-      dateTokens(1).toInt,
-      dateTokens(2).toInt)
+      ChunkCompactorConf(
+        zkHosts,
+        collectionName,
+        chunksSize,
+        alphabetSize,
+        saxStringLength,
+        dateTokens(0).toInt,
+        dateTokens(1).toInt,
+        dateTokens(2).toInt
+      )
+    )
 
 
     logger.info(s"Command line options : $opts")
@@ -188,7 +193,7 @@ object ChunkCompactorJob extends Serializable {
 
 }
 
-class ChunkCompactorJob(options: ChunkCompactorOptions) extends Serializable {
+class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
 
   private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJob])
 
@@ -196,7 +201,7 @@ class ChunkCompactorJob(options: ChunkCompactorOptions) extends Serializable {
   val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
 
   def this() {
-    this(ChunkCompactorJob.defaultOptions)
+    this(ChunkCompactorJob.defaultConf)
   }
 
   def loadDataFromSolR(spark: SparkSession, filterQuery: String): Dataset[TimeSeriesRecord] = {

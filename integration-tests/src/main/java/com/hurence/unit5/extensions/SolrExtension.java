@@ -86,14 +86,10 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
 
         this.dockerComposeContainer.start();
 
-        String zkUrl = dockerComposeContainer.getServiceHost(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT)
-                + ":" +
-                dockerComposeContainer.getServicePort(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT);
+        String zkUrl = getZkUrl(dockerComposeContainer);
         logger.info("url of zookeeper http://" + zkUrl);
 
-        String slrUrl = dockerComposeContainer.getServiceHost(SOLR1_SERVICE_NAME, SOLR_1_PORT)
-                + ":" +
-                dockerComposeContainer.getServicePort(SOLR1_SERVICE_NAME, SOLR_1_PORT);
+        String slrUrl = getSolr1Url(dockerComposeContainer);
         logger.info("url of solr http://" + slrUrl);
 
         CloudSolrClient.Builder clientBuilder = new CloudSolrClient.Builder(
@@ -145,5 +141,17 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
 
     private static Logger getLogger() {
         return logger;
+    }
+
+    public static String getZkUrl(DockerComposeContainer dockerComposeContainer) {
+        return dockerComposeContainer.getServiceHost(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT)
+                + ":" +
+                dockerComposeContainer.getServicePort(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT);
+    }
+
+    public static String getSolr1Url(DockerComposeContainer dockerComposeContainer) {
+        return dockerComposeContainer.getServiceHost(SOLR1_SERVICE_NAME, SOLR_1_PORT)
+                + ":" +
+                dockerComposeContainer.getServicePort(SOLR1_SERVICE_NAME, SOLR_1_PORT);
     }
 }
