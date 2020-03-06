@@ -36,6 +36,27 @@
            </pluginRepository>
          </pluginRepositories>
        -->
+    <dependencyManagement>
+        <dependencies>
+<!--  This force the version of guava to use in transitive dependencies when this is not hard coded
+(this is the case for spark-solr)-->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>28.2-jre</version>
+            </dependency>
+            <dependency>
+                <groupId>org.scala-lang</groupId>
+                <artifactId>scala-library</artifactId>
+                <version>${scala.version}</version>
+            </dependency>
+            <!--        <dependency>-->
+            <!--            <groupId>com.google.guava</groupId>-->
+            <!--            <artifactId>guava</artifactId>-->
+            <!--            <version>11.0.2</version>-->
+            <!--        </dependency>-->
+        </dependencies>
+    </dependencyManagement>
     <dependencies>
         <dependency>
             <groupId>org.scala-lang</groupId>
@@ -66,12 +87,6 @@
             <groupId>com.hurence.historian</groupId>
             <artifactId>timeseries</artifactId>
             <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>11.0.2</version>
         </dependency>
 
         <dependency>
