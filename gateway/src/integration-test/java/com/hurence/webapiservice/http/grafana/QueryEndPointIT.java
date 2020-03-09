@@ -101,7 +101,7 @@ public class QueryEndPointIT {
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/export/csv");
     }
 
     @AfterAll

@@ -16,6 +16,9 @@ public interface GrafanaApi {
         router.post("/query")
                 .produces("application/json")
                 .handler(this::query);
+        router.post("/export/csv")
+                .produces("text/plain")
+                .handler(this::export);
         router.post("/annotations").handler(this::annotations);
         router.post("/tag-keys").handler(this::tagKeys);
         router.post("/tag-values").handler(this::tagValues);
@@ -72,4 +75,10 @@ public interface GrafanaApi {
      * @param context
      */
     void tagValues(RoutingContext context);
+
+    /**
+     * should return metrics based on input as csv.
+     * @param context
+     */
+    void export(RoutingContext context);
 }
