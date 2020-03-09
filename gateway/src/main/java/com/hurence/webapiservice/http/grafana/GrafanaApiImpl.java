@@ -1,6 +1,10 @@
 package com.hurence.webapiservice.http.grafana;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
@@ -12,6 +16,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.util.List;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
@@ -113,6 +120,73 @@ public class GrafanaApiImpl implements GrafanaApi {
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(timeseries.encode());
 
+                }).subscribe();
+    }
+
+    @Override
+    public void export(RoutingContext context) {
+        final long startRequest = System.currentTimeMillis();
+        final QueryRequestParam request;
+        try {
+            JsonObject requestBody = context.getBodyAsJson();
+            /*
+                When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
+                at initialization (did not successfully reproduced this in a unit test).//TODO
+             */
+            request = new QueryRequestParser().parseRequest(requestBody);
+        } catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
+
+        final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
+
+        service
+                .rxGetTimeSeries(getTimeSeriesChunkParams)
+                .map(sampledTimeSeries -> {
+                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES_RESPONSE_FIELD);
+                    if (LOGGER.isDebugEnabled()) {
+                        timeseries.forEach(metric -> {
+                            JsonObject el = (JsonObject) metric;
+                            String metricName = el.getString(TimeSeriesExtracterImpl.TIMESERIE_NAME);
+                            int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
+                            LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
+                                    request.getRequestId(),size, metricName);
+                        });
+                        LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
+                                request.getRequestId(),
+                                sampledTimeSeries.getLong(TOTAL_POINTS_RESPONSE_FIELD, 0L),
+                                System.currentTimeMillis() - startRequest);
+                    }
+                    return timeseries;
+                })
+                .map(timeseries -> {
+                    JsonNode jsonTree = new ObjectMapper().readTree(timeseries.toString());
+                    CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
+                    JsonNode firstObject = jsonTree.elements().next();
+                    firstObject.fieldNames().forEachRemaining(fieldName -> {csvSchemaBuilder.addColumn(fieldName);} );
+                    CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
+                    CsvMapper csvMapper = new CsvMapper();
+                    File file = new File("src/main/resources/results.csv");
+                    csvMapper.writerFor(JsonArray.class)
+                            .with(csvSchema)
+                            .writeValue(file, timeseries);
+                    return file;
+                })
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "text/plain");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(timeseries -> {
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "text/plain");
+                    context.response().sendFile(timeseries.getName()).end();
                 }).subscribe();
     }
 
