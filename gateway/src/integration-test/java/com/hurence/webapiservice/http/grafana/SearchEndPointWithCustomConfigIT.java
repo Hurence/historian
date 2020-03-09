@@ -41,7 +41,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class SearchEndPointWithCustomConfigIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointWithCustomConfigIT.class);
     private static WebClient webClient;
     private static String COLLECTION = HistorianSolrITHelper.COLLECTION;
 
