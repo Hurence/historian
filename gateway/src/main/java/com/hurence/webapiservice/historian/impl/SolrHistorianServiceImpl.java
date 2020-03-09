@@ -242,6 +242,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 int totalMetricsFound = 0;
                 int totalMetricsReturned = 0;
                 for (GroupCommand gc : results) {
+                    LOGGER.info("Ngroup = {}", gc.getNGroups());
                     totalMetricsFound = gc.getNGroups();
                     totalMetricsReturned = gc.getValues().size();
                     List<Group> groups = gc.getValues();
@@ -252,6 +253,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     }
                 LOGGER.debug("Found " + response.getRequestUrl() + response + " result : " + metrics);
                 LOGGER.debug("metrics :: "+ metrics);
+                LOGGER.debug("total found = {}", totalMetricsFound);
                 p.complete(new JsonObject()
                         .put(RESPONSE_TOTAL_METRICS_FOUND, totalMetricsFound)
                         .put(RESPONSE_TOTAL_METRICS_RETURNED, totalMetricsReturned)

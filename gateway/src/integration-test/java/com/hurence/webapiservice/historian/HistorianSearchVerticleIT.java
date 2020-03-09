@@ -118,5 +118,25 @@ public class HistorianSearchVerticleIT {
                 .subscribe ();
     }
 
+    @Test
+    @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
+    void EmptyTest (VertxTestContext testContext) {
+        JsonObject params = new JsonObject ();
+        historian.rxGetMetricsName (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        LOGGER.info("docs {} ",rsp);
+                        assertEquals (7, rsp.getLong(RESPONSE_TOTAL_METRICS_RETURNED));
+                        assertEquals (7, rsp.getLong(RESPONSE_TOTAL_METRICS_FOUND));
+                        JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
+                        LOGGER.info("docs {}",docs);
+                        assertEquals (7, docs.size ());
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+
 }
 

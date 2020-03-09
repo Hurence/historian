@@ -112,7 +112,7 @@ public class GrafanaApiImpl implements GrafanaApi {
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(timeseries.encode());
-
+                    LOGGER.debug("body :: {}", timeseries);
                 }).subscribe();
     }
 
