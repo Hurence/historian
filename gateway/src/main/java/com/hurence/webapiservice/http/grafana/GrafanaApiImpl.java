@@ -138,7 +138,7 @@ public class GrafanaApiImpl implements GrafanaApi {
             JsonObject requestBody = context.getBodyAsJson();
             int maxDataPoints = requestBody.getInteger(MAX_POINT_REQUEST_FIELD);
             if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
-                throw new IllegalArgumentException("max data points is bigger then allowed");
+                throw new IllegalArgumentException("Max data points requested is bigger than allowed");
             }
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
