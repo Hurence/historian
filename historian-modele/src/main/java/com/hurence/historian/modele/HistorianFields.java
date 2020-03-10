@@ -57,4 +57,11 @@ public class HistorianFields {
     public static String RESPONSE_CHUNK_TREND_FIELD = TimeSeriesRecord.CHUNK_TREND;
     public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = TimeSeriesRecord.CHUNK_SIZE_BYTES;
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
+
+    //schema historian
+    public static String CHUNK_YEAR = "year";
+    public static String CHUNK_MONTH = "month";
+    public static String CHUNK_DAY = "day";
+    public static String CHUNK_ORIGIN = "chunk_origin";
 }
+
