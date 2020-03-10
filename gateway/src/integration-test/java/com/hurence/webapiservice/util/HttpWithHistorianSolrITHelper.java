@@ -59,7 +59,8 @@ public abstract class HttpWithHistorianSolrITHelper {
         JsonObject httpConf = new JsonObject()
                 .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, PORT)
                 .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "localhost");
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "localhost")
+                .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
 
         return HistorianSolrITHelper.deployHistorienVerticle(container, vertx)
