@@ -3,11 +3,14 @@ package com.hurence.webapiservice.http.grafana;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.webapiservice.historian.HistorianVerticle;
+import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import com.hurence.webapiservice.util.injector.SolrInjector;
 import com.hurence.webapiservice.util.injector.SolrInjectorMultipleMetricSpecificPoints;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
@@ -18,6 +21,7 @@ import io.vertx.reactivex.core.file.FileSystem;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,8 +45,8 @@ public class QueryEndPointCsvIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
-        HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+        HistorianSolrITHelper
+                .initHistorianSolr(client);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorMultipleMetricSpecificPoints(
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
@@ -110,99 +114,48 @@ public class QueryEndPointCsvIT {
         webClient.close();
         vertx.close(context.succeeding(rsp -> context.completeNow()));
     }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQuery(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/test1/request.json",
-                "/http/grafana/query/extract-algo/test1/expectedResponse.csv");
-    }
-
-    //TODO use parametric tests so that we can add new tests by adding files without touching code
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMaxDataPoints5(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax5/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax5/expectedResponse.csv");
+    @AfterEach
+    public void afterEach(Vertx vertx, VertxTestContext context) {
+        vertx.deploymentIDs().forEach(vertx::undeploy);
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMaxDataPoints6(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax6/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax6/expectedResponse.csv");
+    public void testQueryExportCsv(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
+        JsonObject maxLimitFromConfig = new JsonObject().put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,10000);
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+                .map(t -> {
+                    assertRequestGiveResponseFromFile(vertx, testContext,
+                            "/http/grafana/query/extract-algo/test1/request.json",
+                            "/http/grafana/query/extract-algo/test1/expectedResponse.csv");
+                    return t;
+                }).subscribe();
     }
-
-
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMaxDataPoints7(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax7/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax7/expectedResponse.csv");
+    /*@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)*/
+    public void testQueryWithMaxAllowedPointsPassed(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
+        JsonObject maxLimitFromConfig = new JsonObject().put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,100);
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+                .map(t -> {
+                    assertRequestGiveResponseFromFile(vertx, testContext,
+                            "/http/grafana/query/extract-algo/test1/request.json");
+                    return t;
+                }).subscribe();
     }
 
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMaxDataPoints8(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax8/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax8/expectedResponse.csv");
+    private void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext, String requestFile) {
+        final FileSystem fs = vertx.fileSystem();
+        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
+        webClient.post("/api/grafana/export/csv")
+                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                    testContext.verify(() -> {
+                        assertEquals(413, rsp.statusCode());
+                        assertEquals("max data points is bigger then allowed", rsp.statusMessage());
+                        testContext.completeNow();
+                    });
+                }));
     }
 
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMaxDataPoints9(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax9/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax9/expectedResponse.csv");
-    }
-
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMaxDataPoints10(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax10/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax10/expectedResponse.csv");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMaxDataPoints15(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax15/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax15/expectedResponse.csv");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testAlgoAverageDefaultBucket(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testWithAlgo/average/default-bucket/request.json",
-                "/http/grafana/query/extract-algo/testWithAlgo/average/default-bucket/expectedResponse.csv");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testAlgoAverageBucketSize2(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-2/request.json",
-                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-2/expectedResponse.csv");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testAlgoAverageBucketSize3(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-3/request.json",
-                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-3/expectedResponse.csv");
-    }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
