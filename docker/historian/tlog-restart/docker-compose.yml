@@ -1,0 +1,22 @@
+version: "3.2"
+
+services:
+  zk1:
+    image: jplock/zookeeper:3.4.10
+    ports:
+      - "42181:2181"
+  solr1:
+    image: solr:7.1
+    ports:
+      - "48983:8983"
+    volumes:
+      - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+    command: /bin/bash -c "/usr/bin/wait-for-it.sh -h zk1 -p 2181 -t 0 ; /opt/solr/bin/solr -h solr1 -c -z zk1:2181 -m 4g; tail -f /dev/null"
+  solr2:
+    image: solr:7.1
+    ports:
+      - "47574:7574"
+    volumes:
+      - ./wait-for-it.sh:/usr/bin/wait-for-it.sh
+    command: /bin/bash -c "/usr/bin/wait-for-it.sh -h zk1 -p 2181 -t 0; /opt/solr/bin/solr -h solr2 -c -p 7574 -z zk1:2181 -m 4g; tail -f /dev/null"
+
