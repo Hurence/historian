@@ -57,6 +57,11 @@ public class TimeSeriesRecord extends StandardRecord {
     public static final String CHUNK_VALUE = "chunk_value";
     public static final String CHUNK_SIZE_BYTES = "chunk_size_bytes";
     public static final String METRIC_NAME = "name";
+    public static final String CODE_INSTALL = "code_install";
+    public static final String CHUNK_DAY = "day";
+    public static final String CHUNK_MONTH = "month";
+    public static final String CHUNK_YEAR = "year";
+    public static final String SENSOR = "sensor";
     public static final String CHUNK_SUM = "chunk_sum";
     public static final String CHUNK_WINDOW_MS = "chunk_window_ms";
     public static final String RECORD_TIMESERIE_POINT_TIMESTAMP = "record_timeserie_time";

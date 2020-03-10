@@ -245,11 +245,11 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
     val savedDF = timeseriesDS
       .map(r => (
         r.getId,
-        r.getField("year").asInteger(),
-        r.getField("month").asInteger(),
-        r.getField("day").asInteger(),
-        r.getField("code_install").asString(),
-        r.getField("sensor").asString(),
+        r.getField(TimeSeriesRecord.CHUNK_YEAR).asInteger(),
+        r.getField(TimeSeriesRecord.CHUNK_MONTH).asInteger(),
+        r.getField(TimeSeriesRecord.CHUNK_DAY).asInteger(),
+        r.getField(TimeSeriesRecord.CODE_INSTALL).asString(),
+        r.getField(TimeSeriesRecord.SENSOR).asString(),
         r.getField(TimeSeriesRecord.METRIC_NAME).asString(),
         r.getField(TimeSeriesRecord.CHUNK_VALUE).asString(),
         r.getField(TimeSeriesRecord.CHUNK_START).asLong(),
@@ -268,11 +268,11 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
         r.getField(TimeSeriesRecord.CHUNK_ORIGIN).asString())
       )
       .toDF("id",
-        "year",
-        "month",
-        "day",
-        "code_install",
-        "sensor",
+        TimeSeriesRecord.CHUNK_YEAR,
+        TimeSeriesRecord.CHUNK_MONTH,
+        TimeSeriesRecord.CHUNK_DAY,
+        TimeSeriesRecord.CODE_INSTALL,
+        TimeSeriesRecord.SENSOR,
         TimeSeriesRecord.METRIC_NAME,
         TimeSeriesRecord.CHUNK_VALUE,
         TimeSeriesRecord.CHUNK_START,
