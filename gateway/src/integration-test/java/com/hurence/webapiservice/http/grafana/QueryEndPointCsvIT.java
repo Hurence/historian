@@ -44,7 +44,7 @@ public class QueryEndPointCsvIT {
     private static AssertResponseGivenRequestHelper assertHelper;
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
+    public static void beforeAll(SolrClient client, Vertx vertx) throws IOException, SolrServerException {
         HistorianSolrITHelper
                 .initHistorianSolr(client);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
@@ -115,7 +115,7 @@ public class QueryEndPointCsvIT {
         vertx.close(context.succeeding(rsp -> context.completeNow()));
     }
     @AfterEach
-    public void afterEach(Vertx vertx, VertxTestContext context) {
+    public void afterEach(Vertx vertx) {
         vertx.deploymentIDs().forEach(vertx::undeploy);
     }
 
