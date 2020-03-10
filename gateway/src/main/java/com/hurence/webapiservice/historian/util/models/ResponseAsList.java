@@ -6,11 +6,11 @@ import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class QueryResponse {
+public class ResponseAsList {
 
-    public List<SubResponse> jsonArray;
+    public List<SubResponse> responseList;
 
-    public QueryResponse(JsonArray timeseries) {
+    public ResponseAsList(JsonArray timeseries) {
         List<SubResponse> jsonArray = new ArrayList<>();
         for (Object timeserie : timeseries) {
             JsonObject json = (JsonObject) timeserie;
@@ -25,7 +25,7 @@ public class QueryResponse {
                 jsonArray.add(subResponse);
             }
         }
-        this.jsonArray = jsonArray;
+        this.responseList = jsonArray;
     }
 
     public static class SubResponse {
@@ -41,6 +41,6 @@ public class QueryResponse {
     }
 
     public List<SubResponse> ReturnList() {
-        return this.jsonArray;
+        return this.responseList;
     }
 }

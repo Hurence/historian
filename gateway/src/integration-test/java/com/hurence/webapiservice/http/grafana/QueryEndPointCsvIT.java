@@ -110,9 +110,9 @@ public class QueryEndPointCsvIT {
     }
 
     @AfterAll
-    public static void afterAll(Vertx vertx, VertxTestContext context) {
+    public static void afterAll(Vertx vertx) {
         webClient.close();
-        vertx.close(context.succeeding(rsp -> context.completeNow()));
+        vertx.close();
     }
     @AfterEach
     public void afterEach(Vertx vertx) {
@@ -122,8 +122,8 @@ public class QueryEndPointCsvIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryExportCsv(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        JsonObject maxLimitFromConfig = new JsonObject().put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,10000);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+        int maxLimitFromConfig = 10000;
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
                             "/http/grafana/query/extract-algo/test1/request.json",
@@ -132,10 +132,10 @@ public class QueryEndPointCsvIT {
                 }).subscribe();
     }
     @Test
-    /*@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryWithMaxAllowedPointsPassed(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        JsonObject maxLimitFromConfig = new JsonObject().put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,100);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+        int maxLimitFromConfig = 100;
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
                             "/http/grafana/query/extract-algo/test1/request.json");
