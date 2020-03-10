@@ -1,12 +1,15 @@
 package com.hurence.webapiservice.http.grafana;
 
 
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.webapiservice.historian.util.models.QueryResponse;
 import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -18,6 +21,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
@@ -165,17 +169,22 @@ public class GrafanaApiImpl implements GrafanaApi {
                     return timeseries;
                 })
                 .map(timeseries -> {
-                    JsonNode jsonTree = new ObjectMapper().readTree(timeseries.toString());
-                    CsvSchema.Builder csvSchemaBuilder = CsvSchema.builder();
-                    JsonNode firstObject = jsonTree.elements().next();
-                    firstObject.fieldNames().forEachRemaining(fieldName -> {csvSchemaBuilder.addColumn(fieldName);} );
-                    CsvSchema csvSchema = csvSchemaBuilder.build().withHeader();
+                    QueryResponse queryResponse = new QueryResponse(timeseries);
+                    List<QueryResponse.SubResponse> list = queryResponse.ReturnList();
+                    CsvSchema schema = CsvSchema.builder()
+                            .addColumn("metric")
+                            .addColumn("date")
+                            .addColumn("value")
+                            .build();
                     CsvMapper csvMapper = new CsvMapper();
-                    File file = new File("src/main/resources/results.csv");
-                    csvMapper.writerFor(JsonArray.class)
-                            .with(csvSchema)
-                            .writeValue(file, timeseries);
-                    return file;
+                    csvMapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN,true);
+                    /*File file = new File("src/main/resources/results.csv");
+                    csvMapper.writerFor(ArrayList.class)
+                            .with(schema.withUseHeader(true))
+                            .writeValue(file, list);*/
+                    String csv = csvMapper.writerFor(ArrayList.class)
+                            .with(schema.withUseHeader(true)).writeValueAsString(list);
+                    return csv;
                 })
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
@@ -185,8 +194,8 @@ public class GrafanaApiImpl implements GrafanaApi {
                 })
                 .doOnSuccess(timeseries -> {
                     context.response().setStatusCode(200);
-                    context.response().putHeader("Content-Type", "text/plain");
-                    context.response().sendFile(timeseries.getName()).end();
+                    context.response().putHeader("Content-Type", "text/csv");
+                    context.response().end(timeseries);
                 }).subscribe();
     }
 
