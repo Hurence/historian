@@ -13,6 +13,8 @@ import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.core.buffer.Buffer;
+import io.vertx.reactivex.core.file.FileSystem;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.AfterAll;
@@ -29,17 +31,16 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//import io.vertx.ext.web.client.WebClient;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class QueryEndPointIT {
+public class QueryEndPointCsvIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
+    public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
         HttpWithHistorianSolrITHelper
                 .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
@@ -101,7 +102,7 @@ public class QueryEndPointIT {
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/export/csv");
     }
 
     @AfterAll
@@ -115,7 +116,7 @@ public class QueryEndPointIT {
     public void testQuery(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/test1/request.json",
-                "/http/grafana/query/extract-algo/test1/expectedResponse.json");
+                "/http/grafana/query/extract-algo/test1/expectedResponse.csv");
     }
 
     //TODO use parametric tests so that we can add new tests by adding files without touching code
@@ -124,7 +125,7 @@ public class QueryEndPointIT {
     public void testMaxDataPoints5(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testMaxDataPoints/testMax5/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax5/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax5/expectedResponse.csv");
     }
 
     @Test
@@ -132,7 +133,7 @@ public class QueryEndPointIT {
     public void testMaxDataPoints6(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testMaxDataPoints/testMax6/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax6/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax6/expectedResponse.csv");
     }
 
 
@@ -141,7 +142,7 @@ public class QueryEndPointIT {
     public void testMaxDataPoints7(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testMaxDataPoints/testMax7/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax7/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax7/expectedResponse.csv");
     }
 
 
@@ -150,7 +151,7 @@ public class QueryEndPointIT {
     public void testMaxDataPoints8(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testMaxDataPoints/testMax8/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax8/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax8/expectedResponse.csv");
     }
 
 
@@ -159,7 +160,7 @@ public class QueryEndPointIT {
     public void testMaxDataPoints9(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testMaxDataPoints/testMax9/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax9/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax9/expectedResponse.csv");
     }
 
 
@@ -168,7 +169,7 @@ public class QueryEndPointIT {
     public void testMaxDataPoints10(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testMaxDataPoints/testMax10/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax10/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax10/expectedResponse.csv");
     }
 
     @Test
@@ -176,7 +177,7 @@ public class QueryEndPointIT {
     public void testMaxDataPoints15(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testMaxDataPoints/testMax15/request.json",
-                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax15/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testMaxDataPoints/testMax15/expectedResponse.csv");
     }
 
     @Test
@@ -184,7 +185,7 @@ public class QueryEndPointIT {
     public void testAlgoAverageDefaultBucket(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testWithAlgo/average/default-bucket/request.json",
-                "/http/grafana/query/extract-algo/testWithAlgo/average/default-bucket/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testWithAlgo/average/default-bucket/expectedResponse.csv");
     }
 
     @Test
@@ -192,7 +193,7 @@ public class QueryEndPointIT {
     public void testAlgoAverageBucketSize2(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-2/request.json",
-                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-2/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-2/expectedResponse.csv");
     }
 
     @Test
@@ -200,12 +201,25 @@ public class QueryEndPointIT {
     public void testAlgoAverageBucketSize3(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-3/request.json",
-                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-3/expectedResponse.json");
+                "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-3/expectedResponse.csv");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
+        final FileSystem fs = vertx.fileSystem();
+        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
+        webClient.post("/api/grafana/export/csv")
+                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                    testContext.verify(() -> {
+                        assertEquals(200, rsp.statusCode());
+                        assertEquals("OK", rsp.statusMessage());
+                        String body = rsp.body().toString();
+                        Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
+                        String expectedBody = fileContent.toString();
+                        assertEquals(expectedBody, body);
+                        testContext.completeNow();
+                    });
+                }));
     }
 
 }
