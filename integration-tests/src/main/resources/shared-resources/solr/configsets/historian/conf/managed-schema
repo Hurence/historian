@@ -473,9 +473,9 @@
   <field name="chunk_trend" type="boolean"/>
   <field name="chunk_value" type="string"/>
   <field name="chunk_origin" type="string"/>
-
-  <field name="chunk_outlier" type="string"/>
-
+  <field name="chunk_outlier" type="boolean"/>
+  <field name="code_install" type="string" multiValued="true"/>
+  <field name="sensor" type="string"/>
   <field name="year" type="pint"/>
   <field name="month" type="pint"/>
   <field name="day" type="pint"/>
