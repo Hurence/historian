@@ -1,15 +1,12 @@
 package com.hurence.webapiservice.http.grafana;
 
 
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.historian.util.models.QueryResponse;
+import com.hurence.webapiservice.historian.util.models.ResponseAsList;
 import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -20,7 +17,6 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -134,23 +130,10 @@ public class GrafanaApiImpl implements GrafanaApi {
     @Override
     public void export(RoutingContext context) {
         final long startRequest = System.currentTimeMillis();
-        try {
-            JsonObject requestBody = context.getBodyAsJson();
-            int maxDataPoints = requestBody.getInteger(MAX_POINT_REQUEST_FIELD);
-            if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
-                throw new IllegalArgumentException("Max data points requested is bigger than allowed");
-            }
-        } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(PAYLOAD_TOO_LARGE);
-            context.response().setStatusMessage(ex.getMessage());
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
-            return;
-        }
+        final JsonObject requestBody;
         final QueryRequestParam request;
         try {
-            JsonObject requestBody = context.getBodyAsJson();
+            requestBody = context.getBodyAsJson();
             /*
                 When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
@@ -159,6 +142,19 @@ public class GrafanaApiImpl implements GrafanaApi {
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
+        try {
+            int maxDataPoints = requestBody.getInteger(MAX_POINT_REQUEST_FIELD);
+            if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
+                throw new IllegalArgumentException("max data points is bigger then allowed");
+            }
+        } catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(PAYLOAD_TOO_LARGE);
             context.response().setStatusMessage(ex.getMessage());
             context.response().putHeader("Content-Type", "application/json");
             context.response().end();
@@ -187,8 +183,8 @@ public class GrafanaApiImpl implements GrafanaApi {
                     return timeseries;
                 })
                 .map(timeseries -> {
-                    QueryResponse queryResponse = new QueryResponse(timeseries);
-                    List<QueryResponse.SubResponse> list = queryResponse.ReturnList();
+                    ResponseAsList responseAsList = new ResponseAsList(timeseries);
+                    List<ResponseAsList.SubResponse> list = responseAsList.ReturnList();
                     CsvSchema schema = CsvSchema.builder()
                             .addColumn("metric")
                             .addColumn("date")

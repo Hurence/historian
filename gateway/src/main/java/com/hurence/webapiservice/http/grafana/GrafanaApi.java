@@ -17,7 +17,7 @@ public interface GrafanaApi {
                 .produces("application/json")
                 .handler(this::query);
         router.post("/export/csv")
-                .produces("text/plain")
+                .produces("test/csv")
                 .handler(this::export);
         router.post("/annotations").handler(this::annotations);
         router.post("/tag-keys").handler(this::tagKeys);

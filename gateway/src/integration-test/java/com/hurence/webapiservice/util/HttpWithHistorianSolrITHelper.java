@@ -99,4 +99,20 @@ public abstract class HttpWithHistorianSolrITHelper {
                 });
     }
 
+    public static Single<String> deployCustomHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, int maxLimitFromConfig) {
+        JsonObject httpConf = new JsonObject()
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, PORT)
+                .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "localhost")
+                .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,maxLimitFromConfig);
+        DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
+
+        return HistorianSolrITHelper.deployHistorienVerticle(container, vertx)
+                .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
+                .map(id -> {
+                    LOGGER.info("HistorianVerticle with id '{}' deployed", id);
+                    return id;
+                });
+    }
+
 }
