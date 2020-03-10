@@ -35,6 +35,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     public static final String CONFIG_HTTP_SERVER_HOSTNAME = "host";
     public static final String CONFIG_HISTORIAN_ADDRESS = "historian.address";
     public static final String CONFIG_TIMESERIES_ADDRESS = "timeseries.address";
+    public static final String CONFIG_MAX_CSV_POINTS_ALLOWED = "max_data_points_allowed_for_ExportCsv";
 
     private static final GetTimeSerieRequestParser getTimeSerieParser = new GetTimeSerieRequestParser();
     private static TimeSeriesModeler timeserieModeler = new LogislandTimeSeriesModeler();
@@ -49,6 +50,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     public void start(Promise<Void> promise) throws Exception {
         LOGGER.debug("deploying {} verticle with config : {}", HttpServerVerticle.class.getSimpleName(), config().encodePrettily());
         String historianServiceAdr = config().getString(CONFIG_HISTORIAN_ADDRESS, "historian");
+        int maxDataPointsAllowedForExportCsv = config().getInteger(CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);
         historianService = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), historianServiceAdr);
 
         HttpServer server = vertx.createHttpServer();
@@ -60,7 +62,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 //    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
         router.get("/timeseries").handler(this::getTimeSeries);
-        Router graphanaApi = new GrafanaApiImpl(historianService).getGraphanaRouter(vertx);
+        Router graphanaApi = new GrafanaApiImpl(historianService, maxDataPointsAllowedForExportCsv).getGraphanaRouter(vertx);
         router.mountSubRouter("/api/grafana", graphanaApi);
 
         Router compactionApi = new CompactionApiImpl(historianService).getCompactionRouter(vertx);

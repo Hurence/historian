@@ -25,22 +25,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
-import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
-import static com.hurence.webapiservice.http.Codes.NOT_FOUND;
+import static com.hurence.webapiservice.http.Codes.*;
 
 public class GrafanaApiImpl implements GrafanaApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrafanaApiImpl.class);
     private HistorianService service;
+    private int maxDataPointsAllowedForExportCsv;
 
     public final static String ALGO_TAG_KEY = "Algo";
     public final static String BUCKET_SIZE_TAG_KEY = "Bucket size";
     public final static String FILTER_TAG_KEY = "Tag";
+    public final static String MAX_POINT_REQUEST_FIELD = "maxDataPoints";
 
 
-    public GrafanaApiImpl(HistorianService service) {
+    public GrafanaApiImpl(HistorianService service, int maxDataPointsAllowedForExportCsv) {
         this.service = service;
+        this.maxDataPointsAllowedForExportCsv = maxDataPointsAllowedForExportCsv;
+
     }
+
 
     @Override
     public void root(RoutingContext context) {
@@ -130,6 +134,20 @@ public class GrafanaApiImpl implements GrafanaApi {
     @Override
     public void export(RoutingContext context) {
         final long startRequest = System.currentTimeMillis();
+        try {
+            JsonObject requestBody = context.getBodyAsJson();
+            int maxDataPoints = requestBody.getInteger(MAX_POINT_REQUEST_FIELD);
+            if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
+                throw new IllegalArgumentException("max data points is bigger then allowed");
+            }
+        } catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(PAYLOAD_TOO_LARGE);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
         final QueryRequestParam request;
         try {
             JsonObject requestBody = context.getBodyAsJson();
