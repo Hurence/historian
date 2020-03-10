@@ -263,7 +263,7 @@ object App {
 
         // Init the Timeserie processor
         val tsProcessor = new TimeseriesConverter()
-        val context = new StandardProcessContext(tsProcessor, "")
+        val context = new HistorianContext(tsProcessor)
         context.setProperty(TimeseriesConverter.GROUPBY.getName, "name")
         context.setProperty(TimeseriesConverter.METRIC.getName,
           s"min;max;avg;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
@@ -366,7 +366,7 @@ object App {
 
         // Init the Timeserie processor
         val tsProcessor = new TimeseriesConverter()
-        val context = new StandardProcessContext(tsProcessor, "")
+        val context = new HistorianContext(tsProcessor)
         context.setProperty(TimeseriesConverter.GROUPBY.getName, "name")
         context.setProperty(TimeseriesConverter.METRIC.getName,
           s"first;sum;min;max;avg;trend;outlier;sax:${options.saxAlphabetSize},0.005,${options.saxStringLength}")

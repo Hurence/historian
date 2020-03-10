@@ -3,25 +3,21 @@ package com.hurence.historian
 
 import java.text.SimpleDateFormat
 import java.util
-import java.util.{Collections, Date}
+import java.util.Date
 
-import com.hurence.logisland.processor.StandardProcessContext
-import com.hurence.logisland.record.{EvoaUtils, FieldType, TimeSeriesRecord}
+import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.common.{DoubleList, LongList}
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.commons.lang.ArrayUtils
+import org.apache.solr.client.solrj.SolrQuery
+import org.apache.solr.common.params.MapSolrParams
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
-import scala.collection.mutable.{ArrayBuffer, ListBuffer}
-import org.apache.solr.client.solrj.SolrQuery
-import org.apache.solr.client.solrj.response.QueryResponse
-import java.util.stream.Collectors
-
-import org.apache.solr.common.params.MapSolrParams
+import scala.collection.mutable.ListBuffer
 
 class ChunkCompactor extends Serializable {
 
@@ -120,7 +116,7 @@ class ChunkCompactor extends Serializable {
 
     // parse the command line arguments
     val line = parser.parse(options, args)
-    val sparkMaster = if (line.hasOption("ms")) line.getOptionValue("master") else "local[*]"
+    val sparkMaster = if (line.hasOption("ms")) line.getOptionValue("ms") else "local[*]"
     val useKerberos = if (line.hasOption("kb")) true else false
     val zkHosts = if (line.hasOption("zk")) line.getOptionValue("zk") else "localhost:2181"
     val collectionName = if (line.hasOption("col")) line.getOptionValue("col") else "historian"
@@ -155,13 +151,17 @@ class ChunkCompactor extends Serializable {
   }
 
 
-  def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions, codeInstall: String): Dataset[TimeSeriesRecord] = {
+  def loadDataFromSolR(spark: SparkSession, options: ChunkCompactorOptions, filterQuery: String): Dataset[TimeSeriesRecord] = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
       "collection" -> options.collectionName,
+   /*   "splits" -> "true",
+      "split_field"-> "name",
+      "splits_per_shard"-> "50",*/
+      "sort" -> "chunk_start asc",
       "fields" -> "name,chunk_value,chunk_start,chunk_end",
-      "filters" -> s"chunk_origin:logisland AND year:${options.year} AND month:${options.month} AND day:${options.day} AND code_install:$codeInstall"
+      "filters" -> s"chunk_origin:logisland AND year:${options.year} AND month:${options.month} AND day:${options.day} AND $filterQuery"
     )
 
     logger.info(s"$solrOpts")
@@ -281,6 +281,37 @@ class ChunkCompactor extends Serializable {
     facetResult.getValues.asScala.map(r => r.getName).toList
   }
 
+  def getMetricNameList(queryFilter: String, options: ChunkCompactorOptions) = {
+    logger.info(s"first looking for name to loop on")
+    // Explicit commit to make sure all docs are visible
+    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+
+    val query = new SolrQuery
+    query.setRows(0)
+    query.setFacet(true)
+    query.addFacetField("name")
+    query.setFacetLimit(-1)
+    query.setFacetMinCount(1)
+    query.setQuery(null)
+
+    val queryParamMap = new util.HashMap[String, String]()
+    queryParamMap.put("q", "*:*")
+    queryParamMap.put("fq", queryFilter)
+    queryParamMap.put("facet", "on")
+    queryParamMap.put("facet.field", "name")
+    queryParamMap.put("facet.limit", "-1")
+    queryParamMap.put("facet.mincount", "1")
+
+    val queryParams = new MapSolrParams(queryParamMap)
+
+    val result = solrCloudClient.query(options.collectionName, queryParams)
+    val facetResult = result.getFacetField("name")
+
+    logger.info(facetResult.toString)
+
+    facetResult.getValues.asScala.map(r => r.getName).toList
+  }
+
   def removeChunksFromSolR(queryFilter: String, options: ChunkCompactorOptions) = {
 
 
@@ -362,14 +393,17 @@ class ChunkCompactor extends Serializable {
     }
 
     timeseriesDS
-      .groupByKey(_.getMetricName)
-      .reduceGroups((g1, g2) => merge(g1, g2))
+        .rdd
+        .map( r => (r.getMetricName, r))
+      .reduceByKey((g1, g2) => merge(g1, g2))
+     // .groupByKey(_.getMetricName)
+     // .reduceGroups((g1, g2) => merge(g1, g2))
       .mapPartitions(p => {
 
-        if(p.nonEmpty ){
+        if (p.nonEmpty) {
           // Init the Timeserie processor
           val tsProcessor = new TimeseriesConverter()
-          val context = new StandardProcessContext(tsProcessor, "")
+          val context = new HistorianContext(tsProcessor)
           context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeSeriesRecord.METRIC_NAME)
           context.setProperty(TimeseriesConverter.METRIC.getName,
             s"first;min;max;count;sum;avg;count;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
@@ -408,18 +442,18 @@ class ChunkCompactor extends Serializable {
             splittedRecords.foreach(record => {
               tsProcessor.computeValue(record)
               tsProcessor.computeMetrics(record)
-              EvoaUtils.setChunkOrigin(record, TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR)
               EvoaUtils.setBusinessFields(record)
               EvoaUtils.setDateFields(record)
               EvoaUtils.setHashId(record)
+              EvoaUtils.setChunkOrigin(record, TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR)
             })
 
             splittedRecords
           })
-        }else
+        } else
           Iterator.empty
 
-      })
+      }).toDS()
 
 
   }
@@ -448,19 +482,18 @@ object ChunkCompactor {
 
     compactor.removeChunksFromSolR(queryFilter, options)
 
-    compactor.getCodeInstallList(queryFilter, options)
-    //  .map(codeInstall => {
+    compactor.getMetricNameList(queryFilter, options)
 
-        val timeseriesDS = compactor.loadDataFromSolR(spark, options, "*")
+      .foreach(name => {
+
+        val timeseriesDS = compactor.loadDataFromSolR(spark, options, s"name:$name")
         val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS, options)
         val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS, options)
-
+        // TODO remove old logisland chunks
         timeseriesDS.unpersist()
         mergedTimeseriesDS.unpersist()
         savedDS.unpersist()
-        /*
-            compactor.removeUselessChunksFromSolR(timeseriesDS, options)*/
-    //  })
+      })
 
 
     spark.close()
