@@ -89,14 +89,14 @@ public class SearchEndPointWithCustomConfigIT {
 
 
     @AfterEach
-    public void afterEach(Vertx vertx, VertxTestContext context) {
+    public void afterEach(Vertx vertx) {
         vertx.deploymentIDs().forEach(vertx::undeploy);
     }
 
     @AfterAll
-    public static void afterAll(Vertx vertx, VertxTestContext context) {
+    public static void afterAll(Vertx vertx) {
         webClient.close();
-        vertx.close(context.succeeding(rsp -> context.completeNow()));
+        vertx.close();
     }
 
     @Test
