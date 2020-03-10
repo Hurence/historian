@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class QueryEndPointFocusOnFilterIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointFocusOnFilterIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
 

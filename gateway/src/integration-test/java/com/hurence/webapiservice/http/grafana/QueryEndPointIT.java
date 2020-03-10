@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class QueryEndPointIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
 
