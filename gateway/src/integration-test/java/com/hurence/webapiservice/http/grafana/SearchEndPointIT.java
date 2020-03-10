@@ -79,7 +79,7 @@ public class SearchEndPointIT {
 
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/export/csv");
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/search");
     }
 
 
@@ -90,7 +90,7 @@ public class SearchEndPointIT {
     }
 
     @Test
-    /*@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSearch(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
                 "/http/grafana/search/test1/request.json",
@@ -101,7 +101,7 @@ public class SearchEndPointIT {
                                                                    String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/api/grafana/export/csv")
+        webClient.post("/api/grafana/search")
                 .as(BodyCodec.jsonArray())
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
