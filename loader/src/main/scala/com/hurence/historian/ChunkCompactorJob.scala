@@ -236,11 +236,6 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
 
     import timeseriesDS.sparkSession.implicits._
 
-    val solrOpts = Map(
-      "zkhost" -> options.zkHosts,
-      "collection" -> options.collectionName
-    )
-
     logger.info(s"start saving new chunks to ${options.collectionName}")
     val savedDF = timeseriesDS
       .map(r => (
@@ -260,7 +255,7 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
         r.getField(TimeSeriesRecord.CHUNK_AVG).asDouble(),
         r.getField(TimeSeriesRecord.CHUNK_MIN).asDouble(),
         r.getField(TimeSeriesRecord.CHUNK_MAX).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_COUNT).asInteger(),
+//        r.getField(TimeSeriesRecord.CHUNK_COUNT).asInteger(),
         r.getField(TimeSeriesRecord.CHUNK_SUM).asDouble(),
         r.getField(TimeSeriesRecord.CHUNK_TREND).asBoolean(),
         r.getField(TimeSeriesRecord.CHUNK_OUTLIER).asBoolean(),
@@ -283,7 +278,7 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
         TimeSeriesRecord.CHUNK_AVG,
         TimeSeriesRecord.CHUNK_MIN,
         TimeSeriesRecord.CHUNK_MAX,
-        TimeSeriesRecord.CHUNK_COUNT,
+//        TimeSeriesRecord.CHUNK_COUNT,
         TimeSeriesRecord.CHUNK_SUM,
         TimeSeriesRecord.CHUNK_TREND,
         TimeSeriesRecord.CHUNK_OUTLIER,
@@ -292,7 +287,10 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
 
     savedDF.write
       .format("solr")
-      .options(solrOpts)
+      .options(Map(
+        "zkhost" -> options.zkHosts,
+        "collection" -> options.collectionName
+      ))
       .save()
 
     // Explicit commit to make sure all docs are visible
