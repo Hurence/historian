@@ -81,7 +81,6 @@ public class TimeSeriesRecord extends StandardRecord {
         setField(CHUNK_END, FieldType.LONG, timeSeries.getEnd());
         setField(CHUNK_SIZE, FieldType.INT, timeSeries.getValues().size());
         setField(CHUNK_WINDOW_MS, FieldType.LONG, timeSeries.getEnd() - timeSeries.getStart());
-
         timeSeries.attributes().keySet().forEach(key -> {
             setStringField(key, String.valueOf(timeSeries.attribute(key)));
         });
@@ -112,7 +111,7 @@ public class TimeSeriesRecord extends StandardRecord {
         }
     }
 
-    private List<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
+    public static List<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
         byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
         return converter.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
     }
