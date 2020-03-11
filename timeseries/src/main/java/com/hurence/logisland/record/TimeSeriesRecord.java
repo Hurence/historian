@@ -163,6 +163,13 @@ public class TimeSeriesRecord extends StandardRecord {
             return "";
     }
 
+    public double getFirstValue() {
+        if (hasField(CHUNK_FIRST_VALUE))
+            return getField(CHUNK_FIRST_VALUE).asDouble();
+        else
+            return 0;
+    }
+
     /**
      *
      * @return uncompressed points lazyly if not yet done
