@@ -382,17 +382,17 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
 
     import timeseriesDS.sparkSession.implicits._
 
-    def merge(g1: TimeSeriesRecord, g2: TimeSeriesRecord): TimeSeriesRecord = {
+    def merge(chunk1: TimeSeriesRecord, chunk2: TimeSeriesRecord): TimeSeriesRecord = {
 
 
       /**
         * Initialize all data structures
         */
-      val series1 = g1.getTimeSeries.points().iterator().asScala.toList
-      val series2 = g2.getTimeSeries.points().iterator().asScala.toList
+      val series1 = chunk1.getTimeSeries.points().iterator().asScala.toList
+      val series2 = chunk2.getTimeSeries.points().iterator().asScala.toList
 
-      val tsBuilder = new MetricTimeSeries.Builder(g1.getMetricName, g1.getType)
-        .attributes(g1.getTimeSeries.attributes())
+      val tsBuilder = new MetricTimeSeries.Builder(chunk1.getMetricName, chunk1.getType)
+        .attributes(chunk1.getTimeSeries.attributes())
 
       /**
         * loop around the points to be merged
@@ -446,9 +446,7 @@ class ChunkCompactorJob(options: ChunkCompactorConf) extends Serializable {
     timeseriesDS
         .rdd
         .map( r => (r.getMetricName, r))
-      .reduceByKey((g1, g2) => merge(g1, g2))
-     // .groupByKey(_.getMetricName)
-     // .reduceGroups((g1, g2) => merge(g1, g2))
+      .reduceByKey((chunk1, chunk2) => merge(chunk1, chunk2))
       .mapPartitions(p => {
 
         if (p.nonEmpty) {
