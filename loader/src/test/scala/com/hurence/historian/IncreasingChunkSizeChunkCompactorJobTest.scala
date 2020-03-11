@@ -36,8 +36,6 @@ class IncreasingChunkSizeChunkCompactorJobTest(container: (DockerComposeContaine
   val metricA: String = IncreasingChunkSizeChunkCompactorJobTest.metricA
   val metricB: String = IncreasingChunkSizeChunkCompactorJobTest.metricB
 
-  //TODO there seems to be a problem with sparkSolr when adding new field that are not already specified in schema
-
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
     assertEquals(24, IncreasingChunkSizeChunkCompactorJobTest.docsInSolr(client))
@@ -68,25 +66,29 @@ class IncreasingChunkSizeChunkCompactorJobTest(container: (DockerComposeContaine
     //TODO uncomment commented tests. There is currently a chunk of size 0 that should not exist here !
     //        assertEquals(12, records.size())
     val recordsA: List[TimeSeriesRecord] = records.filter(r => r.getMetricName == metricA).toList
-    assertEquals(4, recordsA.size())
+    assertEquals(2, recordsA.size())
     val pointsA: List[Point] = recordsA.flatMap(_.getPoints)
     assertEquals(12, pointsA.size())
     //first
-//    assertEquals(1477895624866L, recordsA.get(0).getStartChunk)
-//    assertEquals(1477916224866L, recordsA.get(0).getEndChunk)
+    assertEquals(1477895624866L, recordsA.get(0).getStartChunk)
+    assertEquals(1477924224866L, recordsA.get(0).getEndChunk)
+    assertEquals(622, recordsA.get(0).getFirstValue)
     //last
-//    assertEquals(1477925224866L, recordsA.get(1).getStartChunk)
-//    assertEquals(1477926224866L, recordsA.get(1).getEndChunk)
+    assertEquals(1477925224866L, recordsA.get(1).getStartChunk)
+    assertEquals(1477926224866L, recordsA.get(1).getEndChunk)
+    assertEquals(288, recordsA.get(1).getFirstValue)
     val recordsB: List[TimeSeriesRecord] = records.filter(r => r.getMetricName == metricB).toList
-    assertEquals(4, recordsB.size())
+    assertEquals(2, recordsB.size())
     val pointsB: List[Point] = recordsB.flatMap(_.getPoints)
     assertEquals(12, pointsB.size())
     //first
-//    assertEquals(1477895624866L, recordsB.get(0).getStartChunk)
-//    assertEquals(1477916224866L, recordsB.get(0).getEndChunk)
+    assertEquals(1477895624866L, recordsB.get(0).getStartChunk)
+    assertEquals(1477924224866L, recordsB.get(0).getEndChunk)
+    assertEquals(622, recordsB.get(0).getFirstValue)
     //last
-//    assertEquals(1477925224866L, recordsB.get(1).getStartChunk)
-//    assertEquals(1477926224866L, recordsB.get(1).getEndChunk)
+    assertEquals(1477925224866L, recordsB.get(1).getStartChunk)
+    assertEquals(1477926224866L, recordsB.get(1).getEndChunk)
+    assertEquals(288, recordsB.get(1).getFirstValue)
     assertEquals(pointsA, pointsB)
     chunked
   }
@@ -95,7 +97,7 @@ class IncreasingChunkSizeChunkCompactorJobTest(container: (DockerComposeContaine
     LOGGER.info("testTransformingAndSavingIntoSolr")
     val savedDf = compactor.saveNewChunksToSolR(chunked)
     savedDf.show(100)
-    val records: util.List[Row] = savedDf.collectAsList()
+//    val records: util.List[Row] = savedDf.collectAsList()
     //        assertEquals(12, records.size())
     savedDf
   }
