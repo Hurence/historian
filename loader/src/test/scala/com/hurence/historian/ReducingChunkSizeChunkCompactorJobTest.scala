@@ -3,6 +3,7 @@ package com.hurence.historian
 import java.util
 
 import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
+import com.hurence.historian.IncreasingChunkSizeChunkCompactorJobTest.LOGGER
 import com.hurence.historian.ReducingChunkSizeChunkCompactorJobTest.LOGGER
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
@@ -38,6 +39,7 @@ class ReducingChunkSizeChunkCompactorJobTest(container : (DockerComposeContainer
     @Test
     @Disabled("Bug to fix latter")
     def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
+        val start = System.currentTimeMillis();
         assertEquals(2, ReducingChunkSizeChunkCompactorJobTest.docsInSolr(client))
         val loadedFromSolr = testLoading(sparkSession)
         loadedFromSolr.cache()
@@ -48,6 +50,8 @@ class ReducingChunkSizeChunkCompactorJobTest(container : (DockerComposeContainer
         //If we suppose ancient chunk are not deleted !
         client.commit(SolrITHelper.COLLECTION_HISTORIAN)
         assertEquals(14, ReducingChunkSizeChunkCompactorJobTest.docsInSolr(client))
+        val end = System.currentTimeMillis();
+        LOGGER.info("compactor finished in {} s", (end - start) / 1000)
     }
 
     private def testLoading(sparkSession: SparkSession) = {
