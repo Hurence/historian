@@ -51,13 +51,16 @@ object ChunkCompactorJob extends Serializable {
       .master(options.master)
       .getOrCreate()
 
-    //Remove logisland chunks of rpecedent compactor job
+    //Remove logisland chunks of precedent compactor job
     removeChunksFromSolR(options.compactorConf.collectionName, options.compactorConf.zkHosts)
-
-//    new ChunkCompactorJobStrategy1(options.compactorConf).run(spark)
-    new ChunkCompactorJobStrategy2(options.compactorConf).run(spark)
+    createCompactor(options.compactorConf).run(spark)
     // TODO remove old logisland chunks
     spark.close()
+  }
+
+  private def createCompactor(conf: ChunkCompactorConf): ChunkCompactor = {
+//    new ChunkCompactorJobStrategy1(conf)
+    new ChunkCompactorJobStrategy2(conf)
   }
 
   def removeChunksFromSolR(collectionName: String, zkHost: String) = {

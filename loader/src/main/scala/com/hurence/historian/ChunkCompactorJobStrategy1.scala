@@ -27,7 +27,7 @@ class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends ChunkCompa
     this(ChunkCompactorJob.defaultConf)
   }
 
-  def loadDataFromSolR(spark: SparkSession, filterQuery: String): Dataset[TimeSeriesRecord] = {
+  private def loadDataFromSolR(spark: SparkSession, filterQuery: String): Dataset[TimeSeriesRecord] = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -54,7 +54,7 @@ class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends ChunkCompa
 
   }
 
-  def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
+  private def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
 
 
     import timeseriesDS.sparkSession.implicits._
@@ -124,7 +124,7 @@ class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends ChunkCompa
     savedDF
   }
 
-  def getCodeInstallList() = {
+  private def getCodeInstallList() = {
     logger.info(s"first looking for code_install to loop on")
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
@@ -155,7 +155,7 @@ class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends ChunkCompa
     facetResult.getValues.asScala.map(r => r.getName).toList
   }
 
-  def getMetricNameList() = {
+  private def getMetricNameList() = {
     logger.info(s"first looking for name to loop on")
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
@@ -186,7 +186,7 @@ class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends ChunkCompa
     facetResult.getValues.asScala.map(r => r.getName).toList
   }
 
-  def mergeChunks(timeseriesDS: Dataset[TimeSeriesRecord]): Dataset[TimeSeriesRecord] = {
+  private def mergeChunks(timeseriesDS: Dataset[TimeSeriesRecord]): Dataset[TimeSeriesRecord] = {
 
     import timeseriesDS.sparkSession.implicits._
 
