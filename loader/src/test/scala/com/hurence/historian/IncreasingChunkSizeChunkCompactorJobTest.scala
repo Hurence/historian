@@ -39,7 +39,7 @@ class IncreasingChunkSizeChunkCompactorJobTest(container: (DockerComposeContaine
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
     val start = System.currentTimeMillis();
-    assertEquals(24, IncreasingChunkSizeChunkCompactorJobTest.docsInSolr(client))
+    assertEquals(24, SolrUtils.docsInSolr(client))
     val loadedFromSolr = testLoading(sparkSession)
     loadedFromSolr.cache()
     val chunked = testChunking(loadedFromSolr)
@@ -47,7 +47,7 @@ class IncreasingChunkSizeChunkCompactorJobTest(container: (DockerComposeContaine
     val savedDf = testTransformingAndSavingIntoSolr(chunked)
     savedDf.cache()
     //If we suppose ancient chunk are not deleted !
-    assertEquals(28, IncreasingChunkSizeChunkCompactorJobTest.docsInSolr(client))
+    assertEquals(28, SolrUtils.docsInSolr(client))
     val end = System.currentTimeMillis();
     LOGGER.info("compactor finished in {} s", (end - start) / 1000)
   }
@@ -189,11 +189,7 @@ object IncreasingChunkSizeChunkCompactorJobTest {
     )
   }
 
-  def docsInSolr(client: SolrClient) = {
-    val params: SolrParams = new SolrQuery("*:*");
-    val rsp: QueryResponse = client.query(SolrITHelper.COLLECTION_HISTORIAN, params)
-    rsp.getResults.getNumFound
-  }
+
 }
 
 
