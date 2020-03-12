@@ -1,18 +1,13 @@
 package com.hurence.historian
 
-import java.util
-
 import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
-import com.hurence.logisland.record.{EvoaUtils, Point, TimeSeriesRecord}
+import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
-import org.apache.solr.client.solrj.SolrQuery
-import org.apache.solr.common.params.MapSolrParams
 import org.apache.spark.sql.functions.{col, sum}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession, functions => f}
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable.{WrappedArray => ArrayDF}
 
 class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializable {
@@ -119,116 +114,6 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
     savedDF
   }
 
-  def getCodeInstallList() = {
-    logger.info(s"first looking for code_install to loop on")
-    // Explicit commit to make sure all docs are visible
-    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-
-    val query = new SolrQuery
-    query.setRows(0)
-    query.setFacet(true)
-    query.addFacetField("code_install")
-    query.setFacetLimit(-1)
-    query.setFacetMinCount(1)
-    query.setQuery(null)
-
-    val queryParamMap = new util.HashMap[String, String]()
-    queryParamMap.put("q", "*:*")
-    queryParamMap.put("fq", queryFilter)
-    queryParamMap.put("facet", "on")
-    queryParamMap.put("facet.field", "code_install")
-    queryParamMap.put("facet.limit", "-1")
-    queryParamMap.put("facet.mincount", "1")
-
-    val queryParams = new MapSolrParams(queryParamMap)
-
-    val result = solrCloudClient.query(options.collectionName, queryParams)
-    val facetResult = result.getFacetField("code_install")
-
-    logger.info(facetResult.toString)
-
-    facetResult.getValues.asScala.map(r => r.getName).toList
-  }
-
-  def getMetricNameList() = {
-    logger.info(s"first looking for name to loop on")
-    // Explicit commit to make sure all docs are visible
-    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-
-    val query = new SolrQuery
-    query.setRows(0)
-    query.setFacet(true)
-    query.addFacetField("name")
-    query.setFacetLimit(-1)
-    query.setFacetMinCount(1)
-    query.setQuery(null)
-
-    val queryParamMap = new util.HashMap[String, String]()
-    queryParamMap.put("q", "*:*")
-    queryParamMap.put("fq", queryFilter)
-    queryParamMap.put("facet", "on")
-    queryParamMap.put("facet.field", "name")
-    queryParamMap.put("facet.limit", "-1")
-    queryParamMap.put("facet.mincount", "1")
-
-    val queryParams = new MapSolrParams(queryParamMap)
-
-    val result = solrCloudClient.query(options.collectionName, queryParams)
-    val facetResult = result.getFacetField("name")
-
-    logger.info(facetResult.toString)
-
-    facetResult.getValues.asScala.map(r => r.getName).toList
-  }
-
-  def removeChunksFromSolR() = {
-
-
-    // Explicit commit to make sure all docs are visible
-    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-
-    val query = s"chunk_origin:${TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR} AND $queryFilter"
-
-    // Explicit commit to make sure all docs are visible
-    logger.info(s"will permantly delete docs matching $query from ${options.collectionName}}")
-    solrCloudClient.deleteByQuery(options.collectionName, query)
-    solrCloudClient.commit(options.collectionName, true, true)
-  }
-
-
-  def chunkIntoOneTimeSeriesRecord(metricType: String, metricName: String,
-                                   values: ArrayDF[String],
-                                   starts: ArrayDF[Long],
-                                   ends: ArrayDF[Long],
-                                   sizes: ArrayDF[Long]) = {
-    val chunkStart = starts.min
-    val chunkEnd = ends.max
-    val builder = new MetricTimeSeries.Builder(metricName, metricType)
-      .start(chunkStart)
-      .end(chunkEnd)
-
-    if (
-      values.length != starts.length ||
-        values.length != ends.length ||
-        values.length != sizes.length
-    ) {
-      throw new RuntimeException("number of chunk_value, chunk_start, chunk_end and chunk_size are not the same ! This should never happen")
-    }
-    val numberOfChunkToCompact = values.length
-    val numberOfChunkToCompactMinusOne = numberOfChunkToCompact - 1
-    val points: List[Point] = (for (i <- 0 to numberOfChunkToCompactMinusOne) yield {
-      CompactionChunkInfo(values(i), starts(i), ends(i), sizes(i))
-    }).flatMap(_.getPoints())
-      .sortBy(c => c.getTimestamp)
-      .toList
-
-    //split into several TimeSeriesRecord
-    points.foreach((point: Point) => builder.point(point.getTimestamp, point.getValue))
-    val timeSeries: MetricTimeSeries = builder.build
-    val chunk = new TimeSeriesRecord(timeSeries)
-    chunk
-  }
-
   def chunkIntoSeveralTimeSeriesRecord(metricType: String, metricName: String,
                                    values: ArrayDF[String],
                                    starts: ArrayDF[Long],
@@ -303,19 +188,6 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
     EvoaUtils.setChunkOrigin(timeSerie, TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR)
     timeSerie
   }
-
-  def mergeChunksIntoOneChunk(r: Row): TimeSeriesRecord = {
-    val name = r.getAs[String]("name")
-    val values = r.getAs[ArrayDF[String]]("values")
-    val starts = r.getAs[ArrayDF[Long]]("starts")
-    val ends = r.getAs[ArrayDF[Long]]("ends")
-    val sizes = r.getAs[ArrayDF[Long]]("sizes")
-    val totalPoints = r.getAs[Long](point_in_day)
-    logger.info(s"fake chunking for metric $name, a total of points of $totalPoints")
-    val chunked = chunkIntoOneTimeSeriesRecord("evoa_measure", name, values, starts, ends, sizes)
-    chunked
-  }
-
 
   def mergeChunksIntoSeveralChunk(r: Row): List[TimeSeriesRecord] = {
     val name = r.getAs[String]("name")
