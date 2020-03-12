@@ -149,8 +149,35 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     chunks.toList
   }
 
+  /**
+   * determine grouping criteria depending on number of points
+   * If 10 per day, 300 per month, 3000 per year then group by year for those metrics
+   * If 10000 per day then group by day for those metrics
+   *
+   * @param sparkSession
+   * @param solrDf
+   * @return
+   */
   private def mergeChunks(sparkSession: SparkSession, solrDf: DataFrame): Dataset[TimeSeriesRecord] = {
-    val timeseriesDS = solrDf
+    val maxNumberOfPointInPartition = 100000L //TODO this means we can not compact chunks of more than 100000
+//    solrDf.cache()
+    val dailyChunks: Dataset[TimeSeriesRecord] = chunkDailyMetrics(solrDf, maxNumberOfPointInPartition)
+//    val monthlyChunks: Dataset[TimeSeriesRecord] = chunkMonthlyMetrics(solrDf, maxNumberOfPointInPartition)
+//    val yearlyChunks: Dataset[TimeSeriesRecord] = chunkYearlyMetrics(solrDf, maxNumberOfPointInPartition)
+
+//    dailyChunks
+//      .union(monthlyChunks)
+//      .union(yearlyChunks)
+    dailyChunks
+
+//    val monthlyMetrics: Dataset[String] = findMonthlyMetrics(maxNumberOfPointInPartition)
+//    val yearlyMetrics: Dataset[String] = findYearlyMetrics(maxNumberOfPointInPartition)
+  }
+
+  private def chunkDailyMetrics(solrDf: DataFrame, maxNumberOfPointInPartition: Long): Dataset[TimeSeriesRecord] = {
+    val daylyMetrics: Dataset[String] = findDaylyMetrics(solrDf, maxNumberOfPointInPartition)
+
+    val groupedChunkDf = solrDf
       .groupBy(
         col(TimeSeriesRecord.METRIC_NAME),
         col(TimeSeriesRecord.CHUNK_YEAR),
@@ -165,13 +192,17 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         f.first(col(TimeSeriesRecord.METRIC_NAME)).as(nameColumnName)
       )
 
-    import timeseriesDS.sparkSession.implicits._
+    import groupedChunkDf.sparkSession.implicits._
 
-    timeseriesDS
+    groupedChunkDf
       .rdd
       .flatMap(mergeChunksIntoSeveralChunk)
       .map(calculMetrics)
       .toDS()
+  }
+
+  def findDaylyMetrics(solrDf: DataFrame, maxNumberOfPointInPartition: Long): Dataset[String] = {
+    null//TODO
   }
 
   private def calculMetrics(timeSerie: TimeSeriesRecord): TimeSeriesRecord = {
