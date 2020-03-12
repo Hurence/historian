@@ -3,7 +3,7 @@ package com.hurence.historian
 import java.util
 
 import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
-import com.hurence.logisland.record.{Point, TimeSeriesRecord}
+import com.hurence.logisland.record.{EvoaUtils, Point, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.solr.client.solrj.SolrQuery
@@ -280,15 +280,28 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
 
     import timeseriesDS.sparkSession.implicits._
 
-//    timeseriesDS
-//      .rdd
-//      .map(mergeChunksIntoOneChunk)
-//      .toDS()
-
     timeseriesDS
       .rdd
       .flatMap(mergeChunksIntoSeveralChunk)
+      .map(calculMetrics)
       .toDS()
+  }
+
+  def calculMetrics(timeSerie: TimeSeriesRecord): TimeSeriesRecord = {
+    // Init the Timeserie processor
+    val tsProcessor = new TimeseriesConverter()
+    val context = new HistorianContext(tsProcessor)
+    context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeSeriesRecord.METRIC_NAME)
+    context.setProperty(TimeseriesConverter.METRIC.getName,
+      s"first;min;max;count;sum;avg;count;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
+    tsProcessor.init(context)
+    tsProcessor.computeValue(timeSerie)
+    tsProcessor.computeMetrics(timeSerie)
+    EvoaUtils.setBusinessFields(timeSerie)
+    EvoaUtils.setDateFields(timeSerie)
+    EvoaUtils.setHashId(timeSerie)
+    EvoaUtils.setChunkOrigin(timeSerie, TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR)
+    timeSerie
   }
 
   def mergeChunksIntoOneChunk(r: Row): TimeSeriesRecord = {
