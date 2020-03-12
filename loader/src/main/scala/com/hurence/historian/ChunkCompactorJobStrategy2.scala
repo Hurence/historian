@@ -196,7 +196,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
     val ends = r.getAs[ArrayDF[Long]]("ends")
     val sizes = r.getAs[ArrayDF[Long]]("sizes")
     val totalPoints = r.getAs[Long](point_in_day)
-    logger.info(s"fake chunking for metric $name, a total of points of $totalPoints")
+    logger.trace(s"A total of points of $totalPoints")
     val chunked = chunkIntoSeveralTimeSeriesRecord("evoa_measure", name, values, starts, ends, sizes)
     chunked
   }
