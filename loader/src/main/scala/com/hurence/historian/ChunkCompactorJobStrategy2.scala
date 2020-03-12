@@ -1,6 +1,6 @@
 package com.hurence.historian
 
-import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
+import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConfStrategy2
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
@@ -10,19 +10,14 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.{WrappedArray => ArrayDF}
 
-class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends ChunkCompactor {
+class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends ChunkCompactor {
 
   private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJobStrategy2])
   private val point_in_day = "number_points_day"
 
   private implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
-  private val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
 
-  def this() {
-    this(ChunkCompactorJob.defaultConf)
-  }
-
-  private def loadDataFromSolR(spark: SparkSession, filterQuery: String): DataFrame = {
+  private def loadDataFromSolR(spark: SparkSession, origin: String): DataFrame = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -32,16 +27,14 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends ChunkCompa
       "splits_per_shard"-> "50",*/
       "sort" -> "chunk_start asc",
       "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day",
-      "filters" -> s"chunk_origin:logisland AND year:${options.year} AND month:${options.month} AND day:${options.day} AND $filterQuery"
+      "filters" -> s"chunk_origin:$origin"
     )
-
     logger.info(s"$solrOpts")
 
     spark.read
       .format("solr")
       .options(solrOpts)
       .load
-
   }
 
   private def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
@@ -205,7 +198,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends ChunkCompa
    * Compact chunks of historian
    */
   override def run(spark: SparkSession): Unit = {
-    val timeseriesDS = loadDataFromSolR(spark, s"name:*")
+    val timeseriesDS = loadDataFromSolR(spark, "logisland")
     val mergedTimeseriesDS = mergeChunks(sparkSession = spark, timeseriesDS)
     saveNewChunksToSolR(mergedTimeseriesDS)
   }

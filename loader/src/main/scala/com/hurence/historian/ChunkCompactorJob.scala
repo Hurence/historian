@@ -28,13 +28,29 @@ object ChunkCompactorJob extends Serializable {
                                 month: Int,
                                 day: Int)
 
+  case class ChunkCompactorConfStrategy2(zkHosts: String,
+                                collectionName: String,
+                                chunkSize: Int,
+                                saxAlphabetSize: Int,
+                                saxStringLength: Int,
+                                year: Int,
+                                month: Int,
+                                day: Int)
+
   case class ChunkCompactorJobOptions(master: String,
                                       appName: String,
                                       useKerberos: Boolean,
-                                      compactorConf: ChunkCompactorConf)
+                                      zkHosts: String,
+                                      collectionName: String,
+                                      chunkSize: Int,
+                                      saxAlphabetSize: Int,
+                                      saxStringLength: Int,
+                                      year: Int,
+                                      month: Int,
+                                      day: Int)
 
   val defaultConf = ChunkCompactorConf("zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
-  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, defaultConf)
+  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
 
   /**
    *
@@ -52,15 +68,45 @@ object ChunkCompactorJob extends Serializable {
       .getOrCreate()
 
     //Remove logisland chunks of precedent compactor job
-    removeChunksFromSolR(options.compactorConf.collectionName, options.compactorConf.zkHosts)
-    createCompactor(options.compactorConf).run(spark)
+    removeChunksFromSolR(options.collectionName, options.zkHosts)
+    createCompactor(options).run(spark)
     // TODO remove old logisland chunks
     spark.close()
   }
 
-  private def createCompactor(conf: ChunkCompactorConf): ChunkCompactor = {
+
+
+  private def createCompactor(jobConf: ChunkCompactorJobOptions): ChunkCompactor = {
+//    val conf = buildCompactorConf(jobConf)
 //    new ChunkCompactorJobStrategy1(conf)
+    val conf = buildCompactorConf2(jobConf)
     new ChunkCompactorJobStrategy2(conf)
+  }
+
+  def buildCompactorConf(jobConf: ChunkCompactorJobOptions): ChunkCompactorConf = {
+      ChunkCompactorConf(
+        jobConf.zkHosts,
+        jobConf.collectionName,
+        jobConf.chunkSize,
+        jobConf.saxAlphabetSize,
+        jobConf.saxStringLength,
+        jobConf.year,
+        jobConf.month,
+        jobConf.day
+      )
+  }
+
+  def buildCompactorConf2(jobConf: ChunkCompactorJobOptions): ChunkCompactorConfStrategy2 = {
+    ChunkCompactorConfStrategy2(
+      jobConf.zkHosts,
+      jobConf.collectionName,
+      jobConf.chunkSize,
+      jobConf.saxAlphabetSize,
+      jobConf.saxStringLength,
+      jobConf.year,
+      jobConf.month,
+      jobConf.day
+    )
   }
 
   def removeChunksFromSolR(collectionName: String, zkHost: String) = {
@@ -167,19 +213,15 @@ object ChunkCompactorJob extends Serializable {
     val opts = ChunkCompactorJobOptions(sparkMaster,
       "ChunkCompactor",
       useKerberos,
-      ChunkCompactorConf(
-        zkHosts,
-        collectionName,
-        chunksSize,
-        alphabetSize,
-        saxStringLength,
-        dateTokens(0).toInt,
-        dateTokens(1).toInt,
-        dateTokens(2).toInt
-      )
+      zkHosts,
+      collectionName,
+      chunksSize,
+      alphabetSize,
+      saxStringLength,
+      dateTokens(0).toInt,
+      dateTokens(1).toInt,
+      dateTokens(2).toInt
     )
-
-
     logger.info(s"Command line options : $opts")
     opts
   }
