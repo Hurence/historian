@@ -10,19 +10,19 @@ import org.slf4j.LoggerFactory
 
 import scala.collection.mutable.{WrappedArray => ArrayDF}
 
-class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializable {
+class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends ChunkCompactor {
 
   private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJobStrategy2])
-  val point_in_day = "number_points_day"
+  private val point_in_day = "number_points_day"
 
-  implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
-  val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
+  private implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+  private val queryFilter = s"year:${options.year} AND month:${options.month} AND day:${options.day}"
 
   def this() {
     this(ChunkCompactorJob.defaultConf)
   }
 
-  def loadDataFromSolR(spark: SparkSession, filterQuery: String): DataFrame = {
+  private def loadDataFromSolR(spark: SparkSession, filterQuery: String): DataFrame = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -44,7 +44,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
 
   }
 
-  def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
+  private def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
 
 
     import timeseriesDS.sparkSession.implicits._
@@ -114,7 +114,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
     savedDF
   }
 
-  def chunkIntoSeveralTimeSeriesRecord(metricType: String, metricName: String,
+  private def chunkIntoSeveralTimeSeriesRecord(metricType: String, metricName: String,
                                    values: ArrayDF[String],
                                    starts: ArrayDF[Long],
                                    ends: ArrayDF[Long],
@@ -148,7 +148,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
     chunks.toList
   }
 
-  def mergeChunks(sparkSession: SparkSession, solrDf: DataFrame): Dataset[TimeSeriesRecord] = {
+  private def mergeChunks(sparkSession: SparkSession, solrDf: DataFrame): Dataset[TimeSeriesRecord] = {
     val timeseriesDS = solrDf
       .groupBy(col(TimeSeriesRecord.METRIC_NAME),col(TimeSeriesRecord.CHUNK_YEAR),col(TimeSeriesRecord.CHUNK_MONTH),col(TimeSeriesRecord.CHUNK_DAY))
       .agg(
@@ -172,7 +172,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
       .toDS()
   }
 
-  def calculMetrics(timeSerie: TimeSeriesRecord): TimeSeriesRecord = {
+  private def calculMetrics(timeSerie: TimeSeriesRecord): TimeSeriesRecord = {
     // Init the Timeserie processor
     val tsProcessor = new TimeseriesConverter()
     val context = new HistorianContext(tsProcessor)
@@ -189,7 +189,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
     timeSerie
   }
 
-  def mergeChunksIntoSeveralChunk(r: Row): List[TimeSeriesRecord] = {
+  private def mergeChunksIntoSeveralChunk(r: Row): List[TimeSeriesRecord] = {
     val name = r.getAs[String]("name")
     val values = r.getAs[ArrayDF[String]]("values")
     val starts = r.getAs[ArrayDF[Long]]("starts")
@@ -201,4 +201,12 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConf) extends Serializab
     chunked
   }
 
+  /**
+   * Compact chunks of historian
+   */
+  override def run(spark: SparkSession): Unit = {
+    val timeseriesDS = loadDataFromSolR(spark, s"name:*")
+    val mergedTimeseriesDS = mergeChunks(sparkSession = spark, timeseriesDS)
+    saveNewChunksToSolR(mergedTimeseriesDS)
+  }
 }

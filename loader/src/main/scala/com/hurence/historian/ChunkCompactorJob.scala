@@ -53,8 +53,9 @@ object ChunkCompactorJob extends Serializable {
 
     //Remove logisland chunks of rpecedent compactor job
     removeChunksFromSolR(options.compactorConf.collectionName, options.compactorConf.zkHosts)
-//    doStrategy1(options, spark)
-    doStrategy2(options, spark)
+
+//    new ChunkCompactorJobStrategy1(options.compactorConf).run(spark)
+    new ChunkCompactorJobStrategy2(options.compactorConf).run(spark)
     // TODO remove old logisland chunks
     spark.close()
   }
@@ -69,28 +70,6 @@ object ChunkCompactorJob extends Serializable {
     logger.info(s"will permantly delete docs matching $query from ${collectionName}}")
     solrCloudClient.deleteByQuery(collectionName, query)
     solrCloudClient.commit(collectionName, true, true)
-  }
-
-  private def doStrategy1(options: ChunkCompactorJobOptions, spark: SparkSession) = {
-    val compactor = new ChunkCompactorJobStrategy1(options.compactorConf)
-
-    compactor.getMetricNameList()
-
-      .foreach(name => {
-        val timeseriesDS = compactor.loadDataFromSolR(spark, s"name:$name")
-        val mergedTimeseriesDS = compactor.mergeChunks(timeseriesDS)
-        val savedDS = compactor.saveNewChunksToSolR(mergedTimeseriesDS)
-        timeseriesDS.unpersist()
-        mergedTimeseriesDS.unpersist()
-        savedDS.unpersist()
-      })
-  }
-
-  private def doStrategy2(options: ChunkCompactorJobOptions, spark: SparkSession) = {
-    val compactor = new ChunkCompactorJobStrategy2(options.compactorConf)
-    val timeseriesDS = compactor.loadDataFromSolR(spark, s"name:*")
-    val mergedTimeseriesDS = compactor.mergeChunks(sparkSession = spark, timeseriesDS)
-    compactor.saveNewChunksToSolR(mergedTimeseriesDS)
   }
 
   def parseCommandLine(args: Array[String]): ChunkCompactorJobOptions = {

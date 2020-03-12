@@ -16,7 +16,7 @@ import scala.collection.JavaConverters._
 
 import scala.collection.mutable.ListBuffer
 
-class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends Serializable {
+class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends ChunkCompactor {
 
   private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJobStrategy1])
 
@@ -315,4 +315,18 @@ class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends Serializab
 
   }
 
+  /**
+   * Compact chunks of historian
+   */
+  override def run(spark: SparkSession): Unit = {
+      getMetricNameList()
+        .foreach(name => {
+          val timeseriesDS = loadDataFromSolR(spark, s"name:$name")
+          val mergedTimeseriesDS = mergeChunks(timeseriesDS)
+          val savedDS = saveNewChunksToSolR(mergedTimeseriesDS)
+          timeseriesDS.unpersist()
+          mergedTimeseriesDS.unpersist()
+          savedDS.unpersist()
+        })
+  }
 }

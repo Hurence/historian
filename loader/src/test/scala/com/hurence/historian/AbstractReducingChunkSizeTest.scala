@@ -2,8 +2,9 @@ package com.hurence.historian
 
 import java.util
 
+import com.hurence.historian.AbstractIncreasingChunkSizeTest.LOGGER
 import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
-import com.hurence.historian.ReducingChunkSizeChunkCompactorJob2Test.LOGGER
+import com.hurence.historian.AbstractReducingChunkSizeTest.LOGGER
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.logisland.record.{Point, TimeSeriesRecord}
@@ -21,71 +22,85 @@ import org.testcontainers.containers.DockerComposeContainer
 import scala.collection.JavaConversions._
 
 @ExtendWith(Array(classOf[SolrExtension], classOf[SparkExtension]))
-class ReducingChunkSizeChunkCompactorJob2Test(container : (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
+abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
 
-    val compactorConf = ChunkCompactorConf(SolrExtension.getZkUrl(container),  SolrITHelper.COLLECTION_HISTORIAN,
-        chunkSize = 2,
-        saxAlphabetSize = 2,
-        saxStringLength = 3,
-        year = ReducingChunkSizeChunkCompactorJob2Test.year,
-        month = ReducingChunkSizeChunkCompactorJob2Test.month,
-        day = ReducingChunkSizeChunkCompactorJob2Test.day)
+  val zkUrl: String = SolrExtension.getZkUrl(container)
+  val historianCollection: String = SolrITHelper.COLLECTION_HISTORIAN
 
-    val compactor = new ChunkCompactorJobStrategy2(compactorConf)
-    val metricA: String = ReducingChunkSizeChunkCompactorJob2Test.metricA
-    val metricB: String = ReducingChunkSizeChunkCompactorJob2Test.metricB
+  val compactorConf: ChunkCompactorConf = ChunkCompactorConf(zkUrl, historianCollection,
+      chunkSize = 2,
+      saxAlphabetSize = 2,
+      saxStringLength = 3,
+      year = AbstractReducingChunkSizeTest.year,
+      month = AbstractReducingChunkSizeTest.month,
+      day = AbstractReducingChunkSizeTest.day)
 
+  val metricA: String = AbstractReducingChunkSizeTest.metricA
+  val metricB: String = AbstractReducingChunkSizeTest.metricB
+
+  def getCompactorFactory: ChunkCompactorConf => ChunkCompactor
 
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
     val start = System.currentTimeMillis();
-    assertEquals(2, IncreasingChunkSizeChunkCompactorJob2Test.docsInSolr(client))
-    //LOADING
-    val loadedFromSolr = compactor.loadDataFromSolR(sparkSession, s"name:*")
-    loadedFromSolr.cache()
-    loadedFromSolr.show(100)
-    assertEquals(2, loadedFromSolr.count())
-    //CHUNKING
-    val chunked = compactor.mergeChunks(sparkSession, loadedFromSolr)
-    chunked.show(100)
-    chunked.show(100)
-    val records: util.List[TimeSeriesRecord] = chunked.collectAsList()
-    //TODO uncomment commented tests. There is currently a chunk of size 0 that should not exist here !
+    assertEquals(2, SolrUtils.docsInSolr(client))
+    getCompactorFactory(compactorConf).run(sparkSession)
+    assertEquals(14, SolrUtils.docsInSolr(client))
+    val end = System.currentTimeMillis();
+    //Test on chunks created
+    val solrOpts = Map(
+      "zkhost" -> zkUrl,
+      "collection" -> historianCollection,
+      "sort" -> "chunk_start asc",
+      "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day",
+      "filters" -> s"chunk_origin:compactor"
+    )
+    val comapactedChunks = SolrUtils.loadTimeSeriesFromSolR(sparkSession, solrOpts)
+    val records: util.List[TimeSeriesRecord] = comapactedChunks.collectAsList()
     assertEquals(12, records.size())
-    val recordsA: List[TimeSeriesRecord] = records.filter(r => r.getMetricName==metricA).toList
-    //        assertEquals(6, recordsA.size())
-    val pointsA: List[Point] = recordsA.flatMap(_.getPoints)
-    assertEquals(12, pointsA.size())
+    val recordsA: List[TimeSeriesRecord] = records
+      .filter(r => r.getMetricName == metricA)
+      .sortBy(r => r.getStartChunk)
+      .toList
+    assertEquals(6, recordsA.size())
     //first
     assertEquals(1477895624866L, recordsA.get(0).getStartChunk)
     assertEquals(1477916224866L, recordsA.get(0).getEndChunk)
+    assertEquals(2, recordsA.get(0).getChunkSize)
     //last
     assertEquals(1477925224866L, recordsA.get(5).getStartChunk)
     assertEquals(1477926224866L, recordsA.get(5).getEndChunk)
-    val recordsB: List[TimeSeriesRecord] = records.filter(r => r.getMetricName==metricB).toList
-    //        assertEquals(6, recordsB.size())
-    val pointsB: List[Point] =recordsB.flatMap(_.getPoints)
-    assertEquals(12, pointsB.size())
+    assertEquals(2, recordsA.get(5).getChunkSize)
+    val recordsB: List[TimeSeriesRecord] = records
+      .filter(r => r.getMetricName == metricB)
+      .sortBy(r => r.getStartChunk)
+      .toList
+    assertEquals(6, recordsB.size())
     //first
     assertEquals(1477895624866L, recordsB.get(0).getStartChunk)
     assertEquals(1477916224866L, recordsB.get(0).getEndChunk)
+    assertEquals(2, recordsB.get(0).getChunkSize)
     //last
     assertEquals(1477925224866L, recordsB.get(5).getStartChunk)
     assertEquals(1477926224866L, recordsB.get(5).getEndChunk)
-    assertEquals(pointsA, pointsB)
+    assertEquals(2, recordsB.get(5).getChunkSize)
 
-    //If we suppose ancient chunk are not deleted !
-    //SAVING
-    val savedDf = compactor.saveNewChunksToSolR(chunked)
-    savedDf.show(100)
-    assertEquals(14, IncreasingChunkSizeChunkCompactorJob2Test.docsInSolr(client))
-    val end = System.currentTimeMillis();
+    //Test on points of chunks
+    val pointsA: List[Point] = recordsA.flatMap(_.getPoints)
+    assertEquals(12, pointsA.size())
+    val pointsB: List[Point] = recordsB.flatMap(_.getPoints)
+    assertEquals(12, pointsB.size())
+    assertEquals(pointsA, pointsB)
+    assertEquals(622, pointsA.head.getValue)
+    assertEquals(1477895624866L, pointsA.head.getTimestamp)
+    assertEquals(198, pointsA.last.getValue)
+    assertEquals(1477926224866L, pointsA.last.getTimestamp)
     LOGGER.info("compactor finished in {} s", (end - start) / 1000)
   }
 }
 
-object ReducingChunkSizeChunkCompactorJob2Test {
-  private val LOGGER = LoggerFactory.getLogger(classOf[ReducingChunkSizeChunkCompactorJob2Test])
+object AbstractReducingChunkSizeTest {
+  private val LOGGER = LoggerFactory.getLogger(classOf[AbstractReducingChunkSizeTest])
   private val year = 1999;
   private val month = 10;
   private val day = 1;
@@ -132,12 +147,6 @@ object ReducingChunkSizeChunkCompactorJob2Test {
     )
     injector.injectChunks(client)
     LOGGER.info("Indexed some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
-  }
-
-  def docsInSolr(client: SolrClient) = {
-    val params: SolrParams = new SolrQuery("*:*");
-    val rsp: QueryResponse = client.query(SolrITHelper.COLLECTION_HISTORIAN, params)
-    rsp.getResults.getNumFound
   }
 }
 
