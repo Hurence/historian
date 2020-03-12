@@ -150,7 +150,7 @@ public class QueryEndPointCsvIT {
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(413, rsp.statusCode());
-                        assertEquals("max data points is bigger then allowed", rsp.statusMessage());
+                        assertEquals("max data points is bigger than allowed", rsp.statusMessage());
                         testContext.completeNow();
                     });
                 }));

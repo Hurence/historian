@@ -130,36 +130,33 @@ public class GrafanaApiImpl implements GrafanaApi {
     @Override
     public void export(RoutingContext context) {
         final long startRequest = System.currentTimeMillis();
-        final JsonObject requestBody;
         final QueryRequestParam request;
         try {
-            requestBody = context.getBodyAsJson();
+            final JsonObject requestBody = context.getBodyAsJson();
             /*
                 When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
             request = new QueryRequestParser().parseRequest(requestBody);
         } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
+            LOGGER.debug("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
             context.response().setStatusMessage(ex.getMessage());
             context.response().putHeader("Content-Type", "application/json");
             context.response().end();
             return;
         }
-        try {
-            int maxDataPoints = requestBody.getInteger(MAX_POINT_REQUEST_FIELD);
-            if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
-                throw new IllegalArgumentException("max data points is bigger then allowed");
-            }
-        } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
+
+        int maxDataPoints = request.getMaxDataPoints();
+        if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
+            LOGGER.debug("error max data points too large");
             context.response().setStatusCode(PAYLOAD_TOO_LARGE);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage("max data points is bigger than allowed");
             context.response().putHeader("Content-Type", "application/json");
             context.response().end();
             return;
         }
+
 
         final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
 
@@ -203,7 +200,7 @@ public class GrafanaApiImpl implements GrafanaApi {
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
                     context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "text/plain");
+                    context.response().putHeader("Content-Type", "text/csv");
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(timeseries -> {
