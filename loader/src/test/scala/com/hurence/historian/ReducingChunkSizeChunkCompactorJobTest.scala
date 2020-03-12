@@ -32,7 +32,7 @@ class ReducingChunkSizeChunkCompactorJobTest(container : (DockerComposeContainer
         month = ReducingChunkSizeChunkCompactorJobTest.month,
         day = ReducingChunkSizeChunkCompactorJobTest.day)
 
-    val compactor = new ChunkCompactorJob(compactorConf)
+    val compactor = new ChunkCompactorJobStrategy1(compactorConf)
     val metricA: String = ReducingChunkSizeChunkCompactorJobTest.metricA
     val metricB: String = ReducingChunkSizeChunkCompactorJobTest.metricB
 
