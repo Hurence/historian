@@ -35,7 +35,9 @@ object ChunkCompactorJob extends Serializable {
                                 saxStringLength: Int,
                                 year: Int,
                                 month: Int,
-                                day: Int)
+                                day: Int, chunkOriginToCompact: String)
+
+
 
   case class ChunkCompactorJobOptions(master: String,
                                       appName: String,
@@ -105,7 +107,8 @@ object ChunkCompactorJob extends Serializable {
       jobConf.saxStringLength,
       jobConf.year,
       jobConf.month,
-      jobConf.day
+      jobConf.day,
+      "logisland"
     )
   }
 

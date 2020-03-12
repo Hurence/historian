@@ -17,7 +17,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
   private implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
 
-  private def loadDataFromSolR(spark: SparkSession, origin: String): DataFrame = {
+  private def loadDataFromSolR(spark: SparkSession): DataFrame = {
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -27,7 +27,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
       "splits_per_shard"-> "50",*/
       "sort" -> "chunk_start asc",
       "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day",
-      "filters" -> s"chunk_origin:$origin"
+      "filters" -> s"chunk_origin:${options.chunkOriginToCompact}"
     )
     logger.info(s"$solrOpts")
 
@@ -152,9 +152,6 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         f.collect_list(col(TimeSeriesRecord.CHUNK_SIZE)).as("sizes"),
         f.first(col(TimeSeriesRecord.METRIC_NAME)).as("name")
       )
-    timeseriesDS
-      .sort(col(point_in_day).desc)
-      .show(10, false)
 
     import timeseriesDS.sparkSession.implicits._
 
@@ -198,7 +195,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    * Compact chunks of historian
    */
   override def run(spark: SparkSession): Unit = {
-    val timeseriesDS = loadDataFromSolR(spark, "logisland")
+    val timeseriesDS = loadDataFromSolR(spark)
     val mergedTimeseriesDS = mergeChunks(sparkSession = spark, timeseriesDS)
     saveNewChunksToSolR(mergedTimeseriesDS)
   }
