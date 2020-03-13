@@ -3,6 +3,7 @@ package com.hurence.historian
 import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConfStrategy2
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
+import com.hurence.solr.SparkSolrUtils
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.spark.sql.functions.{col, sum}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession, functions => f}
@@ -30,20 +31,15 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
       "collection" -> options.collectionName,
-   /*   "splits" -> "true",
-      "split_field"-> "name",
-      "splits_per_shard"-> "50",*/
+      /*   "splits" -> "true",
+         "split_field"-> "name",
+         "splits_per_shard"-> "50",*/
       "sort" -> "chunk_start asc",
       "fields" -> fields,
-      "filters" -> s"chunk_origin:${options.chunkOriginToCompact}"
+      "filters" -> options.solrFq
     )
-
     logger.info(s"$solrOpts")
-
-    spark.read
-      .format("solr")
-      .options(solrOpts)
-      .load
+    SparkSolrUtils.loadFromSolR(spark, solrOpts)
   }
 
   private def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
@@ -70,7 +66,6 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         r.getField(TimeSeriesRecord.CHUNK_AVG).asDouble(),
         r.getField(TimeSeriesRecord.CHUNK_MIN).asDouble(),
         r.getField(TimeSeriesRecord.CHUNK_MAX).asDouble(),
-//        r.getField(TimeSeriesRecord.CHUNK_COUNT).asInteger(),
         r.getField(TimeSeriesRecord.CHUNK_SUM).asDouble(),
         r.getField(TimeSeriesRecord.CHUNK_TREND).asBoolean(),
         r.getField(TimeSeriesRecord.CHUNK_OUTLIER).asBoolean(),
@@ -93,7 +88,6 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         TimeSeriesRecord.CHUNK_AVG,
         TimeSeriesRecord.CHUNK_MIN,
         TimeSeriesRecord.CHUNK_MAX,
-//        TimeSeriesRecord.CHUNK_COUNT,
         TimeSeriesRecord.CHUNK_SUM,
         TimeSeriesRecord.CHUNK_TREND,
         TimeSeriesRecord.CHUNK_OUTLIER,
