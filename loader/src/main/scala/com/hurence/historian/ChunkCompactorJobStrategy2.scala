@@ -13,11 +13,19 @@ import scala.collection.mutable.{WrappedArray => ArrayDF}
 class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends ChunkCompactor {
 
   private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJobStrategy2])
-  private val point_in_day = "number_points_day"
+  private val totalNumberOfPointColumnName = "number_points_day"
+  private val startsColumnName = "starts"
+  private val valuesColumnName = "values"
+  private val endsColumnName = "ends"
+  private val sizesColumnName = "sizes"
+  private val nameColumnName = "name"
 
   private implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
 
   private def loadDataFromSolR(spark: SparkSession): DataFrame = {
+    val fields = s"${TimeSeriesRecord.METRIC_NAME},${TimeSeriesRecord.CHUNK_VALUE},${TimeSeriesRecord.CHUNK_START}," +
+      s"${TimeSeriesRecord.CHUNK_END},${TimeSeriesRecord.CHUNK_SIZE},${TimeSeriesRecord.CHUNK_YEAR}," +
+      s"${TimeSeriesRecord.CHUNK_MONTH},${TimeSeriesRecord.CHUNK_DAY}"
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -26,9 +34,10 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
       "split_field"-> "name",
       "splits_per_shard"-> "50",*/
       "sort" -> "chunk_start asc",
-      "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day",
+      "fields" -> fields,
       "filters" -> s"chunk_origin:${options.chunkOriginToCompact}"
     )
+
     logger.info(s"$solrOpts")
 
     spark.read
@@ -141,25 +150,60 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     chunks.toList
   }
 
+  /**
+   * determine grouping criteria depending on number of points
+   * If 10 per day, 300 per month, 3000 per year then group by year for those metrics
+   * If 10000 per day then group by day for those metrics
+   *
+   * @param sparkSession
+   * @param solrDf
+   * @return
+   */
   private def mergeChunks(sparkSession: SparkSession, solrDf: DataFrame): Dataset[TimeSeriesRecord] = {
-    val timeseriesDS = solrDf
-      .groupBy(col(TimeSeriesRecord.METRIC_NAME),col(TimeSeriesRecord.CHUNK_YEAR),col(TimeSeriesRecord.CHUNK_MONTH),col(TimeSeriesRecord.CHUNK_DAY))
+    val maxNumberOfPointInPartition = 100000L //TODO this means we can not compact chunks of more than 100000
+//    solrDf.cache()
+    val dailyChunks: Dataset[TimeSeriesRecord] = chunkDailyMetrics(solrDf, maxNumberOfPointInPartition)
+//    val monthlyChunks: Dataset[TimeSeriesRecord] = chunkMonthlyMetrics(solrDf, maxNumberOfPointInPartition)
+//    val yearlyChunks: Dataset[TimeSeriesRecord] = chunkYearlyMetrics(solrDf, maxNumberOfPointInPartition)
+
+//    dailyChunks
+//      .union(monthlyChunks)
+//      .union(yearlyChunks)
+    dailyChunks
+
+//    val monthlyMetrics: Dataset[String] = findMonthlyMetrics(maxNumberOfPointInPartition)
+//    val yearlyMetrics: Dataset[String] = findYearlyMetrics(maxNumberOfPointInPartition)
+  }
+
+  private def chunkDailyMetrics(solrDf: DataFrame, maxNumberOfPointInPartition: Long): Dataset[TimeSeriesRecord] = {
+    val daylyMetrics: Dataset[String] = findDaylyMetrics(solrDf, maxNumberOfPointInPartition)
+
+    val groupedChunkDf = solrDf
+      .groupBy(
+        col(TimeSeriesRecord.METRIC_NAME),
+        col(TimeSeriesRecord.CHUNK_YEAR),
+        col(TimeSeriesRecord.CHUNK_MONTH),
+        col(TimeSeriesRecord.CHUNK_DAY))
       .agg(
-        sum(col(TimeSeriesRecord.CHUNK_SIZE)).as(point_in_day),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_START)).as("starts"),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_VALUE)).as("values"),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_END)).as("ends"),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_SIZE)).as("sizes"),
-        f.first(col(TimeSeriesRecord.METRIC_NAME)).as("name")
+        sum(col(TimeSeriesRecord.CHUNK_SIZE)).as(totalNumberOfPointColumnName),
+        f.collect_list(col(TimeSeriesRecord.CHUNK_START)).as(startsColumnName),
+        f.collect_list(col(TimeSeriesRecord.CHUNK_VALUE)).as(valuesColumnName),
+        f.collect_list(col(TimeSeriesRecord.CHUNK_END)).as(endsColumnName),
+        f.collect_list(col(TimeSeriesRecord.CHUNK_SIZE)).as(sizesColumnName),
+        f.first(col(TimeSeriesRecord.METRIC_NAME)).as(nameColumnName)
       )
 
-    import timeseriesDS.sparkSession.implicits._
+    import groupedChunkDf.sparkSession.implicits._
 
-    timeseriesDS
+    groupedChunkDf
       .rdd
       .flatMap(mergeChunksIntoSeveralChunk)
       .map(calculMetrics)
       .toDS()
+  }
+
+  def findDaylyMetrics(solrDf: DataFrame, maxNumberOfPointInPartition: Long): Dataset[String] = {
+    null//TODO
   }
 
   private def calculMetrics(timeSerie: TimeSeriesRecord): TimeSeriesRecord = {
@@ -180,12 +224,12 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def mergeChunksIntoSeveralChunk(r: Row): List[TimeSeriesRecord] = {
-    val name = r.getAs[String]("name")
-    val values = r.getAs[ArrayDF[String]]("values")
-    val starts = r.getAs[ArrayDF[Long]]("starts")
-    val ends = r.getAs[ArrayDF[Long]]("ends")
-    val sizes = r.getAs[ArrayDF[Long]]("sizes")
-    val totalPoints = r.getAs[Long](point_in_day)
+    val name = r.getAs[String](nameColumnName)
+    val values = r.getAs[ArrayDF[String]](valuesColumnName)
+    val starts = r.getAs[ArrayDF[Long]](startsColumnName)
+    val ends = r.getAs[ArrayDF[Long]](endsColumnName)
+    val sizes = r.getAs[ArrayDF[Long]](sizesColumnName)
+    val totalPoints = r.getAs[Long](totalNumberOfPointColumnName)
     logger.trace(s"A total of points of $totalPoints")
     val chunked = chunkIntoSeveralTimeSeriesRecord("evoa_measure", name, values, starts, ends, sizes)
     chunked
