@@ -26,25 +26,21 @@ abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer
 
   val zkUrl: String = SolrExtension.getZkUrl(container)
   val historianCollection: String = SolrITHelper.COLLECTION_HISTORIAN
-
-  val compactorConf: ChunkCompactorConf = ChunkCompactorConf(zkUrl, historianCollection,
-      chunkSize = 2,
-      saxAlphabetSize = 2,
-      saxStringLength = 3,
-      year = AbstractReducingChunkSizeTest.year,
-      month = AbstractReducingChunkSizeTest.month,
-      day = AbstractReducingChunkSizeTest.day)
+  val chunkSize = 2
+  val year = AbstractReducingChunkSizeTest.year
+  val month = AbstractReducingChunkSizeTest.month
+  val day = AbstractReducingChunkSizeTest.day
 
   val metricA: String = AbstractReducingChunkSizeTest.metricA
   val metricB: String = AbstractReducingChunkSizeTest.metricB
 
-  def getCompactorFactory: ChunkCompactorConf => ChunkCompactor
+  def createCompactor: ChunkCompactor
 
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
     val start = System.currentTimeMillis();
     assertEquals(2, SolrUtils.docsInSolr(client))
-    getCompactorFactory(compactorConf).run(sparkSession)
+    createCompactor.run(sparkSession)
     assertEquals(14, SolrUtils.docsInSolr(client))
     val end = System.currentTimeMillis();
     //Test on chunks created
