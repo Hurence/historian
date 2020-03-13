@@ -1,5 +1,6 @@
 package com.hurence.historian
 
+import com.hurence.logisland.record.TimeSeriesRecord
 import org.testcontainers.containers.DockerComposeContainer
 
 class ReducingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]})
@@ -12,7 +13,7 @@ class ReducingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) f
     year = year,
     month = month,
     day = day,
-    "logisland")
+    solrFq = s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland")
 
   override def createCompactor() = {
     new ChunkCompactorJobStrategy2(compactorConf)
