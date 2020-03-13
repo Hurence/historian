@@ -35,7 +35,8 @@ object ChunkCompactorJob extends Serializable {
                                 saxStringLength: Int,
                                 year: Int,
                                 month: Int,
-                                day: Int, chunkOriginToCompact: String)
+                                day: Int,
+                                         solrFq: String)
 
 
 
@@ -108,7 +109,7 @@ object ChunkCompactorJob extends Serializable {
       jobConf.year,
       jobConf.month,
       jobConf.day,
-      "logisland"
+      s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland"
     )
   }
 
@@ -116,7 +117,7 @@ object ChunkCompactorJob extends Serializable {
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(zkHost)
 
-    val query = s"chunk_origin:${TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR}"
+    val query = s"${TimeSeriesRecord.CHUNK_ORIGIN}:${TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR}"
 
     // Explicit commit to make sure all docs are visible
     logger.info(s"will permantly delete docs matching $query from ${collectionName}}")

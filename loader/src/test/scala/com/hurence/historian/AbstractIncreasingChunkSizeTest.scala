@@ -7,6 +7,7 @@ import com.hurence.historian.AbstractIncreasingChunkSizeTest.LOGGER
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.logisland.record.{Point, TimeSeriesRecord}
+import com.hurence.solr.SparkSolrUtils
 import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
 import org.apache.solr.client.solrj.{SolrClient, SolrQuery}
 import org.apache.solr.client.solrj.response.QueryResponse
@@ -51,7 +52,7 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
       "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day",
       "filters" -> s"chunk_origin:compactor"
     )
-    val comapactedChunks = SolrUtils.loadTimeSeriesFromSolR(sparkSession, solrOpts)
+    val comapactedChunks = SparkSolrUtils.loadTimeSeriesFromSolR(sparkSession, solrOpts)
     val records: util.List[TimeSeriesRecord] = comapactedChunks.collectAsList()
     assertEquals(4, records.size())
     val recordsA: List[TimeSeriesRecord] = records
