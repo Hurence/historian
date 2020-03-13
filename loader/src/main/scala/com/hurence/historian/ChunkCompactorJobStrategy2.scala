@@ -37,6 +37,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
       "fields" -> fields,
       "filters" -> s"chunk_origin:${options.chunkOriginToCompact}"
     )
+
     logger.info(s"$solrOpts")
 
     spark.read
