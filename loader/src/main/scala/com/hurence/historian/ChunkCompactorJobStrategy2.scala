@@ -1,6 +1,5 @@
 package com.hurence.historian
 
-import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConfStrategy2
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.solr.SparkSolrUtils

@@ -2,7 +2,6 @@ package com.hurence.historian
 
 import java.util
 
-import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.common.{DoubleList, LongList}
@@ -12,8 +11,8 @@ import org.apache.solr.client.solrj.SolrQuery
 import org.apache.solr.common.params.MapSolrParams
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.slf4j.LoggerFactory
-import scala.collection.JavaConverters._
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable.ListBuffer
 
 class ChunkCompactorJobStrategy1(options: ChunkCompactorConf) extends ChunkCompactor {

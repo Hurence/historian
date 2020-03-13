@@ -2,20 +2,17 @@ package com.hurence.historian
 
 import java.util
 
-import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
 import com.hurence.historian.AbstractIncreasingChunkSizeTest.LOGGER
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.logisland.record.{Point, TimeSeriesRecord}
 import com.hurence.solr.SparkSolrUtils
 import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
-import org.apache.solr.client.solrj.{SolrClient, SolrQuery}
-import org.apache.solr.client.solrj.response.QueryResponse
-import org.apache.solr.common.params.SolrParams
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.solr.client.solrj.SolrClient
+import org.apache.spark.sql.SparkSession
 import org.junit.jupiter.api.Assertions._
-import org.junit.jupiter.api.{BeforeAll, Test}
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.{BeforeAll, Test}
 import org.slf4j.LoggerFactory
 import org.testcontainers.containers.DockerComposeContainer
 
