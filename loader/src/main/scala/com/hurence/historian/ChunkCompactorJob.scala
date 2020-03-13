@@ -19,27 +19,6 @@ object ChunkCompactorJob extends Serializable {
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 100
 
-  case class ChunkCompactorConf(zkHosts: String,
-                                collectionName: String,
-                                chunkSize: Int,
-                                saxAlphabetSize: Int,
-                                saxStringLength: Int,
-                                year: Int,
-                                month: Int,
-                                day: Int)
-
-  case class ChunkCompactorConfStrategy2(zkHosts: String,
-                                collectionName: String,
-                                chunkSize: Int,
-                                saxAlphabetSize: Int,
-                                saxStringLength: Int,
-                                year: Int,
-                                month: Int,
-                                day: Int,
-                                         solrFq: String)
-
-
-
   case class ChunkCompactorJobOptions(master: String,
                                       appName: String,
                                       useKerberos: Boolean,
@@ -70,8 +49,6 @@ object ChunkCompactorJob extends Serializable {
       .master(options.master)
       .getOrCreate()
 
-    //Remove logisland chunks of precedent compactor job
-    removeChunksFromSolR(options.collectionName, options.zkHosts)
     createCompactor(options).run(spark)
     // TODO remove old logisland chunks
     spark.close()

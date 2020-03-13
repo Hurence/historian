@@ -1,6 +1,5 @@
 package com.hurence.historian
 
-import com.hurence.historian.ChunkCompactorJob.{ChunkCompactorConf, ChunkCompactorConfStrategy2}
 import org.testcontainers.containers.DockerComposeContainer
 
 class ReducingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]})

@@ -1,6 +1,5 @@
 package com.hurence.historian
 
-import com.hurence.historian.ChunkCompactorJob.ChunkCompactorConf
 import org.junit.jupiter.api.Disabled
 import org.testcontainers.containers.DockerComposeContainer
 
