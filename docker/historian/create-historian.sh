@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=historian&numShards=4&replicationFactor=1"
+curl "http://localhost:8983/solr/admin/collections?action=CREATE&name=historian&numShards=2&replicationFactor=1"
 
 curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field-type" : {
@@ -48,9 +48,7 @@ curl -X POST -H 'Content-type:application/json' --data-binary '{
   "add-field":{ "name":"chunk_qualities", "type":"string", "multiValued":true},
   "add-field":{ "name":"name",  "type":"string", "multiValued":false},
   "add-field":{ "name":"timestamp",  "type":"plong" },
-  "add-field":{ "name":"year",  "type":"pint" },
-  "add-field":{ "name":"month",  "type":"pint" },
-  "add-field":{ "name":"day",  "type":"pint" },
+  "add-field":{ "name":"day",  "type":"string" },
   "add-field":{ "name":"hour",  "type":"pint" },
 
 }' http://localhost:8983/solr/historian/schema
