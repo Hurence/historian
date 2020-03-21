@@ -1,11 +1,22 @@
 package com.hurence.historian
 
+import net.liftweb.json.Serialization.write
+import net.liftweb.json._
+
 case class ChunkCompactorConfStrategy2(zkHosts: String,
-                                       collectionName: String,
+                                       timeseriesCollectionName: String,
+                                       reportCollectionName: String,
                                        chunkSize: Int,
                                        saxAlphabetSize: Int,
                                        saxStringLength: Int,
                                        year: Int,
                                        month: Int,
                                        day: Int,
-                                       solrFq: String)
+                                       solrFq: String) {
+
+  def toJson: String = {
+    implicit val formats = DefaultFormats
+    val jsonString = write(this)
+    jsonString
+  }
+}

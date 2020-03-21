@@ -42,6 +42,7 @@ public class SolrITHelper {
     private static Logger LOGGER = LoggerFactory.getLogger(SolrITHelper.class);
     public static String COLLECTION_HISTORIAN = "historian";
     public static String COLLECTION_ANNOTATION = "annotation";
+//    public static String COLLECTION_REPORT = "report";
 
     public static void initHistorianSolr(SolrClient client) throws IOException, SolrServerException {
         LOGGER.debug("creating collection {}", COLLECTION_HISTORIAN);

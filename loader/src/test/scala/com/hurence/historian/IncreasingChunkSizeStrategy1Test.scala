@@ -1,5 +1,6 @@
 package com.hurence.historian
 
+import org.apache.solr.client.solrj.SolrClient
 import org.testcontainers.containers.DockerComposeContainer
 
 class IncreasingChunkSizeStrategy1Test(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]})
@@ -15,5 +16,9 @@ class IncreasingChunkSizeStrategy1Test(container: (DockerComposeContainer[SELF])
 
   override def createCompactor() = {
     new ChunkCompactorJobStrategy1(compactorConf)
+  }
+
+  override def testReportEnd(client: SolrClient): Unit = {
+
   }
 }

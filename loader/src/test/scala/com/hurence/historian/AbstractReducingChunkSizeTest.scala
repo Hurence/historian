@@ -36,9 +36,9 @@ abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
     val start = System.currentTimeMillis();
-    assertEquals(2, SolrUtils.docsInSolr(client))
+    assertEquals(2, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
-    assertEquals(14, SolrUtils.docsInSolr(client))
+    assertEquals(14, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     val end = System.currentTimeMillis();
     //Test on chunks created
     val solrOpts = Map(

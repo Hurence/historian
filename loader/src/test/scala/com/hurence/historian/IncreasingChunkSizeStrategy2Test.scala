@@ -1,12 +1,16 @@
 package com.hurence.historian
 
+import com.hurence.historian.modele.CompactorJobReport
 import com.hurence.logisland.record.TimeSeriesRecord
+import org.apache.solr.client.solrj.SolrClient
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.testcontainers.containers.DockerComposeContainer
 
 class IncreasingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]})
   extends AbstractIncreasingChunkSizeTest(container) {
 
   val compactorConf: ChunkCompactorConfStrategy2 = ChunkCompactorConfStrategy2(zkUrl, historianCollection,
+    CompactorJobReport.DEFAULT_COLLECTION,
     chunkSize = 10,
     saxAlphabetSize = 2,
     saxStringLength = 3,
@@ -17,5 +21,13 @@ class IncreasingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF])
 
   override def createCompactor() = {
     new ChunkCompactorJobStrategy2(compactorConf)
+  }
+
+  override def testReportEnd(client: SolrClient): Unit = {
+    val reports = SolrUtils.getDocsAsJsonObjectInCollection(client, CompactorJobReport.DEFAULT_COLLECTION)
+    assertEquals(1, reports.size())
+    val report1 = reports.getJsonObject(0)
+    //TODO test report
+//    SolrSupport.indexDocs(nukk,nukk,nukk)
   }
 }

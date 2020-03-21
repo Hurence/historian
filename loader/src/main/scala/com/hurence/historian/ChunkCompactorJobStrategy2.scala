@@ -1,13 +1,19 @@
 package com.hurence.historian
 
+import java.util
+
+import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.solr.SparkSolrUtils
 import com.lucidworks.spark.util.SolrSupport
+import org.apache.solr.client.solrj.response.UpdateResponse
+import org.apache.solr.common.SolrInputDocument
 import org.apache.spark.sql.functions.{col, sum}
 import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession, functions => f}
 import org.slf4j.LoggerFactory
 
+import scala.collection.JavaConverters._
 import scala.collection.mutable.{WrappedArray => ArrayDF}
 
 class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends ChunkCompactor {
@@ -22,22 +28,39 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
   private implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
 
-  private def loadDataFromSolR(spark: SparkSession): DataFrame = {
-    val fields = s"${TimeSeriesRecord.METRIC_NAME},${TimeSeriesRecord.CHUNK_VALUE},${TimeSeriesRecord.CHUNK_START}," +
+  private val jobStart: Long = System.currentTimeMillis()
+  private val jobId: String = buildJobId(jobStart)
+  private val commitWithinMs = -1
+
+
+  private def loadChunksToBeTaggegFromSolR(spark: SparkSession): DataFrame = {
+    val fields = s"${TimeSeriesRecord.CHUNK_ID}"
+
+    val solrOpts = Map(
+      "zkhost" -> options.zkHosts,
+      "collection" -> options.timeseriesCollectionName,
+      "fields" -> fields,
+      "filters" -> options.solrFq
+    )
+    logger.info("solrOpts : {}", solrOpts.mkString("\n{", "\n", "}"))
+    SparkSolrUtils.loadFromSolR(spark, solrOpts)
+  }
+
+  private def loadTaggedChunksFromSolR(spark: SparkSession): DataFrame = {
+    val fields = s"${TimeSeriesRecord.CHUNK_ID},${TimeSeriesRecord.METRIC_NAME},${TimeSeriesRecord.CHUNK_VALUE},${TimeSeriesRecord.CHUNK_START}," +
       s"${TimeSeriesRecord.CHUNK_END},${TimeSeriesRecord.CHUNK_SIZE},${TimeSeriesRecord.CHUNK_YEAR}," +
       s"${TimeSeriesRecord.CHUNK_MONTH},${TimeSeriesRecord.CHUNK_DAY}"
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
-      "collection" -> options.collectionName,
+      "collection" -> options.timeseriesCollectionName,
       /*   "splits" -> "true",
          "split_field"-> "name",
          "splits_per_shard"-> "50",*/
-      "sort" -> "chunk_start asc",
       "fields" -> fields,
-      "filters" -> options.solrFq
+      "filters" -> s"${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:$jobId"
     )
-    logger.info(s"$solrOpts")
+    logger.info("solrOpts : {}", solrOpts.mkString("\n{", "\n", "}"))
     SparkSolrUtils.loadFromSolR(spark, solrOpts)
   }
 
@@ -46,7 +69,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
     import timeseriesDS.sparkSession.implicits._
 
-    logger.info(s"start saving new chunks to ${options.collectionName}")
+    logger.info(s"start saving new chunks to ${options.timeseriesCollectionName}")
     val savedDF = timeseriesDS
       .map(r => (
         r.getId,
@@ -71,7 +94,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         if (r.hasField(TimeSeriesRecord.CHUNK_SAX)) r.getField(TimeSeriesRecord.CHUNK_SAX).asString() else "",
         r.getField(TimeSeriesRecord.CHUNK_ORIGIN).asString())
       )
-      .toDF("id",
+      .toDF(TimeSeriesRecord.CHUNK_ID,
         TimeSeriesRecord.CHUNK_YEAR,
         TimeSeriesRecord.CHUNK_MONTH,
         TimeSeriesRecord.CHUNK_DAY,
@@ -97,13 +120,13 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
       .format("solr")
       .options(Map(
         "zkhost" -> options.zkHosts,
-        "collection" -> options.collectionName
+        "collection" -> options.timeseriesCollectionName
       ))
       .save()
 
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-    val response = solrCloudClient.commit(options.collectionName, true, true)
+    val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
     logger.info(s"done saving new chunks : ${response.toString}")
 
     savedDF
@@ -169,8 +192,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def chunkDailyMetrics(solrDf: DataFrame, maxNumberOfPointInPartition: Long): Dataset[TimeSeriesRecord] = {
-    val daylyMetrics: Dataset[String] = findDaylyMetrics(solrDf, maxNumberOfPointInPartition)
-
+//    val daylyMetrics: Dataset[String] = findDaylyMetrics(solrDf, maxNumberOfPointInPartition)
     val groupedChunkDf = solrDf
       .groupBy(
         col(TimeSeriesRecord.METRIC_NAME),
@@ -212,7 +234,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     EvoaUtils.setBusinessFields(timeSerie)
     EvoaUtils.setDateFields(timeSerie)
     EvoaUtils.setHashId(timeSerie)
-    EvoaUtils.setChunkOrigin(timeSerie, TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR)
+    EvoaUtils.setChunkOrigin(timeSerie, jobId)
     timeSerie
   }
 
@@ -229,11 +251,170 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   /**
+   * save job report
+   * @param solrChunks
+   * @return
+   */
+  def saveReportJobAfterTagging(solrChunks: DataFrame) = {
+    logger.info(s"start saving start report of job $jobId to ${options.reportCollectionName}")
+    val reportDoc = solrChunks.select(
+      f.col(TimeSeriesRecord.METRIC_NAME)
+    )
+      .agg(
+        f.lit(jobId).as(CompactorJobReport.JOB_ID),
+        f.lit(CompactorJobReport.JOB_TYPE_VALUE).as(CompactorJobReport.JOB_TYPE),
+        f.lit(jobStart).as(CompactorJobReport.JOB_START),
+        f.lit(JobStatus.RUNNING.toString).as(CompactorJobReport.JOB_STATUS),
+        f.count(TimeSeriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT),
+        f.countDistinct(TimeSeriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_TOTAL_METRICS_RECHUNKED),
+        f.lit(options.toJson).as(CompactorJobReport.JOB_CONF)
+      )
+    reportDoc.write
+      .format("solr")
+      .options(Map(
+        "zkhost" -> options.zkHosts,
+        "collection" -> options.reportCollectionName
+      )).save()
+
+    // Explicit commit to make sure all docs are visible
+    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+    val response = solrCloudClient.commit(options.reportCollectionName, true, true)
+    logger.info(s"done saving start report of job $jobId to ${options.reportCollectionName} :\n{}", response)
+    if (logger.isTraceEnabled) (
+      reportDoc.show(false)
+    )
+
+    reportDoc
+  }
+
+  def buildJobId(start:Long) = {
+    s"compaction-$start"//TODO use string date
+  }
+
+  def saveReportJobSuccess(savedDF: DataFrame) = {
+    logger.info(s"start saving success report of job $jobId to ${options.reportCollectionName}")
+    val numberOfChunkOutput: Long = savedDF.count()
+    val jobEnd = System.currentTimeMillis()
+    val updateDoc = new SolrInputDocument
+    updateDoc.setField(CompactorJobReport.JOB_ID, jobId)
+//    updateDoc.addField(CompactorJobReport.JOB_ELAPSED, new util.HashMap[String, Long](1) {
+//      {
+//        put("set", jobEnd - jobStart);
+//      }
+//    })
+//    updateDoc.addField(CompactorJobReport.JOB_END, new util.HashMap[String, Long](1) {
+//      {
+//        put("set", jobEnd);
+//      }
+//    })
+//    updateDoc.addField(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT, new util.HashMap[String, Long](1) {
+//      {
+//        put("set", numberOfChunkOutput);
+//      }
+//    })
+    updateDoc.setField(CompactorJobReport.JOB_ELAPSED, jobEnd - jobStart)
+    updateDoc.setField(CompactorJobReport.JOB_END, jobEnd)
+    updateDoc.setField(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT, numberOfChunkOutput)
+    updateDoc.setField(CompactorJobReport.JOB_STATUS, new util.HashMap[String, String](1) {
+      {
+        put("set", JobStatus.SUCCEEDED.toString);
+      }
+    })
+
+    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+    val rsp = solrCloudClient.add(options.reportCollectionName, updateDoc)
+    handleSolrResponse(rsp)
+    val rsp2 = solrCloudClient.commit(options.reportCollectionName, true, true)
+    handleSolrResponse(rsp2)
+  }
+
+  def tagChunksToBeCompacted(sparkSession: SparkSession) = {
+    val solrChunks: DataFrame = loadChunksToBeTaggegFromSolR(sparkSession)
+    logger.info(s"start tagging chunks to be compacted by job '$jobId' to collection ${options.timeseriesCollectionName}")
+    import solrChunks.sparkSession.implicits._
+    val chunkIds: Dataset[String] = solrChunks.select(
+      f.col(TimeSeriesRecord.CHUNK_ID)
+    ).as[String]
+    chunkIds.foreachPartition(tagSolrChunks _)
+
+//    def indexDocs(
+//                   zkHost: String,
+//                   collection: String,
+//                   batchSize: Int,
+//                   rdd: RDD[SolrInputDocument],
+//                   commitWithin: Option[Int],
+//                   accumulator: Option[SparkSolrAccumulator] = None): Unit = {
+
+    logger.info(s"done tagging chunks to be compacted by job '$jobId' to collection ${options.timeseriesCollectionName}")
+    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+    val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
+    handleSolrResponse(response)
+  }
+
+  private def tagSolrChunks(ids: Iterator[String]): Unit = {
+    if (ids.isEmpty)
+      return
+    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+    val addJobIdTag: util.Map[String, String] = new util.HashMap[String, String](1) {
+      {
+        put("add", jobId);
+      }
+    }
+    val updatedDocs: util.Collection[SolrInputDocument] = ids.map(id => {
+      val updateDoc = new SolrInputDocument
+      updateDoc.setField(TimeSeriesRecord.CHUNK_ID, id)
+      updateDoc.setField(TimeSeriesRecord.CHUNK_COMPACTION_RUNNING, addJobIdTag)
+      updateDoc
+    }).toList.asJava
+    val rsp = solrCloudClient.add(options.timeseriesCollectionName, updatedDocs, commitWithinMs)
+    handleSolrResponse(rsp)
+  }
+
+  def saveReportJobStarting() = {
+    //TODO
+  }
+
+  def handleSolrResponse(response: UpdateResponse) = {
+    logger.info(s"response : \n{}", response)
+    val statusCode = response.getStatus
+    if (statusCode == 0) {
+      logger.info(s"request succeeded, elapsed time is {},\n header : \n${response.getResponseHeader}\n body ${response.getResponse}", response.getElapsedTime)
+    } else {
+      logger.error(s"error during in response, header : \n${response.getResponseHeader}\n body ${response.getResponse}")
+      throw response.getException
+    }
+  }
+
+  def deleteTaggedChunks() = {
+    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+    val query = s"${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:$jobId"
+    // Explicit commit to make sure all docs are visible
+    logger.info(s"will permantly delete docs matching $query from ${options.timeseriesCollectionName}}")
+    solrCloudClient.deleteByQuery(options.timeseriesCollectionName, query)
+    val rsp = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
+    handleSolrResponse(rsp)
+  }
+
+  /**
    * Compact chunks of historian
    */
   override def run(spark: SparkSession): Unit = {
-    val timeseriesDS = loadDataFromSolR(spark)
-    val mergedTimeseriesDS = mergeChunks(sparkSession = spark, timeseriesDS)
-    saveNewChunksToSolR(mergedTimeseriesDS)
+    saveReportJobStarting()
+    try {
+      tagChunksToBeCompacted(spark)
+      val timeseriesDS = loadTaggedChunksFromSolR(spark)
+      saveReportJobAfterTagging(timeseriesDS)
+      val mergedTimeseriesDS = mergeChunks(sparkSession = spark, timeseriesDS)
+      val savedDF = saveNewChunksToSolR(mergedTimeseriesDS)
+      //TODO be sure no error happenned ! try catch between each step (not lazy step ofc)
+      //Be sure chunked data equal not chunked data as well (so we are sure of not loosing data) Maybe a count of points for each metrics (would be a first verif)
+      deleteTaggedChunks()
+      saveReportJobSuccess(savedDF)
+    } catch {
+      case ex: Throwable => {
+        logger.error("Got some other kind of exception", ex)//TODO
+      }
+    }
+
   }
 }
