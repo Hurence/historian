@@ -42,6 +42,9 @@ public class TimeSeriesRecord extends StandardRecord {
     public static final String RECORD_CHUNK_COMPRESSED_POINTS = "record_chunk_compressed_points";
     public static final String RECORD_CHUNK_UNCOMPRESSED_POINTS = "record_chunk_uncompressed_points";
     public static final String RECORD_CHUNK_SAX_POINTS = "record_chunk_sax_points";
+
+    public static final String CHUNK_ID = "id";
+    public static final String CHUNK_COMPACTION_RUNNING = "compactions_running";
     public static final String CHUNK_START = "chunk_start";
     public static final String CHUNK_END = "chunk_end";
     public static final String CHUNK_META = "chunk_attribute";

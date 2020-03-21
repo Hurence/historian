@@ -74,6 +74,12 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
+<!--        Convert into json object-->
+        <dependency>
+            <groupId>net.liftweb</groupId>
+            <artifactId>lift-json_2.11</artifactId>
+            <version>3.4.1</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.binary.version}</artifactId>

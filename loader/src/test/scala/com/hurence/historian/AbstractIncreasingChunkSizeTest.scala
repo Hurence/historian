@@ -36,18 +36,20 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
 
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
-    val start = System.currentTimeMillis();
-    assertEquals(24, SolrUtils.docsInSolr(client))
+    assertEquals(24, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
-    assertEquals(28, SolrUtils.docsInSolr(client))
-    val end = System.currentTimeMillis();
+    assertEquals(4, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
+    testChunks(sparkSession)
+    testReportEnd(client)
+  }
+
+  def testChunks(sparkSession: SparkSession) = {
     //Test on chunks created
     val solrOpts = Map(
       "zkhost" -> zkUrl,
       "collection" -> historianCollection,
       "sort" -> "chunk_start asc",
-      "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day",
-      "filters" -> s"chunk_origin:compactor"
+      "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day"
     )
     val comapactedChunks = SparkSolrUtils.loadTimeSeriesFromSolR(sparkSession, solrOpts)
     val records: util.List[TimeSeriesRecord] = comapactedChunks.collectAsList()
@@ -89,8 +91,9 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
     assertEquals(1477895624866L, pointsA.head.getTimestamp)
     assertEquals(198, pointsA.last.getValue)
     assertEquals(1477926224866L, pointsA.last.getTimestamp)
-    LOGGER.info("compactor finished in {} s", (end - start) / 1000)
   }
+
+  def testReportEnd(client: SolrClient)
 }
 
 object AbstractIncreasingChunkSizeTest {
@@ -105,6 +108,7 @@ object AbstractIncreasingChunkSizeTest {
   @BeforeAll
   def initHistorianAndDeployVerticle(client: SolrClient): Unit = {
     SolrITHelper.initHistorianSolr(client)
+    SolrUtils.createReportCollection(client)
     LOGGER.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
     val injector: GeneralSolrInjector = new GeneralSolrInjector()
     addSeveralChunksForMetric(injector, metricA)

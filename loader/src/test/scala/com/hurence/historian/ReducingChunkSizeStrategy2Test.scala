@@ -1,5 +1,6 @@
 package com.hurence.historian
 
+import com.hurence.historian.modele.CompactorJobReport
 import com.hurence.logisland.record.TimeSeriesRecord
 import org.testcontainers.containers.DockerComposeContainer
 
@@ -7,6 +8,7 @@ class ReducingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) f
   extends AbstractReducingChunkSizeTest(container) {
 
   val compactorConf: ChunkCompactorConfStrategy2 = ChunkCompactorConfStrategy2(zkUrl, historianCollection,
+    CompactorJobReport.DEFAULT_COLLECTION,
     chunkSize = chunkSize,
     saxAlphabetSize = 2,
     saxStringLength = 3,

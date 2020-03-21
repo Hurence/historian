@@ -4,9 +4,11 @@ package com.hurence.historian
 import java.text.SimpleDateFormat
 import java.util.Date
 
+import com.hurence.historian.modele.CompactorJobReport
 import com.hurence.logisland.record.TimeSeriesRecord
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
+import org.apache.solr.client.solrj.request.UpdateRequest
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 
@@ -80,6 +82,7 @@ object ChunkCompactorJob extends Serializable {
     ChunkCompactorConfStrategy2(
       jobConf.zkHosts,
       jobConf.collectionName,
+      CompactorJobReport.DEFAULT_COLLECTION,
       jobConf.chunkSize,
       jobConf.saxAlphabetSize,
       jobConf.saxStringLength,
@@ -101,6 +104,7 @@ object ChunkCompactorJob extends Serializable {
     solrCloudClient.deleteByQuery(collectionName, query)
     solrCloudClient.commit(collectionName, true, true)
   }
+
 
   def parseCommandLine(args: Array[String]): ChunkCompactorJobOptions = {
 
