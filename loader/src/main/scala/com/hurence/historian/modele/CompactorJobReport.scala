@@ -19,6 +19,7 @@ object CompactorJobReport {
   val JOB_END="end"
   val JOB_STATUS="status"
   val JOB_ERROR="error"
+  val JOB_EXCEPTION_MSG="exception_msg"
   val JOB_ELAPSED="job_duration_in_milli"
   val JOB_NUMBER_OF_CHUNK_INPUT="number_of_chunks_in_input"
   val JOB_NUMBER_OF_CHUNK_OUTPUT="number_of_chunks_in_output"
