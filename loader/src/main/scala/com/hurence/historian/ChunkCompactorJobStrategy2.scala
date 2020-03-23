@@ -1,10 +1,13 @@
 package com.hurence.historian
 
+import java.text.SimpleDateFormat
 import java.util
+import java.util.Date
 
 import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
+import com.hurence.logisland.util.time.DateUtil
 import com.hurence.solr.SparkSolrUtils
 import com.lucidworks.spark.util.{HurenceSolrSupport, SolrSupport}
 import org.apache.solr.client.solrj.response.UpdateResponse
@@ -59,7 +62,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
          "split_field"-> "name",
          "splits_per_shard"-> "50",*/
       "fields" -> fields,
-      "filters" -> s"${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:$jobId"
+      "filters" -> s"""${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:"$jobId""""
     )
     logger.info("solrOpts : {}", solrOpts.mkString("\n{", "\n", "}"))
     SparkSolrUtils.loadFromSolR(spark, solrOpts)
@@ -241,7 +244,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    * @return
    */
   private def saveReportJobAfterTagging(solrChunks: DataFrame) = {
-    logger.info(s"start saving start report of job $jobId to ${options.reportCollectionName}")
+    logger.info(s"Saving report after tagging finished of job $jobId to ${options.reportCollectionName}")
     val reportDoc = solrChunks.select(
       f.col(TimeSeriesRecord.METRIC_NAME)
     )
@@ -264,7 +267,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val response = solrCloudClient.commit(options.reportCollectionName, true, true)
-    logger.info(s"done saving start report of job $jobId to ${options.reportCollectionName} :\n{}", response)
+    logger.info(s"Saving report after tagging finished of job $jobId to ${options.reportCollectionName} :\n{}", response)
     if (logger.isTraceEnabled) (
       reportDoc.show(false)
     )
@@ -273,7 +276,10 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def buildJobId(start:Long) = {
-    s"compaction-$start"//TODO use string date
+    val pattern = "MM-dd-yyyy'T'HH:mm:ss.ZZZ"
+    val df = new SimpleDateFormat(pattern)
+    val date: String =  df.format(new Date(start))
+    s"compaction-$date"
   }
 
   private def saveReportJobSuccess(savedDF: DataFrame) = {
@@ -282,21 +288,6 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val jobEnd = System.currentTimeMillis()
     val updateDoc = new SolrInputDocument
     updateDoc.setField(CompactorJobReport.JOB_ID, jobId)
-//    updateDoc.addField(CompactorJobReport.JOB_ELAPSED, new util.HashMap[String, Long](1) {
-//      {
-//        put("set", jobEnd - jobStart);
-//      }
-//    })
-//    updateDoc.addField(CompactorJobReport.JOB_END, new util.HashMap[String, Long](1) {
-//      {
-//        put("set", jobEnd);
-//      }
-//    })
-//    updateDoc.addField(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT, new util.HashMap[String, Long](1) {
-//      {
-//        put("set", numberOfChunkOutput);
-//      }
-//    })
     updateDoc.setField(CompactorJobReport.JOB_ELAPSED, jobEnd - jobStart)
     updateDoc.setField(CompactorJobReport.JOB_END, jobEnd)
     updateDoc.setField(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT, numberOfChunkOutput)
@@ -332,7 +323,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
     logger.info(s"done tagging chunks to be compacted by job '$jobId' to collection ${options.timeseriesCollectionName}")
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-    val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)//TODO is this necessary ?
+    val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
     handleSolrResponse(response)
   }
 
@@ -384,7 +375,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
   private def deleteTaggedChunks() = {
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-    val query = s"${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:$jobId"
+    val query = s"""${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:"$jobId""""
     // Explicit commit to make sure all docs are visible
     logger.info(s"will permanently delete docs matching $query from ${options.timeseriesCollectionName}}")
     solrCloudClient.deleteByQuery(options.timeseriesCollectionName, query)
@@ -410,7 +401,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val rsp = solrCloudClient.add(options.reportCollectionName, updateDoc)
     handleSolrResponse(rsp)
-    val rsp2 = solrCloudClient.commit(options.reportCollectionName, true, true)//TODO is this needed ?
+    val rsp2 = solrCloudClient.commit(options.reportCollectionName, true, true)
     handleSolrResponse(rsp2)
   }
 
@@ -419,7 +410,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    */
   private def deleteCompactedChunks() = {
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-    val query = s"${TimeSeriesRecord.CHUNK_ORIGIN}:$jobId"
+    val query = s"""${TimeSeriesRecord.CHUNK_ORIGIN}:"$jobId""""
     logger.info(s"will permanently delete docs matching $query from ${options.timeseriesCollectionName}}")
     solrCloudClient.deleteByQuery(options.timeseriesCollectionName, query)
     val rsp = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
@@ -436,7 +427,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     } catch {
       case ex: Throwable => {
         logger.error("Failed during tagging", ex)
-        saveReportJobFailed("Failed while tagging chunks to be compacted", ex)//TODO
+        saveReportJobFailed("Failed while tagging chunks to be compacted", ex)
         throw ex
       }
     }
