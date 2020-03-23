@@ -1,9 +1,10 @@
 package com.hurence.historian
 
+import org.apache.solr.client.solrj.SolrClient
 import org.junit.jupiter.api.Disabled
 import org.testcontainers.containers.DockerComposeContainer
 
-@Disabled("Currently not working. A bug that include some chunks of size 0")
+@Disabled("Currently not working. A bug that include some chunks of size 0. legacy, should be removed soon.")
 class ReducingChunkSizeStrategy1Test(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]})
   extends AbstractReducingChunkSizeTest(container) {
 
@@ -17,5 +18,9 @@ class ReducingChunkSizeStrategy1Test(container: (DockerComposeContainer[SELF]) f
 
   override def createCompactor() = {
     new ChunkCompactorJobStrategy1(compactorConf)
+  }
+
+  override def testReportEnd(client: SolrClient): Unit = {
+    //no report
   }
 }

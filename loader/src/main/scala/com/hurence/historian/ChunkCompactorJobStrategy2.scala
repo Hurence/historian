@@ -6,11 +6,12 @@ import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.solr.SparkSolrUtils
-import com.lucidworks.spark.util.SolrSupport
+import com.lucidworks.spark.util.{HurenceSolrSupport, SolrSupport}
 import org.apache.solr.client.solrj.response.UpdateResponse
 import org.apache.solr.common.SolrInputDocument
+import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.{col, sum}
-import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession, functions => f}
+import org.apache.spark.sql.{DataFrame, Dataset, Encoders, Row, SparkSession, functions => f}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
@@ -267,7 +268,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         f.lit(JobStatus.RUNNING.toString).as(CompactorJobReport.JOB_STATUS),
         f.count(TimeSeriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT),
         f.countDistinct(TimeSeriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_TOTAL_METRICS_RECHUNKED),
-        f.lit(options.toJson).as(CompactorJobReport.JOB_CONF)
+        f.lit(options.toJsonStr).as(CompactorJobReport.JOB_CONF)
       )
     reportDoc.write
       .format("solr")
@@ -328,6 +329,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     handleSolrResponse(rsp2)
   }
 
+
   def tagChunksToBeCompacted(sparkSession: SparkSession) = {
     val solrChunks: DataFrame = loadChunksToBeTaggegFromSolR(sparkSession)
     logger.info(s"start tagging chunks to be compacted by job '$jobId' to collection ${options.timeseriesCollectionName}")
@@ -335,39 +337,39 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val chunkIds: Dataset[String] = solrChunks.select(
       f.col(TimeSeriesRecord.CHUNK_ID)
     ).as[String]
-    chunkIds.foreachPartition(tagSolrChunks _)
 
-//    def indexDocs(
-//                   zkHost: String,
-//                   collection: String,
-//                   batchSize: Int,
-//                   rdd: RDD[SolrInputDocument],
-//                   commitWithin: Option[Int],
-//                   accumulator: Option[SparkSolrAccumulator] = None): Unit = {
+    val taggedChunks: RDD[SolrInputDocument] = buildTaggegSolrDocRdd(chunkIds)
+    HurenceSolrSupport.indexDocs(
+      options.zkHosts,
+      options.timeseriesCollectionName,
+      1000,
+      taggedChunks
+    )
 
     logger.info(s"done tagging chunks to be compacted by job '$jobId' to collection ${options.timeseriesCollectionName}")
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
-    val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
+    val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)//TODO is this necessary ?
     handleSolrResponse(response)
   }
 
-  private def tagSolrChunks(ids: Iterator[String]): Unit = {
-    if (ids.isEmpty)
-      return
-    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
+  /**
+   *
+   * @param chunkIds containing ids of doc to tag
+   * @return
+   */
+  def buildTaggegSolrDocRdd(chunkIds: Dataset[String]) = {
     val addJobIdTag: util.Map[String, String] = new util.HashMap[String, String](1) {
       {
         put("add", jobId);
       }
     }
-    val updatedDocs: util.Collection[SolrInputDocument] = ids.map(id => {
+    chunkIds.rdd.map(id => {
       val updateDoc = new SolrInputDocument
       updateDoc.setField(TimeSeriesRecord.CHUNK_ID, id)
       updateDoc.setField(TimeSeriesRecord.CHUNK_COMPACTION_RUNNING, addJobIdTag)
       updateDoc
-    }).toList.asJava
-    val rsp = solrCloudClient.add(options.timeseriesCollectionName, updatedDocs, commitWithinMs)
-    handleSolrResponse(rsp)
+    })
+    //(Encoders.bean(classOf[SolrInputDocument]))
   }
 
   def saveReportJobStarting() = {
@@ -399,7 +401,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    * Compact chunks of historian
    */
   override def run(spark: SparkSession): Unit = {
-    saveReportJobStarting()
+    saveReportJobStarting()//TODO
     try {
       tagChunksToBeCompacted(spark)
       val timeseriesDS = loadTaggedChunksFromSolR(spark)
