@@ -3,11 +3,13 @@ package com.hurence.historian
 import java.util
 
 import com.hurence.historian.AbstractIncreasingChunkSizeTest.LOGGER
+import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.logisland.record.{Point, TimeSeriesRecord}
 import com.hurence.solr.SparkSolrUtils
 import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
+import io.vertx.core.json.JsonObject
 import org.apache.solr.client.solrj.SolrClient
 import org.apache.spark.sql.SparkSession
 import org.junit.jupiter.api.Assertions._
@@ -93,7 +95,20 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
     assertEquals(1477926224866L, pointsA.last.getTimestamp)
   }
 
-  def testReportEnd(client: SolrClient)
+  def testReportEnd(client: SolrClient): Unit = {
+    val reports = SolrUtils.getDocsAsJsonObjectInCollection(client, CompactorJobReport.DEFAULT_COLLECTION)
+    assertEquals(1, reports.size())
+    val report = reports.getJsonObject(0)
+    assertEquals(JobStatus.SUCCEEDED.toString, report.getString(CompactorJobReport.JOB_STATUS))
+    assertEquals(4, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT))
+    assertEquals(CompactorJobReport.JOB_TYPE_VALUE, report.getString(CompactorJobReport.JOB_TYPE))
+    assertEquals(null, report.getString(CompactorJobReport.JOB_ERROR))
+    assertEquals(24, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT))
+    assertEquals(2, report.getLong(CompactorJobReport.JOB_TOTAL_METRICS_RECHUNKED))
+    additionalTestsOnReportEnd(report)
+  }
+
+  def additionalTestsOnReportEnd(report: JsonObject): Unit = {}
 }
 
 object AbstractIncreasingChunkSizeTest {

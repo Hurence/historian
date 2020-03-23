@@ -3,11 +3,13 @@ package com.hurence.historian
 import java.util
 
 import com.hurence.historian.AbstractReducingChunkSizeTest.LOGGER
+import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.logisland.record.{Point, TimeSeriesRecord}
 import com.hurence.solr.SparkSolrUtils
 import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
+import io.vertx.core.json.JsonObject
 import org.apache.solr.client.solrj.SolrClient
 import org.apache.spark.sql.SparkSession
 import org.junit.jupiter.api.Assertions._
@@ -38,15 +40,14 @@ abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer
     val start = System.currentTimeMillis();
     assertEquals(2, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
-    assertEquals(14, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
+    assertEquals(12, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     val end = System.currentTimeMillis();
     //Test on chunks created
     val solrOpts = Map(
       "zkhost" -> zkUrl,
       "collection" -> historianCollection,
       "sort" -> "chunk_start asc",
-      "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day",
-      "filters" -> s"chunk_origin:compactor"
+      "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day"
     )
     val comapactedChunks = SparkSolrUtils.loadTimeSeriesFromSolR(sparkSession, solrOpts)
     val records: util.List[TimeSeriesRecord] = comapactedChunks.collectAsList()
@@ -90,6 +91,21 @@ abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer
     assertEquals(1477926224866L, pointsA.last.getTimestamp)
     LOGGER.info("compactor finished in {} s", (end - start) / 1000)
   }
+
+  def testReportEnd(client: SolrClient): Unit = {
+    val reports = SolrUtils.getDocsAsJsonObjectInCollection(client, CompactorJobReport.DEFAULT_COLLECTION)
+    assertEquals(1, reports.size())
+    val report = reports.getJsonObject(0)
+    assertEquals(JobStatus.SUCCEEDED.toString, report.getString(CompactorJobReport.JOB_STATUS))
+    assertEquals(12, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT))
+    assertEquals(CompactorJobReport.JOB_TYPE_VALUE, report.getString(CompactorJobReport.JOB_TYPE))
+    assertEquals(null, report.getString(CompactorJobReport.JOB_ERROR))
+    assertEquals(2, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT))
+    assertEquals(2, report.getLong(CompactorJobReport.JOB_TOTAL_METRICS_RECHUNKED))
+    additionalTestsOnReportEnd(report)
+  }
+
+  def additionalTestsOnReportEnd(report: JsonObject): Unit = {}
 }
 
 object AbstractReducingChunkSizeTest {
@@ -104,6 +120,7 @@ object AbstractReducingChunkSizeTest {
   @BeforeAll
   def initHistorianAndDeployVerticle(client: SolrClient): Unit = {
     SolrITHelper.initHistorianSolr(client)
+    SolrUtils.createReportCollection(client)
     LOGGER.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
     val injector: GeneralSolrInjector = new GeneralSolrInjector()
     injector.addChunk(metricA, year, month, day, chunkOrigin,

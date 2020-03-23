@@ -14,7 +14,7 @@ case class ChunkCompactorConfStrategy2(zkHosts: String,
                                        day: Int,
                                        solrFq: String) {
 
-  def toJson: String = {
+  def toJsonStr: String = {
     implicit val formats = DefaultFormats
     val jsonString = write(this)
     jsonString
