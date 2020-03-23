@@ -9,9 +9,6 @@ case class ChunkCompactorConfStrategy2(zkHosts: String,
                                        chunkSize: Int,
                                        saxAlphabetSize: Int,
                                        saxStringLength: Int,
-                                       year: Int,
-                                       month: Int,
-                                       day: Int,
                                        solrFq: String) {
 
   def toJsonStr: String = {

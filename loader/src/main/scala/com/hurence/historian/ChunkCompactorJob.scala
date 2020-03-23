@@ -86,25 +86,9 @@ object ChunkCompactorJob extends Serializable {
       jobConf.chunkSize,
       jobConf.saxAlphabetSize,
       jobConf.saxStringLength,
-      jobConf.year,
-      jobConf.month,
-      jobConf.day,
       s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland"
     )
   }
-
-  def removeChunksFromSolR(collectionName: String, zkHost: String) = {
-    // Explicit commit to make sure all docs are visible
-    val solrCloudClient = SolrSupport.getCachedCloudClient(zkHost)
-
-    val query = s"${TimeSeriesRecord.CHUNK_ORIGIN}:${TimeSeriesRecord.CHUNK_ORIGIN_COMPACTOR}"
-
-    // Explicit commit to make sure all docs are visible
-    logger.info(s"will permantly delete docs matching $query from ${collectionName}}")
-    solrCloudClient.deleteByQuery(collectionName, query)
-    solrCloudClient.commit(collectionName, true, true)
-  }
-
 
   def parseCommandLine(args: Array[String]): ChunkCompactorJobOptions = {
 
