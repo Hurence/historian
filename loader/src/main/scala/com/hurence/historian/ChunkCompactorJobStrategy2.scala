@@ -7,17 +7,15 @@ import java.util.Date
 import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
-import com.hurence.logisland.util.time.DateUtil
 import com.hurence.solr.SparkSolrUtils
 import com.lucidworks.spark.util.{HurenceSolrSupport, SolrSupport}
 import org.apache.solr.client.solrj.response.UpdateResponse
 import org.apache.solr.common.SolrInputDocument
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.functions.{col, sum}
-import org.apache.spark.sql.{DataFrame, Dataset, Encoders, Row, SparkSession, functions => f}
+import org.apache.spark.sql.{DataFrame, Dataset, Row, SparkSession, functions => f}
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters._
 import scala.collection.mutable.{WrappedArray => ArrayDF}
 
 class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends ChunkCompactor {
@@ -69,8 +67,6 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
-
-
     import timeseriesDS.sparkSession.implicits._
 
     logger.info(s"start saving new chunks to ${options.timeseriesCollectionName}")
@@ -120,6 +116,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         TimeSeriesRecord.CHUNK_SAX,
         TimeSeriesRecord.CHUNK_ORIGIN)
 
+    val start = System.currentTimeMillis()
     savedDF.write
       .format("solr")
       .options(Map(
@@ -127,7 +124,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         "collection" -> options.timeseriesCollectionName
       ))
       .save()
-
+    logger.info(s"Saving newly compacted chunks took ${(start - System.currentTimeMillis()) / 1000} seconds")
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
@@ -244,6 +241,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    * @return
    */
   private def saveReportJobAfterTagging(solrChunks: DataFrame) = {
+    val start = System.currentTimeMillis()
     logger.info(s"Saving report after tagging finished of job $jobId to ${options.reportCollectionName}")
     val reportDoc = solrChunks.select(
       f.col(TimeSeriesRecord.METRIC_NAME)
@@ -271,7 +269,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     if (logger.isTraceEnabled) (
       reportDoc.show(false)
     )
-
+    logger.info(s"saving report after tagging lasted ${(start - System.currentTimeMillis()) / 1000} seconds")
     reportDoc
   }
 
@@ -306,6 +304,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
 
   private def tagChunksToBeCompacted(sparkSession: SparkSession) = {
+    val start = System.currentTimeMillis()
     val solrChunks: DataFrame = loadChunksToBeTaggegFromSolR(sparkSession)
     logger.info(s"start tagging chunks to be compacted by job '$jobId' to collection ${options.timeseriesCollectionName}")
     import solrChunks.sparkSession.implicits._
@@ -317,7 +316,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     HurenceSolrSupport.indexDocs(
       options.zkHosts,
       options.timeseriesCollectionName,
-      1000,
+      5000,
       taggedChunks
     )
 
@@ -325,6 +324,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val response = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
     handleSolrResponse(response)
+    logger.info(s"Tagging lasted ${(start - System.currentTimeMillis()) / 1000} seconds")
   }
 
   /**
@@ -348,18 +348,20 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def saveReportJobStarting() = {
+    val start = System.currentTimeMillis()
     logger.info(s"Saving report that job $jobId started (to collection ${options.reportCollectionName})")
     val reportDoc = new SolrInputDocument
     reportDoc.setField(CompactorJobReport.JOB_ID, jobId)
     reportDoc.setField(CompactorJobReport.JOB_TYPE, CompactorJobReport.JOB_TYPE_VALUE)
     reportDoc.setField(CompactorJobReport.JOB_CONF, options.toJsonStr)
-    reportDoc.setField(CompactorJobReport.JOB_STATUS, JobStatus.RUNNING)
+    reportDoc.setField(CompactorJobReport.JOB_STATUS, JobStatus.RUNNING.toString)
     reportDoc.setField(CompactorJobReport.JOB_START, jobStart)
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val rsp = solrCloudClient.add(options.reportCollectionName, reportDoc)
     handleSolrResponse(rsp)
-//    val rsp2 = solrCloudClient.commit(options.reportCollectionName, true, true)
-//    handleSolrResponse(rsp2)
+    val rsp2 = solrCloudClient.commit(options.reportCollectionName, true, true)
+    handleSolrResponse(rsp2)
+    logger.info(s"Start report writing lasted ${(start - System.currentTimeMillis()) / 1000} seconds")
   }
 
   private def handleSolrResponse(response: UpdateResponse) = {
@@ -374,13 +376,19 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def deleteTaggedChunks() = {
-    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val query = s"""${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:"$jobId""""
-    // Explicit commit to make sure all docs are visible
-    logger.info(s"will permanently delete docs matching $query from ${options.timeseriesCollectionName}}")
-    solrCloudClient.deleteByQuery(options.timeseriesCollectionName, query)
-    val rsp = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
+    deleteByQuery(options.timeseriesCollectionName, options.zkHosts, query)
+  }
+
+  def deleteByQuery(collectionName: String, zkHost: String, query: String) = {
+    val start = System.currentTimeMillis()
+    val solrCloudClient = SolrSupport.getCachedCloudClient(zkHost)
+    logger.info(s"will permanently delete docs matching $query from ${collectionName}}")
+    val rsp = solrCloudClient.deleteByQuery(collectionName, query)
     handleSolrResponse(rsp)
+    val rsp2 = solrCloudClient.commit(collectionName, true, true)
+    handleSolrResponse(rsp2)
+    logger.info(s"Deleting data from collection $collectionName with query $query took ${(start - System.currentTimeMillis()) / 1000} seconds")
   }
 
   private def saveReportJobFailed(stageOfFailure: String, ex: Throwable) = {
@@ -409,12 +417,8 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    * Need to eventually delete chunks that would have been successfully injected when an error occurs
    */
   private def deleteCompactedChunks() = {
-    val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val query = s"""${TimeSeriesRecord.CHUNK_ORIGIN}:"$jobId""""
-    logger.info(s"will permanently delete docs matching $query from ${options.timeseriesCollectionName}}")
-    solrCloudClient.deleteByQuery(options.timeseriesCollectionName, query)
-    val rsp = solrCloudClient.commit(options.timeseriesCollectionName, true, true)
-    handleSolrResponse(rsp)
+    deleteByQuery(options.timeseriesCollectionName, options.zkHosts, query)
   }
 
   /**
