@@ -14,7 +14,8 @@ class ReducingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) f
     chunkSize = chunkSize,
     saxAlphabetSize = 2,
     saxStringLength = 3,
-    solrFq = s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland")
+    solrFq = s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
+    false)
 
   override def createCompactor() = {
     new ChunkCompactorJobStrategy2(compactorConf)

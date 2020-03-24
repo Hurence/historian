@@ -31,10 +31,11 @@ object ChunkCompactorJob extends Serializable {
                                       saxStringLength: Int,
                                       year: Int,
                                       month: Int,
-                                      day: Int)
+                                      day: Int,
+                                      taggingChunksToCompact: Boolean)
 
   val defaultConf = ChunkCompactorConf("zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
-  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
+  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19, true)
 
   /**
    *
@@ -86,7 +87,8 @@ object ChunkCompactorJob extends Serializable {
       jobConf.chunkSize,
       jobConf.saxAlphabetSize,
       jobConf.saxStringLength,
-      s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland"
+      s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
+      jobConf.taggingChunksToCompact
     )
   }
 
@@ -160,11 +162,22 @@ object ChunkCompactorJob extends Serializable {
       .build()
     )
 
+
+    options.addOption(Option.builder("nt")
+      .longOpt("no-tagging-chunks")
+      .hasArg(false)
+      .optionalArg(true)
+      .desc("if set, the compactor will not tag chunks to compact. Therefore when deleting chunks at end " +
+        "there is a risk that to delete unchunked data (to lost data). Depending on if the query match different chunks at " +
+        "the start than at the end of the job.")
+      .build()
+    )
+
     // parse the command line arguments
     val line = parser.parse(options, args)
-    val sparkMaster = if (line.hasOption("ms")) line.getOptionValue("ms") else "local[*]"
-    val useKerberos = if (line.hasOption("kb")) true else false
-    val zkHosts = if (line.hasOption("zk")) line.getOptionValue("zk") else "localhost:2181"
+    val sparkMaster: String = if (line.hasOption("ms")) line.getOptionValue("ms") else "local[*]"
+    val useKerberos: Boolean = if (line.hasOption("kb")) true else false
+    val zkHosts: String = if (line.hasOption("zk")) line.getOptionValue("zk") else "localhost:2181"
     val collectionName = if (line.hasOption("col")) line.getOptionValue("col") else "historian"
     val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else ChunkCompactorJob.DEFAULT_CHUNK_SIZE
     val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else ChunkCompactorJob.DEFAULT_SAX_ALPHABET_SIZE
@@ -177,6 +190,7 @@ object ChunkCompactorJob extends Serializable {
       dateFormat.format(new Date())
         .split("-")
     }
+    val taggingChunksToCompact: Boolean = !line.hasOption("nt")
 
     // build the option handler
     val opts = ChunkCompactorJobOptions(sparkMaster,
@@ -189,7 +203,8 @@ object ChunkCompactorJob extends Serializable {
       saxStringLength,
       dateTokens(0).toInt,
       dateTokens(1).toInt,
-      dateTokens(2).toInt
+      dateTokens(2).toInt,
+      taggingChunksToCompact
     )
     logger.info(s"Command line options : $opts")
     opts
