@@ -247,7 +247,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 for(Group group : groups) {
                     group.getGroupValue();
                     metrics.add(group.getGroupValue());
-                    }
+                }
                 LOGGER.debug("Found " + response.getRequestUrl() + response + " result : " + metrics);
                 LOGGER.debug("metrics : "+ metrics);
                 LOGGER.debug("total found = {}", totalMetricsFound);

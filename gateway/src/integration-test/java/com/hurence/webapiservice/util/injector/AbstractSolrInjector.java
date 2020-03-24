@@ -35,7 +35,7 @@ public abstract class AbstractSolrInjector implements SolrInjector {
             ChunkModele chunkExpected = chunks.get(i);
             client.add(COLLECTION, buildSolrDocument(chunkExpected, "id" + i));
         }
-        UpdateResponse updateRsp = client.commit(COLLECTION);
+        UpdateResponse updateRsp = client.commit(COLLECTION, true, true);
     }
 
     public void addChunk(ChunkModele chunk) {
