@@ -42,11 +42,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchEndPointWithCustomConfigIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointWithCustomConfigIT.class);
-    private static WebClient webClient;
     private static String COLLECTION = HistorianSolrITHelper.COLLECTION;
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, Vertx vertx) throws IOException, SolrServerException {
+    public static void beforeAll(SolrClient client) throws IOException, SolrServerException {
         HistorianSolrITHelper
                 .initHistorianSolr(client);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
@@ -84,18 +83,17 @@ public class SearchEndPointWithCustomConfigIT {
         client.add(COLLECTION, doc7);
         client.commit(COLLECTION);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
-        webClient = HttpITHelper.buildWebClient(vertx);
     }
 
 
     @AfterEach
     public void afterEach(Vertx vertx) {
         vertx.deploymentIDs().forEach(vertx::undeploy);
+
     }
 
     @AfterAll
     public static void afterAll(Vertx vertx) {
-        webClient.close();
         vertx.close();
     }
 
@@ -105,12 +103,12 @@ public class SearchEndPointWithCustomConfigIT {
         JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
         JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
         HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
-                .map(t -> {
+                .doOnError(testContext::failNow)
+                .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
                             "/http/grafana/search/test1/request.json",
                             "/http/grafana/search/test1/expectedResponse.json");
-                    return t;
-                }).subscribe();
+                });
     }
 
     @Test
@@ -119,12 +117,12 @@ public class SearchEndPointWithCustomConfigIT {
         JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 2)));
         JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
         HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
-                .map(t -> {
+                .doOnError(testContext::failNow)
+                .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
                             "/http/grafana/search/testWithLimit/request.json",
                             "/http/grafana/search/testWithLimit/expectedResponse.json");
-                    return t;
-                }).subscribe();
+                });
     }
 
     @Test
@@ -133,12 +131,12 @@ public class SearchEndPointWithCustomConfigIT {
         JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
         JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
         HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
-                .map(t -> {
+                .doOnError(testContext::failNow)
+                .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
                             "/http/grafana/search/testEmptyQuery/request.json",
                             "/http/grafana/search/testEmptyQuery/expectedResponse.json");
-                    return t;
-                }).subscribe();
+                });
     }
 
     @Test
@@ -147,16 +145,17 @@ public class SearchEndPointWithCustomConfigIT {
         JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 2)));
         JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
         HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
-                .map(t -> {
+                .doOnError(testContext::failNow)
+                .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
                             "/http/grafana/search/testEmptyQueryWithLimit/request.json",
                             "/http/grafana/search/testEmptyQueryWithLimit/expectedResponse.json");
-                    return t;
-                }).subscribe();
+                });
     }
 
     public void assertRequestGiveObjectResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
                                                                    String requestFile, String responseFile) {
+        WebClient webClient = HttpITHelper.buildWebClient(vertx);
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
@@ -187,6 +186,7 @@ public class SearchEndPointWithCustomConfigIT {
 
     public void assertRequestGiveObjectResponseFromFileWithDeafaultSize(Vertx vertx, VertxTestContext testContext,
                                                                         String requestFile, String responseFile) {
+        WebClient webClient = HttpITHelper.buildWebClient(vertx);
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
