@@ -15,7 +15,8 @@ class IncreasingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF])
     saxAlphabetSize = 2,
     saxStringLength = 3,
     solrFq = s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
-    false
+    false,
+    true
   )
 
   override def createCompactor() = {
