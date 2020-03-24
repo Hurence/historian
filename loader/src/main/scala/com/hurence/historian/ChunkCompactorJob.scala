@@ -29,14 +29,11 @@ object ChunkCompactorJob extends Serializable {
                                       chunkSize: Int,
                                       saxAlphabetSize: Int,
                                       saxStringLength: Int,
-                                      year: Int,
-                                      month: Int,
-                                      day: Int,
                                       taggingChunksToCompact: Boolean,
                                       useCache: Boolean)
 
   val defaultConf = ChunkCompactorConf("zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
-  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19, true, true)
+  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, true, true)
 
   /**
    *
@@ -74,9 +71,9 @@ object ChunkCompactorJob extends Serializable {
         jobConf.chunkSize,
         jobConf.saxAlphabetSize,
         jobConf.saxStringLength,
-        jobConf.year,
-        jobConf.month,
-        jobConf.day
+        2019,
+        1,
+        1
       )
   }
 
@@ -156,14 +153,6 @@ object ChunkCompactorJob extends Serializable {
       .build()
     )
 
-    options.addOption(Option.builder("date")
-      .longOpt("recompaction-date")
-      .hasArg(true)
-      .optionalArg(true)
-      .desc("the day date to recompact in the form of yyyy-MM-dd")
-      .build()
-    )
-
     options.addOption(Option.builder("nt")
       .longOpt("no-tagging-chunks")
       .hasArg(false)
@@ -191,14 +180,6 @@ object ChunkCompactorJob extends Serializable {
     val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else ChunkCompactorJob.DEFAULT_CHUNK_SIZE
     val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else ChunkCompactorJob.DEFAULT_SAX_ALPHABET_SIZE
     val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else ChunkCompactorJob.DEFAULT_SAX_STRING_LENGTH
-    val dateTokens = if (line.hasOption("date")) {
-      line.getOptionValue("date").split("-")
-    } else {
-      val DATE_FORMAT = "yyyy-MM-dd"
-      val dateFormat = new SimpleDateFormat(DATE_FORMAT)
-      dateFormat.format(new Date())
-        .split("-")
-    }
     val taggingChunksToCompact: Boolean = !line.hasOption("nt")
     val useCache: Boolean = line.hasOption("c")
 
@@ -211,9 +192,6 @@ object ChunkCompactorJob extends Serializable {
       chunksSize,
       alphabetSize,
       saxStringLength,
-      dateTokens(0).toInt,
-      dateTokens(1).toInt,
-      dateTokens(2).toInt,
       taggingChunksToCompact,
       useCache
     )
