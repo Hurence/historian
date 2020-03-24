@@ -31,12 +31,12 @@ public class ResponseAsList {
     public static class SubResponse {
         public String metric;
         public Long date;
-        public Long value;
+        public double value;
 
         public SubResponse(JsonArray line) {
             this.metric = line.getString(0);
-            this.date = line.getLong(1);
-            this.value = line.getLong(2);
+            this.date = line.getLong(2);
+            this.value = line.getLong(1);
         }
     }
 
