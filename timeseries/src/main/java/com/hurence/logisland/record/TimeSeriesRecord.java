@@ -18,14 +18,20 @@ package com.hurence.logisland.record;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
 import com.hurence.logisland.util.string.BinaryEncodingUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.util.Map;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
  * Timeseries holder record
  */
 public class TimeSeriesRecord extends StandardRecord {
+
+    private static Logger logger = LoggerFactory.getLogger(StandardRecord.class);
 
     public static final String CHUNK_ORIGIN = "chunk_origin";
     private MetricTimeSeries timeSeries;
@@ -36,6 +42,9 @@ public class TimeSeriesRecord extends StandardRecord {
     public static final String RECORD_CHUNK_COMPRESSED_POINTS = "record_chunk_compressed_points";
     public static final String RECORD_CHUNK_UNCOMPRESSED_POINTS = "record_chunk_uncompressed_points";
     public static final String RECORD_CHUNK_SAX_POINTS = "record_chunk_sax_points";
+
+    public static final String CHUNK_ID = "id";
+    public static final String CHUNK_COMPACTION_RUNNING = "compactions_running";
     public static final String CHUNK_START = "chunk_start";
     public static final String CHUNK_END = "chunk_end";
     public static final String CHUNK_META = "chunk_attribute";
@@ -51,6 +60,11 @@ public class TimeSeriesRecord extends StandardRecord {
     public static final String CHUNK_VALUE = "chunk_value";
     public static final String CHUNK_SIZE_BYTES = "chunk_size_bytes";
     public static final String METRIC_NAME = "name";
+    public static final String CODE_INSTALL = "code_install";
+    public static final String CHUNK_DAY = "day";
+    public static final String CHUNK_MONTH = "month";
+    public static final String CHUNK_YEAR = "year";
+    public static final String SENSOR = "sensor";
     public static final String CHUNK_SUM = "chunk_sum";
     public static final String CHUNK_WINDOW_MS = "chunk_window_ms";
     public static final String RECORD_TIMESERIE_POINT_TIMESTAMP = "record_timeserie_time";
@@ -70,7 +84,6 @@ public class TimeSeriesRecord extends StandardRecord {
         setField(CHUNK_END, FieldType.LONG, timeSeries.getEnd());
         setField(CHUNK_SIZE, FieldType.INT, timeSeries.getValues().size());
         setField(CHUNK_WINDOW_MS, FieldType.LONG, timeSeries.getEnd() - timeSeries.getStart());
-
         timeSeries.attributes().keySet().forEach(key -> {
             setStringField(key, String.valueOf(timeSeries.attribute(key)));
         });
@@ -85,8 +98,7 @@ public class TimeSeriesRecord extends StandardRecord {
         setField(CHUNK_END, FieldType.LONG, chunkEnd);
 
         try {
-            byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
-            Stream<Point> pointStream = converter.unCompressPoints(chunkBytes, chunkStart, chunkEnd).stream();
+            Stream<Point> pointStream = getPointStream(chunkValue, chunkStart, chunkEnd).stream();
 
             MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(name, type)
                     .start(chunkStart)
@@ -100,6 +112,11 @@ public class TimeSeriesRecord extends StandardRecord {
         } catch (Exception ex) {
             // do nothing ?
         }
+    }
+
+    public static List<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
+        byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
+        return converter.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
     }
 
 
@@ -125,6 +142,54 @@ public class TimeSeriesRecord extends StandardRecord {
             return getField(METRIC_NAME).asString();
         else
             return "";
+    }
+
+    public long getStartChunk() {
+        if (hasField(CHUNK_START))
+            return getField(CHUNK_START).asLong();
+        else
+            return 0;
+    }
+
+    public long getEndChunk() {
+        if (hasField(CHUNK_END))
+            return getField(CHUNK_END).asLong();
+        else
+            return 0;
+    }
+
+    public String getChunkValue() {
+        if (hasField(CHUNK_VALUE))
+            return getField(CHUNK_VALUE).asString();
+        else
+            return "";
+    }
+
+    public double getFirstValue() {
+        if (hasField(CHUNK_FIRST_VALUE))
+            return getField(CHUNK_FIRST_VALUE).asDouble();
+        else
+            return 0;
+    }
+
+    /**
+     *
+     * @return uncompressed points lazyly if not yet done
+     */
+    public List<Point> getPoints() {
+        if (hasField(RECORD_CHUNK_UNCOMPRESSED_POINTS))
+            return (List<Point>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue();
+        else {
+            List<Point> points = null;
+            try {
+                points = getPointStream(getChunkValue(), getStartChunk(), getEndChunk());
+            } catch (IOException e) {
+                logger.error("chile uncompressing data points of chunk", e);
+                return Collections.emptyList();
+            }
+            setField(RECORD_CHUNK_UNCOMPRESSED_POINTS, FieldType.ARRAY, points);
+            return points;
+        }
     }
 
 }
