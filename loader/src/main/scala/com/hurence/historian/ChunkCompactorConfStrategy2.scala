@@ -9,7 +9,8 @@ case class ChunkCompactorConfStrategy2(zkHosts: String,
                                        chunkSize: Int,
                                        saxAlphabetSize: Int,
                                        saxStringLength: Int,
-                                       solrFq: String) {
+                                       solrFq: String,
+                                       tagging: Boolean) {
 
   def toJsonStr: String = {
     implicit val formats = DefaultFormats

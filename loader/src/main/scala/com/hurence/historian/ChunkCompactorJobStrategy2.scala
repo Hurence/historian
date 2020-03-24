@@ -35,6 +35,22 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   private val commitWithinMs = -1
 
 
+
+  private def loadChunksFromSolR(spark: SparkSession): DataFrame = {
+    val fields = s"${TimeSeriesRecord.CHUNK_ID},${TimeSeriesRecord.METRIC_NAME},${TimeSeriesRecord.CHUNK_VALUE},${TimeSeriesRecord.CHUNK_START}," +
+      s"${TimeSeriesRecord.CHUNK_END},${TimeSeriesRecord.CHUNK_SIZE},${TimeSeriesRecord.CHUNK_YEAR}," +
+      s"${TimeSeriesRecord.CHUNK_MONTH},${TimeSeriesRecord.CHUNK_DAY}"
+
+    val solrOpts = Map(
+      "zkhost" -> options.zkHosts,
+      "collection" -> options.timeseriesCollectionName,
+      "fields" -> fields,
+      "filters" -> options.solrFq
+    )
+    logger.info("solrOpts : {}", solrOpts.mkString("\n{", "\n", "}"))
+    SparkSolrUtils.loadFromSolR(spark, solrOpts)
+  }
+
   private def loadChunksToBeTaggegFromSolR(spark: SparkSession): DataFrame = {
     val fields = s"${TimeSeriesRecord.CHUNK_ID}"
 
@@ -420,12 +436,77 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val query = s"""${TimeSeriesRecord.CHUNK_ORIGIN}:"$jobId""""
     deleteByQuery(options.timeseriesCollectionName, options.zkHosts, query)
   }
-
   /**
    * Compact chunks of historian
    */
   override def run(spark: SparkSession): Unit = {
     saveReportJobStarting()
+    val timeseriesDS: DataFrame = calculMetricsInReportAndLoadTimeSeries(spark)
+    val savedDF: DataFrame = compactThenSaveChunks(spark, timeseriesDS)
+    deleteOldChunks
+    saveSuccessReport(savedDF)
+  }
+
+  private def saveSuccessReport(savedDF: DataFrame) = {
+    try {
+      saveReportJobSuccess(savedDF)
+    } catch {
+      case ex: Throwable => {
+        logger.error("Failed during tagging", ex)
+        saveReportJobFailed("Failed while attempting to write final report after compactor finished smoothly", ex)
+        throw ex
+      }
+    }
+  }
+
+  def deleteChunksWithQuery() = {
+
+  }
+
+  private def deleteOldChunks = {
+    if (options.tagging) {
+      try {
+        //TODO check chunked data equal not chunked data ? (so we are sure of not loosing data) Maybe a count of points for each metrics (would be a first verif)
+        deleteTaggedChunks()
+      } catch {
+        case ex: Throwable => {
+          logger.error("Failed during tagging", ex)
+          saveReportJobFailed("Error happened while deleting tagged chunks, so there may be duplicates in datas ! " +
+            "Be sure to clean chunks before re running a compaction", ex)
+          throw ex
+        }
+      }
+    } else {
+      //This is unsafe !!!! Use this carefully in prod. The query could match newly injected chunks that are not yet chunked.
+      //This means that these chunks would be deleted (So there would be a lost of data)
+      deleteByQuery(options.timeseriesCollectionName, options.zkHosts, options.solrFq)
+    }
+  }
+
+
+  def calculMetricsInReportAndLoadTimeSeries(spark: SparkSession): DataFrame = {
+    if (options.tagging) {
+      tagChunksThenCalculateMetricsInReportThenLoadTaggedChunks(spark)
+    } else {
+      loadChunksWithQueryThenCalculMetricsInReportThenReturnLoadedChunks(spark)
+    }
+  }
+
+  private def loadChunksWithQueryThenCalculMetricsInReportThenReturnLoadedChunks(spark: SparkSession) = {
+    val timeseriesDS = loadChunksFromSolR(spark)
+    try {
+      saveReportJobAfterTagging(timeseriesDS)
+      timeseriesDS
+    } catch {
+      case ex: Throwable => {
+        logger.error("Failed during tagging", ex)
+        saveReportJobFailed("Failed while attempting to write intermediary report after chunks have been tagged", ex)
+        throw ex
+      }
+    }
+  }
+
+  private def tagChunksThenCalculateMetricsInReportThenLoadTaggedChunks(spark: SparkSession) = {
     try {
       tagChunksToBeCompacted(spark)
     } catch {
@@ -438,6 +519,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val timeseriesDS = loadTaggedChunksFromSolR(spark)
     try {
       saveReportJobAfterTagging(timeseriesDS)
+      timeseriesDS
     } catch {
       case ex: Throwable => {
         logger.error("Failed during tagging", ex)
@@ -445,35 +527,17 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         throw ex
       }
     }
-    var savedDF: DataFrame = null
+  }
+
+  def compactThenSaveChunks(spark: SparkSession, timeseriesDS: DataFrame) = {
     try {
       val mergedTimeseriesDS = mergeChunks(sparkSession = spark, timeseriesDS)
-      savedDF = saveNewChunksToSolR(mergedTimeseriesDS)
+      saveNewChunksToSolR(mergedTimeseriesDS)
     } catch {
       case ex: Throwable => {
         logger.error("Failed during tagging", ex)
         saveReportJobFailed("Failed while trying to save newly compacted chunks", ex)
         deleteCompactedChunks()
-        throw ex
-      }
-    }
-    try {
-      //TODO check chunked data equal not chunked data ? (so we are sure of not loosing data) Maybe a count of points for each metrics (would be a first verif)
-      deleteTaggedChunks()
-    } catch {
-      case ex: Throwable => {
-        logger.error("Failed during tagging", ex)
-        saveReportJobFailed("Error happened while deleting tagged chunks, so there may be duplicates in datas ! " +
-          "Be sure to clean chunks before re running a compaction", ex)
-        throw ex
-      }
-    }
-    try {
-      saveReportJobSuccess(savedDF)
-    } catch {
-      case ex: Throwable => {
-        logger.error("Failed during tagging", ex)
-        saveReportJobFailed("Failed while attempting to write final report after compactor finished smoothly", ex)
         throw ex
       }
     }
