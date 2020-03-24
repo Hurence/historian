@@ -184,8 +184,8 @@ public class GrafanaApiImpl implements GrafanaApi {
                     List<ResponseAsList.SubResponse> list = responseAsList.ReturnList();
                     CsvSchema schema = CsvSchema.builder()
                             .addColumn("metric")
-                            .addColumn("date")
                             .addColumn("value")
+                            .addColumn("date")
                             .build();
                     CsvMapper csvMapper = new CsvMapper();
                     csvMapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN,true);
