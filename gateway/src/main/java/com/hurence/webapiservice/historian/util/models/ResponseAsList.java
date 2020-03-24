@@ -36,7 +36,7 @@ public class ResponseAsList {
         public SubResponse(JsonArray line) {
             this.metric = line.getString(0);
             this.date = line.getLong(2);
-            this.value = line.getLong(1);
+            this.value = line.getDouble(1);
         }
     }
 
