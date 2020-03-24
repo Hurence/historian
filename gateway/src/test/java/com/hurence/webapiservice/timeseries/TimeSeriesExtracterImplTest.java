@@ -2,18 +2,16 @@ package com.hurence.webapiservice.timeseries;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.util.modele.ChunkModele;
+import com.hurence.historian.modele.ChunkModele;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.json.simple.JSONArray;
 import org.junit.Assert;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.List;
 
 public class TimeSeriesExtracterImplTest {
 
