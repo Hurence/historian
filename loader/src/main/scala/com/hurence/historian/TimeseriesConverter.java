@@ -136,7 +136,6 @@ public class TimeseriesConverter implements HistorianProcessor {
 
 
     public TimeSeriesRecord computeValue(TimeSeriesRecord tsRecord) {
-
         try {
             byte[] bytes = converter.serializeTimeseries(tsRecord.getTimeSeries());
             String chunkValueBase64 = BinaryEncodingUtils.encode(bytes);

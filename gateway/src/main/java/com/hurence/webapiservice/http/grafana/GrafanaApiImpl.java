@@ -10,7 +10,9 @@ import com.hurence.webapiservice.historian.util.models.ResponseAsList;
 import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.*;
+import com.hurence.webapiservice.timeseries.AnnotationRequest;
+import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
+import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -20,7 +22,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.*;
 
 public class GrafanaApiImpl implements GrafanaApi {

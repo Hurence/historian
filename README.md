@@ -103,3 +103,88 @@ weekly team 10/02/2020
     - MEJD / intég de la fonction de seuil SAX dans la lib timeseries + unit tests
     - MEJD / integ de la lib grammar viz
     - TOM / utilisation de la fonction seuils SAX pour indexer des annotations
+
+
+
+
+
+# Install
+
+## Solr
+
+Begin by unzipping the Solr release and changing your working directory to the subdirectory where Solr was installed. For example, with a shell in UNIX, Cygwin, or MacOS:
+
+get solr from  `https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.zip`
+
+
+~$ ls solr*
+solr-8.2.0.zip
+
+~$ unzip -q solr-8.2.0.zip
+
+~$ cd solr-8.2.0/
+
+If you’d like to know more about Solr’s directory layout before moving to the first exercise, see the section Directory Layout for details.
+
+
+Choose any available port for each node; the default for the first node is 8983 and 7574 for the second node. The script will start each node in order and show you the command it uses to start the server, such as:
+
+bin/solr start -cloud -s ../data/solr/node1  -p 8983
+bin/solr start -cloud -s ../data/solr/node2/  -p 7574 -z localhost:9983
+
+
+bin/solr stop -all
+
+
+## Historian gateway
+
+unpack historian-1.0.0.zip
+
+run it
+
+    cd historian-1.0.0
+    bin/historian-gateway.sh
+
+
+
+```json
+curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "panelId": 1,
+  "range": {
+    "from": "2020-03-01T00:00:00.000Z",
+    "to": "2020-03-01T23:59:59.000Z"
+  },
+  "interval": "30s",
+  "intervalMs": 30000,
+  "targets": [
+    {
+      "target": "\"U81.PT232.F_CV\"",
+      "refId": "U81.PT232.F_CV",
+      "type": "timeserie"
+    }
+  ],
+  "format": "json",
+  "maxDataPoints": 550
+}'
+```
+
+
+
+
+
+
+Grafana
+
+
+Install Grafana for your platform as described here : `https://grafana.com/docs/grafana/latest/installation/requirements/ `
+Install Json Simple Datasource as described here : 
+
+https://grafana.com/grafana/plugins/grafana-simple-json-datasource
+
+
+To install this plugin using the grafana-cli tool:
+
+    sudo grafana-cli plugins install grafana-simple-json-datasource
+    sudo service grafana-server restart
