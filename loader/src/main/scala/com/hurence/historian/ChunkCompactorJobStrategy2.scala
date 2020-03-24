@@ -132,6 +132,9 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
         TimeSeriesRecord.CHUNK_SAX,
         TimeSeriesRecord.CHUNK_ORIGIN)
 
+    if (options.useCache) {
+      savedDF.cache()
+    }
     val start = System.currentTimeMillis()
     savedDF.write
       .format("solr")
@@ -443,6 +446,9 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     saveReportJobStarting()
     val timeseriesDS: DataFrame = calculMetricsInReportAndLoadTimeSeries(spark)
     val savedDF: DataFrame = compactThenSaveChunks(spark, timeseriesDS)
+    if (options.useCache) {
+      timeseriesDS.unpersist()
+    }
     deleteOldChunks
     saveSuccessReport(savedDF)
   }
@@ -494,6 +500,9 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
   private def loadChunksWithQueryThenCalculMetricsInReportThenReturnLoadedChunks(spark: SparkSession) = {
     val timeseriesDS = loadChunksFromSolR(spark)
+    if (options.useCache) {
+      timeseriesDS.cache()
+    }
     try {
       saveReportJobAfterTagging(timeseriesDS)
       timeseriesDS
@@ -517,6 +526,9 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
       }
     }
     val timeseriesDS = loadTaggedChunksFromSolR(spark)
+    if (options.useCache) {
+      timeseriesDS.cache()
+    }
     try {
       saveReportJobAfterTagging(timeseriesDS)
       timeseriesDS

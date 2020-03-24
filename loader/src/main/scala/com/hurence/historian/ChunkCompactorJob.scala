@@ -32,10 +32,11 @@ object ChunkCompactorJob extends Serializable {
                                       year: Int,
                                       month: Int,
                                       day: Int,
-                                      taggingChunksToCompact: Boolean)
+                                      taggingChunksToCompact: Boolean,
+                                      useCache: Boolean)
 
   val defaultConf = ChunkCompactorConf("zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
-  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19, true)
+  val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19, true, true)
 
   /**
    *
@@ -88,7 +89,8 @@ object ChunkCompactorJob extends Serializable {
       jobConf.saxAlphabetSize,
       jobConf.saxStringLength,
       s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
-      jobConf.taggingChunksToCompact
+      jobConf.taggingChunksToCompact,
+      jobConf.useCache
     )
   }
 
@@ -162,7 +164,6 @@ object ChunkCompactorJob extends Serializable {
       .build()
     )
 
-
     options.addOption(Option.builder("nt")
       .longOpt("no-tagging-chunks")
       .hasArg(false)
@@ -173,6 +174,14 @@ object ChunkCompactorJob extends Serializable {
       .build()
     )
 
+    options.addOption(Option.builder("c")
+      .longOpt("use-cache")
+      .hasArg(false)
+      .optionalArg(true)
+      .desc("use cache on loaded chunks dataset. This may improve or decrease performance depending on " +
+        " memory capacity of the job and the size of the dataset.")
+      .build()
+    )
     // parse the command line arguments
     val line = parser.parse(options, args)
     val sparkMaster: String = if (line.hasOption("ms")) line.getOptionValue("ms") else "local[*]"
@@ -191,6 +200,7 @@ object ChunkCompactorJob extends Serializable {
         .split("-")
     }
     val taggingChunksToCompact: Boolean = !line.hasOption("nt")
+    val useCache: Boolean = line.hasOption("c")
 
     // build the option handler
     val opts = ChunkCompactorJobOptions(sparkMaster,
@@ -204,7 +214,8 @@ object ChunkCompactorJob extends Serializable {
       dateTokens(0).toInt,
       dateTokens(1).toInt,
       dateTokens(2).toInt,
-      taggingChunksToCompact
+      taggingChunksToCompact,
+      useCache
     )
     logger.info(s"Command line options : $opts")
     opts
