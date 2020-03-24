@@ -32,7 +32,6 @@ object ChunkCompactorJob extends Serializable {
                                       taggingChunksToCompact: Boolean,
                                       useCache: Boolean)
 
-  val defaultConf = ChunkCompactorConf("zookeeper:2181", "historian", 1440, 7, 100, 2019, 6, 19)
   val defaultJobOptions = ChunkCompactorJobOptions("local[*]", "", false, "zookeeper:2181", "historian", 1440, 7, 100, true, true)
 
   /**
@@ -58,24 +57,10 @@ object ChunkCompactorJob extends Serializable {
 
 
   private def createCompactor(jobConf: ChunkCompactorJobOptions): ChunkCompactor = {
-//    val conf = buildCompactorConf(jobConf)
-//    new ChunkCompactorJobStrategy1(conf)
     val conf = buildCompactorConf2(jobConf)
     new ChunkCompactorJobStrategy2(conf)
   }
 
-  def buildCompactorConf(jobConf: ChunkCompactorJobOptions): ChunkCompactorConf = {
-      ChunkCompactorConf(
-        jobConf.zkHosts,
-        jobConf.collectionName,
-        jobConf.chunkSize,
-        jobConf.saxAlphabetSize,
-        jobConf.saxStringLength,
-        2019,
-        1,
-        1
-      )
-  }
 
   def buildCompactorConf2(jobConf: ChunkCompactorJobOptions): ChunkCompactorConfStrategy2 = {
     ChunkCompactorConfStrategy2(
