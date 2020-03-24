@@ -52,7 +52,7 @@ public class QueryEndPointCsvIT {
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 1477895624866L, 622),
+                                new Point(0, 1477895624866L, 622.1),
                                 new Point(0, 1477916224866L, -3),
                                 new Point(0, 1477917224866L, 365)
                         ),
