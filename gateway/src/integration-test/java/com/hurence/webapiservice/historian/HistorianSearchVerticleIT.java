@@ -82,8 +82,7 @@ public class HistorianSearchVerticleIT {
         doc7.addField("id", UUID.randomUUID().toString());
         doc7.addField("name", "upper_50");
         final UpdateResponse updateResponse7 = client.add(COLLECTION, doc7);
-        client.commit(COLLECTION);
-
+        client.commit(COLLECTION, true, true);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
     }
 
