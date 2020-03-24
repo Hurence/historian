@@ -1,7 +1,5 @@
 package com.hurence.util;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.gson.JsonElement;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
@@ -11,13 +9,7 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.file.FileSystem;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_ANNOTATIONS;
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_TOTAL_FOUND;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AssertResponseGivenRequestHelper {
 

@@ -31,7 +31,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 
 public class SolrHistorianServiceImpl implements HistorianService {

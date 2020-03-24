@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 
 public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter {
 
