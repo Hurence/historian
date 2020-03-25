@@ -6,16 +6,6 @@
     "port" : 8080,
     "historian.address": "historian",
     "max_data_points_allowed_for_ExportCsv" : 10000,
-    "api" : {
-      "grafana" : {
-        "search" : {
-          "default_size": 10
-        },
-        "annotations" : {
-          "limit": 100
-        }
-      }
-    }
   },
   "historian": {
     "address" : "historian",
@@ -23,6 +13,16 @@
     "limit_number_of_chunks_before_using_solr_partition" : 50000,
     "sleep_milli_between_connection_attempt" : 10000,
     "number_of_connection_attempt" : 3,
+    "api" : {
+      "grafana" : {
+        "search" : {
+          "default_size": 2
+        },
+        "annotations" : {
+          "limit": 100
+        }
+      }
+    },
     "solr" : {
       "use_zookeeper": false,
       "zookeeper_urls": ["localhost:2181"],

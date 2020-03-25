@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class QueryEndPointFocusOnSamplingWithPreAgg {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointFocusOnSamplingWithPreAgg.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
 

@@ -53,11 +53,7 @@ public class GrafanaApiImpl implements GrafanaApi {
 
     @Override
     public void search(RoutingContext context) {
-        //TODO parse request body to filter query of metrics ?
-        //final JsonObject getMetricsParam = new JsonObject();
         final JsonObject getMetricsParam = context.getBodyAsJson();
-
-
 
         service.rxGetMetricsName(getMetricsParam)
                 .doOnError(ex -> {
@@ -67,10 +63,9 @@ public class GrafanaApiImpl implements GrafanaApi {
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(metricResponse -> {
-                    JsonArray metricNames = metricResponse.getJsonArray(RESPONSE_METRICS);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(metricNames.encode());
+                    context.response().end(metricResponse.encode());
                 }).subscribe();
     }
 
@@ -125,7 +120,7 @@ public class GrafanaApiImpl implements GrafanaApi {
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(timeseries.encode());
-
+                    LOGGER.debug("body :: {}", timeseries);
                 }).subscribe();
     }
 
