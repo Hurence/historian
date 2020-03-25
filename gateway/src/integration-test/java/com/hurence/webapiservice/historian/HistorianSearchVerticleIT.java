@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HistorianSearchVerticleIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(HistorianVerticleIT.class);
-    private static String COLLECTION = "historian";
+    private static String COLLECTION =  HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     private static com.hurence.webapiservice.historian.reactivex.HistorianService historian;
 
@@ -78,8 +78,11 @@ public class HistorianSearchVerticleIT {
         doc6.addField("id", UUID.randomUUID().toString());
         doc6.addField("name", "up");
         final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
-        client.commit(COLLECTION);
-
+        final SolrInputDocument doc7 = new SolrInputDocument();
+        doc7.addField("id", UUID.randomUUID().toString());
+        doc7.addField("name", "upper_50");
+        final UpdateResponse updateResponse7 = client.add(COLLECTION, doc7);
+        client.commit(COLLECTION, true, true);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
@@ -102,12 +105,30 @@ public class HistorianSearchVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getLong (RESPONSE_TOTAL_FOUND);
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (5, totalHit);
+                        assertEquals (5, rsp.getLong(RESPONSE_TOTAL_METRICS));
                         JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
                         LOGGER.info("docs {}",docs);
                         assertEquals (5, docs.size ());
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+
+    @Test
+    @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
+    void EmptyTest (VertxTestContext testContext) {
+        JsonObject params = new JsonObject ();
+        historian.rxGetMetricsName (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        LOGGER.info("docs {} ",rsp);
+                        assertEquals (7, rsp.getLong(RESPONSE_TOTAL_METRICS));
+                        JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
+                        LOGGER.info("docs {}",docs);
+                        assertEquals (7, docs.size ());
                         testContext.completeNow ();
                     });
                 })

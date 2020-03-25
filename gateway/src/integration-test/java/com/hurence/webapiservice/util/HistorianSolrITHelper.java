@@ -103,9 +103,14 @@ public class HistorianSolrITHelper {
                 .put(HistorianVerticle.CONFIG_SOLR_ZOOKEEPER_URLS, new JsonArray().add(zkUrl))
                 .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://" + slr1Url + "/solr/" + COLLECTION_HISTORIAN)
                 .put(HistorianVerticle.MAX_NUMBER_OF_TARGET_RETURNED, 100);
+        JsonObject grafana = new JsonObject()
+                .put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject()
+                        .put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject()
+                                .put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
         return new JsonObject()
                 .put(HistorianVerticle.CONFIG_ROOT_SOLR, solrConf)
-                .put(HistorianVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS);
+                .put(HistorianVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
+                .put(HistorianVerticle.CONFIG_API_HISTORAIN, grafana);
     }
 
     public static DeploymentOptions getDeploymentOptions(DockerComposeContainer container,
