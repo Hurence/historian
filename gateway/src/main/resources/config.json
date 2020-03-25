@@ -4,7 +4,8 @@
   "http_server" : {
     "host": "localhost",
     "port" : 8080,
-    "historian.address": "historian"
+    "historian.address": "historian",
+    "max_data_points_allowed_for_ExportCsv" : 10000,
   },
   "historian": {
     "address" : "historian",
@@ -31,5 +32,3 @@
     }
   }
 }
-
-

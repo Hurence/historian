@@ -78,7 +78,7 @@ public class HistorianVerticle extends AbstractVerticle {
     final int connectionTimeout = slrConfig.getInteger(CONFIG_SOLR_CONNECTION_TIMEOUT, 10000);
     final int socketTimeout = slrConfig.getInteger(CONFIG_SOLR_SOCKET_TIMEOUT, 60000);
     final boolean useZookeeper = slrConfig.getBoolean(CONFIG_SOLR_USE_ZOOKEEPER, false);
-    final String collection = slrConfig.getString(CONFIG_SOLR_CHUNK_COLLECTION, "historian");
+    final String chunkCollection = slrConfig.getString(CONFIG_SOLR_CHUNK_COLLECTION, "historian");
     final String annotationCollection = slrConfig.getString(CONFIG_SOLR_ANNOTATION_COLLECTION, "annotation");
 
 
@@ -116,7 +116,8 @@ public class HistorianVerticle extends AbstractVerticle {
 
     SolrHistorianConf historianConf = new SolrHistorianConf();
     historianConf.client = client;
-    historianConf.collection = collection;
+    historianConf.chunkCollection = chunkCollection;
+    historianConf.annotationCollection = annotationCollection;
     historianConf.streamEndPoint = streamEndpoint;
     historianConf.limitNumberOfPoint = limitNumberOfPoint;
     historianConf.limitNumberOfChunks = limitNumberOfChunks;
