@@ -4,7 +4,8 @@ import org.apache.solr.client.solrj.SolrClient;
 
 public class SolrHistorianConf {
     public SolrClient client;
-    public String collection;
+    public String chunkCollection;
+    public String annotationCollection;
     public String streamEndPoint;
     public long limitNumberOfPoint;
     public long limitNumberOfChunks;
@@ -14,10 +15,10 @@ public class SolrHistorianConf {
 
     public SolrHistorianConf() {
     }
-
+// i have to add annotationcollection here
     public SolrHistorianConf(SolrClient client, String collection, String streamEndPoint, long limitNumberOfPoint, long limitNumberOfChunks, long sleepDurationBetweenTry, int numberOfRetryToConnect, int maxNumberOfTargetReturned) {
         this.client = client;
-        this.collection = collection;
+        this.chunkCollection = collection;
         this.streamEndPoint = streamEndPoint;
         this.limitNumberOfPoint = limitNumberOfPoint;
         this.limitNumberOfChunks = limitNumberOfChunks;

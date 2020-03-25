@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HistorianSearchVerticleIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(HistorianVerticleIT.class);
-    private static String COLLECTION = "historian";
+    private static String COLLECTION =  HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     private static com.hurence.webapiservice.historian.reactivex.HistorianService historian;
 
@@ -48,7 +48,7 @@ public class HistorianSearchVerticleIT {
                             context.completeNow();
                         },
                         t -> context.failNow(t));
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
 
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("id", UUID.randomUUID().toString());
@@ -83,7 +83,7 @@ public class HistorianSearchVerticleIT {
         doc7.addField("name", "upper_50");
         final UpdateResponse updateResponse7 = client.add(COLLECTION, doc7);
         client.commit(COLLECTION, true, true);
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
     @AfterAll

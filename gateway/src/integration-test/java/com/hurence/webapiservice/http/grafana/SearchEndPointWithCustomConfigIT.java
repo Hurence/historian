@@ -33,8 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_TOTAL_METRICS_RETURNED;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_API_HISTORAIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -42,13 +41,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchEndPointWithCustomConfigIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointWithCustomConfigIT.class);
-    private static String COLLECTION = HistorianSolrITHelper.COLLECTION;
+    private static String COLLECTION = HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     @BeforeAll
     public static void beforeAll(SolrClient client) throws IOException, SolrServerException {
         HistorianSolrITHelper
                 .initHistorianSolr(client);
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("id", UUID.randomUUID().toString());
         doc.addField("name", "Amazon Kindle Paperwhite");
@@ -82,7 +81,7 @@ public class SearchEndPointWithCustomConfigIT {
         doc7.addField("name", "upper_50");
         client.add(COLLECTION, doc7);
         client.commit(COLLECTION);
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
 
