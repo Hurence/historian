@@ -43,6 +43,10 @@ public class HistorianVerticle extends AbstractVerticle {
   public static final String CONFIG_HISTORIAN_ADDRESS = "address";
   public static final String CONFIG_LIMIT_NUMBER_OF_POINT = "limit_number_of_point_before_using_pre_agg";
   public static final String CONFIG_LIMIT_NUMBER_OF_CHUNK = "limit_number_of_chunks_before_using_solr_partition";
+  public static final String CONFIG_API_HISTORAIN = "api";
+  public static final String CONFIG_SEARCH_HISTORAIN = "search";
+  public static final String CONFIG_DEFAULT_SIZE_HISTORAIN = "default_size";
+  public static final String CONFIG_GRAFANA_HISTORAIN = "grafana";
   public static final String CONFIG_ROOT_SOLR = "solr";
 
   //solr conf
@@ -52,7 +56,8 @@ public class HistorianVerticle extends AbstractVerticle {
   public static final String CONFIG_SOLR_ZOOKEEPER_URLS = "zookeeper_urls";
   public static final String CONFIG_SOLR_CONNECTION_TIMEOUT = "connection_timeout";
   public static final String CONFIG_SOLR_SOCKET_TIMEOUT = "socket_timeout";
-  public static final String CONFIG_SOLR_COLLECTION = "collection";
+  public static final String CONFIG_SOLR_CHUNK_COLLECTION = "chunk_collection";
+  public static final String CONFIG_SOLR_ANNOTATION_COLLECTION = "annotation_collection";
   public static final String CONFIG_SOLR_STREAM_ENDPOINT = "stream_url";
   public static final String CONFIG_SOLR_SLEEP_BETWEEEN_TRY = "sleep_milli_between_connection_attempt";
   public static final String CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT = "number_of_connection_attempt";
@@ -67,12 +72,14 @@ public class HistorianVerticle extends AbstractVerticle {
     final String address = config().getString(CONFIG_HISTORIAN_ADDRESS, "historian");
     final long limitNumberOfPoint = config().getLong(CONFIG_LIMIT_NUMBER_OF_POINT, 50000L);
     final long limitNumberOfChunks = config().getLong(CONFIG_LIMIT_NUMBER_OF_CHUNK, 50000L);
+    final JsonObject grafana = config().getJsonObject(CONFIG_API_HISTORAIN).getJsonObject(CONFIG_GRAFANA_HISTORAIN);
     //solr conf
     final JsonObject slrConfig = config().getJsonObject(CONFIG_ROOT_SOLR);
     final int connectionTimeout = slrConfig.getInteger(CONFIG_SOLR_CONNECTION_TIMEOUT, 10000);
     final int socketTimeout = slrConfig.getInteger(CONFIG_SOLR_SOCKET_TIMEOUT, 60000);
     final boolean useZookeeper = slrConfig.getBoolean(CONFIG_SOLR_USE_ZOOKEEPER, false);
-    final String collection = slrConfig.getString(CONFIG_SOLR_COLLECTION, "historian");
+    final String chunkCollection = slrConfig.getString(CONFIG_SOLR_CHUNK_COLLECTION, "historian");
+    final String annotationCollection = slrConfig.getString(CONFIG_SOLR_ANNOTATION_COLLECTION, "annotation");
 
 
     if (!slrConfig.containsKey(CONFIG_SOLR_STREAM_ENDPOINT))
@@ -109,13 +116,14 @@ public class HistorianVerticle extends AbstractVerticle {
 
     SolrHistorianConf historianConf = new SolrHistorianConf();
     historianConf.client = client;
-    historianConf.collection = collection;
+    historianConf.chunkCollection = chunkCollection;
+    historianConf.annotationCollection = annotationCollection;
     historianConf.streamEndPoint = streamEndpoint;
     historianConf.limitNumberOfPoint = limitNumberOfPoint;
     historianConf.limitNumberOfChunks = limitNumberOfChunks;
     historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);;
     historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);;
-    historianConf.maxNumberOfTargetReturned = slrConfig.getInteger(MAX_NUMBER_OF_TARGET_RETURNED, 10);
+    historianConf.maxNumberOfTargetReturned = grafana.getJsonObject(CONFIG_SEARCH_HISTORAIN).getInteger(CONFIG_DEFAULT_SIZE_HISTORAIN, 100);
 
     HistorianService.create(vertx, historianConf, ready -> {
       if (ready.succeeded()) {

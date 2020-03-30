@@ -28,3 +28,12 @@ hs_err_pid*
 **/spark-warehouse
 **/target
 **/.idea
+
+# idea files
+**/*.ipr
+**/*.iws
+**/dependency-reduced-pom.xml
+
+# maven files
+**/pom.xml.versionsBackup
+

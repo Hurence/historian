@@ -65,13 +65,13 @@ public class BinaryCompactionConverter implements Serializable {
         return chunkrecord;
     }
 
-    private byte[] serializeTimeseries(final MetricTimeSeries timeSeries) {
+    public byte[] serializeTimeseries(final MetricTimeSeries timeSeries) {
         byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(timeSeries.points().iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }
 
 
-    private MetricTimeSeries buildTimeSeries(final List<Record> records) {
+    public MetricTimeSeries buildTimeSeries(final List<Record> records) {
         final Record first = records.get(0);
         final Record last = records.get(records.size() - 1);
         final String metricType = first.getType();

@@ -22,8 +22,8 @@ import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import com.hurence.webapiservice.util.injector.SolrInjector;
-import com.hurence.webapiservice.util.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.historian.solr.injector.SolrInjector;
+import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
@@ -61,7 +61,7 @@ public class HttpServerVerticleSmallChunksIT {
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HttpWithHistorianSolrITHelper
                 .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_a",
                 Arrays.asList(
@@ -90,7 +90,7 @@ public class HttpServerVerticleSmallChunksIT {
                         )
                 ));
         injector.injectChunks(client);
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
     }
 

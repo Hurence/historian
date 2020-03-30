@@ -95,7 +95,7 @@ public class ConvertToTimeseriesTest {
     public void validateChunking() {
         final String name = "cpu.load";
         final TestRunner testRunner = TestRunners.newTestRunner(new ConvertToTimeseries());
-        testRunner.setProperty(ConvertToTimeseries.GROUPBY, FieldDictionary.RECORD_NAME);
+        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeSeriesRecord.METRIC_NAME);
 
         //testRunner.setProperty(ConvertToTimeseries.METRIC, FieldDictionary.RECORD_TIME);
         testRunner.assertValid();
@@ -110,13 +110,13 @@ public class ConvertToTimeseriesTest {
         MockRecord out = testRunner.getOutputRecords().get(0);
         out.assertFieldExists(TimeSeriesRecord.CHUNK_START);
         out.assertFieldExists(TimeSeriesRecord.CHUNK_END);
-        out.assertFieldExists(FieldDictionary.RECORD_NAME);
+        out.assertFieldExists(TimeSeriesRecord.METRIC_NAME);
         out.assertFieldExists(FieldDictionary.RECORD_TYPE);
         out.assertFieldExists(TimeSeriesRecord.CHUNK_VALUE);
 
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_START, 1000000);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_END, 1001999);
-        out.assertFieldEquals(FieldDictionary.RECORD_NAME, "cpu.load");
+        out.assertFieldEquals(TimeSeriesRecord.METRIC_NAME, "cpu.load");
         out.assertFieldEquals(FieldDictionary.RECORD_TYPE, SAMPLED_RECORD);
         out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
@@ -147,7 +147,7 @@ public class ConvertToTimeseriesTest {
     public void validateMetrics() {
         final String name = "cpu.load";
         final TestRunner testRunner = TestRunners.newTestRunner(new ConvertToTimeseries());
-        testRunner.setProperty(ConvertToTimeseries.GROUPBY, FieldDictionary.RECORD_NAME);
+        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeSeriesRecord.METRIC_NAME);
         testRunner.setProperty(ConvertToTimeseries.METRIC, "min;max;avg;trend;outlier;sax:10,0.01,20");
         testRunner.assertValid();
 
@@ -182,7 +182,7 @@ public class ConvertToTimeseriesTest {
     public void validateSumAndFirst() {
         final String name = "cpu.load";
         final TestRunner testRunner = TestRunners.newTestRunner(new ConvertToTimeseries());
-        testRunner.setProperty(ConvertToTimeseries.GROUPBY, FieldDictionary.RECORD_NAME);
+        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeSeriesRecord.METRIC_NAME);
         testRunner.setProperty(ConvertToTimeseries.METRIC, "sum;first");
         testRunner.assertValid();
 
