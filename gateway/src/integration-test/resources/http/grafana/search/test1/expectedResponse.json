@@ -1,1 +1,4 @@
-["metric_0","metric_1","metric_2"]
+{
+  "total": 5,
+  "metrics": ["Amazon Kindle Paperblack","upper_90","Amazon Kindle Paperwhite","upper_50","upper_75"]
+}
