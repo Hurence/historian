@@ -1,0 +1,6 @@
+=== logisland-timeseries
+
+Contient des processeurs logisland utilisant la library timeseries. Ces processeurs manipulent des timeseries. Certains
+sont utilisés pour compacter des données dans le compacteur. A terme, il serait bien de supprimer ce module et de n'utiliser
+que des outils présent dans le module timeseries. En effet il ne paraît pas nécessaire d'embarquer des logiques métier logisland
+dans l'historian.

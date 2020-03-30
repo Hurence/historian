@@ -1,0 +1,4 @@
+=== timeseries
+
+C'est une library qui permet de manipuler les metrics d'une manière général. On peut par exemple les compresser
+et calculer des pré agrégations.
