@@ -1,0 +1,27 @@
+== Descriptions des différents modules
+
+Voici les différents modules de ce projet et leur rôle (voir les sections ci-dessous pour plus de détails)
+
+* **gateway :** La gateway est notre serveur rest qui met à disposition notre API rest.
+* **grafana-historian-datasource :** C'est un sous module git qui est notre datasource plugin grafana que nous utiliserons
+pour faire de la visualisation sur les timeseries de l'historian. La datasource sert de jonction entre grafana et la gateway.
+* **historian-modele :** Contient les objets en commun entre les différents modules.
+* **integration-tests :** Contient des classes utilitaires pour faire des tests d'intégrations.
+* **loader :** Contient du code qui permet de recompacter des chunks déjà contenu dans l'historian.
+* **logisland-timeseries :** Ce module étend le module "timeseries" avec des spécificités logisland.
+* **timeseries :** Une library qui permet de manipuler des timeseries et de les compresser.
+
+include::./description_gateway.ad[]
+
+include::./description_grafana-historian-datasource.ad[]
+
+include::./description_historian-modele.ad[]
+
+include::./description_integration-tests.ad[]
+
+include::./description_loader.ad[]
+
+include::./description_logisland-timeseries.ad[]
+
+include::./description_timeseries.ad[]
+
