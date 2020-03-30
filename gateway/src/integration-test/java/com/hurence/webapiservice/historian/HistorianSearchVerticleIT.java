@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -34,7 +34,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class HistorianSearchVerticleIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(HistorianVerticleIT.class);
-    private static String COLLECTION = "historian";
+    private static String COLLECTION =  HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     private static com.hurence.webapiservice.historian.reactivex.HistorianService historian;
 
@@ -48,7 +48,7 @@ public class HistorianSearchVerticleIT {
                             context.completeNow();
                         },
                         t -> context.failNow(t));
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
 
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("id", UUID.randomUUID().toString());
@@ -78,9 +78,12 @@ public class HistorianSearchVerticleIT {
         doc6.addField("id", UUID.randomUUID().toString());
         doc6.addField("name", "up");
         final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
-        client.commit(COLLECTION);
-
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        final SolrInputDocument doc7 = new SolrInputDocument();
+        doc7.addField("id", UUID.randomUUID().toString());
+        doc7.addField("name", "upper_50");
+        final UpdateResponse updateResponse7 = client.add(COLLECTION, doc7);
+        client.commit(COLLECTION, true, true);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
     @AfterAll
@@ -102,12 +105,30 @@ public class HistorianSearchVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        long totalHit = rsp.getLong (RESPONSE_TOTAL_FOUND);
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (5, totalHit);
+                        assertEquals (5, rsp.getLong(RESPONSE_TOTAL_METRICS));
                         JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
                         LOGGER.info("docs {}",docs);
-                        assertEquals (3, docs.size ());
+                        assertEquals (5, docs.size ());
+                        testContext.completeNow ();
+                    });
+                })
+                .subscribe ();
+    }
+
+    @Test
+    @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
+    void EmptyTest (VertxTestContext testContext) {
+        JsonObject params = new JsonObject ();
+        historian.rxGetMetricsName (params)
+                .doOnError (testContext :: failNow)
+                .doOnSuccess (rsp -> {
+                    testContext.verify (() -> {
+                        LOGGER.info("docs {} ",rsp);
+                        assertEquals (7, rsp.getLong(RESPONSE_TOTAL_METRICS));
+                        JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
+                        LOGGER.info("docs {}",docs);
+                        assertEquals (7, docs.size ());
                         testContext.completeNow ();
                     });
                 })

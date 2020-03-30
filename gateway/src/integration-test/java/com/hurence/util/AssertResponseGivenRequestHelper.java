@@ -1,6 +1,7 @@
 package com.hurence.util;
 
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.VertxTestContext;
@@ -20,8 +21,8 @@ public class AssertResponseGivenRequestHelper {
         this.endpoint = endpoint;
     }
 
-    public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
-                                                         String requestFile, String responseFile) {
+    public void assertRequestGiveArrayResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                       String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post(endpoint)
@@ -38,4 +39,23 @@ public class AssertResponseGivenRequestHelper {
                     });
                 }));
     }
+    public void assertRequestGiveObjectResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                        String requestFile, String responseFile) {
+        final FileSystem fs = vertx.fileSystem();
+        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
+        webClient.post(endpoint)
+                .as(BodyCodec.jsonObject())
+                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                    testContext.verify(() -> {
+                        assertEquals(200, rsp.statusCode());
+                        assertEquals("OK", rsp.statusMessage());
+                        JsonObject body = rsp.body();
+                        Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
+                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
+                        assertEquals(expectedBody, body);
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
 }

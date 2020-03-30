@@ -145,6 +145,8 @@ public class ConvertToTimeseries extends AbstractProcessor {
         TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
 
+        functionValueMap.resetValues();
+
         transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
         analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
         aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));

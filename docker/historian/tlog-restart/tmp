@@ -1,0 +1,6 @@
+2018-01-03 21:14:22.518 WARN  (recoveryExecutor-3-thread-1-processing-n:172.20.0.2:8983_solr x:mycoll2_shard1_replica_t1 s:shard1 c:mycoll2 r:core_node2) [c:mycoll2 s:shard1 r:core_node2 x:mycoll2_shard1_replica
+_t1] o.a.s.h.IndexFetcher File _a.fnm did not match. expected checksum is 751027875 and actual is checksum 3689336667. expected length is 319 and actual length is 319
+2018-01-03 21:14:22.518 INFO  (recoveryExecutor-3-thread-1-processing-n:172.20.0.2:8983_solr x:mycoll2_shard1_replica_t1 s:shard1 c:mycoll2 r:core_node2) [c:mycoll2 s:shard1 r:core_node2 x:mycoll2_shard1_replica
+_t1] o.a.s.h.IndexFetcher Starting download (fullCopy=true) to NRTCachingDirectory(MMapDirectory@/opt/solr/server/solr/mycoll2_shard1_replica_t1/data/index.20180103211422517 lockFactory=org.apache.lucene.store.N
+ativeFSLockFactory@30edbda9; maxCacheMB=48.0 maxMergeSizeMB=4.0)
+
