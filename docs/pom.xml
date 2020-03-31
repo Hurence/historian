@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>historian</groupId>
     <artifactId>historian-usermanual</artifactId>
@@ -62,20 +62,21 @@
                             <goal>process-asciidoc</goal>
                         </goals>
                         <configuration>
-			    <sourceDirectory>${project.basedir}/asciidoc/fr</sourceDirectory>
-			    <outputDirectory>${project.basedir}/pdf/fr</outputDirectory>
+                            <sourceDirectory>${project.basedir}/userguide/asciidoc/fr</sourceDirectory>
+                            <outputDirectory>${project.basedir}/generated-docs/pdf/fr</outputDirectory>
                             <backend>pdf</backend>
+<!--                            <preserveDirectories>true</preserveDirectories>-->
                             <!-- Since 1.5.0-alpha.9, PDF back-end can also use 'rouge' which provides more coverage
                             for other languages like scala -->
                             <sourceHighlighter>coderay</sourceHighlighter>
-			    <attributes>
-				<imagesdir>${project.basedir}/resources/images</imagesdir>
+                            <attributes>
+                                <imagesdir>${project.basedir}/resources/images</imagesdir>
                                 <pagenums/>
-				<toc/>
-				<toc-title>Table des matières</toc-title>
+                                <toc/>
+                                <toc-title>Table des matières</toc-title>
                                 <idprefix/>
                                 <idseparator>-</idseparator>
-			    </attributes>
+                            </attributes>
                         </configuration>
                     </execution>
                     <execution>
@@ -85,20 +86,41 @@
                             <goal>process-asciidoc</goal>
                         </goals>
                         <configuration>
-		            <sourceDirectory>${project.basedir}/asciidoc/fr</sourceDirectory>
-			    <outputDirectory>${project.basedir}/html/fr</outputDirectory>				
-			    <backend>html5</backend>
+                            <sourceDirectory>${project.basedir}/userguide/asciidoc/fr</sourceDirectory>
+                            <outputDirectory>${project.basedir}/generated-docs/html/fr</outputDirectory>
+                            <backend>html5</backend>
                             <sourceHighlighter>coderay</sourceHighlighter>
                             <attributes>
-				<imagesdir>${project.basedir}/resources/images</imagesdir>
-				<toc>left</toc>
-				<toc-title>Table des matières</toc-title>
+                                <imagesdir>${project.basedir}/resources/images</imagesdir>
+                                <toc>left</toc>
+                                <toc-title>Table des matières</toc-title>
                                 <icons>font</icons>
                                 <sectanchors>true</sectanchors>
                                 <!-- set the idprefix to blank -->
                                 <idprefix/>
                                 <idseparator>-</idseparator>
                                 <docinfo1>true</docinfo1>
+                            </attributes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>fr-architecture-dev-to-pdf</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/architecture/asciidoc/fr</sourceDirectory>
+                            <outputDirectory>${project.basedir}/generated-docs/pdf/fr</outputDirectory>
+                            <backend>pdf</backend>
+                            <sourceHighlighter>coderay</sourceHighlighter>
+                            <attributes>
+                                <imagesdir>${project.basedir}/resources/images</imagesdir>
+                                <pagenums/>
+                                <toc/>
+                                <toc-title>Table des matières</toc-title>
+                                <idprefix/>
+                                <idseparator>-</idseparator>
                             </attributes>
                         </configuration>
                     </execution>
