@@ -13,8 +13,15 @@ public interface IngestionApi {
         router.post("/csv")
                 .produces("application/json")
                 .handler(this::importCsv);
+        router.post("/json").handler(this::importJson);
         return router;
     }
+
+    /**
+     * should post points based on json input.
+     * @param context
+     */
+    void importJson(RoutingContext context);
 
     /**
      *  used by the find metric options on the query tab in panels.

@@ -145,7 +145,7 @@ public class HistorianService {
    * @param resultHandler 
    * @return himself
    */
-  public com.hurence.webapiservice.historian.reactivex.HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<Void>> resultHandler) { 
+  public com.hurence.webapiservice.historian.reactivex.HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler) { 
     delegate.addTimeSeries(timeseries, resultHandler);
     return this;
   }
@@ -154,8 +154,8 @@ public class HistorianService {
    * @param timeseries as a json object <pre> [ {  : "metric name to add datapoints",  : [ [timestamp, value, quality] ... [timestamp, value, quality] ] } ] </pre> The quality is optional but should either be present for all datapoints or 0.
    * @return himself
    */
-  public Completable rxAddTimeSeries(JsonArray timeseries) { 
-    return io.vertx.reactivex.impl.AsyncResultCompletable.toCompletable(handler -> {
+  public Single<JsonObject> rxAddTimeSeries(JsonArray timeseries) { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
       addTimeSeries(timeseries, handler);
     });
   }

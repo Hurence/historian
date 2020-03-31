@@ -5,6 +5,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.subscribers.DisposableSubscriber;
 import io.vertx.core.file.OpenOptions;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.FileUpload;
@@ -17,12 +18,33 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_METRICS;
+
 //import io.vertx.reactivex.ext.web.FileUpload;
 
 public class IngestionApiImpl implements IngestionApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiImpl.class);
     private HistorianService service;
+
+    @Override
+    public void importJson(RoutingContext context) {
+
+        final JsonArray getMetricsParam = context.getBodyAsJsonArray();
+
+        service.rxAddTimeSeries(getMetricsParam)
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(response -> {
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(response.encode());
+                }).subscribe();
+    }
 
     @Override
     public void importCsv(RoutingContext context) {
