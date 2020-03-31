@@ -1,13 +1,13 @@
 = Manuel utilisateur
 :subtitle: Data Historian 1.0
 :doctype: book
-:title-logo-image: image:../../resources/images/logo.png[pdfwidth=3.5in,align=center]
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
 :author: (C)Hurence
 :email: contact@hurence.com
 :revnumber: v1.0
 :revdate: 18.02.2020
 :revremark: First draft
 
-include::./introduction.ad[]
+include::./_introduction.ad[]
 
-include::./installation.ad[]
+include::./_installation.ad[]

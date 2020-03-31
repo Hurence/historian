@@ -11,17 +11,17 @@ pour faire de la visualisation sur les timeseries de l'historian. La datasource 
 * **logisland-timeseries :** Ce module étend le module "timeseries" avec des spécificités logisland.
 * **timeseries :** Une library qui permet de manipuler des timeseries et de les compresser.
 
-include::./description_gateway.ad[]
+include::./_description_gateway.ad[]
 
-include::./description_grafana-historian-datasource.ad[]
+include::./_description_grafana-historian-datasource.ad[]
 
-include::./description_historian-modele.ad[]
+include::./_description_historian-modele.ad[]
 
-include::./description_integration-tests.ad[]
+include::./_description_integration-tests.ad[]
 
-include::./description_loader.ad[]
+include::./_description_loader.ad[]
 
-include::./description_logisland-timeseries.ad[]
+include::./_description_logisland-timeseries.ad[]
 
-include::./description_timeseries.ad[]
+include::./_description_timeseries.ad[]
 
