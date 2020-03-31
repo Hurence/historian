@@ -9,7 +9,8 @@ import org.apache.solr.common.SolrInputDocument;
 import java.util.Base64;
 import java.util.List;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
+
 
 public class Chunk {
     private static int ddcThreshold = 0;

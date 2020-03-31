@@ -18,9 +18,6 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_METRICS;
-
-//import io.vertx.reactivex.ext.web.FileUpload;
 
 public class IngestionApiImpl implements IngestionApi {
 

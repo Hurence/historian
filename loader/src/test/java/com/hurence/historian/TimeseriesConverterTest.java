@@ -12,8 +12,6 @@ import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.junit.jupiter.api.Test;
 
-import com.hurence.historian.App;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +50,7 @@ public class TimeseriesConverterTest {
                 createRow(new Object[]{4L, 2.0, 1.1, "metric_B"}),
                 createRow(new Object[]{2L, 2.5, 0.8, "metric_A"})
         );
-        StandardProcessContext context = new StandardProcessContext(converter, "");
+        HistorianContext context = new HistorianContext(converter);
         context.setProperty(TimeseriesConverter.GROUPBY.getName(), "name");
         context.setProperty(TimeseriesConverter.METRIC.getName(),
                 String.format("min;max;avg;trend;outlier;sax:%s,0.01,%s",

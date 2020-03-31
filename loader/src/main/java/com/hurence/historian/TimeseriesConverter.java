@@ -1,10 +1,7 @@
 package com.hurence.historian;
 
-import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
-import com.hurence.logisland.processor.AbstractProcessor;
-import com.hurence.logisland.processor.ProcessContext;
 import com.hurence.logisland.record.*;
 import com.hurence.logisland.serializer.KryoSerializer;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
@@ -23,11 +20,13 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
-public class TimeseriesConverter extends AbstractProcessor {
+public class TimeseriesConverter implements HistorianProcessor {
 
     public static final PropertyDescriptor GROUPBY = new PropertyDescriptor.Builder()
             .name("groupby")
@@ -64,9 +63,7 @@ public class TimeseriesConverter extends AbstractProcessor {
     private final KryoSerializer serializer = new KryoSerializer(true);
 
 
-    @Override
-    public void init(ProcessContext context) throws InitializationException {
-        super.init(context);
+    public void init(HistorianContext context) throws InitializationException {
 
         // init binary converter
         final String[] groupByArray = context.getPropertyValue(GROUPBY).asString().split(",");
@@ -90,11 +87,6 @@ public class TimeseriesConverter extends AbstractProcessor {
         }
     }
 
-    @Override
-    public Collection<Record> process(ProcessContext processContext, Collection<Record> collection) {
-        return null;
-    }
-
 
     /**
      * gets the kryo bytes representation of a ts record
@@ -112,8 +104,7 @@ public class TimeseriesConverter extends AbstractProcessor {
         Field f = tsRecord.getField(TimeSeriesRecord.CHUNK_VALUE);
         if (f != null) {
             if (!(f.getType() == FieldType.BYTES || f.getType() == FieldType.NULL)) {
-                tsRecord.addError("FIELD TYPE", getLogger(),
-                        "Field type '{}' is not an array of bytes",
+                logger.error("Field type '{}' is not an array of bytes",
                         new Object[]{f.getName()});
             } else {
                 byte[] content = f.asBytes();
@@ -121,8 +112,7 @@ public class TimeseriesConverter extends AbstractProcessor {
                     try {
                         tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, BinaryEncodingUtils.encode(content));
                     } catch (Exception e) {
-                        tsRecord.addError("PROCESSING ERROR", getLogger(),
-                                "Unable to encode field '{}' : {}",
+                        logger.error("Unable to encode field '{}' : {}",
                                 new Object[]{f.getName(), e.getMessage()});
                     }
                 }
@@ -136,16 +126,12 @@ public class TimeseriesConverter extends AbstractProcessor {
             baos.close();
             return baos.toByteArray();
         } catch (IOException e) {
-            tsRecord.addError("PROCESSING ERROR", getLogger(),
+            logger.error(
                     "Unable to serialize field record : {}",
                     new Object[]{e.getMessage()});
             return null;
         }
     }
-
-
-
-
 
     public TimeSeriesRecord computeValue( TimeSeriesRecord tsRecord) {
 
@@ -153,9 +139,9 @@ public class TimeseriesConverter extends AbstractProcessor {
             byte[] bytes = binaryCompactor.serializeTimeseries(tsRecord.getTimeSeries());
             String chunkValueBase64 = BinaryEncodingUtils.encode(bytes);
             tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, chunkValueBase64);
-            tsRecord.setIntField(TimeSeriesRecord.CHUNK_SIZE_BYTES,  bytes.length);
-        }catch (Exception ex){
-            tsRecord.addError("PROCESSING ERROR", getLogger(),
+            tsRecord.setIntField(TimeSeriesRecord.CHUNK_SIZE_BYTES, bytes.length);
+        } catch (Exception ex) {
+            logger.error(
                     "Unable to convert chunk_vlaue to base64 : {}",
                     new Object[]{ex.getMessage()});
         }
@@ -169,7 +155,35 @@ public class TimeseriesConverter extends AbstractProcessor {
      * @return
      */
     public TimeSeriesRecord computeMetrics(TimeSeriesRecord tsRecord) {
-        return computeMetricsTimeSeriesRecord(tsRecord);
+
+        MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
+        functionValueMap.resetValues();
+
+        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
+        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
+        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
+        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
+
+        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
+            String name = functionValueMap.getAggregation(i).getQueryName();
+            double value = functionValueMap.getAggregationValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.DOUBLE, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
+            String name = functionValueMap.getAnalysis(i).getQueryName();
+            boolean value = functionValueMap.getAnalysisValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.BOOLEAN, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
+            String name = functionValueMap.getEncoding(i).getQueryName();
+            String value = functionValueMap.getEncodingValue(i);
+            tsRecord.setField("chunk_" + name, FieldType.STRING, value);
+        }
+
+
+        return tsRecord;
     }
 
     /**
@@ -341,5 +355,20 @@ public class TimeseriesConverter extends AbstractProcessor {
 
 
         return tsRecord;
+    }
+
+    @Override
+    public PropertyDescriptor getPropertyDescriptor(String name) {
+
+        for (PropertyDescriptor p : getSupportedPropertyDescriptors()) {
+
+
+            if (p.getName().equals(name))
+                return p;
+        }
+
+        return null;
+
+
     }
 }

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 
 public class TimeSeriesExtracterUtil {
     public final static String TIMESERIES_TIMESTAMPS = "timestamps";

@@ -7,9 +7,9 @@ import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import com.hurence.webapiservice.util.injector.AbstractSolrInjector;
-import com.hurence.webapiservice.util.injector.SolrInjector;
-import com.hurence.webapiservice.util.injector.SolrInjectorOneMetricMultipleChunksSpecificPoints;
+import com.hurence.historian.solr.injector.AbstractSolrInjector;
+import com.hurence.historian.solr.injector.SolrInjector;
+import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPoints;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
@@ -30,13 +30,12 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class QueryEndPointFocusOnSamplingWithPreAgg {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointFocusOnSamplingWithPreAgg.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
 
@@ -50,9 +49,9 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
         HttpWithHistorianSolrITHelper
                 .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
                         client, container, vertx, context, historianConf);
-        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         buildInjector().injectChunks(client);
-        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION);
+        LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
     }
@@ -177,7 +176,7 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveResponseFromFile(vertx, testContext, requestFile, responseFile);
+        assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
 
 }

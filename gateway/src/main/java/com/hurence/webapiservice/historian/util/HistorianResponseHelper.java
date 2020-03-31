@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.historian.util;
 
-import com.hurence.webapiservice.historian.HistorianFields;
-import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.historian.modele.HistorianFields;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
