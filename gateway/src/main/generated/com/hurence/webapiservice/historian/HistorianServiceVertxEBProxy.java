@@ -144,7 +144,7 @@ public class HistorianServiceVertxEBProxy implements HistorianService {
     return this;
   }
   @Override
-  public  HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<Void>> resultHandler){
+  public  HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler){
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
@@ -154,7 +154,7 @@ public class HistorianServiceVertxEBProxy implements HistorianService {
 
     DeliveryOptions _deliveryOptions = (_options != null) ? new DeliveryOptions(_options) : new DeliveryOptions();
     _deliveryOptions.addHeader("action", "addTimeSeries");
-    _vertx.eventBus().<Void>send(_address, _json, _deliveryOptions, res -> {
+    _vertx.eventBus().<JsonObject>send(_address, _json, _deliveryOptions, res -> {
       if (res.failed()) {
         resultHandler.handle(Future.failedFuture(res.cause()));
       } else {

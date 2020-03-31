@@ -135,7 +135,7 @@ public interface HistorianService {
      * @return himself
      */
     @Fluent
-    HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<Void>> resultHandler);
+    HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler);
 
 
 }

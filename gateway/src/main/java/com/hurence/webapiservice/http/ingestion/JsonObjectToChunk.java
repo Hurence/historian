@@ -5,6 +5,8 @@ import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
+import com.hurence.logisland.timeseries.converter.common.DoubleList;
+import com.hurence.logisland.timeseries.converter.common.LongList;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
 import com.hurence.webapiservice.historian.HistorianFields;
 import io.vertx.core.json.JsonArray;
@@ -12,7 +14,10 @@ import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
+import java.util.List;
 
 import static com.hurence.webapiservice.historian.HistorianFields.*;
 import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD;
@@ -25,13 +30,13 @@ public class JsonObjectToChunk {
 //        MetricTimeSeries chunk = buildMetricTimeSeries(json);
 //        return convertIntoSolrDocument(chunk);
 //    }
-    public SolrDocument chunkIntoSolrDocument(JsonObject json) {
+    public SolrInputDocument chunkIntoSolrDocument(JsonObject json) {
         MetricTimeSeries chunk = buildMetricTimeSeries(json);
-        return convertIntoSolrDocument(chunk);
+        return convertIntoSolrInputDocument(chunk);
     }
 
-    private SolrDocument convertIntoSolrDocument(MetricTimeSeries chunk) {
-        final SolrDocument doc = new SolrDocument();
+    private SolrInputDocument convertIntoSolrInputDocument(MetricTimeSeries chunk) {
+        final SolrInputDocument doc = new SolrInputDocument();
         doc.addField(RESPONSE_METRIC_NAME_FIELD, chunk.getName());
         doc.addField(RESPONSE_CHUNK_START_FIELD, chunk.getStart());
         doc.addField(RESPONSE_CHUNK_END_FIELD, chunk.getEnd());
@@ -102,21 +107,29 @@ public class JsonObjectToChunk {
     }
 
     private void addPoints(MetricTimeSeries.Builder tsBuilder, JsonArray points) {
-//        records.forEach(record -> {
-//            if (record.getField(FieldDictionary.RECORD_VALUE) != null && record.getField(FieldDictionary.RECORD_VALUE).getRawValue() != null) {
-//                final long timestamp = record.getTime().getTime();
-//                final double value = record.getField(FieldDictionary.RECORD_VALUE).asDouble();
-//                tsBuilder.point(timestamp, value);
-//            }
-//        });
-        //TODO
+
+        int size = points.size();
+        long[] timestamps = new long[size];
+        double[] values = new double[size];
+        int i = 0;
+        for (Object point : points) {
+            JsonArray jsonpoint = (JsonArray) point;
+            timestamps[i] = jsonpoint.getLong(0);
+            values[i] = jsonpoint.getDouble(1);
+            i++;
+        }
+        LongList timestampsList = new LongList(timestamps, size);
+        DoubleList valuesList = new DoubleList(values, size);
+        tsBuilder.points(timestampsList, valuesList);
     }
 
     private long getEnd(JsonArray points) {
-        return 0;//TODO
+        JsonArray firstArray = points.getJsonArray(0);
+        return firstArray.getLong(0);
     }
 
     private long getStart(JsonArray points) {
-        return 0;//TODO
+        JsonArray lastArray = points.getJsonArray(points.size()-1);
+        return lastArray.getLong(0);
     }
 }

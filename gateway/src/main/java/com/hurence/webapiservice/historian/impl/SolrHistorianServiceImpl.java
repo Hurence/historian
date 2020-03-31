@@ -11,6 +11,7 @@ import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -20,9 +21,11 @@ import org.apache.solr.client.solrj.io.stream.StreamContext;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
@@ -260,21 +263,47 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     @Override
-    public HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<Void>> resultHandler) {
-//        timeseries.forEach(this::addTimeSerie);
+    public HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler) {
 //        JsonArray metrics = timeseries.get
 //TODO each jsonobject into chunkTimeSerie
         
         //buildChunk(metricName, points);
-        return null;
+
+        Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
+            try {
+                timeseries.forEach(this::addTimeSerie);
+                p.complete(new JsonObject("{}")
+                );
+            } catch (Exception e) {
+                LOGGER.error("unexpected exception");
+                p.fail(e);
+            }
+        };
+        vertx.executeBlocking(getMetricsNameHandler, resultHandler);
+
+        return this;
     }
 
-    private SolrDocument chunkTimeSerie(JsonObject timeserie) {
-        String metricName = timeserie.getString(METRIC_NAME_REQUEST_FIELD);
-        JsonArray points = timeserie.getJsonArray(POINTS_REQUEST_FIELD);
+    private SolrInputDocument chunkTimeSerie(JsonObject timeserie) {
         JsonObjectToChunk aa = new JsonObjectToChunk();
-        SolrDocument doc = aa.chunkIntoSolrDocument(timeserie);
+        SolrInputDocument doc = aa.chunkIntoSolrDocument(timeserie);
         return doc;
+    }
+
+    private void addTimeSerie(Object timeserie) {
+        JsonObject timeserieJson = (JsonObject) timeserie;
+        try {
+            LOGGER.info("adding some chunks in collection {}", solrHistorianConf.collection);
+            SolrInputDocument document = chunkTimeSerie(timeserieJson);
+            solrHistorianConf.client.add(solrHistorianConf.collection, document);
+            solrHistorianConf.client.commit(solrHistorianConf.collection);
+            LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.collection);
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
     /**
