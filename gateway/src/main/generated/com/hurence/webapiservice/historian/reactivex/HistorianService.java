@@ -122,7 +122,7 @@ public class HistorianService {
 
   /**
    * @param params as a json object, it is ignored at the moment TODO
-   * @param resultHandler return chunks of timeseries as an array of <pre> {  : "all metric name matching the query",  : "total chunk matching query" } </pre>
+   * @param resultHandler return names of metrics as an array of <pre> {  : "all metric name matching the query",  : "total metric names matching query" } </pre>
    * @return himself
    */
   public com.hurence.webapiservice.historian.reactivex.HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { 
@@ -137,6 +137,26 @@ public class HistorianService {
   public Single<JsonObject> rxGetMetricsName(JsonObject params) { 
     return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
       getMetricsName(params, handler);
+    });
+  }
+
+  /**
+   * @param params as a json object <pre> {  : "start of the date range",  : "end of the date range",  : either "all" either "tags",  : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,  : the max number of annotation to return,  : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags, } </pre>
+   * @param resultHandler return annotations as an array of <pre> {  : "all annotation matching the query",  : "total annotations matching query" } </pre>
+   * @return himself
+   */
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { 
+    delegate.getAnnotations(params, resultHandler);
+    return this;
+  }
+
+  /**
+   * @param params as a json object <pre> {  : "start of the date range",  : "end of the date range",  : either "all" either "tags",  : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,  : the max number of annotation to return,  : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags, } </pre>
+   * @return himself
+   */
+  public Single<JsonObject> rxGetAnnotations(JsonObject params) { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getAnnotations(params, handler);
     });
   }
 

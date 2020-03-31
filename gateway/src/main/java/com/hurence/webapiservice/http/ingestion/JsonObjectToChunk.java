@@ -1,26 +1,19 @@
 package com.hurence.webapiservice.http.ingestion;
 
-import com.hurence.logisland.record.FieldDictionary;
-import com.hurence.logisland.record.FieldType;
-import com.hurence.logisland.record.Record;
-import com.hurence.logisland.record.TimeSeriesRecord;
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.converter.common.DoubleList;
 import com.hurence.logisland.timeseries.converter.common.LongList;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
-import com.hurence.webapiservice.historian.HistorianFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Base64;
-import java.util.List;
 
-import static com.hurence.webapiservice.historian.HistorianFields.*;
-import static com.hurence.webapiservice.historian.HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD;
+import static com.hurence.historian.modele.HistorianFields.METRIC_NAME_REQUEST_FIELD;
+import static com.hurence.historian.modele.HistorianFields.POINTS_REQUEST_FIELD;
+import static com.hurence.historian.modele.HistorianFields.*;
 
 public class JsonObjectToChunk {
 
