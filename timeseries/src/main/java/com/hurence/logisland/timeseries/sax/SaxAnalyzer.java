@@ -8,14 +8,14 @@ package com.hurence.logisland.timeseries.sax;
  * Class: anomaly detection in sax coding strings
  * @author Mejdeddine Nemsi
  * @version 1.0
- *Example: input string "dededdecccdcedeedccddcddccedeeeeeedceefedbdbccdcccp"
- *  calculate the array of distances between characters [1, 1, 1, 1, 0, 1, 2, 0, 0, 1, 1, 2, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 8, 6, 1, 1, 0, 0, 0, 0, 0, 1, 1, 2, 0, 1, 1, 1, 2, 2, 2, 1, 0, 1, 1, 0, 0, 13]
+ *Example:
+ * input string "dededdecccdcedeedccddcddccedeeeeeedceefedbdbccdcccp"
+ * calculate the array of distances between characters [1, 1, 1, 1, 0, 1, 2, 0, 0, 1, 1, 2, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 8, 6, 1, 1, 0, 0, 0, 0, 0, 1, 1, 2, 0, 1, 1, 1, 2, 2, 2, 1, 0, 1, 1, 0, 0, 13]
  * count occurrences (0 -> 17, 1 -> 25, 6 -> 1, 13 -> 1, 2 -> 6, 8 -> 1)
  * normalise occurrences number (0 -> 0.3333333333333333, 1 -> 0.49019607843137253, 6 -> 0.0196078431372549, 13 -> 0.0196078431372549, 2 -> 0.11764705882352941, 8 -> 0.0196078431372549)
  * filter to less then 10% of total occurrences (6 -> 0.0196078431372549, 13 -> 0.0196078431372549)
  * saxThreshold function returns list of last map keys : [6,13]
  * we use these distances in anomalyDetect function which will return the positions of anomalies [25,26,50]
-
  */
 public class SaxAnalyzer {
     /**
@@ -40,7 +40,7 @@ public class SaxAnalyzer {
      * @param str input sax coding string
      * @return array of characters
      */
-    public static char[] convArrayChar (String str){
+    public static char[] convertStringToCharArray (String str){
         char[] result = new char[str.length()];
         for (int i = 0; i < str.length(); i++)
             result[i] = str.charAt(i);
@@ -52,7 +52,7 @@ public class SaxAnalyzer {
      * @param strArray array of characters
      * @return array of integers, empty list in case of empty input
      */
-    public static int[] charDisAbs (char[] strArray){
+    public static int[] charDistanceAbs (char[] strArray){
         if (strArray.length == 0){
             int reslut[] = {};
             return reslut;}
@@ -64,16 +64,14 @@ public class SaxAnalyzer {
     }
 
     /**
-     * Method that returns the searchs for abnormal distances between characters.
-     * Exemple:
-     *
+     * Method that returns the search for abnormal distances between characters.
      * @param str string (sax coding string)
      * @return list of abnormal distances between characters
      */
     public static List<Integer> saxThreshold(String str){
         final double threshold = 0.1;
         //Transform our string into an array of characters then into an array of distances between characters
-        int[] buff = charDisAbs(convArrayChar(str));
+        int[] buff = charDistanceAbs(convertStringToCharArray(str));
         //Counting occurrences
         Map<Integer, Integer> buffCount = countOccurrence(buff);
         //Normalize the occurrences
@@ -102,7 +100,7 @@ public class SaxAnalyzer {
         Boolean res = false;
         List<Integer> finalResult = new ArrayList<>();
         //Transform our string into an array of characters
-        char[] strArray = convArrayChar(str);
+        char[] strArray = convertStringToCharArray(str);
         //Search for Anomalies
         for (int j = 0; j< str.length()-1; j++)
             if(thresh.contains(Math.abs(strArray [j+1] - strArray[j]))) {
