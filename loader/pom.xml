@@ -28,7 +28,7 @@
             <url>https://repo.hortonworks.com/content/repositories/releases/</url>
         </repository>
     </repositories>
-    <!--
+
          <pluginRepositories>
            <pluginRepository>
              <id>scala-tools.org</id>
@@ -36,7 +36,7 @@
              <url>http://scala-tools.org/repo-releases</url>
            </pluginRepository>
          </pluginRepositories>
-       -->
+
     <dependencyManagement>
         <dependencies>
 <!--  This force the version of guava to use in transitive dependencies when this is not hard coded
@@ -84,13 +84,13 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -104,6 +104,7 @@
             <artifactId>timeseries</artifactId>
             <version>${project.version}</version>
         </dependency>
+
 
         <dependency>
             <groupId>com.lucidworks.spark</groupId>
@@ -127,12 +128,23 @@
         </dependency>
 
         <!-- Test -->
+
         <dependency>
             <groupId>com.hurence.historian</groupId>
             <artifactId>integration-tests</artifactId>
             <version>${project.version}</version>
+
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-nop -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-nop</artifactId>
+            <version>2.0.0-alpha1</version>
             <scope>test</scope>
         </dependency>
+
+
     </dependencies>
     <profiles>
         <profile>
