@@ -10,11 +10,16 @@ import org.junit.jupiter.api.extension.ExtendWith
 import scala.collection.mutable.{WrappedArray => ArrayDF}
 
 @ExtendWith(Array(classOf[SparkExtension]))
-class MetricsParameterCalculationTest {
+class MetricsParameterCalculationTest extends Serializable {
 
   @Test
   def main(sparkSession: SparkSession): Unit = {
     print(ParamCalculation(sparkSession))
+  }
+
+  def func(doubles: List[Double]) = {
+
+    doubles.length
   }
 
   private def ParamCalculation(sparkSession: SparkSession): List[Double] = {
@@ -41,8 +46,11 @@ class MetricsParameterCalculationTest {
         List((r.getAs[Long]("timestamp"), r.getAs[Double]("value")))))
       .rdd
       .reduceByKey((g1, g2) => g1 ::: g2)
-      .map(r => (r._1, r._2.sortWith((l1, l2) => l1._1 < l2._1).grouped(1440).toList))
-      .toDF()
+      .map(r => (r._1, r._2.sortWith((l1, l2) => l1._1 < l2._1)))
+      .map( r => (r._1._1, r._1._2,
+
+        func(r._2.map(_._2))))
+      .toDF("day", "metric", "values")
     df.show(5,50)
     df.printSchema()
 
