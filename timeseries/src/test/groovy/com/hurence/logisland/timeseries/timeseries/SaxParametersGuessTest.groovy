@@ -26,7 +26,7 @@ class SaxParametersGuessTest extends Specification{
                   5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77,5.77]
         listin << s1 << s2 << s3
         for (i in listin){
-            listout << guess(i as double[])
+            listout << guess(i as double[],0,46,2,2,10,1,2,10,1)
         }
         expect:
         listout == [[12, 4, 9, 1.4450012717343763, 100, 6, 100, 84, 2, 0.5531914893617021, 100, 0.3333333333333333, 2]
