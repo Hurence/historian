@@ -46,7 +46,7 @@ class MetricsParameterCalculationTest {
     df.show(5,50)
     df.printSchema()
 
-    val values = df.map(r => r.getAs[ArrayDF[Double]]("_2"))
+    //val values = df.map(r => r.getAs[ArrayDF[Double]]("_2"))
 
 
     val numberOfRows = df.count()

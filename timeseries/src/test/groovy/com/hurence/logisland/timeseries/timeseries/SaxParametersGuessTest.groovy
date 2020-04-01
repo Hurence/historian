@@ -6,7 +6,7 @@ import spock.lang.Unroll
 
 import static com.hurence.logisland.timeseries.sax.SaxParametersGuess.guess
 
-/**git//
+/**git//git diff
  * Unit test for the sax parameter guess
  * @author Mejdeddine Nemsi
  */
@@ -29,6 +29,8 @@ class SaxParametersGuessTest extends Specification{
             listout << guess(i as double[])
         }
         expect:
-        listout == [[12,4,9],[],[2,2,2]]
+        listout == [[12, 4, 9, 1.4450012717343763, 100, 6, 100, 84, 2, 0.5531914893617021, 100, 0.3333333333333333, 2]
+                    ,[]
+                    ,[2, 2, 2, 5.095510249803914, 2, 1, 2, 2, 1, 0.0, 2, 1.0, 1]]
     }
 }
