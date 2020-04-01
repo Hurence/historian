@@ -1,16 +1,15 @@
 package com.hurence.logisland.timeseries.sax;
 
-import net.seninp.gi.rulepruner.RulePruner;
-import java.util.ArrayList;
-import java.util.Collections;
 import net.seninp.gi.GIAlgorithm;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import net.seninp.gi.rulepruner.ReductionSorter;
+import net.seninp.gi.rulepruner.RulePruner;
 import net.seninp.gi.rulepruner.RulePrunerParameters;
 import net.seninp.gi.rulepruner.SampledPoint;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
+import java.util.ArrayList;
+import java.util.Collections;
 
 
 /**
@@ -28,6 +27,8 @@ import static com.sun.xml.internal.ws.spi.db.BindingContextFactory.LOGGER;
  * the guess method will return a list of the optimal window size, PAA size and alphabet size : [12,4,9]
  */
 public class SaxParametersGuess {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(SaxParametersGuess.class);
 
     public static ArrayList guess(double[] ts){
 
