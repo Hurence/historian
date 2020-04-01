@@ -36,7 +36,7 @@
              <url>http://scala-tools.org/repo-releases</url>
            </pluginRepository>
          </pluginRepositories>
-       -->
+
     <dependencyManagement>
         <dependencies>
 <!--  This force the version of guava to use in transitive dependencies when this is not hard coded
