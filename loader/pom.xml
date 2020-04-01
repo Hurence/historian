@@ -94,7 +94,7 @@
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
-            <artifactId>spark-sql-kafka-0-10_2.11</artifactId>
+            <artifactId>spark-sql-kafka-0-10_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
         </dependency>
@@ -133,16 +133,16 @@
             <groupId>com.hurence.historian</groupId>
             <artifactId>integration-tests</artifactId>
             <version>${project.version}</version>
-
+            <scope>test</scope>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-nop -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-nop</artifactId>
-            <version>2.0.0-alpha1</version>
-            <scope>test</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>org.slf4j</groupId>-->
+<!--            <artifactId>slf4j-nop</artifactId>-->
+<!--            <version>2.0.0-alpha1</version>-->
+<!--            <scope>test</scope>-->
+<!--        </dependency>-->
 
 <!--          <dependency>-->
 <!--            <groupId>org.scala-tools.testing</groupId>-->
