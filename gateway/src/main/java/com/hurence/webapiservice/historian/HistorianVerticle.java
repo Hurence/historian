@@ -17,6 +17,7 @@
 
 package com.hurence.webapiservice.historian;
 
+import com.hurence.webapiservice.historian.compatibility.SchemaVersion;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -48,6 +49,7 @@ public class HistorianVerticle extends AbstractVerticle {
   public static final String CONFIG_DEFAULT_SIZE_HISTORAIN = "default_size";
   public static final String CONFIG_GRAFANA_HISTORAIN = "grafana";
   public static final String CONFIG_ROOT_SOLR = "solr";
+  public static final String CONFIG_SCHEMA_VERSION = "schema_version";
 
   //solr conf
   public static final String CONFIG_SOLR_URLS = "urls";
@@ -124,6 +126,8 @@ public class HistorianVerticle extends AbstractVerticle {
     historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);;
     historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);;
     historianConf.maxNumberOfTargetReturned = grafana.getJsonObject(CONFIG_SEARCH_HISTORAIN).getInteger(CONFIG_DEFAULT_SIZE_HISTORAIN, 100);
+    String schemaVersion = config().getString(CONFIG_SCHEMA_VERSION, SchemaVersion.CURRENT_VERSION.toString());
+    historianConf.schemaVersion = SchemaVersion.valueOf(schemaVersion);
 
     HistorianService.create(vertx, historianConf, ready -> {
       if (ready.succeeded()) {

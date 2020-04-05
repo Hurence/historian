@@ -2,6 +2,7 @@ package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
+import com.hurence.webapiservice.historian.compatibility.JsonStreamSolrStreamSchemaVersion0;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -361,7 +362,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     return;
                 }
                 final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(myParams, query, metricsInfo);
-                requestSolrAndbuildTimeSeries(query, p, timeSeriesExtracter);
+                requestSolrAndBuildTimeSeries(query, p, timeSeriesExtracter);
             } catch (IOException e) {
                 LOGGER.error("unexpected exception", e);
                 p.fail(e);
@@ -394,7 +395,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return timeSeriesExtracter;
     }
 
-    public void requestSolrAndbuildTimeSeries(SolrQuery query, Promise<JsonObject> p, MultiTimeSeriesExtracter timeSeriesExtracter) {
+    public void requestSolrAndBuildTimeSeries(SolrQuery query, Promise<JsonObject> p, MultiTimeSeriesExtracter timeSeriesExtracter) {
         try (JsonStream stream = queryStream(query)) {
             JsonObject timeseries = extractTimeSeriesThenBuildResponse(stream, timeSeriesExtracter);
             p.complete(timeseries);
@@ -532,7 +533,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         TupleStream solrStream = new SolrStream(solrHistorianConf.streamEndPoint, paramsLoc);
         StreamContext context = new StreamContext();
         solrStream.setStreamContext(context);
-        return new JsonStreamSolrStreamImpl(solrStream);
+        return JsonStreamSolrStream.forVersion(solrHistorianConf.schemaVersion, solrStream);
     }
 
 
