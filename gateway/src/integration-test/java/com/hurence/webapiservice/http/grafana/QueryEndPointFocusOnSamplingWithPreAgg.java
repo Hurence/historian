@@ -179,7 +179,7 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
     }
 
     @Test
-//    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric1ChunkOf20PointMax4Point(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/preagg-algo/testMetric1ChunkOf20PointMaxPoint4/request.json",
