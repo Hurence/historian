@@ -1,0 +1,14 @@
+=== loader
+
+Le loader contient des jobs batch. Pour l'instant il est implémenter un unique job qui sert a recompacter les chunks
+de l'historian avec différente tailles paramétrable. Par exemple lors de l'injection temps réel dans le data historian,
+on injecte des chunks de petites tailles, or pour optimiser les performances nous avons besoin de chunks de grosse tailles.
+De plus selon le type de requête effectuer et la fréquence des points pour une métrique données jouer sur la taille des chunks
+est très important.
+
+Par exemple si l'on fait des requêtes sur de grande périodes, nous avons besoin de gros chunks pour gagner en performance,
+en effet nous n'aurons même pas besoin de décompresser ces chunks, utiliser leur agrégation précalculer sera suffisant.
+D'ailleurs ce job de recompaction pourra également servir de base pour nous permettre dans le futur de rajouter
+de nouvelles agrégations pré-calculer si nécessaire, ou bien de rajouter n'importe quel information qui nous paraît nécessaire.
+
+Le compacteur utilise spark et solr.
