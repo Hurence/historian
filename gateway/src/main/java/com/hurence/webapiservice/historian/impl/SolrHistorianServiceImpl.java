@@ -401,7 +401,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             JsonObject timeseries = extractTimeSeriesThenBuildResponse(stream, timeSeriesExtracter);
             p.complete(timeseries);
         } catch (Exception e) {
-            LOGGER.error("unexpected exception", e);
+            LOGGER.error("unexpected exception while reading JsonStream", e);
             p.fail(e);
         }
     }
