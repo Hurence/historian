@@ -278,32 +278,28 @@ public class SolrHistorianServiceImpl implements HistorianService {
             queryString = RESPONSE_METRIC_NAME_FIELD + ":*" + name + "*";
         }
         SolrQuery query = new SolrQuery(queryString);
+        query.setFilterQueries(queryString);
         int max = solrHistorianConf.maxNumberOfTargetReturned;
-        LOGGER.debug("max limit:" + max);
-        query.setRows(max);
-        query.addField(RESPONSE_METRIC_NAME_FIELD);
-        query.set("group", "true");
-        query.set("group.field", RESPONSE_METRIC_NAME_FIELD);
-        query.set("group.ngroups", "true");
-        query.set("group.limit", "-1");
+        query.setRows(0);//we only need distinct values of metrics
+        query.setFacet(true);
+//        query.setFacetSort("index");
+//        query.setFacetPrefix("per");
+        query.setFacetLimit(max);
+        query.setFacetMinCount(1);//number of doc matching the query is at least 1
+        query.addFacetField(RESPONSE_METRIC_NAME_FIELD);
+        //  EXECUTE REQUEST
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
-                GroupResponse solrDocumentsGroup = response.getGroupResponse();
-                List<GroupCommand> results = solrDocumentsGroup.getValues();
-                JsonArray metrics = new JsonArray();
-                GroupCommand gc = results.get(0);
-                LOGGER.info("Ngroup = {}", gc.getNGroups());
-                int totalMetrics = gc.getValues().size();
-                List<Group> groups = gc.getValues();
-                for(Group group : groups) {
-                    metrics.add(group.getGroupValue());
-                }
-                LOGGER.debug("Found " + response.getRequestUrl() + response + " result : " + metrics);
-                LOGGER.debug("metrics : "+ metrics);
-                LOGGER.debug("total found = {}", totalMetrics);
+                FacetField facetField = response.getFacetField(RESPONSE_METRIC_NAME_FIELD);
+                FacetField.Count count = facetField.getValues().get(0);
+                LOGGER.debug("Found " + facetField.getValueCount() + " different values");
+                JsonArray metrics = new JsonArray(facetField.getValues().stream()
+                        .map(FacetField.Count::getName)
+                        .collect(Collectors.toList())
+                );
                 p.complete(new JsonObject()
-                        .put(RESPONSE_TOTAL_METRICS, totalMetrics)
+                        .put(RESPONSE_TOTAL_METRICS, facetField.getValueCount())
                         .put(RESPONSE_METRICS, metrics)
                 );
             } catch (IOException | SolrServerException e) {
