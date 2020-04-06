@@ -13,12 +13,13 @@ public class JsonSchemaCompatibilityUtilTest {
     private static Logger LOGGER = LoggerFactory.getLogger(QueryRequestParserTest.class);
     @Test
     public void testTransformingChunkFirst() {
-        JsonObject requestBody = new JsonObject(
+        JsonObject inputJson = new JsonObject(
                 "{" +
                         "\"name\":\"metric_10_chunk\"," +
                         "\"chunk_start\":1," +
                         "\"chunk_size\":2," +
-                        "\"chunk_first\":[1.0]," +
+                        "\"chunk_first\": [1.0]," +
+                        "\"chunk_sum\": [1.0]," +
                         "\"chunk_end\":2" +
                 "}");
         final JsonObject expectedJson = new JsonObject(
@@ -27,15 +28,40 @@ public class JsonSchemaCompatibilityUtilTest {
                         "\"chunk_start\":1," +
                         "\"chunk_size\":2," +
                         "\"chunk_first\": 1.0," +
+                        "\"chunk_sum\": 1.0," +
                         "\"chunk_end\":2" +
                         "}");
-        final JsonObject jsonConvertedToCurrentSchema = JsonSchemaCompatibilityUtil.convertSchema0ToCurrent(requestBody);
-        assertEquals(expectedJson, jsonConvertedToCurrentSchema);
+        JsonSchemaCompatibilityUtil.convertJsonSchema0ToCurrent(inputJson);
+        assertEquals(expectedJson, inputJson);
+    }
+
+    @Test
+    public void testTransformingChunkFirstEmptyArray() {
+        JsonObject inputJson = new JsonObject(
+                "{" +
+                        "\"name\":\"metric_10_chunk\"," +
+                        "\"chunk_start\":1," +
+                        "\"chunk_size\":2," +
+                        "\"chunk_first\": []," +
+                        "\"chunk_sum\": []," +
+                        "\"chunk_end\":2" +
+                        "}");
+        final JsonObject expectedJson = new JsonObject(
+                "{" +
+                        "\"name\":\"metric_10_chunk\"," +
+                        "\"chunk_start\":1," +
+                        "\"chunk_size\":2," +
+                        "\"chunk_first\": []," +
+                        "\"chunk_sum\": []," +
+                        "\"chunk_end\":2" +
+                        "}");
+        JsonSchemaCompatibilityUtil.convertJsonSchema0ToCurrent(inputJson);
+        assertEquals(expectedJson, inputJson);
     }
 
     @Test
     public void testNotThrowingErrorIfAlreadyOfCorrectType() {
-        JsonObject requestBody = new JsonObject(
+        JsonObject inputJson = new JsonObject(
                 "{" +
                         "\"name\":\"metric_10_chunk\"," +
                         "\"chunk_start\":1," +
@@ -51,7 +77,7 @@ public class JsonSchemaCompatibilityUtilTest {
                         "\"chunk_first\": 1.0," +
                         "\"chunk_end\":2" +
                         "}");
-        final JsonObject jsonConvertedToCurrentSchema = JsonSchemaCompatibilityUtil.convertSchema0ToCurrent(requestBody);
-        assertEquals(expectedJson, jsonConvertedToCurrentSchema);
+        JsonSchemaCompatibilityUtil.convertJsonSchema0ToCurrent(inputJson);
+        assertEquals(expectedJson, inputJson);
     }
 }

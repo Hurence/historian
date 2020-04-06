@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.historian.compatibility;
 
-import com.hurence.webapiservice.historian.compatibility.JsonSchemaCompatibilityUtil;
 import com.hurence.webapiservice.historian.impl.JsonStreamSolrStream;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.io.Tuple;
@@ -16,6 +15,7 @@ public class JsonStreamSolrStreamSchemaVersion0 extends JsonStreamSolrStream {
     @Override
     protected JsonObject toJson(Tuple tuple) {
         final JsonObject json = super.toJson(tuple);
-        return JsonSchemaCompatibilityUtil.convertSchema0ToCurrent(json);
+        JsonSchemaCompatibilityUtil.convertJsonSchema0ToCurrent(json);
+        return json;
     }
 }
