@@ -13,7 +13,10 @@ public interface IngestionApi {
         router.post("/csv")
                 .produces("application/json")
                 .handler(this::importCsv);
-        router.post("/json").handler(this::importJson);
+        router.post("/json")
+                .produces("application/json")
+                .handler(this::importJson);
+
         return router;
     }
 

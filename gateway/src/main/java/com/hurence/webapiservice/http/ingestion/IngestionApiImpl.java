@@ -24,6 +24,11 @@ public class IngestionApiImpl implements IngestionApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiImpl.class);
     private HistorianService service;
 
+    public IngestionApiImpl(HistorianService service) {
+        this.service = service;
+
+    }
+
     @Override
     public void importJson(RoutingContext context) {
 
