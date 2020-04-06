@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.grafana;
 
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +46,38 @@ public class QueryRequestParserTest {
                 .forEach(i -> {
                     final QueryRequestParser queryRequestParser = new QueryRequestParser();
                     queryRequestParser.parseRequest(requestBody);
+        });
+    }
+
+    @Test
+    public void testparsingMinimalRequest() {
+        JsonObject requestBody = new JsonObject("{" +
+                "\"range\":{\"from\":\"2019-11-14T02:56:53.285Z\"," +
+                "\"to\":\"2019-11-14T08:56:53.285Z\"}," +
+                "\"targets\":[{\"target\":\"speed\"}," +
+                "{\"target\":\"pressure\"}," +
+                "{\"target\":\"rotation\"}]," +
+                "\"maxDataPoints\":844" +
+                "}");
+        final QueryRequestParser queryRequestParser = new QueryRequestParser();
+        final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        LOGGER.info("request : {}", request);
+        assertEquals(1573700213285L, request.getFrom());
+        assertEquals(1573721813285L, request.getTo());
+        assertEquals(844, request.getSamplingConf().getMaxPoint());
+        assertEquals(DEFAULT_BUCKET_SIZE, request.getSamplingConf().getBucketSize());
+        assertEquals(DEFAULT_SAMPLING_ALGORITHM, request.getSamplingConf().getAlgo());
+        assertEquals(Collections.emptyList(), request.getAggs());
+        assertEquals(Arrays.asList("speed", "pressure", "rotation"), request.getMetricNames());
+        assertEquals(Collections.emptyList(), request.getTags());
+    }
+
+    @Test
+    public void testparsingErrorEmptyRequest() {
+        JsonObject requestBody = new JsonObject("{}");
+        final QueryRequestParser queryRequestParser = new QueryRequestParser();
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
         });
     }
 

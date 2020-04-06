@@ -1,14 +1,9 @@
 package com.hurence.webapiservice.http.grafana;
 
-import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import com.hurence.webapiservice.util.injector.SolrInjector;
-import com.hurence.webapiservice.util.injector.SolrInjectorMultipleMetricSpecificPoints;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
@@ -29,17 +24,15 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//import io.vertx.ext.web.client.WebClient;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class AddEndPointIT {
+public class ImportJsonEndPointIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(ImportJsonEndPointIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
 
@@ -64,20 +57,15 @@ public class AddEndPointIT {
         assertAddRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testAdd/request.json",
                 "/http/grafana/query/extract-algo/testAdd/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQuery(Vertx vertx, VertxTestContext testContext) {
-
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/test0/request.json",
                 "/http/grafana/query/extract-algo/test0/expectedResponse.json");
     }
 
+
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveResponseFromFile(vertx, testContext, requestFile, responseFile);
+        assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
 
     public void assertAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,

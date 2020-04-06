@@ -347,15 +347,13 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler) {
-//        JsonArray metrics = timeseries.get
-//TODO each jsonobject into chunkTimeSerie
-        
-        //buildChunk(metricName, points);
 
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
+                JsonObject json = new JsonObject("{}");
                 timeseries.forEach(this::addTimeSerie);
-                p.complete(new JsonObject("{}")
+                solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
+                p.complete(json
                 );
             } catch (Exception e) {
                 LOGGER.error("unexpected exception");
@@ -379,7 +377,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
             LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
             SolrInputDocument document = chunkTimeSerie(timeserieJson);
             solrHistorianConf.client.add(solrHistorianConf.chunkCollection, document);
-            solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
             LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
         } catch (SolrServerException e) {
             e.printStackTrace();
@@ -411,6 +408,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(myParams, query, metricsInfo);
                 requestSolrAndbuildTimeSeries(query, p, timeSeriesExtracter);
             } catch (IOException e) {
+                LOGGER.error("unexpected io exception", e);
+                p.fail(e);
+            } catch (Exception e) {
                 LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }

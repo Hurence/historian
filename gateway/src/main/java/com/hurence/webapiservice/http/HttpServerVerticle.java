@@ -46,7 +46,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         Router graphanaApi = new GrafanaApiImpl(historianService, maxDataPointsAllowedForExportCsv).getGraphanaRouter(vertx);
         router.mountSubRouter("/api/grafana", graphanaApi);
 
-        Router importApi = new IngestionApiImpl().getImportRouter(vertx);
+        Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
         router.mountSubRouter("/historian-server/ingestion", importApi);
 //    router.get("/doc/similarTo/:id").handler(this::getSimilarDoc);
 
