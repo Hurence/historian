@@ -40,8 +40,11 @@ public class QueryEndPointIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+        initSolrAndVerticles(client, container, vertx, context);
+        injectChunksIntoSolr(client, vertx);
+    }
+
+    public static void injectChunksIntoSolr(SolrClient client, Vertx vertx) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorMultipleMetricSpecificPoints(
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
@@ -102,6 +105,11 @@ public class QueryEndPointIT {
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
+    }
+
+    public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
+        HttpWithHistorianSolrITHelper
+                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
     }
 
     @AfterAll

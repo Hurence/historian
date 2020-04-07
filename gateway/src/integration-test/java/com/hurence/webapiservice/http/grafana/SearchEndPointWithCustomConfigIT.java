@@ -152,22 +152,35 @@ public class SearchEndPointWithCustomConfigIT {
                 });
     }
 
+
+    @Test
+    @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
+    public void testNoMatch(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
+        JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
+        JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
+                .doOnError(testContext::failNow)
+                .subscribe(t -> {
+                    assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
+                            "/http/grafana/search/testNoMatch/request.json",
+                            "/http/grafana/search/testNoMatch/expectedResponse.json");
+                });
+    }
+
     public void assertRequestGiveObjectResponseFromFileWithNoOrder(Vertx vertx, VertxTestContext testContext,
                                                                    String requestFile, String responseFile) {
         WebClient webClient = HttpITHelper.buildWebClient(vertx);
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
-                .as(BodyCodec.jsonObject())
+                .as(BodyCodec.jsonArray())
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());
-                        JsonObject body = rsp.body();
+                        JsonArray metrics = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
-                        JsonArray metrics = body.getJsonArray(RESPONSE_METRICS);
-                        JsonArray expectedMetrics = expectedBody.getJsonArray(RESPONSE_METRICS);
+                        JsonArray expectedMetrics = new JsonArray(fileContent.getDelegate());
                         Set expectedSet = new HashSet();
                         Set set = new HashSet();
                         for (Object object : metrics) {
@@ -177,7 +190,7 @@ public class SearchEndPointWithCustomConfigIT {
                             expectedSet.add(object);
                         }
                         assertEquals(expectedSet, set);
-                        assertEquals(expectedBody.getInteger(RESPONSE_TOTAL_METRICS_RETURNED), body.getInteger(RESPONSE_TOTAL_METRICS_RETURNED));
+                        assertEquals(expectedMetrics.size(), metrics.size());
                         testContext.completeNow();
                     });
                 }));
@@ -189,18 +202,15 @@ public class SearchEndPointWithCustomConfigIT {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
-                .as(BodyCodec.jsonObject())
+                .as(BodyCodec.jsonArray())
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());
-                        JsonObject body = rsp.body();
+                        JsonArray metrics = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
-                        JsonArray metrics = body.getJsonArray(RESPONSE_METRICS);
-                        JsonArray expectedMetrics = expectedBody.getJsonArray(RESPONSE_METRICS);
+                        JsonArray expectedMetrics = new JsonArray(fileContent.getDelegate());
                         assertEquals(expectedMetrics.size(), metrics.size());
-                        assertEquals(expectedBody.getInteger(RESPONSE_TOTAL_METRICS_RETURNED), body.getInteger(RESPONSE_TOTAL_METRICS_RETURNED));
                         testContext.completeNow();
                     });
                 }));

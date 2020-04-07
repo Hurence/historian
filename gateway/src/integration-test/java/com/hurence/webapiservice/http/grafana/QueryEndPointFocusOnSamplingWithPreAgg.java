@@ -1,5 +1,8 @@
 package com.hurence.webapiservice.http.grafana;
 
+import com.hurence.historian.solr.injector.AbstractSolrInjector;
+import com.hurence.historian.solr.injector.SolrInjector;
+import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPoints;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
@@ -7,9 +10,6 @@ import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import com.hurence.historian.solr.injector.AbstractSolrInjector;
-import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPoints;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
@@ -41,19 +41,31 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        JsonObject historianConf = new JsonObject()
-                //10 so if more than 5 chunk (of size 2) returned we should sample
-                //with pre aggs
-                .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_POINT, 10L)
-                .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L);//we only want to test intermediate algo here
-        HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
-                        client, container, vertx, context, historianConf);
+        initSolrAndVerticles(client, container, vertx, context);
+        injectChunksIntoSolr(client, vertx);
+    }
+
+    public static void injectChunksIntoSolr(SolrClient client, Vertx vertx) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         buildInjector().injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
+    }
+
+    public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
+        JsonObject historianConf = buildHistorianConf();
+        HttpWithHistorianSolrITHelper
+                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
+                        client, container, vertx, context, historianConf);
+    }
+
+    public static JsonObject buildHistorianConf() {
+        return new JsonObject()
+                    //10 so if more than 5 chunk (of size 2) returned we should sample
+                    //with pre aggs
+                    .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_POINT, 10L)
+                    .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L);
     }
 
     public static SolrInjector buildInjector() {

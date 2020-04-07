@@ -2,6 +2,7 @@ package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
+import com.hurence.webapiservice.historian.compatibility.JsonStreamSolrStreamSchemaVersion0;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -51,6 +52,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         LOGGER.debug("streamEndPoint : {}", solrHistorianConf.streamEndPoint);
         LOGGER.debug("limitNumberOfPoint : {}", solrHistorianConf.limitNumberOfPoint);
         LOGGER.debug("limitNumberOfChunks : {}", solrHistorianConf.limitNumberOfChunks);
+        LOGGER.debug("version of schema to be used : {}", solrHistorianConf.schemaVersion.toString());
         Handler<Promise<Integer>> colPinghandler = createPingHandler(solrHistorianConf.sleepDurationBetweenTry, solrHistorianConf.numberOfRetryToConnect);
         Handler<AsyncResult<Integer>> statusHandler = h -> {
             if (h.succeeded()) {
@@ -129,7 +131,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
@@ -163,7 +165,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
@@ -276,38 +278,41 @@ public class SolrHistorianServiceImpl implements HistorianService {
             queryString = RESPONSE_METRIC_NAME_FIELD + ":*" + name + "*";
         }
         SolrQuery query = new SolrQuery(queryString);
+        query.setFilterQueries(queryString);
         int max = solrHistorianConf.maxNumberOfTargetReturned;
-        LOGGER.debug("max limit:" + max);
-        query.setRows(max);
-        query.addField(RESPONSE_METRIC_NAME_FIELD);
-        query.set("group", "true");
-        query.set("group.field", RESPONSE_METRIC_NAME_FIELD);
-        query.set("group.ngroups", "true");
-        query.set("group.limit", "-1");
+        query.setRows(0);//we only need distinct values of metrics
+        query.setFacet(true);
+//        query.setFacetSort("index");
+//        query.setFacetPrefix("per");
+        query.setFacetLimit(max);
+        query.setFacetMinCount(1);//number of doc matching the query is at least 1
+        query.addFacetField(RESPONSE_METRIC_NAME_FIELD);
+        //  EXECUTE REQUEST
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
-                GroupResponse solrDocumentsGroup = response.getGroupResponse();
-                List<GroupCommand> results = solrDocumentsGroup.getValues();
-                JsonArray metrics = new JsonArray();
-                GroupCommand gc = results.get(0);
-                LOGGER.info("Ngroup = {}", gc.getNGroups());
-                int totalMetrics = gc.getValues().size();
-                List<Group> groups = gc.getValues();
-                for(Group group : groups) {
-                    metrics.add(group.getGroupValue());
+                FacetField facetField = response.getFacetField(RESPONSE_METRIC_NAME_FIELD);
+                List<FacetField.Count> facetFieldsCount = facetField.getValues();
+                if (facetFieldsCount.size() == 0) {
+                    p.complete(new JsonObject()
+                            .put(RESPONSE_TOTAL_METRICS, 0)
+                            .put(RESPONSE_METRICS, new JsonArray())
+                    );
+                    return;
                 }
-                LOGGER.debug("Found " + response.getRequestUrl() + response + " result : " + metrics);
-                LOGGER.debug("metrics : "+ metrics);
-                LOGGER.debug("total found = {}", totalMetrics);
+                LOGGER.debug("Found " + facetField.getValueCount() + " different values");
+                JsonArray metrics = new JsonArray(facetFieldsCount.stream()
+                        .map(FacetField.Count::getName)
+                        .collect(Collectors.toList())
+                );
                 p.complete(new JsonObject()
-                        .put(RESPONSE_TOTAL_METRICS, totalMetrics)
+                        .put(RESPONSE_TOTAL_METRICS, facetField.getValueCount())
                         .put(RESPONSE_METRICS, metrics)
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
@@ -333,7 +338,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
@@ -361,7 +366,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     return;
                 }
                 final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(myParams, query, metricsInfo);
-                requestSolrAndbuildTimeSeries(query, p, timeSeriesExtracter);
+                requestSolrAndBuildTimeSeries(query, p, timeSeriesExtracter);
             } catch (IOException e) {
                 LOGGER.error("unexpected exception", e);
                 p.fail(e);
@@ -394,12 +399,12 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return timeSeriesExtracter;
     }
 
-    public void requestSolrAndbuildTimeSeries(SolrQuery query, Promise<JsonObject> p, MultiTimeSeriesExtracter timeSeriesExtracter) {
+    public void requestSolrAndBuildTimeSeries(SolrQuery query, Promise<JsonObject> p, MultiTimeSeriesExtracter timeSeriesExtracter) {
         try (JsonStream stream = queryStream(query)) {
             JsonObject timeseries = extractTimeSeriesThenBuildResponse(stream, timeSeriesExtracter);
             p.complete(timeseries);
         } catch (Exception e) {
-            LOGGER.error("unexpected exception", e);
+            LOGGER.error("unexpected exception while reading JsonStream", e);
             p.fail(e);
         }
     }
@@ -532,7 +537,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         TupleStream solrStream = new SolrStream(solrHistorianConf.streamEndPoint, paramsLoc);
         StreamContext context = new StreamContext();
         solrStream.setStreamContext(context);
-        return new JsonStreamSolrStreamImpl(solrStream);
+        return JsonStreamSolrStream.forVersion(solrHistorianConf.schemaVersion, solrStream);
     }
 
 

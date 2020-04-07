@@ -69,6 +69,95 @@ mvn clean install -Pbuild-integration-tests
 
 to build integration tests source class ! Then you can run the test in your IDE.
 
+# Configuration
+
+You have an exemple in ./resources/config.json
+
+Where every settings you can use are set. This files should always be up to date.
+
+```json
+{
+  "web.verticles.instance.number": 2,
+  "historian.verticles.instance.number": 1,
+  "http_server" : {
+    "host": "localhost",
+    "port" : 8080,
+    "historian.address": "historian",
+    "max_data_points_allowed_for_ExportCsv" : 10000
+  },
+  "historian": {
+    "address" : "historian",
+    "schema_version": "VERSION_0",
+    "limit_number_of_point_before_using_pre_agg" : 50000,
+    "limit_number_of_chunks_before_using_solr_partition" : 50000,
+    "sleep_milli_between_connection_attempt" : 10000,
+    "number_of_connection_attempt" : 3,
+    "api" : {
+      "grafana" : {
+        "search" : {
+          "default_size": 2
+        },
+        "annotations" : {
+          "limit": 100
+        }
+      }
+    },
+    "solr" : {
+      "use_zookeeper": false,
+      "zookeeper_urls": ["localhost:2181"],
+      "stream_url": "http://localhost:8983/solr/historian",
+      "chunk_collection": "historian",
+      "annotation_collection": "annotation"
+    }
+  }
+}
+```
+
+There is a part to configure the rest API called **"http_server"**
+
+```json
+{
+    "host": "localhost",
+    "port" : 8080,
+    "historian.address": "historian",
+    "max_data_points_allowed_for_ExportCsv" : 10000
+}
+```
+
+There is a part to configure the historian service called **"historian"**
+
+```json
+ {
+    "address" : "historian",
+    "schema_version": "VERSION_0",
+    "limit_number_of_point_before_using_pre_agg" : 50000,
+    "limit_number_of_chunks_before_using_solr_partition" : 50000,
+    "sleep_milli_between_connection_attempt" : 10000,
+    "number_of_connection_attempt" : 3,
+    "api" : {
+      "grafana" : {
+        "search" : {
+          "default_size": 2
+        },
+        "annotations" : {
+          "limit": 100
+        }
+      }
+    },
+    "solr" : {
+      "use_zookeeper": false,
+      "zookeeper_urls": ["localhost:2181"],
+      "stream_url": "http://localhost:8983/solr/historian",
+      "chunk_collection": "historian",
+      "annotation_collection": "annotation"
+    }
+  }
+```
+
+If tou are working with the old schema please specify **"schema_version": "VERSION_0"** otherwise
+by default it is using the last stable schema. At the moment there is only two different types of schemas.
+
+
 # CONTRIBUTE
 
 Please read DEVELOPMENT.md
