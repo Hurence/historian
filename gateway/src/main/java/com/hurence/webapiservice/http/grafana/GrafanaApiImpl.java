@@ -63,9 +63,10 @@ public class GrafanaApiImpl implements GrafanaApi {
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(metricResponse -> {
+                    JsonArray array = metricResponse.getJsonArray(RESPONSE_METRICS);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(metricResponse.encode());
+                    context.response().end(array.encode());
                 }).subscribe();
     }
 
