@@ -18,6 +18,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
+
 
 public class IngestionApiImpl implements IngestionApi {
 
@@ -31,8 +34,20 @@ public class IngestionApiImpl implements IngestionApi {
 
     @Override
     public void importJson(RoutingContext context) {
+        JsonArray getMetricsParam;
+        try {
+             getMetricsParam = context.getBodyAsJsonArray();
 
-        final JsonArray getMetricsParam = context.getBodyAsJsonArray();
+             ImportRequestParser.checkRequest(getMetricsParam);
+
+        }catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
 
         service.rxAddTimeSeries(getMetricsParam)
                 .doOnError(ex -> {
@@ -50,6 +65,7 @@ public class IngestionApiImpl implements IngestionApi {
 
     @Override
     public void importCsv(RoutingContext context) {
+        //TODO finish this method !!!
         LOGGER.trace("received request at importCsv: {}", context.request());
         Set<FileUpload> uploads = context.fileUploads();
 

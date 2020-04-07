@@ -62,6 +62,13 @@ public class ImportJsonEndPointIT {
                 "/http/grafana/query/extract-algo/test0/expectedResponse.json");
     }
 
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testWrongAdd(Vertx vertx, VertxTestContext testContext) {
+
+        assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testWrongAdd/request.json");
+    }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
@@ -82,6 +89,19 @@ public class ImportJsonEndPointIT {
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                         JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
                         assertEquals(expectedBody, body);
+                        testContext.completeNow();
+                    });
+                }));
+    }
+    public void assertWrongAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                     String requestFile) {
+        final FileSystem fs = vertx.fileSystem();
+        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
+        webClient.post("/historian-server/ingestion/json")
+                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                    testContext.verify(() -> {
+                        assertEquals(500, rsp.statusCode());
+                        assertEquals("Internal Server Error", rsp.statusMessage());
                         testContext.completeNow();
                     });
                 }));
