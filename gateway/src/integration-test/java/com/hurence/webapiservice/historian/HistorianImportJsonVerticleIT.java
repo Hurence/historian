@@ -67,7 +67,8 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        assertEquals(rsp, new JsonObject("{}"));
+                        JsonObject jsonObject = new JsonObject().put("status", "OK").put("message", "injected 1 chunks");
+                        assertEquals(rsp, jsonObject);
                     });
                 })
                 .doAfterSuccess(t -> {
@@ -116,7 +117,8 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        assertEquals(rsp, new JsonObject("{}"));
+                        JsonObject jsonObject = new JsonObject().put("status", "OK").put("message", "injected 4 chunks");
+                        assertEquals(rsp, jsonObject);
                     });
                 })
                 .doAfterSuccess(t -> {

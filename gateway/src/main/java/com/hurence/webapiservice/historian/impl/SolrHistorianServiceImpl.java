@@ -9,6 +9,7 @@ import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtractorUsingPreAgg;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -45,6 +46,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     private final Vertx vertx;
     private final SolrHistorianConf solrHistorianConf;
+    private JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk();
 
     public SolrHistorianServiceImpl(Vertx vertx, SolrHistorianConf solrHistorianConf,
                                     Handler<AsyncResult<HistorianService>> readyHandler) {
@@ -350,11 +352,26 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
-                JsonObject json = new JsonObject("{}");
-                timeseries.forEach(this::addTimeSerie);
+                JsonObject json = new JsonObject();
+                Collection<SolrInputDocument> documents = new ArrayList<>();
+                int numChunk = 0;
+                for (Object object : timeseries) {
+                    JsonObject jsonObject1 = (JsonObject) object;
+                    LOGGER.info("building SolrDocument from a chunk");
+                    SolrInputDocument document = chunkTimeSerie(jsonObject1);
+                    documents.add(document);
+                    numChunk++;
+                }
+                LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
+                solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
                 solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
+                LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
+                String message = "injected " + numChunk + " chunks";
+                json.put("status", "OK").put("message", message);
                 p.complete(json
                 );
+            } catch (SolrServerException | IOException e) {
+                e.printStackTrace();
             } catch (Exception e) {
                 LOGGER.error("unexpected exception");
                 p.fail(e);
@@ -366,25 +383,10 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     private SolrInputDocument chunkTimeSerie(JsonObject timeserie) {
-        JsonObjectToChunk aa = new JsonObjectToChunk();
-        SolrInputDocument doc = aa.chunkIntoSolrDocument(timeserie);
+        SolrInputDocument doc = jsonObjectToChunk.chunkIntoSolrDocument(timeserie);
         return doc;
     }
 
-    private void addTimeSerie(Object timeserie) {
-        JsonObject timeserieJson = (JsonObject) timeserie;
-        try {
-            LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
-            SolrInputDocument document = chunkTimeSerie(timeserieJson);
-            solrHistorianConf.client.add(solrHistorianConf.chunkCollection, document);
-            LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-    }
 
     /**
      * nombre point < LIMIT_TO_DEFINE ==> Extract points from chunk
