@@ -131,7 +131,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
@@ -165,7 +165,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
@@ -292,9 +292,16 @@ public class SolrHistorianServiceImpl implements HistorianService {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
                 FacetField facetField = response.getFacetField(RESPONSE_METRIC_NAME_FIELD);
-                FacetField.Count count = facetField.getValues().get(0);
+                List<FacetField.Count> facetFieldsCount = facetField.getValues();
+                if (facetFieldsCount.size() == 0) {
+                    p.complete(new JsonObject()
+                            .put(RESPONSE_TOTAL_METRICS, 0)
+                            .put(RESPONSE_METRICS, new JsonArray())
+                    );
+                    return;
+                }
                 LOGGER.debug("Found " + facetField.getValueCount() + " different values");
-                JsonArray metrics = new JsonArray(facetField.getValues().stream()
+                JsonArray metrics = new JsonArray(facetFieldsCount.stream()
                         .map(FacetField.Count::getName)
                         .collect(Collectors.toList())
                 );
@@ -305,7 +312,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
@@ -331,7 +338,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };
