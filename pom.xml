@@ -84,11 +84,11 @@
     </properties>
     <modules>
         <module>loader</module>
-        <module>gateway</module>
+        <module>historian-server</module>
         <module>timeseries</module>
         <module>logisland-timeseries</module>
         <module>integration-tests</module>
-        <module>historian-modele</module>
+        <module>historian-resources</module>
     </modules>
 
     <dependencies>

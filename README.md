@@ -1,3 +1,36 @@
+# Logisland Data Historian
+
+timeseries big data analytics tools
+
+
+## Setup
+
+
+### Before You Begin
+To follow along with this tutorial, you will need…​
+
+To meet the system requirements
+
+
+- Apache Solr runs on Java 8 or greater.
+- It is also recommended to always use the latest update version of your Java VM, because bugs may affect Solr. An overview of known JVM bugs can be found on http://wiki.apache.org/lucene-java/JavaBugs
+- With all Java versions it is strongly recommended to not use experimental -XX JVM options.
+- CPU, disk and memory requirements are based on the many choices made in implementing Solr (document size, number of documents, and number of hits retrieved to name a few). The benchmarks page has some information related to performance on particular platforms.
+
+
+unpack the following solr archive : https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz
+
+
+
+    rm -r ../data/solr/node1/historian_shard1_replica_n1/ ../data/solr/node1/zoo_data/ ../data/solr/node2/historian_shard2_replica_n2/
+
+
+    bin/solr start -cloud -s ../data/solr/node1  -p 8983
+    bin/solr start -cloud -s ../data/solr/node2/  -p 7574 -z localhost:9983
+    
+    
+    bin/solr stop -all
+    
 # First time cloning project
 
 This project include git sub modules. That's why you need to clone this project with the option --recurse-submodules.

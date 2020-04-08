@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>historian-gateway</artifactId>
+    <artifactId>historian-server</artifactId>
 
     <properties>
         <main.verticle>com.hurence.webapiservice.WebApiServiceMainVerticle</main.verticle>
@@ -42,7 +42,7 @@
         </dependency>
         <dependency>
             <groupId>com.hurence.historian</groupId>
-            <artifactId>historian-modele</artifactId>
+            <artifactId>historian-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
         <!--        VERTX-->

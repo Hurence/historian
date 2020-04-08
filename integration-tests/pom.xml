@@ -30,7 +30,7 @@
         <!-- HISTORIAN modules -->
         <dependency>
             <groupId>com.hurence.historian</groupId>
-            <artifactId>historian-modele</artifactId>
+            <artifactId>historian-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
