@@ -352,23 +352,26 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
-                JsonObject json = new JsonObject();
+                JsonObject response = new JsonObject();
                 Collection<SolrInputDocument> documents = new ArrayList<>();
                 int numChunk = 0;
-                for (Object object : timeseries) {
-                    JsonObject jsonObject1 = (JsonObject) object;
+                int numPoints = 0;
+                for (Object TimeseriesObject : timeseries) {
+                    JsonObject timeserie = (JsonObject) TimeseriesObject;
                     LOGGER.info("building SolrDocument from a chunk");
-                    SolrInputDocument document = chunkTimeSerie(jsonObject1);
+                    SolrInputDocument document = chunkTimeSerie(timeserie);
                     documents.add(document);
+                    int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
                     numChunk++;
+                    numPoints = numPoints + totalNumPointsInChunk;
                 }
                 LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
                 solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
                 solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
                 LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
-                String message = "injected " + numChunk + " chunks";
-                json.put("status", "OK").put("message", message);
-                p.complete(json
+                String message = "injected " + numPoints + " points of " + numChunk + " metrics in " + numChunk + " chunks";
+                response.put("status", "OK").put("message", message);
+                p.complete(response
                 );
             } catch (SolrServerException | IOException e) {
                 e.printStackTrace();
