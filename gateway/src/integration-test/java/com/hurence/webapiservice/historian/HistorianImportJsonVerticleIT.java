@@ -67,8 +67,8 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject jsonObject = new JsonObject().put("status", "OK").put("message", "injected 1 chunks");
-                        assertEquals(rsp, jsonObject);
+                        JsonObject response = new JsonObject().put("status", "OK").put("message", "injected 2 points of 1 metrics in 1 chunks");
+                        assertEquals(rsp, response);
                     });
                 })
                 .doAfterSuccess(t -> {
@@ -117,8 +117,8 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject jsonObject = new JsonObject().put("status", "OK").put("message", "injected 4 chunks");
-                        assertEquals(rsp, jsonObject);
+                        JsonObject response = new JsonObject().put("status", "OK").put("message", "injected 8 points of 4 metrics in 4 chunks");
+                        assertEquals(rsp, response);
                     });
                 })
                 .doAfterSuccess(t -> {
@@ -164,6 +164,50 @@ public class HistorianImportJsonVerticleIT {
                             .subscribe();
                 })
                 .subscribe();
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    void addTimeseries(VertxTestContext testContext) {
+        long time1 = 1477895624866L;
+        long time2 = 1477916224866L;
+        JsonArray params = new JsonArray().add(new JsonObject().put("name", "openSpaceSensors.Temperature555").put("points", new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))));
+        historian.rxAddTimeSeries(params)
+                .doOnError(testContext::failNow)
+                .doOnSuccess(rsp -> {
+                    testContext.verify(() -> {
+                        JsonObject response = new JsonObject().put("status", "OK").put("message", "injected 2 points of 1 metrics in 1 chunks");
+                        assertEquals(rsp, response);
+                    });
+                })
+                .subscribe();
+        JsonObject params1 = new JsonObject().put("names", new JsonArray().add("openSpaceSensors.Temperature555"));
+        historian.rxGetTimeSeriesChunk(params1)
+                .doOnError(testContext::failNow)
+                .doOnSuccess(rsp -> {
+                    testContext.verify(() -> {
+                        LOGGER.info("responces : {}", rsp);
+                        long totalHit = rsp.getLong(RESPONSE_TOTAL_FOUND);
+                        assertEquals(1, totalHit);
+                        JsonArray docs = rsp.getJsonArray(RESPONSE_CHUNKS);
+                        assertEquals(1, docs.size());
+                        JsonObject doc1 = docs.getJsonObject(0);
+                        assertTrue(doc1.containsKey(RESPONSE_METRIC_NAME_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_START_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
+                        assertEquals(time1, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
+                        assertEquals(time2, doc1.getLong(RESPONSE_CHUNK_END_FIELD));
+                        testContext.completeNow();
+                    });
+                })
+                .subscribe();
+
     }
 }
 
