@@ -19,13 +19,13 @@ public class ImportRequestParser {
         try {
             for (Object object : getMetricsParam) {
                 JsonObject jsonObject = (JsonObject) object;
-                final boolean[] boo3 = new boolean[1];
-                boo3[0] = true;
+                final boolean[] boo = new boolean[1];
+                boo[0] = true;
                 jsonObject.getJsonArray(POINTS_REQUEST_FIELD).forEach(point -> {
                     JsonArray pointArray = (JsonArray) point;
-                    boo3[0] =  boo3[0] && pointArray.size() == 2;
+                    boo[0] =  boo[0] && pointArray.size() == 2;
                 });
-                if (!jsonObject.containsKey(METRIC_NAME_REQUEST_FIELD) && !jsonObject.containsKey(POINTS_REQUEST_FIELD) && boo3[0]) {
+                if (!jsonObject.containsKey(METRIC_NAME_REQUEST_FIELD) && !jsonObject.containsKey(POINTS_REQUEST_FIELD) && boo[0]) {
                     throw new IllegalArgumentException("bad request");
                 }
             }

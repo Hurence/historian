@@ -168,7 +168,7 @@ public class HistorianImportJsonVerticleIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void addTimeseries(VertxTestContext testContext) {
+    void checkAddedTimeseriesChunks(VertxTestContext testContext) {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
         JsonArray params = new JsonArray().add(new JsonObject().put("name", "openSpaceSensors.Temperature555").put("points", new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))));
@@ -193,11 +193,14 @@ public class HistorianImportJsonVerticleIT {
                         assertEquals(1, docs.size());
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertTrue(doc1.containsKey(RESPONSE_METRIC_NAME_FIELD));
+                        assertEquals("openSpaceSensors.Temperature555",doc1.getString(RESPONSE_METRIC_NAME_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_START_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
+                        assertEquals(2,doc1.getLong(RESPONSE_CHUNK_SIZE_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
+                        assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
