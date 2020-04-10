@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http.grafana;
 
+import com.hurence.webapiservice.http.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;

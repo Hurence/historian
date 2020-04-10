@@ -5,7 +5,7 @@ import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
 import com.hurence.webapiservice.http.GetTimeSerieRequestParser;
-import com.hurence.webapiservice.http.grafana.QueryRequestParser;
+import com.hurence.webapiservice.http.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.*;
 import io.vertx.core.json.JsonArray;

@@ -9,6 +9,8 @@ import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.util.models.ResponseAsList;
 import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
+import com.hurence.webapiservice.http.grafana.parser.AnnotationRequestParser;
+import com.hurence.webapiservice.http.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.AnnotationRequest;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
@@ -233,7 +235,7 @@ public class GrafanaApiImpl implements GrafanaApi {
         return new JsonObject()
                 .put(FROM_REQUEST_FIELD, request.getFrom())
                 .put(TO_REQUEST_FIELD, request.getTo())
-                .put(TAGS_REQUEST_FIELD, request.getTagsAsJsonArray())
+                .put(TAGS_REQUEST_FIELD, request.getTags())
                 .put(MAX_ANNOTATION_REQUEST_FIELD, request.getMaxAnnotation())
                 .put(MATCH_ANY_REQUEST_FIELD, request.getMatchAny())
                 .put(TYPE_REQUEST_FIELD, request.getType());
@@ -248,7 +250,7 @@ public class GrafanaApiImpl implements GrafanaApi {
                 When declaring AnnotationRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
-            request = new AnnotationRequestParser().parseAnnotationRequest(requestBody);
+            request = new AnnotationRequestParser().parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);

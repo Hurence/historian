@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.grafana.util;
 
-import com.hurence.webapiservice.http.grafana.QueryRequestParser;
+import com.hurence.webapiservice.http.grafana.parser.QueryRequestParser;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;

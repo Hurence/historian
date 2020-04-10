@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.historian;
 
 import com.hurence.unit5.extensions.SolrExtension;
+import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
@@ -107,7 +108,7 @@ public class HistorianAnnotationVerticleIT {
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, true)
-                .put(TYPE_REQUEST_FIELD, "all");
+                .put(TYPE_REQUEST_FIELD, AnnotationRequestType.ALL.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
@@ -130,7 +131,7 @@ public class HistorianAnnotationVerticleIT {
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, true)
-                .put(TYPE_REQUEST_FIELD, "tags");
+                .put(TYPE_REQUEST_FIELD, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
@@ -155,7 +156,7 @@ public class HistorianAnnotationVerticleIT {
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 100)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, false)
-                .put(TYPE_REQUEST_FIELD, "tags");
+                .put(TYPE_REQUEST_FIELD, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
@@ -178,7 +179,7 @@ public class HistorianAnnotationVerticleIT {
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 2)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, true)
-                .put(TYPE_REQUEST_FIELD, "tags");
+                .put(TYPE_REQUEST_FIELD, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
@@ -200,7 +201,7 @@ public class HistorianAnnotationVerticleIT {
                 .put(MAX_ANNOTATION_REQUEST_FIELD, 10)
                 .put(TAGS_REQUEST_FIELD, new JsonArray().add("tag1").add("tag2"))
                 .put(MATCH_ANY_REQUEST_FIELD, true)
-                .put(TYPE_REQUEST_FIELD, "tags");
+                .put(TYPE_REQUEST_FIELD, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
