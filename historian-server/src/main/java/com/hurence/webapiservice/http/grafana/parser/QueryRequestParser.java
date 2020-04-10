@@ -1,20 +1,15 @@
-package com.hurence.webapiservice.http.grafana;
+package com.hurence.webapiservice.http.grafana.parser;
 
 import com.hurence.webapiservice.http.grafana.modele.AdHocFilter;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.Target;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
-import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.http.grafana.util.DateRequestParserUtil.parseDate;

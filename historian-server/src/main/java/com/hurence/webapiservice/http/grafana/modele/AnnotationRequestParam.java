@@ -1,47 +1,54 @@
 package com.hurence.webapiservice.http.grafana.modele;
 
-import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.AnnotationRequest;
 import io.vertx.core.json.JsonArray;
 
+import java.util.Collections;
 import java.util.List;
 
 public class AnnotationRequestParam implements AnnotationRequest {
 
-    private JsonArray tags;
+    public static final long DEFAULT_FROM = 0L;
+    public static final long DEFAULT_TO = Long.MAX_VALUE;
+    public static final boolean DEFAULT_MATCH_ANY = true;
+    public static final List<String> DEFAULT_TAGS = Collections.emptyList();
+    public static final int DEFAULT_MAX_ANNOTATION_TO_RETURN = 1000;
+    public static final AnnotationRequestType DEFAULT_TYPE = AnnotationRequestType.ALL;
+
+    private List<String> tags;
     private Long from;
     private Long to;
-    private int maxAnnotation;
+    private Integer maxAnnotation;
     private Boolean matchAny;
-    private String type;
+    private AnnotationRequestType type;
 
 
-    public void setTags(JsonArray tags) {
+    private void setTags(List<String> tags) {
         this.tags = tags;
     }
 
-    public void setFrom(Long from) {
+    private void setFrom(Long from) {
         this.from = from;
     }
 
-    public void setTo(Long to) {
+    private void setTo(Long to) {
         this.to = to;
     }
 
-    public void setMaxAnnotation(int maxAnnotation) {
+    private void setMaxAnnotation(int maxAnnotation) {
         this.maxAnnotation = maxAnnotation;
     }
 
-    public void setMatchAny(Boolean matchAny) {
+    private void setMatchAny(Boolean matchAny) {
         this.matchAny = matchAny;
     }
 
-    public void setType(String type) {
+    private void setType(AnnotationRequestType type) {
         this.type = type;
     }
 
     @Override
-    public JsonArray getTagsAsJsonArray() { // i need to use this getTags without the one in the TimeSeriesRquest
+    public List<String> getTags() { // i need to use this getTags without the one in the TimeSeriesRquest
         return tags;
     }
 
@@ -49,21 +56,9 @@ public class AnnotationRequestParam implements AnnotationRequest {
         return from;
     }
 
-
     public Long getTo() {
         return to;
     }
-
-    @Override
-    public SamplingConf getSamplingConf() {
-        return null;
-    }
-
-
-    public List<String> getTags() {
-        return null;
-    }
-
 
     @Override
     public int getMaxAnnotation() {
@@ -71,27 +66,27 @@ public class AnnotationRequestParam implements AnnotationRequest {
     }
 
     @Override
-    public Boolean getMatchAny() {
+    public boolean getMatchAny() {
         return matchAny;
     }
 
     @Override
-    public String getType() {
+    public AnnotationRequestType getType() {
         return type;
     }
 
 
     public static final class Builder {
-        private JsonArray tags;
+        private List<String> tags;
         private Long from;
         private Long to;
-        private int maxAnnotation;
+        private Integer maxAnnotation;
         private Boolean matchAny;
-        private String type;
+        private AnnotationRequestType type;
 
         public Builder() { }
 
-        public AnnotationRequestParam.Builder withTags(JsonArray tags) {
+        public AnnotationRequestParam.Builder withTags(List<String> tags) {
             this.tags = tags;
             return this;
         }
@@ -108,7 +103,7 @@ public class AnnotationRequestParam implements AnnotationRequest {
 
 
 
-        public AnnotationRequestParam.Builder withMaxAnnotation(int maxAnnotation) {
+        public AnnotationRequestParam.Builder withMaxAnnotation(Integer maxAnnotation) {
             this.maxAnnotation = maxAnnotation;
             return this;
         }
@@ -118,7 +113,7 @@ public class AnnotationRequestParam implements AnnotationRequest {
             return this;
         }
 
-        public AnnotationRequestParam.Builder withType(String type) {
+        public AnnotationRequestParam.Builder withType(AnnotationRequestType type) {
             this.type = type;
             return this;
         }
@@ -140,3 +135,4 @@ public class AnnotationRequestParam implements AnnotationRequest {
 
 
 }
+

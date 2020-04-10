@@ -57,17 +57,11 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         Router router = Router.router(vertx);
 
-//    router.route().handler(CookieHandler.create());
         router.route().handler(BodyHandler.create());
-//    router.route().handler(SessionHandler.create(LocalSessionStore.create(vertx)));
 
         router.get("/timeseries").handler(this::getTimeSeries);
         Router graphanaApi = new GrafanaApiImpl(historianService, maxDataPointsAllowedForExportCsv).getGraphanaRouter(vertx);
         router.mountSubRouter("/api/grafana", graphanaApi);
-
-        Router compactionApi = new CompactionApiImpl(historianService).getCompactionRouter(vertx);
-        router.mountSubRouter("/api/compaction", compactionApi);
-//    router.get("/doc/similarTo/:id").handler(this::getSimilarDoc);
 
         int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
         String host = config().getString(CONFIG_HTTP_SERVER_HOSTNAME, "localhost");

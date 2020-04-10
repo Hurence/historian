@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
+import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 
@@ -10,17 +11,12 @@ public interface AnnotationRequest {
 
     Long getTo();
 
-
-    SamplingConf getSamplingConf();
-
-    String getType();
+    AnnotationRequestType getType();
 
     List<String> getTags();
 
-    JsonArray getTagsAsJsonArray();
-
     int getMaxAnnotation();
 
-    Boolean getMatchAny();
+    boolean getMatchAny();
 
 }

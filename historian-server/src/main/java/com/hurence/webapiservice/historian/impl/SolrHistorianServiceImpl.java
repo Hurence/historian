@@ -2,7 +2,7 @@ package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
-import com.hurence.webapiservice.historian.compatibility.JsonStreamSolrStreamSchemaVersion0;
+import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -229,18 +229,22 @@ public class SolrHistorianServiceImpl implements HistorianService {
         StringBuilder stringQuery = new StringBuilder();
         String operator = "";
         SolrQuery query = new SolrQuery();
-        if (params.getString(TYPE_REQUEST_FIELD, "all").equals("tags")) {
-            queryBuilder.append(" && ");
-            if (!params.getBoolean(MATCH_ANY_REQUEST_FIELD, true)) {
-                operator = " AND ";
-            } else {
-                operator = " OR ";
-            }
-            for (String tag : tags.subList(0,tags.size()-1)) {
-                stringQuery.append(tag).append(operator);
-            }
-            stringQuery.append(tags.get(tags.size()-1));
-            queryBuilder.append(TAGS_TO_FILTER_ON_REQUEST_FIELD).append(":").append("(").append(stringQuery.toString()).append(")");
+        switch (AnnotationRequestType.valueOf(params.getString(TYPE_REQUEST_FIELD, AnnotationRequestType.ALL.toString()))) {
+            case ALL:
+                break;
+            case TAGS:
+                queryBuilder.append(" && ");
+                if (!params.getBoolean(MATCH_ANY_REQUEST_FIELD, true)) {
+                    operator = " AND ";
+                } else {
+                    operator = " OR ";
+                }
+                for (String tag : tags.subList(0,tags.size()-1)) {
+                    stringQuery.append(tag).append(operator);
+                }
+                stringQuery.append(tags.get(tags.size()-1));
+                queryBuilder.append(TAGS_TO_FILTER_ON_REQUEST_FIELD).append(":").append("(").append(stringQuery.toString()).append(")");
+                break;
         }
         if (queryBuilder.length() != 0 ) {
             LOGGER.info("query is : {}", queryBuilder.toString());
