@@ -30,6 +30,7 @@ public class JsonObjectToChunk {
 
     private SolrInputDocument convertIntoSolrInputDocument(MetricTimeSeries chunk) {
         final SolrInputDocument doc = new SolrInputDocument();
+        checkChnukNotEmpty(chunk);
         doc.addField(RESPONSE_METRIC_NAME_FIELD, chunk.getName());
         doc.addField(RESPONSE_CHUNK_START_FIELD, chunk.getStart());
         doc.addField(RESPONSE_CHUNK_END_FIELD, chunk.getEnd());
@@ -42,6 +43,16 @@ public class JsonObjectToChunk {
         doc.addField(RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
         doc.addField(RESPONSE_CHUNK_SIZE_BYTES_FIELD, compressedPoints.length);
         return doc;
+    }
+
+    private void checkChnukNotEmpty (MetricTimeSeries chunk) {
+        if (chunk.isEmpty())
+            throw new IllegalArgumentException("chunk is empty !");
+        else if(chunk.getName().isEmpty())
+            throw new IllegalArgumentException("chunk name is empty !");
+        else if(chunk.getValues().isEmpty())
+            throw new IllegalArgumentException("chunk values are empty !");
+
     }
     public SolrInputDocument buildSolrDocument(String id) {
 

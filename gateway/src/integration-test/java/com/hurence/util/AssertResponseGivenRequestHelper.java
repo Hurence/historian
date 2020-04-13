@@ -58,4 +58,18 @@ public class AssertResponseGivenRequestHelper {
                 }));
     }
 
+    public void assertWrongRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                          String requestFile) {
+        final FileSystem fs = vertx.fileSystem();
+        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
+        webClient.post(endpoint)
+                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                    testContext.verify(() -> {
+                        assertEquals(400, rsp.statusCode());
+                        assertEquals("Bad Request", rsp.statusMessage());
+                        testContext.completeNow();
+                    });
+                }));
+    }
+
 }
