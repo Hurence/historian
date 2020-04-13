@@ -35,6 +35,7 @@ public class ImportJsonEndPointIT {
     private static Logger LOGGER = LoggerFactory.getLogger(ImportJsonEndPointIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
+    private static AssertResponseGivenRequestHelper assertHelper1;
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
@@ -42,6 +43,7 @@ public class ImportJsonEndPointIT {
                 .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
+        assertHelper1 = new AssertResponseGivenRequestHelper(webClient, "/historian-server/ingestion/json");
     }
 
     @AfterAll
@@ -77,33 +79,11 @@ public class ImportJsonEndPointIT {
 
     public void assertAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
-        final FileSystem fs = vertx.fileSystem();
-        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/historian-server/ingestion/json")
-                .as(BodyCodec.jsonObject())
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
-                    testContext.verify(() -> {
-                        assertEquals(200, rsp.statusCode());
-                        assertEquals("OK", rsp.statusMessage());
-                        JsonObject body = rsp.body();
-                        Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
-                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
-                        assertEquals(expectedBody, body);
-                        testContext.completeNow();
-                    });
-                }));
+        assertHelper1.assertRequestGiveObjectResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
     public void assertWrongAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                      String requestFile) {
-        final FileSystem fs = vertx.fileSystem();
-        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/historian-server/ingestion/json")
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
-                    testContext.verify(() -> {
-                        assertEquals(500, rsp.statusCode());
-                        assertEquals("Internal Server Error", rsp.statusMessage());
-                        testContext.completeNow();
-                    });
-                }));
+        assertHelper1.assertWrongRequestGiveResponseFromFile(vertx, testContext,
+                requestFile);
     }
 }

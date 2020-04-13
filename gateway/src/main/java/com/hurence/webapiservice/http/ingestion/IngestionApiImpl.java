@@ -35,15 +35,18 @@ public class IngestionApiImpl implements IngestionApi {
     @Override
     public void importJson(RoutingContext context) {
         JsonArray getMetricsParam;
+        String error ;
         try {
              getMetricsParam = context.getBodyAsJsonArray();
-
-             ImportRequestParser.checkRequest(getMetricsParam);
-
+             error = new ImportRequestParser().checkRequest(getMetricsParam)[0];
+             if ((error != null) && !(error.isEmpty())) {
+                 LOGGER.error(error);
+                 throw new IllegalArgumentException(error);
+             }
         }catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage("Bad Request");
             context.response().putHeader("Content-Type", "application/json");
             context.response().end();
             return;
@@ -60,6 +63,7 @@ public class IngestionApiImpl implements IngestionApi {
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(response.encode());
+                    LOGGER.info("response : {}", response);
                 }).subscribe();
     }
 
