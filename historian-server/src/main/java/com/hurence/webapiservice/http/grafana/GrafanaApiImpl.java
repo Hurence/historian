@@ -42,7 +42,6 @@ public class GrafanaApiImpl implements GrafanaApi {
     public GrafanaApiImpl(HistorianService service, int maxDataPointsAllowedForExportCsv) {
         this.service = service;
         this.maxDataPointsAllowedForExportCsv = maxDataPointsAllowedForExportCsv;
-
     }
 
 
