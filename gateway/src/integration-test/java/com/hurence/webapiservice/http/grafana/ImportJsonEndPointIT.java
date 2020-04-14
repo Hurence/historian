@@ -64,9 +64,69 @@ public class ImportJsonEndPointIT {
                 "/http/grafana/query/extract-algo/test0/expectedResponse.json");
     }
 
+
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testWrongAdd(Vertx vertx, VertxTestContext testContext) {
+    public void testAddWithMissingNameField(Vertx vertx, VertxTestContext testContext) {
+
+        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingNameField/testAdd/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingNameField/testAdd/expectedResponse.json");
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingNameField/testQuery/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingNameField/testQuery/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testAddWithMissingPointsField(Vertx vertx, VertxTestContext testContext) {
+
+        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingPointsField/testAdd/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingPointsField/testAdd/expectedResponse.json");
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingPointsField/testQuery/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testMissingPointsField/testQuery/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testAddWithInvalidPointsSize(Vertx vertx, VertxTestContext testContext) {
+
+        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testInvalidPointsSize/testAdd/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testInvalidPointsSize/testAdd/expectedResponse.json");
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testInvalidPointsSize/testQuery/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testInvalidPointsSize/testQuery/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testAddWithNullDate(Vertx vertx, VertxTestContext testContext) {
+
+        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullDate/testAdd/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullDate/testAdd/expectedResponse.json");
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullDate/testQuery/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullDate/testQuery/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testAddWithNullValue(Vertx vertx, VertxTestContext testContext) {
+
+        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullValue/testAdd/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullValue/testAdd/expectedResponse.json");
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullValue/testQuery/request.json",
+                "/http/grafana/query/extract-algo/testMissingAdd/testNullValue/testQuery/expectedResponse.json");
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testWrongAddWithCode400(Vertx vertx, VertxTestContext testContext) {
 
         assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testWrongAdd/request.json");
@@ -85,5 +145,9 @@ public class ImportJsonEndPointIT {
                                                      String requestFile) {
         assertHelper1.assertWrongRequestGiveResponseFromFile(vertx, testContext,
                 requestFile);
+    }
+    public void assertMissingPointsAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                                  String requestFile, String responseFile) {
+        assertHelper1.assertMissingPointsRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
 }

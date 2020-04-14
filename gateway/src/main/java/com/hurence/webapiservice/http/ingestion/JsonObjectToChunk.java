@@ -30,7 +30,7 @@ public class JsonObjectToChunk {
 
     private SolrInputDocument convertIntoSolrInputDocument(MetricTimeSeries chunk) {
         final SolrInputDocument doc = new SolrInputDocument();
-        checkChnukNotEmpty(chunk);
+        checkChunkNotEmpty(chunk);
         doc.addField(RESPONSE_METRIC_NAME_FIELD, chunk.getName());
         doc.addField(RESPONSE_CHUNK_START_FIELD, chunk.getStart());
         doc.addField(RESPONSE_CHUNK_END_FIELD, chunk.getEnd());
@@ -45,7 +45,7 @@ public class JsonObjectToChunk {
         return doc;
     }
 
-    private void checkChnukNotEmpty (MetricTimeSeries chunk) {
+    private void checkChunkNotEmpty(MetricTimeSeries chunk) {
         if (chunk.isEmpty())
             throw new IllegalArgumentException("chunk is empty !");
         else if(chunk.getName().isEmpty())
@@ -54,28 +54,7 @@ public class JsonObjectToChunk {
             throw new IllegalArgumentException("chunk values are empty !");
 
     }
-    public SolrInputDocument buildSolrDocument(String id) {
 
-        final SolrInputDocument doc = new SolrInputDocument();//TODO last remaining fields
-        doc.addField(RESPONSE_CHUNK_ID_FIELD, id);
-//        doc.addField(RESPONSE_CHUNK_START_FIELD, this.start);
-//        doc.addField(RESPONSE_CHUNK_SIZE_FIELD, this.points.size());
-//        doc.addField(RESPONSE_CHUNK_END_FIELD, this.end);
-//        doc.addField(RESPONSE_CHUNK_SAX_FIELD, this.sax);
-//        doc.addField(RESPONSE_CHUNK_VALUE_FIELD, this.compressedPoints);
-//        doc.addField(RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(this.compressedPoints));
-//        doc.addField(RESPONSE_CHUNK_AVG_FIELD, this.avg);
-//        doc.addField(RESPONSE_CHUNK_MIN_FIELD, this.min);
-//        doc.addField(RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
-//        doc.addField(RESPONSE_METRIC_NAME_FIELD, this.name);
-//        doc.addField(RESPONSE_CHUNK_TREND_FIELD, this.trend);
-//        doc.addField(RESPONSE_CHUNK_MAX_FIELD, this.max);
-//        doc.addField(RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
-//        doc.addField(RESPONSE_CHUNK_SUM_FIELD, this.sum);
-//        doc.addField(RESPONSE_TAG_NAME_FIELD, this.tags);
-//        doc.addField(RESPONSE_CHUNK_FIRST_VALUE_FIELD, this.firstValue);
-        return doc;
-    }
 
     /**
      *
