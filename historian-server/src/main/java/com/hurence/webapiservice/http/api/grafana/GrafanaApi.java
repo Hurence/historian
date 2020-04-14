@@ -2,11 +2,25 @@ package com.hurence.webapiservice.http.api.grafana;
 
 
 import com.hurence.logisland.record.FieldDictionary;
+import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
 public interface GrafanaApi {
+
+
+    static GrafanaApi fromVersion(GrafanaApiVersion grafanaApiVersion,
+                                  HistorianService historianService) {
+        switch (grafanaApiVersion) {
+            case SIMPLE_JSON_PLUGIN:
+                return new GrafanaSimpleJsonPluginApiImpl(historianService);
+            case HURENCE_DATASOURCE_PLUGIN:
+                return new GrafanaHurenceDatasourcePliginApiImpl(historianService);
+            default:
+                throw new IllegalArgumentException(String.format("version %s is not yet supported !", grafanaApiVersion));
+        }
+    }
 
     String TARGET = "target";
     default Router getGraphanaRouter(Vertx vertx) {
@@ -16,9 +30,6 @@ public interface GrafanaApi {
         router.post("/query")
                 .produces("application/json")
                 .handler(this::query);
-        router.post("/export/csv")
-                .produces("text/csv")
-                .handler(this::export);
         router.post("/annotations").handler(this::annotations);
         router.post("/tag-keys").handler(this::tagKeys);
         router.post("/tag-values").handler(this::tagValues);
@@ -75,10 +86,4 @@ public interface GrafanaApi {
      * @param context
      */
     void tagValues(RoutingContext context);
-
-    /**
-     * should return metrics based on input as csv.
-     * @param context
-     */
-    void export(RoutingContext context);
 }

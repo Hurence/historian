@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.modele;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApiImpl;
+import com.hurence.webapiservice.http.api.grafana.GrafanaSimpleJsonPluginApiImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
@@ -92,7 +92,7 @@ public class QueryRequestParam implements TimeSeriesRequest {
     }
 
     public SamplingConf getSamplingConf() {
-        if (containFilter(GrafanaApiImpl.ALGO_TAG_KEY) || containFilter(GrafanaApiImpl.BUCKET_SIZE_TAG_KEY)) {
+        if (containFilter(GrafanaSimpleJsonPluginApiImpl.ALGO_TAG_KEY) || containFilter(GrafanaSimpleJsonPluginApiImpl.BUCKET_SIZE_TAG_KEY)) {
             Optional<SamplingAlgorithm> algo = getAlgoFromFilter();
             Optional<Integer> bucketSize = getBucketSizeFromFilter();
             return new SamplingConf(
@@ -111,21 +111,21 @@ public class QueryRequestParam implements TimeSeriesRequest {
 
     private Optional<Integer> getBucketSizeFromFilter() {
         return getAdHocFilters().stream()
-                .filter(adhoc -> GrafanaApiImpl.BUCKET_SIZE_TAG_KEY.equals(adhoc.getKey()))
+                .filter(adhoc -> GrafanaSimpleJsonPluginApiImpl.BUCKET_SIZE_TAG_KEY.equals(adhoc.getKey()))
                 .map(adhoc -> Integer.parseInt(adhoc.getValue()))
                 .findAny();
     }
 
     private Optional<SamplingAlgorithm> getAlgoFromFilter() {
         return getAdHocFilters().stream()
-                .filter(adhoc -> GrafanaApiImpl.ALGO_TAG_KEY.equals(adhoc.getKey()))
+                .filter(adhoc -> GrafanaSimpleJsonPluginApiImpl.ALGO_TAG_KEY.equals(adhoc.getKey()))
                 .map(adhoc -> SamplingAlgorithm.valueOf(adhoc.getValue()))
                 .findAny();
     }
 
     private List<String> getTagsFromFilter() {
         return getAdHocFilters().stream()
-                .filter(adhoc -> GrafanaApiImpl.FILTER_TAG_KEY.equals(adhoc.getKey()))
+                .filter(adhoc -> GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY.equals(adhoc.getKey()))
                 .map(AdHocFilter::getValue)
                 .collect(Collectors.toList());
     }
@@ -139,7 +139,7 @@ public class QueryRequestParam implements TimeSeriesRequest {
 
     @Override
     public List<String> getTags() {
-        if (containFilter(GrafanaApiImpl.FILTER_TAG_KEY)) {
+        if (containFilter(GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY)) {
             return getTagsFromFilter();
         } else {
             return Collections.emptyList();
