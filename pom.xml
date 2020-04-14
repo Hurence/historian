@@ -89,6 +89,7 @@
         <module>logisland-timeseries</module>
         <module>integration-tests</module>
         <module>historian-resources</module>
+        <module>assembly</module>
     </modules>
 
     <dependencies>
