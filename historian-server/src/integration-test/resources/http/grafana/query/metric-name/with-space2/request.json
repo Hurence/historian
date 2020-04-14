@@ -1,0 +1,14 @@
+{
+  "targets": [
+    {
+      "target": "metric with spaces",
+      "refId": "A",
+      "type": "timeserie"
+    },
+    {
+      "target": "temp_b",
+      "refId": "B",
+      "type": "timeserie"
+    }
+  ]
+}

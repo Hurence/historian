@@ -265,11 +265,11 @@ public class SolrHistorianServiceImpl implements HistorianService {
         if (jsonArray == null || jsonArray.isEmpty())
             return Optional.empty();
         if (jsonArray.size() == 1) {
-            return Optional.of(responseMetricNameField + ":" + jsonArray.getString(0));
+            return Optional.of(responseMetricNameField + ":\"" + jsonArray.getString(0) + "\"");
         } else {
             String orNames = jsonArray.stream()
                     .map(String.class::cast)
-                    .collect(Collectors.joining(" OR ", "(", ")"));
+                    .collect(Collectors.joining("\" OR \"", "(\"", "\")"));
             return Optional.of(responseMetricNameField + ":" + orNames);
         }
     }
