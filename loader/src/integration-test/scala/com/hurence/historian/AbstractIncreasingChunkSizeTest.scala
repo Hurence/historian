@@ -2,7 +2,6 @@ package com.hurence.historian
 
 import java.util
 
-import com.hurence.historian.AbstractIncreasingChunkSizeTest.LOGGER
 import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
