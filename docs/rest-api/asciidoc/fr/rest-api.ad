@@ -1,0 +1,485 @@
+= REST API
+:subtitle: Data Historian 1.0
+:doctype: book
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
+:author: (C)Hurence
+:email: contact@hurence.com
+:revnumber: v1.0
+:revdate: 18.02.2020
+:revremark: First draft
+
+Cette section décrit l'api rest de l'historian.
+
+== Introduction
+
+L'api REST de l'historian est actuellement séparé en 2 endpoints principal :
+
+* GET _/api/grafana_ : L'api principal pour interagir avec nos plugins grafana.
+* POST _/timeseries_ : Notre api principal pour requêter les points des metrics.
+
+== Grafana
+
+Cet endpoint renvoie une réponse 200 'OK' si l'historian fonctionne correctement.
+De plus il y a 6 sous endpoint à /api/grafana/ :
+
+* POST _/search_ : Permet de chercher les différentes métrics disponibles.
+* POST _/query_ : Permet de récupérer les points des métrics spécifiés dans un interval de temps donnée au format json.
+* POST _/export/csv_ : Permet de récupérer les points des métrics spécifiés dans un interval de temps donnée au format csv.
+* POST _/annotations_ : Permet de récupérer des annotations (qui peuvent être affichés sur les graphes grafana).
+* POST _/tag-keys_ : Permet de savoir les valeur que l'on peut mettre comme clé dans les adhoc filter dans la requête de __/query__
+* POST _/tag-values_ : Permet de savoir les valeur que l'on peut mettre comme valeur dans les adhoc filter dans la requête de __/query__
+
+=== _POST_ Search
+
+Permet de chercher les différentes métrics disponibles.
+
+Exemple de requête :
+
+[source,json]
+----
+{ "target": "upper_50" }
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/target
+|String
+|Une partie du nom de la métric recherché.
+|Non
+|
+|
+|===
+
+NOTE: Le corps de la requête est optionnel.
+
+Exemple de réponse :
+
+[source,json]
+----
+["upper_25","upper_50","upper_75","upper_90","upper_95"]
+----
+
+=== _POST_ Query
+
+Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponible.
+
+Exemple de requête :
+
+[source,json]
+----
+{
+    "panelId": 1,
+    "range": {
+        "from": "2016-10-31T06:33:44.866Z",
+        "to": "2016-10-31T12:33:44.866Z",
+        "raw": {
+            "from": "now-6h",
+            "to": "now"
+        }
+    },
+    "rangeRaw": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "interval": "30s",
+    "intervalMs": 30000,
+    "targets": [
+        { "target": "upper_50", "refId": "A", "type": "timeserie" },
+        { "target": "upper_75", "refId": "B", "type": "timeserie" }
+    ],
+    "adhocFilters": [{
+        "key": "City",
+        "operator": "=",
+        "value": "Berlin"
+    }],
+    "format": "json",
+    "maxDataPoints": 550
+}
+----
+
+Exemple de requête minimal :
+
+[source,json]
+----
+{
+    "targets": [
+      { "target": "upper_50" }
+    ]
+}
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/targets
+|array
+|Permet de renseigner les métriques pour lesquelles on souhaite obtenir des points.
+|Oui
+|
+|
+
+|/targets/target
+|String
+|Le nom d'une métrique pour laquelle on souhaite obtenir des points.
+|Oui (au moins une métrique doit être renseigné)
+|
+|
+
+|/range/from
+|String
+|La date de début pour rechercher les points. Il ne sera retourner que les points avec une
+date supérieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
+
+|/range/to
+|String
+|La date de fin pour rechercher les points. Il ne sera retourner que les points avec une
+date inférieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
+
+|/maxDataPoints
+|long
+|Le nombre maximum de point désirer pour chaque métrique (En effet le but est de tracer des points sur un graphe).
+Si nécessaire les points seront echantilloné avec un algorithm sa sampling par défaut.
+|Non
+|positif
+|1000
+
+|/adhocFilters
+|String
+|Utiliser par grafana
+|Non
+|
+|
+|===
+
+
+NOTE: Le reste des paramètres sont des paramètres qui sont envoyé par grafana
+mais qui ne sont pas exploité pour le moment.
+
+Exemple de réponse
+
+[source,json]
+----
+[
+  {
+    "target":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "target":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----
+
+=== _POST_ Export Csv
+
+TODO
+
+=== _POST_ Annotations compatible avec simpleJsonPlugin
+
+Permet de chercher les annotations.
+
+Exemple de requête :
+
+[source,json]
+----
+{
+  "range": {
+    "from": "2020-2-14T01:43:14.070Z",
+    "to": "2020-2-14T06:50:14.070Z"
+  },
+  "limit" : 100,
+  "tags": ["tag1", "tag2"],
+  "matchAny": false,
+  "type": "tags"
+}
+----
+
+Exemple de réponse actuelle
+
+[source,json]
+----
+[
+  {
+    "annotation": "annotation",
+    "time": "time",
+    "title": "title",
+    "tags": "tags",
+    "text": "text"
+  }
+]
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/range/from
+|String
+|La date de début pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date supérieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
+
+|/range/to
+|String
+|La date de fin pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date inférieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
+
+|/limit
+|Integer
+|Le nombre maximum d'annotation a renvoyer
+|Non
+|entier positif
+|100
+
+|/tags
+|Liste de string
+|Le nom des tags pour filtrer les annotations. Le comportement dépend de la valeur du champs _/type_
+|Non
+|
+|[] (empty array)
+
+|/matchAny
+|Boolean
+|Si le champs _type_ vaut _TAGS_. Si _true_ les annotations doivent avoir au moins un des tags du champs _tags_
+sinon les annotations doivent contenir tous les tags.
+|Non
+|
+|true
+
+|/type
+|String
+|Le type de requête. Si la valeur est "ALL", toutes les annotations dans l'interval de temps sera renvoyé.
+Si le type est "TAGS", les annotations devront en plus contenir des tags (soit tous soit au moins un selon
+la valeur de _matchAny_.
+|Non
+|une valeur parmis [ALL, TAGS]
+|ALL
+|===
+
+=== _POST_ Annotations actuelle
+
+Permet de chercher les annotations.
+
+Exemple de requête :
+
+[source,json]
+----
+{
+  "range": {
+    "from": "2020-2-14T01:43:14.070Z",
+    "to": "2020-2-14T06:50:14.070Z"
+  },
+  "limit" : 100,
+  "tags": ["tag1", "tag2"],
+  "matchAny": false,
+  "type": "tags"
+}
+----
+
+Exemple de réponse actuelle
+
+[source,json]
+----
+{
+  "annotations" : [
+    {
+      "time": 1581669794070,
+      "text": "annotation 7",
+      "tags": ["tag2","tag3"]
+    },
+    {
+      "time": 1581666194070,
+      "text": "annotation 6",
+      "tags": ["tag3","tag5"]
+    }
+  ],
+  "total_hit" : 2
+}
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/range/from
+|String
+|La date de début pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date supérieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
+
+|/range/to
+|String
+|La date de fin pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date inférieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
+
+|/limit
+|Integer
+|Le nombre maximum d'annotation a renvoyer
+|Non
+|entier positif
+|100
+
+|/tags
+|Liste de string
+|Le nom des tags pour filtrer les annotations. Le comportement dépend de la valeur du champs _/type_
+|Non
+|
+|[] (empty array)
+
+|/matchAny
+|Boolean
+|Si le champs _type_ vaut _TAGS_. Si _true_ les annotations doivent avoir au moins un des tags du champs _tags_
+sinon les annotations doivent contenir tous les tags.
+|Non
+|
+|true
+
+|/type
+|String
+|Le type de requête. Si la valeur est "ALL", toutes les annotations dans l'interval de temps sera renvoyé.
+Si le type est "TAGS", les annotations devront en plus contenir des tags (soit tous soit au moins un selon
+la valeur de _matchAny_.
+|Non
+|une valeur parmis [ALL, TAGS]
+|ALL
+|===
+
+
+=== _POST_ tag-keys
+
+Permet de savoir les clés utilisable dans l'endpoint _tag_values_.
+
+Exemple de requête :
+
+[source,json]
+----
+{}
+----
+
+Exemple de réponse :
+
+[source,json]
+----
+[
+    {"type":"string","text":"City"},
+    {"type":"string","text":"Country"}
+]
+----
+
+Les valeurs dans text sont les valeurs utilsable comme clé dans l'endpoint tag-values.
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/range/from
+|String
+|La date de début pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date supérieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
+
+|/range/to
+|String
+|La date de fin pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date inférieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
+
+|/limit
+|Integer
+|Le nombre maximum d'annotation a renvoyer
+|Non
+|entier positif
+|100
+
+|/tags
+|Liste de string
+|Le nom des tags pour filtrer les annotations. Le comportement dépend de la valeur du champs _/type_
+|Non
+|
+|[] (empty array)
+
+|/matchAny
+|Boolean
+|Si le champs _type_ vaut _TAGS_. Si _true_ les annotations doivent avoir au moins un des tags du champs _tags_
+sinon les annotations doivent contenir tous les tags.
+|Non
+|
+|true
+
+|/type
+|String
+|Le type de requête. Si la valeur est "ALL", toutes les annotations dans l'interval de temps sera renvoyé.
+Si le type est "TAGS", les annotations devront en plus contenir des tags (soit tous soit au moins un selon
+la valeur de _matchAny_.
+|Non
+|une valeur parmis [ALL, TAGS]
+|ALL
+|===
+
+
+=== _POST_ tag-values
+
+Permet de chercher les différentes métrics disponibles.
+
+Exemple de requête :
+
+[source,json]
+----
+{"key": "City"}
+----
+
+Exemple de réponse :
+
+[source,json]
+----
+[
+    {"text": "Eins!"},
+    {"text": "Zwei"},
+    {"text": "Drei!"}
+]
+----
+
+These are the values available for the corresponding keys.
+
+
+
+==  _POST_ Timeseries
+
+Permet de chercher les différentes métrics disponibles.
+
+TODO

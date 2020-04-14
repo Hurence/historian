@@ -124,6 +124,27 @@
                             </attributes>
                         </configuration>
                     </execution>
+                    <execution>
+                        <id>fr-rest-api-to-pdf</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>process-asciidoc</goal>
+                        </goals>
+                        <configuration>
+                            <sourceDirectory>${project.basedir}/rest-api/asciidoc/fr</sourceDirectory>
+                            <outputDirectory>${project.basedir}/generated-docs/pdf/fr</outputDirectory>
+                            <backend>pdf</backend>
+                            <sourceHighlighter>coderay</sourceHighlighter>
+                            <attributes>
+                                <imagesdir>${project.basedir}/resources/images</imagesdir>
+                                <pagenums/>
+                                <toc/>
+                                <toc-title>Table des matières</toc-title>
+                                <idprefix/>
+                                <idseparator>-</idseparator>
+                            </attributes>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
         </plugins>
