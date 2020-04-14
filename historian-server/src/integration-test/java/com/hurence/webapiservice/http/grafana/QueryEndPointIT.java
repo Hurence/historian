@@ -47,7 +47,7 @@ public class QueryEndPointIT {
     public static void injectChunksIntoSolr(SolrClient client, Vertx vertx) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorMultipleMetricSpecificPoints(
-                Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
+                Arrays.asList("temp_a", "temp_b", "maxDataPoints", "metric with spaces"),
                 Arrays.asList(
                         Arrays.asList(
                                 new Point(0, 1477895624866L, 622),
@@ -99,6 +99,10 @@ public class QueryEndPointIT {
                                 new Point(0, 1477895624903L, 1),
                                 new Point(0, 1477895624904L, 1),
                                 new Point(0, 1477895624905L, 1)
+                        ),
+                        Arrays.asList(
+                                new Point(0, 1477895624866L, 861),
+                                new Point(0, 1477917224866L, 767)
                         )
                 ));
         injector.injectChunks(client);
@@ -209,6 +213,23 @@ public class QueryEndPointIT {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-3/request.json",
                 "/http/grafana/query/extract-algo/testWithAlgo/average/bucket-3/expectedResponse.json");
+    }
+
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testMetricWithSpace(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/metric-name/with-space/request.json",
+                "/http/grafana/query/metric-name/with-space/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testMetricWithSpace2(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/query/metric-name/with-space2/request.json",
+                "/http/grafana/query/metric-name/with-space2/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
