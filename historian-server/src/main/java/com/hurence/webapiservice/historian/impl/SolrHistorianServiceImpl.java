@@ -2,7 +2,7 @@ package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
-import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestType;
+import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
+import static com.hurence.webapiservice.http.api.grafana.GrafanaApi.TARGET;
 
 
 public class SolrHistorianServiceImpl implements HistorianService {
