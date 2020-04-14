@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.compatibility;
 
-import com.hurence.webapiservice.http.grafana.QueryRequestParserTest;
+import com.hurence.webapiservice.http.api.grafana.QueryRequestParserTest;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;

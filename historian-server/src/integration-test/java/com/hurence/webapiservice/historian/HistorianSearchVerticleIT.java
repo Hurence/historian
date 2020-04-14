@@ -27,7 +27,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
+import static com.hurence.webapiservice.http.api.grafana.GrafanaApi.TARGET;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
