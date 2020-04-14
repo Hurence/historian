@@ -15,6 +15,10 @@ public class QueryRequestParam implements TimeSeriesRequest {
 
     public static final int DEFAULT_BUCKET_SIZE = 1;//will be recomputed later by historian if necessary depending on maxDataPoints
     public static final SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.AVERAGE;
+    public static final long DEFAULT_FROM = 0L;
+    public static final long DEFAULT_TO = Long.MAX_VALUE;
+    public static final int DEFAULT_MAX_DATAPOINTS = 1000;
+    public static final  List<AdHocFilter> DEFAULT_FILTERS = Collections.emptyList();
 
     private List<Target> targets;
     private long from;

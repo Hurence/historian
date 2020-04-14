@@ -16,7 +16,8 @@ public class DateRequestParserUtil {
     private DateRequestParserUtil () {};
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRequestParser.class);
-    private static SimpleDateFormat dateFormat = createDateFormat();
+    //DOES NOT MAKE this variable global because it can be used in a multi threaded way !
+    //private static SimpleDateFormat dateFormat = createDateFormat();
 
     public static SimpleDateFormat createDateFormat() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -35,7 +36,8 @@ public class DateRequestParserUtil {
         if (fromObj instanceof String) {
             String fromStr = (String) fromObj;
             try {
-                return dateFormat.parse(fromStr).getTime();
+                //Have to create a local SimpleDAteFormat because this method can be used in a multi threaded way !
+                return createDateFormat().parse(fromStr).getTime();
             } catch (ParseException e) {
                 throw new IllegalArgumentException(
                         String.format("'%s' json pointer value '%s' could not be parsed as a valid date !",
