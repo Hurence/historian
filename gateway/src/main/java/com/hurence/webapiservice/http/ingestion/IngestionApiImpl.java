@@ -35,10 +35,9 @@ public class IngestionApiImpl implements IngestionApi {
 
     @Override
     public void importJson(RoutingContext context) {
-        JsonArray getMetricsParam;
         final ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder;
         try {
-             getMetricsParam = context.getBodyAsJsonArray();
+            JsonArray getMetricsParam = context.getBodyAsJsonArray();
              responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(getMetricsParam);
 
         }catch (Exception ex) {
@@ -50,14 +49,9 @@ public class IngestionApiImpl implements IngestionApi {
             return;
         }
 
-        JsonArray correctRequest = responseAndErrorHolder.correctPoints;
-        StringBuilder errorMessage = new StringBuilder();
-        for (String SingleErrorMessage : responseAndErrorHolder.errorMessages) {
-            errorMessage.append(SingleErrorMessage).append("\n");
-        }
+        String finalErrorMessage = extractFinalErrorMessage(responseAndErrorHolder);
 
-        String finalErrorMessage = errorMessage.toString();
-        service.rxAddTimeSeries(correctRequest)
+        service.rxAddTimeSeries(responseAndErrorHolder.correctPoints)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
                     context.response().setStatusCode(500);
@@ -75,6 +69,14 @@ public class IngestionApiImpl implements IngestionApi {
                     context.response().end(response.encode());
                     LOGGER.info("response : {}", response);
                 }).subscribe();
+    }
+
+    private String extractFinalErrorMessage(ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
+        StringBuilder errorMessage = new StringBuilder();
+        for (String SingleErrorMessage : responseAndErrorHolder.errorMessages) {
+            errorMessage.append(SingleErrorMessage).append("\n");
+        }
+        return errorMessage.toString();
     }
 
     @Override
