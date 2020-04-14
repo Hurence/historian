@@ -71,5 +71,22 @@ public class AssertResponseGivenRequestHelper {
                     });
                 }));
     }
+    public void assertMissingPointsRequestGiveArrayResponseFromFile(Vertx vertx, VertxTestContext testContext,
+                                                       String requestFile, String responseFile) {
+        final FileSystem fs = vertx.fileSystem();
+        Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
+        webClient.post(endpoint)
+                .as(BodyCodec.jsonObject())
+                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                    testContext.verify(() -> {
+                        assertEquals(207, rsp.statusCode());
+                        JsonObject body = rsp.body();
+                        Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
+                        JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
+                        assertEquals(expectedBody, body);
+                        testContext.completeNow();
+                    });
+                }));
+    }
 
 }

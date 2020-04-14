@@ -358,28 +358,17 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 int numPoints = 0;
                 for (Object timeserieObject : timeseries) {
                     JsonObject timeserie = (JsonObject) timeserieObject;
-                    LOGGER.info("building SolrDocument from a chunk");
                     SolrInputDocument document;
-                    try {
-                        document = chunkTimeSerie(timeserie);
-                    } catch (Exception e) {
-                        continue;
-                    }
-                    boolean boo = documents.add(document);
-                    if (boo) {
-                        int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
-                        numChunk++;
-                        numPoints = numPoints + totalNumPointsInChunk;
-                    }
+                    LOGGER.info("building SolrDocument from a chunk");
+                    document = chunkTimeSerie(timeserie);
+                    documents.add(document);
+                    int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
+                    numChunk++;
+                    numPoints = numPoints + totalNumPointsInChunk;
                 }
                 LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
-                if (!documents.isEmpty()) {
-                    solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
-                    solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
-                } else {
-                    LOGGER.info("all attempts to add chunks failed, please check errors in the request");
-                    throw new IllegalArgumentException("all attempts to add chunks failed, please check errors in the request");
-                }
+                solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
+                solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
                 LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
                 String message = "injected " + numPoints + " points of " + numChunk + " metrics in " + numChunk + " chunks";
                 response.put("status", "OK").put("message", message);

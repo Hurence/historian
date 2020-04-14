@@ -1,9 +1,9 @@
 [
   {
-    "name": 1234,
+    "name": "openSpaceSensors.Temperature111",
     "points": [
       [1477895624866],
-      [1477916224866]
+      [1477916224866, 4.0]
     ]
   },
   {

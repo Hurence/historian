@@ -47,14 +47,4 @@ public class DateRequestParserUtil {
                         pointer, fromObj));
     }
 
-    public static Boolean checkValidDate(Long val) {
-        if (val == null)
-            return false;
-        if (val.toString().length() == 10)
-            return System.currentTimeMillis()/1000 > val;
-        else if (val.toString().length() == 13)
-            return System.currentTimeMillis() > val;
-        else
-            return false;
-    }
 }

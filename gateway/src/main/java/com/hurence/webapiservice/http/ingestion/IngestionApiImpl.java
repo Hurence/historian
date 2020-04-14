@@ -18,8 +18,9 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.ERRORS_RESPONSE_FIELD;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.Codes.MULTI_STATUS;
 
 
 public class IngestionApiImpl implements IngestionApi {
@@ -35,14 +36,11 @@ public class IngestionApiImpl implements IngestionApi {
     @Override
     public void importJson(RoutingContext context) {
         JsonArray getMetricsParam;
-        String error ;
+        final ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder;
         try {
              getMetricsParam = context.getBodyAsJsonArray();
-             error = new ImportRequestParser().checkRequest(getMetricsParam)[0];
-             if ((error != null) && !(error.isEmpty())) {
-                 LOGGER.error(error);
-                 throw new IllegalArgumentException(error);
-             }
+             responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(getMetricsParam);
+
         }catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
@@ -52,7 +50,14 @@ public class IngestionApiImpl implements IngestionApi {
             return;
         }
 
-        service.rxAddTimeSeries(getMetricsParam)
+        JsonArray correctRequest = responseAndErrorHolder.correctPoints;
+        StringBuilder errorMessage = new StringBuilder();
+        for (String SingleErrorMessage : responseAndErrorHolder.errorMessages) {
+            errorMessage.append(SingleErrorMessage).append("\n");
+        }
+
+        String finalErrorMessage = errorMessage.toString();
+        service.rxAddTimeSeries(correctRequest)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
                     context.response().setStatusCode(500);
@@ -60,7 +65,12 @@ public class IngestionApiImpl implements IngestionApi {
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(response -> {
-                    context.response().setStatusCode(200);
+                    if (responseAndErrorHolder.errorMessages.isEmpty()) {
+                        context.response().setStatusCode(200);
+                    } else {
+                        response.put(ERRORS_RESPONSE_FIELD, finalErrorMessage);
+                        context.response().setStatusCode(MULTI_STATUS);
+                    }
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(response.encode());
                     LOGGER.info("response : {}", response);
