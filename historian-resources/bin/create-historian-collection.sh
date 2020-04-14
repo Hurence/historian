@@ -111,15 +111,15 @@ create_collection() {
 
 
 add_field() {
-  SOLR_UPDATE_QUERY="\"add-field\": { \"name\":\"$1\", \"type\":\"$2\" }, ${SOLR_UPDATE_QUERY}"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\" }"
 }
 
 add_field_multivalued() {
-  SOLR_UPDATE_QUERY="\"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"multiValued\":true} }, ${SOLR_UPDATE_QUERY}"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"multiValued\":true} }"
 }
 
 add_field_not_indexed() {
-  SOLR_UPDATE_QUERY="\"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"indexed\":false }, ${SOLR_UPDATE_QUERY}"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"indexed\":false }"
 }
 
 delete_field() {
@@ -131,7 +131,7 @@ create_schema() {
     echo -e "${GREEN}Creating schema for historian version ${MODEL_VERSION} ${NOCOLOR}"
 
     case ${MODEL_VERSION} in
-        "0")
+        "IFP0")
             add_field "chunk_start" "plong"
             add_field "chunk_end" "plong"
             add_field "chunk_value" "text_general"
@@ -158,7 +158,7 @@ create_schema() {
             add_field "day" "pint"
             add_field "hour" "pint"
             ;;
-        "1")
+        "0")
             add_field_not_indexed "chunk_value" "string"
             add_field "chunk_start" "plong"
             add_field "chunk_end" "plong"

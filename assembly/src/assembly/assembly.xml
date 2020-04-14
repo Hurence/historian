@@ -1,0 +1,77 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+    <id>bin</id>
+    <formats>
+        <format>dir</format>
+        <format>tgz</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <baseDirectory>historian-${project.version}</baseDirectory>
+    <moduleSets>
+        <moduleSet>
+
+            <!-- Enable access to all projects in the current multimodule build! -->
+            <useAllReactorProjects>true</useAllReactorProjects>
+
+            <!-- Now, select which projects to include in this module-set. -->
+            <includes>
+                <include>com.hurence.historian:historian-server</include>
+                <include>com.hurence.historian:loader</include>
+                <include>com.hurence.historian:logisland-timeseries</include>
+            </includes>
+            <binaries>
+                <directoryMode>0770</directoryMode>
+                <fileMode>0660</fileMode>
+                <outputDirectory>lib</outputDirectory>
+                <includeDependencies>false</includeDependencies>
+                <unpack>false</unpack>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+    <fileSets>
+        <!--   Embed all resources in logisland-resources module  -->
+        <fileSet>
+            <directory>../historian-resources/bin</directory>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0770</fileMode>
+            <outputDirectory>./bin</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>../historian-server/bin</directory>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0770</fileMode>
+            <outputDirectory>./bin</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
+        <!-- Add extra jars for redirecting log4j logging into slf4j api. (This may reduce performance)
+            See https://logging.apache.org/log4j/2.x/log4j-to-slf4j/index.html
+         -->
+        <fileSet>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0660</fileMode>
+            <directory>./src/extra-jars</directory>
+            <outputDirectory>./lib/cores</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0660</fileMode>
+            <directory>..</directory>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>*.md</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+    <files>
+    </files>
+</assembly>

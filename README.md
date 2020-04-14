@@ -5,31 +5,54 @@ timeseries big data analytics tools
 
 ## Setup
 
+make a workspace directory called historian for example. we'll refer to it as `$HISTORIAN_HOME`
 
-### Before You Begin
-To follow along with this tutorial, you will need…​
+create a directory to store your data
 
-To meet the system requirements
+    mkdir $HISTORIAN_HOME/data
 
+### Install SolR
+To follow along with this tutorial, you will need to unpack the following solr archive : https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz into your `$HISTORIAN_HOME` directory
 
-- Apache Solr runs on Java 8 or greater.
-- It is also recommended to always use the latest update version of your Java VM, because bugs may affect Solr. An overview of known JVM bugs can be found on http://wiki.apache.org/lucene-java/JavaBugs
-- With all Java versions it is strongly recommended to not use experimental -XX JVM options.
-- CPU, disk and memory requirements are based on the many choices made in implementing Solr (document size, number of documents, and number of hits retrieved to name a few). The benchmarks page has some information related to performance on particular platforms.
+then start 2 solr cores locally
 
-
-unpack the following solr archive : https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz
-
-
-
-    rm -r ../data/solr/node1/historian_shard1_replica_n1/ ../data/solr/node1/zoo_data/ ../data/solr/node2/historian_shard2_replica_n2/
-
+    cd $HISTORIAN_HOME/solr-8.2.0
 
     bin/solr start -cloud -s ../data/solr/node1  -p 8983
     bin/solr start -cloud -s ../data/solr/node2/  -p 7574 -z localhost:9983
     
+
+### Install Historian
+you will need to unpack the following solr archive : https://github.com/Hurence/historian/releases/download/v1.3.4/historian-1.3.4-SNAPSHOT.tgz  into your `$HISTORIAN_HOME` directory
+
+
+you can now create the solr schema for the SolR historian collection
+
+    cd $HISTORIAN_HOME/historian-1.3.4-SNAPSHOT
+    bin/create-historian-collection.sh
+    
+and launch the historian REST server
+
+    bin/historian-server.sh
+    
+
+    
+### Install Spark
+
+
+###     
+    
+    
+### Stop your services
+
+when you're done you can stop your SolR cores
     
     bin/solr stop -all
+    
+if you want to reset manually your data
+    
+    rm -r ../data/solr/node1/historian_shard1_replica_n1/ ../data/solr/node1/zoo_data/ ../data/solr/node2/historian_shard2_replica_n2/
+    
     
 # First time cloning project
 
