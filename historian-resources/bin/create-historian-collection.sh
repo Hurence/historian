@@ -164,6 +164,7 @@ create_schema() {
             add_field "chunk_end" "plong"
             add_field "chunk_avg" "pdouble"
             add_field "chunk_size_bytes" "pint"
+            add_field "chunk_size" "pint"
             add_field "chunk_count" "pint"
             add_field "chunk_min" "pdouble"
             add_field "chunk_max" "pdouble"
