@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.http.grafana.parser;
 
 import com.hurence.webapiservice.http.grafana.modele.AdHocFilter;
+import com.hurence.webapiservice.http.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.grafana.modele.Target;
 import io.vertx.core.json.Json;
@@ -22,22 +23,21 @@ public class QueryRequestParser {
     public QueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse requestBody : {}", requestBody);
         QueryRequestParam.Builder builder = new QueryRequestParam.Builder();
-        long from = parseFrom(requestBody);
-        builder.from(from);
-        long to = parseTo(requestBody);
-        builder.to(to);
+        Long from = parseFrom(requestBody);
+        builder.from(from == null ? QueryRequestParam.DEFAULT_FROM : from);
+        Long to = parseTo(requestBody);
+        builder.to(to == null ? QueryRequestParam.DEFAULT_TO : to);
         String format = parseFormat(requestBody);
         builder.withFormat(format);
-        int maxDataPoints = parseMaxDataPoints(requestBody);;
-        builder.withMaxDataPoints(maxDataPoints);
+        Integer maxDataPoints = parseMaxDataPoints(requestBody);;
+        builder.withMaxDataPoints(maxDataPoints == null ? QueryRequestParam.DEFAULT_MAX_DATAPOINTS : maxDataPoints);
         List<Target> targets = parseTargets(requestBody);;
         builder.withTargets(targets);
         List<AdHocFilter> adHocFilters = parseAdHocFilters(requestBody);;
-        builder.withAdHocFilters(adHocFilters);
+        builder.withAdHocFilters(adHocFilters == null ? QueryRequestParam.DEFAULT_FILTERS : adHocFilters);
         String requestId = parseRequestId(requestBody);
         builder.withId(requestId);
         return builder.build();
-
     }
 
     private List<Target> parseTargets(JsonObject requestBody) {
@@ -48,11 +48,11 @@ public class QueryRequestParser {
                 .collect(Collectors.toList());
     }
 
-    private long parseFrom(JsonObject requestBody) {
+    private Long parseFrom(JsonObject requestBody) {
         return parseDate(requestBody, "/range/from");
     }
 
-    private long parseTo(JsonObject requestBody) {
+    private Long parseTo(JsonObject requestBody) {
         return parseDate(requestBody, "/range/to");
     }
 
@@ -66,7 +66,7 @@ public class QueryRequestParser {
         return requestBody.getString("requestId");
     }
 
-    private int parseMaxDataPoints(JsonObject requestBody) {
+    private Integer parseMaxDataPoints(JsonObject requestBody) {
         return requestBody.getInteger("maxDataPoints");
     }
 
