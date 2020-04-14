@@ -175,6 +175,7 @@
                                 <configuration>
                                     <sources>
                                         <source>src/integration-test/java</source>
+                                        <source>src/integration-test/scala</source>
                                     </sources>
                                 </configuration>
                             </execution>
@@ -215,6 +216,7 @@
                                 <configuration>
                                     <sources>
                                         <source>src/integration-test/java</source>
+                                        <source>src/integration-test/scala</source>
                                     </sources>
                                 </configuration>
                             </execution>
@@ -239,4 +241,5 @@
         </profile>
     </profiles>
 </project>
+
 
