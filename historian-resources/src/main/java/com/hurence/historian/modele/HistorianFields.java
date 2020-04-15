@@ -15,32 +15,30 @@ import com.hurence.logisland.record.TimeSeriesRecord;
 public class HistorianFields {
     private HistorianFields() {}
     //Request fields
-    public static String FROM_REQUEST_FIELD = "from";
-    public static String TO_REQUEST_FIELD = "to";
-    public static String FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD = "fields";
-    public static String TAGS_TO_FILTER_ON_REQUEST_FIELD = "tags";
-    public static String METRIC_NAMES_AS_LIST_REQUEST_FIELD = "names";
-    public static String MAX_TOTAL_CHUNKS_TO_RETRIEVE_REQUEST_FIELD = "total_max_chunks";
-    public static String SAMPLING_ALGO_REQUEST_FIELD = "sampling_algo";
-    public static String BUCKET_SIZE_REQUEST_FIELD = "bucket_size";
-    public static String MAX_POINT_BY_METRIC_REQUEST_FIELD = "max_points_to_return_by_metric";
-    public static String TIME_REQUEST_FIELD = "time";
-    public static String TEXT_REQUEST_FIELD = "text";
-    public static String TAGS_REQUEST_FIELD = "tags";
-    public static String MAX_ANNOTATION_REQUEST_FIELD = "limit";
-    public static String MATCH_ANY_REQUEST_FIELD = "matchAny";
-    public static String TYPE_REQUEST_FIELD = "type";
+    public static String FROM = "from";
+    public static String TO = "to";
+    public static String FIELDS = "fields";
+    public static String NAMES = "names";
+    public static String MAX_TOTAL_CHUNKS_TO_RETRIEVE = "total_max_chunks";
+    public static String SAMPLING_ALGO = "sampling_algo";
+    public static String BUCKET_SIZE = "bucket_size";
+    public static String MAX_POINT_BY_METRIC = "max_points_to_return_by_metric";
+    public static String TIME = "time";
+    public static String TEXT = "text";
+    public static String TAGS = "tags";
+    public static String LIMIT = "limit";
+    public static String MATCH_ANY = "matchAny";
+    public static String TYPE = "type";
+    public static String METRIC = "metric";
 
     //Response fields
-    public static String TOTAL_POINTS_RESPONSE_FIELD = "total_points";
-    public static String TIMESERIES_RESPONSE_FIELD = "timeseries";
+    public static String TOTAL_POINTS = "total_points";
+    public static String TIMESERIES = "timeseries";
 
-    public static String RESPONSE_CHUNKS = "chunks";
-    public static String RESPONSE_METRICS = "metrics";
-    public static String RESPONSE_ANNOTATIONS = "annotations";
-    public static String RESPONSE_TOTAL_FOUND = "total_hit";
-    public static String RESPONSE_TOTAL_METRICS_RETURNED = "total_returned";
-    public static String RESPONSE_TOTAL_METRICS = "total";
+    public static String CHUNKS = "chunks";
+    public static String METRICS = "metrics";
+    public static String ANNOTATIONS = "annotations";
+    public static String TOTAL = "total";
     public static String RESPONSE_METRIC_NAME_FIELD = "name";
     public static String RESPONSE_TAG_NAME_FIELD = "tagname";
     public static String RESPONSE_CHUNK_ID_FIELD = "id";

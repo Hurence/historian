@@ -7,14 +7,18 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 
 public interface MainHistorianApi {
 
+    String EXPORT_ENDPOINT = "/export/csv";
+    String SEARCH_ENDPOINT = "/search";
+    String QUERY_ENDPOINT = "/query";
+
     default Router getMainRouter(Vertx vertx) {
         Router router = Router.router(vertx);
         router.get("/").handler(this::root);
-        router.post("/search").handler(this::search);
-        router.post("/query")
+        router.post(SEARCH_ENDPOINT).handler(this::search);
+        router.post(QUERY_ENDPOINT)
                 .produces("application/json")
                 .handler(this::getTimeSeries);
-        router.post("/export/csv")
+        router.post(EXPORT_ENDPOINT)
                 .produces("text/csv")
                 .handler(this::export);
         return router;

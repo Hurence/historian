@@ -35,7 +35,6 @@ public class AnnotationRequestParser {
         AnnotationRequestType type = parseType(requestBody);
         builder.withType(type);
         return builder.build();
-
     }
 
 

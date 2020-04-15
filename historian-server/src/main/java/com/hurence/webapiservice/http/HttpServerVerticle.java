@@ -2,8 +2,6 @@ package com.hurence.webapiservice.http;
 
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
-import com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePliginApiImpl;
-import com.hurence.webapiservice.http.api.grafana.GrafanaSimpleJsonPluginApiImpl;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
 import com.hurence.webapiservice.http.api.main.MainHistorianApiImpl;
 import io.vertx.core.Promise;
@@ -29,6 +27,8 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     private HistorianService historianService;
 
+    public static final String MAIN_API_ENDPOINT = "/api/historian/v0";
+    public static final String GRAFANA_API_ENDPOINT = "/api/grafana";
 
     @Override
     public void start(Promise<Void> promise) throws Exception {
@@ -44,11 +44,11 @@ public class HttpServerVerticle extends AbstractVerticle {
         router.route().handler(BodyHandler.create());
 
         Router mainApi = new MainHistorianApiImpl(historianService, maxDataPointsAllowedForExportCsv).getMainRouter(vertx);
-        router.mountSubRouter("/api/historian/v0", mainApi);
+        router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
 
         GrafanaApiVersion grafanaApiVersion = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
         Router graphanaApi = GrafanaApi.fromVersion(grafanaApiVersion, historianService).getGraphanaRouter(vertx);
-        router.mountSubRouter("/api/grafana", graphanaApi);
+        router.mountSubRouter(GRAFANA_API_ENDPOINT, graphanaApi);
 
         int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
         String host = config().getString(CONFIG_HTTP_SERVER_HOSTNAME, "localhost");

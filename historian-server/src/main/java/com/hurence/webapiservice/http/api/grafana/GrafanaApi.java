@@ -1,14 +1,12 @@
 package com.hurence.webapiservice.http.api.grafana;
 
 
-import com.hurence.logisland.record.FieldDictionary;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
 public interface GrafanaApi {
-
 
     static GrafanaApi fromVersion(GrafanaApiVersion grafanaApiVersion,
                                   HistorianService historianService) {
@@ -22,17 +20,23 @@ public interface GrafanaApi {
         }
     }
 
+    String SEARCH_ENDPOINT = "/search";
+    String QUERY_ENDPOINT = "/query";
+    String ANNOTATIONS_ENDPOINT = "/annotations";
+    String TAG_KEYS_ENDPOINT = "/tag-keys";
+    String TAG_VALUES_ENDPOINT = "/tag-values";
     String TARGET = "target";
+
     default Router getGraphanaRouter(Vertx vertx) {
         Router router = Router.router(vertx);
         router.get("/").handler(this::root);
-        router.post("/search").handler(this::search);
-        router.post("/query")
+        router.post(SEARCH_ENDPOINT).handler(this::search);
+        router.post(QUERY_ENDPOINT)
                 .produces("application/json")
                 .handler(this::query);
-        router.post("/annotations").handler(this::annotations);
-        router.post("/tag-keys").handler(this::tagKeys);
-        router.post("/tag-values").handler(this::tagValues);
+        router.post(ANNOTATIONS_ENDPOINT).handler(this::annotations);
+        router.post(TAG_KEYS_ENDPOINT).handler(this::tagKeys);
+        router.post(TAG_VALUES_ENDPOINT).handler(this::tagValues);
         return router;
     }
 
@@ -43,34 +47,18 @@ public interface GrafanaApi {
     void root(RoutingContext context);
 
     /**
-     *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value FieldDictionary#RECORD_NAME}' value in historian.
-     * @param context
-     * Expected request exemple :
-     * <pre>
-     * { target: 'upper_50' }
-     * </pre>
-     * response Exemple :
-     * <pre>
-     *     ["upper_25","upper_50","upper_75","upper_90","upper_95"]
-     * </pre>
-     *
-     * @see <a href="https://grafana.com/grafana/plugins/grafana-simple-json-datasource.">
-     *          https://grafana.com/grafana/plugins/grafana-simple-json-datasource.
-     *      </a>
-     *
-     *
+     * should return metrics name based on input.
      */
     void search(RoutingContext context);
 
     /**
-     * should return metrics based on input.
+     * should return datapoints of metrics based on input.
      * @param context
      */
     void query(RoutingContext context);
 
     /**
-     * should return annotations.
+     * should return annotations based on input.
      * @param context
      */
     void annotations(RoutingContext context);
