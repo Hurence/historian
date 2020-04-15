@@ -1,4 +1,4 @@
-package com.hurence.historian
+package com.hurence.historian.spark.compactor
 
 import net.liftweb.json.Serialization.write
 import net.liftweb.json._

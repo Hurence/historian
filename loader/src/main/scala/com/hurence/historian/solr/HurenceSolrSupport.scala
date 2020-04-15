@@ -1,7 +1,8 @@
-package com.lucidworks.spark.util
+package com.hurence.historian.solr
 
 import java.net.{ConnectException, SocketException}
 
+import com.lucidworks.spark.util.{CacheCloudSolrClient, SolrSupport}
 import com.lucidworks.spark.{LazyLogging, SparkSolrAccumulator}
 import org.apache.http.NoHttpResponseException
 import org.apache.solr.client.solrj.SolrClient
@@ -10,7 +11,7 @@ import org.apache.solr.common.{SolrException, SolrInputDocument}
 import org.apache.spark.rdd.RDD
 import org.apache.zookeeper.KeeperException.{OperationTimeoutException, SessionExpiredException}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.mutable.ArrayBuffer
 
 object HurenceSolrSupport extends LazyLogging {

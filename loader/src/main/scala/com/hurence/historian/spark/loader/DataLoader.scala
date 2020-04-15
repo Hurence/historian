@@ -1,9 +1,8 @@
-package com.hurence.historian
+package com.hurence.historian.spark.loader
 
-
-import com.hurence.historian.LoaderMode.Value
 import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
 import com.hurence.historian.spark.compactor.ChunkCompactor
+import com.hurence.historian.spark.sql.reader.TimeseriesReader
 import com.hurence.logisland.record.{EvoaUtils, TimeseriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
@@ -332,15 +331,13 @@ class DataLoader extends Serializable {
               val name = mergedRecord._1._2
               val tsBuilder = new MetricTimeSeries.Builder(name, "rd-booster")
 
-            /*  tsBuilder.attribute("metric_id", metricId)
-              tsBuilder.attribute("metric_name", metricName)*/
+              /*  tsBuilder.attribute("metric_id", metricId)
+                tsBuilder.attribute("metric_name", metricName)*/
               tsBuilder.attribute("day", day)
 
               l.foreach(t => tsBuilder.point(t._1, t._2))
 
               val record = new TimeseriesRecord(tsBuilder.build())
-
-
 
               tsProcessor.computeValue(record)
               tsProcessor.computeMetrics(record)

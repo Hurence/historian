@@ -1,17 +1,10 @@
-package com.hurence.historian
+package com.hurence.historian.spark.compactor
 
-
-import java.text.SimpleDateFormat
-import java.util.Date
-
-import com.hurence.historian.modele.CompactorJobReport
-import com.hurence.logisland.record.TimeSeriesRecord
-import com.lucidworks.spark.util.SolrSupport
+import com.hurence.historian.spark.compactor.job.CompactorJobReport
+import com.hurence.logisland.record.TimeseriesRecord
 import org.apache.commons.cli.{DefaultParser, Option, Options}
-import org.apache.solr.client.solrj.request.UpdateRequest
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
-
 
 object ChunkCompactorJob extends Serializable {
 
@@ -70,7 +63,7 @@ object ChunkCompactorJob extends Serializable {
       jobConf.chunkSize,
       jobConf.saxAlphabetSize,
       jobConf.saxStringLength,
-      s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
+      s"${TimeseriesRecord.CHUNK_ORIGIN}:logisland",
       jobConf.taggingChunksToCompact,
       jobConf.useCache
     )

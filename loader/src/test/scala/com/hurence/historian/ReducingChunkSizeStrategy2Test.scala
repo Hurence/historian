@@ -1,7 +1,9 @@
 package com.hurence.historian
 
-import com.hurence.historian.modele.CompactorJobReport
-import com.hurence.logisland.record.TimeSeriesRecord
+import com.hurence.historian.spark.compactor.job.CompactorJobReport
+import com.hurence.historian.spark.compactor.{ChunkCompactorConfStrategy2, ChunkCompactorJobStrategy2}
+import com.hurence.historian.spark.compactor.ChunkCompactorJobStrategy2
+import com.hurence.logisland.record.TimeseriesRecord
 import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.testcontainers.containers.DockerComposeContainer
@@ -14,7 +16,7 @@ class ReducingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) f
     chunkSize = chunkSize,
     saxAlphabetSize = 2,
     saxStringLength = 3,
-    solrFq = s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
+    solrFq = s"${TimeseriesRecord.CHUNK_ORIGIN}:logisland",
     false,
     true)
 

@@ -1,4 +1,4 @@
-package com.hurence.historian.modele
+package com.hurence.historian.spark.compactor.job
 
 case class CompactorJobReport(jobId: String,
                               jobType: String,

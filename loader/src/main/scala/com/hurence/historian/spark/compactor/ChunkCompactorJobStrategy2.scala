@@ -1,14 +1,16 @@
-package com.hurence.historian
+package com.hurence.historian.spark.compactor
 
 import java.text.SimpleDateFormat
 import java.util
 import java.util.Date
 
-import com.hurence.historian.modele.{CompactorJobReport, JobStatus}
-import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
+import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
+import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
+import com.hurence.historian.solr.HurenceSolrSupport
+import com.hurence.logisland.record.{EvoaUtils, TimeseriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.solr.SparkSolrUtils
-import com.lucidworks.spark.util.{HurenceSolrSupport, SolrSupport}
+import com.lucidworks.spark.util.SolrSupport
 import org.apache.solr.client.solrj.response.UpdateResponse
 import org.apache.solr.common.SolrInputDocument
 import org.apache.spark.rdd.RDD
@@ -28,7 +30,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   private val sizesColumnName = "sizes"
   private val nameColumnName = "name"
 
-  private implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+  private implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeseriesRecord]
 
   private val jobStart: Long = System.currentTimeMillis()
   private val jobId: String = buildJobId(jobStart)
@@ -37,9 +39,9 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
 
 
   private def loadChunksFromSolR(spark: SparkSession): DataFrame = {
-    val fields = s"${TimeSeriesRecord.CHUNK_ID},${TimeSeriesRecord.METRIC_NAME},${TimeSeriesRecord.CHUNK_VALUE},${TimeSeriesRecord.CHUNK_START}," +
-      s"${TimeSeriesRecord.CHUNK_END},${TimeSeriesRecord.CHUNK_SIZE},${TimeSeriesRecord.CHUNK_YEAR}," +
-      s"${TimeSeriesRecord.CHUNK_MONTH},${TimeSeriesRecord.CHUNK_DAY}"
+    val fields = s"${TimeseriesRecord.CHUNK_ID},${TimeseriesRecord.METRIC_NAME},${TimeseriesRecord.CHUNK_VALUE},${TimeseriesRecord.CHUNK_START}," +
+      s"${TimeseriesRecord.CHUNK_END},${TimeseriesRecord.CHUNK_SIZE},${TimeseriesRecord.CHUNK_YEAR}," +
+      s"${TimeseriesRecord.CHUNK_MONTH},${TimeseriesRecord.CHUNK_DAY}"
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -52,7 +54,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def loadChunksToBeTaggegFromSolR(spark: SparkSession): DataFrame = {
-    val fields = s"${TimeSeriesRecord.CHUNK_ID}"
+    val fields = s"${TimeseriesRecord.CHUNK_ID}"
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -65,9 +67,9 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def loadTaggedChunksFromSolR(spark: SparkSession): DataFrame = {
-    val fields = s"${TimeSeriesRecord.CHUNK_ID},${TimeSeriesRecord.METRIC_NAME},${TimeSeriesRecord.CHUNK_VALUE},${TimeSeriesRecord.CHUNK_START}," +
-      s"${TimeSeriesRecord.CHUNK_END},${TimeSeriesRecord.CHUNK_SIZE},${TimeSeriesRecord.CHUNK_YEAR}," +
-      s"${TimeSeriesRecord.CHUNK_MONTH},${TimeSeriesRecord.CHUNK_DAY}"
+    val fields = s"${TimeseriesRecord.CHUNK_ID},${TimeseriesRecord.METRIC_NAME},${TimeseriesRecord.CHUNK_VALUE},${TimeseriesRecord.CHUNK_START}," +
+      s"${TimeseriesRecord.CHUNK_END},${TimeseriesRecord.CHUNK_SIZE},${TimeseriesRecord.CHUNK_YEAR}," +
+      s"${TimeseriesRecord.CHUNK_MONTH},${TimeseriesRecord.CHUNK_DAY}"
 
     val solrOpts = Map(
       "zkhost" -> options.zkHosts,
@@ -76,61 +78,61 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
          "split_field"-> "name",
          "splits_per_shard"-> "50",*/
       "fields" -> fields,
-      "filters" -> s"""${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:"$jobId""""
+      "filters" -> s"""${TimeseriesRecord.CHUNK_COMPACTION_RUNNING}:"$jobId""""
     )
     logger.info("solrOpts : {}", solrOpts.mkString("\n{", "\n", "}"))
     SparkSolrUtils.loadFromSolR(spark, solrOpts)
   }
 
-  private def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord]) = {
+  private def saveNewChunksToSolR(timeseriesDS: Dataset[TimeseriesRecord]) = {
     import timeseriesDS.sparkSession.implicits._
 
     logger.info(s"start saving new chunks to ${options.timeseriesCollectionName}")
     val savedDF = timeseriesDS
       .map(r => (
         r.getId,
-        r.getField(TimeSeriesRecord.CHUNK_YEAR).asInteger(),
-        r.getField(TimeSeriesRecord.CHUNK_MONTH).asInteger(),
-        r.getField(TimeSeriesRecord.CHUNK_DAY).asInteger(),
-        r.getField(TimeSeriesRecord.CODE_INSTALL).asString(),
-        r.getField(TimeSeriesRecord.SENSOR).asString(),
-        r.getField(TimeSeriesRecord.METRIC_NAME).asString(),
-        r.getField(TimeSeriesRecord.CHUNK_VALUE).asString(),
-        r.getField(TimeSeriesRecord.CHUNK_START).asLong(),
-        r.getField(TimeSeriesRecord.CHUNK_END).asLong(),
-        r.getField(TimeSeriesRecord.CHUNK_WINDOW_MS).asLong(),
-        r.getField(TimeSeriesRecord.CHUNK_SIZE).asInteger(),
-        r.getField(TimeSeriesRecord.CHUNK_FIRST_VALUE).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_AVG).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_MIN).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_MAX).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_SUM).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_TREND).asBoolean(),
-        r.getField(TimeSeriesRecord.CHUNK_OUTLIER).asBoolean(),
-        if (r.hasField(TimeSeriesRecord.CHUNK_SAX)) r.getField(TimeSeriesRecord.CHUNK_SAX).asString() else "",
-        r.getField(TimeSeriesRecord.CHUNK_ORIGIN).asString())
+        r.getField(TimeseriesRecord.CHUNK_YEAR).asInteger(),
+        r.getField(TimeseriesRecord.CHUNK_MONTH).asInteger(),
+        r.getField(TimeseriesRecord.CHUNK_DAY).asInteger(),
+        r.getField(TimeseriesRecord.CODE_INSTALL).asString(),
+        r.getField(TimeseriesRecord.SENSOR).asString(),
+        r.getField(TimeseriesRecord.METRIC_NAME).asString(),
+        r.getField(TimeseriesRecord.CHUNK_VALUE).asString(),
+        r.getField(TimeseriesRecord.CHUNK_START).asLong(),
+        r.getField(TimeseriesRecord.CHUNK_END).asLong(),
+        r.getField(TimeseriesRecord.CHUNK_WINDOW_MS).asLong(),
+        r.getField(TimeseriesRecord.CHUNK_SIZE).asInteger(),
+        r.getField(TimeseriesRecord.CHUNK_FIRST_VALUE).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_AVG).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_MIN).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_MAX).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_SUM).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_TREND).asBoolean(),
+        r.getField(TimeseriesRecord.CHUNK_OUTLIER).asBoolean(),
+        if (r.hasField(TimeseriesRecord.CHUNK_SAX)) r.getField(TimeseriesRecord.CHUNK_SAX).asString() else "",
+        r.getField(TimeseriesRecord.CHUNK_ORIGIN).asString())
       )
-      .toDF(TimeSeriesRecord.CHUNK_ID,
-        TimeSeriesRecord.CHUNK_YEAR,
-        TimeSeriesRecord.CHUNK_MONTH,
-        TimeSeriesRecord.CHUNK_DAY,
-        TimeSeriesRecord.CODE_INSTALL,
-        TimeSeriesRecord.SENSOR,
-        TimeSeriesRecord.METRIC_NAME,
-        TimeSeriesRecord.CHUNK_VALUE,
-        TimeSeriesRecord.CHUNK_START,
-        TimeSeriesRecord.CHUNK_END,
-        TimeSeriesRecord.CHUNK_WINDOW_MS,
-        TimeSeriesRecord.CHUNK_SIZE,
-        TimeSeriesRecord.CHUNK_FIRST_VALUE,
-        TimeSeriesRecord.CHUNK_AVG,
-        TimeSeriesRecord.CHUNK_MIN,
-        TimeSeriesRecord.CHUNK_MAX,
-        TimeSeriesRecord.CHUNK_SUM,
-        TimeSeriesRecord.CHUNK_TREND,
-        TimeSeriesRecord.CHUNK_OUTLIER,
-        TimeSeriesRecord.CHUNK_SAX,
-        TimeSeriesRecord.CHUNK_ORIGIN)
+      .toDF(TimeseriesRecord.CHUNK_ID,
+        TimeseriesRecord.CHUNK_YEAR,
+        TimeseriesRecord.CHUNK_MONTH,
+        TimeseriesRecord.CHUNK_DAY,
+        TimeseriesRecord.CODE_INSTALL,
+        TimeseriesRecord.SENSOR,
+        TimeseriesRecord.METRIC_NAME,
+        TimeseriesRecord.CHUNK_VALUE,
+        TimeseriesRecord.CHUNK_START,
+        TimeseriesRecord.CHUNK_END,
+        TimeseriesRecord.CHUNK_WINDOW_MS,
+        TimeseriesRecord.CHUNK_SIZE,
+        TimeseriesRecord.CHUNK_FIRST_VALUE,
+        TimeseriesRecord.CHUNK_AVG,
+        TimeseriesRecord.CHUNK_MIN,
+        TimeseriesRecord.CHUNK_MAX,
+        TimeseriesRecord.CHUNK_SUM,
+        TimeseriesRecord.CHUNK_TREND,
+        TimeseriesRecord.CHUNK_OUTLIER,
+        TimeseriesRecord.CHUNK_SAX,
+        TimeseriesRecord.CHUNK_ORIGIN)
 
     if (options.useCache) {
       savedDF.cache()
@@ -175,7 +177,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
       .map(chunkPoints => {
         val builder = new MetricTimeSeries.Builder(metricName, metricType)
         chunkPoints.foreach(p => builder.point(p.getTimestamp, p.getValue))
-        new TimeSeriesRecord(builder.build())
+        new TimeseriesRecord(builder.build())
       })
 
     if (logger.isTraceEnabled) {
@@ -195,25 +197,25 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    * @param solrDf
    * @return
    */
-  private def mergeChunks(sparkSession: SparkSession, solrDf: DataFrame): Dataset[TimeSeriesRecord] = {
-    val dailyChunks: Dataset[TimeSeriesRecord] = chunkDailyMetrics(solrDf)
+  private def mergeChunks(sparkSession: SparkSession, solrDf: DataFrame): Dataset[TimeseriesRecord] = {
+    val dailyChunks: Dataset[TimeseriesRecord] = chunkDailyMetrics(solrDf)
     dailyChunks
   }
 
-  private def chunkDailyMetrics(solrDf: DataFrame): Dataset[TimeSeriesRecord] = {
+  private def chunkDailyMetrics(solrDf: DataFrame): Dataset[TimeseriesRecord] = {
     val groupedChunkDf = solrDf
       .groupBy(
-        col(TimeSeriesRecord.METRIC_NAME),
-        col(TimeSeriesRecord.CHUNK_YEAR),
-        col(TimeSeriesRecord.CHUNK_MONTH),
-        col(TimeSeriesRecord.CHUNK_DAY))
+        col(TimeseriesRecord.METRIC_NAME),
+        col(TimeseriesRecord.CHUNK_YEAR),
+        col(TimeseriesRecord.CHUNK_MONTH),
+        col(TimeseriesRecord.CHUNK_DAY))
       .agg(
-        sum(col(TimeSeriesRecord.CHUNK_SIZE)).as(totalNumberOfPointColumnName),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_START)).as(startsColumnName),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_VALUE)).as(valuesColumnName),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_END)).as(endsColumnName),
-        f.collect_list(col(TimeSeriesRecord.CHUNK_SIZE)).as(sizesColumnName),
-        f.first(col(TimeSeriesRecord.METRIC_NAME)).as(nameColumnName)
+        sum(col(TimeseriesRecord.CHUNK_SIZE)).as(totalNumberOfPointColumnName),
+        f.collect_list(col(TimeseriesRecord.CHUNK_START)).as(startsColumnName),
+        f.collect_list(col(TimeseriesRecord.CHUNK_VALUE)).as(valuesColumnName),
+        f.collect_list(col(TimeseriesRecord.CHUNK_END)).as(endsColumnName),
+        f.collect_list(col(TimeseriesRecord.CHUNK_SIZE)).as(sizesColumnName),
+        f.first(col(TimeseriesRecord.METRIC_NAME)).as(nameColumnName)
       )
 
     import groupedChunkDf.sparkSession.implicits._
@@ -225,11 +227,11 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
       .toDS()
   }
 
-  private def calculMetrics(timeSerie: TimeSeriesRecord): TimeSeriesRecord = {
+  private def calculMetrics(timeSerie: TimeseriesRecord): TimeseriesRecord = {
     // Init the Timeserie processor
     val tsProcessor = new TimeseriesConverter()
     val context = new HistorianContext(tsProcessor)
-    context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeSeriesRecord.METRIC_NAME)
+    context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeseriesRecord.METRIC_NAME)
     context.setProperty(TimeseriesConverter.METRIC.getName,
       s"first;min;max;count;sum;avg;count;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
     tsProcessor.init(context)
@@ -242,7 +244,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     timeSerie
   }
 
-  private def mergeChunksIntoSeveralChunk(r: Row): List[TimeSeriesRecord] = {
+  private def mergeChunksIntoSeveralChunk(r: Row): List[TimeseriesRecord] = {
     val name = r.getAs[String](nameColumnName)
     val values = r.getAs[ArrayDF[String]](valuesColumnName)
     val starts = r.getAs[ArrayDF[Long]](startsColumnName)
@@ -263,15 +265,15 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val start = System.currentTimeMillis()
     logger.info(s"Saving report after tagging finished of job $jobId to ${options.reportCollectionName}")
     val reportDoc = solrChunks.select(
-      f.col(TimeSeriesRecord.METRIC_NAME)
+      f.col(TimeseriesRecord.METRIC_NAME)
     )
       .agg(
         f.lit(jobId).as(CompactorJobReport.JOB_ID),
         f.lit(CompactorJobReport.JOB_TYPE_VALUE).as(CompactorJobReport.JOB_TYPE),
         f.lit(jobStart).as(CompactorJobReport.JOB_START),
         f.lit(JobStatus.RUNNING.toString).as(CompactorJobReport.JOB_STATUS),
-        f.count(TimeSeriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT),
-        f.countDistinct(TimeSeriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_TOTAL_METRICS_RECHUNKED),
+        f.count(TimeseriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT),
+        f.countDistinct(TimeseriesRecord.METRIC_NAME).as(CompactorJobReport.JOB_TOTAL_METRICS_RECHUNKED),
         f.lit(options.toJsonStr).as(CompactorJobReport.JOB_CONF)
       )
     reportDoc.write
@@ -328,7 +330,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     logger.info(s"start tagging chunks to be compacted by job '$jobId' to collection ${options.timeseriesCollectionName}")
     import solrChunks.sparkSession.implicits._
     val chunkIds: Dataset[String] = solrChunks.select(
-      f.col(TimeSeriesRecord.CHUNK_ID)
+      f.col(TimeseriesRecord.CHUNK_ID)
     ).as[String]
 
     val taggedChunks: RDD[SolrInputDocument] = buildTaggegSolrDocRdd(chunkIds)
@@ -359,8 +361,8 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     }
     chunkIds.rdd.map(id => {
       val updateDoc = new SolrInputDocument
-      updateDoc.setField(TimeSeriesRecord.CHUNK_ID, id)
-      updateDoc.setField(TimeSeriesRecord.CHUNK_COMPACTION_RUNNING, addJobIdTag)
+      updateDoc.setField(TimeseriesRecord.CHUNK_ID, id)
+      updateDoc.setField(TimeseriesRecord.CHUNK_COMPACTION_RUNNING, addJobIdTag)
       updateDoc
     })
     //(Encoders.bean(classOf[SolrInputDocument]))
@@ -395,7 +397,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
   }
 
   private def deleteTaggedChunks() = {
-    val query = s"""${TimeSeriesRecord.CHUNK_COMPACTION_RUNNING}:"$jobId""""
+    val query = s"""${TimeseriesRecord.CHUNK_COMPACTION_RUNNING}:"$jobId""""
     deleteByQuery(options.timeseriesCollectionName, options.zkHosts, query)
   }
 
@@ -436,7 +438,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
    * Need to eventually delete chunks that would have been successfully injected when an error occurs
    */
   private def deleteCompactedChunks() = {
-    val query = s"""${TimeSeriesRecord.CHUNK_ORIGIN}:"$jobId""""
+    val query = s"""${TimeseriesRecord.CHUNK_ORIGIN}:"$jobId""""
     deleteByQuery(options.timeseriesCollectionName, options.zkHosts, query)
   }
   /**

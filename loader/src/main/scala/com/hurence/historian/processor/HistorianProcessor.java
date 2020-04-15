@@ -1,4 +1,4 @@
-package com.hurence.historian;
+package com.hurence.historian.processor;
 
 import com.hurence.logisland.component.PropertyDescriptor;
 
