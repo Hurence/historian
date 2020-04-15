@@ -1,9 +1,9 @@
-package com.hurence.historian;
+package com.hurence.historian.processor;
 
-import com.hurence.logisland.record.TimeSeriesRecord;
+import com.hurence.historian.EvoaMeasure;
+import com.hurence.logisland.record.TimeseriesRecord;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
-import com.hurence.logisland.processor.ProcessContext;
 import com.hurence.logisland.record.*;
 import com.hurence.logisland.serializer.KryoSerializer;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
@@ -95,14 +95,14 @@ public class TimeseriesConverter implements HistorianProcessor {
      * @param tsRecord
      * @return
      */
-    public byte[] serialize(TimeSeriesRecord tsRecord) {
+    public byte[] serialize(TimeseriesRecord tsRecord) {
 
         // has Id
-        final String hashString = DigestUtils.sha256Hex(tsRecord.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes());
+        final String hashString = DigestUtils.sha256Hex(tsRecord.getField(TimeseriesRecord.CHUNK_VALUE).asBytes());
         tsRecord.setId(hashString);
 
         // encode chunk_value to base64
-        Field f = tsRecord.getField(TimeSeriesRecord.CHUNK_VALUE);
+        Field f = tsRecord.getField(TimeseriesRecord.CHUNK_VALUE);
         if (f != null) {
             if (!(f.getType() == FieldType.BYTES || f.getType() == FieldType.NULL)) {
                 logger.error("Field type '{}' is not an array of bytes",
@@ -111,7 +111,7 @@ public class TimeseriesConverter implements HistorianProcessor {
                 byte[] content = f.asBytes();
                 if (content != null) {
                     try {
-                        tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, BinaryEncodingUtils.encode(content));
+                        tsRecord.setStringField(TimeseriesRecord.CHUNK_VALUE, BinaryEncodingUtils.encode(content));
                     } catch (Exception e) {
                         logger.error("Unable to encode field '{}' : {}",
                                 new Object[]{f.getName(), e.getMessage()});
@@ -135,12 +135,12 @@ public class TimeseriesConverter implements HistorianProcessor {
     }
 
 
-    public TimeSeriesRecord computeValue(TimeSeriesRecord tsRecord) {
+    public TimeseriesRecord computeValue(TimeseriesRecord tsRecord) {
         try {
             byte[] bytes = converter.serializeTimeseries(tsRecord.getTimeSeries());
             String chunkValueBase64 = BinaryEncodingUtils.encode(bytes);
-            tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, chunkValueBase64);
-            tsRecord.setIntField(TimeSeriesRecord.CHUNK_SIZE_BYTES, bytes.length);
+            tsRecord.setStringField(TimeseriesRecord.CHUNK_VALUE, chunkValueBase64);
+            tsRecord.setIntField(TimeseriesRecord.CHUNK_SIZE_BYTES, bytes.length);
         } catch (Exception ex) {
             logger.error(
                     "Unable to convert chunk_vlaue to base64 : {}",
@@ -155,7 +155,7 @@ public class TimeseriesConverter implements HistorianProcessor {
      *
      * @return
      */
-    public TimeSeriesRecord computeMetrics(TimeSeriesRecord tsRecord) {
+    public TimeseriesRecord computeMetrics(TimeseriesRecord tsRecord) {
 
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
         functionValueMap.resetValues();
@@ -192,8 +192,8 @@ public class TimeseriesConverter implements HistorianProcessor {
      *
      * @return
      */
-    public TimeSeriesRecord fromRecords(List<Record> groupedRecords) {
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+    public TimeseriesRecord fromRecords(List<Record> groupedRecords) {
+        TimeseriesRecord tsRecord = converter.chunk(groupedRecords);
         return computeMetrics(tsRecord);
     }
 
@@ -204,7 +204,7 @@ public class TimeseriesConverter implements HistorianProcessor {
      * @param rows
      * @return
      */
-    public TimeSeriesRecord fromRecords(String metricName, List<Row> rows) {
+    public TimeseriesRecord fromRecords(String metricName, List<Row> rows) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
@@ -297,7 +297,7 @@ public class TimeseriesConverter implements HistorianProcessor {
      * @param measures
      * @return
      */
-    public TimeSeriesRecord fromMeasurestoTimeseriesRecord(List<EvoaMeasure> measures) {
+    public TimeseriesRecord fromMeasurestoTimeseriesRecord(List<EvoaMeasure> measures) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
@@ -325,7 +325,7 @@ public class TimeseriesConverter implements HistorianProcessor {
         }
 
 
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+        TimeseriesRecord tsRecord = converter.chunk(groupedRecords);
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
 
         functionValueMap.resetValues();

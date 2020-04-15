@@ -1,4 +1,5 @@
-package com.hurence.historian
+package com.hurence.historian.spark.compactor
+
 import org.apache.spark.sql.SparkSession
 
 trait ChunkCompactor extends Serializable {
