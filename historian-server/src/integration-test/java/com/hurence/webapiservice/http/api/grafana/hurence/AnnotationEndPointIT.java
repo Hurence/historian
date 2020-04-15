@@ -1,9 +1,14 @@
-package com.hurence.webapiservice.http.api.grafana;
+package com.hurence.webapiservice.http.api.grafana.hurence;
 
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.webapiservice.http.HttpServerVerticle;
+import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
+import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
+import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
@@ -33,6 +38,7 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.ANNOTATIONS;
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.COLLECTION_ANNOTATION;
+import static com.hurence.webapiservice.util.HistorianSolrITHelper.HISTORIAN_ADRESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -45,8 +51,7 @@ public class AnnotationEndPointIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+        HistorianSolrITHelper.initHistorianSolr(client);
         LOGGER.info("Indexing some documents in {} collection", COLLECTION_ANNOTATION);
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("time", 1581648194070L);   // 2020-2-14T02:43:14.070Z
@@ -86,7 +91,23 @@ public class AnnotationEndPointIT {
         client.commit(COLLECTION_ANNOTATION);
         LOGGER.info("Indexed some documents in {} collection", COLLECTION_ANNOTATION);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/annotations");
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.ANNOTATIONS_ENDPOINT);
+        JsonObject httpConf = new JsonObject()
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
+                .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
+                .put(HttpServerVerticle.GRAFANA,
+                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
+        DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
+        HistorianSolrITHelper.deployHistorienVerticle(container, vertx)
+                .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
+                .map(id -> {
+                    LOGGER.info("HistorianVerticle with id '{}' deployed", id);
+                    return id;
+                }).subscribe(id -> {
+                    context.completeNow();
+                },
+                t -> context.failNow(t));
     }
 
     @AfterAll
@@ -99,48 +120,48 @@ public class AnnotationEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithTypeEqualsAll(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/testWithTypeEqualsAll/request.json",
-                "/http/grafana/annotation/testWithTypeEqualsAll/expectedResponse.json");
+                "/http/grafana/hurencedatasource/annotation/testWithTypeEqualsAll/request.json",
+                "/http/grafana/hurencedatasource/annotation/testWithTypeEqualsAll/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsTrue(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/annotation/testMatchAnyEqualsTrue/request.json",
-                "/http/grafana/annotation/testMatchAnyEqualsTrue/expectedResponse.json");
+                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsTrue/request.json",
+                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsTrue/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsFalse(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/testMatchAnyEqualsFalse/request.json",
-                "/http/grafana/annotation/testMatchAnyEqualsFalse/expectedResponse.json");
+                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsFalse/request.json",
+                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsFalse/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithLimit(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/testLimitNumberOfTags/request.json",
-                "/http/grafana/annotation/testLimitNumberOfTags/expectedResponse.json");
+                "/http/grafana/hurencedatasource/annotation/testLimitNumberOfTags/request.json",
+                "/http/grafana/hurencedatasource/annotation/testLimitNumberOfTags/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithNoTime(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/annotation/testRequestWithNoTime/request.json",
-                "/http/grafana/annotation/testRequestWithNoTime/expectedResponse.json");
+                "/http/grafana/hurencedatasource/annotation/testRequestWithNoTime/request.json",
+                "/http/grafana/hurencedatasource/annotation/testRequestWithNoTime/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithEmptyQuery(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/annotation/testEmptyQuery/request.json",
-                "/http/grafana/annotation/testEmptyQuery/expectedResponse.json");
+                "/http/grafana/hurencedatasource/annotation/testEmptyQuery/request.json",
+                "/http/grafana/hurencedatasource/annotation/testEmptyQuery/expectedResponse.json");
     }
 
 
@@ -153,7 +174,7 @@ public class AnnotationEndPointIT {
                                                                    String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/api/grafana/annotations")
+        webClient.post(HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.ANNOTATIONS_ENDPOINT)
                 .as(BodyCodec.jsonObject())
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {

@@ -1,14 +1,12 @@
-package com.hurence.webapiservice.http.api.grafana;
+package com.hurence.webapiservice.http.api.grafana.simplejson;
 
 
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.Timeout;
@@ -32,13 +30,12 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_API_HISTORAIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class SearchEndPointWithCustomConfigIT {
+public class SearchEndPointIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointWithCustomConfigIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
     private static String COLLECTION = HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     @BeforeAll
@@ -97,56 +94,48 @@ public class SearchEndPointWithCustomConfigIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithQueryAndNoLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
-        JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                            "/http/grafana/search/test1/request.json",
-                            "/http/grafana/search/test1/expectedResponse.json");
+                            "/http/grafana/simplejson/search/test1/request.json",
+                            "/http/grafana/simplejson/search/test1/expectedResponse.json");
                 });
     }
 
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithQueryAndLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 2)));
-        JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
-                            "/http/grafana/search/testWithLimit/request.json",
-                            "/http/grafana/search/testWithLimit/expectedResponse.json");
+                            "/http/grafana/simplejson/search/testWithLimit/request.json",
+                            "/http/grafana/simplejson/search/testWithLimit/expectedResponse.json");
                 });
     }
 
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithEmptyQueryAndNoLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
-        JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
-                            "/http/grafana/search/testEmptyQuery/request.json",
-                            "/http/grafana/search/testEmptyQuery/expectedResponse.json");
+                            "/http/grafana/simplejson/search/testEmptyQuery/request.json",
+                            "/http/grafana/simplejson/search/testEmptyQuery/expectedResponse.json");
                 });
     }
 
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithEmptyQueryAndLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 2)));
-        JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
-                            "/http/grafana/search/testEmptyQueryWithLimit/request.json",
-                            "/http/grafana/search/testEmptyQueryWithLimit/expectedResponse.json");
+                            "/http/grafana/simplejson/search/testEmptyQueryWithLimit/request.json",
+                            "/http/grafana/simplejson/search/testEmptyQueryWithLimit/expectedResponse.json");
                 });
     }
 
@@ -154,14 +143,12 @@ public class SearchEndPointWithCustomConfigIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testNoMatch(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        JsonObject grafana = new JsonObject().put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_SEARCH_HISTORAIN, new JsonObject().put(HistorianVerticle.CONFIG_DEFAULT_SIZE_HISTORAIN, 100)));
-        JsonObject apiDefault = new JsonObject().put(CONFIG_API_HISTORAIN, grafana);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, apiDefault)
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                            "/http/grafana/search/testNoMatch/request.json",
-                            "/http/grafana/search/testNoMatch/expectedResponse.json");
+                            "/http/grafana/simplejson/search/testNoMatch/request.json",
+                            "/http/grafana/simplejson/search/testNoMatch/expectedResponse.json");
                 });
     }
 

@@ -19,6 +19,11 @@ public class HttpServerVerticle extends AbstractVerticle {
      */
     public static final String CONFIG_HTTP_SERVER_PORT = "port";
     public static final String CONFIG_HTTP_SERVER_HOSTNAME = "host";
+    public static final String GRAFANA = "grafana";
+    public static final String VERSION = "version";
+//    public static final String API = "api";
+//    public static final String SEARCH = "search";
+//    public static final String LIMIT_DEFAULT = "limit_default";
     public static final String CONFIG_HISTORIAN_ADDRESS = "historian.address";
     public static final String CONFIG_TIMESERIES_ADDRESS = "timeseries.address";
     public static final String CONFIG_MAX_CSV_POINTS_ALLOWED = "max_data_points_allowed_for_ExportCsv";
@@ -29,6 +34,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     public static final String MAIN_API_ENDPOINT = "/api/historian/v0";
     public static final String GRAFANA_API_ENDPOINT = "/api/grafana";
+    public static final GrafanaApiVersion GRAFANA_API_VEFSION_DEFAULT = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
 
     @Override
     public void start(Promise<Void> promise) throws Exception {
@@ -46,7 +52,7 @@ public class HttpServerVerticle extends AbstractVerticle {
         Router mainApi = new MainHistorianApiImpl(historianService, maxDataPointsAllowedForExportCsv).getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
 
-        GrafanaApiVersion grafanaApiVersion = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
+        GrafanaApiVersion grafanaApiVersion = getGrafanaApiVersion();
         Router graphanaApi = GrafanaApi.fromVersion(grafanaApiVersion, historianService).getGraphanaRouter(vertx);
         router.mountSubRouter(GRAFANA_API_ENDPOINT, graphanaApi);
 
@@ -65,5 +71,16 @@ public class HttpServerVerticle extends AbstractVerticle {
                         promise.fail(ar.cause());
                     }
                 });
+    }
+
+    private GrafanaApiVersion getGrafanaApiVersion() {
+        String apiversion;
+        try {
+            apiversion = config().getJsonObject(GRAFANA).getString(VERSION, GRAFANA_API_VEFSION_DEFAULT.toString());
+        } catch (Exception ex) {
+            LOGGER.info("grafana version is not defined. We will use default version which is " +  GRAFANA_API_VEFSION_DEFAULT);
+            return GRAFANA_API_VEFSION_DEFAULT;
+        }
+        return GrafanaApiVersion.valueOf(apiversion.toUpperCase());
     }
 }

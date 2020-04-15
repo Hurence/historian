@@ -100,7 +100,7 @@ public class HistorianSearchVerticleIT {
     @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void getMetricsNameTest (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
-                .put (TARGET, "per");
+                .put(METRIC, "per");
         historian.rxGetMetricsName (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
@@ -120,7 +120,7 @@ public class HistorianSearchVerticleIT {
     @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void EmptyTest (VertxTestContext testContext) {
         JsonObject params = new JsonObject ();
-        historian.rxGetMetricsName (params)
+        historian.rxGetMetricsName(params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {

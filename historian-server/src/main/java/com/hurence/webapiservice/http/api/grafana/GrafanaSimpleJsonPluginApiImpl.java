@@ -328,8 +328,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
         return annotationsAsArray;
     }
     private JsonObject modifyAnnotation(JsonObject annotation) {
-        annotation.put("annotation", "historian");
-        annotation.put("title", "annotation from historian");
+        annotation.put("title", annotation.getString(TEXT));
         return annotation;
     }
 

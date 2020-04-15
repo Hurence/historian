@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http.api.grafana;
+package com.hurence.webapiservice.http.api.grafana.simplejson;
 
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
@@ -35,7 +35,7 @@ public class TagKeysAndValuesEndPointIT {
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertTagKeyHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/tag-keys");
         assertTagValueHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/tag-values");
@@ -51,24 +51,24 @@ public class TagKeysAndValuesEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testTagKey(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFileTagKeys(vertx, testContext,
-                "/http/grafana/tagkeys/test1/request.json",
-                "/http/grafana/tagkeys/test1/expectedResponse.json");
+                "/http/grafana/simplejson/tagkeys/test1/request.json",
+                "/http/grafana/simplejson/tagkeys/test1/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testTagValuesAlgo(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFileTagValues(vertx, testContext,
-                "/http/grafana/tagvalues/testAlgo/request.json",
-                "/http/grafana/tagvalues/testAlgo/expectedResponse.json");
+                "/http/grafana/simplejson/tagvalues/testAlgo/request.json",
+                "/http/grafana/simplejson/tagvalues/testAlgo/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testTagValuesBucketSize(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFileTagValues(vertx, testContext,
-                "/http/grafana/tagvalues/testBucketSize/request.json",
-                "/http/grafana/tagvalues/testBucketSize/expectedResponse.json");
+                "/http/grafana/simplejson/tagvalues/testBucketSize/request.json",
+                "/http/grafana/simplejson/tagvalues/testBucketSize/expectedResponse.json");
     }
 
 
