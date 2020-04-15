@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http.api.grafana;
+package com.hurence.webapiservice.http.api.grafana.simplejson;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
@@ -39,7 +39,7 @@ public class QueryEndPointFocusOnFilterIT {
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "metric_to_filter",
@@ -84,24 +84,24 @@ public class QueryEndPointFocusOnFilterIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testFilterOnTagsBerlin(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testWithAdhocFilters/testFilterOnTags/berlin/request.json",
-                "/http/grafana/query/extract-algo/testWithAdhocFilters/testFilterOnTags/berlin/expectedResponse.json");
+                "/http/grafana/simplejson/query/extract-algo/testWithAdhocFilters/testFilterOnTags/berlin/request.json",
+                "/http/grafana/simplejson/query/extract-algo/testWithAdhocFilters/testFilterOnTags/berlin/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testFilterOnTagsFrance(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testWithAdhocFilters/testFilterOnTags/france/request.json",
-                "/http/grafana/query/extract-algo/testWithAdhocFilters/testFilterOnTags/france/expectedResponse.json");
+                "/http/grafana/simplejson/query/extract-algo/testWithAdhocFilters/testFilterOnTags/france/request.json",
+                "/http/grafana/simplejson/query/extract-algo/testWithAdhocFilters/testFilterOnTags/france/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testFilterOnTagsBerlinAndFrance(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testWithAdhocFilters/testFilterOnTags/franceAndBerlin/request.json",
-                "/http/grafana/query/extract-algo/testWithAdhocFilters/testFilterOnTags/franceAndBerlin/expectedResponse.json");
+                "/http/grafana/simplejson/query/extract-algo/testWithAdhocFilters/testFilterOnTags/franceAndBerlin/request.json",
+                "/http/grafana/simplejson/query/extract-algo/testWithAdhocFilters/testFilterOnTags/franceAndBerlin/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,

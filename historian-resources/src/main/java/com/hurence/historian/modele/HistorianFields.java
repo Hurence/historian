@@ -39,6 +39,7 @@ public class HistorianFields {
     public static String METRICS = "metrics";
     public static String ANNOTATIONS = "annotations";
     public static String TOTAL = "total";
+    public static String TOTAL_HIT = "total_hit";
     public static String RESPONSE_METRIC_NAME_FIELD = "name";
     public static String RESPONSE_TAG_NAME_FIELD = "tagname";
     public static String RESPONSE_CHUNK_ID_FIELD = "id";
@@ -64,4 +65,5 @@ public class HistorianFields {
     public static String CHUNK_DAY = "day";
     public static String CHUNK_ORIGIN = "chunk_origin";
 }
+
 

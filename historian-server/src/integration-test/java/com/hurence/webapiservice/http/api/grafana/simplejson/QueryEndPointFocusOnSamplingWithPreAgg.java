@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http.api.grafana;
+package com.hurence.webapiservice.http.api.grafana.simplejson;
 
 import com.hurence.historian.solr.injector.AbstractSolrInjector;
 import com.hurence.historian.solr.injector.SolrInjector;
@@ -56,7 +56,7 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
     public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
         JsonObject historianConf = buildHistorianConf();
         HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
+                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
                         client, container, vertx, context, historianConf);
     }
 
@@ -142,48 +142,48 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric10ChunkMax20(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/preagg-algo/testMetric10ChunkMaxPoint20/request.json",
-                "/http/grafana/query/preagg-algo/testMetric10ChunkMaxPoint20/expectedResponse.json");
+                "/http/grafana/simplejson/query/preagg-algo/testMetric10ChunkMaxPoint20/request.json",
+                "/http/grafana/simplejson/query/preagg-algo/testMetric10ChunkMaxPoint20/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric10ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/preagg-algo/testMetric10ChunkMaxPoint4/request.json",
-                "/http/grafana/query/preagg-algo/testMetric10ChunkMaxPoint4/expectedResponse.json");
+                "/http/grafana/simplejson/query/preagg-algo/testMetric10ChunkMaxPoint4/request.json",
+                "/http/grafana/simplejson/query/preagg-algo/testMetric10ChunkMaxPoint4/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric9ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/preagg-algo/testMetric9ChunkMaxPoint4/request.json",
-                "/http/grafana/query/preagg-algo/testMetric9ChunkMaxPoint4/expectedResponse.json");
+                "/http/grafana/simplejson/query/preagg-algo/testMetric9ChunkMaxPoint4/request.json",
+                "/http/grafana/simplejson/query/preagg-algo/testMetric9ChunkMaxPoint4/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric7ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/preagg-algo/testMetric7ChunkMaxPoint4/request.json",
-                "/http/grafana/query/preagg-algo/testMetric7ChunkMaxPoint4/expectedResponse.json");
+                "/http/grafana/simplejson/query/preagg-algo/testMetric7ChunkMaxPoint4/request.json",
+                "/http/grafana/simplejson/query/preagg-algo/testMetric7ChunkMaxPoint4/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric5ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/preagg-algo/testMetric5ChunkMaxPoint4/request.json",
-                "/http/grafana/query/preagg-algo/testMetric5ChunkMaxPoint4/expectedResponse.json");
+                "/http/grafana/simplejson/query/preagg-algo/testMetric5ChunkMaxPoint4/request.json",
+                "/http/grafana/simplejson/query/preagg-algo/testMetric5ChunkMaxPoint4/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric1ChunkOf20PointMax4Point(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/preagg-algo/testMetric1ChunkOf20PointMaxPoint4/request.json",
-                "/http/grafana/query/preagg-algo/testMetric1ChunkOf20PointMaxPoint4/expectedResponse.json");
+                "/http/grafana/simplejson/query/preagg-algo/testMetric1ChunkOf20PointMaxPoint4/request.json",
+                "/http/grafana/simplejson/query/preagg-algo/testMetric1ChunkOf20PointMaxPoint4/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,

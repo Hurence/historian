@@ -337,7 +337,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 LOGGER.debug("annotations found : "+ annotation);
                 p.complete(new JsonObject()
                         .put(ANNOTATIONS, annotation)
-                        .put(HistorianFields.TOTAL, annotation.size())
+                        .put(HistorianFields.TOTAL_HIT, annotation.size())
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
