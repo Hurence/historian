@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http.api.grafana;
+package com.hurence.webapiservice.http.api.main;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
@@ -30,13 +30,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.http.HttpServerVerticle.MAIN_API_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class QueryEndPointCsvIT {
+public class ExportCsvEndPointIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointCsvIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(ExportCsvEndPointIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
 
@@ -103,7 +104,7 @@ public class QueryEndPointCsvIT {
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/export/csv");
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, MAIN_API_ENDPOINT + MainHistorianApi.EXPORT_ENDPOINT);
     }
 
     @AfterAll

@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.http.api.compaction;
 
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
@@ -57,7 +58,7 @@ public class CompactionApiImpl implements CompactionApi {
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(metricResponse -> {
-                    JsonArray metricNames = metricResponse.getJsonArray(RESPONSE_METRICS);
+                    JsonArray metricNames = metricResponse.getJsonArray(METRICS);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(metricNames.encode());
@@ -79,7 +80,7 @@ public class CompactionApiImpl implements CompactionApi {
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(metricResponse -> {
-                    JsonArray metricNames = metricResponse.getJsonArray(RESPONSE_METRICS);
+                    JsonArray metricNames = metricResponse.getJsonArray(METRICS);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(metricNames.encode());
@@ -162,14 +163,14 @@ public class CompactionApiImpl implements CompactionApi {
                 .add(RESPONSE_METRIC_NAME_FIELD);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
-                .put(FROM_REQUEST_FIELD, request.getFrom())
-                .put(TO_REQUEST_FIELD, request.getTo())
-                .put(FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD, fieldsToFetch)
-                .put(METRIC_NAMES_AS_LIST_REQUEST_FIELD, request.getMetricNames())
-                .put(TAGS_TO_FILTER_ON_REQUEST_FIELD, request.getTags())
-                .put(SAMPLING_ALGO_REQUEST_FIELD, samplingConf.getAlgo())
-                .put(BUCKET_SIZE_REQUEST_FIELD, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC_REQUEST_FIELD, samplingConf.getMaxPoint());
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(FIELDS, fieldsToFetch)
+                .put(NAMES, request.getMetricNames())
+                .put(HistorianFields.TAGS, request.getTags())
+                .put(SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
 

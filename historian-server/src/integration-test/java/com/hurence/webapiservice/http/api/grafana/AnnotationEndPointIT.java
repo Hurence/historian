@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.RESPONSE_ANNOTATIONS;
+import static com.hurence.historian.modele.HistorianFields.ANNOTATIONS;
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.COLLECTION_ANNOTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -162,8 +162,8 @@ public class AnnotationEndPointIT {
                         JsonObject body = rsp.body();
                         Buffer fileContent = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(responseFile).getFile());
                         JsonObject expectedBody = new JsonObject(fileContent.getDelegate());
-                        JsonArray annotationExpected = expectedBody.getJsonArray(RESPONSE_ANNOTATIONS);
-                        JsonArray annotations = body.getJsonArray(RESPONSE_ANNOTATIONS);
+                        JsonArray annotationExpected = expectedBody.getJsonArray(ANNOTATIONS);
+                        JsonArray annotations = body.getJsonArray(ANNOTATIONS);
                         Set expectedSet = new HashSet();
                         Set set = new HashSet();
                         for (Object object : annotations) {

@@ -11,8 +11,8 @@ public class HistorianResponseHelper {
     private HistorianResponseHelper() {}
 
     public static List<JsonObject> extractChunks(JsonObject chunkResponse) throws UnsupportedOperationException {
-        final long totalFound = chunkResponse.getLong(HistorianFields.RESPONSE_TOTAL_FOUND);
-        List<JsonObject> chunks = chunkResponse.getJsonArray(HistorianFields.RESPONSE_CHUNKS).stream()
+        final long totalFound = chunkResponse.getLong(HistorianFields.TOTAL);
+        List<JsonObject> chunks = chunkResponse.getJsonArray(HistorianFields.CHUNKS).stream()
                 .map(JsonObject.class::cast)
                 .collect(Collectors.toList());
         if (totalFound != chunks.size())

@@ -3,13 +3,13 @@ package com.hurence.webapiservice.http.api.main;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
 import com.hurence.webapiservice.historian.util.models.ResponseAsList;
 import com.hurence.webapiservice.http.GetTimeSerieRequestParser;
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
-import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.LogislandTimeSeriesModeler;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
 import com.hurence.webapiservice.timeseries.TimeSeriesModeler;
@@ -54,7 +54,6 @@ public class MainHistorianApiImpl implements MainHistorianApi {
     @Override
     public void search(RoutingContext context) {
         final JsonObject getMetricsParam = context.getBodyAsJson();
-        //TODO
         service.rxGetMetricsName(getMetricsParam)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
@@ -63,7 +62,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(metricResponse -> {
-                    JsonArray array = metricResponse.getJsonArray(RESPONSE_METRICS);
+                    JsonArray array = metricResponse.getJsonArray(METRICS);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(array.encode());
@@ -145,11 +144,11 @@ public class MainHistorianApiImpl implements MainHistorianApi {
             fieldsToFetch.add(aggField);
         });
         return new JsonObject()
-                .put(FROM_REQUEST_FIELD, request.getFrom())
-                .put(TO_REQUEST_FIELD, request.getTo())
-                .put(FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD, fieldsToFetch)
-                .put(METRIC_NAMES_AS_LIST_REQUEST_FIELD, request.getMetricNames())
-                .put(TAGS_TO_FILTER_ON_REQUEST_FIELD, request.getTags());
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(FIELDS, fieldsToFetch)
+                .put(NAMES, request.getMetricNames())
+                .put(HistorianFields.TAGS, request.getTags());
     }
 
     @Override
@@ -188,7 +187,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
                 .map(sampledTimeSeries -> {
-                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES_RESPONSE_FIELD);
+                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES);
                     if (LOGGER.isDebugEnabled()) {
                         timeseries.forEach(metric -> {
                             JsonObject el = (JsonObject) metric;
@@ -199,7 +198,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                         });
                         LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
                                 request.getRequestId(),
-                                sampledTimeSeries.getLong(TOTAL_POINTS_RESPONSE_FIELD, 0L),
+                                sampledTimeSeries.getLong(TOTAL_POINTS, 0L),
                                 System.currentTimeMillis() - startRequest);
                     }
                     return timeseries;

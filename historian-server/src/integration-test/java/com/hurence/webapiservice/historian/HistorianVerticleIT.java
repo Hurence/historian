@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.historian;
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
@@ -132,9 +133,9 @@ public class HistorianVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        long totalHit = rsp.getLong(RESPONSE_TOTAL_FOUND);
+                        long totalHit = rsp.getLong(HistorianFields.TOTAL);
                         assertEquals(4, totalHit);
-                        JsonArray docs = rsp.getJsonArray(RESPONSE_CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(CHUNKS);
                         assertEquals(4, docs.size());
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertTrue(doc1.containsKey(RESPONSE_METRIC_NAME_FIELD));
@@ -176,12 +177,12 @@ public class HistorianVerticleIT {
     void getTimeSeriesChunkTestWithStart(VertxTestContext testContext) {
 
         JsonObject params = new JsonObject()
-                .put(FROM_REQUEST_FIELD, 9L);
+                .put(FROM, 9L);
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonArray docs = rsp.getJsonArray(RESPONSE_CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(CHUNKS);
                         JsonObject doc2 = docs.getJsonObject(0);
                         assertEquals("id2", doc2.getString("id"));
                         JsonObject doc3 = docs.getJsonObject(1);
@@ -197,12 +198,12 @@ public class HistorianVerticleIT {
     void getTimeSeriesChunkTestWithEnd(VertxTestContext testContext) {
 
         JsonObject params = new JsonObject()
-                .put(TO_REQUEST_FIELD, 1571129390801L);
+                .put(TO, 1571129390801L);
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonArray docs = rsp.getJsonArray(RESPONSE_CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(CHUNKS);
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertEquals("id0", doc1.getString("id"));
                         JsonObject doc2 = docs.getJsonObject(1);
@@ -218,14 +219,14 @@ public class HistorianVerticleIT {
     @Disabled("This feature is legacy, now this is the service that decides what to return based on timeseries request.")
     void getTimeSeriesChunkTestWithSelectedFields(VertxTestContext testContext) {
         JsonObject params = new JsonObject()
-                .put(FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD, new JsonArray()
+                .put(FIELDS, new JsonArray()
                     .add(RESPONSE_CHUNK_VALUE_FIELD).add(RESPONSE_CHUNK_START_FIELD).add(RESPONSE_CHUNK_MAX_FIELD).add("id")
                 );
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonArray docs = rsp.getJsonArray(RESPONSE_CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(CHUNKS);
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertEquals(4, doc1.size());
                         assertEquals("id0", doc1.getString("id"));
@@ -243,14 +244,14 @@ public class HistorianVerticleIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     void getTimeSeriesChunkTestWithName(VertxTestContext testContext) {
         JsonObject params = new JsonObject()
-                .put(METRIC_NAMES_AS_LIST_REQUEST_FIELD, Arrays.asList("temp_a"));
+                .put(NAMES, Arrays.asList("temp_a"));
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        long totalHit = rsp.getLong(RESPONSE_TOTAL_FOUND);
+                        long totalHit = rsp.getLong(HistorianFields.TOTAL);
                         assertEquals(3, totalHit);
-                        JsonArray docs = rsp.getJsonArray(RESPONSE_CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(CHUNKS);
                         assertEquals(3, docs.size());
                         testContext.completeNow();
                     });

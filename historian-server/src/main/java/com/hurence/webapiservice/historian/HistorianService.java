@@ -42,24 +42,24 @@ public interface HistorianService {
      * @param params        as a json object
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#FROM_REQUEST_FIELD} : "content of chunks as an array",
-     *                          {@value HistorianFields#TO_REQUEST_FIELD} : "total chunk matching query",
-     *                          {@value HistorianFields#FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD} : ["field1", "field2"...],
-     *                          {@value HistorianFields#TAGS_TO_FILTER_ON_REQUEST_FIELD} : "total chunk matching query",
-     *                          {@value HistorianFields#METRIC_NAMES_AS_LIST_REQUEST_FIELD} : "content of chunks as an array",
+     *                          {@value HistorianFields#FROM} : "content of chunks as an array",
+     *                          {@value HistorianFields#TO} : "total chunk matching query",
+     *                          {@value HistorianFields#FIELDS} : ["field1", "field2"...],
+     *                          {@value HistorianFields#TAGS} : "total chunk matching query",
+     *                          {@value HistorianFields#NAMES} : "content of chunks as an array",
      *                      }
      *                      </pre>
      *                      explanation :
-     *                      if {@value HistorianFields#FROM_REQUEST_FIELD} not specified will search from 0
-     *                      if {@value HistorianFields#TO_REQUEST_FIELD} not specified will search to Max.Long
-     *                      use {@value HistorianFields#FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD} if you want to retrieve some of the precalculated aggs. If not specified retrieve all.
-     *                      use {@value HistorianFields#TAGS_TO_FILTER_ON_REQUEST_FIELD} to search for specific timeseries having one of those tags
-     *                      use {@value HistorianFields#METRIC_NAMES_AS_LIST_REQUEST_FIELD} to search a specific timeseries name
+     *                      if {@value HistorianFields#FROM} not specified will search from 0
+     *                      if {@value HistorianFields#TO} not specified will search to Max.Long
+     *                      use {@value HistorianFields#FIELDS} if you want to retrieve some of the precalculated aggs. If not specified retrieve all.
+     *                      use {@value HistorianFields#TAGS} to search for specific timeseries having one of those tags
+     *                      use {@value HistorianFields#NAMES} to search a specific timeseries name
      * @param resultHandler return chunks of timeseries as an array of
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#RESPONSE_CHUNKS} : "content of chunks as an array",
-     *                          {@value HistorianFields#RESPONSE_TOTAL_FOUND} : "total chunk matching query",
+     *                          {@value HistorianFields#CHUNKS} : "content of chunks as an array",
+     *                          {@value HistorianFields#TOTAL} : "total chunk matching query",
      *                      }
      *                      </pre>
      * @return himself
@@ -72,24 +72,24 @@ public interface HistorianService {
      * @param params        as a json object
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#FROM_REQUEST_FIELD} : "content of chunks as an array",
-     *                          {@value HistorianFields#TO_REQUEST_FIELD} : "total chunk matching query",
-     *                          {@value HistorianFields#FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD} : ["field1", "field2"...],
-     *                          {@value HistorianFields#TAGS_TO_FILTER_ON_REQUEST_FIELD} : "total chunk matching query",
-     *                          {@value HistorianFields#METRIC_NAMES_AS_LIST_REQUEST_FIELD} : "content of chunks as an array",
+     *                          {@value HistorianFields#FROM} : "content of chunks as an array",
+     *                          {@value HistorianFields#TO} : "total chunk matching query",
+     *                          {@value HistorianFields#FIELDS} : ["field1", "field2"...],
+     *                          {@value HistorianFields#TAGS} : "total chunk matching query",
+     *                          {@value HistorianFields#NAMES} : "content of chunks as an array",
      *                      }
      *                      </pre>
      *                      explanation :
-     *                      if {@value HistorianFields#FROM_REQUEST_FIELD} not specified will search from 0
-     *                      if {@value HistorianFields#TO_REQUEST_FIELD} not specified will search to Max.Long
-     *                      use {@value HistorianFields#FIELDS_TO_FETCH_AS_LIST_REQUEST_FIELD} if you want to retrieve some of the precalculated aggs. If not specified retrieve all.
-     *                      use {@value HistorianFields#TAGS_TO_FILTER_ON_REQUEST_FIELD} to search for specific timeseries having one of those tags
-     *                      use {@value HistorianFields#METRIC_NAMES_AS_LIST_REQUEST_FIELD} to search a specific timeseries name
+     *                      if {@value HistorianFields#FROM} not specified will search from 0
+     *                      if {@value HistorianFields#TO} not specified will search to Max.Long
+     *                      use {@value HistorianFields#FIELDS} if you want to retrieve some of the precalculated aggs. If not specified retrieve all.
+     *                      use {@value HistorianFields#TAGS} to search for specific timeseries having one of those tags
+     *                      use {@value HistorianFields#NAMES} to search a specific timeseries name
      * @param resultHandler return chunks of timeseries as an array of
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#RESPONSE_CHUNKS} : "content of chunks as an array",
-     *                          {@value HistorianFields#RESPONSE_TOTAL_FOUND} : "total chunk matching query",
+     *                          {@value HistorianFields#CHUNKS} : "content of chunks as an array",
+     *                          {@value HistorianFields#TOTAL} : "total chunk matching query",
      *                      }
      *                      </pre>
      * @return himself
@@ -101,12 +101,18 @@ public interface HistorianService {
 
 
     /**
-     * @param params        as a json object, it is ignored at the moment TODO
+     * @param params        as a json object
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#METRIC} : "A string to help finding desired metric",
+     *                          {@value HistorianFields#LIMIT} : <maximum number of metric to return>(int)
+     *                      }
+     *                      </pre>
      * @param resultHandler return names of metrics as an array of
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#RESPONSE_METRICS} : "all metric name matching the query",
-     *                          {@value HistorianFields#RESPONSE_TOTAL_FOUND} : "total metric names matching query"
+     *                          {@value HistorianFields#METRICS} : "all metric name matching the query",
+     *                          {@value HistorianFields#TOTAL} : <Number of metric returned>(int)
      *                      }
      *                      </pre>
      * @return himself
@@ -118,19 +124,19 @@ public interface HistorianService {
      * @param params        as a json object
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#FROM_REQUEST_FIELD} : "start of the date range",
-     *                          {@value HistorianFields#TO_REQUEST_FIELD} : "end of the date range",
-     *                          {@value HistorianFields#TYPE_REQUEST_FIELD} : either "all" either "tags",
-     *                          {@value HistorianFields#TAGS_TO_FILTER_ON_REQUEST_FIELD} : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,
-     *                          {@value HistorianFields#MAX_ANNOTATION_REQUEST_FIELD} : the max number of annotation to return,
-     *                          {@value HistorianFields#MATCH_ANY_REQUEST_FIELD} : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags,
+     *                          {@value HistorianFields#FROM} : "start of the date range",
+     *                          {@value HistorianFields#TO} : "end of the date range",
+     *                          {@value HistorianFields#TYPE} : either "all" either "tags",
+     *                          {@value HistorianFields#TAGS} : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,
+     *                          {@value HistorianFields#LIMIT} : the max number of annotation to return,
+     *                          {@value HistorianFields#MATCH_ANY} : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags,
      *                      }
      *                      </pre>
      * @param resultHandler return annotations as an array of
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#RESPONSE_ANNOTATIONS} : "all annotation matching the query",
-     *                          {@value HistorianFields#RESPONSE_TOTAL_FOUND} : "total annotations matching query"
+     *                          {@value HistorianFields#ANNOTATIONS} : "all annotation matching the query",
+     *                          {@value HistorianFields#TOTAL} : "total annotations matching query"
      *                      }
      *                      </pre>
      * @return himself
