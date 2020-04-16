@@ -16,10 +16,10 @@
   "intervalMs": 30000,
   "targets": [
     {
-      "target": "openSpaceSensors.Temperature111"
+      "target": "openSpaceSensors.Temperature15"
     },
     {
-      "target": "openSpaceSensors.Temperature222"
+      "target": "openSpaceSensors.Temperature16"
     }
   ],
   "format": "json",
