@@ -38,7 +38,7 @@ public class HistorianFields {
     public static String TIMESERIES_RESPONSE_FIELD = "timeseries";
     public static String TARGET_RESPONSE_FIELD = "target";
     public static String DATAPOINTS_RESPONSE_FIELD = "datapoints";
-    public static String ERRORS_RESPONSE_FIELD = "errors";
+    public static String ERRORS_RESPONSE_FIELD = "error";
 
     public static String RESPONSE_CHUNKS = "chunks";
     public static String RESPONSE_METRICS = "metrics";
