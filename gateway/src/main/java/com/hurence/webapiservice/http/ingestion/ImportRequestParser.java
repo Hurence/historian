@@ -17,36 +17,70 @@ public class ImportRequestParser {
 
 
     public ResponseAndErrorHolder checkAndBuildValidHistorianImportRequest(JsonArray metricsParam) throws IllegalArgumentException {
-        // TODO should i keep this ?
-        /*if (null == metricsParam) {
-            throw new IllegalArgumentException("parameter array is NULL");
+        if (null == metricsParam) {
+            throw new NullPointerException("Null request body");
         }else if (metricsParam.isEmpty()) {
-            throw new IllegalArgumentException("parameter array is empty");
-        }*/
-
+            throw new IllegalArgumentException("Empty request body");
+        }
         ResponseAndErrorHolder responseAndErrorHolder = new ResponseAndErrorHolder();
         for (Object object : metricsParam) {
             JsonObject timeserie = (JsonObject) object;
-            if ((timeserie.getString(METRIC_NAME_REQUEST_FIELD) == null) || (timeserie.getJsonArray(POINTS_REQUEST_FIELD) == null)) {
-                responseAndErrorHolder.errorMessages.add("can't add this object " + timeserie.toString());
+            if (!(timeserie.containsKey(METRIC_NAME_REQUEST_FIELD))) {
+                throw new IllegalArgumentException("Missing a name for at least one metric");
+            } else if ((timeserie.getValue(METRIC_NAME_REQUEST_FIELD) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) {
+                int numPoints = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
+                responseAndErrorHolder.errorMessages.add("Ignored "+ numPoints +" points for metric with name 'null' because this is not a valid name");
                 continue;
-            }
+            } else if (!(timeserie.getValue(METRIC_NAME_REQUEST_FIELD) instanceof String)) {
+                throw new IllegalArgumentException("A name is not a string for at least one metric");
+            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD)) || (!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null))
+                throw new IllegalArgumentException("field 'points' is required");
+
             JsonObject newTimeserie = new JsonObject();
             newTimeserie.put(METRIC_NAME_REQUEST_FIELD, timeserie.getString(METRIC_NAME_REQUEST_FIELD));
             JsonArray newPoints = new JsonArray();
             for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
-                JsonArray pointArray = (JsonArray) point;
-                if ((pointArray.size() != 2) || (pointArray.getLong(0) == null) || (pointArray.getDouble(1) == null)) {
-                    responseAndErrorHolder.errorMessages.add("can't add this point " + pointArray.toString() + " of this object " + timeserie.toString());
+                JsonArray pointArray;
+                String communErrorMessage = "Ignored 1 points for metric with name '" + timeserie.getString(METRIC_NAME_REQUEST_FIELD);
+                try {
+                    pointArray = (JsonArray) point;
+                    pointArray.size();
+                } catch (Exception ex) {
+                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because it was not an array");
                     continue;
-                } else
-                    newPoints.add(pointArray);
+                }
+                if (pointArray.size() == 0){
+                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because this point was an empty array");
+                    continue;
+                } else if (pointArray.size() != 2)
+                    throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
+                try {
+                    if (pointArray.getLong(0) == null) {
+                        responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its timestamp is null");
+                        continue;
+                    }
+                } catch (Exception e) {
+                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its timestamp is not a long");
+                    continue;
+                }
+                try {
+                    if ((pointArray.getDouble(1) == null)) {
+                        responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its value was not a double");
+                        continue;
+                    }
+                } catch (Exception e) {
+                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its value was not a double");
+                    continue;
+                }
+                newPoints.add(pointArray);
             }
-            newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
-            responseAndErrorHolder.correctPoints.add(newTimeserie);
+            if(!newPoints.isEmpty()) {
+                newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
+                responseAndErrorHolder.correctPoints.add(newTimeserie);
+            }
         }
         if (responseAndErrorHolder.correctPoints.isEmpty())
-            throw new IllegalArgumentException("all points are invalid");
+            throw new IllegalArgumentException("There is no valid points");
         return responseAndErrorHolder;
 
     }

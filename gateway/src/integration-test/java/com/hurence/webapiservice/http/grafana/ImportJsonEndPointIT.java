@@ -15,22 +15,17 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class ImportJsonEndPointIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ImportJsonEndPointIT.class);
     private static WebClient webClient;
-    private static AssertResponseGivenRequestHelper assertHelper;
     private static AssertResponseGivenRequestHelper assertHelper1;
 
     @BeforeAll
@@ -38,7 +33,6 @@ public class ImportJsonEndPointIT {
         HttpWithHistorianSolrITHelper
                 .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
         assertHelper1 = new AssertResponseGivenRequestHelper(webClient, "/historian-server/ingestion/json");
     }
 
@@ -52,7 +46,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testCorrectJsonImport(Vertx vertx, VertxTestContext testContext) {
 
-        assertCorrectPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertCorrectPointsImportRequest(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testCorrectJsonImport/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testCorrectJsonImport/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testCorrectJsonImport/testQuery/request.json",
@@ -64,7 +58,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithMissingNameField(Vertx vertx, VertxTestContext testContext) {
 
-        assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithBadRequestResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithMissingNameField/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithMissingNameField/expectedResponse.json");
     }
@@ -74,7 +68,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNoStringNameField(Vertx vertx, VertxTestContext testContext) {
 
-        assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithBadRequestResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithNoStringNameField/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithNoStringNameField/expectedResponse.json");
     }
@@ -83,7 +77,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNullNameField(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullNameField/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullNameField/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullNameField/testQuery/request.json",
@@ -94,7 +88,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithMissingPointsField(Vertx vertx, VertxTestContext testContext) {
 
-        assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithBadRequestResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithMissingPointsField/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithMissingPointsField/expectedResponse.json");
     }
@@ -103,7 +97,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNonJsonArrayPointsField(Vertx vertx, VertxTestContext testContext) {
 
-        assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithBadRequestResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithNonJsonArrayPointsField/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithNonJsonArrayPointsField/expectedResponse.json");
     }
@@ -112,7 +106,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithZeroPointsSize(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithZeroPointsSize/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithZeroPointsSize/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithZeroPointsSize/testQuery/request.json",
@@ -123,7 +117,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNoTwoOrZeroPointsSize(Vertx vertx, VertxTestContext testContext) {
 
-        assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithBadRequestResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithNoTwoOrZeroPointsSize/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportWithNoTwoOrZeroPointsSize/expectedResponse.json");
     }
@@ -132,7 +126,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNullDate(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullDate/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullDate/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullDate/testQuery/request.json",
@@ -143,7 +137,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNoLongDate(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoLongDate/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoLongDate/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoLongDate/testQuery/request.json",
@@ -154,7 +148,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNoJsonArrayPoint(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoJsonArrayPoint/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoJsonArrayPoint/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoJsonArrayPoint/testQuery/request.json",
@@ -165,7 +159,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNullPoint(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullPoint/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullPoint/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullPoint/testQuery/request.json",
@@ -176,7 +170,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNullValue(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullValue/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullValue/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNullValue/testQuery/request.json",
@@ -187,7 +181,7 @@ public class ImportJsonEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testImportWithNoDoubleValue(Vertx vertx, VertxTestContext testContext) {
 
-        assertMissingPointsAddRequestGiveResponseFromFile(vertx, testContext,
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoDoubleValue/testImportJson/request.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoDoubleValue/testImportJson/expectedResponse.json",
                 "/http/grafana/query/extract-algo/testsImportJsonWithStatusOK/testImportWithNoDoubleValue/testQuery/request.json",
@@ -196,25 +190,26 @@ public class ImportJsonEndPointIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testAddAllErrorsWithCode400(Vertx vertx, VertxTestContext testContext) {
+    public void testImportAllNonBadRequestErrors(Vertx vertx, VertxTestContext testContext) {
 
-        assertWrongAddRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testAddAllErrorsWithCode400/request.json",
-                "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testAddAllErrorsWithCode400/expectedResponse.json");
+        assertWrongImportRequestWithBadRequestResponse(vertx, testContext,
+                "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportAllNonBadRequestErrors/request.json",
+                "/http/grafana/query/extract-algo/testsImportJsonWithResponseBadRequest/testImportAllNonBadRequestErrors/expectedResponse.json");
     }
 
-    public void assertWrongAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
-                                                     String requestFile, String responseFile) {
-        assertHelper1.assertWrongRequestGiveResponseFromFile(vertx, testContext,
+    public void assertWrongImportRequestWithBadRequestResponse(Vertx vertx, VertxTestContext testContext,
+                                                               String requestFile, String responseFile) {
+        assertHelper1.assertWrongImportRequestWithBadRequestResponseGiveResponseFromFile(vertx, testContext,
                 requestFile, responseFile);
     }
 
-    public void assertMissingPointsAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
-                                                                  String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
-        assertHelper1.assertMissingPointsRequestGiveArrayResponseFromFile(vertx, testContext, addRequestFile, addResponseFile,queryRequestFile, queryResponseFile);
+    public void assertWrongImportRequestWithOKResponse(Vertx vertx, VertxTestContext testContext,
+                                                       String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
+        assertHelper1.assertWrongImportRequestWithOKResponseGiveArrayResponseFromFile(vertx, testContext, addRequestFile, addResponseFile,queryRequestFile, queryResponseFile);
     }
-    public void assertCorrectPointsAddRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
-                                                                  String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
+
+    public void assertCorrectPointsImportRequest(Vertx vertx, VertxTestContext testContext,
+                                                 String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
         assertHelper1.assertCorrectPointsRequestGiveArrayResponseFromFile(vertx, testContext, addRequestFile, addResponseFile,queryRequestFile, queryResponseFile);
     }
 }

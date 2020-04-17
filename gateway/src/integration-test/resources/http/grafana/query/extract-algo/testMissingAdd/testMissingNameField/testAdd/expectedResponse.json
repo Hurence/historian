@@ -1,1 +1,1 @@
-{"status":"OK","message":"injected 4 points of 2 metrics in 2 chunks", "errors": "can't add this object {\"points\":[[1477895624866,2.0],[1477916224866,4.0]]}\ncan't add this object {\"points\":[[1477895624886,65.2],[1477916224516,14]]}\n"}
+{"errors" :  "Missing a name for at least one metric"}

@@ -1,7 +1,7 @@
 {
   "panelId": 1,
   "range": {
-    "from": "2016-10-31T06:33:44.866Z",
+    "from": "2016-10-30T06:33:44.866Z",
     "to": "2016-10-31T12:33:44.866Z",
     "raw": {
       "from": "now-6h",
@@ -16,10 +16,10 @@
   "intervalMs": 30000,
   "targets": [
     {
-      "target": "openSpaceSensors.Temperature111"
+      "target": "openSpaceSensors.Temperature9"
     },
     {
-      "target": "openSpaceSensors.Temperature222"
+      "target": "openSpaceSensors.Temperature10"
     }
   ],
   "format": "json",

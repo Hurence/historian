@@ -5,6 +5,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.subscribers.DisposableSubscriber;
 import io.vertx.core.file.OpenOptions;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.buffer.Buffer;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.ERRORS_RESPONSE_FIELD;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
-import static com.hurence.webapiservice.http.Codes.MULTI_STATUS;
+import static com.hurence.webapiservice.http.Codes.CREATED;
 
 
 public class IngestionApiImpl implements IngestionApi {
@@ -39,17 +40,15 @@ public class IngestionApiImpl implements IngestionApi {
         try {
             JsonArray getMetricsParam = context.getBodyAsJsonArray();
              responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(getMetricsParam);
-
         }catch (Exception ex) {
+            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage("Bad Request");
+            context.response().setStatusMessage("BAD REQUEST");
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(String.valueOf(errorObject));
             return;
         }
-
-        String finalErrorMessage = extractFinalErrorMessage(responseAndErrorHolder);
 
         service.rxAddTimeSeries(responseAndErrorHolder.correctPoints)
                 .doOnError(ex -> {
@@ -62,21 +61,36 @@ public class IngestionApiImpl implements IngestionApi {
                     if (responseAndErrorHolder.errorMessages.isEmpty()) {
                         context.response().setStatusCode(200);
                     } else {
-                        response.put(ERRORS_RESPONSE_FIELD, finalErrorMessage);
-                        context.response().setStatusCode(MULTI_STATUS);
+                        context.response().setStatusCode(CREATED);
                     }
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(response.encode());
+                    context.response().end(constructFinalResponse(response, responseAndErrorHolder).encode());
                     LOGGER.info("response : {}", response);
                 }).subscribe();
     }
 
-    private String extractFinalErrorMessage(ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
+    private JsonObject constructFinalResponse(JsonObject response, ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
+        StringBuilder message = new StringBuilder();
+        message.append("Injected ").append(response.getInteger("numPoints")).append(" points of ")
+                .append(response.getInteger("numChunks"))
+                .append(" metrics in ").append(response.getInteger("numChunks"))
+                .append(" chunks");
+        JsonObject finalResponse = new JsonObject();
+        if (!responseAndErrorHolder.errorMessages.isEmpty()) {
+            message.append(extractFinalErrorMessage(responseAndErrorHolder).toString());
+            finalResponse.put("status", "Done but got some errors").put("message", message.toString());
+        }else
+            finalResponse.put("status", "OK").put("message", message.toString());
+        return finalResponse;
+    }
+    private StringBuilder extractFinalErrorMessage(ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
         StringBuilder errorMessage = new StringBuilder();
-        for (String SingleErrorMessage : responseAndErrorHolder.errorMessages) {
-            errorMessage.append(SingleErrorMessage).append("\n");
-        }
-        return errorMessage.toString();
+        errorMessage.append(". ").append(responseAndErrorHolder.errorMessages.get(0));
+        if (responseAndErrorHolder.errorMessages.size() > 1)
+            for (int i = 1; i < responseAndErrorHolder.errorMessages.size()-1; i++) {
+                errorMessage.append("\n").append(responseAndErrorHolder.errorMessages.get(i));
+            }
+        return errorMessage;
     }
 
     @Override

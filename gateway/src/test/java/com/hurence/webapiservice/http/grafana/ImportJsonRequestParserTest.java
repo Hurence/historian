@@ -21,8 +21,9 @@ import static org.junit.jupiter.api.Assertions.*;
 public class ImportJsonRequestParserTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(QueryRequestParserTest.class);
+
     @Test
-    public void testParsingCorrectRequest() throws Exception {
+    public void testParsingCorrectRequest() {
         JsonArray requestBody = new JsonArray("[\n" +
                 "  {\n" +
                 "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
@@ -34,7 +35,7 @@ public class ImportJsonRequestParserTest {
                 "  {\n" +
                 "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
                 "    \"points\": [\n" +
-                "      [1477917224866, 8.0],\n" +
+                "      [1477917224866, 8],\n" +
                 "      [1477895624866, 43.0]\n" +
                 "    ]\n" +
                 "  }\n" +
@@ -51,16 +52,18 @@ public class ImportJsonRequestParserTest {
     @Test
     public void testNullRequestParsing() {
         JsonArray requestBody = null;
-        Assertions.assertThrows(NullPointerException.class, () -> {
+        String message = Assertions.assertThrows(NullPointerException.class, () -> {
             ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        });
+        }).getMessage();
+        assertEquals(message, "Null request body");
     }
     @Test
     public void testEmptyRequestParsing() {
         JsonArray requestBody = new JsonArray();
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+        String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        });
+        }).getMessage();
+        assertEquals(message, "Empty request body");
     }
     @Test
     public void testRequestWithMissingNameField() {
@@ -92,36 +95,10 @@ public class ImportJsonRequestParserTest {
                 "    ]\n" +
                 "  }\n" +
                 "]");
-        JsonArray expectedArray = new JsonArray("[\n" +
-                "  {\n" +
-                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
-                "    \"points\": [\n" +
-                "      [1477917224866, 8.0],\n" +
-                "      [1477895624866, 43.0]\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"name\": \"openSpaceSensors.Temperature333\",\n" +
-                "    \"points\": [\n" +
-                "      [1477895624865, 88],\n" +
-                "      [1477916224066, 447.0]\n" +
-                "    ]\n" +
-                "  }\n" +
-                "]");
-        ArrayList<String> errors = new ArrayList<>();
-        errors.add("can't add this object {\"points\":[[1477895624866,2.0],[1477916224866,4.0]]}\ncan't add this object {\"points\":[[1477895624886,65.2],[1477916224516,14]]}");
-        ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        JsonArray correctPoints = responseAndErrorHolder.correctPoints;
-        StringBuilder errorMessageBuilder = new StringBuilder();
-        for (String SingleErrorMessage : responseAndErrorHolder.errorMessages) {
-            errorMessageBuilder.append(SingleErrorMessage).append("\n");
-        }
-        StringBuilder errorMessageBuilderExpected = new StringBuilder();
-        for (String SingleErrorMessage : errors) {
-            errorMessageBuilderExpected.append(SingleErrorMessage).append("\n");
-        }
-        assertEquals(errorMessageBuilderExpected.toString(), errorMessageBuilder.toString());
-        assertEquals(correctPoints, expectedArray);
+        String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        }).getMessage();
+        assertEquals(message, "Missing a name for at least one metric");
     }
 
     @Test
@@ -156,9 +133,67 @@ public class ImportJsonRequestParserTest {
                 "    ]\n" +
                 "  }\n" +
                 "]");
-        Assertions.assertThrows(ClassCastException.class, () -> {
+        String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        });
+        }).getMessage();
+        assertEquals(message, "A name is not a string for at least one metric");
+    }
+
+    @Test
+    public void testRequestWithNullNameField() {
+        JsonArray requestBody = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": null,\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477917224866, 8.0],\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": null,\n" +
+                "    \"points\": [\n" +
+                "      [1477895624865, 88],\n" +
+                "      [1477916224066, 447.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature444\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624886, 65.2],\n" +
+                "      [1477916224516, 14]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        JsonArray expectedArray = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477917224866, 8.0],\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature444\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624886, 65.2],\n" +
+                "      [1477916224516, 14]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        ArrayList<String> errors = new ArrayList<>();
+        errors.add("Ignored 2 points for metric with name 'null' because this is not a valid name");
+        errors.add("Ignored 2 points for metric with name 'null' because this is not a valid name");
+        ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+
     }
     @Test
     public void testRequestWithMissingPointsField() throws Exception {
@@ -184,36 +219,13 @@ public class ImportJsonRequestParserTest {
                 "    \"name\": \"openSpaceSensors.Temperature444\"\n" +
                 "  }\n" +
                 "]");
-        JsonArray expectedArray = new JsonArray("[\n" +
-                "  {\n" +
-                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
-                "    \"points\": [\n" +
-                "      [1477917224866, 8.0],\n" +
-                "      [1477895624866, 43.0]\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"name\": \"openSpaceSensors.Temperature333\",\n" +
-                "    \"points\": [\n" +
-                "      [1477895624865, 88],\n" +
-                "      [1477916224066, 447.0]\n" +
-                "    ]\n" +
-                "  }\n" +
-                "]");
-        ArrayList<String> errors = new ArrayList<>();
-        errors.add("can't add this object {\"name\":\"openSpaceSensors.Temperature111\"}\ncan't add this object {\"name\":\"openSpaceSensors.Temperature444\"}");
-        ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        JsonArray correctPoints = responseAndErrorHolder.correctPoints;
-        StringBuilder errorMessageBuilder = new StringBuilder();
-        for (String SingleErrorMessage : responseAndErrorHolder.errorMessages) {
-            errorMessageBuilder.append(SingleErrorMessage).append("\n");
-        }
-        StringBuilder errorMessageBuilderExpected = new StringBuilder();
-        for (String SingleErrorMessage : errors) {
-            errorMessageBuilderExpected.append(SingleErrorMessage).append("\n");
-        }
-        assertEquals(errorMessageBuilderExpected.toString(), errorMessageBuilder.toString());
-        assertEquals(correctPoints, expectedArray);
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        });
+        String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        }).getMessage();
+        assertEquals(message, "field 'points' is required");
     }
     @Test
     public void testRequestWithWorngPointsFieldType() {
@@ -233,38 +245,26 @@ public class ImportJsonRequestParserTest {
                 "    ]\n" +
                 "  }\n" +
                 "]");
-        Assertions.assertThrows(ClassCastException.class, () -> {
+        String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        });
+        }).getMessage();
+        assertEquals(message, "field 'points' is required");
     }
     @Test
-    public void testRequestWithInvalidPointsSizeAndMissingNameField() throws Exception {
+    public void testRequestWithZeroPointSize() throws Exception {
         JsonArray requestBody = new JsonArray("[\n" +
                 "  {\n" +
                 "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
                 "    \"points\": [\n" +
-                "      [1477895624866],\n" +
+                "      [],\n" +
                 "      [1477916224866, 4.0]\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
-                "    \"points\": [\n" +
-                "      [1477917224866, 8.0],\n" +
-                "      [43.0]\n" +
                 "    ]\n" +
                 "  },\n" +
                 "  {\n" +
                 "    \"name\": \"openSpaceSensors.Temperature333\",\n" +
                 "    \"points\": [\n" +
-                "      [1477895624865],\n" +
+                "      [],\n" +
                 "      [1477916224066, 447.0]\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
-                "    \"points\": [\n" +
-                "      [1477895624886, 65.2],\n" +
-                "      [1477916224516]\n" +
                 "    ]\n" +
                 "  }\n" +
                 "]");
@@ -276,12 +276,6 @@ public class ImportJsonRequestParserTest {
                 "    ]\n" +
                 "  },\n" +
                 "  {\n" +
-                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
-                "    \"points\": [\n" +
-                "      [1477917224866, 8.0]\n" +
-                "    ]\n" +
-                "  },\n" +
-                "  {\n" +
                 "    \"name\": \"openSpaceSensors.Temperature333\",\n" +
                 "    \"points\": [\n" +
                 "      [1477916224066, 447.0]\n" +
@@ -289,20 +283,41 @@ public class ImportJsonRequestParserTest {
                 "  }\n" +
                 "]");
         ArrayList<String> errors = new ArrayList<>();
-        errors.add("can't add this point [1477895624866] of this object {\"name\":\"openSpaceSensors.Temperature111\",\"points\":[[1477895624866],[1477916224866,4.0]]}\ncan't add this point [43.0] of this object {\"name\":\"openSpaceSensors.Temperature222\",\"points\":[[1477917224866,8.0],[43.0]]}\n"+
-                "can't add this point [1477895624865] of this object {\"name\":\"openSpaceSensors.Temperature333\",\"points\":[[1477895624865],[1477916224066,447.0]]}\ncan't add this object {\"points\":[[1477895624886,65.2],[1477916224516]]}");
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature111' because this point was an empty array");
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature333' because this point was an empty array");
         ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        JsonArray correctPoints = responseAndErrorHolder.correctPoints;
-        StringBuilder errorMessageBuilder = new StringBuilder();
-        for (String SingleErrorMessage : responseAndErrorHolder.errorMessages) {
-            errorMessageBuilder.append(SingleErrorMessage).append("\n");
-        }
-        StringBuilder errorMessageBuilderExpected = new StringBuilder();
-        for (String SingleErrorMessage : errors) {
-            errorMessageBuilderExpected.append(SingleErrorMessage).append("\n");
-        }
-        assertEquals(errorMessageBuilderExpected.toString(), errorMessageBuilder.toString());
-        assertEquals(correctPoints, expectedArray);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
+    }
+    @Test
+    public void testRequestWithInvalidPointSize() throws Exception {
+        JsonArray requestBody = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866],\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature333\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624865, 88],\n" +
+                "      [1477916224066, 447.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        }).getMessage();
+        assertEquals(message, "Points should be of the form [timestamp, value]");
     }
     @Test
     public void testRequestWithNullDate() throws Exception {
@@ -338,13 +353,10 @@ public class ImportJsonRequestParserTest {
                 "  }\n" +
                 "]");
         ArrayList<String> errors = new ArrayList<>();
-        errors.add("can't add this point [null,2.0] of this object {\"name\":\"openSpaceSensors.Temperature111\",\"points\":[[null,2.0],[1477916224866,4.0]]}");
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature111' because its timestamp is null");
         ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        ArrayList<String> errorMessage = responseAndErrorHolder.errorMessages;
-        JsonArray correctPoints = responseAndErrorHolder.correctPoints;
-
-        assertEquals(errors, errorMessage);
-        assertEquals(correctPoints, expectedArray);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
     }
     @Test
     public void testRequestWithInvalidDateType() {
@@ -364,9 +376,104 @@ public class ImportJsonRequestParserTest {
                 "    ]\n" +
                 "  }\n" +
                 "]");
-        Assertions.assertThrows(ClassCastException.class, () -> {
-            ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        });
+        JsonArray expectedArray = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624865, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        ArrayList<String> errors = new ArrayList<>();
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature222' because its timestamp is not a long");
+        ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
+    }
+    @Test
+    public void testRequestWithNonJsonArrayPoint() {
+        JsonArray requestBody = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624865, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      5,\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        JsonArray expectedArray = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624865, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        ArrayList<String> errors = new ArrayList<>();
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature222' because it was not an array");
+        ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
+    }
+    @Test
+    public void testRequestWithNullPoint() {
+        JsonArray requestBody = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624865, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      null,\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        JsonArray expectedArray = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624865, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        ArrayList<String> errors = new ArrayList<>();
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature222' because it was not an array");
+        ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
     }
     @Test
     public void testRequestWithIntegerValue() throws Exception {
@@ -392,6 +499,45 @@ public class ImportJsonRequestParserTest {
 
         assertEquals(new ArrayList<String>(), errorMessage);
         assertEquals(correctPoints, requestBody);
+    }
+    @Test
+    public void testRequestWithNonDoubleValue() throws Exception {
+        JsonArray requestBody = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477917224866, \"string\"],\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        JsonArray expectedArray = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 2.0],\n" +
+                "      [1477916224866, 4.0]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      [1477895624866, 43.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        ArrayList<String> errors = new ArrayList<>();
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature222' because its value was not a double");
+        ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
     }
     @Test
     public void testRequestWithNullValue() throws Exception {
@@ -427,14 +573,39 @@ public class ImportJsonRequestParserTest {
                 "  }\n" +
                 "]");
         ArrayList<String> errors = new ArrayList<>();
-        errors.add("can't add this point [1477917224866,null] of this object {\"name\":\"openSpaceSensors.Temperature222\",\"points\":[[1477917224866,null],[1477895624866,43.0]]}");
+        errors.add("Ignored 1 points for metric with name 'openSpaceSensors.Temperature222' because its value was not a double");
         ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
-        ArrayList<String> errorMessage = responseAndErrorHolder.errorMessages;
-        JsonArray correctPoints = responseAndErrorHolder.correctPoints;
-
-        assertEquals(errors, errorMessage);
-        assertEquals(correctPoints, expectedArray);
+        assertEquals(errors, responseAndErrorHolder.errorMessages);
+        assertEquals(responseAndErrorHolder.correctPoints, expectedArray);
     }
 
+    @Test
+    public void testRequestWithAllNonBadRequestErrors() throws Exception {
+        JsonArray requestBody = new JsonArray("[\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature111\",\n" +
+                "    \"points\": [\n" +
+                "      [],\n" +
+                "      [1477916224866, null]\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature222\",\n" +
+                "    \"points\": [\n" +
+                "      []\n" +
+                "    ]\n" +
+                "  },\n" +
+                "  {\n" +
+                "    \"name\": \"openSpaceSensors.Temperature333\",\n" +
+                "    \"points\": [\n" +
+                "      [\"string\", 447.0]\n" +
+                "    ]\n" +
+                "  }\n" +
+                "]");
+        String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
+            ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
+        }).getMessage();
+        assertEquals(message, "There is no valid points");
+    }
 
 }

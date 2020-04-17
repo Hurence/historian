@@ -67,7 +67,7 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject response = new JsonObject().put("status", "OK").put("message", "injected 2 points of 1 metrics in 1 chunks");
+                        JsonObject response = new JsonObject().put("numPoints", 2).put("numChunks", 1);
                         assertEquals(rsp, response);
                     });
                 })
@@ -117,7 +117,7 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject response = new JsonObject().put("status", "OK").put("message", "injected 8 points of 4 metrics in 4 chunks");
+                        JsonObject response = new JsonObject().put("numPoints", 8).put("numChunks", 4);
                         assertEquals(rsp, response);
                     });
                 })
@@ -177,7 +177,7 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject response = new JsonObject().put("status", "OK").put("message", "injected 4 points of 2 metrics in 2 chunks");
+                        JsonObject response = new JsonObject().put("numPoints", 4).put("numChunks", 2);
                         assertEquals(rsp, response);
                     });
                 })
@@ -194,47 +194,44 @@ public class HistorianImportJsonVerticleIT {
                                     assertEquals(2, docs.size());
                                     JsonObject doc1 = docs.getJsonObject(0);
                                     assertTrue(doc1.containsKey(RESPONSE_METRIC_NAME_FIELD));
-                                    assertEquals("openSpaceSensors.Temperature555",doc1.getString(RESPONSE_METRIC_NAME_FIELD));
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_START_FIELD));
-                                    assertEquals(time1, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
-                                    assertEquals(time2, doc1.getLong(RESPONSE_CHUNK_END_FIELD));
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
-                                    /*assertEquals("092ec781-4901-4fe6-8a0c-ee278b8604aa",doc1.getString(RESPONSE_CHUNK_ID_FIELD));*/
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
-                                    assertEquals(2,doc1.getLong(RESPONSE_CHUNK_SIZE_FIELD));
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
-                                    assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-                                    assertEquals(20600000,doc1.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
-                                    assertEquals(38,doc1.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
-                                    assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
-                                    /*assertEquals(1663577207679746048L,doc1.getLong(RESPONSE_CHUNK_VERSION_FIELD));*/
-                                    JsonObject doc2 = docs.getJsonObject(1);
-                                    assertTrue(doc2.containsKey(RESPONSE_METRIC_NAME_FIELD));
-                                    assertEquals("openSpaceSensors.Temperature666",doc2.getString(RESPONSE_METRIC_NAME_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_START_FIELD));
-                                    assertEquals(time1, doc2.getLong(RESPONSE_CHUNK_START_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_END_FIELD));
-                                    assertEquals(time2, doc2.getLong(RESPONSE_CHUNK_END_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_ID_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
-                                    assertEquals(2,doc2.getLong(RESPONSE_CHUNK_SIZE_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
-                                    assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQ4HLj4BA6sfMmpOWsmCCg6CDAAAFASLIkdAAAA", doc2.getString(RESPONSE_CHUNK_VALUE_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-                                    assertEquals(20600000,doc2.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
-                                    assertEquals(45,doc2.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
-                                    assertTrue(doc2.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
+                                    if (doc1.getString(RESPONSE_METRIC_NAME_FIELD).equals("openSpaceSensors.Temperature555")){
+                                        checkTimeseriesChunks(doc1,docs.getJsonObject(1));
+                                    } else {
+                                        checkTimeseriesChunks(docs.getJsonObject(1), doc1);
+                                    }
                                     testContext.completeNow();
                                 });
                             })
                             .subscribe();
                 })
                 .subscribe();
-
+    }
+    private void checkTimeseriesChunks (JsonObject doc1, JsonObject doc2) {
+        long time1 = 1477895624866L;
+        long time2 = 1477916224866L;
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_START_FIELD));
+        assertEquals(time1, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
+        assertEquals(time2, doc1.getLong(RESPONSE_CHUNK_END_FIELD));
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
+        /*assertEquals("092ec781-4901-4fe6-8a0c-ee278b8604aa",doc1.getString(RESPONSE_CHUNK_ID_FIELD));*/
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
+        assertEquals(2,doc1.getLong(RESPONSE_CHUNK_SIZE_FIELD));
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
+        assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
+        assertEquals(20600000,doc1.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
+        assertEquals(38,doc1.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
+        /*assertEquals(1663577207679746048L,doc1.getLong(RESPONSE_CHUNK_VERSION_FIELD));*/
+        assertEquals("openSpaceSensors.Temperature666",doc2.getString(RESPONSE_METRIC_NAME_FIELD));
+        assertEquals(time1, doc2.getLong(RESPONSE_CHUNK_START_FIELD));
+        assertEquals(time2, doc2.getLong(RESPONSE_CHUNK_END_FIELD));
+        assertEquals(2,doc2.getLong(RESPONSE_CHUNK_SIZE_FIELD));
+        assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQ4HLj4BA6sfMmpOWsmCCg6CDAAAFASLIkdAAAA", doc2.getString(RESPONSE_CHUNK_VALUE_FIELD));
+        assertEquals(20600000,doc2.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
+        assertEquals(45,doc2.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
     }
 
 }
