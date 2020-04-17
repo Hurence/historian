@@ -1,1 +1,0 @@
-{"status":"OK","message":"injected 3 points of 2 metrics in 2 chunks", "errors": ["can't add this point [null,2.0] of this object {\"name\":\"openSpaceSensors.Temperature11\",\"points\":[[null,2.0],[1477916224866,4.0]]}"]}
