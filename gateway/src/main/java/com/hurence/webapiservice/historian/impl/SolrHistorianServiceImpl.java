@@ -366,12 +366,13 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     numChunk++;
                     numPoints = numPoints + totalNumPointsInChunk;
                 }
-                LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
-                solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
-                solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
-                LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
-                String message = "injected " + numPoints + " points of " + numChunk + " metrics in " + numChunk + " chunks";
-                response.put("status", "OK").put("message", message);
+                if(!documents.isEmpty()) {
+                    LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
+                    solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
+                    solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
+                    LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
+                }
+                response.put("numPoints", numPoints).put("numChunks", numChunk);
                 p.complete(response
                 );
             } catch (SolrServerException | IOException e) {

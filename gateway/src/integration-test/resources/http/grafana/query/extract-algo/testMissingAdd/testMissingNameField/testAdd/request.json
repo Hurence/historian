@@ -6,14 +6,14 @@
     ]
   },
   {
-    "name": "openSpaceSensors.Temperature222",
+    "name": "openSpaceSensors.Temperature3",
     "points": [
       [1477917224866, 8.0],
       [1477895624866, 43.0]
     ]
   },
   {
-    "name": "openSpaceSensors.Temperature333",
+    "name": "openSpaceSensors.Temperature4",
     "points": [
       [1477895624865, 88],
       [1477916224066, 447.0]
