@@ -4,6 +4,7 @@ import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
+import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -20,10 +21,12 @@ import org.apache.solr.client.solrj.io.stream.SolrStream;
 import org.apache.solr.client.solrj.io.stream.StreamContext;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
-import org.apache.solr.client.solrj.response.*;
+import org.apache.solr.client.solrj.response.FacetField;
+import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
+import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
@@ -35,13 +38,13 @@ import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
-
 public class SolrHistorianServiceImpl implements HistorianService {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SolrHistorianServiceImpl.class);
 
     private final Vertx vertx;
     private final SolrHistorianConf solrHistorianConf;
+    private JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk();
 
     public SolrHistorianServiceImpl(Vertx vertx, SolrHistorianConf solrHistorianConf,
                                     Handler<AsyncResult<HistorianService>> readyHandler) {
@@ -192,13 +195,13 @@ public class SolrHistorianServiceImpl implements HistorianService {
         //    FILTER
         buildSolrFilterFromArray(params.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
                 .ifPresent(query::addFilterQuery);
-        buildSolrFilterFromArray(params.getJsonArray(NAMES), RESPONSE_METRIC_NAME_FIELD)
+        buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
                 .ifPresent(query::addFilterQuery);
         //    FIELDS_TO_FETCH
         query.setFields(RESPONSE_CHUNK_START_FIELD,
                 RESPONSE_CHUNK_END_FIELD,
                 RESPONSE_CHUNK_SIZE_FIELD,
-                RESPONSE_METRIC_NAME_FIELD);
+                NAME);
         //    SORT
         query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
         query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
@@ -277,9 +280,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
     @Override
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
         String name = params.getString(HistorianFields.METRIC);
-        String queryString = RESPONSE_METRIC_NAME_FIELD+":*";
+        String queryString = NAME +":*";
         if (name!=null && !name.isEmpty()) {
-            queryString = RESPONSE_METRIC_NAME_FIELD + ":*" + name + "*";
+            queryString = NAME + ":*" + name + "*";
         }
         SolrQuery query = new SolrQuery(queryString);
         query.setFilterQueries(queryString);
@@ -290,12 +293,12 @@ public class SolrHistorianServiceImpl implements HistorianService {
 //        query.setFacetPrefix("per");
         query.setFacetLimit(max);
         query.setFacetMinCount(1);//number of doc matching the query is at least 1
-        query.addFacetField(RESPONSE_METRIC_NAME_FIELD);
+        query.addFacetField(NAME);
         //  EXECUTE REQUEST
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
-                FacetField facetField = response.getFacetField(RESPONSE_METRIC_NAME_FIELD);
+                FacetField facetField = response.getFacetField(NAME);
                 List<FacetField.Count> facetFieldsCount = facetField.getValues();
                 if (facetFieldsCount.size() == 0) {
                     p.complete(new JsonObject()
@@ -350,6 +353,52 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
+    @Override
+    public HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler) {
+
+        Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
+            try {
+                JsonObject response = new JsonObject();
+                Collection<SolrInputDocument> documents = new ArrayList<>();
+                int numChunk = 0;
+                int numPoints = 0;
+                for (Object timeserieObject : timeseries) {
+                    JsonObject timeserie = (JsonObject) timeserieObject;
+                    SolrInputDocument document;
+                    LOGGER.info("building SolrDocument from a chunk");
+                    document = chunkTimeSerie(timeserie);
+                    documents.add(document);
+                    int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
+                    numChunk++;
+                    numPoints = numPoints + totalNumPointsInChunk;
+                }
+                if(!documents.isEmpty()) {
+                    LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
+                    solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
+                    solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
+                    LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
+                }
+                response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
+                p.complete(response
+                );
+            } catch (SolrServerException | IOException e) {
+                e.printStackTrace();
+            } catch (Exception e) {
+                LOGGER.error("unexpected exception");
+                p.fail(e);
+            }
+        };
+        vertx.executeBlocking(getMetricsNameHandler, resultHandler);
+
+        return this;
+    }
+
+    private SolrInputDocument chunkTimeSerie(JsonObject timeserie) {
+        SolrInputDocument doc = jsonObjectToChunk.chunkIntoSolrDocument(timeserie);
+        return doc;
+    }
+
+
     /**
      * nombre point < LIMIT_TO_DEFINE ==> Extract points from chunk
      * nombre point >= LIMIT_TO_DEFINE && nombre de chunk < LIMIT_TO_DEFINE ==> Sample points with chunk aggs depending on alg (min, avg)
@@ -372,6 +421,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(myParams, query, metricsInfo);
                 requestSolrAndBuildTimeSeries(query, p, timeSeriesExtracter);
             } catch (IOException e) {
+                LOGGER.error("unexpected io exception", e);
+                p.fail(e);
+            } catch (Exception e) {
                 LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
@@ -586,8 +638,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
             }
         }
         exprBuilder.append(",fl=\"").append(RESPONSE_CHUNK_SIZE_FIELD).append(", ")
-                .append(RESPONSE_METRIC_NAME_FIELD).append("\"")
-                .append(",qt=\"/export\", sort=\"").append(RESPONSE_METRIC_NAME_FIELD).append(" asc\")")
+                .append(NAME).append("\"")
+                .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\")")
                 .append(",over=\"name\", sum(chunk_size), count(*))");
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();

@@ -41,7 +41,7 @@ public class GrafanaTimeSeriesModeler implements TimeSeriesModeler {
     public JsonObject extractTimeSerieFromChunks(long from, long to, List<AGG> aggs, SamplingConf samplingConf, List<JsonObject> chunks) {
 
         if (chunks==null || chunks.isEmpty()) throw new IllegalArgumentException("chunks is null or empty !");
-        String name = chunks.stream().findFirst().get().getString(RESPONSE_METRIC_NAME_FIELD);
+        String name = chunks.stream().findFirst().get().getString(NAME);
         List<JsonArray> points = getPoints(from, to, samplingConf, chunks);
         return new JsonObject()
                 .put(TIMESERIE_NUM_POINTS, points.size())

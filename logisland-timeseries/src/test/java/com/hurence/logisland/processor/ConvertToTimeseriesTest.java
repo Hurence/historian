@@ -17,7 +17,8 @@ package com.hurence.logisland.processor;
 
 
 import com.hurence.logisland.record.*;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.util.runner.MockRecord;
 import com.hurence.logisland.util.runner.TestRunner;
 import com.hurence.logisland.util.runner.TestRunners;
@@ -124,16 +125,10 @@ public class ConvertToTimeseriesTest {
 
         out.assertRecordSizeEquals(7);
 
-
         byte[] binaryTimeseries = out.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes();
 
-
-        BinaryCompactionConverter.Builder builder = new BinaryCompactionConverter.Builder();
-        BinaryCompactionConverter converter = builder.build();
-
-
         try {
-            List<Point> points = converter.unCompressPoints(binaryTimeseries, 1000000, 1001999);
+            List<Point> points = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
 
             assertEquals(points.size(), recordsCount);
         } catch (IOException e) {

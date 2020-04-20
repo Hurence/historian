@@ -18,7 +18,6 @@ import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import jdk.internal.dynalink.support.NameCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -227,7 +226,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 .add(RESPONSE_CHUNK_START_FIELD)
                 .add(RESPONSE_CHUNK_END_FIELD)
                 .add(RESPONSE_CHUNK_SIZE_FIELD)
-                .add(RESPONSE_METRIC_NAME_FIELD);
+                .add(NAME);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
                 .put(FROM, request.getFrom())

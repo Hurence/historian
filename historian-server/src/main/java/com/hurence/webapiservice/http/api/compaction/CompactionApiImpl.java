@@ -114,7 +114,7 @@ public class CompactionApiImpl implements CompactionApi {
                     List<JsonObject> chunks = HistorianResponseHelper.extractChunks(chunkResponse);
 
                     Map<String, List<JsonObject>> chunksByName = chunks.stream().collect(
-                            Collectors.groupingBy(chunk ->  chunk.getString(RESPONSE_METRIC_NAME_FIELD))
+                            Collectors.groupingBy(chunk ->  chunk.getString(NAME))
                     );
                     return TimeSeriesModeler.buildTimeSeries(request, chunksByName, timeserieModeler);
                 })
@@ -160,7 +160,7 @@ public class CompactionApiImpl implements CompactionApi {
                 .add(RESPONSE_CHUNK_START_FIELD)
                 .add(RESPONSE_CHUNK_END_FIELD)
                 .add(RESPONSE_CHUNK_SIZE_FIELD)
-                .add(RESPONSE_METRIC_NAME_FIELD);
+                .add(NAME);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
                 .put(FROM, request.getFrom())

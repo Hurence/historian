@@ -48,4 +48,5 @@ public class DateRequestParserUtil {
                 String.format("'%s' json pointer value '%s' is not a string !",
                         pointer, fromObj));
     }
+
 }

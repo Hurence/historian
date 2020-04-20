@@ -138,7 +138,7 @@ public class HistorianVerticleIT {
                         JsonArray docs = rsp.getJsonArray(CHUNKS);
                         assertEquals(4, docs.size());
                         JsonObject doc1 = docs.getJsonObject(0);
-                        assertTrue(doc1.containsKey(RESPONSE_METRIC_NAME_FIELD));
+                        assertTrue(doc1.containsKey(NAME));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_START_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_AVG_FIELD));

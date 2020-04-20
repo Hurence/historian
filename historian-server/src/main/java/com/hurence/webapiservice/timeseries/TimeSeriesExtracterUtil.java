@@ -1,7 +1,8 @@
 package com.hurence.webapiservice.timeseries;
 
 import com.hurence.logisland.record.Point;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.timeseries.sampling.Sampler;
 import com.hurence.logisland.timeseries.sampling.SamplerFactory;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
@@ -27,8 +28,6 @@ public class TimeSeriesExtracterUtil {
 
 
     private TimeSeriesExtracterUtil() {}
-
-    private static BinaryCompactionConverter compacter = new BinaryCompactionConverter.Builder().build();
     /**
      *
      * @param from
@@ -47,7 +46,7 @@ public class TimeSeriesExtracterUtil {
                     long chunkStart = chunk.getLong(RESPONSE_CHUNK_START_FIELD);
                     long chunkEnd = chunk.getLong(RESPONSE_CHUNK_END_FIELD);
                     try {
-                        return compacter.unCompressPoints(binaryChunk, chunkStart, chunkEnd, from, to).stream();
+                        return BinaryCompactionUtil.unCompressPoints(binaryChunk, chunkStart, chunkEnd, from, to).stream();
                     } catch (IOException ex) {
                         throw new IllegalArgumentException("error during uncompression of a chunk !", ex);
                     }

@@ -1,13 +1,11 @@
 package com.hurence.historian;
 
-import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
-import com.hurence.logisland.processor.ProcessContext;
 import com.hurence.logisland.record.*;
 import com.hurence.logisland.serializer.KryoSerializer;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;
@@ -22,8 +20,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class TimeseriesConverter implements HistorianProcessor {
@@ -35,7 +35,6 @@ public class TimeseriesConverter implements HistorianProcessor {
             .addValidator(StandardValidators.COMMA_SEPARATED_LIST_VALIDATOR)
             .defaultValue("name")
             .build();
-
 
     public static final PropertyDescriptor METRIC = new PropertyDescriptor.Builder()
             .name("metric")
@@ -59,7 +58,7 @@ public class TimeseriesConverter implements HistorianProcessor {
     private List<ChronixEncoding> encodings = Collections.emptyList();
     private FunctionValueMap functionValueMap = new FunctionValueMap(0, 0, 0, 0);
 
-    private BinaryCompactionConverter converter;
+    private BinaryCompactionConverterOfRecord binaryCompactor;
     private List<String> groupBy;
     private final KryoSerializer serializer = new KryoSerializer(true);
 
@@ -71,8 +70,8 @@ public class TimeseriesConverter implements HistorianProcessor {
         groupBy = Arrays.stream(groupByArray)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toList());
-        BinaryCompactionConverter.Builder builder = new BinaryCompactionConverter.Builder();
-        converter = builder.build();
+        BinaryCompactionConverterOfRecord.Builder builder = new BinaryCompactionConverterOfRecord.Builder();
+        binaryCompactor = builder.build();
 
         // init metric functions
         if (context.getPropertyValue(METRIC).isSet()) {
@@ -134,10 +133,10 @@ public class TimeseriesConverter implements HistorianProcessor {
         }
     }
 
+    public TimeSeriesRecord computeValue( TimeSeriesRecord tsRecord) {
 
-    public TimeSeriesRecord computeValue(TimeSeriesRecord tsRecord) {
-        try {
-            byte[] bytes = converter.serializeTimeseries(tsRecord.getTimeSeries());
+        try{
+            byte[] bytes = binaryCompactor.serializeTimeseries(tsRecord.getTimeSeries());
             String chunkValueBase64 = BinaryEncodingUtils.encode(bytes);
             tsRecord.setStringField(TimeSeriesRecord.CHUNK_VALUE, chunkValueBase64);
             tsRecord.setIntField(TimeSeriesRecord.CHUNK_SIZE_BYTES, bytes.length);
@@ -193,7 +192,7 @@ public class TimeseriesConverter implements HistorianProcessor {
      * @return
      */
     public TimeSeriesRecord fromRecords(List<Record> groupedRecords) {
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+        TimeSeriesRecord tsRecord = binaryCompactor.chunk(groupedRecords);
         return computeMetrics(tsRecord);
     }
 
@@ -204,7 +203,7 @@ public class TimeseriesConverter implements HistorianProcessor {
      * @param rows
      * @return
      */
-    public TimeSeriesRecord fromRecords(String metricName, List<Row> rows) {
+    public TimeSeriesRecord fromRows(String metricName, List<Row> rows) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
@@ -287,7 +286,6 @@ public class TimeseriesConverter implements HistorianProcessor {
 
         }
 
-
         return fromRecords(groupedRecords);
     }
 
@@ -297,11 +295,11 @@ public class TimeseriesConverter implements HistorianProcessor {
      * @param measures
      * @return
      */
-    public TimeSeriesRecord fromMeasurestoTimeseriesRecord(List<EvoaMeasure> measures) {
+    public TimeSeriesRecord fromMeasurestoTimeseriesRecord(List<App.EvoaMeasure> measures) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
-        for (EvoaMeasure measure : measures) {
+        for (App.EvoaMeasure measure : measures) {
             try {
                 Record record = new StandardRecord(RecordDictionary.TIMESERIES)
                         .setStringField(FieldDictionary.RECORD_NAME, measure.name())
@@ -323,9 +321,11 @@ public class TimeseriesConverter implements HistorianProcessor {
             }
 
         }
+        TimeSeriesRecord tsRecord = binaryCompactor.chunk(groupedRecords);
+        return computeMetricsTimeSeriesRecord(tsRecord);
+    }
 
-
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+    private TimeSeriesRecord computeMetricsTimeSeriesRecord(TimeSeriesRecord tsRecord) {
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
 
         functionValueMap.resetValues();
