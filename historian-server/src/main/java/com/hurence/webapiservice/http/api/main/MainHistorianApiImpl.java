@@ -88,7 +88,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
 
         service
-                .rxGetTimeSeries(getTimeSeriesChunkParams)
+                .rxGetTimeSeriesChunk(getTimeSeriesChunkParams)
                 .map(chunkResponse -> {
                     List<JsonObject> chunks = HistorianResponseHelper.extractChunks(chunkResponse);
                     Map<String, List<JsonObject>> chunksByName = chunks.stream().collect(
