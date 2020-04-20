@@ -31,7 +31,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     @Override
     public void addChunk(JsonObject chunk) {
-        String metricName = chunk.getString(HistorianFields.RESPONSE_METRIC_NAME_FIELD);
+        String metricName = chunk.getString(HistorianFields.NAME);
         bucketerByMetrics
                 .computeIfAbsent(metricName, this::createTimeSeriesExtractor)
                 .addChunk(chunk);

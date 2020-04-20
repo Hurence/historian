@@ -1,6 +1,5 @@
 package com.hurence.historian.modele;
 
-import com.hurence.logisland.record.FieldDictionary;
 import com.hurence.logisland.record.TimeSeriesRecord;
 
 /**
@@ -14,7 +13,11 @@ import com.hurence.logisland.record.TimeSeriesRecord;
  */
 public class HistorianFields {
     private HistorianFields() {}
-    //Request fields
+
+    public static String DATAPOINTS_RESPONSE_FIELD = "datapoints";
+    public static String ERRORS_RESPONSE_FIELD = "error";
+    public static String TARGET_RESPONSE_FIELD = "target";
+    public static String POINTS_REQUEST_FIELD = "points";
     public static String FROM = "from";
     public static String TO = "to";
     public static String FIELDS = "fields";
@@ -40,7 +43,7 @@ public class HistorianFields {
     public static String ANNOTATIONS = "annotations";
     public static String TOTAL = "total";
     public static String TOTAL_HIT = "total_hit";
-    public static String RESPONSE_METRIC_NAME_FIELD = "name";
+    public static String NAME = "name";
     public static String RESPONSE_TAG_NAME_FIELD = "tagname";
     public static String RESPONSE_CHUNK_ID_FIELD = "id";
     public static String RESPONSE_CHUNK_VERSION_FIELD = "_version_";
@@ -58,6 +61,8 @@ public class HistorianFields {
     public static String RESPONSE_CHUNK_TREND_FIELD = TimeSeriesRecord.CHUNK_TREND;
     public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = TimeSeriesRecord.CHUNK_SIZE_BYTES;
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
+    public static String RESPONSE_TOTAL_ADDED_POINTS = "total_added_points";
+    public static String RESPONSE_TOTAL_ADDED_CHUNKS = "total_added_chunks";
 
     //schema historian
     public static String CHUNK_YEAR = "year";

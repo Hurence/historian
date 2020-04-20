@@ -5,6 +5,7 @@ import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -168,5 +169,14 @@ public class QueryRequestParserTest {
         assertEquals(Collections.emptyList(), request.getAggs());
         assertEquals(Arrays.asList("speed"), request.getMetricNames());
         assertEquals(Collections.emptyList(), request.getTags());
+    }
+
+    @Test
+    public void testparsingErrorEmptyRequest() {
+        JsonObject requestBody = new JsonObject("{}");
+        final QueryRequestParser queryRequestParser = new QueryRequestParser();
+        Assertions.assertThrows(NullPointerException.class, () -> {
+            final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        });
     }
 }

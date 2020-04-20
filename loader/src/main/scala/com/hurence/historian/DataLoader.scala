@@ -1,12 +1,11 @@
 package com.hurence.historian
 
 
-import com.hurence.historian.LoaderMode.Value
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
-import org.apache.spark.sql.functions.{asc, from_unixtime, hour, concat, lit}
+import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 

@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
+import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
 import com.hurence.webapiservice.http.api.main.MainHistorianApiImpl;
 import io.vertx.core.Promise;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -34,6 +35,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     public static final String MAIN_API_ENDPOINT = "/api/historian/v0";
     public static final String GRAFANA_API_ENDPOINT = "/api/grafana";
+    public static final String INGESTION_API_ENDPOINT = "/historian-server/ingestion";
     public static final GrafanaApiVersion GRAFANA_API_VEFSION_DEFAULT = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
 
     @Override
@@ -55,6 +57,9 @@ public class HttpServerVerticle extends AbstractVerticle {
         GrafanaApiVersion grafanaApiVersion = getGrafanaApiVersion();
         Router graphanaApi = GrafanaApi.fromVersion(grafanaApiVersion, historianService).getGraphanaRouter(vertx);
         router.mountSubRouter(GRAFANA_API_ENDPOINT, graphanaApi);
+
+        Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
+        router.mountSubRouter(INGESTION_API_ENDPOINT, importApi);
 
         int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
         String host = config().getString(CONFIG_HTTP_SERVER_HOSTNAME, "localhost");

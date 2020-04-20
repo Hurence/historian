@@ -16,7 +16,8 @@
 package com.hurence.logisland.record;
 
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.util.string.BinaryEncodingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,9 +36,6 @@ public class TimeSeriesRecord extends StandardRecord {
 
     public static final String CHUNK_ORIGIN = "chunk_origin";
     private MetricTimeSeries timeSeries;
-
-    private static final BinaryCompactionConverter converter = new BinaryCompactionConverter.Builder().build();
-
 
     public static final String RECORD_CHUNK_COMPRESSED_POINTS = "record_chunk_compressed_points";
     public static final String RECORD_CHUNK_UNCOMPRESSED_POINTS = "record_chunk_uncompressed_points";
@@ -116,7 +114,7 @@ public class TimeSeriesRecord extends StandardRecord {
 
     public static List<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
         byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
-        return converter.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
+        return BinaryCompactionUtil.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
     }
 
 
