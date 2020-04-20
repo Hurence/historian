@@ -115,7 +115,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianFields.TOTAL);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (4, totalHit);
                         testContext.completeNow ();
@@ -138,7 +138,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianFields.TOTAL);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (4, totalHit);
                         testContext.completeNow ();
@@ -163,7 +163,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianFields.TOTAL);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (1, totalHit);
                         testContext.completeNow ();
@@ -186,7 +186,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianFields.TOTAL);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (2, totalHit);
                         testContext.completeNow ();
@@ -208,7 +208,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianFields.TOTAL);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (5, totalHit);
                         testContext.completeNow ();
@@ -226,7 +226,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianFields.TOTAL);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (7, totalHit);
                         testContext.completeNow ();

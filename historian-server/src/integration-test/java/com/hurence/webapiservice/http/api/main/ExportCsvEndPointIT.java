@@ -40,6 +40,7 @@ public class ExportCsvEndPointIT {
     private static Logger LOGGER = LoggerFactory.getLogger(ExportCsvEndPointIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
+    private static String exportEndpoint = MAIN_API_ENDPOINT + MainHistorianApi.EXPORT_ENDPOINT;
 
     @BeforeAll
     public static void beforeAll(SolrClient client, Vertx vertx) throws IOException, SolrServerException {
@@ -104,7 +105,7 @@ public class ExportCsvEndPointIT {
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, MAIN_API_ENDPOINT + MainHistorianApi.EXPORT_ENDPOINT);
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, exportEndpoint);
     }
 
     @AfterAll
@@ -124,8 +125,8 @@ public class ExportCsvEndPointIT {
         HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
-                            "/http/grafana/query/extract-algo/test1/request.json",
-                            "/http/grafana/query/extract-algo/test1/expectedResponse.csv");
+                            "/http/grafana/simplejson/query/extract-algo/test1/request.json",
+                            "/http/grafana/simplejson/query/extract-algo/test1/expectedResponse.csv");
                     return t;
                 }).subscribe();
     }
@@ -136,7 +137,7 @@ public class ExportCsvEndPointIT {
         HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
-                            "/http/grafana/query/extract-algo/test1/request.json");
+                            "/http/grafana/simplejson/query/extract-algo/test1/request.json");
                     return t;
                 }).subscribe();
     }
@@ -144,7 +145,7 @@ public class ExportCsvEndPointIT {
     private void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext, String requestFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/api/grafana/export/csv")
+        webClient.post(exportEndpoint)
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(413, rsp.statusCode());
@@ -159,7 +160,7 @@ public class ExportCsvEndPointIT {
                                                   String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/api/grafana/export/csv")
+        webClient.post(exportEndpoint)
                 .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
