@@ -49,7 +49,8 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
     public final static String ZOOKEEPER_SERVICE_NAME = "zookeeper_1";
     public final static int ZOOKEEPER_PORT = 2181;
     private final static String IMAGE = "solr:8";
-    public final static String SOLR_CONF_TEMPLATE_HISTORIAN = "historian";
+    public final static String SOLR_CONF_TEMPLATE_HISTORIAN_CURRENT = "historian-current";
+    public final static String SOLR_CONF_TEMPLATE_HISTORIAN_VERSION_0 = "historian-version-0";
     public final static String SOLR_CONF_TEMPLATE_ANNOTATION = "annotation";
     public final static String SOLR_CONF_TEMPLATE_REPORT = "report";
     public final static String SOLR_CONF_TEMPLATE_DEFAULT = "_default";
@@ -105,7 +106,8 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
 
         try (SolrZkClient zkClient = new SolrZkClient(zkUrl, 15000)) {
             ZkConfigManager manager = new ZkConfigManager(zkClient);
-            manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/historian/conf").getFile()), SOLR_CONF_TEMPLATE_HISTORIAN);
+            manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/historian-current/conf").getFile()), SOLR_CONF_TEMPLATE_HISTORIAN_CURRENT);
+            manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/historian-version-0/conf").getFile()), SOLR_CONF_TEMPLATE_HISTORIAN_VERSION_0);
             manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/annotation/conf").getFile()), SOLR_CONF_TEMPLATE_ANNOTATION);
             manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/report/conf").getFile()), SOLR_CONF_TEMPLATE_REPORT);
         } catch (IOException ex) {
