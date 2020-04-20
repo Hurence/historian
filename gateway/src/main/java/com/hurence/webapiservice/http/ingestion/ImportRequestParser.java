@@ -33,9 +33,11 @@ public class ImportRequestParser {
                 continue;
             } else if (!(timeserie.getValue(METRIC_NAME_REQUEST_FIELD) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD)) || (!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null))
+            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD))) {
                 throw new IllegalArgumentException("field 'points' is required");
-
+            } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
+                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
+            }
             JsonObject newTimeserie = new JsonObject();
             newTimeserie.put(METRIC_NAME_REQUEST_FIELD, timeserie.getString(METRIC_NAME_REQUEST_FIELD));
             JsonArray newPoints = new JsonArray();

@@ -248,7 +248,7 @@ public class ImportJsonRequestParserTest {
         String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(requestBody);
         }).getMessage();
-        assertEquals(message, "field 'points' is required");
+        assertEquals(message, "field 'points' : {\"time\":[1477916224866,4.0]} is not an array");
     }
     @Test
     public void testRequestWithZeroPointSize() throws Exception {

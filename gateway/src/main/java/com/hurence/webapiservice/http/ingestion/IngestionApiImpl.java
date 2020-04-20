@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.ERRORS_RESPONSE_FIELD;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.Codes.CREATED;
 
@@ -71,9 +71,9 @@ public class IngestionApiImpl implements IngestionApi {
 
     private JsonObject constructFinalResponse(JsonObject response, ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
         StringBuilder message = new StringBuilder();
-        message.append("Injected ").append(response.getInteger("numPoints")).append(" points of ")
-                .append(response.getInteger("numChunks"))
-                .append(" metrics in ").append(response.getInteger("numChunks"))
+        message.append("Injected ").append(response.getInteger(RESPONSE_TOTAL_ADDED_POINTS)).append(" points of ")
+                .append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
+                .append(" metrics in ").append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
                 .append(" chunks");
         JsonObject finalResponse = new JsonObject();
         if (!responseAndErrorHolder.errorMessages.isEmpty()) {
