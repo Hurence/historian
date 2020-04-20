@@ -64,6 +64,8 @@ public class HistorianFields {
     public static String RESPONSE_CHUNK_TREND_FIELD = TimeSeriesRecord.CHUNK_TREND;
     public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = TimeSeriesRecord.CHUNK_SIZE_BYTES;
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
+    public static String RESPONSE_TOTAL_ADDED_POINTS = "total_added_points";
+    public static String RESPONSE_TOTAL_ADDED_CHUNKS = "total_added_chunks";
 
     //schema historian
     public static String CHUNK_YEAR = "year";

@@ -372,7 +372,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
                     LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
                 }
-                response.put("numPoints", numPoints).put("numChunks", numChunk);
+                response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
                 p.complete(response
                 );
             } catch (SolrServerException | IOException e) {
