@@ -67,8 +67,8 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject response = new JsonObject().put("numPoints", 2).put("numChunks", 1);
-                        assertEquals(rsp, response);
+                        JsonObject expectedResponse = new JsonObject().put(RESPONSE_TOTAL_ADDED_POINTS, 2).put(RESPONSE_TOTAL_ADDED_CHUNKS, 1);
+                        assertEquals(rsp, expectedResponse);
                     });
                 })
                 .doAfterSuccess(t -> {
@@ -85,7 +85,7 @@ public class HistorianImportJsonVerticleIT {
                             .doOnError(testContext::failNow)
                             .doOnSuccess(rsp -> {
                                 testContext.verify(() -> {
-                                    LOGGER.info("responces : {}", rsp);
+                                    LOGGER.info("responses : {}", rsp);
                                     long totalPoints = rsp.getLong(TOTAL_POINTS_RESPONSE_FIELD);
                                     assertEquals(2, totalPoints);
                                     JsonArray docs = rsp.getJsonArray(TIMESERIES_RESPONSE_FIELD);
@@ -117,8 +117,8 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject response = new JsonObject().put("numPoints", 8).put("numChunks", 4);
-                        assertEquals(rsp, response);
+                        JsonObject expectedResponse = new JsonObject().put(RESPONSE_TOTAL_ADDED_POINTS, 8).put(RESPONSE_TOTAL_ADDED_CHUNKS, 4);
+                        assertEquals(rsp, expectedResponse);
                     });
                 })
                 .doAfterSuccess(t -> {
@@ -137,7 +137,7 @@ public class HistorianImportJsonVerticleIT {
                             .doOnError(testContext::failNow)
                             .doOnSuccess(rsp -> {
                                 testContext.verify(() -> {
-                                    LOGGER.info("responces : {}", rsp);
+                                    LOGGER.info("responses : {}", rsp);
                                     long totalPoints = rsp.getLong(TOTAL_POINTS_RESPONSE_FIELD);
                                     assertEquals(8, totalPoints);
                                     JsonArray docs = rsp.getJsonArray(TIMESERIES_RESPONSE_FIELD);
@@ -177,8 +177,8 @@ public class HistorianImportJsonVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject response = new JsonObject().put("numPoints", 4).put("numChunks", 2);
-                        assertEquals(rsp, response);
+                        JsonObject expectedResponse = new JsonObject().put(RESPONSE_TOTAL_ADDED_POINTS, 4).put(RESPONSE_TOTAL_ADDED_CHUNKS, 2);
+                        assertEquals(rsp, expectedResponse);
                     });
                 })
                 .doAfterSuccess(t -> {
@@ -187,7 +187,7 @@ public class HistorianImportJsonVerticleIT {
                             .doOnError(testContext::failNow)
                             .doOnSuccess(rsp -> {
                                 testContext.verify(() -> {
-                                    LOGGER.info("responces : {}", rsp);
+                                    LOGGER.info("responses : {}", rsp);
                                     long totalHit = rsp.getLong(RESPONSE_TOTAL_FOUND);
                                     assertEquals(2, totalHit);
                                     JsonArray docs = rsp.getJsonArray(RESPONSE_CHUNKS);
