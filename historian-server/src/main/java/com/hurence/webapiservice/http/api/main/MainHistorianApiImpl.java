@@ -10,6 +10,7 @@ import com.hurence.webapiservice.historian.util.models.ResponseAsList;
 import com.hurence.webapiservice.http.GetTimeSerieRequestParser;
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
+import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.LogislandTimeSeriesModeler;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
 import com.hurence.webapiservice.timeseries.TimeSeriesModeler;
@@ -87,7 +88,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
 
         service
-                .rxGetTimeSeriesChunk(getTimeSeriesChunkParams)
+                .rxGetTimeSeries(getTimeSeriesChunkParams)
                 .map(chunkResponse -> {
                     List<JsonObject> chunks = HistorianResponseHelper.extractChunks(chunkResponse);
                     Map<String, List<JsonObject>> chunksByName = chunks.stream().collect(
@@ -143,12 +144,16 @@ public class MainHistorianApiImpl implements MainHistorianApi {
             }
             fieldsToFetch.add(aggField);
         });
+        SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
                 .put(FROM, request.getFrom())
                 .put(TO, request.getTo())
                 .put(FIELDS, fieldsToFetch)
                 .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTags());
+                .put(HistorianFields.TAGS, request.getTags())
+                .put(SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
     @Override
