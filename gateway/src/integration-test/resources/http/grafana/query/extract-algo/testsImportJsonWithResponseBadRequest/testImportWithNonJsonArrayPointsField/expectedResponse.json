@@ -1,1 +1,1 @@
-{"error" : "field 'points' is required"}
+{"error" : "field 'points' : string is not an array"}
