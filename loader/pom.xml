@@ -4,7 +4,7 @@
     <parent>
         <artifactId>historian</artifactId>
         <groupId>com.hurence.historian</groupId>
-        <version>1.3.3-SNAPSHOT</version>
+        <version>1.3.4-SNAPSHOT</version>
     </parent>
 
     <artifactId>loader</artifactId>
@@ -323,7 +323,7 @@
                         </goals>
                         <configuration>
                             <overwrite>true</overwrite>
-                            <outputDirectory>src/test/resources/shared-resources</outputDirectory>
+                            <outputDirectory>src/integration-test/resources/shared-resources</outputDirectory>
                             <resources>
                                 <resource>
                                     <directory>../integration-tests/src/main/resources/shared-resources</directory>

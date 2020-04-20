@@ -1,0 +1,5 @@
+=== gateway
+
+La gateway est implémenté avec vertx. Il propose une API rest que le grafana-historian-datasource utilise pour tracer les
+graphes dans grafana. Cela implique que ces deux modules sont étroitement liés, si on modifie l'api de la gateway cela
+aura un impacte sur la datazsource et vice versa.
