@@ -1,0 +1,16 @@
+[
+  {
+    "target": "openSpaceSensors.Temperature1",
+    "datapoints": [
+      [2.0, 1477895624866],
+      [4.0, 1477916224866]
+    ]
+  },
+  {
+    "target": "openSpaceSensors.Temperature2",
+    "datapoints": [
+      [43.0, 1477895624866],
+      [8.0, 1477917224866]
+    ]
+  }
+]
