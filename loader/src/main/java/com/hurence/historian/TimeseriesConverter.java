@@ -1,5 +1,7 @@
 package com.hurence.historian;
 
+import com.hurence.historian.processor.HistorianContext;
+import com.hurence.historian.processor.HistorianProcessor;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.record.*;
@@ -295,11 +297,11 @@ public class TimeseriesConverter implements HistorianProcessor {
      * @param measures
      * @return
      */
-    public TimeseriesRecord fromMeasurestoTimeseriesRecord(List<App.EvoaMeasure> measures) {
+    public TimeseriesRecord fromMeasurestoTimeseriesRecord(List<EvoaMeasure> measures) {
 
         // Convert first to logisland records
         List<Record> groupedRecords = new ArrayList<>();
-        for (App.EvoaMeasure measure : measures) {
+        for (EvoaMeasure measure : measures) {
             try {
                 Record record = new StandardRecord(RecordDictionary.TIMESERIES)
                         .setStringField(FieldDictionary.RECORD_NAME, measure.name())

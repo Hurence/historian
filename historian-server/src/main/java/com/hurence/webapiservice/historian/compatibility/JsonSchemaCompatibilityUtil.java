@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.compatibility;
 
-import com.hurence.historian.spark.compactor.job.HistorianFields;
+import com.hurence.historian.modele.HistorianFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;

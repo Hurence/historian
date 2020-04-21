@@ -27,7 +27,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.spark.compactor.job.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianFields.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})

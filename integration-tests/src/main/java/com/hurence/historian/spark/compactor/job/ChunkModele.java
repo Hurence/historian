@@ -1,5 +1,6 @@
 package com.hurence.historian.spark.compactor.job;
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.converter.common.Compression;
 import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;

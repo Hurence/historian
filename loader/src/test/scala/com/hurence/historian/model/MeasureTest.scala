@@ -1,8 +1,6 @@
 package com.hurence.historian.model
 
-import java.util.{Calendar, Date}
-
-import com.hurence.historian.model.MeasureRecordV0
+import java.util.Date
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.Calendar

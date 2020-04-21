@@ -2,8 +2,8 @@ package com.hurence.historian
 
 
 import com.hurence.historian.LoaderMode.LoaderMode
-import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
-import com.hurence.logisland.record.{TimeseriesRecord}
+import com.hurence.historian.processor.HistorianContext
+import com.hurence.logisland.record.TimeseriesRecord
 import org.apache.commons.cli.{ GnuParser, Option, OptionBuilder, Options}
 import org.apache.spark.sql.{Encoder,  SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
@@ -273,7 +273,7 @@ object App {
           .groupBy(row => row.getString(row.fieldIndex("name")))
           .flatMap(group => group._2
             .sliding(options.chunkSize, options.chunkSize)
-            .map(subGroup => tsProcessor.fromRecords(group._1, subGroup.toList))
+            .map(subGroup => tsProcessor.fromRows(group._1, subGroup.toList))
             .map(ts => (ts.getId, tsProcessor.serialize(ts)))
           )
           .iterator

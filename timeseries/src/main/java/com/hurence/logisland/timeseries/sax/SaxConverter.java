@@ -17,7 +17,6 @@ package com.hurence.logisland.timeseries.sax;
 
 import com.hurence.logisland.processor.ProcessException;
 import com.hurence.logisland.record.Record;
-import jdk.internal.org.xml.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 import org.slf4j.Logger;

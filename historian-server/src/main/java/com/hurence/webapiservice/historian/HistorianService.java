@@ -11,7 +11,7 @@ import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import com.hurence.historian.spark.compactor.job.HistorianFields;
+import com.hurence.historian.modele.HistorianFields;
 
 
 /**
