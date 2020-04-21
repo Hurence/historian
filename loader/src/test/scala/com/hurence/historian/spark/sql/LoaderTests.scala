@@ -1,9 +1,7 @@
 package com.hurence.historian.spark.sql
 
 import com.hurence.historian.model.ChunkRecordV0
-import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
 import com.hurence.historian.spark.SparkSessionTestWrapper
-import com.hurence.logisland.record.{EvoaUtils, TimeseriesRecord}
 import com.hurence.historian.spark.sql.functions.{chunk, sax}
 import org.apache.spark.sql.functions.{avg, count, lit, max, min}
 import org.junit.jupiter.api.Assertions.assertEquals
