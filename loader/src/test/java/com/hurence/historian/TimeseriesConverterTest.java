@@ -1,7 +1,7 @@
 package com.hurence.historian;
 
+import com.hurence.historian.processor.HistorianContext;
 import com.hurence.logisland.component.InitializationException;
-import com.hurence.logisland.processor.StandardProcessContext;
 import com.hurence.logisland.record.TimeseriesRecord;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import org.apache.spark.sql.Row;

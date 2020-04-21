@@ -1,8 +1,6 @@
 package com.hurence.historian
 
-import com.hurence.historian.App.logger
-import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
-import com.hurence.logisland.processor.StandardProcessContext
+import com.hurence.historian.processor.HistorianContext
 import com.hurence.logisland.record.{FieldDictionary, TimeseriesRecord}
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.slf4j.LoggerFactory

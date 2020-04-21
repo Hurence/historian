@@ -1,6 +1,7 @@
 package com.hurence.historian.spark.loader
 
-import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
+import com.hurence.historian.TimeseriesConverter
+import com.hurence.historian.processor.HistorianContext
 import com.hurence.historian.spark.compactor.ChunkCompactor
 import com.hurence.historian.spark.sql.reader.TimeseriesReader
 import com.hurence.logisland.record.{EvoaUtils, TimeseriesRecord}

@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.sql
 
 import com.hurence.logisland.timeseries.MetricTimeSeries
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import com.hurence.logisland.timeseries.sax.SaxConverter
 import com.hurence.logisland.util.string.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
@@ -15,7 +15,7 @@ import scala.collection.JavaConverters._
 object functions {
 
 
-  private val converter = new BinaryCompactionConverter.Builder().build
+  private val converter = new BinaryCompactionConverterOfRecord.Builder().build
 
 
   /**

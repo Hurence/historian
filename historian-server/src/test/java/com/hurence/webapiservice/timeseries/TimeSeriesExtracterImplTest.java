@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.historian.modele.ChunkModele;
+import com.hurence.historian.spark.compactor.job.ChunkModele;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;

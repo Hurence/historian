@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.historian.modele.ChunkModele;
+import com.hurence.historian.spark.compactor.job.ChunkModele;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -28,6 +28,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
                 new Point(0, 1477916224870L, 1),
                 new Point(0, 1477916224871L, 1),
                 new Point(0, 1477916224872L, 1),
+
                 new Point(0, 1477917224865L, 1)
         ));
         return chunk.toJson("id1");
