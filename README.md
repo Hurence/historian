@@ -1,3 +1,59 @@
+# Logisland Data Historian
+
+timeseries big data analytics tools
+
+
+## Setup
+
+make a workspace directory called historian for example. we'll refer to it as `$HISTORIAN_HOME`
+
+create a directory to store your data
+
+    mkdir $HISTORIAN_HOME/data
+
+### Install SolR
+To follow along with this tutorial, you will need to unpack the following solr archive : https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz into your `$HISTORIAN_HOME` directory
+
+then start 2 solr cores locally
+
+    cd $HISTORIAN_HOME/solr-8.2.0
+
+    bin/solr start -cloud -s ../data/solr/node1  -p 8983
+    bin/solr start -cloud -s ../data/solr/node2/  -p 7574 -z localhost:9983
+    
+
+### Install Historian
+you will need to unpack the following solr archive : https://github.com/Hurence/historian/releases/download/v1.3.4/historian-1.3.4-SNAPSHOT.tgz  into your `$HISTORIAN_HOME` directory
+
+
+you can now create the solr schema for the SolR historian collection
+
+    cd $HISTORIAN_HOME/historian-1.3.4-SNAPSHOT
+    bin/create-historian-collection.sh
+    
+and launch the historian REST server
+
+    bin/historian-server.sh
+    
+
+    
+### Install Spark
+
+
+###     
+    
+    
+### Stop your services
+
+when you're done you can stop your SolR cores
+    
+    bin/solr stop -all
+    
+if you want to reset manually your data
+    
+    rm -r ../data/solr/node1/historian_shard1_replica_n1/ ../data/solr/node1/zoo_data/ ../data/solr/node2/historian_shard2_replica_n2/
+    
+    
 # First time cloning project
 
 This project include git sub modules. That's why you need to clone this project with the option --recurse-submodules.

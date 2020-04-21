@@ -1,0 +1,5 @@
+
+=== historian-modele
+
+C'est un module qui sert à partager des class qui est utilisé par la gateway mais aussi d'autres modules. Par exemple le
+module loader. Cela évite de devoir embarquer la dépendance sur la gateway (qui contient beaucoup de choses).

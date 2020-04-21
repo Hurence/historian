@@ -17,6 +17,7 @@ package com.hurence.logisland.timeseries.sax;
 
 import com.hurence.logisland.processor.ProcessException;
 import com.hurence.logisland.record.Record;
+import jdk.internal.org.xml.sax.SAXException;
 import net.seninp.jmotif.sax.SAXProcessor;
 import net.seninp.jmotif.sax.alphabet.NormalAlphabet;
 import org.slf4j.Logger;
@@ -57,6 +58,26 @@ public class SaxConverter {
 
     public SAXOptions getSaxOptions() {
         return saxOptions;
+    }
+
+
+
+    public  String getSaxStringFromValues(List<Double> points)  {
+
+        double[] valuePoints = points.stream().mapToDouble(x -> x).toArray();
+        try {
+
+            char[] saxString = SaxConverter.saxProcessor
+                    .ts2string(valuePoints,
+                            saxOptions.paaSize(),
+                            SaxConverter.normalAlphabet.getCuts(saxOptions.alphabetSize()), saxOptions.nThreshold());
+
+            return new String(saxString);
+
+        } catch (net.seninp.jmotif.sax.SAXException e) {
+            logger.error("error while trying to calculate sax string for chunk", e);
+        }
+        return "sax_error";
     }
 
     /**

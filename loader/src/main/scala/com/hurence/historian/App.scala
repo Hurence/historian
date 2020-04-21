@@ -2,11 +2,10 @@ package com.hurence.historian
 
 
 import com.hurence.historian.LoaderMode.LoaderMode
-import com.hurence.logisland.processor.StandardProcessContext
-import com.hurence.logisland.record.{FieldDictionary, Record, RecordDictionary, StandardRecord, TimeSeriesRecord}
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
-import org.apache.commons.cli.{CommandLine, GnuParser, Option, OptionBuilder, Options, Parser}
-import org.apache.spark.sql.{Encoder, Encoders, Row, SaveMode, SparkSession}
+import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
+import com.hurence.logisland.record.{TimeseriesRecord}
+import org.apache.commons.cli.{ GnuParser, Option, OptionBuilder, Options}
+import org.apache.spark.sql.{Encoder,  SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -255,7 +254,7 @@ object App {
     val n = testDF.agg(countDistinct($"name")).collect().head.getLong(0).toInt
 
 
-    implicit val enc: Encoder[TimeSeriesRecord] = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+    implicit val enc: Encoder[TimeseriesRecord] = org.apache.spark.sql.Encoders.kryo[TimeseriesRecord]
 
     val tsDF = testDF.repartition(n, $"name")
       .sortWithinPartitions($"name", $"time_ms")

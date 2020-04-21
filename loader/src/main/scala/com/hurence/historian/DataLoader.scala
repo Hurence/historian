@@ -2,11 +2,13 @@ package com.hurence.historian
 
 
 import com.hurence.historian.LoaderMode.Value
-import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
+import com.hurence.historian.processor.{HistorianContext, TimeseriesConverter}
+import com.hurence.historian.spark.compactor.ChunkCompactor
+import com.hurence.logisland.record.{EvoaUtils, TimeseriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
-import org.apache.spark.sql.functions.{asc, from_unixtime, hour, concat, lit}
+import org.apache.spark.sql.functions.{asc, concat, from_unixtime, hour, lit}
 import org.apache.spark.sql.{Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 
@@ -33,7 +35,7 @@ class DataLoader extends Serializable {
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 100
 
-  implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+  implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeseriesRecord]
 
   case class DataLoaderOptions(master: String,
                                zkHosts: String,
@@ -230,7 +232,7 @@ class DataLoader extends Serializable {
 
   }
 
-  def saveNewChunksToSolR(timeseriesDS: Dataset[TimeSeriesRecord], options: DataLoaderOptions) = {
+  def saveNewChunksToSolR(timeseriesDS: Dataset[TimeseriesRecord], options: DataLoaderOptions) = {
 
 
     import timeseriesDS.sparkSession.implicits._
@@ -245,41 +247,41 @@ class DataLoader extends Serializable {
       .map(r => (
         r.getId,
         r.getField("day").asString(),
-        r.getField(TimeSeriesRecord.METRIC_NAME).asString(),
-        r.getField(TimeSeriesRecord.CHUNK_VALUE).asString(),
-        r.getField(TimeSeriesRecord.CHUNK_START).asLong(),
-        r.getField(TimeSeriesRecord.CHUNK_END).asLong(),
-        r.getField(TimeSeriesRecord.CHUNK_WINDOW_MS).asLong(),
-        r.getField(TimeSeriesRecord.CHUNK_SIZE).asInteger(),
-        r.getField(TimeSeriesRecord.CHUNK_FIRST_VALUE).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_AVG).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_MIN).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_MAX).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_COUNT).asInteger(),
-        r.getField(TimeSeriesRecord.CHUNK_SUM).asDouble(),
-        r.getField(TimeSeriesRecord.CHUNK_TREND).asBoolean(),
-        r.getField(TimeSeriesRecord.CHUNK_OUTLIER).asBoolean(),
-        if (r.hasField(TimeSeriesRecord.CHUNK_SAX)) r.getField(TimeSeriesRecord.CHUNK_SAX).asString() else "",
-        r.getField(TimeSeriesRecord.CHUNK_ORIGIN).asString())
+        r.getField(TimeseriesRecord.METRIC_NAME).asString(),
+        r.getField(TimeseriesRecord.CHUNK_VALUE).asString(),
+        r.getField(TimeseriesRecord.CHUNK_START).asLong(),
+        r.getField(TimeseriesRecord.CHUNK_END).asLong(),
+        r.getField(TimeseriesRecord.CHUNK_WINDOW_MS).asLong(),
+        r.getField(TimeseriesRecord.CHUNK_SIZE).asInteger(),
+        r.getField(TimeseriesRecord.CHUNK_FIRST_VALUE).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_AVG).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_MIN).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_MAX).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_COUNT).asInteger(),
+        r.getField(TimeseriesRecord.CHUNK_SUM).asDouble(),
+        r.getField(TimeseriesRecord.CHUNK_TREND).asBoolean(),
+        r.getField(TimeseriesRecord.CHUNK_OUTLIER).asBoolean(),
+        if (r.hasField(TimeseriesRecord.CHUNK_SAX)) r.getField(TimeseriesRecord.CHUNK_SAX).asString() else "",
+        r.getField(TimeseriesRecord.CHUNK_ORIGIN).asString())
       )
       .toDF("id",
         "day",
-        TimeSeriesRecord.METRIC_NAME,
-        TimeSeriesRecord.CHUNK_VALUE,
-        TimeSeriesRecord.CHUNK_START,
-        TimeSeriesRecord.CHUNK_END,
-        TimeSeriesRecord.CHUNK_WINDOW_MS,
-        TimeSeriesRecord.CHUNK_SIZE,
-        TimeSeriesRecord.CHUNK_FIRST_VALUE,
-        TimeSeriesRecord.CHUNK_AVG,
-        TimeSeriesRecord.CHUNK_MIN,
-        TimeSeriesRecord.CHUNK_MAX,
-        TimeSeriesRecord.CHUNK_COUNT,
-        TimeSeriesRecord.CHUNK_SUM,
-        TimeSeriesRecord.CHUNK_TREND,
-        TimeSeriesRecord.CHUNK_OUTLIER,
-        TimeSeriesRecord.CHUNK_SAX,
-        TimeSeriesRecord.CHUNK_ORIGIN)
+        TimeseriesRecord.METRIC_NAME,
+        TimeseriesRecord.CHUNK_VALUE,
+        TimeseriesRecord.CHUNK_START,
+        TimeseriesRecord.CHUNK_END,
+        TimeseriesRecord.CHUNK_WINDOW_MS,
+        TimeseriesRecord.CHUNK_SIZE,
+        TimeseriesRecord.CHUNK_FIRST_VALUE,
+        TimeseriesRecord.CHUNK_AVG,
+        TimeseriesRecord.CHUNK_MIN,
+        TimeseriesRecord.CHUNK_MAX,
+        TimeseriesRecord.CHUNK_COUNT,
+        TimeseriesRecord.CHUNK_SUM,
+        TimeseriesRecord.CHUNK_TREND,
+        TimeseriesRecord.CHUNK_OUTLIER,
+        TimeseriesRecord.CHUNK_SAX,
+        TimeseriesRecord.CHUNK_ORIGIN)
 
     savedDF.write
       .format("solr")
@@ -295,10 +297,10 @@ class DataLoader extends Serializable {
   }
 
 
-  def makeChunksFromParquet(spark: SparkSession, options: DataLoaderOptions): Dataset[TimeSeriesRecord] = {
+  def makeChunksFromParquet(spark: SparkSession, options: DataLoaderOptions): Dataset[TimeseriesRecord] = {
 
     import spark.implicits._
-    implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
+    implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[TimeseriesRecord]
 
     spark.read.parquet(options.parquetFilePath.get)
       .withColumn("day", from_unixtime($"timestamp" / 1000, "yyyy-MM-dd"))
@@ -314,7 +316,7 @@ class DataLoader extends Serializable {
           // Init the Timeserie processor
           val tsProcessor = new TimeseriesConverter()
           val context = new HistorianContext(tsProcessor)
-          context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeSeriesRecord.METRIC_NAME)
+          context.setProperty(TimeseriesConverter.GROUPBY.getName, TimeseriesRecord.METRIC_NAME)
           context.setProperty(TimeseriesConverter.METRIC.getName,
             s"first;min;max;count;sum;avg;trend;outlier;sax:${options.saxAlphabetSize},0.01,${options.saxStringLength}")
 
@@ -336,12 +338,14 @@ class DataLoader extends Serializable {
 
               l.foreach(t => tsBuilder.point(t._1, t._2))
 
-              val record = new TimeSeriesRecord(tsBuilder.build())
+              val record = new TimeseriesRecord(tsBuilder.build())
+
+
 
               tsProcessor.computeValue(record)
               tsProcessor.computeMetrics(record)
               EvoaUtils.setHashId(record)
-              EvoaUtils.setChunkOrigin(record, TimeSeriesRecord.CHUNK_ORIGIN_LOADER)
+              EvoaUtils.setChunkOrigin(record, TimeseriesRecord.CHUNK_ORIGIN_LOADER)
               record
             })
 
