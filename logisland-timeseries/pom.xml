@@ -51,6 +51,12 @@
             <artifactId>guava</artifactId>
             <version>19.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>timeseries</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
     <build>
         <plugins>

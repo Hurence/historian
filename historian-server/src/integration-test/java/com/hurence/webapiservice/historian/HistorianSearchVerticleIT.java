@@ -26,8 +26,8 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.spark.compactor.job.HistorianFields.*;
-import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
+import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.grafana.GrafanaApi.TARGET;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -100,14 +100,14 @@ public class HistorianSearchVerticleIT {
     @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void getMetricsNameTest (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
-                .put (TARGET, "per");
+                .put(METRIC, "per");
         historian.rxGetMetricsName (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (5, rsp.getLong(RESPONSE_TOTAL_METRICS));
-                        JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
+                        assertEquals (5, rsp.getLong(TOTAL));
+                        JsonArray docs = rsp.getJsonArray (METRICS);
                         LOGGER.info("docs {}",docs);
                         assertEquals (5, docs.size ());
                         testContext.completeNow ();
@@ -120,13 +120,13 @@ public class HistorianSearchVerticleIT {
     @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void EmptyTest (VertxTestContext testContext) {
         JsonObject params = new JsonObject ();
-        historian.rxGetMetricsName (params)
+        historian.rxGetMetricsName(params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (7, rsp.getLong(RESPONSE_TOTAL_METRICS));
-                        JsonArray docs = rsp.getJsonArray (RESPONSE_METRICS);
+                        assertEquals (7, rsp.getLong(TOTAL));
+                        JsonArray docs = rsp.getJsonArray (METRICS);
                         LOGGER.info("docs {}",docs);
                         assertEquals (7, docs.size ());
                         testContext.completeNow ();

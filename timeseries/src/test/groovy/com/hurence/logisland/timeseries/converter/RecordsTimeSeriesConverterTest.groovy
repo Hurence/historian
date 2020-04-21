@@ -19,7 +19,7 @@ import com.hurence.logisland.record.FieldDictionary
 import com.hurence.logisland.record.FieldType
 import com.hurence.logisland.record.StandardRecord
 import com.hurence.logisland.record.TimeseriesRecord
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import spock.lang.Specification
 
 import java.time.Instant
@@ -40,7 +40,7 @@ class RecordsTimeSeriesConverterTest extends Specification {
         def end = Instant.now().plusSeconds(64000).toEpochMilli()
         def name = "\\CPU\\LOAD"
         def host = "host1"
-        def converter = new BinaryCompactionConverter.Builder()
+        def converter = new BinaryCompactionConverterOfRecord.Builder()
             .ddcThreshold(0)
             .build()
         def records = [new StandardRecord("measure")

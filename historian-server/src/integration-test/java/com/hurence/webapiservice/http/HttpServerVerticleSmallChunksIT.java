@@ -13,12 +13,14 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+ *//*
+
 
 package com.hurence.webapiservice.http;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
+import com.hurence.webapiservice.http.api.main.MainHistorianApi;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
@@ -60,7 +62,7 @@ public class HttpServerVerticleSmallChunksIT {
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HttpWithHistorianSolrITHelper
-                .initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_a",
@@ -103,7 +105,7 @@ public class HttpServerVerticleSmallChunksIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testErrorNoParam(VertxTestContext testContext) {
-        webClient.get("/timeseries")
+        webClient.get(HttpServerVerticle.MAIN_API_ENDPOINT + MainHistorianApi.QUERY_ENDPOINT)
                 .as(BodyCodec.jsonObject())
                 .send(testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
@@ -119,7 +121,7 @@ public class HttpServerVerticleSmallChunksIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testGetAllPoints(Vertx vertx, VertxTestContext testContext) {
-        webClient.get("/timeseries?from=0")
+        webClient.get(HttpServerVerticle.MAIN_API_ENDPOINT + MainHistorianApi.QUERY_ENDPOINT + "?from=0")
                 .as(BodyCodec.jsonObject())
                 .send(testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
@@ -139,7 +141,7 @@ public class HttpServerVerticleSmallChunksIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testGetAllPointsFrom1To10(Vertx vertx, VertxTestContext testContext) {
-        webClient.get("/timeseries?from=1&to=10")
+        webClient.get(HttpServerVerticle.MAIN_API_ENDPOINT + MainHistorianApi.QUERY_ENDPOINT + "?from=1&to=10")
                 .as(BodyCodec.jsonObject())
                 .send(testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
@@ -158,7 +160,7 @@ public class HttpServerVerticleSmallChunksIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testGetAllPointsFrom3To10(Vertx vertx, VertxTestContext testContext) {
-        webClient.get("/timeseries?from=3&to=10")
+        webClient.get(HttpServerVerticle.MAIN_API_ENDPOINT + MainHistorianApi.QUERY_ENDPOINT + "?from=3&to=10")
                 .as(BodyCodec.jsonObject())
                 .send(testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
@@ -174,3 +176,4 @@ public class HttpServerVerticleSmallChunksIT {
                 }));
     }
 }
+*/

@@ -154,7 +154,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     savedDF
   }
 
-  private def chunkIntoSeveralTimeSeriesRecord(metricType: String, metricName: String,
+  private def chunkIntoSeveralTimeseriesRecord(metricType: String, metricName: String,
                                    values: ArrayDF[String],
                                    starts: ArrayDF[Long],
                                    ends: ArrayDF[Long],
@@ -252,7 +252,7 @@ class ChunkCompactorJobStrategy2(options: ChunkCompactorConfStrategy2) extends C
     val sizes = r.getAs[ArrayDF[Long]](sizesColumnName)
     val totalPoints = r.getAs[Long](totalNumberOfPointColumnName)
     logger.trace(s"A total of points of $totalPoints")
-    val chunked = chunkIntoSeveralTimeSeriesRecord("evoa_measure", name, values, starts, ends, sizes)
+    val chunked = chunkIntoSeveralTimeseriesRecord("evoa_measure", name, values, starts, ends, sizes)
     chunked
   }
 

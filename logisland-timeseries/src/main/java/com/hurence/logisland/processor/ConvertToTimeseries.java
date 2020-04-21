@@ -40,7 +40,7 @@ import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.TimeseriesRecord;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;
@@ -86,7 +86,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
     private List<ChronixEncoding> encodings = Collections.emptyList();
     private FunctionValueMap functionValueMap = new FunctionValueMap(0, 0, 0, 0);
 
-    private BinaryCompactionConverter converter;
+    private BinaryCompactionConverterOfRecord converter;
     private List<String> groupBy;
 
     @Override
@@ -98,7 +98,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
         groupBy = Arrays.stream(groupByArray)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toList());
-        BinaryCompactionConverter.Builder builder = new BinaryCompactionConverter.Builder();
+        BinaryCompactionConverterOfRecord.Builder builder = new BinaryCompactionConverterOfRecord.Builder();
         converter = builder.build();
 
         // init metric functions
@@ -132,7 +132,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
                     .filter(l -> !l.isEmpty())                                      // remove empty groups
                     .peek(recs -> recs.sort(Comparator.comparing(Record::getTime))) // sort by time asc
                     .map(groupedRecords -> {
-                        return getTimeSeriesRecord(groupedRecords);
+                        return getTimeseriesRecord(groupedRecords);
                     })
                     .collect(Collectors.toList());
         }
@@ -140,7 +140,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
         return outputRecords;
     }
 
-    public TimeseriesRecord getTimeSeriesRecord(List<Record> groupedRecords) {
+    public TimeseriesRecord getTimeseriesRecord(List<Record> groupedRecords) {
         TimeseriesRecord tsRecord = converter.chunk(groupedRecords);
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
 
