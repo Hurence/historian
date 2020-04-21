@@ -25,8 +25,8 @@ import org.slf4j.LoggerFactory;
 
 public class HttpITHelper {
     private static Logger LOGGER = LoggerFactory.getLogger(HttpITHelper.class);
-    private static int PORT = 8080;
-    private static String HOST = "localhost";
+    public static int PORT = 8080;
+    public static String HOST = "localhost";
 
     public static WebClient buildWebClient(Vertx vertx) {
         return WebClient.create(vertx.getDelegate(), new WebClientOptions()

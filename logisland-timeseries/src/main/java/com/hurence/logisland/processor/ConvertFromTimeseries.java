@@ -21,7 +21,7 @@ import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.record.*;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ public class ConvertFromTimeseries extends AbstractProcessor {
 
     //TODO delete use others processor instead
     private final static Logger logger = LoggerFactory.getLogger(ConvertFromTimeseries.class.getName());
-    private BinaryCompactionConverter converter;
+    private BinaryCompactionConverterOfRecord converter;
     private List<String> groupBy;
 
 

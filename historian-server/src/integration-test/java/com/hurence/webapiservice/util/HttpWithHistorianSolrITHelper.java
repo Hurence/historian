@@ -39,27 +39,21 @@ import static com.hurence.webapiservice.util.HistorianSolrITHelper.HISTORIAN_ADR
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public abstract class HttpWithHistorianSolrITHelper {
     private static Logger LOGGER = LoggerFactory.getLogger(HttpWithHistorianSolrITHelper.class);
-    private static int PORT = 8080;
 
     private HttpWithHistorianSolrITHelper() {}
 
-    public static void initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
+    public static void initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
             SolrClient client, DockerComposeContainer container,
             Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
-        LOGGER.info("Initializing Historian solr");
-        HistorianSolrITHelper.initHistorianSolr(client);
-        LOGGER.info("Initializing Verticles");
-        deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
-                    context.completeNow();
-                },
-                t -> context.failNow(t));
+        initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx,
+                context, new JsonObject());
     }
 
     public static Single<String> deployHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx) {
         JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, PORT)
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
                 .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "localhost")
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
                 .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
 
@@ -71,7 +65,7 @@ public abstract class HttpWithHistorianSolrITHelper {
                 });
     }
 
-    public static void initWebClientAndHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
+    public static void initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
             SolrClient client, DockerComposeContainer container,
             Vertx vertx, VertxTestContext context,
             JsonObject historianConf) throws IOException, SolrServerException {
@@ -86,9 +80,9 @@ public abstract class HttpWithHistorianSolrITHelper {
 
     public static Single<String> deployHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, JsonObject historianConf) {
         JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, PORT)
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
                 .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "localhost");
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST);
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
 
         return HistorianSolrITHelper.deployHistorienVerticle(container, vertx, historianConf)
@@ -101,9 +95,9 @@ public abstract class HttpWithHistorianSolrITHelper {
 
     public static Single<String> deployCustomHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, int maxLimitFromConfig) {
         JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, PORT)
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
                 .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "localhost")
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
                 .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,maxLimitFromConfig);
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
 

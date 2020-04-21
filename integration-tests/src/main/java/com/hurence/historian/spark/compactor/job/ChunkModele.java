@@ -76,7 +76,7 @@ public class ChunkModele {
         json.put(HistorianFields.RESPONSE_CHUNK_AVG_FIELD, this.avg);
         json.put(HistorianFields.RESPONSE_CHUNK_MIN_FIELD, this.min);
         json.put(HistorianFields.RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
-        json.put(HistorianFields.RESPONSE_METRIC_NAME_FIELD, this.name);
+        json.put(HistorianFields.NAME, this.name);
         json.put(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
         json.put(HistorianFields.RESPONSE_CHUNK_MAX_FIELD, this.max);
         json.put(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
@@ -97,7 +97,7 @@ public class ChunkModele {
         doc.addField(HistorianFields.RESPONSE_CHUNK_AVG_FIELD, this.avg);
         doc.addField(HistorianFields.RESPONSE_CHUNK_MIN_FIELD, this.min);
         doc.addField(HistorianFields.RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
-        doc.addField(HistorianFields.RESPONSE_METRIC_NAME_FIELD, this.name);
+        doc.addField(HistorianFields.NAME, this.name);
         doc.addField(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
         doc.addField(HistorianFields.RESPONSE_CHUNK_MAX_FIELD, this.max);
         doc.addField(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
