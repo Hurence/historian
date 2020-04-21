@@ -10,7 +10,7 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.spark.compactor.job.HistorianFields;
 
 
 /**

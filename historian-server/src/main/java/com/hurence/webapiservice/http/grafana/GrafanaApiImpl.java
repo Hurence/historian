@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.spark.compactor.job.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.*;
 
 public class GrafanaApiImpl implements GrafanaApi {

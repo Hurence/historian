@@ -29,7 +29,9 @@ import java.util.stream.Stream;
 /**
  * Timeseries holder record
  */
-public class TimeSeriesRecord extends StandardRecord {
+public class TimeseriesRecord extends StandardRecord {
+
+    public static final String SCHEMA_VERSION = "0";
 
     private static Logger logger = LoggerFactory.getLogger(StandardRecord.class);
 
@@ -75,7 +77,7 @@ public class TimeSeriesRecord extends StandardRecord {
     public static final String CHUNK_ORIGIN_LOADER = "loader";
 
 
-    public TimeSeriesRecord(MetricTimeSeries timeSeries) {
+    public TimeseriesRecord(MetricTimeSeries timeSeries) {
         super(timeSeries.getType());
         this.timeSeries = timeSeries;
 
@@ -89,7 +91,7 @@ public class TimeSeriesRecord extends StandardRecord {
         });
     }
 
-    public TimeSeriesRecord(String type, String name, String chunkValue, long chunkStart, long chunkEnd) {
+    public TimeseriesRecord(String type, String name, String chunkValue, long chunkStart, long chunkEnd) {
         super(type);
 
         setStringField(METRIC_NAME, name);

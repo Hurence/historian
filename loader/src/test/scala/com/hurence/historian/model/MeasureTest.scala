@@ -20,19 +20,18 @@ class MeasureTest {
     val measureYear = cal.get(Calendar.YEAR)
     val measureMonth = cal.get(Calendar.MONTH)
     val measureDay = cal.get(Calendar.DAY_OF_MONTH)
-    val measureLat = 44.75420d
-    val measureLon = 5.373523d
-    val tags = List("host:host1", "ip:12.1.1.1")
+    val measureLat = "44.75420"
+    val measureLon = "5.373523"
+    val tags = Map("host" -> "host1", "ip" -> "12.1.1.1", "lon" -> measureLon)
 
-    val measure = MeasureRecordV0(measureName, measureValue, measureTimestamp, measureYear, measureMonth, "2020-15-04", 2, tags, lon = Some(measureLon))
+    val measure = MeasureRecordV0(measureName, measureValue, measureTimestamp, measureYear, measureMonth, "2020-15-04", 2, tags)
 
     assertEquals(measureName, measure.name)
     assertEquals(measureValue, measure.value)
     assertEquals(measureTimestamp, measure.timestamp)
     assertEquals(measureYear, measure.year)
     assertEquals(tags, measure.tags)
-    assertEquals(false, measure.lat.isDefined)
-    assertEquals(measureLon, measure.lon.get)
+    assertEquals(measureLon, measure.tags("lon"))
 
   }
 }

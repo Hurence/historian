@@ -1,4 +1,4 @@
-package com.hurence.historian.modele;
+package com.hurence.historian.spark.compactor.job;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.converter.common.Compression;

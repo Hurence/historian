@@ -31,7 +31,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.RESPONSE_ANNOTATIONS;
+import static com.hurence.historian.spark.compactor.job.HistorianFields.RESPONSE_ANNOTATIONS;
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.COLLECTION_ANNOTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

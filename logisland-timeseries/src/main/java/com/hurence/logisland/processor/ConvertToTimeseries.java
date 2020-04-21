@@ -36,10 +36,9 @@ import com.hurence.logisland.annotation.documentation.CapabilityDescription;
 import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.PropertyDescriptor;
-import com.hurence.logisland.component.SaxEncodingValidators;
 import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
-import com.hurence.logisland.record.TimeSeriesRecord;
+import com.hurence.logisland.record.TimeseriesRecord;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
 import com.hurence.logisland.timeseries.functions.*;
@@ -141,8 +140,8 @@ public class ConvertToTimeseries extends AbstractProcessor {
         return outputRecords;
     }
 
-    public TimeSeriesRecord getTimeSeriesRecord(List<Record> groupedRecords) {
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+    public TimeseriesRecord getTimeSeriesRecord(List<Record> groupedRecords) {
+        TimeseriesRecord tsRecord = converter.chunk(groupedRecords);
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
 
         functionValueMap.resetValues();

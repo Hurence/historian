@@ -33,7 +33,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.spark.compactor.job.HistorianFields.*;
 import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_API_HISTORAIN;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

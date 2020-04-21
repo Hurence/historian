@@ -8,7 +8,7 @@ import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.RESPONSE_METRIC_NAME_FIELD;
+import static com.hurence.historian.spark.compactor.job.HistorianFields.RESPONSE_METRIC_NAME_FIELD;
 
 public class LogislandTimeSeriesModeler implements TimeSeriesModeler {
     private static String TIMESERIES_NAME = "name";

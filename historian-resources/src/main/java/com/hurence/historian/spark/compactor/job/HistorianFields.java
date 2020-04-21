@@ -1,7 +1,6 @@
-package com.hurence.historian.modele;
+package com.hurence.historian.spark.compactor.job;
 
-import com.hurence.logisland.record.FieldDictionary;
-import com.hurence.logisland.record.TimeSeriesRecord;
+import com.hurence.logisland.record.TimeseriesRecord;
 
 /**
  * Static class to put field names used by HistorianService.
@@ -45,19 +44,19 @@ public class HistorianFields {
     public static String RESPONSE_TAG_NAME_FIELD = "tagname";
     public static String RESPONSE_CHUNK_ID_FIELD = "id";
     public static String RESPONSE_CHUNK_VERSION_FIELD = "_version_";
-    public static String RESPONSE_CHUNK_VALUE_FIELD = TimeSeriesRecord.CHUNK_VALUE;
-    public static String RESPONSE_CHUNK_MAX_FIELD = TimeSeriesRecord.CHUNK_MAX;
-    public static String RESPONSE_CHUNK_MIN_FIELD = TimeSeriesRecord.CHUNK_MIN;
-    public static String RESPONSE_CHUNK_START_FIELD = TimeSeriesRecord.CHUNK_START;
-    public static String RESPONSE_CHUNK_END_FIELD = TimeSeriesRecord.CHUNK_END;
-    public static String RESPONSE_CHUNK_FIRST_VALUE_FIELD = TimeSeriesRecord.CHUNK_FIRST_VALUE;
-    public static String RESPONSE_CHUNK_AVG_FIELD = TimeSeriesRecord.CHUNK_AVG;
-    public static String RESPONSE_CHUNK_SIZE_FIELD = TimeSeriesRecord.CHUNK_SIZE;
-    public static String RESPONSE_CHUNK_SUM_FIELD = TimeSeriesRecord.CHUNK_SUM;
-    public static String RESPONSE_CHUNK_SAX_FIELD = TimeSeriesRecord.CHUNK_SAX;
-    public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeSeriesRecord.CHUNK_WINDOW_MS;
-    public static String RESPONSE_CHUNK_TREND_FIELD = TimeSeriesRecord.CHUNK_TREND;
-    public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = TimeSeriesRecord.CHUNK_SIZE_BYTES;
+    public static String RESPONSE_CHUNK_VALUE_FIELD = TimeseriesRecord.CHUNK_VALUE;
+    public static String RESPONSE_CHUNK_MAX_FIELD = TimeseriesRecord.CHUNK_MAX;
+    public static String RESPONSE_CHUNK_MIN_FIELD = TimeseriesRecord.CHUNK_MIN;
+    public static String RESPONSE_CHUNK_START_FIELD = TimeseriesRecord.CHUNK_START;
+    public static String RESPONSE_CHUNK_END_FIELD = TimeseriesRecord.CHUNK_END;
+    public static String RESPONSE_CHUNK_FIRST_VALUE_FIELD = TimeseriesRecord.CHUNK_FIRST_VALUE;
+    public static String RESPONSE_CHUNK_AVG_FIELD = TimeseriesRecord.CHUNK_AVG;
+    public static String RESPONSE_CHUNK_SIZE_FIELD = TimeseriesRecord.CHUNK_SIZE;
+    public static String RESPONSE_CHUNK_SUM_FIELD = TimeseriesRecord.CHUNK_SUM;
+    public static String RESPONSE_CHUNK_SAX_FIELD = TimeseriesRecord.CHUNK_SAX;
+    public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeseriesRecord.CHUNK_WINDOW_MS;
+    public static String RESPONSE_CHUNK_TREND_FIELD = TimeseriesRecord.CHUNK_TREND;
+    public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = TimeseriesRecord.CHUNK_SIZE_BYTES;
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
 
     //schema historian

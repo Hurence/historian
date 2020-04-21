@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.util;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.spark.compactor.job.HistorianFields;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;

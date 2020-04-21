@@ -16,7 +16,6 @@
 
             <!-- Now, select which projects to include in this module-set. -->
             <includes>
-                <include>com.hurence.historian:historian-server</include>
                 <include>com.hurence.historian:loader</include>
                 <include>com.hurence.historian:logisland-timeseries</include>
             </includes>
@@ -42,10 +41,10 @@
         </fileSet>
 
         <fileSet>
-            <directory>../historian-server/bin</directory>
+            <directory>../historian-resources/conf</directory>
             <directoryMode>0770</directoryMode>
             <fileMode>0770</fileMode>
-            <outputDirectory>./bin</outputDirectory>
+            <outputDirectory>./conf</outputDirectory>
             <includes>
                 <include>**/*</include>
             </includes>
@@ -56,10 +55,10 @@
         <fileSet>
             <directoryMode>0770</directoryMode>
             <fileMode>0660</fileMode>
-            <directory>./src/extra-jars</directory>
-            <outputDirectory>./lib/cores</outputDirectory>
+            <directory>../historian-server/target</directory>
+            <outputDirectory>./lib</outputDirectory>
             <includes>
-                <include>*.jar</include>
+                <include>*-fat.jar</include>
             </includes>
         </fileSet>
         <fileSet>

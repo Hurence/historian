@@ -1,15 +1,16 @@
 package com.hurence.historian.model
 
 
+/**
+  * A chunk is a group of consecutive measures
+  *
+  * @see Measure
+  */
 sealed trait Chunk {
 
   def apiVersion: String = "v0"
 
   def name: String
-
-  def lat: Option[Double]
-
-  def lon: Option[Double]
 
   def start: Long
 
@@ -17,11 +18,7 @@ sealed trait Chunk {
 
   def value: String
 
-  def quality: String
-
-  def count: Int
-
-  def sizeInBytes: Int
+  def count: Long
 
   def first: Double
 
@@ -35,29 +32,45 @@ sealed trait Chunk {
 
   def sax: String
 
-  def trend: Boolean
-
-  def outlier: Boolean
-
-  def origin: Option[String]
-
 }
 
+
+// kurtosis
+//
+/**
+  * Chunk Record v0
+  *
+  * @param name
+  * @param day
+  * @param start
+  * @param end
+  * @param value
+  * @param timestamps
+  * @param values
+  * @param count
+  * @param avg
+  * @param stddev
+  * @param min
+  * @param max
+  * @param first
+  * @param last
+  * @param sax
+  * @param tags
+  */
 case class ChunkRecordV0(name: String,
+                         day:String,
                          start: Long,
                          end: Long,
                          value: String,
-                         quality: String,
-                         count: Int,
-                         sizeInBytes: Int,
-                         first: Double,
-                         last: Double,
+                         timestamps: Array[Long],
+                         values: Array[Double],
+                         count: Long,
+                         avg: Double,
+                         stddev: Double,
                          min: Double,
                          max: Double,
-                         avg: Double,
+                         first: Double,
+                         last: Double,
                          sax: String,
-                         trend: Boolean,
-                         outlier: Boolean,
-                         origin: Option[String],
-                         lat: Option[Double],
-                         lon: Option[Double]) extends Chunk
+                         tags: Map[String,String]) extends Chunk
+

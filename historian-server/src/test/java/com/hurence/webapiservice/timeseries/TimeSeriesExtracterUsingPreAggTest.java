@@ -2,7 +2,7 @@ package com.hurence.webapiservice.timeseries;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.historian.modele.ChunkModele;
+import com.hurence.historian.spark.compactor.job.ChunkModele;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

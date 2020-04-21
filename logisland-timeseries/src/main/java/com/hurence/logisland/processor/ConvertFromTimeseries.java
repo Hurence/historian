@@ -16,7 +16,6 @@ package com.hurence.logisland.processor;
  * limitations under the License.
  */
 
-import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.annotation.documentation.CapabilityDescription;
 import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
 import com.hurence.logisland.annotation.documentation.Tags;
@@ -57,8 +56,8 @@ public class ConvertFromTimeseries extends AbstractProcessor {
     @Override
     public Collection<Record> process(ProcessContext context, Collection<Record> records) {
         return records.stream()
-                .filter(TimeSeriesRecord.class::isInstance)
-                .map(TimeSeriesRecord.class::cast)
+                .filter(TimeseriesRecord.class::isInstance)
+                .map(TimeseriesRecord.class::cast)
                 .flatMap(r -> {
                     try {
                         return converter.unchunk(r).stream();

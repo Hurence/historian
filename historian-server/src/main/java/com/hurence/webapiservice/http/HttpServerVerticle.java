@@ -2,7 +2,6 @@ package com.hurence.webapiservice.http;
 
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
-import com.hurence.webapiservice.http.compaction.CompactionApiImpl;
 import com.hurence.webapiservice.http.grafana.GrafanaApiImpl;
 import com.hurence.webapiservice.timeseries.LogislandTimeSeriesModeler;
 import com.hurence.webapiservice.timeseries.TimeSeriesModeler;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.spark.compactor.job.HistorianFields.*;
 import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
 
 public class HttpServerVerticle extends AbstractVerticle {
