@@ -1,12 +1,4 @@
-package com.hurence.historian.spark.sql
-
-
-object WriterType extends Enumeration {
-  type WriterType = Value
-
-  val SOLR:Value = Value("SOLR")
-  val PARQUET:Value = Value("PARQUET")
-}
+package com.hurence.historian.spark.sql.reader
 
 object ReaderType extends Enumeration {
   type ReaderType = Value
@@ -15,5 +7,3 @@ object ReaderType extends Enumeration {
   val RD_BOOSTER_CSV:Value = Value("RD_BOOSTER_CSV")
   val PARQUET:Value = Value("PARQUET")
 }
-
-

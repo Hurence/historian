@@ -1,9 +1,12 @@
 package com.hurence.historian.spark.sql.reader
 
+import com.hurence.historian.spark.sql.reader.ReaderType.ReaderType
 import com.hurence.historian.spark.sql.reader.csv.{EvoaCSVTimeseriesReader, RDBoosterCSVTimeseriesReader}
 import com.hurence.historian.spark.sql.reader.parquet.ParquetTimeseriesReader
-import com.hurence.historian.spark.sql.ReaderType
-import com.hurence.historian.spark.sql.ReaderType.ReaderType
+
+
+
+
 
 object TimeseriesReaderFactory {
 

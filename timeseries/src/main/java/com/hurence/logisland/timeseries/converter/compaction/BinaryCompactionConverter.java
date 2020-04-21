@@ -49,18 +49,18 @@ public class BinaryCompactionConverter implements Serializable {
      * @return
      * @throws ProcessException
      */
-    public TimeSeriesRecord chunk(List<Record> records) throws ProcessException {
+    public TimeseriesRecord chunk(List<Record> records) throws ProcessException {
 
         if (records.isEmpty())
             throw new ProcessException("not enough records to build a timeseries, should contain at least 1 records ");
 
         final MetricTimeSeries timeSeries = buildTimeSeries(records);
-        final TimeSeriesRecord chunkrecord = new TimeSeriesRecord(timeSeries);
+        final TimeseriesRecord chunkrecord = new TimeseriesRecord(timeSeries);
 
         // compress chunk into binaries
         byte[] serializedTimeseries = serializeTimeseries(timeSeries);
-        chunkrecord.setField(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES, serializedTimeseries);
-        chunkrecord.setField(TimeSeriesRecord.CHUNK_SIZE_BYTES, FieldType.INT, serializedTimeseries.length);
+        chunkrecord.setField(TimeseriesRecord.CHUNK_VALUE, FieldType.BYTES, serializedTimeseries);
+        chunkrecord.setField(TimeseriesRecord.CHUNK_SIZE_BYTES, FieldType.INT, serializedTimeseries.length);
 
         return chunkrecord;
     }
@@ -107,11 +107,11 @@ public class BinaryCompactionConverter implements Serializable {
      * @return
      * @throws ProcessException
      */
-    public List<Record> unchunk(final TimeSeriesRecord record) throws IOException {
+    public List<Record> unchunk(final TimeseriesRecord record) throws IOException {
 
         final long start = record.getTimeSeries().getStart();
         final long end = record.getTimeSeries().getEnd();
-        return unCompressPoints(record.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes(), start, end).stream()
+        return unCompressPoints(record.getField(TimeseriesRecord.CHUNK_VALUE).asBytes(), start, end).stream()
                 .map(m -> {
 
                     long timestamp = m.getTimestamp();

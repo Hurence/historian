@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.spark.compactor.job.HistorianFields.*;
 
 public class GrafanaTimeSeriesModeler implements TimeSeriesModeler {
     private static String TIMESERIE_NAME = "target";

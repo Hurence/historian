@@ -114,6 +114,11 @@ add_field() {
   SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\" }"
 }
 
+
+add_dynamic_field() {
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-dynamic-field\": { \"name\":\"$1\", \"type\":\"$2\" }"
+}
+
 add_field_multivalued() {
   SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"multiValued\":true} }"
 }
@@ -131,7 +136,7 @@ create_schema() {
     echo -e "${GREEN}Creating schema for historian version ${MODEL_VERSION} ${NOCOLOR}"
 
     case ${MODEL_VERSION} in
-        "IFP0")
+        "EVOA0")
             add_field "chunk_start" "plong"
             add_field "chunk_end" "plong"
             add_field "chunk_value" "text_general"
@@ -185,6 +190,7 @@ create_schema() {
             add_field "month" "pint"
             add_field "day" "string"
             add_field "hour" "pint"
+            add_dynamic_field "tag_*" "text"
             ;;
         *)
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"

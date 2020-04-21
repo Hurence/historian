@@ -2,21 +2,30 @@ package com.hurence.historian.model
 
 
 /**
-  * For
+  * A measure is a chronodated value of something
   */
 sealed trait Measure {
+
   def name: String
 
   def value: Double
 
   def timestamp: Long
 
-  def lat: Option[Double] = None
-
-  def lon: Option[Double] = None
 }
 
-
+/**
+  * MeasureRecord V0
+  *
+  * @param name
+  * @param value
+  * @param timestamp
+  * @param year
+  * @param month
+  * @param day
+  * @param hour
+  * @param tags
+  */
 case class MeasureRecordV0(name: String,
                            value: Double,
                            timestamp: Long,
@@ -24,8 +33,6 @@ case class MeasureRecordV0(name: String,
                            month: Int,
                            day: String,
                            hour: Int,
-                           tags: List[String],
-                           override val lat: Option[Double] = None,
-                           override val lon: Option[Double] = None) extends Measure
+                           tags: Map[String,String]) extends Measure
 
 

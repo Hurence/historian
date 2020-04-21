@@ -1,8 +1,6 @@
 package com.hurence.historian.spark.sql.writer
 
-
-import com.hurence.historian.spark.sql.WriterType
-import com.hurence.historian.spark.sql.WriterType.WriterType
+import com.hurence.historian.spark.sql.writer.WriterType.WriterType
 import com.hurence.historian.spark.sql.writer.parquet.ParquetTimeseriesWriter
 import com.hurence.historian.spark.sql.writer.solr.SolrTimeseriesWriter
 
@@ -10,7 +8,7 @@ import com.hurence.historian.spark.sql.writer.solr.SolrTimeseriesWriter
 /**
   * Timeseries Reader factory to get the one you need to load dataframe
   */
-object TimeseriesReaderFactory {
+object TimeseriesWriterFactory {
 
 
   def apply(writerType: WriterType): TimeseriesWriter = writerType match {

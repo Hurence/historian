@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.spark.compactor.job.HistorianFields.*;
 import static com.hurence.webapiservice.http.grafana.GrafanaApi.TARGET;
 import static org.junit.jupiter.api.Assertions.*;
 
