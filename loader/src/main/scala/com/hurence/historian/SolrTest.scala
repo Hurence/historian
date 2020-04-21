@@ -1,6 +1,5 @@
 package com.hurence.historian
 
-import com.hurence.logisland.record.TimeseriesRecord
 import org.apache.spark.sql.SparkSession
 
 
