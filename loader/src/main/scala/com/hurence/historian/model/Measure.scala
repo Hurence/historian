@@ -4,7 +4,7 @@ package com.hurence.historian.model
 /**
   * A measure is a chronodated value of something
   */
-sealed trait Measure {
+sealed trait Measure extends HistorianRecord {
 
   def name: String
 
