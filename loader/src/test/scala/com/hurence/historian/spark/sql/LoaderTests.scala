@@ -4,7 +4,7 @@ import com.hurence.historian.LoaderOptions
 import com.hurence.historian.model.{ChunkRecordV0, MeasureRecordV0}
 import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.sql.functions.{chunk, sax}
-import com.hurence.historian.spark.sql.reader.{ReaderFactory, ReaderOptions, ReaderType}
+import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ModelVersion, ReaderFactory}
 import org.apache.orc.OrcFile.ReaderOptions
 import org.apache.spark.sql.Dataset
 import org.apache.spark.sql.functions._
@@ -125,17 +125,56 @@ class LoaderTests extends SparkSessionTestWrapper {
 
 
   @Test
-  def testLoadITDataV0() ={
-
+  def testLoadITDataCSVV0() ={
 
     spark.version
 
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
-    val itDataV0ReaderOptions = reader.ReaderOptions( ReaderType.ITDATA_CSV_MEASURES_READER, filePath)
-    val itDataV0Reader = ReaderFactory(ReaderType.ITDATA_CSV_MEASURES_READER)
+    val options = Options(
+      filePath,
+      Map(
+      "inferSchema" -> "true",
+      "delimiter" -> ",",
+      "header" -> "true",
+      "dateFormat" -> ""
+    ))
+    val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
 
-    val ds = itDataV0Reader.read(itDataV0ReaderOptions).as[MeasureRecordV0]
+    val ds = itDataV0Reader.read(options)
 
     ds.show()
+  }
+
+  @Test
+  def testLoadITDataParquetV0() ={
+
+    spark.version
+
+    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
+    val options = Options( filePath, Map())
+    val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
+
+    val ds = itDataV0Reader.read(options)
+
+
+    ds.printSchema()
+    ds.show()
+
+  }
+
+
+  @Test
+  def testLoadITDataChunksParquetV0() ={
+
+    spark.version
+
+    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics-chunk.parquet").getPath
+    val options = Options( filePath, Map())
+    val reader = ReaderFactory.getChunksReader(ChunksReaderType.PARQUET)
+    val ds = reader.read(options)
+
+    ds.printSchema()
+    ds.show()
+
   }
 }
