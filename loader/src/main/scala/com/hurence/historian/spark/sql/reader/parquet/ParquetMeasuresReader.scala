@@ -1,16 +1,15 @@
 package com.hurence.historian.spark.sql.reader.parquet
 
-import com.hurence.historian.LoaderOptions
 import com.hurence.historian.model.MeasureRecordV0
-import com.hurence.historian.spark.sql.reader.TimeseriesReader
+import com.hurence.historian.spark.sql.reader.{Reader, ReaderOptions}
 import com.hurence.logisland.record.TimeseriesRecord
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-class ParquetTimeseriesReader extends TimeseriesReader {
+class ParquetMeasuresReader extends Reader[MeasureRecordV0] {
 
 
-  override def read(options: LoaderOptions): Dataset[MeasureRecordV0] = {
+  override def read(options: ReaderOptions): Dataset[MeasureRecordV0] = {
 
 
     val spark = SparkSession.getActiveSession.get

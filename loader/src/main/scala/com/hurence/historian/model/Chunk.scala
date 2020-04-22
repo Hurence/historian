@@ -1,12 +1,18 @@
 package com.hurence.historian.model
 
 
+
+trait HistorianRecord {
+  def name: String
+}
+
+
 /**
   * A chunk is a group of consecutive measures
   *
   * @see Measure
   */
-sealed trait Chunk {
+sealed trait Chunk extends HistorianRecord {
 
   def apiVersion: String = "v0"
 
