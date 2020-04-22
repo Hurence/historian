@@ -1,13 +1,13 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.LoaderOptions
 import com.hurence.historian.model.MeasureRecordV0
+import com.hurence.historian.spark.sql.reader.{Reader, ReaderOptions}
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-class EvoaCSVTimeseriesReader extends CSVTimeseriesReader {
+class EvoaCSVMeasuresReader extends Reader[MeasureRecordV0] {
 
-  override def config(): Map[String, String] = Map(
+  def config(): Map[String, String] = Map(
     "inferSchema" -> "true",
     "sep" -> ";",
     "header" -> "true",
@@ -15,7 +15,7 @@ class EvoaCSVTimeseriesReader extends CSVTimeseriesReader {
   )
 
 
-  override def read(options: LoaderOptions): Dataset[MeasureRecordV0] = {
+  override def read(options: ReaderOptions): Dataset[MeasureRecordV0] = {
 
 
     val spark = SparkSession.getActiveSession.get
