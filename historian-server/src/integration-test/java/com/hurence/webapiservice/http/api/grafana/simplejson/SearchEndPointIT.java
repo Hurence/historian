@@ -7,14 +7,14 @@ import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.json.JsonArray;
-import io.vertx.ext.web.client.WebClient;
-import io.vertx.ext.web.codec.BodyCodec;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.file.FileSystem;
+import io.vertx.reactivex.ext.web.client.WebClient;
+import io.vertx.reactivex.ext.web.codec.BodyCodec;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
@@ -159,7 +159,7 @@ public class SearchEndPointIT {
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
                 .as(BodyCodec.jsonArray())
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());
@@ -188,7 +188,7 @@ public class SearchEndPointIT {
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post("/api/grafana/search")
                 .as(BodyCodec.jsonArray())
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());

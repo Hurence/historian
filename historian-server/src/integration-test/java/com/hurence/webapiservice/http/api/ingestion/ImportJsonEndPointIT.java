@@ -2,16 +2,17 @@ package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.util.AssertResponseGivenRequestHelperTwoEndpoint;
-import com.hurence.webapiservice.http.HttpServerVerticle;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
+import com.hurence.util.RequestResponseConf;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import io.vertx.ext.web.client.WebClient;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.web.client.WebClient;
+import io.vertx.reactivex.ext.web.codec.BodyCodec;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.AfterAll;
@@ -21,25 +22,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.http.Codes.CREATED;
+import static com.hurence.webapiservice.http.Codes.OK;
+import static com.hurence.webapiservice.http.HttpServerVerticle.IMPORT_JSON_ENDPOINT;
+import static com.hurence.webapiservice.http.HttpServerVerticle.QUERY_ENDPOINT;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class ImportJsonEndPointIT {
 
     private static WebClient webClient;
-    private static AssertResponseGivenRequestHelperTwoEndpoint assertHelper1;
+    private static AssertResponseGivenRequestHelper assertHelper1;
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HttpWithHistorianSolrITHelper
                 .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper1 = new AssertResponseGivenRequestHelperTwoEndpoint(
-                webClient,
-                HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.JSON_ENDPOINT,
-                HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.QUERY_ENDPOINT);
+        assertHelper1 = new AssertResponseGivenRequestHelper(webClient, IMPORT_JSON_ENDPOINT);
     }
 
     @AfterAll
@@ -211,11 +215,21 @@ public class ImportJsonEndPointIT {
 
     public void assertWrongImportRequestWithOKResponse(Vertx vertx, VertxTestContext testContext,
                                                        String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
-        assertHelper1.assertWrongImportRequestWithOKResponseGiveArrayResponseFromFile(vertx, testContext, addRequestFile, addResponseFile,queryRequestFile, queryResponseFile);
+        List<RequestResponseConf<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "Created", BodyCodec.jsonObject()),
+                new RequestResponseConf<JsonArray>(QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray())
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, vertx, testContext, confs);
     }
 
     public void assertCorrectPointsImportRequest(Vertx vertx, VertxTestContext testContext,
                                                  String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
-        assertHelper1.assertCorrectPointsRequestGiveArrayResponseFromFile(vertx, testContext, addRequestFile, addResponseFile,queryRequestFile, queryResponseFile);
+        List<RequestResponseConf<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, OK, "OK", BodyCodec.jsonObject()),
+                new RequestResponseConf<JsonArray>(QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray())
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, vertx, testContext, confs);
     }
 }

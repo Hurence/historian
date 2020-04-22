@@ -17,9 +17,9 @@
 
 package com.hurence.webapiservice.util;
 
-import io.vertx.ext.web.client.WebClient;
 import io.vertx.ext.web.client.WebClientOptions;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.ext.web.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,7 +29,7 @@ public class HttpITHelper {
     public static String HOST = "localhost";
 
     public static WebClient buildWebClient(Vertx vertx) {
-        return WebClient.create(vertx.getDelegate(), new WebClientOptions()
+        return WebClient.create(vertx, new WebClientOptions()
                 .setDefaultHost(HOST)
                 .setDefaultPort(PORT));
     }
