@@ -1,7 +1,8 @@
 package com.hurence.historian.spark.sql.reader.csv
 
 import com.hurence.historian.model.MeasureRecordV0
-import com.hurence.historian.spark.sql.reader.{Reader, ReaderOptions}
+import com.hurence.historian.spark.sql.Options
+import com.hurence.historian.spark.sql.reader.Reader
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
 
@@ -15,7 +16,7 @@ class EvoaCSVMeasuresReader extends Reader[MeasureRecordV0] {
   )
 
 
-  override def read(options: ReaderOptions): Dataset[MeasureRecordV0] = {
+  override def read(options: Options): Dataset[MeasureRecordV0] = {
 
 
     val spark = SparkSession.getActiveSession.get
@@ -28,8 +29,8 @@ class EvoaCSVMeasuresReader extends Reader[MeasureRecordV0] {
     // Load raw data
     val measuresDF = spark.read
       .format("csv")
-      .options(config())
-      .load(options.in)
+      .options(options.config)
+      .load(options.path)
       .withColumn("time_ms", unix_timestamp($"timestamp", dateFmt) * 1000)
       .withColumn("year", year(to_date($"timestamp", dateFmt)))
       .withColumn("month", month(to_date($"timestamp", dateFmt)))
