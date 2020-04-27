@@ -120,7 +120,7 @@ add_dynamic_field() {
 }
 
 add_field_multivalued() {
-  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"multiValued\":true} }"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"multiValued\":true}"
 }
 
 add_field_not_indexed() {
@@ -164,33 +164,29 @@ create_schema() {
             add_field "hour" "pint"
             ;;
         "0")
-            add_field_not_indexed "chunk_value" "string"
-            add_field "chunk_start" "plong"
-            add_field "chunk_end" "plong"
-            add_field "chunk_avg" "pdouble"
-            add_field "chunk_size_bytes" "pint"
-            add_field "chunk_size" "pint"
-            add_field "chunk_count" "pint"
-            add_field "chunk_min" "pdouble"
-            add_field "chunk_max" "pdouble"
-            add_field "chunk_sax" "ngramtext"
-            add_field "chunk_trend" "boolean"
-            add_field "chunk_outlier" "boolean"
-            add_field "chunk_window_ms" "plong"
-            add_field "chunk_first" "pdouble"
-            add_field "chunk_sum" "pdouble"
-            add_field "chunk_origin" "string"
-            add_field "chunk_api_version" "string"
-            add_field_multivalued "chunk_attributes" "string"
-            add_field_multivalued "chunk_tags" "string"
-            add_field_multivalued "chunk_qualities" "string"
+            add_field_not_indexed "value" "string"
+            add_field "start" "plong"
+            add_field "end" "plong"
+            add_field "avg" "pdouble"
+            add_field "count" "pint"
+            add_field "min" "pdouble"
+            add_field "max" "pdouble"
+            add_field "sax" "ngramtext"
+            add_field "trend" "boolean"
+            add_field "outlier" "boolean"
+            add_field "first" "pdouble"
+            add_field "last" "pdouble"
+            add_field "stddev" "pdouble"
+            add_field "sum" "pdouble"
+            add_field_multivalued "attributes" "text_general"
+            add_field_multivalued "tags" "text_general"
+            add_field_multivalued "qualities" "string"
             add_field "name" "string"
             add_field "timestamp" "plong"
             add_field "year" "pint"
             add_field "month" "pint"
             add_field "day" "string"
             add_field "hour" "pint"
-            add_dynamic_field "tag_*" "text"
             ;;
         *)
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"
