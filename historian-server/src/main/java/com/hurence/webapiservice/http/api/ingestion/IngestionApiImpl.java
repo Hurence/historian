@@ -64,7 +64,7 @@ public class IngestionApiImpl implements IngestionApi {
                         context.response().setStatusCode(CREATED);
                     }
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponse(response, responseAndErrorHolder).encode());
+                    context.response().end(constructFinalResponse(response, responseAndErrorHolder).encodePrettily());
                     LOGGER.info("response : {}", response);
                 }).subscribe();
     }

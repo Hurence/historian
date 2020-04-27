@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.ingestion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
+import com.hurence.util.RequestResponseConfI;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.json.JsonArray;
@@ -215,21 +216,21 @@ public class ImportJsonEndPointIT {
 
     public void assertWrongImportRequestWithOKResponse(Vertx vertx, VertxTestContext testContext,
                                                        String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
-        List<RequestResponseConf<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "Created", BodyCodec.jsonObject()),
-                new RequestResponseConf<JsonArray>(QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray())
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "Created", BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
-                .assertRequestGiveResponseFromFileAndFinishTest(webClient, vertx, testContext, confs);
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
 
     public void assertCorrectPointsImportRequest(Vertx vertx, VertxTestContext testContext,
                                                  String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
-        List<RequestResponseConf<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, OK, "OK", BodyCodec.jsonObject()),
-                new RequestResponseConf<JsonArray>(QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray())
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, OK, "OK", BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
-                .assertRequestGiveResponseFromFileAndFinishTest(webClient, vertx, testContext, confs);
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
 }

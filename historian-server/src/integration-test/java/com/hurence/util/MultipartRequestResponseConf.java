@@ -9,26 +9,26 @@ import io.vertx.reactivex.core.file.FileSystem;
 import io.vertx.reactivex.ext.web.codec.BodyCodec;
 import io.vertx.reactivex.ext.web.multipart.MultipartForm;
 
-public class RequestResponseConf<RESPONSE> implements RequestResponseConfI<RESPONSE> {
+public class MultipartRequestResponseConf<RESPONSE> implements RequestResponseConfI<RESPONSE> {
+    MultipartForm multipartForm;
     String endPointRequest;
-    String requestFile;
     String responseFile;
-    int statusCode;
-    String statusMessage;
+    int expectedStatusCode;
+    String expectedStatusMessage;
     BodyCodec<RESPONSE> responseType;
     final Vertx vertx;
 
-    public RequestResponseConf(String endPointRequest,
-                               String requestFile,
-                               String responseFile,
-                               int statusCode,
-                               String statusMessage,
-                               BodyCodec<RESPONSE> responseType,
-                               Vertx vertx) {
-        this.requestFile = requestFile;
+    public MultipartRequestResponseConf(String endPointRequest,
+                                        MultipartForm multipartForm,
+                                        String responseFile,
+                                        int expectedStatusCode,
+                                        String expectedStatusMessage,
+                                        BodyCodec<RESPONSE> responseType,
+                                        Vertx vertx) {
+        this.multipartForm = multipartForm;
         this.responseFile = responseFile;
-        this.statusCode = statusCode;
-        this.statusMessage = statusMessage;
+        this.expectedStatusCode = expectedStatusCode;
+        this.expectedStatusMessage = expectedStatusMessage;
         this.responseType = responseType;
         this.endPointRequest = endPointRequest;
         this.vertx = vertx;
@@ -41,8 +41,7 @@ public class RequestResponseConf<RESPONSE> implements RequestResponseConfI<RESPO
 
     @Override
     public Buffer getRequestBody() {
-        final FileSystem fs = vertx.fileSystem();
-        return fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(this.requestFile).getFile());
+        return null;
     }
 
     @Override
@@ -60,12 +59,12 @@ public class RequestResponseConf<RESPONSE> implements RequestResponseConfI<RESPO
 
     @Override
     public int getExpectedStatusCode() {
-        return this.statusCode;
+        return this.expectedStatusCode;
     }
 
     @Override
     public String getExpectedStatusMessage() {
-        return this.statusMessage;
+        return this.expectedStatusMessage;
     }
 
     @Override
@@ -75,11 +74,11 @@ public class RequestResponseConf<RESPONSE> implements RequestResponseConfI<RESPO
 
     @Override
     public boolean isMultipart() {
-        return false;
+        return true;
     }
 
     @Override
     public MultipartForm getMultipartForm() {
-        return null;
+        return this.multipartForm;
     }
 }
