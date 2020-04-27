@@ -1,9 +1,10 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.model.{ MeasureRecordV0}
-import com.hurence.historian.spark.sql.reader.{Reader, ReaderOptions}
+import com.hurence.historian.model.MeasureRecordV0
+import com.hurence.historian.spark.sql.Options
+import com.hurence.historian.spark.sql.reader.Reader
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.functions.{ lit}
+import org.apache.spark.sql.functions.lit
 import org.apache.spark.sql.{Dataset, SparkSession}
 
 class ITDataCSVMeasuresReaderV0 extends Reader[MeasureRecordV0] {
@@ -15,20 +16,16 @@ class ITDataCSVMeasuresReaderV0 extends Reader[MeasureRecordV0] {
     "dateFormat" -> ""
   )
 
-  override def read(options: ReaderOptions): Dataset[MeasureRecordV0] = {
+  override def read(options: Options): Dataset[MeasureRecordV0] = {
 
 
     val spark = SparkSession.getActiveSession.get
     import spark.implicits._
 
-
-    val filePath = options.in
-
-
     spark.read
       .format("csv")
-      .options(config())
-      .load(filePath)
+      .options(options.config)
+      .load(options.path)
       .withColumn("year", year(from_unixtime($"timestamp")))
       .withColumn("month", month(from_unixtime($"timestamp")))
       .withColumn("day", from_unixtime($"timestamp", "yyyy-MM-dd"))

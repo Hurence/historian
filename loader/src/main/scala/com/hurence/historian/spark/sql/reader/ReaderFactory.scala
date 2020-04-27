@@ -1,9 +1,10 @@
 package com.hurence.historian.spark.sql.reader
 
-import com.hurence.historian.model.HistorianRecord
-import com.hurence.historian.spark.sql.reader.ReaderType.ReaderType
+import com.hurence.historian.spark.sql.reader.ChunksReaderType.ChunksReaderType
+import com.hurence.historian.spark.sql.reader.MeasuresReaderType.MeasuresReaderType
 import com.hurence.historian.spark.sql.reader.csv.{EvoaCSVMeasuresReader, ITDataCSVMeasuresReaderV0}
 import com.hurence.historian.spark.sql.reader.parquet.{ParquetChunksReader, ParquetMeasuresReader}
+import com.hurence.historian.spark.sql.reader.solr.SolrChunksReader
 
 
 /**
@@ -12,15 +13,14 @@ import com.hurence.historian.spark.sql.reader.parquet.{ParquetChunksReader, Parq
 object ReaderFactory {
 
 
-  def apply(readerType: ReaderType): Reader[_ <: HistorianRecord] = readerType match {
-    case ReaderType.EVOA_CSV_MEASURES_READER => new EvoaCSVMeasuresReader()
-    case ReaderType.ITDATA_CSV_MEASURES_READER => new ITDataCSVMeasuresReaderV0()
-    case ReaderType.PARQUET_MEASURES_READER => new ParquetMeasuresReader()
-    case ReaderType.PARQUET_CHUNKS_READER => new ParquetChunksReader()
+  def getMeasuresReader(readerType: MeasuresReaderType)  = readerType match {
+    case MeasuresReaderType.EVOA_CSV => new EvoaCSVMeasuresReader()
+    case MeasuresReaderType.ITDATA_CSV => new ITDataCSVMeasuresReaderV0()
+    case MeasuresReaderType.PARQUET => new ParquetMeasuresReader()
   }
-}
 
-
-class ReaderFactory[T] {
-
+  def getChunksReader(readerType: ChunksReaderType)  = readerType match {
+    case ChunksReaderType.PARQUET => new ParquetChunksReader()
+    case ChunksReaderType.SOLR => new SolrChunksReader()
+  }
 }

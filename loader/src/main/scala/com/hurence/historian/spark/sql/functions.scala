@@ -2,7 +2,7 @@ package com.hurence.historian.spark.sql
 
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
-import com.hurence.logisland.timeseries.sax.SaxConverter
+import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
 import com.hurence.logisland.util.string.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
 
@@ -54,6 +54,30 @@ object functions {
 
 
     saxConverter.getSaxStringFromValues(list)
+
+  }
+
+
+
+  /**
+    * Encoding function: returns the sax string of the values.
+    *
+    *
+    *
+    */
+  val guess = udf { (alphabetSize:Int, values: mutable.WrappedArray[Double]) =>
+
+
+    val guessSasxParams = new GuessSaxParameters.Builder()
+      .alphabetSize(alphabetSize)
+      .build()
+
+    val list = values.map(Double.box).asJava
+
+
+   guessSasxParams.computeBestParam(list).asScala
+
+   // mutable.WrappedArray(guessParm)
 
   }
 }
