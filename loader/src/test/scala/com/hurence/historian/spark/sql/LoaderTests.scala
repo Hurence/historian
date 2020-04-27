@@ -1,12 +1,9 @@
 package com.hurence.historian.spark.sql
 
-import com.hurence.historian.LoaderOptions
-import com.hurence.historian.model.{ChunkRecordV0, MeasureRecordV0}
+import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.SparkSessionTestWrapper
-import com.hurence.historian.spark.sql.functions.{chunk, sax}
-import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ModelVersion, ReaderFactory}
-import org.apache.orc.OrcFile.ReaderOptions
-import org.apache.spark.sql.Dataset
+import com.hurence.historian.spark.sql.functions.{chunk, sax, guess}
+import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import org.apache.spark.sql.functions._
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -95,6 +92,23 @@ class LoaderTests extends SparkSessionTestWrapper {
     val sample = it4MetricsChunksDS
       .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
       .withColumn("sax", sax(lit(5), lit(0.05), lit(50), $"values"))
+      .as[ChunkRecordV0]
+      .collect()
+
+    assertEquals("acabaaabbbbbbaaccdddeeeedeedeeddddddddddcdbbbbabbb", sample(0).sax)
+
+
+  }
+
+
+  @Test
+  def testChunksV0Guess() = {
+
+
+    // simply recompute sax string ith new parameters
+    val sample = it4MetricsChunksDS
+      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+      .withColumn("guess", guess(lit(5), $"values"))
       .as[ChunkRecordV0]
       .collect()
 
