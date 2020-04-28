@@ -1,8 +1,0 @@
-{
-  "targets": [
-    {
-      "target": "metric_1"
-    }
-  ],
-  "maxDataPoints": 550
-}

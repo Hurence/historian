@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.StatusCodes.BAD_REQUEST;
 
 public class CompactionApiImpl implements CompactionApi {
 

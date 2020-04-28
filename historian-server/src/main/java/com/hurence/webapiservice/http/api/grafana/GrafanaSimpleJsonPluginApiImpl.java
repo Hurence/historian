@@ -22,7 +22,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.Codes.*;
+import static com.hurence.webapiservice.http.StatusCodes.*;
 
 public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
 

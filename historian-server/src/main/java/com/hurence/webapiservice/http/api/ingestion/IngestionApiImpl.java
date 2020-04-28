@@ -5,7 +5,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.subscribers.DisposableSubscriber;
 import io.vertx.core.file.OpenOptions;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.buffer.Buffer;
@@ -20,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.Codes.BAD_REQUEST;
-import static com.hurence.webapiservice.http.Codes.CREATED;
+import static com.hurence.webapiservice.http.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.StatusCodes.CREATED;
 
 
 public class IngestionApiImpl implements IngestionApi {
