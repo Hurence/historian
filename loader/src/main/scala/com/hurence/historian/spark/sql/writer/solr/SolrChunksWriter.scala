@@ -3,7 +3,7 @@ package com.hurence.historian.spark.sql.writer.solr
 import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.writer.Writer
-import org.apache.spark.sql.Dataset
+import org.apache.spark.sql.{Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 
 
@@ -23,7 +23,9 @@ class SolrChunksWriter extends Writer[ChunkRecordV0] {
 
     logger.info(s"start saving new chunks to ${options.config("collection")}")
 
-    ds.write
+    ds
+      .drop("timestamps", "values")
+      .write
       .format("solr")
       .options(options.config)
       .save()

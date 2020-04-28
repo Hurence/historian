@@ -1,5 +1,6 @@
 package com.hurence.historian.spark.sql
 
+import com.hurence.logisland.record.Point
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
@@ -8,7 +9,6 @@ import org.apache.spark.sql.functions.udf
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
-
 
 
 // TODO : add functions on Dataset[ChunkRecordV0]
@@ -39,9 +39,22 @@ object functions {
 
 
   /**
+    * Decoding function: returns the base64 encoding as a Chronix chunk.
+    */
+  val unchunk = udf { (chunk: String, start: Long, end: Long) =>
+
+
+    val bytes = BinaryEncodingUtils.decode(chunk)
+
+    converter.deSerializeTimeseries(bytes, start, end).asScala.map(p => (p.getTimestamp, p.getValue))
+
+
+  }
+
+  /**
     * Encoding function: returns the sax string of the values.
     */
-  val sax = udf { (alphabetSize:Int, nThreshold:Float, paaSize:Int, values: mutable.WrappedArray[Double]) =>
+  val sax = udf { (alphabetSize: Int, nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
 
 
     val saxConverter = new SaxConverter.Builder()
@@ -58,14 +71,13 @@ object functions {
   }
 
 
-
   /**
     * Encoding function: returns the sax string of the values.
     *
     *
     *
     */
-  val guess = udf { (alphabetSize:Int, values: mutable.WrappedArray[Double]) =>
+  val guess = udf { (alphabetSize: Int, values: mutable.WrappedArray[Double]) =>
 
 
     val guessSasxParams = new GuessSaxParameters.Builder()
@@ -75,9 +87,9 @@ object functions {
     val list = values.map(Double.box).asJava
 
 
-   guessSasxParams.computeBestParam(list).asScala
+    guessSasxParams.computeBestParam(list).asScala
 
-   // mutable.WrappedArray(guessParm)
+    // mutable.WrappedArray(guessParm)
 
   }
 }
