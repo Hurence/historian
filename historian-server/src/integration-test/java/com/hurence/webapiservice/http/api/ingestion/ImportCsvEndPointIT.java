@@ -109,6 +109,38 @@ public class ImportCsvEndPointIT {
     }
 
     /*
+        Import should be idem potent. This can be easily done by setting the id of the chunk as a hash of all parameters.
+        TODO feiz you can see that with me if you do not understand.
+     */
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testIdemPotence(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx),
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(QUERY_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+
+    /*
         Csv without quality
      */
     @Test
