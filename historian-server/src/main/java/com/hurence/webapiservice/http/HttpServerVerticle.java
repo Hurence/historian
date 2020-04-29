@@ -5,6 +5,7 @@ import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApi;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
+import com.hurence.webapiservice.http.api.main.MainHistorianApi;
 import com.hurence.webapiservice.http.api.main.MainHistorianApiImpl;
 import io.vertx.core.Promise;
 import io.vertx.reactivex.core.AbstractVerticle;
@@ -40,7 +41,8 @@ public class HttpServerVerticle extends AbstractVerticle {
     public static final GrafanaApiVersion GRAFANA_API_VEFSION_DEFAULT = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
     public static final String IMPORT_CSV_ENDPOINT = HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.CSV_ENDPOINT;
     public static final String IMPORT_JSON_ENDPOINT = HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.JSON_ENDPOINT;
-    public static final String QUERY_ENDPOINT = HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.QUERY_ENDPOINT;
+    public static final String GRAFANA_QUERY_ENDPOINT = HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.QUERY_ENDPOINT;
+    public static final String MAIN_QUERY_ENDPOINT = HttpServerVerticle.MAIN_API_ENDPOINT + MainHistorianApi.QUERY_ENDPOINT;
 
     @Override
     public void start(Promise<Void> promise) throws Exception {
