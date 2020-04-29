@@ -101,23 +101,6 @@ class LoaderTests extends SparkSessionTestWrapper {
   }
 
 
-  @Test
-  def testChunksV0Guess() = {
-
-
-    // simply recompute sax string ith new parameters
-    val sample = it4MetricsChunksDS
-      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-      .withColumn("guess", guess(lit(5), $"values"))
-      .as[ChunkRecordV0]
-      .collect()
-
-    assertEquals("acabaaabbbbbbaaccdddeeeedeedeeddddddddddcdbbbbabbb", sample(0).sax)
-
-
-  }
-
-
 
   @Test
   def testLoaderCSV() ={
