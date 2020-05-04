@@ -22,7 +22,7 @@
       "chunk_size_bytes": "TO_REPLACE_WITH_CORRECT_VALUE",
       "chunk_sum": 3.2,
       "chunk_first": 1.2,
-      "day": 1,
+      "day": "1970-01-01",
       "month": 1,
       "year": 1970,
       "chunk_origin": "ingestion-csv"
@@ -43,7 +43,7 @@
       "chunk_size_bytes": "TO_REPLACE_WITH_CORRECT_VALUE",
       "chunk_sum": 3.0,
       "chunk_first": 3.0,
-      "day": 4,
+      "day": "1970-01-04",
       "month": 1,
       "year": 1970,
       "chunk_origin": "ingestion-csv"
