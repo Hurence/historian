@@ -243,7 +243,7 @@ public class ImportCsvEndPointIT {
                 //this query test content of the chunk
                 new RequestResponseConf<>(TEST_CHUNK_QUERY_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQueryChunk/request-metric_1.json",
-                        "/http/ingestion/csv/onemetric-3points/testQueryChunk/expectedResponse.json",
+                        "/http/ingestion/csv/onemetric-3points/testQueryChunk/expectedResponse_with_tags.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonObject(), vertx)
         );
