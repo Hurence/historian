@@ -30,7 +30,7 @@ public class QueryRequestParser {
         builder.withFormat(format);
         Integer maxDataPoints = parseMaxDataPoints(requestBody);;
         builder.withMaxDataPoints(maxDataPoints == null ? QueryRequestParam.DEFAULT_MAX_DATAPOINTS : maxDataPoints);
-        List<Target> targets = parseTargets(requestBody);;
+        List<Target> targets = parseTargets(requestBody);
         builder.withTargets(targets);
         List<AdHocFilter> adHocFilters = parseAdHocFilters(requestBody);;
         builder.withAdHocFilters(adHocFilters == null ? QueryRequestParam.DEFAULT_FILTERS : adHocFilters);

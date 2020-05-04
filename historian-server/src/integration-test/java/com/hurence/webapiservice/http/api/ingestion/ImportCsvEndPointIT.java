@@ -6,7 +6,7 @@ import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.MultipartRequestResponseConf;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
-import com.hurence.webapiservice.http.StatusMessages;
+import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.json.JsonArray;
@@ -37,8 +37,8 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.http.HttpServerVerticle.IMPORT_CSV_ENDPOINT;
 import static com.hurence.webapiservice.http.HttpServerVerticle.GRAFANA_QUERY_ENDPOINT;
-import static com.hurence.webapiservice.http.StatusCodes.BAD_REQUEST;
-import static com.hurence.webapiservice.http.StatusCodes.OK;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})

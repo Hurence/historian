@@ -7,7 +7,6 @@ import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
 import com.hurence.webapiservice.historian.util.models.ResponseAsList;
-import com.hurence.webapiservice.http.GetTimeSerieRequestParser;
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -17,7 +16,6 @@ import com.hurence.webapiservice.timeseries.TimeSeriesModeler;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,8 +26,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.StatusCodes.BAD_REQUEST;
-import static com.hurence.webapiservice.http.StatusCodes.PAYLOAD_TOO_LARGE;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.PAYLOAD_TOO_LARGE;
 
 public class MainHistorianApiImpl implements MainHistorianApi {
 
@@ -37,7 +35,6 @@ public class MainHistorianApiImpl implements MainHistorianApi {
     private HistorianService service;
     private int maxDataPointsAllowedForExportCsv;
 
-    private static final GetTimeSerieRequestParser getTimeSerieParser = new GetTimeSerieRequestParser();
     private static TimeSeriesModeler timeserieModeler = new LogislandTimeSeriesModeler();
 
     public MainHistorianApiImpl(HistorianService service, int maxDataPointsAllowedForExportCsv) {
@@ -74,8 +71,8 @@ public class MainHistorianApiImpl implements MainHistorianApi {
     public void getTimeSeries(RoutingContext context) {
         final TimeSeriesRequest request;
         try {
-            MultiMap map = context.queryParams();
-            request = getTimeSerieParser.parseRequest(map);
+            JsonObject body = context.getBodyAsJson();
+            request =  new GetTimeSerieJsonRequestParser().parseRequest(body);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
@@ -105,8 +102,8 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .doOnSuccess(timeseries -> {
                     JsonObject response = new JsonObject();
                     response
-                            .put("query", "TODO")
-                            .put("total_timeseries", "TODO")
+                            .put("query", context.getBodyAsJson())
+                            .put("total_timeseries", timeseries.size())
                             .put("timeseries", timeseries);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");

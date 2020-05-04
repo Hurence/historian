@@ -9,7 +9,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hurence.webapiservice.http.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
 public class GrafanaHurenceDatasourcePliginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
 

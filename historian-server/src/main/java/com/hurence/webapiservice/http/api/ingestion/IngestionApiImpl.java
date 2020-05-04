@@ -19,8 +19,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.StatusCodes.BAD_REQUEST;
-import static com.hurence.webapiservice.http.StatusCodes.CREATED;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
 
 
 public class IngestionApiImpl implements IngestionApi {

@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http;
+package com.hurence.webapiservice.http.api.modele;
 
 public class StatusCodes {
     public final static int BAD_REQUEST = 400;

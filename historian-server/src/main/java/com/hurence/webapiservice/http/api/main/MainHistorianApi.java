@@ -15,7 +15,7 @@ public interface MainHistorianApi {
         Router router = Router.router(vertx);
         router.get("/").handler(this::root);
         router.post(SEARCH_ENDPOINT).handler(this::search);
-        router.get(QUERY_ENDPOINT)
+        router.post(QUERY_ENDPOINT)
                 .produces("application/json")
                 .handler(this::getTimeSeries);
         router.post(EXPORT_ENDPOINT)

@@ -8,7 +8,9 @@ import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ChunkModele {
     private static int ddcThreshold = 0;
@@ -30,9 +32,21 @@ public class ChunkModele {
     public int month;
     public int day;
     public String chunk_origin;
+    public Map<String, String> tagsAsKeyValue = new HashMap<>();
 
     public static ChunkModele fromPoints(String metricName, List<Point> points) {
         return fromPoints(metricName, 2000, 12, 13, "logisland", points);
+    }
+
+    /**
+     *
+     * @param key
+     * @param value
+     * @return himself for fluent api
+     */
+    public ChunkModele addTag(String key, String value) {
+        tagsAsKeyValue.put(key, value);
+        return this;
     }
 
     public static ChunkModele fromPoints(String metricName,
@@ -89,6 +103,7 @@ public class ChunkModele {
 
     public SolrInputDocument buildSolrDocument(String id) {
         final SolrInputDocument doc = new SolrInputDocument();
+        tagsAsKeyValue.forEach(doc::addField);
         doc.addField(HistorianFields.RESPONSE_CHUNK_ID_FIELD, id);
         doc.addField(HistorianFields.RESPONSE_CHUNK_START_FIELD, this.start);
         doc.addField(HistorianFields.RESPONSE_CHUNK_SIZE_FIELD, this.points.size());

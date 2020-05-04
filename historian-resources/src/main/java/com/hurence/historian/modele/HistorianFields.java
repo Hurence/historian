@@ -34,6 +34,8 @@ public class HistorianFields {
     public static String MATCH_ANY = "matchAny";
     public static String TYPE = "type";
     public static String METRIC = "metric";
+    public static String KEY = "key";
+    public static String VALUE = "value";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";

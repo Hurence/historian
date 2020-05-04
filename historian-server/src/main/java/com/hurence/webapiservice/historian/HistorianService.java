@@ -73,38 +73,6 @@ public interface HistorianService {
      * @param params        as a json object
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#FROM} : "content of chunks as an array",
-     *                          {@value HistorianFields#TO} : "total chunk matching query",
-     *                          {@value HistorianFields#FIELDS} : ["field1", "field2"...],
-     *                          {@value HistorianFields#TAGS} : "total chunk matching query",
-     *                          {@value HistorianFields#NAMES} : "content of chunks as an array",
-     *                      }
-     *                      </pre>
-     *                      explanation :
-     *                      if {@value HistorianFields#FROM} not specified will search from 0
-     *                      if {@value HistorianFields#TO} not specified will search to Max.Long
-     *                      use {@value HistorianFields#FIELDS} if you want to retrieve some of the precalculated aggs. If not specified retrieve all.
-     *                      use {@value HistorianFields#TAGS} to search for specific timeseries having one of those tags
-     *                      use {@value HistorianFields#NAMES} to search a specific timeseries name
-     * @param resultHandler return chunks of timeseries as an array of
-     *                      <pre>
-     *                      {
-     *                          {@value HistorianFields#CHUNKS} : "content of chunks as an array",
-     *                          {@value HistorianFields#TOTAL} : "total chunk matching query",
-     *                      }
-     *                      </pre>
-     * @return himself
-     */
-    @Fluent
-    HistorianService compactTimeSeriesChunk(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
-
-
-
-
-    /**
-     * @param params        as a json object
-     *                      <pre>
-     *                      {
      *                          {@value HistorianFields#METRIC} : "A string to help finding desired metric",
      *                          {@value HistorianFields#LIMIT} : <maximum number of metric to return>(int)
      *                      }

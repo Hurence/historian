@@ -142,40 +142,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    @Override
-    public HistorianService compactTimeSeriesChunk(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        final SolrQuery query = buildTimeSeriesChunkQuery(params);
-        query.setFields();//so we return every fields (this endpoint is currently used only in tests, this is legacy code)
-        //  EXECUTE REQUEST
-        Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
-            try {
-
-
-                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
-                final SolrDocumentList documents = response.getResults();
-
-                LOGGER.debug("Found " + documents.getNumFound() + " documents");
-                JsonArray docs = new JsonArray(documents.stream()
-                        .map(this::convertDoc)
-                        .collect(Collectors.toList())
-                );
-                p.complete(new JsonObject()
-                        .put(HistorianFields.TOTAL, documents.getNumFound())
-                        .put(CHUNKS, docs)
-                );
-
-
-            } catch (IOException | SolrServerException e) {
-                p.fail(e);
-            } catch (Exception e) {
-                LOGGER.error("unexpected exception", e);
-                p.fail(e);
-            }
-        };
-        vertx.executeBlocking(getTimeSeriesHandler, resultHandler);
-        return this;
-    }
-
     private SolrQuery buildTimeSeriesChunkQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
         if (params.getLong(TO) != null) {
@@ -193,7 +159,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
         //    FILTER
-        buildSolrFilterFromArray(params.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
+//        buildSolrFilterFromArray(params.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
+//                .ifPresent(query::addFilterQuery);
+        buildSolrFilterFromTags(params.getJsonObject(HistorianFields.TAGS))
                 .ifPresent(query::addFilterQuery);
         buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
                 .ifPresent(query::addFilterQuery);
@@ -275,6 +243,18 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     .collect(Collectors.joining("\" OR \"", "(\"", "\")"));
             return Optional.of(responseMetricNameField + ":" + orNames);
         }
+    }
+
+    private Optional<String> buildSolrFilterFromTags(JsonObject tags) {
+        if (tags == null || tags.isEmpty())
+            return Optional.empty();
+        String filters = tags.fieldNames().stream()
+                .map(tagName -> {
+                    String value = tags.getString(tagName);
+                    return tagName + ":\"" + value + "\"";
+                })
+                .collect(Collectors.joining(" OR ", "", ""));
+        return Optional.of(filters);
     }
 
     @Override

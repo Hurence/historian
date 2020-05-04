@@ -27,8 +27,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.http.StatusCodes.CREATED;
-import static com.hurence.webapiservice.http.StatusCodes.OK;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 import static com.hurence.webapiservice.http.HttpServerVerticle.IMPORT_JSON_ENDPOINT;
 import static com.hurence.webapiservice.http.HttpServerVerticle.GRAFANA_QUERY_ENDPOINT;
 

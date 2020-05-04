@@ -8,6 +8,7 @@ import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -138,12 +139,8 @@ public class QueryRequestParam implements TimeSeriesRequest {
     }
 
     @Override
-    public List<String> getTags() {
-        if (containFilter(GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY)) {
-            return getTagsFromFilter();
-        } else {
-            return Collections.emptyList();
-        }
+    public Map<String, String> getTags() {
+        return Collections.emptyMap();
     }
 
 
