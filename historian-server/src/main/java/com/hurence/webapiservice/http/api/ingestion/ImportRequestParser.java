@@ -2,10 +2,12 @@ package com.hurence.webapiservice.http.api.ingestion;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.jfree.text.G2TextMeasurer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Set;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
@@ -23,6 +25,11 @@ public class ImportRequestParser {
         ResponseAndErrorHolder responseAndErrorHolder = new ResponseAndErrorHolder();
         for (Object object : metricsParam) {
             JsonObject timeserie = (JsonObject) object;
+            // to catch the groupby
+            if(timeserie.containsKey(GROUPED_BY)) {
+                responseAndErrorHolder.groupedBy = timeserie.getJsonArray(GROUPED_BY);
+                continue;
+            }
             if (!(timeserie.containsKey(NAME))) {
                 throw new IllegalArgumentException("Missing a name for at least one metric");
             } else if ((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) {
@@ -37,39 +44,45 @@ public class ImportRequestParser {
                 throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
-            newTimeserie.put(NAME, timeserie.getString(NAME));
+            Set<String> fieldsWithoutPoints = timeserie.fieldNames();
+            fieldsWithoutPoints.forEach(i -> { // here i put the other fields like the grouped by tags in the new timeserie
+                    if (!i.equals(POINTS_REQUEST_FIELD))
+                        newTimeserie.put(i, timeserie.getValue(i));
+                    if (i.equals(TAGS))
+                        responseAndErrorHolder.tags = timeserie.getJsonArray(i);
+            });
             JsonArray newPoints = new JsonArray();
             for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
                 JsonArray pointArray;
-                String communErrorMessage = "Ignored 1 points for metric with name '" + timeserie.getString(NAME);
+                String commonErrorMessage = "Ignored 1 points for metric with name '" + timeserie.getString(NAME);
                 try {
                     pointArray = (JsonArray) point;
                     pointArray.size();
                 } catch (Exception ex) {
-                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because it was not an array");
+                    responseAndErrorHolder.errorMessages.add(commonErrorMessage + "' because it was not an array");
                     continue;
                 }
                 if (pointArray.size() == 0){
-                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because this point was an empty array");
+                    responseAndErrorHolder.errorMessages.add(commonErrorMessage + "' because this point was an empty array");
                     continue;
                 } else if (pointArray.size() != 2)
                     throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
                 try {
                     if (pointArray.getLong(0) == null) {
-                        responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its timestamp is null");
+                        responseAndErrorHolder.errorMessages.add(commonErrorMessage + "' because its timestamp is null");
                         continue;
                     }
                 } catch (Exception e) {
-                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its timestamp is not a long");
+                    responseAndErrorHolder.errorMessages.add(commonErrorMessage + "' because its timestamp is not a long");
                     continue;
                 }
                 try {
                     if ((pointArray.getDouble(1) == null)) {
-                        responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its value was not a double");
+                        responseAndErrorHolder.errorMessages.add(commonErrorMessage + "' because its value was not a double");
                         continue;
                     }
                 } catch (Exception e) {
-                    responseAndErrorHolder.errorMessages.add(communErrorMessage + "' because its value was not a double");
+                    responseAndErrorHolder.errorMessages.add(commonErrorMessage + "' because its value was not a double");
                     continue;
                 }
                 newPoints.add(pointArray);
@@ -81,7 +94,11 @@ public class ImportRequestParser {
         }
         if (responseAndErrorHolder.correctPoints.isEmpty())
             throw new IllegalArgumentException("There is no valid points");
+        if (!responseAndErrorHolder.groupedBy.isEmpty()) {  // here add the grouped by object to the correct points to use them in the addTimeseries
+            responseAndErrorHolder.correctPoints.add(new JsonObject().put(GROUPED_BY,responseAndErrorHolder.groupedBy));
+        }
         return responseAndErrorHolder;
+
 
     }
 
@@ -89,10 +106,30 @@ public class ImportRequestParser {
 
         public JsonArray correctPoints;
         public ArrayList<String> errorMessages;
+        public JsonArray groupedBy;
+        public JsonArray tags;
 
         ResponseAndErrorHolder () {
             this.correctPoints = new JsonArray();
             this.errorMessages = new ArrayList<>();
+            this.groupedBy = new JsonArray();
+            this.tags = new JsonArray();
+        }
+    }
+    public static class ResponseAndErrorHolderAllFiles {
+
+        public JsonArray correctPoints;
+        public ArrayList<ArrayList<String>> errorMessages;
+        public JsonArray groupedBy;
+        public JsonArray tags;
+        public JsonArray tooBigFiles;
+
+        ResponseAndErrorHolderAllFiles () {
+            this.correctPoints = new JsonArray();
+            this.errorMessages = new ArrayList<>();
+            this.groupedBy = new JsonArray();
+            this.tags = new JsonArray();
+            this.tooBigFiles = new JsonArray();
         }
     }
 }

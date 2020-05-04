@@ -47,7 +47,7 @@ public class ImportCsvEndPointIT {
     private static AssertResponseGivenRequestHelper assertHelper1;
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportCsvEndPointIT.class);
     public static String DEFAULT_TIMESTAMP_FIELD = "timestamp";
-    public static String DEFAULT_NAME_FIELD = "name";
+    public static String DEFAULT_NAME_FIELD = "metric"; // i changed this from name to metric
     public static String DEFAULT_VALUE_FIELD = "value";
     public static String DEFAULT_QUALITY_FIELD = "quality";
 
@@ -169,7 +169,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_VALUE, "metric_value")
                 .attribute(MAPPING_QUALITY, "metric_quality")
                 .attribute(FORMAT_DATE, "TIMESTAMP_IN_MILLISECONDS")
-                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "metric_name") // this should match the MAPPING_NAME
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
@@ -197,7 +197,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_VALUE, "metric_value_2")
                 .attribute(MAPPING_QUALITY, "metric_quality_2")
                 .attribute(FORMAT_DATE, "TIMESTAMP_IN_MILLISECONDS")
-                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "metric_name_2") // same here
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
@@ -217,17 +217,17 @@ public class ImportCsvEndPointIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testCsvFileImportWithTags(Vertx vertx, VertxTestContext testContext) {
+    public void testCsvFileImportWithTags(Vertx vertx, VertxTestContext testContext) {  // if there is tags shouldn't there be tags [..] in response !
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_tags.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
-                .attribute(MAPPING_TIMESTAMP, "metric_timestamp_2")
-                .attribute(MAPPING_NAME, "metric_name_2")
-                .attribute(MAPPING_VALUE, "metric_value_2")
-                .attribute(MAPPING_QUALITY, "metric_quality_2")
+                .attribute(MAPPING_TIMESTAMP, "timestamp") // i changed this because this matches what in datapoints_with_tags.csv
+                .attribute(MAPPING_NAME, "metric")
+                .attribute(MAPPING_VALUE, "value")
+                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(FORMAT_DATE, "TIMESTAMP_IN_MILLISECONDS")
-                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "metric") // same here
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
@@ -256,14 +256,14 @@ public class ImportCsvEndPointIT {
     public void testCsvFileImportGroupByWithSensorTag(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_tags.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
-                .attribute(MAPPING_TIMESTAMP, "metric_timestamp_2")
-                .attribute(MAPPING_NAME, "metric_name_2")
-                .attribute(MAPPING_VALUE, "metric_value_2")
-                .attribute(MAPPING_QUALITY, "metric_quality_2")
+                .attribute(MAPPING_TIMESTAMP, "timestamp") // i changed this because this matches what in datapoints_with_tags.csv
+                .attribute(MAPPING_NAME, "metric")
+                .attribute(MAPPING_VALUE, "value")
+                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(FORMAT_DATE, "TIMESTAMP_IN_MILLISECONDS")
-                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, DEFAULT_NAME_FIELD) // same here
                 .attribute(GROUP_BY, "tags.sensor")
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
@@ -293,21 +293,21 @@ public class ImportCsvEndPointIT {
     public void testCsvFileImportGroupByWithOtherThanTagsShouldFail(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_tags.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
-                .attribute(MAPPING_TIMESTAMP, "metric_timestamp_2")
-                .attribute(MAPPING_NAME, "metric_name_2")
-                .attribute(MAPPING_VALUE, "metric_value_2")
-                .attribute(MAPPING_QUALITY, "metric_quality_2")
+                .attribute(MAPPING_TIMESTAMP, "timestamp") // i changed this because this matches what in datapoints_with_tags.csv
+                .attribute(MAPPING_NAME, "metric")
+                .attribute(MAPPING_VALUE, "value")
+                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(FORMAT_DATE, "TIMESTAMP_IN_MILLISECONDS")
-                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "metric") // same here
                 .attribute(GROUP_BY, DEFAULT_TIMESTAMP_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
                         multipartForm,
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_grouped_by_other_than_tags.json",
-                        BAD_REQUEST, StatusMessages.OK/*TODO Here you can insert the adequate status message*/,
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST/*TODO Here you can insert the adequate status message*/, // i think BAD_REQUEST is a good message here
                         BodyCodec.jsonObject(), vertx)
         );
         AssertResponseGivenRequestHelper
@@ -348,7 +348,7 @@ public class ImportCsvEndPointIT {
     public void testCsvFileImportWithStringDates2(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_string_date_utc_2.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
-                .attribute(FORMAT_DATE, "yyyy DD mm'T'HH")
+                .attribute(FORMAT_DATE, "yyyy-D-m HH:mm:ss.SSS") // this matches what's in file
                 .attribute(TIMEZONE_DATE, "UTC")
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
@@ -385,7 +385,7 @@ public class ImportCsvEndPointIT {
                         BodyCodec.jsonObject(), vertx),
                 new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
-                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",  // here the timestamps are 50400001 50400002 50400003
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
         );
@@ -441,7 +441,7 @@ public class ImportCsvEndPointIT {
     public void testCsvFileImportFileTooBig(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/csv_5001_lines.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
-                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+                .textFileUpload("my_csv_file", "csv_5001_lines.csv", pathCsvFile, "text/csv"); // here the name is csv_5001_lines.csv
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
                         multipartForm,

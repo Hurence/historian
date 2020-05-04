@@ -74,6 +74,7 @@ public class JsonObjectToChunk {
     private MetricTimeSeries buildMetricTimeSeries(JsonObject json) {
         String metricName = json.getString(NAME);
         JsonArray points = json.getJsonArray(POINTS_REQUEST_FIELD);
+        JsonArray tags = json.getJsonArray(TAGS, new JsonArray());
 
         final long start = getStart(points);
         final long end  = getEnd(points);
@@ -82,7 +83,10 @@ public class JsonObjectToChunk {
         tsBuilder.start(start);
         tsBuilder.end(end);
         // If want to add nay attributes
-        // tsBuilder.attribute(tagKey, tagValue);
+        //tsBuilder.attribute(tagKey, tagValue);
+        if (!tags.isEmpty()) // TODO should we left tags: empty array if there is no tags ?
+            tsBuilder.attribute(TAGS,tags);
+        tags.forEach(tag -> tsBuilder.attribute(tag.toString(), json.getString(tag.toString())));
         addPoints(tsBuilder, points);
         return tsBuilder.build();
     }

@@ -1,22 +1,20 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
+import com.fasterxml.jackson.databind.MappingIterator;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import io.reactivex.Flowable;
-import io.reactivex.Single;
-import io.reactivex.subscribers.DisposableSubscriber;
-import io.vertx.core.file.OpenOptions;
+import com.hurence.webapiservice.http.api.ingestion.util.DataConverter;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
+import java.io.File;
+import java.io.IOException;
+import java.util.*;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
@@ -36,9 +34,11 @@ public class IngestionApiImpl implements IngestionApi {
     @Override
     public void importJson(RoutingContext context) {
         final ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder;
+        final ImportRequestParser.ResponseAndErrorHolderAllFiles responseAndErrorHolderAllFiles = new ImportRequestParser.ResponseAndErrorHolderAllFiles();
         try {
             JsonArray getMetricsParam = context.getBodyAsJsonArray();
-             responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(getMetricsParam);
+            responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(getMetricsParam);
+            responseAndErrorHolderAllFiles.correctPoints.add(responseAndErrorHolder.correctPoints);
         }catch (Exception ex) {
             JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
@@ -49,7 +49,7 @@ public class IngestionApiImpl implements IngestionApi {
             return;
         }
 
-        service.rxAddTimeSeries(responseAndErrorHolder.correctPoints)
+        service.rxAddTimeSeries(responseAndErrorHolderAllFiles.correctPoints)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
                     context.response().setStatusCode(500);
@@ -63,12 +63,12 @@ public class IngestionApiImpl implements IngestionApi {
                         context.response().setStatusCode(CREATED);
                     }
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponse(response, responseAndErrorHolder).encodePrettily());
+                    context.response().end(constructFinalResponseJson(response, responseAndErrorHolder).encodePrettily());
                     LOGGER.info("response : {}", response);
                 }).subscribe();
     }
 
-    private JsonObject constructFinalResponse(JsonObject response, ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
+    private JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
         StringBuilder message = new StringBuilder();
         message.append("Injected ").append(response.getInteger(RESPONSE_TOTAL_ADDED_POINTS)).append(" points of ")
                 .append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
@@ -94,68 +94,94 @@ public class IngestionApiImpl implements IngestionApi {
 
     @Override
     public void importCsv(RoutingContext context) {
-        //TODO finish this method !!!
         LOGGER.trace("received request at importCsv: {}", context.request());
         Set<FileUpload> uploads = context.fileUploads();
 
+        final ImportRequestParser.ResponseAndErrorHolderAllFiles responseAndErrorHolderAllFiles = new ImportRequestParser.ResponseAndErrorHolderAllFiles();
 
-        List<Single<JsonObject>> importedFiles = uploads.stream()
-                .map(fileUpload -> this.startCsvImportJob(context, fileUpload))
-                .collect(Collectors.toList());
+        for (FileUpload currentFileUpload : uploads) {
+            LOGGER.info("uploaded currentFileUpload : {} of size : {}", currentFileUpload.fileName(), currentFileUpload.size());
+            LOGGER.info("contentType currentFileUpload : {} of contentTransferEncoding : {}", currentFileUpload.contentType(), currentFileUpload.contentTransferEncoding());
+            LOGGER.info("uploaded uploadedFileName : {} ", currentFileUpload.uploadedFileName());
+            LOGGER.info("uploaded charSet : {} ", currentFileUpload.charSet());
+            String fileName = currentFileUpload.uploadedFileName();
+            File uploadedFile = new File(fileName);
 
-        Single.zip(importedFiles, a -> "OK")
-        .subscribe(result -> {
-            LOGGER.info("import finished with zip !!!!");
-        });
-        context.response().setStatusCode(200);
-        context.response().putHeader("Content-Type", "application/json");
-        context.response().end(new JsonObject().put("status", "OK").encode());
+            final ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder;
+            try {
+                JsonArray fileInArray;
+                try {
+                     fileInArray = ConvertCsvFileToJson(uploadedFile, context);
+                } catch (IOException e) {
+                    String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of 5000";
+                    JsonObject errorObject = new JsonObject().put(FILE, currentFileUpload.fileName()).put(CAUSE, errorMessage);
+                    responseAndErrorHolderAllFiles.tooBigFiles.add(errorObject);
+                    continue;
+                }
+                responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(fileInArray);
+                if (!responseAndErrorHolder.correctPoints.isEmpty())
+                    responseAndErrorHolderAllFiles.correctPoints.add(responseAndErrorHolder.correctPoints);
+                if (!responseAndErrorHolder.errorMessages.isEmpty())
+                    responseAndErrorHolderAllFiles.errorMessages.add(responseAndErrorHolder.errorMessages);
+                responseAndErrorHolderAllFiles.groupedBy = responseAndErrorHolder.groupedBy;  // here the group by and tags should be the same for every file
+                responseAndErrorHolderAllFiles.tags = responseAndErrorHolder.tags;
+            } catch (Exception ex) {
+                JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
+                LOGGER.error("error parsing request", ex);
+                context.response().setStatusCode(BAD_REQUEST);
+                context.response().setStatusMessage("BAD REQUEST");
+                context.response().putHeader("Content-Type", "application/json");
+                context.response().end(String.valueOf(errorObject));
+                return;
+            }
+        }
+        try {
+            service.rxAddTimeSeries(responseAndErrorHolderAllFiles.correctPoints)
+                    .doOnError(ex -> {
+                        LOGGER.error("Unexpected error : ", ex);
+                        context.response().setStatusCode(500);
+                        context.response().putHeader("Content-Type", "application/json");
+                        context.response().end(ex.getMessage());
+                    })
+                    .doOnSuccess(response -> {
+                        if (responseAndErrorHolderAllFiles.errorMessages.isEmpty()) {
+                            context.response().setStatusCode(200);
+                        } else {
+                            context.response().setStatusCode(CREATED);
+                        }
+                        context.response().putHeader("Content-Type", "application/json");
+                        context.response().end(constructFinalResponseCsv(response, responseAndErrorHolderAllFiles).encodePrettily());
+                        LOGGER.info("response : {}", response);
+                    }).subscribe();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    private JsonObject constructFinalResponseCsv(JsonObject response, ImportRequestParser.ResponseAndErrorHolderAllFiles responseAndErrorHolderAllFiles) {
+        JsonArray result = response.getJsonArray(CSV);
+        JsonObject finalResponse = new JsonObject();
+        if (!result.isEmpty())
+            finalResponse.put(TAGS, responseAndErrorHolderAllFiles.tags)
+                .put(GROUPED_BY_IN_RESPONSE, responseAndErrorHolderAllFiles.groupedBy)
+                .put(REPORT, result);
+        if (!responseAndErrorHolderAllFiles.tooBigFiles.isEmpty())
+                finalResponse.put(ERRORS, responseAndErrorHolderAllFiles.tooBigFiles);
+        return finalResponse;
     }
 
-    /**
-     *
-     * @param context
-     * @param fileUpload
-     * @return
-     */
-    private Single<JsonObject> startCsvImportJob(RoutingContext context, final FileUpload fileUpload) {
-        LOGGER.trace("uploaded file : {} of size : {}", fileUpload.fileName(), fileUpload.size());
-        LOGGER.trace("contentType file : {} of contentTransferEncoding : {}", fileUpload.contentType(), fileUpload.contentTransferEncoding());
-        LOGGER.trace("uploaded uploadedFileName : {} ", fileUpload.uploadedFileName());
-        LOGGER.info("uploaded charSet : {} ", fileUpload.charSet());
-        OpenOptions options = new OpenOptions();
+    private JsonArray ConvertCsvFileToJson (File file, RoutingContext context) throws IOException {
+        CsvMapper csvMapper = new CsvMapper();
+        MappingIterator<Map> rows = csvMapper
+                .readerWithSchemaFor(Map.class)
+                .with(CsvSchema.emptySchema().withHeader())
+                .readValues(file);
+        DataConverter converter = new DataConverter(context);
+        List<Map<String, Object>> result = converter.toGroupedByMetricDataPoints(rows);
+        if (result.size()-1 > MAX_LINGE_FOR_CSV_FILE) {
+            throw new IOException(String.valueOf(result.size()-1));
+        }
+        return new JsonArray(result);
 
-        return context.vertx().fileSystem().rxOpen(fileUpload.uploadedFileName(), options)
-                .map(file -> {
-                    Flowable<Buffer> flowable = file.toFlowable();
-                    flowable
-                            .delay(1, TimeUnit.SECONDS)
-                            .subscribeWith(getChunkingDisposable());
-//                            .forEach(data -> LOGGER.info("Read data: " + data.toString("UTF-8")));
-//                    LOGGER.info("imported csv");
-                    return new JsonObject()
-                            .put("file", fileUpload.name())
-                            .put("status", "running");
-                });
-    }
-
-   private DisposableSubscriber getChunkingDisposable() {
-        return new DisposableSubscriber<Buffer>() {
-            @Override public void onStart() {
-                LOGGER.info("Start!");
-                request(1);
-            }
-            @Override public void onNext(Buffer data) {
-                LOGGER.info("Read data: " + data.toString("UTF-8"));
-                request(1);
-            }
-            @Override public void onError(Throwable t) {
-                t.printStackTrace();
-            }
-            @Override public void onComplete() {
-                LOGGER.info("Done!");
-//                                    testContext.completeNow();
-            }
-        };
     }
 }
