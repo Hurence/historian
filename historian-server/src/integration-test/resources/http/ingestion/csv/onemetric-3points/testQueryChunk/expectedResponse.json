@@ -1,0 +1,32 @@
+{
+  "query": {
+    "metrics": [
+      "metric_1"
+    ]
+  },
+  "total": 1,
+  "chunks": [
+    {
+      "sensor": "sensor_1",
+      "id": "id0",
+      "chunk_start": 1,
+      "chunk_size": 3,
+      "chunk_end": 3,
+      "chunk_sax": "TO_REPLACE_WITH_CORRECT_VALUE",
+      "chunk_value": "TO_REPLACE_WITH_CORRECT_VALUE",
+      "chunk_avg": 2.6,
+      "chunk_min": 1.2,
+      "chunk_window_ms": "TO_REPLACE_WITH_CORRECT_VALUE",
+      "name": "metric_1",
+      "chunk_trend": "TO_REPLACE_WITH_CORRECT_VALUE",
+      "chunk_max": 3.0,
+      "chunk_size_bytes": "TO_REPLACE_WITH_CORRECT_VALUE",
+      "chunk_sum": 6.2,
+      "chunk_first": 1.2,
+      "day": 1,
+      "month": 1,
+      "year": 1970,
+      "chunk_origin": "ingestion-csv"
+    }
+  ]
+}

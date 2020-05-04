@@ -8,6 +8,10 @@ import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
+import com.hurence.webapiservice.http.HttpServerVerticle;
+import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
+import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
+import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
@@ -16,8 +20,11 @@ import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
+import io.vertx.reactivex.core.http.HttpServer;
+import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.ext.web.codec.BodyCodec;
+import io.vertx.reactivex.ext.web.handler.BodyHandler;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.AfterAll;
@@ -111,9 +118,17 @@ public class QueryEndPointIT {
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
 
-    public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
-                                                  String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testGetChunks(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<>(TEST_CHUNK_QUERY_ENDPOINT,
+                        "/http/mainapi/getchunks/minimal/request.json",
+                        "/http/mainapi/getchunks/minimal/response.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
-
 }
