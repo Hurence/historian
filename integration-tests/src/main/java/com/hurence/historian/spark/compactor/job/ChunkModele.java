@@ -30,7 +30,7 @@ public class ChunkModele {
     public List<String> tags;
     public int year;
     public int month;
-    public int day;
+    public String day;
     public String chunk_origin;
     public Map<String, String> tagsAsKeyValue = new HashMap<>();
 
@@ -69,7 +69,7 @@ public class ChunkModele {
         chunk.firstValue = points.get(0).getValue();
         chunk.year = year;
         chunk.month = month;
-        chunk.day = day;
+        chunk.day = String.valueOf(day);
         chunk.chunk_origin = chunk_origin;
         return chunk;
     }

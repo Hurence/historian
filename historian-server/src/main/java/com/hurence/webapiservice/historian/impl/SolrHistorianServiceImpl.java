@@ -1,6 +1,9 @@
 package com.hurence.webapiservice.historian.impl;
 
+import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.logisland.record.Record;
+import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
@@ -33,6 +36,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -44,7 +48,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     private final Vertx vertx;
     private final SolrHistorianConf solrHistorianConf;
-    private JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk();
 
     public SolrHistorianServiceImpl(Vertx vertx, SolrHistorianConf solrHistorianConf,
                                     Handler<AsyncResult<HistorianService>> readyHandler) {
@@ -335,7 +338,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService addTimeSeries(JsonArray timeseriesWithGroupbyAndTags, Handler<AsyncResult<JsonObject>> resultHandler) {
-
+        //TODO final String chunkOrigin = timeseriesWithGroupbyAndTags.getString("chunk_origin", "ingestion-json");
+        final String chunkOrigin = null;//TODO
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
                 JsonObject response = new JsonObject();
@@ -362,7 +366,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                             JsonObject timeserie = (JsonObject) timeserieObject;
                             SolrInputDocument document;
                             LOGGER.info("building SolrDocument from a chunk");
-                            document = chunkTimeSerie(timeserie);
+                            document = chunkTimeSerie(timeserie, chunkOrigin);
                             documents.add(document);
                             HashMap<String, String> groupedByFieldsForThisChunk = new LinkedHashMap<String,String>();
                             groupedByFields.forEach(f -> groupedByFieldsForThisChunk.put(f,document.getFieldValue(f).toString()));
@@ -417,11 +421,11 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 }).collect(Collectors.toList());
     }
 
-    private SolrInputDocument chunkTimeSerie(JsonObject timeserie) {
+    private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
+        JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk(chunkOrigin);
         SolrInputDocument doc = jsonObjectToChunk.chunkIntoSolrDocument(timeserie);
         return doc;
     }
-
 
     /**
      * nombre point < LIMIT_TO_DEFINE ==> Extract points from chunk

@@ -10,7 +10,7 @@ import java.time.temporal.WeekFields;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class EvoaUtils {
+    public class EvoaUtils {
 
     static Pattern  csvRegexp = Pattern.compile("(\\w+)\\.?(\\w+-?\\w+-?\\w+)?\\.?(\\w+)?");
 

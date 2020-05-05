@@ -1,8 +1,12 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
+import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.record.FieldType;
+import com.hurence.logisland.record.TimeSeriesRecord;
+import com.hurence.logisland.timeseries.DateInfo;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
+import com.hurence.logisland.timeseries.TimeSeriesUtil;
 import com.hurence.logisland.timeseries.converter.common.DoubleList;
 import com.hurence.logisland.timeseries.converter.common.LongList;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
@@ -14,6 +18,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
@@ -31,8 +36,12 @@ public class JsonObjectToChunk {
     private List<ChronixAnalysis> analyses;
     private List<ChronixEncoding> encodings;
     private FunctionValueMap functionValueMap;
+    private String chunkOrigin;
 
-    public JsonObjectToChunk() { }
+    public JsonObjectToChunk(String chunkOrigin) {
+        this.chunkOrigin = chunkOrigin;
+    }
+
 
     private void configMetricsCalcul(String[] metrics) {
         // init metric functions
@@ -64,7 +73,32 @@ public class JsonObjectToChunk {
         doc.addField(RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
         doc.addField(RESPONSE_CHUNK_SIZE_BYTES_FIELD, compressedPoints.length);
         computeAndSetMetrics(doc, chunk);
+        DateInfo dateInfo = TimeSeriesUtil.calculDateFields(chunk.getStart());
+        doc.addField(CHUNK_YEAR, dateInfo.year);
+        doc.addField(CHUNK_DAY, dateInfo.day);
+        doc.addField(CHUNK_MONTH, dateInfo.month);
+        doc.addField(CHUNK_ORIGIN, this.chunkOrigin);
+        doc.setField(RESPONSE_CHUNK_ID_FIELD, calulateHash(doc));
         return doc;
+    }
+
+    /**
+     * calculate sha256 of value, start and name
+     *
+     * @param doc
+     * @return
+     */
+    private String calulateHash(SolrInputDocument doc) {
+        String toHash = doc.getField(TimeSeriesRecord.CHUNK_VALUE).toString() +
+                doc.getField(TimeSeriesRecord.METRIC_NAME).toString() +
+                doc.getField(TimeSeriesRecord.CHUNK_START).toString() +
+                doc.getField(TimeSeriesRecord.CHUNK_ORIGIN).toString();
+
+        String sha256hex = Hashing.sha256()
+                .hashString(toHash, StandardCharsets.UTF_8)
+                .toString();
+
+        return sha256hex;
     }
 
     /**
