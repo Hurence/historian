@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.loader
 
 import com.hurence.historian.model.ChunkRecordV0
-import com.hurence.historian.spark.ml.Chunkytizer
+import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.functions.{chunk, guess, sax}
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
@@ -185,13 +185,10 @@ object DataLoaderV2 {
     )))
 
 
-    val chunkyfier = new Chunkytizer()
-      .setValueCol("value")
-      .setTimestampCol("timestamp")
+    val chunkyfier = new Chunkyfier()
       .setGroupByCols(Array(  "name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
-      .setChunkMaxSize(1440)
       .setSaxAlphabetSize(options.saxAlphabetSize)
       .setSaxStringLength(options.saxStringLength)
 

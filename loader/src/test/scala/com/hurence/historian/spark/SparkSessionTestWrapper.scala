@@ -3,6 +3,10 @@ package com.hurence.historian.spark
 import com.hurence.historian.model.{ChunkRecordV0, MeasureRecordV0}
 import org.apache.spark.sql.SparkSession
 
+
+/**
+  * Initialize a Spark session for unit tests
+  */
 trait SparkSessionTestWrapper {
 
   lazy val spark: SparkSession = {

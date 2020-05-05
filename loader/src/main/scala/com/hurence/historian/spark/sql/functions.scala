@@ -1,6 +1,5 @@
 package com.hurence.historian.spark.sql
 
-import com.hurence.logisland.record.Point
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
@@ -11,9 +10,7 @@ import scala.collection.mutable
 import scala.collection.JavaConverters._
 
 
-// TODO : add functions on Dataset[ChunkRecordV0]
 object functions {
-
 
   private val converter = new BinaryCompactionConverterOfRecord.Builder().build
 
@@ -22,8 +19,6 @@ object functions {
     * Encoding function: returns the base64 encoding as a Chronix chunk.
     */
   val chunk = udf { (name: String, start: Long, end: Long, timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
-
-
 
     // @TODO move this into timeseries modules and do the same for Chronix functions call
     val builder = new MetricTimeSeries.Builder(name, "measures")

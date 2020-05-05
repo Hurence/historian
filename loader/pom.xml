@@ -13,35 +13,37 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-     <spark.version>2.3.2.3.1.4.0-315</spark.version>
-    <!--   <spark.version>2.4.5</spark.version>-->
-<spark.solr>3.6.6</spark.solr>
-<scala.version>2.11.12</scala.version>
-<scala.binary.version>2.11</scala.binary.version>
-<jackson.version>2.9.10</jackson.version>
-</properties>
+        <spark.version>2.3.2.3.1.4.0-315</spark.version>
+        <!--   <spark.version>2.4.5</spark.version>-->
+        <spark.solr>3.6.6</spark.solr>
+        <scala.version>2.11.12</scala.version>
+        <solr.version>8.2.0</solr.version>
+        <scala.binary.version>2.11</scala.binary.version>
+        <jackson.version>2.9.10</jackson.version>
+        <MaxPermSize>128m</MaxPermSize>
+    </properties>
 
 
-<repositories>
-<repository>
-    <id>repo.hortonworks.com</id>
-    <name>hdp</name>
-    <url>https://repo.hortonworks.com/content/repositories/releases/</url>
-</repository>
-</repositories>
-<!--
- <pluginRepositories>
-   <pluginRepository>
-     <id>scala-tools.org</id>
-     <name>Scala-Tools Maven2 Repository</name>
-     <url>http://scala-tools.org/repo-releases</url>
-   </pluginRepository>
- </pluginRepositories>
--->
+    <repositories>
+        <repository>
+            <id>repo.hortonworks.com</id>
+            <name>hdp</name>
+            <url>https://repo.hortonworks.com/content/repositories/releases/</url>
+        </repository>
+    </repositories>
+    <!--
+     <pluginRepositories>
+       <pluginRepository>
+         <id>scala-tools.org</id>
+         <name>Scala-Tools Maven2 Repository</name>
+         <url>http://scala-tools.org/repo-releases</url>
+       </pluginRepository>
+     </pluginRepositories>
+    -->
     <dependencyManagement>
         <dependencies>
-<!--  This force the version of guava to use in transitive dependencies when this is not hard coded
-(this is the case for spark-solr)-->
+            <!--  This force the version of guava to use in transitive dependencies when this is not hard coded
+            (this is the case for spark-solr)-->
             <dependency>
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
@@ -57,16 +59,16 @@
                 <artifactId>scala-library</artifactId>
                 <version>${scala.version}</version>
             </dependency>
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson.core</groupId>-->
-<!--                <artifactId>jackson-databind</artifactId>-->
-<!--                <version>${jackson.version}</version>-->
-<!--            </dependency>-->
-<!--            <dependency>-->
-<!--                <groupId>com.fasterxml.jackson.module</groupId>-->
-<!--                <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>-->
-<!--                <version>${jackson.version}</version>-->
-<!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>com.fasterxml.jackson.core</groupId>-->
+            <!--                <artifactId>jackson-databind</artifactId>-->
+            <!--                <version>${jackson.version}</version>-->
+            <!--            </dependency>-->
+            <!--            <dependency>-->
+            <!--                <groupId>com.fasterxml.jackson.module</groupId>-->
+            <!--                <artifactId>jackson-module-scala_${scala.binary.version}</artifactId>-->
+            <!--                <version>${jackson.version}</version>-->
+            <!--            </dependency>-->
         </dependencies>
     </dependencyManagement>
     <dependencies>
@@ -75,7 +77,7 @@
             <artifactId>scala-library</artifactId>
             <version>${scala.version}</version>
         </dependency>
-<!--        Convert into json object-->
+        <!--        Convert into json object-->
         <dependency>
             <groupId>net.liftweb</groupId>
             <artifactId>lift-json_2.11</artifactId>
@@ -90,6 +92,13 @@
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
+<exclusions>
+    <exclusion>
+        <groupId>org.apache.zookeeper</groupId>
+        <artifactId>zookeeper</artifactId>
+    </exclusion>
+</exclusions>
+
         </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
@@ -103,15 +112,21 @@
         </dependency>
 
         <dependency>
+            <groupId>io.dropwizard.metrics</groupId>
+            <artifactId>metrics-core</artifactId>
+            <version>4.1.1</version>
+        </dependency>
+
+        <dependency>
             <groupId>commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
             <version>3.1</version>
             <exclusions>
-            <exclusion>
-                <!-- use the jackson libraries specified by solr dependencies -->
-                <groupId>commons-codec</groupId>
-                <artifactId>commons-codec</artifactId>
-            </exclusion>
+                <exclusion>
+                    <!-- use the jackson libraries specified by solr dependencies -->
+                    <groupId>commons-codec</groupId>
+                    <artifactId>commons-codec</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
@@ -142,7 +157,80 @@
             </exclusions>
         </dependency>
 
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-core</artifactId>
+            <version>${solr.version}</version>
+            <type>jar</type>
+            <scope>compile</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>commons-compiler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>janino</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-annotations</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-auth</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <!-- Test -->
+
+        <dependency>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest_${scala.binary.version}</artifactId>
+            <version>3.0.3</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.apache.solr</groupId>
+            <artifactId>solr-test-framework</artifactId>
+            <version>${solr.version}</version>
+            <type>jar</type>
+            <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>commons-compiler</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.codehaus.janino</groupId>
+                    <artifactId>janino</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.antlr</groupId>
+                    <artifactId>antlr4-runtime</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-annotations</artifactId>
+                </exclusion>
+
+                <exclusion>
+                    <groupId>org.apache.hadoop</groupId>
+                    <artifactId>hadoop-hdfs-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>com.hurence.historian</groupId>
             <artifactId>integration-tests</artifactId>
@@ -216,6 +304,32 @@
             <id>depsOnly</id>
             <build>
                 <plugins>
+                    <!-- ScalaTest runs Scala tests -->
+                    <plugin>
+                        <groupId>org.scalatest</groupId>
+                        <artifactId>scalatest-maven-plugin</artifactId>
+                        <version>1.0</version>
+                        <configuration>
+                            <stderr/>
+                            <!-- Log to stderr -->
+                            <junitxml>.</junitxml>
+                            <!-- Directory/ies for JUnit XML -->
+                            <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+                            <argLine>-ea -XX:MaxPermSize=${MaxPermSize}</argLine>
+                            <systemProperties>
+                                <java.awt.headless>true</java.awt.headless>
+                                <java.io.tmpdir>${project.build.directory}/tmp</java.io.tmpdir>
+                            </systemProperties>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>test</id>
+                                <goals>
+                                    <goal>test</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>
@@ -320,12 +434,12 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.22.0</version>
             </plugin>
-<!--
+            <!--
 
-            we need to copy a resource from integration-tests so that solr can properly be initialized.
-            This way solr configuration in centralized in integration-tests module. Any module that needs
-            the historian solr for test should add this plugin to his pom.
--->
+                        we need to copy a resource from integration-tests so that solr can properly be initialized.
+                        This way solr configuration in centralized in integration-tests module. Any module that needs
+                        the historian solr for test should add this plugin to his pom.
+            -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>

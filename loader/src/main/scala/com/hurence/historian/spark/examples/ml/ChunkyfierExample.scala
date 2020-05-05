@@ -4,10 +4,8 @@ package com.hurence.historian.spark.examples.ml
 // $example on$
 import java.util.Date
 
-import com.hurence.historian.spark.ml.{Chunkytizer, UnChunkytizer}
-import org.apache.spark.ml.feature.Bucketizer
-import org.apache.spark.sql.expressions.Window
-import org.apache.spark.sql.functions.{col, collect_list, from_unixtime, rank, row_number, window}
+import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
+
 // $example off$
 import org.apache.spark.sql.SparkSession
 
@@ -77,7 +75,7 @@ object ChunkyfierExample {
 +--------+-----+-------------+----------------+
      */
 
-    val chunkyfier = new Chunkytizer()
+    val chunkyfier = new Chunkyfier()
       .setValueCol("value")
       .setTimestampCol("timestamp")
       .setChunkCol("chunk")
@@ -106,7 +104,7 @@ object ChunkyfierExample {
 
 
 
-    val unchunkyfier = new UnChunkytizer()
+    val unchunkyfier = new UnChunkyfier()
       .setChunkCol("chunk")
     unchunkyfier.transform(bucketedData).show()
 

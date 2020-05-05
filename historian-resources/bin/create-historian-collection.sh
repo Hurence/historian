@@ -111,7 +111,7 @@ create_collection() {
 
 
 add_field() {
-  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\" }"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"indexed\":true, \"stored\":true, \"multiValued\":false }"
 }
 
 
@@ -120,11 +120,11 @@ add_dynamic_field() {
 }
 
 add_field_multivalued() {
-  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"multiValued\":true}"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"indexed\":true, \"stored\":true, \"multiValued\":true }"
 }
 
 add_field_not_indexed() {
-  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"indexed\":false }"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"indexed\":false, \"multiValued\":false }"
 }
 
 delete_field() {
@@ -164,7 +164,7 @@ create_schema() {
             add_field "hour" "pint"
             ;;
         "0")
-            add_field_not_indexed "value" "string"
+            add_field_not_indexed "chunk" "string"
             add_field "start" "plong"
             add_field "end" "plong"
             add_field "avg" "pdouble"
