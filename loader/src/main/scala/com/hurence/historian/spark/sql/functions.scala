@@ -5,14 +5,28 @@ import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionCon
 import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
 import com.hurence.logisland.util.string.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
+import org.apache.spark.unsafe.types.UTF8String
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 
 object functions {
 
   private val converter = new BinaryCompactionConverterOfRecord.Builder().build
+
+
+  val toDateUTC = udf { (epochMilliUTC: Long, dateFormat: String) =>
+    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
+      .withZone(java.time.ZoneId.of("Europe/Paris"))
+
+    try {
+      dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC))
+    } catch {
+      case NonFatal(_) => null
+    }
+  }
 
 
   /**

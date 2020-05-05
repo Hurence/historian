@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.ml
 
 
-import com.hurence.historian.spark.sql.functions.{chunk, sax}
+import com.hurence.historian.spark.sql.functions.{chunk, sax, toDateUTC}
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util._
@@ -124,7 +124,7 @@ final class Chunkyfier(override val uid: String)
       .orderBy(col($(timestampCol)))
 
     val groupedDF = df
-      .withColumn("day", from_unixtime(col($(timestampCol)) / 1000.0, $(dateBucketFormat)))
+      .withColumn("day", toDateUTC(  col($(timestampCol)) , lit($(dateBucketFormat))))
       .withColumn("values", collect_list(col($(valueCol))).over(w))
       .withColumn("timestamps", collect_list(col($(timestampCol))).over(w))
       .groupBy(grougingCols: _*)
