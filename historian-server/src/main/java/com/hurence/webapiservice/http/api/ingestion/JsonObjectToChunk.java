@@ -1,26 +1,49 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.converter.common.DoubleList;
 import com.hurence.logisland.timeseries.converter.common.LongList;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
+import com.hurence.logisland.timeseries.functions.*;
+import com.hurence.logisland.timeseries.metric.MetricType;
+import com.hurence.logisland.timeseries.query.QueryEvaluator;
+import com.hurence.logisland.timeseries.query.TypeFunctions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.util.Base64;
+import java.util.List;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
+/**
+ * This class is not thread safe !
+ */
 public class JsonObjectToChunk {
 
     private static String metricType = "timeseries";
 
-//    public SolrDocument chunkIntoSolrDocument(String metricName, long[] timestamps, double[] values, double[] quality) {
-//        MetricTimeSeries chunk = buildMetricTimeSeries(json);
-//        return convertIntoSolrDocument(chunk);
-//    }
+    private List<ChronixTransformation> transformations;
+    private List<ChronixAggregation> aggregations;
+    private List<ChronixAnalysis> analyses;
+    private List<ChronixEncoding> encodings;
+    private FunctionValueMap functionValueMap;
+
+    public JsonObjectToChunk() { }
+
+    private void configMetricsCalcul(String[] metrics) {
+        // init metric functions
+        TypeFunctions functions = QueryEvaluator.extractFunctions(metrics);
+        transformations = functions.getTypeFunctions(new MetricType()).getTransformations();
+        aggregations = functions.getTypeFunctions(new MetricType()).getAggregations();
+        analyses = functions.getTypeFunctions(new MetricType()).getAnalyses();
+        encodings = functions.getTypeFunctions(new MetricType()).getEncodings();
+        functionValueMap = new FunctionValueMap(aggregations.size(), analyses.size(), transformations.size(), encodings.size());
+    }
+
     public SolrInputDocument chunkIntoSolrDocument(JsonObject json) {
         MetricTimeSeries chunk = buildMetricTimeSeries(json);
         return convertIntoSolrInputDocument(chunk);
@@ -40,7 +63,45 @@ public class JsonObjectToChunk {
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(chunk);
         doc.addField(RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
         doc.addField(RESPONSE_CHUNK_SIZE_BYTES_FIELD, compressedPoints.length);
+        computeAndSetMetrics(doc, chunk);
         return doc;
+    }
+
+    /**
+     * Converts a list of records to a timeseries chunk
+     *
+     * @return
+     */
+    private void computeAndSetMetrics(SolrInputDocument doc, MetricTimeSeries timeSeries) {
+        Integer sax_alphabet_size = Math.max(Math.min(timeSeries.size(), 7), 2);
+        Integer sax_string_length = Math.min(timeSeries.size(), 100);
+        String metricString = String.format("first;min;max;sum;avg;trend;outlier;sax:%s,0.01,%s", sax_alphabet_size, sax_string_length);
+        String[] metrics = new String[]{"metric{" + metricString + "}"};
+        configMetricsCalcul(metrics);
+
+        functionValueMap.resetValues();
+        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
+        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
+        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
+        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
+
+        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
+            String name = functionValueMap.getAggregation(i).getQueryName();
+            double value = functionValueMap.getAggregationValue(i);
+            doc.setField("chunk_" + name, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
+            String name = functionValueMap.getAnalysis(i).getQueryName();
+            boolean value = functionValueMap.getAnalysisValue(i);
+            doc.setField("chunk_" + name, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
+            String name = functionValueMap.getEncoding(i).getQueryName();
+            String value = functionValueMap.getEncodingValue(i);
+            doc.setField("chunk_" + name, value);
+        }
     }
 
     private void checkChunkNotEmpty(MetricTimeSeries chunk) {

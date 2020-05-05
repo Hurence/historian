@@ -7,13 +7,17 @@
   "total": 1,
   "chunks": [
     {
-      "code_install": ["code_1", "code_2"],
-      "sensor": ["sensor_1", "sensor_2"],
+      "tags": [
+        "sensor",
+        "code_install"
+      ],
+      "code_install": "code_1",
+      "sensor": "sensor_1",
       "id": "id0",
       "chunk_start": 1,
       "chunk_size": 3,
       "chunk_end": 3,
-      "chunk_sax": "TO_REPLACE_WITH_CORRECT_VALUE",
+      "chunk_sax": "abc",
       "chunk_value": "TO_REPLACE_WITH_CORRECT_VALUE",
       "chunk_avg": 2.6,
       "chunk_min": 1.2,

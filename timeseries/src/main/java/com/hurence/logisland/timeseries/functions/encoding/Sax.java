@@ -94,7 +94,7 @@ public final class Sax implements ChronixEncoding<MetricTimeSeries> {
             SAXRecords res = sp.ts2saxByChunking(ts, paaSize, na.getCuts(alphabetSize), nThreshold);
             functionValueMap.add(this, res.getSAXString(""));
         } catch (SAXException e) {
-            logger.debug("unable to encode sax string due to : " + e.getMessage());
+            logger.error("unable to encode sax string due to : " + e.getMessage());
         }
 
 
