@@ -163,6 +163,31 @@ create_schema() {
             add_field "day" "pint"
             add_field "hour" "pint"
             ;;
+#  <field name="chunk_first" type="pdouble" multiValued="true"/>
+#  <field name="chunk_avg" type="pdouble" multiValued="true"/>
+#  <field name="chunk_end" type="plong"/>
+#  <field name="chunk_max" type="pdouble"/>
+#  <field name="chunk_min" type="pdouble"/>
+#  <field name="chunk_sum" type="pdouble" multiValued="true"/>
+#  <field name="chunk_sax" type="ngramtext"/>
+#  <field name="chunk_size" type="pint"/>
+#  <field name="chunk_size_bytes" type="pint"/>
+#  <field name="chunk_start" type="plong"/>
+#  <field name="chunk_trend" type="boolean"/>
+#  <field name="chunk_value" type="string"/>
+#  <field name="chunk_origin" type="string"/>
+#  <field name="chunk_outlier" type="boolean" multiValued="true"/>
+#  <field name="code_install" type="string" multiValued="true"/>
+#  <field name="sensor" type="string"/>
+#  <field name="year" type="pint" multiValued="true"/>
+#  <field name="month" type="pint" multiValued="true"/>
+#  <field name="day" type="pint" multiValued="true"/>
+#  <field name="week" type="pint" multiValued="true"/>
+#  <field name="chunk_window_ms" type="plong"/>
+#  <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
+#  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+#  <field name="tagname" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
+#  <field name="name" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
         "0")
             add_field_not_indexed "chunk" "string"
             add_field "start" "plong"
@@ -189,6 +214,31 @@ create_schema() {
             add_field "hour" "pint"
             ;;
         *)
+#  <field name="chunk_first" type="pdouble"/>
+#  <field name="chunk_avg" type="pdouble"/>
+#  <field name="chunk_end" type="plong"/>
+#  <field name="chunk_max" type="pdouble"/>
+#  <field name="chunk_min" type="pdouble"/>
+#  <field name="chunk_sum" type="pdouble"/>
+#  <field name="chunk_sax" type="ngramtext"/>
+#  <field name="chunk_size" type="pint"/>
+#  <field name="chunk_size_bytes" type="pint"/>
+#  <field name="chunk_start" type="plong"/>
+#  <field name="chunk_trend" type="boolean"/>
+#  <field name="chunk_value" type="string"/>
+#  <field name="chunk_origin" type="string"/>
+#  <field name="chunk_outlier" type="boolean"/>
+#  <field name="code_install" type="string" multiValued="true"/>
+#  <field name="sensor" type="string"/>
+#  <field name="year" type="pint"/>
+#  <field name="month" type="pint"/>
+#  <field name="day" type="pint"/>
+#  <field name="chunk_window_ms" type="plong"/>
+#  <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
+#  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+#  <field name="tagname" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
+#  <field name="name" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"
             exit 0
             ;;
