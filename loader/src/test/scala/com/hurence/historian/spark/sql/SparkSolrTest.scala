@@ -2,9 +2,12 @@ package com.hurence.historian.spark.sql
 
 import java.util.UUID
 
-import org.apache.spark.sql.functions.{base64,col}
+import com.hurence.historian.model.ChunkRecordV0
+import org.apache.spark.sql.functions.{base64, col}
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.solr.{SolrCloudUtil, TestSuiteBuilder}
+import com.hurence.historian.spark.sql
+import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.spark.sql.SaveMode.Overwrite
 import org.apache.spark.sql._
@@ -23,52 +26,62 @@ class SparkSolrTest extends TestSuiteBuilder {
     assert(!SolrSupport.isSolrVersionAtleast(solrVersion, 9, 0, 0))
   }
 
+  test("Measures and chunks") {
 
-
-  test("measures and chunks") {
+    val spark =SparkSession.getActiveSession.get
+    import spark.implicits._
     val collectionName = "testHistorian-" + UUID.randomUUID().toString
     SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient, sc)
     try {
 
 
+      // 1. load measures from parquet file
+      val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
+      val measures = sparkSession.read
+        .parquet(filePath)
+        .cache()
+
+     // 2. make chunks from measures
       val chunkyfier = new Chunkyfier()
         .setValueCol("value")
         .setTimestampCol("timestamp")
         .setChunkCol("chunk")
         .setGroupByCols(Array("name", "tags.metric_id"))
         .setDateBucketFormat("yyyy-MM-dd")
-        .doDropLists(false)
         .setSaxAlphabetSize(7)
         .setSaxStringLength(50)
-
-
-      val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
-
-
-      val measures = sparkSession.read
-        .parquet(filePath)
-
-
-
-      // TODO add Transformer that generates an id for solr
-      // Transform original data into its bucket index.
       val ack08 = chunkyfier.transform(measures)
         .where("name = 'ack' AND avg != 0.0")
-        .withColumn("id", base64(col("chunk")))
         .repartition(1)
+        .as[ChunkRecordV0]
 
+      ack08.show()
 
+      // 3. write those chunks to SolR
       val solrOpts = Map("zkhost" -> zkHost, "collection" -> collectionName)
-      ack08.write.format("solr").options(solrOpts).mode(Overwrite).save()
 
-      // Explicit commit to make sure all docs are visible
+
+      val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
+      writer.write(sql.Options(collectionName, Map(
+        "zkhost" -> zkHost,
+        "collection" -> collectionName,
+        "tag_names" -> "metric_id,min,max,warn,crit"
+      )), ack08)
+
+
+
+      // 4. Explicit commit to make sure all docs are visible
       val solrCloudClient = SolrSupport.getCachedCloudClient(zkHost)
       solrCloudClient.commit(collectionName, true, true)
 
+
+      // 5. load back those chunks to verify
       val solrDF = sparkSession.read.format("solr").options(solrOpts).load()
+        .where("metric_id LIKE '08%'")
+       // .as[ChunkRecordV0]
 
       solrDF.show()
-      assert(solrDF.count == 70)
+      assert(solrDF.count == 5)
     /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
       val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
       assert(oneColFirstRow != null)

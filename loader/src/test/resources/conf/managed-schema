@@ -20,29 +20,28 @@
 
 
 
-    <field name="attributes" type="text_en" multiValued="true" indexed="true" stored="true"/>
-    <field name="avg" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk" type="string" multiValued="false" indexed="false"/>
-    <field name="count" type="pint" multiValued="false" indexed="true" stored="true"/>
-    <field name="day" type="string" multiValued="false" indexed="true" stored="true"/>
-    <field name="end" type="plong" multiValued="false" indexed="true" stored="true"/>
-    <field name="first" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="hour" type="pint" multiValued="false" indexed="true" stored="true"/>
-    <field name="last" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="max" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="min" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="month" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_avg" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
+    <field name="chunk_count" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_day" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_end" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_first" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_hour" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_last" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_max" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_min" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_month" type="pint" multiValued="false" indexed="true" stored="true"/>
     <field name="name" type="string" multiValued="false" indexed="true" stored="true"/>
-    <field name="outlier" type="boolean" multiValued="false" indexed="true" stored="true"/>
-    <field name="qualities" type="string" multiValued="true" indexed="true" stored="true"/>
-    <field name="sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
-    <field name="start" type="plong" multiValued="false" indexed="true" stored="true"/>
-    <field name="stddev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_outlier" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_qualities" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="chunk_sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_start" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_stddev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
     <field name="tags" type="text_en" multiValued="true" indexed="true" stored="true"/>
-    <field name="timestamp" type="plong" multiValued="false" indexed="true" stored="true"/>
-    <field name="trend" type="boolean" multiValued="false" indexed="true" stored="true"/>
-    <field name="year" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_timestamp" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_trend" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_year" type="pint" multiValued="false" indexed="true" stored="true"/>
 
 
   <dynamicField indexed="true" name="*_i" stored="true" type="pint"/>

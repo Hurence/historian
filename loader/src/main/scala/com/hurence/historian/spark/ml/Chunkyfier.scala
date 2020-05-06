@@ -177,6 +177,7 @@ final class Chunkyfier(override val uid: String)
         groupedDF.col("values")))
 
     if ($(dropLists)) {
+      log.debug("droping columns values and timestamps")
       chunkDF.drop("values", "timestamps")
     } else {
       chunkDF
