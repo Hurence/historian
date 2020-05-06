@@ -337,39 +337,35 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     @Override
-    public HistorianService addTimeSeries(JsonArray timeseriesWithGroupbyAndTags, Handler<AsyncResult<JsonObject>> resultHandler) {
-        //TODO final String chunkOrigin = timeseriesWithGroupbyAndTags.getString("chunk_origin", "ingestion-json");
-        final String chunkOrigin = null;//TODO
-        Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
+    public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
+     Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
+                final String chunkOrigin = null;//TODO
+                JsonArray timeseriesPoints = timeseriesObject.getJsonArray("correctPoints");
                 JsonObject response = new JsonObject();
-                List<Map<String, Object>> resultForCsvImpot = new LinkedList<>();
+                List<Map<String, Object>> resultForCsvImport = new LinkedList<>();
                 int numChunk = 0;
                 int numPoints = 0;
-                for(Object timeseriesWithGroupByAndTagsObject : timeseriesWithGroupbyAndTags) {
+                for(Object timeseriesPointsObject : timeseriesPoints) {
                     try {
-                        JsonArray timeseries =(JsonArray) timeseriesWithGroupByAndTagsObject;
+                        JsonArray timeseries =(JsonArray) timeseriesPointsObject;
                         Collection<SolrInputDocument> documents = new ArrayList<>();
-                        List<String> groupedByFields = new ArrayList<>(); // to catch the group by fields
+                        JsonArray groupedByFields = timeseriesObject.getJsonArray(GROUPED_BY); // to catch the group by fields
                         List<HashMap<String, String>> groupedByFieldsForEveryChunk = new LinkedList<>();
-                        JsonArray timeseriesWithoutGroupBy = new JsonArray();
                         for (Object timeserieObject : timeseries) {
                             JsonObject timeserie = (JsonObject) timeserieObject;
-                            if (timeserie.containsKey(GROUPED_BY)) {
-                                groupedByFields = timeserie.getJsonArray(GROUPED_BY).getList();
-                                continue;
-                            }
-                            timeseriesWithoutGroupBy.add(timeserie);
-                        }
-                        // now we have the timeseries without the group by object in timeseriesWithoutGroupBy
-                        for (Object timeserieObject : timeseriesWithoutGroupBy) {
-                            JsonObject timeserie = (JsonObject) timeserieObject;
+                            JsonObject tagsObject = timeserie.getJsonObject(TAGS); // here we get the tags object tso we ( with the list of groupby ) get the values of the group by !!
                             SolrInputDocument document;
                             LOGGER.info("building SolrDocument from a chunk");
                             document = chunkTimeSerie(timeserie, chunkOrigin);
                             documents.add(document);
                             HashMap<String, String> groupedByFieldsForThisChunk = new LinkedHashMap<String,String>();
-                            groupedByFields.forEach(f -> groupedByFieldsForThisChunk.put(f,document.getFieldValue(f).toString()));
+                            groupedByFields.forEach(f -> {
+                                if (f.toString().equals(NAME))
+                                    groupedByFieldsForThisChunk.put(f.toString(),timeserie.getString(f.toString()));
+                                else
+                                    groupedByFieldsForThisChunk.put(f.toString(),tagsObject.getString(f.toString()));
+                            });
                             int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
                             numChunk++;
                             numPoints = numPoints + totalNumPointsInChunk;
@@ -382,14 +378,17 @@ public class SolrHistorianServiceImpl implements HistorianService {
                             solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
                             LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
                         }
-                        resultForCsvImpot.addAll(prepareTheResultForCsv(groupedByFieldsForEveryChunk, groupedByFields));
+                        resultForCsvImport.addAll(prepareTheResultForCsv(groupedByFieldsForEveryChunk, groupedByFields));
                     } catch (SolrServerException | IOException e) {
                         e.printStackTrace();
                     }
                 }
-                response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk).put(CSV,resultForCsvImpot);
+                /*if(timeseriesObject.getValue(IMPORT_TYPE) == ImportRequestType.CSV.toString())
+                    response.put(CSV,new JsonArray(resultForCsvImport));
+                if(timeseriesObject.getValue(IMPORT_TYPE) == ImportRequestType.JSON.toString())
+                    response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
                 p.complete(response
-                );
+                );*/
             } catch (Exception e) {
                 LOGGER.error("unexpected exception");
                 p.fail(e);
@@ -400,11 +399,11 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    List<Map<String, Object>> prepareTheResultForCsv(List<HashMap<String, String>> groupedByFieldsForEveryChunk, List<String> groupBdByFields) {
+    List<Map<String, Object>> prepareTheResultForCsv(List<HashMap<String, String>> groupedByFieldsForEveryChunk, JsonArray groupBdByFields) {
         return groupedByFieldsForEveryChunk.stream()
                 .collect(Collectors.groupingBy(map -> {
                             HashMap<String, String> groupedByFieldsForThisMap = new LinkedHashMap<String,String>();
-                            groupBdByFields.forEach(f -> groupedByFieldsForThisMap.put(f, map.get(f)));
+                            groupBdByFields.forEach(f -> groupedByFieldsForThisMap.put(f.toString(), map.get(f)));
                             return groupedByFieldsForThisMap;
                         },LinkedHashMap::new,
                         Collectors.mapping(map -> map.get("totalPointsForThisChunk"),
