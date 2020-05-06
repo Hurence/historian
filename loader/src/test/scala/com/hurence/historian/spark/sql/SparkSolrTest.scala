@@ -7,6 +7,7 @@ import org.apache.spark.sql.functions.{base64, col}
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.solr.{SolrCloudUtil, TestSuiteBuilder}
 import com.hurence.historian.spark.sql
+import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.spark.sql.SaveMode.Overwrite
@@ -28,7 +29,7 @@ class SparkSolrTest extends TestSuiteBuilder {
 
   test("Measures and chunks") {
 
-    val spark =SparkSession.getActiveSession.get
+    val spark = SparkSession.getActiveSession.get
     import spark.implicits._
     val collectionName = "testHistorian-" + UUID.randomUUID().toString
     SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient, sc)
@@ -41,7 +42,7 @@ class SparkSolrTest extends TestSuiteBuilder {
         .parquet(filePath)
         .cache()
 
-     // 2. make chunks from measures
+      // 2. make chunks from measures
       val chunkyfier = new Chunkyfier()
         .setValueCol("value")
         .setTimestampCol("timestamp")
@@ -69,25 +70,27 @@ class SparkSolrTest extends TestSuiteBuilder {
       )), ack08)
 
 
-
       // 4. Explicit commit to make sure all docs are visible
       val solrCloudClient = SolrSupport.getCachedCloudClient(zkHost)
       solrCloudClient.commit(collectionName, true, true)
 
 
       // 5. load back those chunks to verify
-      val solrDF = sparkSession.read.format("solr").options(solrOpts).load()
+      val reader = ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
+      val solrDF = reader.read(sql.Options(collectionName, Map(
+        "zkhost" -> zkHost,
+        "collection" -> collectionName,
+        "tag_names" -> "metric_id"
+      )))
         .where("metric_id LIKE '08%'")
-       // .as[ChunkRecordV0]
-
       solrDF.show()
       assert(solrDF.count == 5)
-    /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
-      val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
-      assert(oneColFirstRow != null)
-      val firstRow = solrDF.head.toSeq                        // query for all columns
-      assert(firstRow.size === 5)
-      firstRow.foreach(col => assert(col != null))            // no missing values*/
+      /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
+        val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
+        assert(oneColFirstRow != null)
+        val firstRow = solrDF.head.toSeq                        // query for all columns
+        assert(firstRow.size === 5)
+        firstRow.foreach(col => assert(col != null))            // no missing values*/
 
     } finally {
       SolrCloudUtil.deleteCollection(collectionName, cluster)
@@ -112,17 +115,17 @@ class SparkSolrTest extends TestSuiteBuilder {
       assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
       val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
       assert(oneColFirstRow != null)
-      val firstRow = solrDF.head.toSeq                        // query for all columns
+      val firstRow = solrDF.head.toSeq // query for all columns
       assert(firstRow.size === 5)
-      firstRow.foreach(col => assert(col != null))            // no missing values
+      firstRow.foreach(col => assert(col != null)) // no missing values
 
     } finally {
       SolrCloudUtil.deleteCollection(collectionName, cluster)
     }
   }
 
-  def buildTestData() : DataFrame = {
-    val testDataSchema : StructType = StructType(
+  def buildTestData(): DataFrame = {
+    val testDataSchema: StructType = StructType(
       StructField("id", IntegerType, true) ::
         StructField("one_txt", StringType, false) ::
         StructField("two_txt", StringType, false) ::
@@ -134,7 +137,7 @@ class SparkSolrTest extends TestSuiteBuilder {
       Row(3, "F", "G", "H")
     )
 
-    val csvDF : DataFrame = sparkSession.createDataFrame(sparkSession.sparkContext.makeRDD(rows, 1), testDataSchema)
+    val csvDF: DataFrame = sparkSession.createDataFrame(sparkSession.sparkContext.makeRDD(rows, 1), testDataSchema)
     assert(csvDF.count == 3)
     return csvDF
   }

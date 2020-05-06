@@ -199,7 +199,8 @@ object DataLoaderV2 {
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
     writer.write(sql.Options(options.collectionName, Map(
       "zkhost" -> options.zkHosts,
-      "collection" -> options.collectionName
+      "collection" -> options.collectionName,
+      "tag_names" -> "metric_id,min,max,warn,crit"
     )), chunksDS)
 
 

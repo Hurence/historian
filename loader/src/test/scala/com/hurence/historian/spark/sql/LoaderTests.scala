@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.sql
 
 import com.hurence.historian.model.ChunkRecordV0
-@import com.hurence.historian.spark.SparkSessionTestWrapper
+import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql.functions.{chunk, guess, sax}
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
