@@ -8,7 +8,6 @@
   "chunks":
   [
     {
-
       "name": "metric_1",
       "chunk_start": 1,
       "chunk_end": 2,
@@ -37,7 +36,6 @@
       "id": "a8df57ce84588434514b5a05b96df0062fcaeca881c6a6d397f1875f0c052f88"
     },
     {
-
       "name": "metric_1",
       "chunk_start": 3,
       "chunk_end": 3,
