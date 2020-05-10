@@ -74,14 +74,19 @@ public class HistorianFields {
     public static String CHUNK_ORIGIN = "chunk_origin";
 
     //Csv fields
-    public static int MAX_LINGE_FOR_CSV_FILE = 5000;
+    public static int MAX_LINES_FOR_CSV_FILE = 5000;
     public static String FILE = "file";
     public static String CAUSE = "cause";
-    public  static String GROUPED_BY = "groupedBy";
-    public  static String GROUPED_BY_IN_RESPONSE = "grouped_by";
-    public  static String REPORT = "report";
+    public static String GROUPED_BY = "groupedBy";
+    public static String GROUPED_BY_IN_RESPONSE = "grouped_by";
+    public static String REPORT = "report";
     public static String CSV = "csv";
     public static String ERRORS = "errors";
+    public static String IMPORT_TYPE = "import_type";
+
+    public static String DEFAULT_NAME_FIELD = "name";
+    public static String DATE = "date";
+    public static String CORRECT_POINTS = "correctPoints";
 
     //Mapping fields
     public static String MAPPING_TIMESTAMP = "mapping.timestamp";
@@ -92,6 +97,7 @@ public class HistorianFields {
     public static String FORMAT_DATE = "format_date";
     public static String GROUP_BY = "group_by";
     public static String TIMEZONE_DATE = "timezone_date";
+
 }
 
 

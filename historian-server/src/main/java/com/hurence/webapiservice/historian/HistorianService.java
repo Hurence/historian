@@ -116,16 +116,27 @@ public interface HistorianService {
     /**
      * @param timeseries        as a json object
      *                          <pre>
-     *                          [
-     *                              {
-     *                                  {@value HistorianFields#NAME} : "metric name to add datapoints",
-     *                                  {@value HistorianFields#POINTS_REQUEST_FIELD } : [
-     *                                      [timestamp, value, quality]
-     *                                      ...
-     *                                      [timestamp, value, quality]
-     *                                  ]
-     *                              }
-     *                          ]
+     *                          {    "correctPoints" : [
+     *                                  {
+     *                                      {@value HistorianFields#NAME} : "metric name to add datapoints",
+     *                                      {@value HistorianFields#POINTS_REQUEST_FIELD } : [
+     *                                          [timestamp, value, quality]
+     *                                          ...
+     *                                          [timestamp, value, quality]
+     *                                      ]
+     *                                  }
+     *                                  {
+     *                                      {@value HistorianFields#NAME} : "metric name to add datapoints",
+     *                                      {@value HistorianFields#POINTS_REQUEST_FIELD } : [
+     *                                          [timestamp, value, quality]
+     *                                          ...
+     *                                          [timestamp, value, quality]
+     *                                      ]
+     *                                  }
+     *                                   ...
+     *                              ]
+     *                              {@value HistorianFields#GROUPED_BY} : [groupedByField_1, groupedByField_2, ...]
+     *                      }
      *                          </pre>
      *                               The quality is optional but should either be present for all datapoints or 0.
      * @param resultHandler

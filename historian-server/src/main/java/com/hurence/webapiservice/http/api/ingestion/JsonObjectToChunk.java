@@ -169,7 +169,7 @@ public class JsonObjectToChunk {
     private MetricTimeSeries buildMetricTimeSeries(JsonObject json) {
         String metricName = json.getString(NAME);
         JsonArray points = json.getJsonArray(POINTS_REQUEST_FIELD);
-        /*JsonArray tags = json.getJsonArray(TAGS, new JsonArray());*/ // !!!
+        JsonObject tags = json.getJsonObject(TAGS, new JsonObject());
 
         final long start = getStart(points);
         final long end  = getEnd(points);
@@ -179,9 +179,13 @@ public class JsonObjectToChunk {
         tsBuilder.end(end);
         // If want to add nay attributes
         //tsBuilder.attribute(tagKey, tagValue);
-        /*if (!tags.isEmpty()) // TODO should we left tags: empty array if there is no tags ?
-            tsBuilder.attribute(TAGS,tags);
-        tags.forEach(tag -> tsBuilder.attribute(tag.toString(), json.getString(tag.toString())));*/
+        JsonArray allTagsAsArray = new JsonArray();
+        tags.getMap().forEach((key, value) -> {
+            allTagsAsArray.add(key);
+            tsBuilder.attribute(key,value.toString());
+        });
+        if (!allTagsAsArray.isEmpty())
+            tsBuilder.attribute(TAGS, allTagsAsArray);
         addPoints(tsBuilder, points);
         return tsBuilder.build();
     }
@@ -193,9 +197,9 @@ public class JsonObjectToChunk {
         double[] values = new double[size];
         int i = 0;
         for (Object point : points) {
-            JsonArray jsonpoint = (JsonArray) point;
-            timestamps[i] = jsonpoint.getLong(0);
-            values[i] = jsonpoint.getDouble(1);
+            JsonArray jsonPoint = (JsonArray) point;
+            timestamps[i] = jsonPoint.getLong(0);
+            values[i] = jsonPoint.getDouble(1);
             i++;
         }
         LongList timestampsList = new LongList(timestamps, size);
