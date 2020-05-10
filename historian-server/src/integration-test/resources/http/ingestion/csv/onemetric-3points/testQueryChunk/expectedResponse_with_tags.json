@@ -7,31 +7,32 @@
   "total": 1,
   "chunks": [
     {
+      "name": "metric_1",
+      "chunk_start": 1,
+      "chunk_end": 3,
+      "chunk_size": 3,
+      "chunk_window_ms": 2,
+      "sensor": "sensor_1",
+      "code_install": ["code_1"],
       "tags": [
         "sensor",
         "code_install"
       ],
-      "code_install": "code_1",
-      "sensor": "sensor_1",
-      "id": "id0",
-      "chunk_start": 1,
-      "chunk_size": 3,
-      "chunk_end": 3,
-      "chunk_sax": "abc",
-      "chunk_value": "TO_REPLACE_WITH_CORRECT_VALUE",
-      "chunk_avg": 2.6,
-      "chunk_min": 1.2,
-      "chunk_window_ms": "TO_REPLACE_WITH_CORRECT_VALUE",
-      "name": "metric_1",
-      "chunk_trend": "TO_REPLACE_WITH_CORRECT_VALUE",
-      "chunk_max": 3.0,
-      "chunk_size_bytes": "TO_REPLACE_WITH_CORRECT_VALUE",
-      "chunk_sum": 6.2,
+      "chunk_value": "H4sIAAAAAAAAAOPi1DQGg8/2XNwKjJoMEODAxS0A43A4CDAAAHn0278nAAAA",
+      "chunk_size_bytes": 45,
       "chunk_first": 1.2,
+      "chunk_min": 1.2,
+      "chunk_max": 3.0,
+      "chunk_sum": 6.2,
+      "chunk_avg": 2.066666666666667,
+      "chunk_trend": true,
+      "chunk_outlier": false,
+      "chunk_sax": "abc",
+      "year": 1970,
       "day": "1970-01-01",
       "month": 1,
-      "year": 1970,
-      "chunk_origin": "ingestion-csv"
+      "chunk_origin": "ingestion-csv",
+      "id": "b87e8985e8b16524e560f989be8113af77d44ac3038a4a68b9e8ad9cd06dee83"
     }
   ]
 }
