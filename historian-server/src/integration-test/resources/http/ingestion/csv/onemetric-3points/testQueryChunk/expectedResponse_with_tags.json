@@ -13,7 +13,7 @@
       "chunk_size": 3,
       "chunk_window_ms": 2,
       "sensor": "sensor_1",
-      "code_install": ["code_1"],
+      "code_install": "code_1",
       "tags": [
         "sensor",
         "code_install"
