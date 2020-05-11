@@ -71,7 +71,7 @@ object functions {
     val guessSaxParams = new GuessSaxParameters
 
 
-    val list = values.map(Double.box).asJava
+    val list = values.map(Double.box).asJava.toArray()
 
    guessSaxParams.computeBestParam(list)
 
