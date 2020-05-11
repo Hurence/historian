@@ -16,13 +16,12 @@ package com.hurence.logisland.processor;
  * limitations under the License.
  */
 
-import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.annotation.documentation.CapabilityDescription;
 import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.record.*;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,7 +38,7 @@ public class ConvertFromTimeseries extends AbstractProcessor {
 
     //TODO delete use others processor instead
     private final static Logger logger = LoggerFactory.getLogger(ConvertFromTimeseries.class.getName());
-    private BinaryCompactionConverter converter;
+    private BinaryCompactionConverterOfRecord converter;
     private List<String> groupBy;
 
 
@@ -57,8 +56,8 @@ public class ConvertFromTimeseries extends AbstractProcessor {
     @Override
     public Collection<Record> process(ProcessContext context, Collection<Record> records) {
         return records.stream()
-                .filter(TimeSeriesRecord.class::isInstance)
-                .map(TimeSeriesRecord.class::cast)
+                .filter(TimeseriesRecord.class::isInstance)
+                .map(TimeseriesRecord.class::cast)
                 .flatMap(r -> {
                     try {
                         return converter.unchunk(r).stream();

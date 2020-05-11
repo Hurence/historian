@@ -22,8 +22,6 @@ sealed trait Chunk extends HistorianRecord {
 
   def end: Long
 
-  def value: String
-
   def count: Long
 
   def first: Double
@@ -50,9 +48,6 @@ sealed trait Chunk extends HistorianRecord {
   * @param day
   * @param start
   * @param end
-  * @param value
-  * @param timestamps
-  * @param values
   * @param count
   * @param avg
   * @param stddev
@@ -67,9 +62,7 @@ case class ChunkRecordV0(name: String,
                          day:String,
                          start: Long,
                          end: Long,
-                         value: String,
-                         timestamps: Array[Long],
-                         values: Array[Double],
+                         chunk: String,
                          count: Long,
                          avg: Double,
                          stddev: Double,

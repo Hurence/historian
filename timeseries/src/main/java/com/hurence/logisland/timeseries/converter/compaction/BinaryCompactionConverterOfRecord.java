@@ -63,6 +63,11 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, Timese
         return chunkrecord;
     }
 
+
+    public List<Point> deSerializeTimeseries(final byte[] chunk, final long start, final long end) throws IOException {
+        return BinaryCompactionUtil.unCompressPoints(chunk, start,end);
+    }
+
     public byte[] serializeTimeseries(final MetricTimeSeries timeSeries) {
         return BinaryCompactionUtil.serializeTimeseries(timeSeries, ddcThreshold);
     }
