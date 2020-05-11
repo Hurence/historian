@@ -41,6 +41,20 @@ class SumTest extends Specification {
         analysisResult.getAggregationValue(0) == 10449.0d
     }
 
+    def "test 2 execute"() {
+        given:
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Sum","metric")
+        timeSeries.point(11, 1)
+        timeSeries.point(10, 2)
+        MetricTimeSeries ts = timeSeries.build()
+        def analysisResult = new FunctionValueMap(1, 0, 0);
+
+        when:
+        new Sum().execute(ts, analysisResult)
+        then:
+        analysisResult.getAggregationValue(0) == 3.0d
+    }
+
 
     def "test for empty time series"() {
         given:
