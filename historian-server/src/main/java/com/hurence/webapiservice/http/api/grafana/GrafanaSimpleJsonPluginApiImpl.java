@@ -220,7 +220,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 }).subscribe();
     }
 
-    private JsonObject buildHistorianRequest(TimeSeriesRequest request) {
+    private JsonObject buildHistorianRequest(QueryRequestParam request) {
         JsonArray fieldsToFetch = new JsonArray()
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
@@ -233,7 +233,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 .put(TO, request.getTo())
                 .put(FIELDS, fieldsToFetch)
                 .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTags())
+                .put(HistorianFields.TAGS, request.getTagsValuesToFilter())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());

@@ -22,7 +22,6 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -141,20 +140,20 @@ public class HistorianService {
   }
 
   /**
-   * @param timeseries as a json object <pre> [ {  : "metric name to add datapoints",  : [ [timestamp, value, quality] ... [timestamp, value, quality] ] } ] </pre> The quality is optional but should either be present for all datapoints or 0.
+   * @param timeseries as a json object <pre> { "correctPoints" : [ {  : "metric name to add datapoints",  : [ [timestamp, value, quality] ... [timestamp, value, quality] ] } {  : "metric name to add datapoints",  : [ [timestamp, value, quality] ... [timestamp, value, quality] ] } ... ]  : [groupedByField_1, groupedByField_2, ...] } </pre> The quality is optional but should either be present for all datapoints or 0.
    * @param resultHandler 
    * @return himself
    */
-  public com.hurence.webapiservice.historian.reactivex.HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler) { 
+  public com.hurence.webapiservice.historian.reactivex.HistorianService addTimeSeries(JsonObject timeseries, Handler<AsyncResult<JsonObject>> resultHandler) { 
     delegate.addTimeSeries(timeseries, resultHandler);
     return this;
   }
 
   /**
-   * @param timeseries as a json object <pre> [ {  : "metric name to add datapoints",  : [ [timestamp, value, quality] ... [timestamp, value, quality] ] } ] </pre> The quality is optional but should either be present for all datapoints or 0.
+   * @param timeseries as a json object <pre> { "correctPoints" : [ {  : "metric name to add datapoints",  : [ [timestamp, value, quality] ... [timestamp, value, quality] ] } {  : "metric name to add datapoints",  : [ [timestamp, value, quality] ... [timestamp, value, quality] ] } ... ]  : [groupedByField_1, groupedByField_2, ...] } </pre> The quality is optional but should either be present for all datapoints or 0.
    * @return himself
    */
-  public Single<JsonObject> rxAddTimeSeries(JsonArray timeseries) { 
+  public Single<JsonObject> rxAddTimeSeries(JsonObject timeseries) { 
     return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
       addTimeSeries(timeseries, handler);
     });

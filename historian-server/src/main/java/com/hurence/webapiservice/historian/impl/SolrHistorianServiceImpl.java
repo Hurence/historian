@@ -120,6 +120,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
     @Override
     public HistorianService getTimeSeriesChunk(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
         final SolrQuery query = buildTimeSeriesChunkQuery(params);
+        //    FILTER
+        buildSolrFilterFromTags(params.getJsonObject(HistorianFields.TAGS))
+                .ifPresent(query::addFilterQuery);
         query.setFields();//so we return every fields (this endpoint is currently used only in tests, this is legacy code)
         //  EXECUTE REQUEST
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
@@ -162,11 +165,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
         SolrQuery query = new SolrQuery("*:*");
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
-        //    FILTER
-//        buildSolrFilterFromArray(params.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
-//                .ifPresent(query::addFilterQuery);
-        buildSolrFilterFromTags(params.getJsonObject(HistorianFields.TAGS))
-                .ifPresent(query::addFilterQuery);
         buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
                 .ifPresent(query::addFilterQuery);
         //    FIELDS_TO_FETCH
@@ -236,16 +234,16 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return query;
     }
 
-    private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String responseMetricNameField) {
+    private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String fieldToFilter) {
         if (jsonArray == null || jsonArray.isEmpty())
             return Optional.empty();
         if (jsonArray.size() == 1) {
-            return Optional.of(responseMetricNameField + ":\"" + jsonArray.getString(0) + "\"");
+            return Optional.of(fieldToFilter + ":\"" + jsonArray.getString(0) + "\"");
         } else {
             String orNames = jsonArray.stream()
                     .map(String.class::cast)
                     .collect(Collectors.joining("\" OR \"", "(\"", "\")"));
-            return Optional.of(responseMetricNameField + ":" + orNames);
+            return Optional.of(fieldToFilter + ":" + orNames);
         }
     }
 
@@ -444,6 +442,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
     @Override
     public HistorianService getTimeSeries(JsonObject myParams, Handler<AsyncResult<JsonObject>> myResult) {
         final SolrQuery query = buildTimeSeriesChunkQuery(myParams);
+        //    FILTER
+        buildSolrFilterFromArray(myParams.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
+                .ifPresent(query::addFilterQuery);
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
             MetricsSizeInfo metricsInfo;
             try {

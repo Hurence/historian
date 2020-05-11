@@ -33,7 +33,6 @@ import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.ProxyUtils;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -144,7 +143,7 @@ public class HistorianServiceVertxEBProxy implements HistorianService {
     return this;
   }
   @Override
-  public  HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler){
+  public  HistorianService addTimeSeries(JsonObject timeseries, Handler<AsyncResult<JsonObject>> resultHandler){
     if (closed) {
       resultHandler.handle(Future.failedFuture(new IllegalStateException("Proxy is closed")));
       return this;
