@@ -6,7 +6,7 @@
     <parent>
         <artifactId>historian</artifactId>
         <groupId>com.hurence.historian</groupId>
-        <version>1.3.4-SNAPSHOT</version>
+        <version>1.3.3-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -51,12 +51,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>19.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.hurence.historian</groupId>
-            <artifactId>timeseries</artifactId>
-            <version>${project.version}</version>
         </dependency>
     </dependencies>
     <build>

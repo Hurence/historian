@@ -1,0 +1,14 @@
+{
+  "range": {
+    "from": "2020-2-14T04:43:14.070Z",
+    "to": "2020-2-14T07:43:14.070Z"
+  },
+  "rangeRaw": {
+    "from": "now-1h",
+    "to": "now"
+  },
+  "limit" : 2,
+  "tags": ["tag1", "tag2"],
+  "matchAny": true,
+  "type": "all"
+}

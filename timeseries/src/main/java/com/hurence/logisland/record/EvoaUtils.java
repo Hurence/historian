@@ -22,9 +22,9 @@ public class EvoaUtils {
      * @return
      */
     public static synchronized Record setDateFields(final Record record){
-        if (record.hasField(TimeseriesRecord.CHUNK_START)) {
+        if (record.hasField(TimeSeriesRecord.CHUNK_START)) {
             try {
-                Instant instant = Instant.ofEpochMilli(record.getField(TimeseriesRecord.CHUNK_START).asLong());
+                Instant instant = Instant.ofEpochMilli(record.getField(TimeSeriesRecord.CHUNK_START).asLong());
                 LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
                 int month = localDate.getMonthValue();
                 int day = localDate.getDayOfMonth();
@@ -50,10 +50,10 @@ public class EvoaUtils {
      * @return
      */
     public static synchronized Record setBusinessFields(Record record) {
-        if (record.hasField(TimeseriesRecord.METRIC_NAME)) {
+        if (record.hasField(TimeSeriesRecord.METRIC_NAME)) {
 
             try {
-                Matcher m = csvRegexp.matcher(record.getField(TimeseriesRecord.METRIC_NAME).asString());
+                Matcher m = csvRegexp.matcher(record.getField(TimeSeriesRecord.METRIC_NAME).asString());
                 boolean b = m.matches();
                 if (b) {
                     record.setStringField("code_install", m.group(1));
@@ -75,7 +75,7 @@ public class EvoaUtils {
      * @return
      */
     public static synchronized Record setChunkOrigin(Record record, String origin) {
-        record.setStringField(TimeseriesRecord.CHUNK_ORIGIN, origin);
+        record.setStringField(TimeSeriesRecord.CHUNK_ORIGIN, origin);
         return record;
     }
 
@@ -87,9 +87,9 @@ public class EvoaUtils {
      */
     public static synchronized Record setHashId(Record record) {
         try {
-            String toHash = record.getField(TimeseriesRecord.CHUNK_VALUE).asString() +
-                    record.getField(TimeseriesRecord.METRIC_NAME).asString() +
-                    record.getField(TimeseriesRecord.CHUNK_START).asLong();
+            String toHash = record.getField(TimeSeriesRecord.CHUNK_VALUE).asString() +
+                    record.getField(TimeSeriesRecord.METRIC_NAME).asString() +
+                    record.getField(TimeSeriesRecord.CHUNK_START).asLong();
 
             String sha256hex = Hashing.sha256()
                     .hashString(toHash, StandardCharsets.UTF_8)
