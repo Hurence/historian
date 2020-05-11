@@ -1,8 +1,7 @@
 package com.hurence.historian
 
-import com.hurence.historian.App.logger
-import com.hurence.logisland.processor.StandardProcessContext
-import com.hurence.logisland.record.{FieldDictionary, TimeSeriesRecord}
+import com.hurence.historian.processor.HistorianContext
+import com.hurence.logisland.record.{FieldDictionary, TimeseriesRecord}
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.slf4j.LoggerFactory
 
@@ -85,17 +84,17 @@ class ChunkTagger extends Serializable {
           .map(subGroup => tsProcessor.fromMeasurestoTimeseriesRecord(subGroup.toList))
           /* .map(ts => (
              if(ts.getId!=null) ts.getId else "",
-             if(ts.hasField(TimeSeriesRecord.CHUNK_SAX))
-               ts.getField(TimeSeriesRecord.CHUNK_SAX).asString()
+             if(ts.hasField(TimeseriesRecord.CHUNK_SAX))
+               ts.getField(TimeseriesRecord.CHUNK_SAX).asString()
              else
                "",
-             if(ts.hasField(TimeSeriesRecord.CHUNK_START)) ts.getField(TimeSeriesRecord.CHUNK_START).asLong() else 0L,
+             if(ts.hasField(TimeseriesRecord.CHUNK_START)) ts.getField(TimeseriesRecord.CHUNK_START).asLong() else 0L,
              if(ts.hasField(FieldDictionary.RECORD_NAME))  ts.getField(FieldDictionary.RECORD_NAME).asString() else ""))*/
 
           .map(ts => (ts.getId,
-          ts.getField(TimeSeriesRecord.CHUNK_START).asLong(),
+          ts.getField(TimeseriesRecord.CHUNK_START).asLong(),
           ts.getField(FieldDictionary.RECORD_NAME).asString(),
-          if (ts.hasField(TimeSeriesRecord.CHUNK_SAX)) ts.getField(TimeSeriesRecord.CHUNK_SAX).asString() else ""
+          if (ts.hasField(TimeseriesRecord.CHUNK_SAX)) ts.getField(TimeseriesRecord.CHUNK_SAX).asString() else ""
         ))
       })
       .toDF("key", "start", "name", "sax")

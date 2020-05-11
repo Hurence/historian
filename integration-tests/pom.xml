@@ -5,7 +5,7 @@
     <parent>
         <artifactId>historian</artifactId>
         <groupId>com.hurence.historian</groupId>
-        <version>1.3.3-SNAPSHOT</version>
+        <version>1.3.4-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>integration-tests</artifactId>
@@ -14,7 +14,7 @@
     <properties>
         <spark.version>2.3.2.3.1.4.0-315</spark.version>
         <scala.binary.version>2.11</scala.binary.version>
-        <solr.version>8.4.0</solr.version>
+        <solr.version>8.2.0</solr.version>
         <test.containers>1.12.2</test.containers>
     </properties>
 
@@ -30,7 +30,7 @@
         <!-- HISTORIAN modules -->
         <dependency>
             <groupId>com.hurence.historian</groupId>
-            <artifactId>historian-modele</artifactId>
+            <artifactId>historian-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -92,4 +92,34 @@
             <version>${junit.version}</version>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-resources-for-integration-tests</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <overwrite>true</overwrite>
+                            <outputDirectory>src/main/resources/shared-resources</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>../historian-resources/bin</directory>
+                                    <includes>
+                                        <include>create-historian-collection.sh</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

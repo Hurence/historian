@@ -17,7 +17,6 @@ package com.hurence.logisland.processor;
 
 
 import com.hurence.logisland.record.*;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
 import com.hurence.logisland.util.runner.MockRecord;
 import com.hurence.logisland.util.runner.TestRunner;
 import com.hurence.logisland.util.runner.TestRunners;
@@ -25,11 +24,6 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -44,7 +38,7 @@ public class AddEvoaTagsTest {
         return new StandardRecord(SAMPLED_RECORD)
                 .setField(FieldDictionary.RECORD_VALUE, FieldType.DOUBLE, value)
                 .setField(FieldDictionary.RECORD_TIME, FieldType.LONG, time)
-                .setField(TimeSeriesRecord.CHUNK_START, FieldType.LONG, time)
+                .setField(TimeseriesRecord.CHUNK_START, FieldType.LONG, time)
                 .setField(FieldDictionary.RECORD_NAME, FieldType.STRING, name)
                 .setField("name", FieldType.STRING, name);
     }
@@ -84,7 +78,7 @@ public class AddEvoaTagsTest {
         out.assertFieldEquals("week", 7);
         out.assertFieldEquals("code_install", "T062");
         out.assertFieldEquals("sensor", "TC06_PV");
-        out.assertFieldEquals(TimeSeriesRecord.CHUNK_ORIGIN, "logisland");
+        out.assertFieldEquals(TimeseriesRecord.CHUNK_ORIGIN, "logisland");
     }
 
 }

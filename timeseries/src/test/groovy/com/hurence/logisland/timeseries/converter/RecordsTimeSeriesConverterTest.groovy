@@ -18,8 +18,8 @@ package com.hurence.logisland.timeseries.converter
 import com.hurence.logisland.record.FieldDictionary
 import com.hurence.logisland.record.FieldType
 import com.hurence.logisland.record.StandardRecord
-import com.hurence.logisland.record.TimeSeriesRecord
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter
+import com.hurence.logisland.record.TimeseriesRecord
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import spock.lang.Specification
 
 import java.time.Instant
@@ -40,7 +40,7 @@ class RecordsTimeSeriesConverterTest extends Specification {
         def end = Instant.now().plusSeconds(64000).toEpochMilli()
         def name = "\\CPU\\LOAD"
         def host = "host1"
-        def converter = new BinaryCompactionConverter.Builder()
+        def converter = new BinaryCompactionConverterOfRecord.Builder()
             .ddcThreshold(0)
             .build()
         def records = [new StandardRecord("measure")
@@ -66,9 +66,9 @@ class RecordsTimeSeriesConverterTest extends Specification {
         then:
         chunkRecord != null
         chunkRecord.getAllFields().size() == 11
-        chunkRecord.getField(TimeSeriesRecord.CHUNK_START).asLong() == start
-        chunkRecord.getField(TimeSeriesRecord.CHUNK_END).asLong() == end
-        chunkRecord.getField(TimeSeriesRecord.METRIC_NAME).asString() == name
+        chunkRecord.getField(TimeseriesRecord.CHUNK_START).asLong() == start
+        chunkRecord.getField(TimeseriesRecord.CHUNK_END).asLong() == end
+        chunkRecord.getField(TimeseriesRecord.METRIC_NAME).asString() == name
         chunkRecord.getTimeSeries().attributes().get("host") == host
 
         revertedRecords.size() == 3

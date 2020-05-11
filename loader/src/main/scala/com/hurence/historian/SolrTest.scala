@@ -1,6 +1,5 @@
 package com.hurence.historian
 
-import com.hurence.logisland.record.TimeSeriesRecord
 import org.apache.spark.sql.SparkSession
 
 
@@ -36,14 +35,14 @@ object SolrTest {
 /*
     import spark.implicits._
 
-    val ds = df.map(r => new TimeSeriesRecord("evoa_measure",
+    val ds = df.map(r => new TimeseriesRecord("evoa_measure",
       r.getAs[String]("id"),
       r.getAs[String]("name"),
       r.getAs[String]("chunk_value"),
       r.getAs[Long]("chunk_start"),
       r.getAs[Long]("chunk_end")))
 
-    mergeChunks(ds,options).take(20).foreach(r=> println(s"${r.getMetricName} : ${r.getTimeSeries.size()} points, chunk_value:${r.getField(TimeSeriesRecord.CHUNK_VALUE).asDouble() }"))
+    mergeChunks(ds,options).take(20).foreach(r=> println(s"${r.getMetricName} : ${r.getTimeSeries.size()} points, chunk_value:${r.getField(TimeseriesRecord.CHUNK_VALUE).asDouble() }"))
 
 
     mergedTimeseriesDS
