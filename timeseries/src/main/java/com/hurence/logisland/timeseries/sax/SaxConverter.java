@@ -59,6 +59,26 @@ public class SaxConverter {
         return saxOptions;
     }
 
+
+
+    public  String getSaxStringFromValues(List<Double> points)  {
+
+        double[] valuePoints = points.stream().mapToDouble(x -> x).toArray();
+        try {
+
+            char[] saxString = SaxConverter.saxProcessor
+                    .ts2string(valuePoints,
+                            saxOptions.paaSize(),
+                            SaxConverter.normalAlphabet.getCuts(saxOptions.alphabetSize()), saxOptions.nThreshold());
+
+            return new String(saxString);
+
+        } catch (net.seninp.jmotif.sax.SAXException e) {
+            logger.error("error while trying to calculate sax string for chunk", e);
+        }
+        return "sax_error";
+    }
+
     /**
      * Compact a related list of records a single chunked one
      *

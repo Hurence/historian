@@ -36,18 +36,19 @@ import com.hurence.logisland.annotation.documentation.CapabilityDescription;
 import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.PropertyDescriptor;
-import com.hurence.logisland.component.SaxEncodingValidators;
 import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
-import com.hurence.logisland.record.TimeSeriesRecord;
+import com.hurence.logisland.record.TimeseriesRecord;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverter;
+import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;
 import com.hurence.logisland.timeseries.query.TypeFunctions;
 import com.hurence.logisland.validator.StandardValidators;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -56,6 +57,9 @@ import java.util.stream.Collectors;
 @CapabilityDescription("Converts a given field records into a chronix timeseries record")
 @ExtraDetailFile("./details/common-processors/EncodeSAX-Detail.rst")
 public class ConvertToTimeseries extends AbstractProcessor {
+
+
+    private final static Logger logger = LoggerFactory.getLogger(ConvertToTimeseries.class.getName());
 
     public static final PropertyDescriptor GROUPBY = new PropertyDescriptor.Builder()
             .name("groupby")
@@ -87,7 +91,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
     private List<ChronixEncoding> encodings = Collections.emptyList();
     private FunctionValueMap functionValueMap = new FunctionValueMap(0, 0, 0, 0);
 
-    private BinaryCompactionConverter converter;
+    private BinaryCompactionConverterOfRecord converter;
     private List<String> groupBy;
 
     @Override
@@ -99,7 +103,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
         groupBy = Arrays.stream(groupByArray)
                 .filter(StringUtils::isNotBlank)
                 .collect(Collectors.toList());
-        BinaryCompactionConverter.Builder builder = new BinaryCompactionConverter.Builder();
+        BinaryCompactionConverterOfRecord.Builder builder = new BinaryCompactionConverterOfRecord.Builder();
         converter = builder.build();
 
         // init metric functions
@@ -120,7 +124,7 @@ public class ConvertToTimeseries extends AbstractProcessor {
     public Collection<Record> process(ProcessContext context, Collection<Record> records) {
 
         List<Record> outputRecords = Collections.emptyList();
-
+        try{
         Map<String, List<Record>> groups = records.stream().collect(
                 Collectors.groupingBy(r -> groupBy.stream()
                         .map(f -> r.hasField(f) ? r.getField(f).asString() : null)
@@ -128,21 +132,26 @@ public class ConvertToTimeseries extends AbstractProcessor {
                 )
         );
 
-        if (!groups.isEmpty()) {
-            outputRecords = groups.values().stream()
-                    .filter(l -> !l.isEmpty())                                      // remove empty groups
-                    .peek(recs -> recs.sort(Comparator.comparing(Record::getTime))) // sort by time asc
-                    .map(groupedRecords -> {
-                        return getTimeSeriesRecord(groupedRecords);
-                    })
-                    .collect(Collectors.toList());
+
+            if (!groups.isEmpty()) {
+                outputRecords = groups.values().stream()
+                        .filter(l -> !l.isEmpty())                                      // remove empty groups
+                        .peek(recs -> recs.sort(Comparator.comparing(Record::getTime))) // sort by time asc
+                        .map(groupedRecords -> {
+                            return getTimeseriesRecord(groupedRecords);
+                        })
+                        .collect(Collectors.toList());
+            }
+        }catch (Exception ex){
+            logger.error("unable to convert records to timeseries : {}", ex.getMessage() );
         }
+
 
         return outputRecords;
     }
 
-    public TimeSeriesRecord getTimeSeriesRecord(List<Record> groupedRecords) {
-        TimeSeriesRecord tsRecord = converter.chunk(groupedRecords);
+    public TimeseriesRecord getTimeseriesRecord(List<Record> groupedRecords) {
+        TimeseriesRecord tsRecord = converter.chunk(groupedRecords);
         MetricTimeSeries timeSeries = tsRecord.getTimeSeries();
 
         functionValueMap.resetValues();

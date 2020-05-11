@@ -3,27 +3,45 @@ package com.hurence.historian.spark.sql
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
+import com.hurence.logisland.util.DateUtil
 import com.hurence.logisland.util.string.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
+import org.apache.spark.unsafe.types.UTF8String
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.util.control.NonFatal
 
 
-
-// TODO : add functions on Dataset[ChunkRecordV0]
 object functions {
 
-
   private val converter = new BinaryCompactionConverterOfRecord.Builder().build
+
+
+  val toDateUTC = udf { (epochMilliUTC: Long, dateFormat: String) =>
+    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
+      .withZone(java.time.ZoneId.of("Europe/Paris"))
+
+    try {
+      dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC))
+    } catch {
+      case NonFatal(_) => null
+    }
+  }
+
+  val toTimestampUTC = udf { (dateString: String, dateFormat: String) =>
+    try {
+      DateUtil.parse(dateString, dateFormat).getTime
+    } catch {
+      case NonFatal(_) => null
+    }
+  }
 
 
   /**
     * Encoding function: returns the base64 encoding as a Chronix chunk.
     */
   val chunk = udf { (name: String, start: Long, end: Long, timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
-
-
 
     // @TODO move this into timeseries modules and do the same for Chronix functions call
     val builder = new MetricTimeSeries.Builder(name, "measures")
@@ -39,9 +57,22 @@ object functions {
 
 
   /**
+    * Decoding function: returns the base64 encoding as a Chronix chunk.
+    */
+  val unchunk = udf { (chunk: String, start: Long, end: Long) =>
+
+
+    val bytes = BinaryEncodingUtils.decode(chunk)
+
+    converter.deSerializeTimeseries(bytes, start, end).asScala.map(p => (p.getTimestamp, p.getValue))
+
+
+  }
+
+  /**
     * Encoding function: returns the sax string of the values.
     */
-  val sax = udf { (alphabetSize:Int, nThreshold:Float, paaSize:Int, values: mutable.WrappedArray[Double]) =>
+  val sax = udf { (alphabetSize: Int, nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
 
 
     val saxConverter = new SaxConverter.Builder()
@@ -58,22 +89,25 @@ object functions {
   }
 
 
-
   /**
-    * Encoding function: returns the sax guess parameters
+    * Encoding function: returns the sax string of the values.
     *
     *
     *
     */
-  val guess = udf { (values: mutable.WrappedArray[Double]) =>
+  val guess = udf { (alphabetSize: Int, values: mutable.WrappedArray[Double]) =>
 
 
-    val guessSaxParams = new GuessSaxParameters
+    val guessSasxParams = new GuessSaxParameters.Builder()
+      .alphabetSize(alphabetSize)
+      .build()
+
+    val list = values.map(Double.box).asJava
 
 
-    val list = values.map(Double.box).asJava.toArray()
+    guessSasxParams.computeBestParam(list).asScala
 
-   guessSaxParams.computeBestParam(list)
+    // mutable.WrappedArray(guessParm)
 
   }
 }
