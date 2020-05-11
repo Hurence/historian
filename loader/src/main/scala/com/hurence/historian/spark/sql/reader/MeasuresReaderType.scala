@@ -6,4 +6,5 @@ object MeasuresReaderType extends Enumeration {
   val EVOA_CSV:Value  = Value("EVOA_CSV_MEASURES_READER")
   val ITDATA_CSV:Value = Value("ITDATA_CSV_MEASURES_READER")
   val PARQUET:Value = Value("PARQUET_MEASURES_READER")
+  val GENERIC_CSV:Value = Value("GENERIC_CSV")
 }

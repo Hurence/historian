@@ -3,6 +3,7 @@ package com.hurence.historian.spark.sql
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
+import com.hurence.logisland.util.DateUtil
 import com.hurence.logisland.util.string.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
 import org.apache.spark.unsafe.types.UTF8String
@@ -23,6 +24,14 @@ object functions {
 
     try {
       dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC))
+    } catch {
+      case NonFatal(_) => null
+    }
+  }
+
+  val toTimestampUTC = udf { (dateString: String, dateFormat: String) =>
+    try {
+      DateUtil.parse(dateString, dateFormat).getTime
     } catch {
       case NonFatal(_) => null
     }

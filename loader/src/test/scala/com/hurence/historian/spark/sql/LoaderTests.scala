@@ -144,19 +144,27 @@ class LoaderTests extends SparkSessionTestWrapper {
   @Test
   def testLoaderCSV() = {
 
-    def config(): Map[String, String] = Map(
-      "inferSchema" -> "true",
-      "delimiter" -> ",",
-      "header" -> "true",
-      "dateFormat" -> ""
-    )
+    // to lazy load spark if needed
+    spark.version
 
+    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
+    val options = Options(
+      filePath,
+      Map(
+        "inferSchema" -> "true",
+        "delimiter" -> ",",
+        "header" -> "true",
+        "nameField" -> "metric_name",
+        "timestampField" -> "timestamp",
+        "timestampDateFormat" -> "s",
+        "valueField" -> "value",
+        "tagsFields" -> "metric_id,warn,crit"
+      ))
 
-    spark.read
-      .options(config)
-      .csv(filePath)
-      .show()
+    val ds = reader.read(options)
+ds.show()
+
   }
 
 
