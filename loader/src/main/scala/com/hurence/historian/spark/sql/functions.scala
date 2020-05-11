@@ -60,24 +60,20 @@ object functions {
 
 
   /**
-    * Encoding function: returns the sax string of the values.
+    * Encoding function: returns the sax guess parameters
     *
     *
     *
     */
-  val guess = udf { (alphabetSize:Int, values: mutable.WrappedArray[Double]) =>
+  val guess = udf { (values: mutable.WrappedArray[Double]) =>
 
 
-    val guessSasxParams = new GuessSaxParameters.Builder()
-      .alphabetSize(alphabetSize)
-      .build()
+    val guessSaxParams = new GuessSaxParameters
+
 
     val list = values.map(Double.box).asJava
 
-
-   guessSasxParams.computeBestParam(list).asScala
-
-   // mutable.WrappedArray(guessParm)
+   guessSaxParams.computeBestParam(list)
 
   }
 }
