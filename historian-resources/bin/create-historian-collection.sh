@@ -110,13 +110,17 @@ create_collection() {
 }
 
 
+add_field_name_type() {
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\" }"
+}
+
 add_field() {
   SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"$1\", \"type\":\"$2\", \"indexed\":true, \"stored\":true, \"multiValued\":false }"
 }
 
 
 add_dynamic_field() {
-  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-dynamic-field\": { \"name\":\"$1\", \"type\":\"$2\" }"
+  SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-dynamic-field\": { \"name\":\"$1\", \"type\":\"string\", \"indexed\":true, \"stored\":true, \"multiValued\":false  }"
 }
 
 add_field_multivalued() {
@@ -137,105 +141,71 @@ create_schema() {
 
     case ${MODEL_VERSION} in
         "EVOA0")
-            add_field "chunk_start" "plong"
-            add_field "chunk_end" "plong"
-            add_field "chunk_value" "text_general"
-            add_field "chunk_avg" "pdouble"
-            add_field "chunk_size_bytes" "pint"
-            add_field "chunk_size" "pint"
-            add_field "chunk_count" "pint"
-            add_field "chunk_min" "pdouble"
-            add_field "chunk_max" "pdouble"
-            add_field "chunk_sax" "ngramtext"
-            add_field "chunk_trend" "boolean"
-            add_field "chunk_window_ms" "plong"
-            add_field "chunk_first" "pdouble"
-            add_field "timestamp" "plong"
-            add_field "value" "pdouble"
-            add_field "tagname" "text_general"
-            add_field "name" "text_general"
-            add_field "record_value" "pdouble"
-            add_field "code_install" "text_general"
-            add_field "sensor" "text_general"
-            add_field "quality" "pfloat"
-            add_field "year" "pint"
-            add_field "month" "pint"
-            add_field "day" "pint"
-            add_field "hour" "pint"
+            add_field_name_type "chunk_start" "plong"
+            add_field_name_type "chunk_end" "plong"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"chunk_value\", \"type\":\"string\", \"indexed\":false, \"multiValued\":false }"
+            add_field_name_type "chunk_origin" "text_general"
+            add_field_name_type "numeric_type" "text_general"
+            add_field_name_type "chunk_avg" "pdouble"
+            add_field_name_type "chunk_size_bytes" "pint"
+            add_field_name_type "chunk_size" "pint"
+            add_field_name_type "chunk_count" "pint"
+            add_field_name_type "chunk_min" "pdouble"
+            add_field_name_type "chunk_max" "pdouble"
+            add_field_name_type "chunk_sum" "pdoubles"
+            add_field_name_type "chunk_sax" "ngramtext"
+            add_field_name_type "chunk_trend" "boolean"
+            add_field_name_type "chunk_outlier" "booleans"
+            add_field_name_type "chunk_window_ms" "plong"
+            add_field_name_type "chunk_first" "pdoubles"
+            add_field_name_type "record_errors" "text_general"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"name\", \"type\":\"string\", \"multiValued\":false }"
+            add_field_name_type "record_id" "text_general"
+            add_field_name_type "record_name" "text_general"
+            add_field_name_type "record_time" "plong"
+            add_field_name_type "record_type" "text_general"
+            add_field_name_type "record_value" "pdouble"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"sensor\", \"type\":\"string\", \"multiValued\":false }"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"tagname\", \"type\":\"string\", \"multiValued\":false }"
+            add_field_name_type "timestamp" "plong"
+            add_field_name_type "value" "pdoubles"
+            add_field_name_type "week" "plongs"
+            add_field_name_type "year" "plongs"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"code_install\", \"type\":\"string\", \"multiValued\":false }"
+            add_field_name_type "quality" "pfloat"
+            add_field_name_type "month" "plongs"
+            add_field_name_type "day" "plongs"
+            add_field_name_type "hour" "pint"
+            add_field_name_type "delete" "text_general"
+            add_field_name_type "file_path" "text_general"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
             ;;
-#  <field name="chunk_first" type="pdouble" multiValued="true"/>
-#  <field name="chunk_avg" type="pdouble" multiValued="true"/>
-#  <field name="chunk_end" type="plong"/>
-#  <field name="chunk_max" type="pdouble"/>
-#  <field name="chunk_min" type="pdouble"/>
-#  <field name="chunk_sum" type="pdouble" multiValued="true"/>
-#  <field name="chunk_sax" type="ngramtext"/>
-#  <field name="chunk_size" type="pint"/>
-#  <field name="chunk_size_bytes" type="pint"/>
-#  <field name="chunk_start" type="plong"/>
-#  <field name="chunk_trend" type="boolean"/>
-#  <field name="chunk_value" type="string"/>
-#  <field name="chunk_origin" type="string"/>
-#  <field name="chunk_outlier" type="boolean" multiValued="true"/>
-#  <field name="code_install" type="string" multiValued="true"/>
-#  <field name="sensor" type="string"/>
-#  <field name="year" type="pint" multiValued="true"/>
-#  <field name="month" type="pint" multiValued="true"/>
-#  <field name="day" type="pint" multiValued="true"/>
-#  <field name="week" type="pint" multiValued="true"/>
-#  <field name="chunk_window_ms" type="plong"/>
-#  <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
-#  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-#  <field name="tagname" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
-#  <field name="name" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
         "0")
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"name\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"compactions_running\", \"type\":\"string\", \"indexed\":true, \"multiValued\":true, \"stored\" : true }"
             add_field_not_indexed "chunk_value" "string"
-            add_field "chunk_start" "plong"
-            add_field "chunk_end" "plong"
-            add_field "chunk_avg" "pdouble"
-            add_field "chunk_count" "pint"
-            add_field "chunk_min" "pdouble"
-            add_field "chunk_max" "pdouble"
-            add_field "chunk_sax" "ngramtext"
-            add_field "chunk_trend" "boolean"
-            add_field "chunk_outlier" "boolean"
-            add_field "chunk_first" "pdouble"
-            add_field "chunk_last" "pdouble"
-            add_field "chunk_stddev" "pdouble"
-            add_field "chunk_sum" "pdouble"
-            add_field_multivalued "tags" "text_general"
-            add_field "name" "string"
-            add_field "year" "pint"
-            add_field "month" "pint"
-            add_field "chunk_day" "string"
-            add_field "hour" "pint"
+            add_field_name_type "chunk_start" "plong"
+            add_field_name_type "chunk_end" "plong"
+            add_field_name_type "chunk_avg" "pdouble"
+            add_field_name_type "chunk_size" "pint"
+            add_field_name_type "chunk_size_bytes" "pint"
+            add_field_name_type "chunk_min" "pdouble"
+            add_field_name_type "chunk_max" "pdouble"
+            add_field_name_type "chunk_sax" "ngramtext"
+            add_field_name_type "chunk_trend" "boolean"
+            add_field_name_type "chunk_origin" "string"
+            add_field_name_type "chunk_outlier" "boolean"
+            add_field_name_type "chunk_first" "pdouble"
+            add_field_name_type "chunk_last" "pdouble"
+            add_field_name_type "chunk_stddev" "pdouble"
+            add_field_name_type "chunk_sum" "pdouble"
+            add_field_name_type "chunk_year" "pint"
+            add_field_name_type "chunk_month" "pint"
+            add_field_name_type "chunk_day" "string"
+            add_field_name_type "chunk_hour" "pint"
             ;;
         *)
-#  <field name="chunk_first" type="pdouble"/>
-#  <field name="chunk_avg" type="pdouble"/>
-#  <field name="chunk_end" type="plong"/>
-#  <field name="chunk_max" type="pdouble"/>
-#  <field name="chunk_min" type="pdouble"/>
-#  <field name="chunk_sum" type="pdouble"/>
-#  <field name="chunk_sax" type="ngramtext"/>
-#  <field name="chunk_size" type="pint"/>
-#  <field name="chunk_size_bytes" type="pint"/>
-#  <field name="chunk_start" type="plong"/>
-#  <field name="chunk_trend" type="boolean"/>
-#  <field name="chunk_value" type="string"/>
-#  <field name="chunk_origin" type="string"/>
-#  <field name="chunk_outlier" type="boolean"/>
-#  <field name="code_install" type="string" multiValued="true"/>
-#  <field name="sensor" type="string"/>
-#  <field name="year" type="pint"/>
-#  <field name="month" type="pint"/>
-#  <field name="day" type="pint"/>
-#  <field name="chunk_window_ms" type="plong"/>
-#  <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
-#  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-#  <field name="tagname" type="string" multiValued="true" indexed="true" required="false" stored="true"/>
-#  <field name="name" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"
             exit 0
             ;;
