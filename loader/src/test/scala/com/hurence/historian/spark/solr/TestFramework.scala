@@ -30,7 +30,8 @@ trait SolrCloudTestBuilder extends BeforeAndAfterAll with LazyLogging { this: Su
     super.beforeAll()
 
     System.setProperty("jetty.testMode", "true")
-    val solrXml = new File("src/test/resources/solr.xml")
+   // val solrXml = new File("src/test/resources/solr.xml")
+    val solrXml = new File(this.getClass.getClassLoader.getResource("solr.xml").getPath)
     val solrXmlContents: String = TestSolrCloudClusterSupport.readSolrXml(solrXml)
 
     val targetDir = new File("target")

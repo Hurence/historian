@@ -197,7 +197,8 @@ object SolrCloudUtil extends LazyLogging {
                       cloudClient: CloudSolrClient,
                       sc: SparkContext): Unit = {
     val confName = "testConfig"
-    val confDir = new File("src/test/resources/conf")
+   // val confDir = new File("src/test/resources/conf")
+    val confDir = new File(this.getClass.getClassLoader.getResource("conf").getPath)
     val replicationFactor: Int = 1
     createCollection(collection, numShards, replicationFactor, numShards, confName, confDir, cloudClient)
 
