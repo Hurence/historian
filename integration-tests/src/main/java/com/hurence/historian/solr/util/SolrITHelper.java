@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.hurence.unit5.extensions.SolrExtension.SOLR_CONF_TEMPLATE_ANNOTATION;
-import static com.hurence.unit5.extensions.SolrExtension.SOLR_CONF_TEMPLATE_HISTORIAN_CURRENT;
+import static com.hurence.unit5.extensions.SolrExtension.SOLR_CONF_TEMPLATE_HISTORIAN;
 
 public class SolrITHelper {
 
@@ -45,14 +45,24 @@ public class SolrITHelper {
 //    public static String COLLECTION_REPORT = "report";
 
     public static void initHistorianSolr(SolrClient client) throws IOException, SolrServerException {
-        initHistorianSolr(client, SOLR_CONF_TEMPLATE_HISTORIAN_CURRENT, SOLR_CONF_TEMPLATE_ANNOTATION);
+        LOGGER.debug("creating collection {}", COLLECTION_HISTORIAN);
+        createHistorianCollection(client);
+        LOGGER.debug("creating collection {}", COLLECTION_ANNOTATION);
+        createAnnotationCollection(client);
+        LOGGER.debug("verify collections {} and {} exist and are ready", COLLECTION_HISTORIAN, COLLECTION_ANNOTATION);
+        checkCollectionsHasBeenCreated(client);
+        LOGGER.debug("printing conf {} and {}", COLLECTION_HISTORIAN, COLLECTION_ANNOTATION);
+        checkCollectionsSchema(client);
     }
 
-    public static void initHistorianSolr(SolrClient client, String templateHistorian, String templateAnnotation) throws IOException, SolrServerException {
-        LOGGER.debug("creating collection {}", COLLECTION_HISTORIAN);
-        createHistorianCollection(client, templateHistorian);
-        LOGGER.debug("creating collection {}", COLLECTION_ANNOTATION);
-        createAnnotationCollection(client, templateAnnotation);
+    private static void checkCollectionsSchema(SolrClient client) throws IOException, SolrServerException {
+        checkHistorianSchema(client);
+        checkAnnotationSchema(client);
+    }
+
+    private static void checkCollectionsHasBeenCreated(SolrClient client) throws IOException, SolrServerException {
+        checkHistorianCollectionHasBeenCreated(client);
+        checkAnnotationCollectionHasBeenCreated(client);
     }
 
     private static void checkHistorianSchema(SolrClient client) throws SolrServerException, IOException {
@@ -91,20 +101,12 @@ public class SolrITHelper {
         LOGGER.info("collection {} is up and running !", COLLECTION_ANNOTATION);
     }
 
-    public static void createHistorianCollection(SolrClient client, String templateConf) throws SolrServerException, IOException {
-        createCollection(client, COLLECTION_HISTORIAN, templateConf);
-        checkHistorianCollectionHasBeenCreated(client);
-        checkHistorianSchema(client);
+    private static void createHistorianCollection(SolrClient client) throws SolrServerException, IOException {
+        final SolrRequest createrequest = CollectionAdminRequest.createCollection(COLLECTION_HISTORIAN, SOLR_CONF_TEMPLATE_HISTORIAN, 2, 1);
+        client.request(createrequest);
     }
-
-    public static void createAnnotationCollection(SolrClient client, String templateConf) throws SolrServerException, IOException {
-        createCollection(client, COLLECTION_ANNOTATION, templateConf);
-        checkAnnotationCollectionHasBeenCreated(client);
-        checkAnnotationSchema(client);
-    }
-
-    private static void createCollection(SolrClient client, String collectionName, String templateConf) throws SolrServerException, IOException {
-        final SolrRequest createrequest = CollectionAdminRequest.createCollection(collectionName, templateConf, 2, 1);
+    private static void createAnnotationCollection(SolrClient client) throws SolrServerException, IOException {
+        final SolrRequest createrequest = CollectionAdminRequest.createCollection(COLLECTION_ANNOTATION, SOLR_CONF_TEMPLATE_ANNOTATION, 2, 1);
         client.request(createrequest);
     }
 }
