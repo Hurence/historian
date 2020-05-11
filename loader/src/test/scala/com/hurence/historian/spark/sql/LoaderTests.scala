@@ -113,7 +113,7 @@ class LoaderTests extends SparkSessionTestWrapper {
       .collect()
 
 
-    assertEquals(" ", sample(0).sax)
+    assertEquals(" ......", sample(0).sax)
 
   }
 

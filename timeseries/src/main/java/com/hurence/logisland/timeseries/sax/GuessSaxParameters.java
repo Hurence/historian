@@ -45,7 +45,7 @@ public class GuessSaxParameters {
      * Grammar size, Grammar rules, compressed grammar size, prune rules, coverage, reduction et max frequency:
      * [12, 4, 9, 1.4450012717343763, 100, 6, 100, 84, 2, 0.5531914893617021, 100, 0.3333333333333333, 2]
      */
-    private List<Double> computeBestParam(List<Double> points )  {
+    private ArrayList computeBestParam(List<Double> points )  {
 
         int WINDOW_START = 0;
         int WINDOW_END = 100;
