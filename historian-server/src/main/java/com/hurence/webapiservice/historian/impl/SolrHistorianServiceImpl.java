@@ -41,6 +41,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.sortTheCsvIngestionResult;
 
 public class SolrHistorianServiceImpl implements HistorianService {
 
@@ -388,7 +389,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     }
                 }
                 if(timeseriesObject.getValue(IMPORT_TYPE, "ingestion-json") == "ingestion-csv")
-                    response.put(CSV,new JsonArray(resultForCsvImport));
+                    response.put(CSV,new JsonArray(sortTheCsvIngestionResult(resultForCsvImport)));
                 if(timeseriesObject.getValue(IMPORT_TYPE ,"ingestion-json") == "ingestion-json")
                     response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
                 p.complete(response

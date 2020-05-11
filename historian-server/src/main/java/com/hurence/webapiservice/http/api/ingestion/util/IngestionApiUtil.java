@@ -16,10 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
@@ -145,5 +142,22 @@ public class IngestionApiUtil {
                 errorMessage.append("\n").append(responseAndErrorHolder.errorMessages.get(i));
             }
         return errorMessage;
+    }
+
+    public static List<Map<String, Object>> sortTheCsvIngestionResult (List<Map<String, Object>> result) {
+        result.sort(new Comparator<Map<String, Object>>() {
+
+            @Override
+            public int compare(Map<String, Object> a, Map<String, Object> b) {
+                String valA = "";
+                String valB = "";
+
+                valA = (String) a.get(NAME);
+                valB = (String) b.get(NAME);
+
+                return valA.compareTo(valB);
+            }
+        });
+        return new ArrayList<>(result);
     }
 }
