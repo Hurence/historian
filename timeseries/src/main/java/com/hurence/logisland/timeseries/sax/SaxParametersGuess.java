@@ -89,8 +89,6 @@ public class SaxParametersGuess {
         //comparison is done through the use of reduction param, best parameters have the lowest reduction
         Collections.sort(res, new ReductionSorter());
 
-        //LOGGER.info("apparently, the best parameters are " + res.get(0).toString());
-        //for (int i=0 ;i< 56; i++)System.out.println(res.get(i));
 
        // result.add(res.get(0));
         result.add( res.get(0).getWindow());

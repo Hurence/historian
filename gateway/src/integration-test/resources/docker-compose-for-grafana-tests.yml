@@ -1,0 +1,121 @@
+version: '3.7'
+services:
+  solr1:
+    container_name: solr1
+    image: solr:8.3
+    ports:
+      - "8981:8983"
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    networks:
+      - solr
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+
+  solr2:
+    image: solr:8.3
+    container_name: solr2
+    ports:
+      - "8982:8983"
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    networks:
+      - solr
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+
+  solr3:
+    image: solr:8.3
+    container_name: solr3
+    ports:
+      - "8983:8983"
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    networks:
+      - solr
+    depends_on:
+      - zoo1
+      - zoo2
+      - zoo3
+
+  zoo1:
+    image: zookeeper:3.5
+    container_name: zoo1
+    restart: always
+    hostname: zoo1
+    ports:
+      - 2181:2181
+    environment:
+      ZOO_MY_ID: 1
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=zoo3:2888:3888;2181
+    networks:
+      - solr
+
+  zoo2:
+    image: zookeeper:3.5
+    container_name: zoo2
+    restart: always
+    hostname: zoo2
+    ports:
+      - 2182:2181
+    environment:
+      ZOO_MY_ID: 2
+      ZOO_SERVERS: server.1=0.0.0.0:2888:3888;2181 server.2=0.0.0.0:2888:3888;2181 server.3=zoo3:2888:3888;2181
+    networks:
+      - solr
+
+  zoo3:
+    image: zookeeper:3.5
+    container_name: zoo3
+    restart: always
+    hostname: zoo3
+    ports:
+      - 2183:2181
+    environment:
+      ZOO_MY_ID: 3
+      ZOO_SERVERS: server.1=zoo1:2888:3888;2181 server.2=zoo2:2888:3888;2181 server.3=0.0.0.0:2888:3888;2181
+    networks:
+      - solr
+
+  solr-initializer:
+    image: solr:8.3
+    container_name: solr4
+    networks:
+      - solr
+    depends_on:
+      - solr1
+      - solr2
+      - solr3
+    environment:
+      - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
+    volumes:
+      - ./scripts:/opt/scripts
+      - ./solr/configsets:/opt/solr/configsets
+    command: >
+      /bin/bash /opt/scripts/init-solr.bash
+
+  historian:
+    image: hurence/historian:latest
+    command: >
+      /bin/bash
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./historian-conf/conf:/opt/historian/conf/
+      - ./historian-conf/log4j.properties:/opt/historian/log4j.properties
+    links:
+      - zoo1
+      - zoo2
+      - zoo3
+      - solr1
+      - solr2
+      - solr3
+    networks:
+      - solr
+
+networks:
+  solr:

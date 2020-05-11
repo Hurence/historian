@@ -1,0 +1,29 @@
+{
+  "web.verticles.instance.number": 2,
+  "historian.verticles.instance.number": 1,
+  "http_server" : {
+    "host": "localhost",
+    "port" : 8080,
+    "historian.address": "historian",
+    "api" : {
+      "grafana" : {
+        "search" : {
+          "default_size": 10
+        },
+        "annotations" : {
+          "limit": 100
+        }
+      }
+    }
+  },
+  "historian": {
+    "address" : "historian",
+    "solr" : {
+      "use_zookeeper": false,
+      "zookeeper_urls": ["localhost:2181"],
+      "stream_url": "http://localhost:8983/solr/historian",
+      "chunk_collection": "historian",
+      "annotation_collection": "annotation"
+    }
+  }
+}
