@@ -6,7 +6,6 @@ import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
 import com.hurence.logisland.util.DateUtil
 import com.hurence.logisland.util.string.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
-import org.apache.spark.unsafe.types.UTF8String
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -33,7 +32,7 @@ object functions {
     try {
       DateUtil.parse(dateString, dateFormat).getTime
     } catch {
-      case NonFatal(_) => null
+      case NonFatal(_) => 0L
     }
   }
 

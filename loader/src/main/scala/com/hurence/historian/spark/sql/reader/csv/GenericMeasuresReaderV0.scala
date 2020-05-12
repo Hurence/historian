@@ -61,7 +61,7 @@ class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
       logger.info("getting date from timestamp in seconds")
       df.withColumn("timestamp", $"timestamp" * 1000L)
     }
-    else if (isTimestampInMilliSeconds) {
+    else if(isTimestampInMilliSeconds)  {
       logger.info("getting date from timestamp in milliseconds")
       df.withColumn("timestamp", $"timestamp" * 1L)
     }
