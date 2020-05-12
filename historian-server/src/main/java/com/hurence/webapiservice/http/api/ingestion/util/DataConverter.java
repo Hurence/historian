@@ -80,7 +80,15 @@ public class DataConverter {
     public static Object toNumber(Object value, MultiMap multiMap) {
         if (multiMap.get(FORMAT_DATE) == null || multiMap.get(TIMEZONE_DATE) == null)
             try {
-                return Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+",""));
+                long l = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
+                if ((multiMap.get(TIMESTAMP_UNIT) == null) || (multiMap.get(TIMESTAMP_UNIT) == TimestampUnit.MILLISECONDS_EPOCH.toString()))
+                    return l;
+                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.SECONDS_EPOCH.toString()))
+                    return l*1000;
+                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.MICROSECONDS_EPOCH.toString()))
+                    return l/1000;
+                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.NANOSECONDS_EPOCH.toString()))
+                    return l/1000000;
             } catch (Exception e) {
                 LOGGER.debug("error in parsing date", e);
                 return value;

@@ -6,6 +6,7 @@ import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.MultipartRequestResponseConf;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
+import com.hurence.webapiservice.http.api.ingestion.util.TimestampUnit;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
@@ -59,6 +60,7 @@ public class ImportCsvEndPointIT {
     public static String FORMAT_DATE = "format_date";
     public static String TIMEZONE_DATE = "timezone_date";
     public static String GROUP_BY = "group_by";
+    public static String TIMESTAMP_UNIT = "timestamp_unit";
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
@@ -497,6 +499,75 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testQueryChunk/expectedResponse_on_several_days.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithSecondTimestampDate(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_second_date.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(TIMESTAMP_UNIT, TimestampUnit.SECONDS_EPOCH.toString())
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_second_date.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_second_date.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithNanoSecondTimestampDate(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_nano_second_date.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(TIMESTAMP_UNIT, TimestampUnit.NANOSECONDS_EPOCH.toString())
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_second_date.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_second_date.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithMicroSecondTimestampDate(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_micro_second_date.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(TIMESTAMP_UNIT, TimestampUnit.MICROSECONDS_EPOCH.toString())
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_second_date.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_second_date.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);

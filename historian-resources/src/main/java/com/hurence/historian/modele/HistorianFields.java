@@ -97,6 +97,7 @@ public class HistorianFields {
     public static String FORMAT_DATE = "format_date";
     public static String GROUP_BY = "group_by";
     public static String TIMEZONE_DATE = "timezone_date";
+    public static String TIMESTAMP_UNIT = "timestamp_unit";
 
 }
 
