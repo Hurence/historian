@@ -37,7 +37,7 @@ import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.record.EvoaUtils;
 import com.hurence.logisland.record.Record;
-import com.hurence.logisland.record.TimeseriesRecord;
+import com.hurence.logisland.record.TimeSeriesRecord;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -65,7 +65,7 @@ public class AddEvoaTags extends AbstractProcessor {
         records.forEach(record -> {
             EvoaUtils.setDateFields(record);
             EvoaUtils.setBusinessFields(record);
-            EvoaUtils.setChunkOrigin(record, TimeseriesRecord.CHUNK_ORIGIN_LOGISLAND);
+            EvoaUtils.setChunkOrigin(record, TimeSeriesRecord.CHUNK_ORIGIN_LOGISLAND);
             EvoaUtils.setHashId(record);
         });
 

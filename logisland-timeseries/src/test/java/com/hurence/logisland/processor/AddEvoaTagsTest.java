@@ -38,7 +38,7 @@ public class AddEvoaTagsTest {
         return new StandardRecord(SAMPLED_RECORD)
                 .setField(FieldDictionary.RECORD_VALUE, FieldType.DOUBLE, value)
                 .setField(FieldDictionary.RECORD_TIME, FieldType.LONG, time)
-                .setField(TimeseriesRecord.CHUNK_START, FieldType.LONG, time)
+                .setField(TimeSeriesRecord.CHUNK_START, FieldType.LONG, time)
                 .setField(FieldDictionary.RECORD_NAME, FieldType.STRING, name)
                 .setField("name", FieldType.STRING, name);
     }
@@ -78,7 +78,7 @@ public class AddEvoaTagsTest {
         out.assertFieldEquals("week", 7);
         out.assertFieldEquals("code_install", "T062");
         out.assertFieldEquals("sensor", "TC06_PV");
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_ORIGIN, "logisland");
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_ORIGIN, "logisland");
     }
 
 }

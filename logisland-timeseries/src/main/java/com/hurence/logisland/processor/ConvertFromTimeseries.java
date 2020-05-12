@@ -56,8 +56,8 @@ public class ConvertFromTimeseries extends AbstractProcessor {
     @Override
     public Collection<Record> process(ProcessContext context, Collection<Record> records) {
         return records.stream()
-                .filter(TimeseriesRecord.class::isInstance)
-                .map(TimeseriesRecord.class::cast)
+                .filter(TimeSeriesRecord.class::isInstance)
+                .map(TimeSeriesRecord.class::cast)
                 .flatMap(r -> {
                     try {
                         return converter.unchunk(r).stream();

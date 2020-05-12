@@ -37,8 +37,8 @@ import java.util.stream.Stream;
 /**
  * Timeseries holder record
  */
-
 public class TimeSeriesRecord extends StandardRecord {
+
 
     private static Logger logger = LoggerFactory.getLogger(StandardRecord.class);
 
