@@ -7,11 +7,22 @@ import com.hurence.historian.spark.sql.functions.{chunk, guess, sax}
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import org.apache.spark.sql.functions._
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.{BeforeAll, Test, TestInstance}
 
+
+@TestInstance(Lifecycle.PER_CLASS)
 class LoaderTests extends SparkSessionTestWrapper {
 
   import spark.implicits._
+
+
+  @BeforeAll
+  def init() : Unit= {
+    // to lazy load spark if needed
+    spark.version
+  }
+
 
   @Test
   def testMeasureV0() = {
@@ -144,9 +155,6 @@ class LoaderTests extends SparkSessionTestWrapper {
   @Test
   def testLoaderCSV() = {
 
-    // to lazy load spark if needed
-    spark.version
-
     val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
     val options = Options(
@@ -171,8 +179,6 @@ ds.show()
   @Test
   def testLoadITDataCSVV0() = {
 
-    spark.version
-
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
     val options = Options(
       filePath,
@@ -192,8 +198,6 @@ ds.show()
   @Test
   def testLoadITDataParquetV0() = {
 
-    spark.version
-
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
     val options = Options(filePath, Map())
     val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
@@ -209,8 +213,6 @@ ds.show()
 
   @Test
   def testLoadITDataChunksParquetV0() = {
-
-    spark.version
 
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics-chunk.parquet").getPath
     val options = Options(filePath, Map())
