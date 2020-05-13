@@ -77,7 +77,7 @@ public class HistorianImportJsonVerticleIT {
                             "\""+TO+"\": 1477916925845," +
                             "\""+FIELDS+"\":[\""+RESPONSE_CHUNK_VALUE_FIELD+"\",\""+RESPONSE_CHUNK_START_FIELD+"\",\""+RESPONSE_CHUNK_END_FIELD+"\",\""+RESPONSE_CHUNK_SIZE_FIELD+"\",\""+NAME+"\"]," +
                             "\""+NAMES+"\":[\"openSpaceSensors.Temperature000\"]," +
-                            "\""+TAGS+"\":{}," +
+                            "\""+TAGS+"\":[]," +
                             "\""+SAMPLING_ALGO+"\":\"AVERAGE\"," +
                             "\""+BUCKET_SIZE+"\":1," +
                             "\""+MAX_POINT_BY_METRIC+"\":844" +
@@ -130,7 +130,7 @@ public class HistorianImportJsonVerticleIT {
                             "\""+NAMES+"\":[\"openSpaceSensors.Temperature111\",\"openSpaceSensors.Temperature222\"," +
                             "\"openSpaceSensors.Temperature333\"," +
                             "\"openSpaceSensors.Temperature444\"]," +
-                            "\""+TAGS+"\":{}," +
+                            "\""+TAGS+"\":[]," +
                             "\""+SAMPLING_ALGO+"\":\"AVERAGE\"," +
                             "\""+BUCKET_SIZE+"\":1," +
                             "\""+MAX_POINT_BY_METRIC+"\":844" +
