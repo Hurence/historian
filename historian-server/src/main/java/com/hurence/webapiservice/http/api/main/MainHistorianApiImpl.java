@@ -82,7 +82,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
             return;
         }
 
-        final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
+        final JsonObject getTimeSeriesChunkParams = buildGetTimeSeriesChunkRequest(request);
 
         service
                 .rxGetTimeSeriesChunk(getTimeSeriesChunkParams)
@@ -111,7 +111,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 }).subscribe();
     }
 
-    private JsonObject buildHistorianRequest(TimeSeriesRequest request) {
+    private JsonObject buildGetTimeSeriesChunkRequest(TimeSeriesRequest request) {
         JsonArray fieldsToFetch = new JsonArray()
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
@@ -153,6 +153,25 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
+    private JsonObject buildGetTimeSeriesRequest(QueryRequestParam request) {
+        JsonArray fieldsToFetch = new JsonArray()
+                .add(RESPONSE_CHUNK_VALUE_FIELD)
+                .add(RESPONSE_CHUNK_START_FIELD)
+                .add(RESPONSE_CHUNK_END_FIELD)
+                .add(RESPONSE_CHUNK_SIZE_FIELD)
+                .add(NAME);
+        SamplingConf samplingConf = request.getSamplingConf();
+        return new JsonObject()
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(FIELDS, fieldsToFetch)
+                .put(NAMES, request.getMetricNames())
+                .put(HistorianFields.TAGS, request.getTagsValuesToFilter())
+                .put(SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+    }
+
     @Override
     public void export(RoutingContext context) {
         final long startRequest = System.currentTimeMillis();
@@ -184,7 +203,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         }
 
 
-        final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
+        final JsonObject getTimeSeriesChunkParams = buildGetTimeSeriesRequest(request);
 
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
