@@ -419,6 +419,31 @@ public class ImportCsvEndPointIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithATagDate(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_date_tag.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TAGS, "date")
+                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<>(TEST_CHUNK_QUERY_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQueryChunk/request-metric_1.json",
+                        "/http/ingestion/csv/onemetric-3points/testQueryChunk/expectedResponse_grouped_by_sensor.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testCsvFileImportSeveralFiles(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints.csv").getFile();
         String pathCsvFile2 = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints2.csv").getFile();
