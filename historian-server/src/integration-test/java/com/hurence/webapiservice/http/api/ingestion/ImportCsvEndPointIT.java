@@ -110,6 +110,26 @@ public class ImportCsvEndPointIT {
     }
 
     /*
+        Csv without quality
+     */
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testMinimalCsvFileImport2(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_without_quality.csv").getFile();
+        testMinimalCsvFileImport(vertx, testContext, pathCsvFile);
+    }
+
+    /*
+    schema of csv changed
+     */
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testMinimalCsvFileImport3(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_shuffled_columns.csv").getFile();
+        testMinimalCsvFileImport(vertx, testContext, pathCsvFile);
+    }
+
+    /*
         Import should be idem potent. This can be easily done by setting the id of the chunk as a hash of all parameters.
      */
     @Test
@@ -137,27 +157,6 @@ public class ImportCsvEndPointIT {
         );
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
-    }
-
-
-    /*
-        Csv without quality
-     */
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMinimalCsvFileImport2(Vertx vertx, VertxTestContext testContext) {
-        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_without_quality.csv").getFile();
-        testMinimalCsvFileImport(vertx, testContext, pathCsvFile);
-    }
-
-    /*
-    schema of csv changed
-     */
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testMinimalCsvFileImport3(Vertx vertx, VertxTestContext testContext) {
-        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_shuffled_columns.csv").getFile();
-        testMinimalCsvFileImport(vertx, testContext, pathCsvFile);
     }
 
     @Test
