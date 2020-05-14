@@ -78,7 +78,7 @@ public class DataConverter {
     }
 
     public static Object toNumber(Object value, MultiMap multiMap) {
-        if (multiMap.get(FORMAT_DATE) == null || multiMap.get(TIMEZONE_DATE) == null)
+        if (multiMap.get(FORMAT_DATE) == null || multiMap.get(TIMEZONE_DATE) == null) {
             try {
                 long l = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
                 if ((multiMap.get(TIMESTAMP_UNIT) == null) || (multiMap.get(TIMESTAMP_UNIT) == TimestampUnit.MILLISECONDS_EPOCH.toString()))
@@ -93,6 +93,7 @@ public class DataConverter {
                 LOGGER.debug("error in parsing date", e);
                 return value;
             }
+        }
         long date = 0;
         try {
             date = createDateFormat(multiMap.get(FORMAT_DATE),multiMap.get(TIMEZONE_DATE)).parse(value.toString()).getTime();
