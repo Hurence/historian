@@ -335,7 +335,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    @Override
+    /*@Override
     public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
         final String chunkOrigin = timeseriesObject.getString(IMPORT_TYPE, "ingestion-json");
         final JsonObject failedPoints = timeseriesObject.getJsonObject("number of failed points");
@@ -392,6 +392,47 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
                 p.complete(response
                 );
+            } catch (Exception e) {
+                LOGGER.error("unexpected exception");
+                p.fail(e);
+            }
+        };
+        vertx.executeBlocking(getMetricsNameHandler, resultHandler);
+
+        return this;
+    }*/
+    @Override
+    public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
+
+        Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
+            try {
+                final String chunkOrigin = timeseriesObject.getString(CHUNK_ORIGIN, "ingestion-json");
+                JsonArray timeseriesPoints = timeseriesObject.getJsonArray(POINTS_REQUEST_FIELD);
+                JsonObject response = new JsonObject();
+                Collection<SolrInputDocument> documents = new ArrayList<>();
+                int numChunk = 0;
+                int numPoints = 0;
+                for (Object timeserieObject : timeseriesPoints) {
+                    JsonObject timeserie = (JsonObject) timeserieObject;
+                    SolrInputDocument document;
+                    LOGGER.info("building SolrDocument from a chunk");
+                    document = chunkTimeSerie(timeserie, chunkOrigin);
+                    documents.add(document);
+                    int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
+                    numChunk++;
+                    numPoints = numPoints + totalNumPointsInChunk;
+                }
+                if(!documents.isEmpty()) {
+                    LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
+                    solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
+                    solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
+                    LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
+                }
+                response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
+                p.complete(response
+                );
+            } catch (SolrServerException | IOException e) {
+                e.printStackTrace();
             } catch (Exception e) {
                 LOGGER.error("unexpected exception");
                 p.fail(e);

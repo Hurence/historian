@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.webapiservice.http.api.ingestion.ImportRequestParser;
+import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
@@ -120,7 +121,7 @@ public class IngestionApiUtil {
         return finalResponse;
     }
 
-    public static JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
+    public static JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
         StringBuilder message = new StringBuilder();
         message.append("Injected ").append(response.getInteger(RESPONSE_TOTAL_ADDED_POINTS)).append(" points of ")
                 .append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
@@ -134,7 +135,7 @@ public class IngestionApiUtil {
             finalResponse.put("status", "OK").put("message", message.toString());
         return finalResponse;
     }
-    public static StringBuilder extractFinalErrorMessage(ImportRequestParser.ResponseAndErrorHolder responseAndErrorHolder) {
+    public static StringBuilder extractFinalErrorMessage(ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
         StringBuilder errorMessage = new StringBuilder();
         errorMessage.append(". ").append(responseAndErrorHolder.errorMessages.get(0));
         if (responseAndErrorHolder.errorMessages.size() > 1)

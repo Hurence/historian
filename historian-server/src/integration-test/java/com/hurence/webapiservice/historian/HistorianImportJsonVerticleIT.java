@@ -62,8 +62,8 @@ public class HistorianImportJsonVerticleIT {
     void importJsonTimeseries(VertxTestContext testContext) {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
-        JsonArray params = new JsonArray().add(new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature000").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0)))));
-        JsonObject paramsObject = new JsonObject().put(CORRECT_POINTS, params).put(IMPORT_TYPE, "ingestion-json");
+        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature000").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))));
+        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
@@ -110,11 +110,11 @@ public class HistorianImportJsonVerticleIT {
         long time2 = 1477916224866L;
         long time3 = 1477895724888L;
         long time4 = 1477916924845L;
-        JsonArray params = new JsonArray().add(new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature111").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
+        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature111").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
                 .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature222").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))))
                 .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature333").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time3).add(4.1)).add(new JsonArray().add(time4).add(6.5))))
-                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature444").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time3).add(0.0)).add(new JsonArray().add(time4).add(9.1)))));
-        JsonObject paramsObject = new JsonObject().put(CORRECT_POINTS, params).put(IMPORT_TYPE, "ingestion-json");
+                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature444").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time3).add(0.0)).add(new JsonArray().add(time4).add(9.1))));
+        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
@@ -173,9 +173,9 @@ public class HistorianImportJsonVerticleIT {
     void checkAddedTimeseriesChunks(VertxTestContext testContext) {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
-        JsonArray params = new JsonArray().add(new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature555").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
-        .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature666").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8)))));
-        JsonObject paramsObject = new JsonObject().put(CORRECT_POINTS, params).put(IMPORT_TYPE, "ingestion-json");
+        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature555").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
+        .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature666").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))));
+        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {

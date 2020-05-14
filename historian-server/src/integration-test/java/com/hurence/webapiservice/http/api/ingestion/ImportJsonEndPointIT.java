@@ -227,7 +227,7 @@ public class ImportJsonEndPointIT {
     public void assertCorrectPointsImportRequest(Vertx vertx, VertxTestContext testContext,
                                                  String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
         List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, OK, "OK", BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "Created", BodyCodec.jsonObject(), vertx),
                 new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
