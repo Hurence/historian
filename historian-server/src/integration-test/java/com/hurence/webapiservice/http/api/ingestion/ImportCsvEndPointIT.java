@@ -34,6 +34,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.http.HttpServerVerticle.*;
@@ -375,7 +376,7 @@ public class ImportCsvEndPointIT {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_string_date_asia.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
                 .attribute(FORMAT_DATE, "yyyy-MM-dd HH:mm:ss.SSS")
-                .attribute(TIMEZONE_DATE, "CST")//UTC +8
+                .attribute(TIMEZONE_DATE, "Asia/Aden")//UTC +3
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
@@ -385,7 +386,30 @@ public class ImportCsvEndPointIT {
                         BodyCodec.jsonObject(), vertx),
                 new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
-                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_string_date3.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithStringDatesDefautUTC(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_string_date_utc_2.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(FORMAT_DATE, "yyyy-D-m HH:mm:ss.SSS")
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
         );

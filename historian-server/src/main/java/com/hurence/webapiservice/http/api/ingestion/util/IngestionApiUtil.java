@@ -95,7 +95,7 @@ public class IngestionApiUtil {
                 long date = (long) DataConverter.toNumber(date1, multiMap);
                 Date d = new Date(date); // here see what is the default timestamp format
                 DateFormat f = new SimpleDateFormat("yyyy-MM-dd");
-                i.put(DATE, f.format(d));
+                i.put(DATE, f.format(d));//TODO !!!!! What happens if csv contain a column date ????
             }catch (Exception e) {
                 LOGGER.debug("error in parsing date", e);
             }

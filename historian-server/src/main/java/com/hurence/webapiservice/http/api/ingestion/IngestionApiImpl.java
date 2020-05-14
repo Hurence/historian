@@ -36,7 +36,7 @@ public class IngestionApiImpl implements IngestionApi {
             responseAndErrorHolder = new ImportRequestParser().checkAndBuildValidHistorianImportRequest(getMetricsParam, null);
             responseAndErrorHolderAllFiles.correctPoints.getJsonArray("correctPoints").add(responseAndErrorHolder.correctPoints);
             responseAndErrorHolderAllFiles.correctPoints.put(IMPORT_TYPE, "ingestion-json");
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);

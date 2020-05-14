@@ -14,10 +14,6 @@
       "chunk_window_ms": 2,
       "sensor": "sensor_1",
       "code_install": "code_1",
-      "tags": [
-        "sensor",
-        "code_install"
-      ],
       "chunk_value": "H4sIAAAAAAAAAOPi1DQGg8/2XNwKjJoMEODAxS0A43A4CDAAAHn0278nAAAA",
       "chunk_size_bytes": 45,
       "chunk_first": 1.2,
