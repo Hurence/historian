@@ -1,0 +1,4 @@
+metric,timestamp,value,quality,date
+metric_1, 1, 1.2 ,1.4,14-01-99
+metric_1, 2, 2 ,1.4,14-01-99
+metric_1, 3, 3 ,1.4,14-01-99
