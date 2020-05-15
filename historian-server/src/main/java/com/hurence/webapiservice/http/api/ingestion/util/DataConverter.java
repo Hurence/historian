@@ -22,7 +22,7 @@ public class DataConverter {
         this.multiMap = multiMap;
     }
 
-    public JsonArray toGroupedByMetricDataPoints(List<Map> rows) {
+    public JsonArray toGroupedByMetricDataPoints(List<IngestionApiUtil.LineWithDateInfo> LinesWithDateInfo) {
 
         if (multiMap.get(MAPPING_NAME) == null)
             multiMap.add(MAPPING_NAME, "metric");
@@ -42,20 +42,20 @@ public class DataConverter {
                 throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
         }).collect(Collectors.toList());
 
-        List<Map<String, Object>> finalGroupedPoints = rows.stream()
+        List<Map<String, Object>> finalGroupedPoints = LinesWithDateInfo.stream()
             //group by metric,tag,date -> [value, date] ( in case where group by just metric : metric,date -> [value, date])
             .collect(Collectors.groupingBy(map -> {
                 List<Object> groupByListForThisMap = new ArrayList<>();
-                groupByList.forEach(i -> groupByListForThisMap.add(map.get(i)));
-                groupByListForThisMap.add(map.get(DATE));
+                groupByList.forEach(i -> groupByListForThisMap.add(map.mapFromOneCsvLine.get(i)));
+                groupByListForThisMap.add(map.date);
                 return groupByListForThisMap;
                 },
                 LinkedHashMap::new,
                 Collectors.mapping(map -> {
                     JsonObject tagsList = new JsonObject();
-                    multiMap.getAll(MAPPING_TAGS).forEach(t -> tagsList.put(t, map.get(t)));
-                    return Arrays.asList(Arrays.asList(toNumber(map.get(multiMap.get(MAPPING_TIMESTAMP)), multiMap),
-                            toDouble(map.get(multiMap.get(MAPPING_VALUE)))),
+                    multiMap.getAll(MAPPING_TAGS).forEach(t -> tagsList.put(t, map.mapFromOneCsvLine.get(t)));
+                    return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_TIMESTAMP)), multiMap),
+                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_VALUE)))),
                             tagsList);
                 },
             Collectors.toList())))
@@ -78,10 +78,10 @@ public class DataConverter {
     }
 
     public static Object toNumber(Object value, MultiMap multiMap) {
-        if (multiMap.get(FORMAT_DATE) == null || multiMap.get(TIMEZONE_DATE) == null) {
+        if (multiMap.get(FORMAT_DATE) == null && multiMap.get(TIMEZONE_DATE) == null) {
             try {
                 long l = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
-                if ((multiMap.get(TIMESTAMP_UNIT) == null) || (multiMap.get(TIMESTAMP_UNIT) == TimestampUnit.MILLISECONDS_EPOCH.toString()))
+                if ((multiMap.get(TIMESTAMP_UNIT) == null) || (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.MILLISECONDS_EPOCH.toString())))
                     return l;
                 else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.SECONDS_EPOCH.toString()))
                     return l*1000;
@@ -93,7 +93,8 @@ public class DataConverter {
                 LOGGER.debug("error in parsing date", e);
                 return value;
             }
-        }
+        } else if (multiMap.get(TIMEZONE_DATE) == null)
+            multiMap.add(TIMEZONE_DATE, "UTC");
         long date = 0;
         try {
             date = createDateFormat(multiMap.get(FORMAT_DATE),multiMap.get(TIMEZONE_DATE)).parse(value.toString()).getTime();

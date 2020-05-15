@@ -222,6 +222,101 @@ public class ImportRequestParser {
             this.errorMessages = new ArrayList<>();
         }
     }
+    public CorrectPointsAndFailedPoints parseCsvImportRequest(JsonArray metricsParam, MultiMap multiMap) throws IllegalArgumentException {
+        if (null == metricsParam) {
+            throw new NullPointerException("Null request body");
+        }else if (metricsParam.isEmpty()) {
+            throw new IllegalArgumentException("Empty request body");
+        }
+        CorrectPointsAndFailedPoints correctPointsAndFailedPoints = new CorrectPointsAndFailedPoints();
+        for (Object metricsObject : metricsParam) {
+            JsonObject timeserie = (JsonObject) metricsObject;
+            int numberOfFailedPointsForThisName = 0;
+            if (!(timeserie.containsKey(NAME)))
+                throw new IllegalArgumentException("Missing a name for at least one metric");
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
+                numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints;
+                continue;
+            } else if (!(timeserie.getValue(NAME) instanceof String)) {
+                throw new IllegalArgumentException("A name is not a string for at least one metric");
+            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD))) {
+                throw new IllegalArgumentException("field 'points' is required");
+            } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
+                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
+            }
+            JsonObject newTimeserie = new JsonObject();
+            Set<String> fieldsNamesWithoutPoints = timeserie.fieldNames();
+            fieldsNamesWithoutPoints.forEach(i -> {
+                if (!i.equals(POINTS_REQUEST_FIELD))
+                    newTimeserie.put(i, timeserie.getValue(i));
+            });
+            JsonArray newPoints = new JsonArray();
+            for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
+                JsonArray pointArray;
+                try {
+                    pointArray = (JsonArray) point;
+                    pointArray.size();
+                } catch (Exception ex) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+                if (pointArray.size() == 0){
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                } else if (pointArray.size() != 2)
+                    throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
+                try {
+                    if (pointArray.getLong(0) == null) {
+                        numberOfFailedPointsForThisName++;
+                        continue;
+                    }
+                } catch (Exception e) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+                try {
+                    if ((pointArray.getDouble(1) == null)) {
+                        numberOfFailedPointsForThisName++;
+                        continue;
+                    }
+                } catch (Exception e) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+                newPoints.add(pointArray);
+            }
+            if(!newPoints.isEmpty()) {
+                newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
+                correctPointsAndFailedPoints.correctPoints.add(newTimeserie);
+            }
+            int currentNumberOfFailedPoints;
+            JsonArray groupByArray = new JsonArray();
+            if (multiMap != null) {
+                List<String> groupByList = multiMap.getAll(GROUP_BY).stream().map(s -> {
+                    if (s.startsWith(TAGS+".")) {
+                        return s.substring(5);
+                    }else if (s.equals(NAME))
+                        return s;
+                    else return null ;
+                }).collect(Collectors.toList());
+                groupByList.remove(null);
+                groupByList.forEach(i -> groupByArray.add(timeserie.getValue(i)));
+            } else {
+                groupByArray.add(NAME);
+            }
+            if (correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.containsKey(groupByArray.toString())) {
+                currentNumberOfFailedPoints = correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.getInteger(groupByArray.toString());
+                correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.put(groupByArray.toString(), currentNumberOfFailedPoints+numberOfFailedPointsForThisName);
+            }else {
+                correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.put(groupByArray.toString(), numberOfFailedPointsForThisName);
+            }
+
+        }
+        if (correctPointsAndFailedPoints.correctPoints.isEmpty())
+            throw new IllegalArgumentException("There is no valid points");
+        return correctPointsAndFailedPoints;
+    }
 
     public static class ResponseAndErrorHolder {
 
@@ -235,19 +330,27 @@ public class ImportRequestParser {
             this.numberOfFailedPointsPerMetric = new JsonObject();
         }
     }
-    public static class ResponseAndErrorHolderAllFiles {
+    public static class CorrectPointsAndFailedPointsOfAllFiles {
 
-        public JsonObject correctPoints;
-        public ArrayList<ArrayList<String>> errorMessages;
-        public JsonArray tooBigFiles;
+        public JsonArray correctPoints;
+        public JsonArray namesOfTooBigFiles;
         public JsonObject numberOfFailedPointsPerMetric;
 
-        ResponseAndErrorHolderAllFiles () {
-            this.correctPoints = new JsonObject();
-            correctPoints.put(CORRECT_POINTS, new JsonArray());
-            this.errorMessages = new ArrayList<>();
-            this.tooBigFiles = new JsonArray();
+        public CorrectPointsAndFailedPointsOfAllFiles() {
+            this.correctPoints = new JsonArray();
+            this.namesOfTooBigFiles = new JsonArray();
             this.numberOfFailedPointsPerMetric = new JsonObject();
         }
     }
+    public static class CorrectPointsAndFailedPoints {
+
+        public JsonArray correctPoints;
+        public JsonObject numberOfFailedPointsPerMetric;
+
+        CorrectPointsAndFailedPoints () {
+            this.correctPoints = new JsonArray();
+            this.numberOfFailedPointsPerMetric = new JsonObject();
+        }
+    }
+
 }

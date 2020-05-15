@@ -85,7 +85,6 @@ public class HistorianFields {
     public static String IMPORT_TYPE = "import_type";
 
     public static String DEFAULT_NAME_FIELD = "name";
-    public static String DATE = "date";
     public static String CORRECT_POINTS = "correctPoints";
 
     //Mapping fields

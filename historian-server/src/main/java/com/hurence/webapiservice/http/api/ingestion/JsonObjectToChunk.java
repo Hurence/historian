@@ -184,8 +184,6 @@ public class JsonObjectToChunk {
             allTagsAsArray.add(key);
             tsBuilder.attribute(key,value.toString());
         });
-        if (!allTagsAsArray.isEmpty())
-            tsBuilder.attribute(TAGS, allTagsAsArray);
         addPoints(tsBuilder, points);
         return tsBuilder.build();
     }

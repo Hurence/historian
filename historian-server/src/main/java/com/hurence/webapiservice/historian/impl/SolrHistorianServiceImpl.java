@@ -1,9 +1,6 @@
 package com.hurence.webapiservice.historian.impl;
 
-import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.record.Record;
-import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
@@ -36,12 +33,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.sortTheCsvIngestionResult;
 
 public class SolrHistorianServiceImpl implements HistorianService {
 
@@ -335,72 +330,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    /*@Override
-    public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
-        final String chunkOrigin = timeseriesObject.getString(IMPORT_TYPE, "ingestion-json");
-        final JsonObject failedPoints = timeseriesObject.getJsonObject("number of failed points");
-        Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
-            try {
-                JsonArray timeseriesPoints = timeseriesObject.getJsonArray(CORRECT_POINTS);
-                JsonObject response = new JsonObject();
-                List<Map<String, Object>> resultForCsvImport = new LinkedList<>();
-                int numChunk = 0;
-                int numPoints = 0;
-                for(Object timeseriesPointsObject : timeseriesPoints) {
-                    try {
-                        JsonArray timeseries =(JsonArray) timeseriesPointsObject;
-                        Collection<SolrInputDocument> documents = new ArrayList<>();
-                        JsonArray groupedByFields = timeseriesObject.getJsonArray(GROUPED_BY);
-                        List<HashMap<String, String>> groupedByFieldsForEveryChunk = new LinkedList<>();
-                        for (Object timeserieObject : timeseries) {
-                            JsonObject timeserie = (JsonObject) timeserieObject;
-                            JsonObject tagsObject = timeserie.getJsonObject(TAGS);
-                            SolrInputDocument document;
-                            LOGGER.info("building SolrDocument from a chunk");
-                            document = chunkTimeSerie(timeserie, chunkOrigin);
-                            documents.add(document);
-                            if(timeseriesObject.getValue(IMPORT_TYPE, "ingestion-json") == "ingestion-csv") {
-                                HashMap<String, String> groupedByFieldsForThisChunk = new LinkedHashMap<String,String>();
-                                groupedByFields.forEach(f -> {
-                                    if (f.toString().equals(NAME))
-                                        groupedByFieldsForThisChunk.put(f.toString(),timeserie.getString(f.toString()));
-                                    else
-                                        groupedByFieldsForThisChunk.put(f.toString(),tagsObject.getString(f.toString()));
-                                });
-                                int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
-                                groupedByFieldsForThisChunk.put("totalPointsForThisChunk", String.valueOf(totalNumPointsInChunk));
-                                groupedByFieldsForEveryChunk.add(groupedByFieldsForThisChunk);
-                            }
-                            numChunk++;
-                            numPoints = numPoints + (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
-                        }
-                        if(!documents.isEmpty()) {
-                            LOGGER.info("adding some chunks in collection {}", solrHistorianConf.chunkCollection);
-                            solrHistorianConf.client.add(solrHistorianConf.chunkCollection, documents);
-                            solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
-                            LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
-                        }
-                        if(timeseriesObject.getValue(IMPORT_TYPE, "ingestion-json") == "ingestion-csv")
-                            resultForCsvImport.addAll(prepareTheResultForCsv(groupedByFieldsForEveryChunk, groupedByFields, failedPoints));
-                    } catch (SolrServerException | IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                if(timeseriesObject.getValue(IMPORT_TYPE, "ingestion-json") == "ingestion-csv")
-                    response.put(CSV,new JsonArray(sortTheCsvIngestionResult(resultForCsvImport)));
-                if(timeseriesObject.getValue(IMPORT_TYPE ,"ingestion-json") == "ingestion-json")
-                    response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
-                p.complete(response
-                );
-            } catch (Exception e) {
-                LOGGER.error("unexpected exception");
-                p.fail(e);
-            }
-        };
-        vertx.executeBlocking(getMetricsNameHandler, resultHandler);
-
-        return this;
-    }*/
     @Override
     public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
 
@@ -443,30 +372,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    List<Map<String, Object>> prepareTheResultForCsv(List<HashMap<String, String>> groupedByFieldsForEveryChunk, JsonArray groupBdByFields, JsonObject failedPoints) {
-        return groupedByFieldsForEveryChunk.stream()
-                .collect(Collectors.groupingBy(map -> {
-                            HashMap<String, String> groupedByFieldsForThisMap = new LinkedHashMap<String,String>();
-                            groupBdByFields.forEach(f -> groupedByFieldsForThisMap.put(f.toString(), map.get(f)));
-                            return groupedByFieldsForThisMap;
-                        },LinkedHashMap::new,
-                        Collectors.mapping(map -> map.get("totalPointsForThisChunk"),
-                                Collectors.toList()))).entrySet().stream().map(entry -> {
-                    Map<String, Object> resultObject = new LinkedHashMap<>();
-                    JsonArray groupByListForThisChunk = new JsonArray();
-                    int totalNumberOfPointsPerGroupedFildes = 0;
-                    int chunkNumber = entry.getValue().size();
-                    entry.getKey().forEach(resultObject::put);
-                    totalNumberOfPointsPerGroupedFildes = entry.getValue().stream().mapToInt(Integer::valueOf).sum();
-                    resultObject.put("number_of_points_injected", totalNumberOfPointsPerGroupedFildes);
-                    entry.getKey().entrySet().forEach(entry1 -> {
-                        groupByListForThisChunk.add(entry1.getValue());
-                    });
-                    resultObject.put("number_of_point_failed", failedPoints.getInteger(groupByListForThisChunk.toString(), 0));
-                    resultObject.put("number_of_chunk_created", chunkNumber);
-                    return resultObject;
-                }).collect(Collectors.toList());
-    }
 
     private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
         JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk(chunkOrigin);
