@@ -1,5 +1,7 @@
 package com.hurence.historian.spark.compactor.job
 
+import com.hurence.historian.modele.HistorianCollections
+
 case class CompactorJobReport(jobId: String,
                               jobType: String,
                               start: Long,
@@ -29,5 +31,5 @@ object CompactorJobReport {
   val JOB_CONF="job_conf"
 
   val JOB_TYPE_VALUE="compaction"
-  val DEFAULT_COLLECTION="historian-reports"
+  val DEFAULT_COLLECTION: String =HistorianCollections.DEFAULT_COLLECTION_REPORT
 }

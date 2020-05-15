@@ -51,7 +51,7 @@ object ChunkCompactorJob extends Serializable {
 
   private def createCompactor(jobConf: ChunkCompactorJobOptions): ChunkCompactor = {
     val conf = buildCompactorConf2(jobConf)
-    new ChunkCompactorJobStrategy2(conf)
+    new ChunkCompactorJobStrategy2SchemaVersion0(conf)
   }
 
 

@@ -2,6 +2,7 @@ package com.hurence.historian
 
 import java.util
 
+import com.hurence.historian.modele.SchemaVersion
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.historian.spark.compactor.ChunkCompactor
@@ -121,9 +122,12 @@ object AbstractIncreasingChunkSizeTest {
   private val metricB = "temp_b"
 
   @BeforeAll
-  def initHistorianAndDeployVerticle(client: SolrClient): Unit = {
-    SolrITHelper.initHistorianSolr(client)
-    SolrUtils.createReportCollection(client)
+  def initHistorianAndDeployVerticle(client: SolrClient,
+                                     container: (DockerComposeContainer[SELF]) forSome
+                                     {type SELF <: DockerComposeContainer[SELF]}): Unit = {
+    SolrITHelper.creatingAllCollections(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString)
+    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeseriesRecord.CODE_INSTALL)
+    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeseriesRecord.SENSOR)
     LOGGER.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
     val injector: GeneralSolrInjector = new GeneralSolrInjector()
     addSeveralChunksForMetric(injector, metricA)

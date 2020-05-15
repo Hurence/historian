@@ -137,7 +137,7 @@ delete_field() {
 
 create_schema() {
 
-    echo -e "${GREEN}Creating schema for historian version ${MODEL_VERSION} ${NOCOLOR}"
+    echo -e "${GREEN}Creating schema of chunk collection for historian version ${MODEL_VERSION} ${NOCOLOR}"
 
     case ${MODEL_VERSION} in
         "EVOA0")
@@ -178,11 +178,11 @@ create_schema() {
             add_field_name_type "hour" "pint"
             add_field_name_type "delete" "text_general"
             add_field_name_type "file_path" "text_general"
-            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
+#            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
             ;;
-        "0")
+        "VERSION_0")
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"name\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
-            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
+#            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"compactions_running\", \"type\":\"string\", \"indexed\":true, \"multiValued\":true, \"stored\" : true }"
             add_field_not_indexed "chunk_value" "string"
             add_field_name_type "chunk_start" "plong"
@@ -255,15 +255,3 @@ LIGHTCYAN='\033[1;36m'
 WHITE='\033[1;37m'
 
 main "$@"
-
-
-
-
-
-
-
-
-
-
-
-

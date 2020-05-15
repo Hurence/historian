@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.historian.compatibility;
+package com.hurence.historian.modele;
 
 public enum SchemaVersion {
     EVOA0,

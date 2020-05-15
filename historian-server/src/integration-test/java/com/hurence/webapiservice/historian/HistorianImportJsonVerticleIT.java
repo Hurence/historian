@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.historian;
 
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
@@ -37,7 +38,7 @@ public class HistorianImportJsonVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.initHistorianSolr(client);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         HistorianSolrITHelper
                 .deployHistorienVerticle(container, vertx)
                 .subscribe(id -> {
@@ -219,8 +220,8 @@ public class HistorianImportJsonVerticleIT {
         assertEquals(2,doc1.getLong(RESPONSE_CHUNK_SIZE_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
         assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-        assertEquals(20600000,doc1.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
+//        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
+//        assertEquals(20600000, doc1.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
         assertEquals(38,doc1.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
@@ -230,7 +231,7 @@ public class HistorianImportJsonVerticleIT {
         assertEquals(time2, doc2.getLong(RESPONSE_CHUNK_END_FIELD));
         assertEquals(2,doc2.getLong(RESPONSE_CHUNK_SIZE_FIELD));
         assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQ4HLj4BA6sfMmpOWsmCCg6CDAAAFASLIkdAAAA", doc2.getString(RESPONSE_CHUNK_VALUE_FIELD));
-        assertEquals(20600000,doc2.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
+//        assertEquals(20600000,doc2.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
         assertEquals(45,doc2.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
     }
 

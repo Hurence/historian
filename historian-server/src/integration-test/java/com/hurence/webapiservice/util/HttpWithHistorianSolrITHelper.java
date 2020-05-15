@@ -17,6 +17,8 @@
 
 package com.hurence.webapiservice.util;
 
+import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.http.HttpServerVerticle;
 import io.reactivex.Single;
@@ -44,7 +46,7 @@ public abstract class HttpWithHistorianSolrITHelper {
 
     public static void initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
             SolrClient client, DockerComposeContainer container,
-            Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
+            Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
         initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx,
                 context, new JsonObject());
     }
@@ -68,9 +70,11 @@ public abstract class HttpWithHistorianSolrITHelper {
     public static void initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
             SolrClient client, DockerComposeContainer container,
             Vertx vertx, VertxTestContext context,
-            JsonObject historianConf) throws IOException, SolrServerException {
-        LOGGER.info("Initializing Historian solr");
-        HistorianSolrITHelper.initHistorianSolr(client);
+            JsonObject historianConf) throws IOException, SolrServerException, InterruptedException {
+        LOGGER.info("Initializing Historian chunk collection");
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
+        LOGGER.info("Initializing Historian chunk collection");
+        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Initializing Verticles");
         deployHttpAndHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();

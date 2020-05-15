@@ -111,9 +111,9 @@
                             <resources>
                                 <resource>
                                     <directory>../historian-resources/bin</directory>
-                                    <includes>
-                                        <include>create-historian-collection.sh</include>
-                                    </includes>
+                                    <excludes>
+                                        <exclude>historian-server.sh</exclude>
+                                    </excludes>
                                 </resource>
                             </resources>
                         </configuration>

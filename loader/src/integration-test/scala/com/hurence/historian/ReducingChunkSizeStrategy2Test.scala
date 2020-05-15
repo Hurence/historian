@@ -1,8 +1,8 @@
 package com.hurence.historian
 
 import com.hurence.historian.spark.compactor.job.CompactorJobReport
-import com.hurence.historian.spark.compactor.{ChunkCompactorConfStrategy2, ChunkCompactorJobStrategy2}
-import com.hurence.historian.spark.compactor.ChunkCompactorJobStrategy2
+import com.hurence.historian.spark.compactor.{ChunkCompactorConfStrategy2, ChunkCompactorJobStrategy2SchemaVersion0}
+import com.hurence.historian.spark.compactor.ChunkCompactorJobStrategy2SchemaVersion0
 import com.hurence.logisland.record.TimeseriesRecord
 import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -21,7 +21,7 @@ class ReducingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) f
     true)
 
   override def createCompactor() = {
-    new ChunkCompactorJobStrategy2(compactorConf)
+    new ChunkCompactorJobStrategy2SchemaVersion0(compactorConf)
   }
 
   override def additionalTestsOnReportEnd(report: JsonObject): Unit = {

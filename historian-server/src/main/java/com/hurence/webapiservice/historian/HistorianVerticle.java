@@ -17,7 +17,7 @@
 
 package com.hurence.webapiservice.historian;
 
-import com.hurence.webapiservice.historian.compatibility.SchemaVersion;
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -124,7 +124,7 @@ public class HistorianVerticle extends AbstractVerticle {
     historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);;
     historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);;
     historianConf.maxNumberOfTargetReturned = maxNumberOfTargetReturned;
-    String schemaVersion = config().getString(CONFIG_SCHEMA_VERSION, SchemaVersion.CURRENT_VERSION.toString());
+    String schemaVersion = config().getString(CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
     historianConf.schemaVersion = SchemaVersion.valueOf(schemaVersion);
 
     HistorianService.create(vertx, historianConf, ready -> {

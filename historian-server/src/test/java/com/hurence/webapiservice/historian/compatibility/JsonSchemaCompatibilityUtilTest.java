@@ -31,7 +31,7 @@ public class JsonSchemaCompatibilityUtilTest {
                         "\"chunk_sum\": 1.0," +
                         "\"chunk_end\":2" +
                         "}");
-        JsonSchemaCompatibilityUtil.convertJsonSchema0ToCurrent(inputJson);
+        JsonSchemaCompatibilityUtil.convertJsonSchemaEVOA0ToVERSION_0(inputJson);
         assertEquals(expectedJson, inputJson);
     }
 
@@ -55,7 +55,7 @@ public class JsonSchemaCompatibilityUtilTest {
                         "\"chunk_sum\": []," +
                         "\"chunk_end\":2" +
                         "}");
-        JsonSchemaCompatibilityUtil.convertJsonSchema0ToCurrent(inputJson);
+        JsonSchemaCompatibilityUtil.convertJsonSchemaEVOA0ToVERSION_0(inputJson);
         assertEquals(expectedJson, inputJson);
     }
 
@@ -77,7 +77,7 @@ public class JsonSchemaCompatibilityUtilTest {
                         "\"chunk_first\": 1.0," +
                         "\"chunk_end\":2" +
                         "}");
-        JsonSchemaCompatibilityUtil.convertJsonSchema0ToCurrent(inputJson);
+        JsonSchemaCompatibilityUtil.convertJsonSchemaEVOA0ToVERSION_0(inputJson);
         assertEquals(expectedJson, inputJson);
     }
 }
