@@ -61,9 +61,10 @@ public class TimeseriesRecord extends StandardRecord {
     public static final String CHUNK_SIZE_BYTES = "chunk_size_bytes";
     public static final String METRIC_NAME = "name";
     public static final String CODE_INSTALL = "code_install";
-    public static final String CHUNK_DAY = "day";
-    public static final String CHUNK_MONTH = "month";
-    public static final String CHUNK_YEAR = "year";
+    public static final String CHUNK_DAY = "chunk_day";
+    public static final String CHUNK_MONTH = "chunk_month";
+    public static final String CHUNK_YEAR = "chunk_year";
+    public static final String CHUNK_WEEK = "chunk_week";
     public static final String SENSOR = "sensor";
     public static final String CHUNK_SUM = "chunk_sum";
     public static final String CHUNK_WINDOW_MS = "chunk_window_ms";
