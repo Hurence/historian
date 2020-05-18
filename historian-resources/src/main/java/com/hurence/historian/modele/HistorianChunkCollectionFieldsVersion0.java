@@ -1,7 +1,7 @@
 package com.hurence.historian.modele;
 
 
-import com.hurence.logisland.record.TimeseriesRecord;
+import com.hurence.logisland.record.TimeSeriesRecord;
 
 /**
  * Static class to put field names used by HistorianService.
@@ -19,20 +19,20 @@ public class HistorianChunkCollectionFieldsVersion0 {
     public static String ID = "id";
     public static String COMPACTIONS_RUNNING = "compactions_running";
     public static String CHUNK_VALUE = "chunk_value";
-    public static String CHUNK_START = TimeseriesRecord.CHUNK_START;
-    public static String CHUNK_MAX = TimeseriesRecord.CHUNK_MAX;
-    public static String CHUNK_MIN = TimeseriesRecord.CHUNK_MIN;
-    public static String CHUNK_END = TimeseriesRecord.CHUNK_END;
-    public static String CHUNK_AVG = TimeseriesRecord.CHUNK_AVG;
-    public static String CHUNK_SIZE = TimeseriesRecord.CHUNK_SIZE;
-    public static String CHUNK_SIZE_BYTES = TimeseriesRecord.CHUNK_SIZE_BYTES;
-    public static String CHUNK_SAX = TimeseriesRecord.CHUNK_SAX;
-    public static String CHUNK_TREND = TimeseriesRecord.CHUNK_TREND;
-    public static String CHUNK_ORIGIN = TimeseriesRecord.CHUNK_ORIGIN;
-    public static String CHUNK_OUTLIER = TimeseriesRecord.CHUNK_OUTLIER;
-    public static String CHUNK_FIRST = TimeseriesRecord.CHUNK_FIRST_VALUE;
+    public static String CHUNK_START = TimeSeriesRecord.CHUNK_START;
+    public static String CHUNK_MAX = TimeSeriesRecord.CHUNK_MAX;
+    public static String CHUNK_MIN = TimeSeriesRecord.CHUNK_MIN;
+    public static String CHUNK_END = TimeSeriesRecord.CHUNK_END;
+    public static String CHUNK_AVG = TimeSeriesRecord.CHUNK_AVG;
+    public static String CHUNK_SIZE = TimeSeriesRecord.CHUNK_SIZE;
+    public static String CHUNK_SIZE_BYTES = TimeSeriesRecord.CHUNK_SIZE_BYTES;
+    public static String CHUNK_SAX = TimeSeriesRecord.CHUNK_SAX;
+    public static String CHUNK_TREND = TimeSeriesRecord.CHUNK_TREND;
+    public static String CHUNK_ORIGIN = TimeSeriesRecord.CHUNK_ORIGIN;
+    public static String CHUNK_OUTLIER = TimeSeriesRecord.CHUNK_OUTLIER;
+    public static String CHUNK_FIRST = TimeSeriesRecord.CHUNK_FIRST_VALUE;
     public static String CHUNK_LAST = "chunk_last";
-    public static String CHUNK_SUM = TimeseriesRecord.CHUNK_SUM;
+    public static String CHUNK_SUM = TimeSeriesRecord.CHUNK_SUM;
     public static String CHUNK_YEAR = "chunk_year";
     public static String CHUNK_MONTH = "chunk_month";
     public static String CHUNK_DAY = "chunk_day";

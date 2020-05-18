@@ -126,8 +126,8 @@ object AbstractIncreasingChunkSizeTest {
                                      container: (DockerComposeContainer[SELF]) forSome
                                      {type SELF <: DockerComposeContainer[SELF]}): Unit = {
     SolrITHelper.creatingAllCollections(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString)
-    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeseriesRecord.CODE_INSTALL)
-    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeseriesRecord.SENSOR)
+    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.CODE_INSTALL)
+    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.SENSOR)
     LOGGER.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
     val injector: GeneralSolrInjector = new GeneralSolrInjector()
     addSeveralChunksForMetric(injector, metricA)
