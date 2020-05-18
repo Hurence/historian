@@ -11,8 +11,7 @@
       "chunk_start": 1,
       "chunk_end": 3,
       "chunk_size": 3,
-      "chunk_window_ms": 2,
-      "date":["Wed Apr 11 01:00:00 CET 14"],
+      "date":"14-01-99",
       "chunk_value": "H4sIAAAAAAAAAOPi1DQGg8/2XNwKjJoMEODAxS0A43A4CDAAAHn0278nAAAA",
       "chunk_size_bytes": 45,
       "chunk_first": 1.2,
@@ -23,9 +22,9 @@
       "chunk_trend": true,
       "chunk_outlier": false,
       "chunk_sax": "abc",
-      "year": 1970,
-      "day": "1970-01-01",
-      "month": 1,
+      "chunk_year": 1970,
+      "chunk_day": "1970-01-01",
+      "chunk_month": 1,
       "chunk_origin": "ingestion-csv",
       "id": "b87e8985e8b16524e560f989be8113af77d44ac3038a4a68b9e8ad9cd06dee83"
     }

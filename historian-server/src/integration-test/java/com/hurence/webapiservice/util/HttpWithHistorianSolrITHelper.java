@@ -18,7 +18,6 @@
 package com.hurence.webapiservice.util;
 
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.http.HttpServerVerticle;
 import io.reactivex.Single;
@@ -52,19 +51,7 @@ public abstract class HttpWithHistorianSolrITHelper {
     }
 
     public static Single<String> deployHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx) {
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
-                .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
-                .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);
-        DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
-
-        return HistorianSolrITHelper.deployHistorienVerticle(container, vertx)
-                .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
-                .map(id -> {
-                    LOGGER.info("HistorianVerticle with id '{}' deployed", id);
-                    return id;
-                });
+        return deployHttpAndHistorianVerticle(container, vertx, new JsonObject());
     }
 
     public static void initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
@@ -73,7 +60,7 @@ public abstract class HttpWithHistorianSolrITHelper {
             JsonObject historianConf) throws IOException, SolrServerException, InterruptedException {
         LOGGER.info("Initializing Historian chunk collection");
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
-        LOGGER.info("Initializing Historian chunk collection");
+        LOGGER.info("Initializing Historian annotation collection");
         HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Initializing Verticles");
         deployHttpAndHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
@@ -87,6 +74,7 @@ public abstract class HttpWithHistorianSolrITHelper {
                 .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
                 .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
                 .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
+                .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, 10000)
                 .put(HttpServerVerticle.CONFIG_DEBUG_MODE, true);
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
 

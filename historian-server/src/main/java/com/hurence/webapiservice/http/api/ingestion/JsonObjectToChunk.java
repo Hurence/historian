@@ -65,7 +65,6 @@ public class JsonObjectToChunk {
         doc.addField(RESPONSE_CHUNK_START_FIELD, chunk.getStart());
         doc.addField(RESPONSE_CHUNK_END_FIELD, chunk.getEnd());
         doc.addField(RESPONSE_CHUNK_SIZE_FIELD, chunk.getValues().size());
-        doc.addField(RESPONSE_CHUNK_WINDOW_MS_FIELD,  chunk.getEnd() - chunk.getStart());
         chunk.attributes().keySet().forEach(key -> {
             doc.addField(key, chunk.attribute(key));
         });
