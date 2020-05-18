@@ -27,7 +27,7 @@ class SaxAnalyserTest extends Specification{
 
         listin << s1 << s2 << s3 << s4 <<s5 << s6 <<s7
         for (i in listin){
-            listout<<anomalyDetect(i, saxThreshold(i))
+            listout<<anomalyDetect(i, saxThreshold(i,0.1))
         }
         expect:
         listout == [[49],[-1],[-1],[50],[32,33],[49, 77, 78],[-1]]
