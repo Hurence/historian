@@ -68,8 +68,8 @@ public class SaxAnalyzer {
      * @param str string (sax coding string)
      * @return list of abnormal distances between characters
      */
-    public static List<Integer> saxThreshold(String str){
-        final double threshold = 0.1;
+    public static List<Integer> saxThreshold(String str, double threshold){
+        //final double threshold = 0.1;
         //Transform our string into an array of characters then into an array of distances between characters
         int[] buff = charDistanceAbs(convertStringToCharArray(str));
         //Counting occurrences
