@@ -480,7 +480,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
         deleteTaggedChunks()
       } catch {
         case ex: Throwable => {
-          logger.error("Failed during tagging", ex)
+          logger.error("Failed while deleting tagged chunks", ex)
           saveReportJobFailed("Error happened while deleting tagged chunks, so there may be duplicates in datas ! " +
             "Be sure to clean chunks before re running a compaction", ex)
           throw ex
@@ -512,7 +512,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
       timeseriesDS
     } catch {
       case ex: Throwable => {
-        logger.error("Failed during tagging", ex)
+        logger.error("Failed while attempting to write intermediary report after chunks have been tagged", ex)
         saveReportJobFailed("Failed while attempting to write intermediary report after chunks have been tagged", ex)
         throw ex
       }
@@ -524,7 +524,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
       tagChunksToBeCompacted(spark)
     } catch {
       case ex: Throwable => {
-        logger.error("Failed during tagging", ex)
+        logger.error("Failed while tagging chunks to be compacted", ex)
         saveReportJobFailed("Failed while tagging chunks to be compacted", ex)
         throw ex
       }
@@ -538,7 +538,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
       timeseriesDS
     } catch {
       case ex: Throwable => {
-        logger.error("Failed during tagging", ex)
+        logger.error("Failed while attempting to write intermediary report after chunks have been tagged", ex)
         saveReportJobFailed("Failed while attempting to write intermediary report after chunks have been tagged", ex)
         throw ex
       }
@@ -551,7 +551,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
       saveNewChunksToSolR(mergedTimeseriesDS)
     } catch {
       case ex: Throwable => {
-        logger.error("Failed during tagging", ex)
+        logger.error("Failed while trying to save newly compacted chunks", ex)
         saveReportJobFailed("Failed while trying to save newly compacted chunks", ex)
         deleteCompactedChunks()
         throw ex
