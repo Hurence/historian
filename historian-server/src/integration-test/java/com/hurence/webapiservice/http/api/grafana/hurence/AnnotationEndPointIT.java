@@ -1,5 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
+import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
@@ -51,7 +53,7 @@ public class AnnotationEndPointIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.initHistorianSolr(client);
+        SolrITHelper.createAnnotationCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", COLLECTION_ANNOTATION);
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("time", 1581648194070L);   // 2020-2-14T02:43:14.070Z

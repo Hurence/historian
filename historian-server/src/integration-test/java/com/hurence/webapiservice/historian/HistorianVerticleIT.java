@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.historian;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
@@ -46,7 +47,7 @@ public class HistorianVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.initHistorianSolr(client);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempA = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_a",
@@ -116,7 +117,7 @@ public class HistorianVerticleIT {
         assertValidSchemaResponse(schemaResponse);
         SchemaRepresentation schemaRepresentation = schemaResponse.getSchemaRepresentation();
         assertNotNull(schemaRepresentation);
-        assertEquals("historian", schemaRepresentation.getName());
+        assertEquals("default-config", schemaRepresentation.getName());
         assertEquals(1.6, schemaRepresentation.getVersion(), 0.001f);
         assertEquals("id", schemaRepresentation.getUniqueKey());
 //        assertEquals(28, schemaRepresentation.getFields().size());

@@ -108,7 +108,6 @@ class LoaderTests extends SparkSessionTestWrapper {
   @Test
   def testChunksV0() = {
 
-
     it4MetricsChunksDS.show()
 
     val sample = it4MetricsChunksDS

@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http.api.main;
 
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
@@ -43,9 +44,8 @@ public class ExportCsvEndPointIT {
     private static String exportEndpoint = MAIN_API_ENDPOINT + MainHistorianApi.EXPORT_ENDPOINT;
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, Vertx vertx) throws IOException, SolrServerException {
-        HistorianSolrITHelper
-                .initHistorianSolr(client);
+    public static void beforeAll(SolrClient client, Vertx vertx, DockerComposeContainer container) throws IOException, SolrServerException, InterruptedException {
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorMultipleMetricSpecificPoints(
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),

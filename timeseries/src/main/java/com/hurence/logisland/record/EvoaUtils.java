@@ -31,10 +31,10 @@ import java.util.regex.Pattern;
                 int year = localDate.getYear();
                 int week = localDate.get(WeekFields.ISO.weekOfWeekBasedYear());
 
-                record.setIntField("month", month);
-                record.setIntField("day", day);
-                record.setIntField("year", year);
-                record.setIntField("week", week);
+                record.setIntField("chunk_month", month);
+                record.setIntField("chunk_day", day);
+                record.setIntField("chunk_year", year);
+                record.setIntField("chunk_week", week);
             } catch (Exception ex) {
                 //do nothing
             }

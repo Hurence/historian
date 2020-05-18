@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
@@ -40,7 +40,7 @@ public class HistorianAnnotationVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.initHistorianSolr(client);
+        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
         HistorianSolrITHelper
                 .deployHistorienVerticle(container, vertx)
                 .subscribe(id -> {

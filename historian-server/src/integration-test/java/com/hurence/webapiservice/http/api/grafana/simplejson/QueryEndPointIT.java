@@ -110,7 +110,7 @@ public class QueryEndPointIT {
         assertHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/query");
     }
 
-    public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
+    public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
         HttpWithHistorianSolrITHelper
                 .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
     }

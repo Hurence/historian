@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.webapiservice.historian.compatibility.JsonStreamSolrStreamSchemaVersion0;
-import com.hurence.webapiservice.historian.compatibility.SchemaVersion;
+import com.hurence.historian.modele.SchemaVersion;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
@@ -12,9 +12,9 @@ public class JsonStreamSolrStream implements JsonStream {
 
     public static JsonStreamSolrStream forVersion(SchemaVersion version, TupleStream stream) {
         switch (version) {
-            case VERSION_0:
+            case EVOA0:
                 return new JsonStreamSolrStreamSchemaVersion0(stream);
-            case CURRENT_VERSION:
+            case VERSION_0:
                 return new JsonStreamSolrStream(stream);
             default:
                 throw new IllegalArgumentException(String.format(

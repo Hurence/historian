@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.impl;
 
-import com.hurence.webapiservice.historian.compatibility.SchemaVersion;
+import com.hurence.historian.modele.SchemaVersion;
 import org.apache.solr.client.solrj.SolrClient;
 
 public class SolrHistorianConf {

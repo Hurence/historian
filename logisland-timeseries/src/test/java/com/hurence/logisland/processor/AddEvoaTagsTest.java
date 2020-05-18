@@ -72,12 +72,12 @@ public class AddEvoaTagsTest {
 
         MockRecord out = testRunner.getOutputRecords().get(0);
 
-        out.assertFieldEquals("month", 2);
-        out.assertFieldEquals("year", 2020);
-        out.assertFieldEquals("day", 11);
-        out.assertFieldEquals("week", 7);
-        out.assertFieldEquals("code_install", "T062");
-        out.assertFieldEquals("sensor", "TC06_PV");
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_MONTH, 2);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_YEAR, 2020);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_DAY, 11);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_WEEK, 7);
+        out.assertFieldEquals(TimeSeriesRecord.CODE_INSTALL, "T062");
+        out.assertFieldEquals(TimeSeriesRecord.SENSOR, "TC06_PV");
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_ORIGIN, "logisland");
     }
 
