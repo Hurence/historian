@@ -17,7 +17,6 @@ package com.hurence.logisland.processor;
 
 
 import com.hurence.logisland.record.*;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.util.runner.MockRecord;
 import com.hurence.logisland.util.runner.TestRunner;
@@ -96,7 +95,7 @@ public class ConvertToTimeseriesTest {
     public void validateChunking() {
         final String name = "cpu.load";
         final TestRunner testRunner = TestRunners.newTestRunner(new ConvertToTimeseries());
-        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeseriesRecord.METRIC_NAME);
+        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeSeriesRecord.METRIC_NAME);
 
         //testRunner.setProperty(ConvertToTimeseries.METRIC, FieldDictionary.RECORD_TIME);
         testRunner.assertValid();
@@ -109,23 +108,23 @@ public class ConvertToTimeseriesTest {
         testRunner.assertOutputRecordsCount(1);
 
         MockRecord out = testRunner.getOutputRecords().get(0);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_START);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_END);
-        out.assertFieldExists(TimeseriesRecord.METRIC_NAME);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_START);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_END);
+        out.assertFieldExists(TimeSeriesRecord.METRIC_NAME);
         out.assertFieldExists(FieldDictionary.RECORD_TYPE);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_VALUE);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_VALUE);
 
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_START, 1000000);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_END, 1001999);
-        out.assertFieldEquals(TimeseriesRecord.METRIC_NAME, "cpu.load");
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_START, 1000000);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_END, 1001999);
+        out.assertFieldEquals(TimeSeriesRecord.METRIC_NAME, "cpu.load");
         out.assertFieldEquals(FieldDictionary.RECORD_TYPE, SAMPLED_RECORD);
-        out.assertFieldTypeEquals(TimeseriesRecord.CHUNK_VALUE, FieldType.BYTES);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_SIZE, 2000);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_SIZE_BYTES, 8063);
+        out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8063);
 
         out.assertRecordSizeEquals(7);
 
-        byte[] binaryTimeseries = out.getField(TimeseriesRecord.CHUNK_VALUE).asBytes();
+        byte[] binaryTimeseries = out.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes();
 
         try {
             List<Point> points = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
@@ -142,7 +141,7 @@ public class ConvertToTimeseriesTest {
     public void validateMetrics() {
         final String name = "cpu.load";
         final TestRunner testRunner = TestRunners.newTestRunner(new ConvertToTimeseries());
-        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeseriesRecord.METRIC_NAME);
+        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeSeriesRecord.METRIC_NAME);
         testRunner.setProperty(ConvertToTimeseries.METRIC, "min;max;avg;trend;outlier;sax:10,0.01,20");
         testRunner.assertValid();
 
@@ -156,19 +155,19 @@ public class ConvertToTimeseriesTest {
 
         MockRecord out = testRunner.getOutputRecords().get(0);
 
-        out.assertFieldExists(TimeseriesRecord.CHUNK_MIN);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_MAX);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_AVG);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_TREND);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_OUTLIER);
-        out.assertFieldExists(TimeseriesRecord.CHUNK_SAX);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_MIN);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_MAX);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_AVG);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_TREND);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_OUTLIER);
+        out.assertFieldExists(TimeSeriesRecord.CHUNK_SAX);
 
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_MIN, -1.0);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_MAX, 1.0);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_AVG, 0.0);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_TREND, false);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_OUTLIER, false);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_SAX, "gijigdbabdgijigdbabd");
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_MIN, -1.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_MAX, 1.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_AVG, 0.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_TREND, false);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_OUTLIER, false);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SAX, "gijigdbabdgijigdbabd");
         out.assertRecordSizeEquals(13);
 
     }
@@ -177,7 +176,7 @@ public class ConvertToTimeseriesTest {
     public void validateSumAndFirst() {
         final String name = "cpu.load";
         final TestRunner testRunner = TestRunners.newTestRunner(new ConvertToTimeseries());
-        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeseriesRecord.METRIC_NAME);
+        testRunner.setProperty(ConvertToTimeseries.GROUPBY, TimeSeriesRecord.METRIC_NAME);
         testRunner.setProperty(ConvertToTimeseries.METRIC, "sum;first");
         testRunner.assertValid();
 
@@ -195,9 +194,9 @@ public class ConvertToTimeseriesTest {
 
         MockRecord out = testRunner.getOutputRecords().get(0);
 
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_SIZE, 3);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_SUM, 5.5);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_FIRST_VALUE, 0.0);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 3);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SUM, 5.5);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_FIRST_VALUE, 0.0);
         out.assertRecordSizeEquals(9);
 
     }

@@ -64,7 +64,8 @@ public class HistorianImportJsonVerticleIT {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
         JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature000").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))));
-        historian.rxAddTimeSeries(params)
+        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
+        historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
@@ -114,7 +115,8 @@ public class HistorianImportJsonVerticleIT {
                 .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature222").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))))
                 .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature333").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time3).add(4.1)).add(new JsonArray().add(time4).add(6.5))))
                 .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature444").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time3).add(0.0)).add(new JsonArray().add(time4).add(9.1))));
-        historian.rxAddTimeSeries(params)
+        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
+        historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
@@ -174,7 +176,8 @@ public class HistorianImportJsonVerticleIT {
         long time2 = 1477916224866L;
         JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature555").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
         .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature666").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))));
-        historian.rxAddTimeSeries(params)
+        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
+        historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
@@ -215,7 +218,8 @@ public class HistorianImportJsonVerticleIT {
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
         assertEquals(time2, doc1.getLong(RESPONSE_CHUNK_END_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
-        /*assertEquals("092ec781-4901-4fe6-8a0c-ee278b8604aa",doc1.getString(RESPONSE_CHUNK_ID_FIELD));*/
+assertEquals("7e52004b840e5fabbcd033384149d843390d4c7a118e47719798695e7ecd4216",doc1.getString(RESPONSE_CHUNK_ID_FIELD));
+
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
         assertEquals(2,doc1.getLong(RESPONSE_CHUNK_SIZE_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
@@ -225,7 +229,7 @@ public class HistorianImportJsonVerticleIT {
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
         assertEquals(38,doc1.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
-        /*assertEquals(1663577207679746048L,doc1.getLong(RESPONSE_CHUNK_VERSION_FIELD));*/
+
         assertEquals("openSpaceSensors.Temperature666",doc2.getString(NAME));
         assertEquals(time1, doc2.getLong(RESPONSE_CHUNK_START_FIELD));
         assertEquals(time2, doc2.getLong(RESPONSE_CHUNK_END_FIELD));

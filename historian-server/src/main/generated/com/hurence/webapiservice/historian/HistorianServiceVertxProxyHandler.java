@@ -41,7 +41,6 @@ import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.HelperUtils;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -126,11 +125,6 @@ public class HistorianServiceVertxProxyHandler extends ProxyHandler {
                         HelperUtils.createHandler(msg));
           break;
         }
-        case "compactTimeSeriesChunk": {
-          service.compactTimeSeriesChunk((io.vertx.core.json.JsonObject)json.getValue("params"),
-                        HelperUtils.createHandler(msg));
-          break;
-        }
         case "getMetricsName": {
           service.getMetricsName((io.vertx.core.json.JsonObject)json.getValue("params"),
                         HelperUtils.createHandler(msg));
@@ -142,7 +136,7 @@ public class HistorianServiceVertxProxyHandler extends ProxyHandler {
           break;
         }
         case "addTimeSeries": {
-          service.addTimeSeries((io.vertx.core.json.JsonArray)json.getValue("timeseries"),
+          service.addTimeSeries((io.vertx.core.json.JsonObject)json.getValue("timeseries"),
                         HelperUtils.createHandler(msg));
           break;
         }

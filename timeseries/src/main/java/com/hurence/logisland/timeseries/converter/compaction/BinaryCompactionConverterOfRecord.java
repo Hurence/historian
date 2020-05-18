@@ -18,18 +18,15 @@ package com.hurence.logisland.timeseries.converter.compaction;
 import com.hurence.logisland.processor.ProcessException;
 import com.hurence.logisland.record.*;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.common.Compression;
-import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeseriesRecord>, Serializable {
+public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSeriesRecord>, Serializable {
 
     private static Logger LOGGER = LoggerFactory.getLogger(BinaryCompactionConverterOfRecord.class.getName());
 
@@ -47,18 +44,18 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, Timese
      * @throws ProcessException
      */
     @Override
-    public TimeseriesRecord chunk(List<Record> records) {
+    public TimeSeriesRecord chunk(List<Record> records) {
 
         if (records.isEmpty())
             throw new ProcessException("not enough records to build a timeseries, should contain at least 1 records ");
 
         final MetricTimeSeries timeSeries = buildTimeSeries(records);
-        final TimeseriesRecord chunkrecord = new TimeseriesRecord(timeSeries);
+        final TimeSeriesRecord chunkrecord = new TimeSeriesRecord(timeSeries);
 
         // compress chunk into binaries
         byte[] serializedTimeseries = serializeTimeseries(timeSeries);
-        chunkrecord.setField(TimeseriesRecord.CHUNK_VALUE, FieldType.BYTES, serializedTimeseries);
-        chunkrecord.setField(TimeseriesRecord.CHUNK_SIZE_BYTES, FieldType.INT, serializedTimeseries.length);
+        chunkrecord.setField(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES, serializedTimeseries);
+        chunkrecord.setField(TimeSeriesRecord.CHUNK_SIZE_BYTES, FieldType.INT, serializedTimeseries.length);
 
         return chunkrecord;
     }
@@ -109,11 +106,11 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, Timese
      * @throws ProcessException
      */
     @Override
-    public List<Record> unchunk(final TimeseriesRecord record) throws IOException {
+    public List<Record> unchunk(final TimeSeriesRecord record) throws IOException {
 
         final long start = record.getTimeSeries().getStart();
         final long end = record.getTimeSeries().getEnd();
-        return BinaryCompactionUtil.unCompressPoints(record.getField(TimeseriesRecord.CHUNK_VALUE).asBytes(), start, end).stream()
+        return BinaryCompactionUtil.unCompressPoints(record.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes(), start, end).stream()
                 .map(m -> {
 
                     long timestamp = m.getTimestamp();

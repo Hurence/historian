@@ -1,25 +1,17 @@
-package com.hurence.webapiservice.http;
+package com.hurence.webapiservice.http.api.main;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.webapiservice.http.api.modele.MultiMapRequestParser;
 import com.hurence.webapiservice.modele.AGG;
-import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.reactivex.core.MultiMap;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.*;
+
 public class GetTimeSerieRequestParser extends MultiMapRequestParser {
-    /*
-      REST API PARAMS
-     */
-    public static final String QUERY_PARAM_FROM = "from";
-    public static final String QUERY_PARAM_TO = "to";
-    public static final String QUERY_PARAM_NAME = "names";
-    public static final String QUERY_PARAM_AGGS = "aggs";
-    public static final String QUERY_PARAM_SAMPLING = "samplingAlgo";
-    public static final String QUERY_PARAM_BUCKET_SIZE = "bucketSize";
-    public static final String QUERY_PARAM_MAX_POINT = "maxPoints";
 
     public GetTimeSerieRequestParam parseRequest(MultiMap map) throws IllegalArgumentException {
         GetTimeSerieRequestParam.Builder builder = new GetTimeSerieRequestParam.Builder();
@@ -30,13 +22,13 @@ public class GetTimeSerieRequestParser extends MultiMapRequestParser {
         List<AGG> aggs = parseAggsOrDefault(map, QUERY_PARAM_AGGS, Collections.emptyList());
         builder.withAggs(aggs);
         int maxPoints = parseIntOrDefault(map, QUERY_PARAM_MAX_POINT, 10000);
+        builder.withMaxDataPoints(maxPoints);
         int bucketSize = parseIntOrDefault(map, QUERY_PARAM_BUCKET_SIZE, 50);
+        builder.withBucketSize(bucketSize);
         SamplingAlgorithm algo = parseSamplingAlgorithmOrDefault(map, QUERY_PARAM_SAMPLING, SamplingAlgorithm.NONE);
-        SamplingConf samplingConf = new SamplingConf(algo, bucketSize, maxPoints);
-        builder.withSamplingConf(samplingConf);
-        //names
+        builder.withSamplingAlgo(algo);
         List<String> names = parseListOrDefault(map, QUERY_PARAM_NAME, Collections.emptyList());
-        builder.withNames(names);
+        builder.withMetricNames(names);
         return builder.build();
     }
 

@@ -8,7 +8,7 @@ import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjectorMultipleMetricSpecificPoints;
-import io.vertx.ext.web.client.WebClient;
+import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-//import io.vertx.ext.web.client.WebClient;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class QueryEndPointIT {

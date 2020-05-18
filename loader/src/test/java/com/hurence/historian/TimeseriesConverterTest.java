@@ -2,7 +2,7 @@ package com.hurence.historian;
 
 import com.hurence.historian.processor.HistorianContext;
 import com.hurence.logisland.component.InitializationException;
-import com.hurence.logisland.record.TimeseriesRecord;
+import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
@@ -56,7 +56,7 @@ public class TimeseriesConverterTest {
                 String.format("min;max;avg;trend;outlier;sax:%s,0.01,%s",
                         App.DEFAULT_SAX_ALPHABET_SIZE(), App.DEFAULT_SAX_STRING_LENGTH()));
         converter.init(context);
-        TimeseriesRecord timeseries = converter.fromRows("my_metric", rows);
+        TimeSeriesRecord timeseries = converter.fromRows("my_metric", rows);
         assertFalse(false);
         assertEquals("metric_A",   timeseries.getMetricName());
         assertEquals("timeseries",   timeseries.getType());

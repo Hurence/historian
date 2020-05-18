@@ -18,21 +18,27 @@ package com.hurence.logisland.record;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
+import com.hurence.logisland.timeseries.functions.*;
+import com.hurence.logisland.timeseries.metric.MetricType;
+import com.hurence.logisland.timeseries.query.QueryEvaluator;
+import com.hurence.logisland.timeseries.query.TypeFunctions;
 import com.hurence.logisland.util.string.BinaryEncodingUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * Timeseries holder record
  */
-public class TimeseriesRecord extends StandardRecord {
+public class TimeSeriesRecord extends StandardRecord {
 
-    public static final String SCHEMA_VERSION = "0";
 
     private static Logger logger = LoggerFactory.getLogger(StandardRecord.class);
 
@@ -76,7 +82,7 @@ public class TimeseriesRecord extends StandardRecord {
     public static final String CHUNK_ORIGIN_LOADER = "loader";
 
 
-    public TimeseriesRecord(MetricTimeSeries timeSeries) {
+    public TimeSeriesRecord(MetricTimeSeries timeSeries) {
         super(timeSeries.getType());
         this.timeSeries = timeSeries;
 
@@ -90,7 +96,7 @@ public class TimeseriesRecord extends StandardRecord {
         });
     }
 
-    public TimeseriesRecord(String type, String name, String chunkValue, long chunkStart, long chunkEnd) {
+    public TimeSeriesRecord(String type, String name, String chunkValue, long chunkStart, long chunkEnd) {
         super(type);
 
         setStringField(METRIC_NAME, name);
@@ -193,4 +199,57 @@ public class TimeseriesRecord extends StandardRecord {
         }
     }
 
+    public void computeAndSetChunkValueAndChunkSizeBytes() {
+        try{
+            byte[] bytes = BinaryCompactionUtil.serializeTimeseries(getTimeSeries(), BinaryCompactionUtil.DEFAULT_DDC_THRESHOLD);
+            String chunkValueBase64 = BinaryEncodingUtils.encode(bytes);
+            this.setStringField(TimeSeriesRecord.CHUNK_VALUE, chunkValueBase64);
+            this.setIntField(TimeSeriesRecord.CHUNK_SIZE_BYTES, bytes.length);
+        } catch (Exception ex) {
+            logger.error(
+                    "Unable to convert chunk_vlaue to base64 : {}",
+                    new Object[]{ex.getMessage()});
+        }
+    }
+
+    /**
+     * Converts a list of records to a timeseries chunk
+     *
+     * @return
+     */
+    public void computeAndSetMetrics(String[] metric) {
+        // init metric functions
+        TypeFunctions functions = QueryEvaluator.extractFunctions(metric);
+        final List<ChronixTransformation> transformations = functions.getTypeFunctions(new MetricType()).getTransformations();
+        final List<ChronixAggregation> aggregations = functions.getTypeFunctions(new MetricType()).getAggregations();
+        final List<ChronixAnalysis> analyses = functions.getTypeFunctions(new MetricType()).getAnalyses();
+        final List<ChronixEncoding> encodings = functions.getTypeFunctions(new MetricType()).getEncodings();
+        FunctionValueMap functionValueMap = new FunctionValueMap(aggregations.size(), analyses.size(), transformations.size(), encodings.size());
+
+        MetricTimeSeries timeSeries = this.getTimeSeries();
+        functionValueMap.resetValues();
+
+        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
+        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
+        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
+        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
+
+        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
+            String name = functionValueMap.getAggregation(i).getQueryName();
+            double value = functionValueMap.getAggregationValue(i);
+            this.setField("chunk_" + name, FieldType.DOUBLE, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
+            String name = functionValueMap.getAnalysis(i).getQueryName();
+            boolean value = functionValueMap.getAnalysisValue(i);
+            this.setField("chunk_" + name, FieldType.BOOLEAN, value);
+        }
+
+        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
+            String name = functionValueMap.getEncoding(i).getQueryName();
+            String value = functionValueMap.getEncodingValue(i);
+            this.setField("chunk_" + name, FieldType.STRING, value);
+        }
+    }
 }

@@ -16,8 +16,17 @@
 package com.hurence.logisland.timeseries;
 
 
+import com.google.common.hash.Hashing;
+import com.hurence.logisland.record.Record;
+import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.dts.Pair;
 
+import java.nio.charset.StandardCharsets;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.WeekFields;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.BinaryOperator;
@@ -36,6 +45,35 @@ import static com.hurence.logisland.timeseries.iterators.Iterators.*;
  * @author johannes.siedersleben
  */
 public final class TimeSeriesUtil {
+
+
+
+    public static ZoneId DEFAULT_TIMEZONE = ZoneId.of("UTC");
+
+    public static DateInfo calculDateFields(final long epochMilliUTC){
+        return calculDateFields(epochMilliUTC, DEFAULT_TIMEZONE);
+    }
+
+    public static DateInfo calculDateFields(final long epochMilliUTC, ZoneId zoneId){
+        Instant instant = Instant.ofEpochMilli(epochMilliUTC);
+        ZonedDateTime date = instant.atZone(zoneId);
+        DateInfo dateInfo = new DateInfo();
+        dateInfo.month = date.getMonthValue();
+        dateInfo.day = getDateAsFormat(epochMilliUTC, "yyyy-MM-dd", DEFAULT_TIMEZONE);
+        dateInfo.year =date.getYear();
+        dateInfo.week =  date.get(WeekFields.ISO.weekOfWeekBasedYear());
+        return dateInfo;
+    }
+
+    public static String getDateAsFormat(final long epochMilliUTC, String dateFormat){
+        return getDateAsFormat(epochMilliUTC, dateFormat, DEFAULT_TIMEZONE);
+    }
+
+    public static String getDateAsFormat(final long epochMilliUTC, String dateFormat, ZoneId zoneId){
+        DateTimeFormatter dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
+                .withZone(zoneId);
+        return dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC));
+    }
 
     /**
      * Private utility class constructor.

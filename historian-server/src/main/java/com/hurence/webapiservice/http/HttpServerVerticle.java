@@ -3,8 +3,12 @@ package com.hurence.webapiservice.http;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
+import com.hurence.webapiservice.http.api.ingestion.IngestionApi;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
+import com.hurence.webapiservice.http.api.main.MainHistorianApi;
 import com.hurence.webapiservice.http.api.main.MainHistorianApiImpl;
+import com.hurence.webapiservice.http.api.test.TestHistorianApi;
+import com.hurence.webapiservice.http.api.test.TestHistorianApiImpl;
 import io.vertx.core.Promise;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpServer;
@@ -26,6 +30,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 //    public static final String SEARCH = "search";
 //    public static final String LIMIT_DEFAULT = "limit_default";
     public static final String CONFIG_HISTORIAN_ADDRESS = "historian.address";
+    public static final String CONFIG_DEBUG_MODE = "debug";
     public static final String CONFIG_TIMESERIES_ADDRESS = "timeseries.address";
     public static final String CONFIG_MAX_CSV_POINTS_ALLOWED = "max_data_points_allowed_for_ExportCsv";
 
@@ -36,11 +41,18 @@ public class HttpServerVerticle extends AbstractVerticle {
     public static final String MAIN_API_ENDPOINT = "/api/historian/v0";
     public static final String GRAFANA_API_ENDPOINT = "/api/grafana";
     public static final String INGESTION_API_ENDPOINT = "/historian-server/ingestion";
+    public static final String TEST_API_ENDPOINT = "/test/api";
     public static final GrafanaApiVersion GRAFANA_API_VEFSION_DEFAULT = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
+    public static final String IMPORT_CSV_ENDPOINT = HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.CSV_ENDPOINT;
+    public static final String IMPORT_JSON_ENDPOINT = HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.JSON_ENDPOINT;
+    public static final String GRAFANA_QUERY_ENDPOINT = HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.QUERY_ENDPOINT;
+    public static final String MAIN_QUERY_ENDPOINT = HttpServerVerticle.MAIN_API_ENDPOINT + MainHistorianApi.QUERY_ENDPOINT;
+    public static final String TEST_CHUNK_QUERY_ENDPOINT = HttpServerVerticle.TEST_API_ENDPOINT + TestHistorianApi.QUERY_CHUNK_ENDPOINT;
 
     @Override
     public void start(Promise<Void> promise) throws Exception {
         LOGGER.debug("deploying {} verticle with config : {}", HttpServerVerticle.class.getSimpleName(), config().encodePrettily());
+        boolean debugMode = config().getBoolean(CONFIG_DEBUG_MODE, false);
         String historianServiceAdr = config().getString(CONFIG_HISTORIAN_ADDRESS, "historian");
         int maxDataPointsAllowedForExportCsv = config().getInteger(CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);
         historianService = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), historianServiceAdr);
@@ -60,6 +72,11 @@ public class HttpServerVerticle extends AbstractVerticle {
 
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
         router.mountSubRouter(INGESTION_API_ENDPOINT, importApi);
+
+        if (debugMode) {
+            Router debugApi = new TestHistorianApiImpl(historianService).getMainRouter(vertx);
+            router.mountSubRouter(TEST_API_ENDPOINT, debugApi);
+        }
 
         int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
         String host = config().getString(CONFIG_HTTP_SERVER_HOSTNAME, "localhost");

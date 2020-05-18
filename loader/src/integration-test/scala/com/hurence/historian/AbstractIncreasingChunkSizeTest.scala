@@ -7,7 +7,7 @@ import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.historian.spark.compactor.ChunkCompactor
 import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
-import com.hurence.logisland.record.{Point, TimeseriesRecord}
+import com.hurence.logisland.record.{Point, TimeSeriesRecord}
 import com.hurence.solr.SparkSolrUtils
 import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
 import io.vertx.core.json.JsonObject
@@ -55,9 +55,9 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
       "fields" -> "name,chunk_value,chunk_start,chunk_end,chunk_size,year,month,day"
     )
     val comapactedChunks = SparkSolrUtils.loadTimeSeriesFromSolR(sparkSession, solrOpts)
-    val records: util.List[TimeseriesRecord] = comapactedChunks.collectAsList()
+    val records: util.List[TimeSeriesRecord] = comapactedChunks.collectAsList()
     assertEquals(4, records.size())
-    val recordsA: List[TimeseriesRecord] = records
+    val recordsA: List[TimeSeriesRecord] = records
       .filter(r => r.getMetricName == metricA)
       .sortBy(r => r.getStartChunk)
       .toList
@@ -70,7 +70,7 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
     assertEquals(1477925224866L, recordsA.get(1).getStartChunk)
     assertEquals(1477926224866L, recordsA.get(1).getEndChunk)
     assertEquals(2, recordsA.get(1).getChunkSize)
-    val recordsB: List[TimeseriesRecord] = records
+    val recordsB: List[TimeSeriesRecord] = records
       .filter(r => r.getMetricName == metricB)
       .sortBy(r => r.getStartChunk)
       .toList

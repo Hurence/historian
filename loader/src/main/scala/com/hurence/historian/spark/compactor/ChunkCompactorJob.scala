@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.compactor
 
 import com.hurence.historian.spark.compactor.job.CompactorJobReport
-import com.hurence.logisland.record.TimeseriesRecord
+import com.hurence.logisland.record.TimeSeriesRecord
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
@@ -63,7 +63,7 @@ object ChunkCompactorJob extends Serializable {
       jobConf.chunkSize,
       jobConf.saxAlphabetSize,
       jobConf.saxStringLength,
-      s"${TimeseriesRecord.CHUNK_ORIGIN}:logisland",
+      s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
       jobConf.taggingChunksToCompact,
       jobConf.useCache
     )

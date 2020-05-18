@@ -19,11 +19,13 @@ import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.converter.common.Compression;
 import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
+import com.hurence.logisland.util.string.BinaryEncodingUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.List;
 
 public class BinaryCompactionUtil {
@@ -41,6 +43,18 @@ public class BinaryCompactionUtil {
         byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(timeSeries.points().iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }
+
+    public static String serializeTimeseriesAsString(final MetricTimeSeries timeSeries) throws UnsupportedEncodingException {
+        byte[] serializedPoints = serializeTimeseries(timeSeries);
+        return BinaryEncodingUtils.encode(serializedPoints);
+    }
+
+    public static String serializeTimeseriesAsString(final MetricTimeSeries timeSeries, int ddcThreshold) throws UnsupportedEncodingException {
+        byte[] serializedPoints = serializeTimeseries(timeSeries, ddcThreshold);
+        return BinaryEncodingUtils.encode(serializedPoints);
+    }
+
+
 
 //    public MetricTimeSeries buildTimeSeries(String metricName, String metricType,
 //                                            long[] timestamps, double[] values, double[] quality) {

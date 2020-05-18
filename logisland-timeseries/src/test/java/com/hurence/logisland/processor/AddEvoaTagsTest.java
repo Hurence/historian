@@ -38,7 +38,7 @@ public class AddEvoaTagsTest {
         return new StandardRecord(SAMPLED_RECORD)
                 .setField(FieldDictionary.RECORD_VALUE, FieldType.DOUBLE, value)
                 .setField(FieldDictionary.RECORD_TIME, FieldType.LONG, time)
-                .setField(TimeseriesRecord.CHUNK_START, FieldType.LONG, time)
+                .setField(TimeSeriesRecord.CHUNK_START, FieldType.LONG, time)
                 .setField(FieldDictionary.RECORD_NAME, FieldType.STRING, name)
                 .setField("name", FieldType.STRING, name);
     }
@@ -72,13 +72,13 @@ public class AddEvoaTagsTest {
 
         MockRecord out = testRunner.getOutputRecords().get(0);
 
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_MONTH, 2);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_YEAR, 2020);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_DAY, 11);
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_WEEK, 7);
-        out.assertFieldEquals(TimeseriesRecord.CODE_INSTALL, "T062");
-        out.assertFieldEquals(TimeseriesRecord.SENSOR, "TC06_PV");
-        out.assertFieldEquals(TimeseriesRecord.CHUNK_ORIGIN, "logisland");
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_MONTH, 2);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_YEAR, 2020);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_DAY, 11);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_WEEK, 7);
+        out.assertFieldEquals(TimeSeriesRecord.CODE_INSTALL, "T062");
+        out.assertFieldEquals(TimeSeriesRecord.SENSOR, "TC06_PV");
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_ORIGIN, "logisland");
     }
 
 }

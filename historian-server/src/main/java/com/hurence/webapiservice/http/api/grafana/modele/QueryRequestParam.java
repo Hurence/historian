@@ -8,6 +8,7 @@ import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -123,13 +124,6 @@ public class QueryRequestParam implements TimeSeriesRequest {
                 .findAny();
     }
 
-    private List<String> getTagsFromFilter() {
-        return getAdHocFilters().stream()
-                .filter(adhoc -> GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY.equals(adhoc.getKey()))
-                .map(AdHocFilter::getValue)
-                .collect(Collectors.toList());
-    }
-
     @Override
     public List<String> getMetricNames() {
         return getTargets().stream()
@@ -138,14 +132,24 @@ public class QueryRequestParam implements TimeSeriesRequest {
     }
 
     @Override
-    public List<String> getTags() {
+    public Map<String, String> getTags() {
+        return Collections.emptyMap();
+    }
+
+    private List<String> getTagsFromFilter() {
+        return getAdHocFilters().stream()
+                .filter(adhoc -> GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY.equals(adhoc.getKey()))
+                .map(AdHocFilter::getValue)
+                .collect(Collectors.toList());
+    }
+
+    public List<String> getTagsValuesToFilter() {
         if (containFilter(GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY)) {
             return getTagsFromFilter();
         } else {
             return Collections.emptyList();
         }
     }
-
 
     public static final class Builder {
         private List<Target> targets;

@@ -1,7 +1,7 @@
 package com.hurence.historian.modele;
 
 
-import com.hurence.logisland.record.TimeseriesRecord;
+import com.hurence.logisland.record.TimeSeriesRecord;
 
 /**
  * Static class to put field names used by HistorianService.
@@ -34,6 +34,8 @@ public class HistorianFields {
     public static String MATCH_ANY = "matchAny";
     public static String TYPE = "type";
     public static String METRIC = "metric";
+    public static String KEY = "key";
+    public static String VALUE = "value";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";
@@ -45,6 +47,7 @@ public class HistorianFields {
     public static String TOTAL = "total";
     public static String TOTAL_HIT = "total_hit";
     public static String NAME = "name";
+
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
     public static String RESPONSE_TOTAL_ADDED_POINTS = "total_added_points";
     public static String RESPONSE_TOTAL_ADDED_CHUNKS = "total_added_chunks";
@@ -62,11 +65,37 @@ public class HistorianFields {
     public static String RESPONSE_CHUNK_SIZE_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE;
     public static String RESPONSE_CHUNK_SUM_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SUM;
     public static String RESPONSE_CHUNK_SAX_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SAX;
-    public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeseriesRecord.CHUNK_WINDOW_MS;
+    public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeSeriesRecord.CHUNK_WINDOW_MS;
     public static String RESPONSE_CHUNK_TREND_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_TREND;
     public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE_BYTES;
 
     //schema historian
+
+    //Csv fields
+    public static int MAX_LINES_FOR_CSV_FILE = 5000;
+    public static String FILE = "file";
+    public static String CAUSE = "cause";
+    public static String GROUPED_BY = "groupedBy";
+    public static String GROUPED_BY_IN_RESPONSE = "grouped_by";
+    public static String REPORT = "report";
+    public static String CSV = "csv";
+    public static String ERRORS = "errors";
+    public static String IMPORT_TYPE = "import_type";
+
+    public static String DEFAULT_NAME_FIELD = "name";
+    public static String CORRECT_POINTS = "correctPoints";
+
+    //Mapping fields
+    public static String MAPPING_TIMESTAMP = "mapping.timestamp";
+    public static String MAPPING_NAME = "mapping.name";
+    public static String MAPPING_VALUE = "mapping.value";
+    public static String MAPPING_QUALITY = "mapping.quality";
+    public static String MAPPING_TAGS = "mapping.tags";
+    public static String FORMAT_DATE = "format_date";
+    public static String GROUP_BY = "group_by";
+    public static String TIMEZONE_DATE = "timezone_date";
+    public static String TIMESTAMP_UNIT = "timestamp_unit";
+
     public static String CHUNK_YEAR = HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR;
     public static String CHUNK_MONTH = HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH;
     public static String CHUNK_DAY = HistorianChunkCollectionFieldsVersion0.CHUNK_DAY;

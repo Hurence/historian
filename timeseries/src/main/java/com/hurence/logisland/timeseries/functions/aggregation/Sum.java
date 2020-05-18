@@ -45,7 +45,7 @@ public final class Sum implements ChronixAggregation<MetricTimeSeries> {
         int size = timeSeries.size();
         double sum = 0;
         //Sum up the single values
-        for (int i = 1; i < size; i++) {
+        for (int i = 0; i < size; i++) {
             sum += timeSeries.getValue(i);
 
         }

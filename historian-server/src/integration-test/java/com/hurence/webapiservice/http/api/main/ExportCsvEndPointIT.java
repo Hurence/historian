@@ -9,7 +9,7 @@ import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjectorMultipleMetricSpecificPoints;
-import io.vertx.ext.web.client.WebClient;
+import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -146,7 +146,7 @@ public class ExportCsvEndPointIT {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post(exportEndpoint)
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(413, rsp.statusCode());
                         assertEquals("max data points is bigger than allowed", rsp.statusMessage());
@@ -161,7 +161,7 @@ public class ExportCsvEndPointIT {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
         webClient.post(exportEndpoint)
-                .sendBuffer(requestBuffer.getDelegate(), testContext.succeeding(rsp -> {
+                .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(200, rsp.statusCode());
                         assertEquals("OK", rsp.statusMessage());

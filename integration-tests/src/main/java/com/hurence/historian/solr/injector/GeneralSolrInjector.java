@@ -24,4 +24,8 @@ public class GeneralSolrInjector extends AbstractSolrInjector {
         ChunkModele chunk = ChunkModele.fromPoints(metric, 1, 1, 1, origin, points);
         chunks.add(chunk);
     }
+
+    public void addChunk(ChunkModele chunk) {
+        chunks.add(chunk);
+    }
 }

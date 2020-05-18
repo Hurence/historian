@@ -44,7 +44,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     private final Vertx vertx;
     private final SolrHistorianConf solrHistorianConf;
-    private JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk();
 
     public SolrHistorianServiceImpl(Vertx vertx, SolrHistorianConf solrHistorianConf,
                                     Handler<AsyncResult<HistorianService>> readyHandler) {
@@ -116,6 +115,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
     @Override
     public HistorianService getTimeSeriesChunk(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
         final SolrQuery query = buildTimeSeriesChunkQuery(params);
+        //    FILTER
+        buildSolrFilterFromTags(params.getJsonObject(HistorianFields.TAGS))
+                .ifPresent(query::addFilterQuery);
         query.setFields();//so we return every fields (this endpoint is currently used only in tests, this is legacy code)
         //  EXECUTE REQUEST
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
@@ -131,40 +133,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
                         .put(HistorianFields.TOTAL, documents.getNumFound())
                         .put(CHUNKS, docs)
                 );
-            } catch (IOException | SolrServerException e) {
-                p.fail(e);
-            } catch (Exception e) {
-                LOGGER.error("unexpected exception", e);
-                p.fail(e);
-            }
-        };
-        vertx.executeBlocking(getTimeSeriesHandler, resultHandler);
-        return this;
-    }
-
-    @Override
-    public HistorianService compactTimeSeriesChunk(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        final SolrQuery query = buildTimeSeriesChunkQuery(params);
-        query.setFields();//so we return every fields (this endpoint is currently used only in tests, this is legacy code)
-        //  EXECUTE REQUEST
-        Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
-            try {
-
-
-                final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
-                final SolrDocumentList documents = response.getResults();
-
-                LOGGER.debug("Found " + documents.getNumFound() + " documents");
-                JsonArray docs = new JsonArray(documents.stream()
-                        .map(this::convertDoc)
-                        .collect(Collectors.toList())
-                );
-                p.complete(new JsonObject()
-                        .put(HistorianFields.TOTAL, documents.getNumFound())
-                        .put(CHUNKS, docs)
-                );
-
-
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
             } catch (Exception e) {
@@ -192,9 +160,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
         SolrQuery query = new SolrQuery("*:*");
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
-        //    FILTER
-        buildSolrFilterFromArray(params.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
-                .ifPresent(query::addFilterQuery);
         buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
                 .ifPresent(query::addFilterQuery);
         //    FIELDS_TO_FETCH
@@ -264,17 +229,29 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return query;
     }
 
-    private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String responseMetricNameField) {
+    private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String fieldToFilter) {
         if (jsonArray == null || jsonArray.isEmpty())
             return Optional.empty();
         if (jsonArray.size() == 1) {
-            return Optional.of(responseMetricNameField + ":\"" + jsonArray.getString(0) + "\"");
+            return Optional.of(fieldToFilter + ":\"" + jsonArray.getString(0) + "\"");
         } else {
             String orNames = jsonArray.stream()
                     .map(String.class::cast)
                     .collect(Collectors.joining("\" OR \"", "(\"", "\")"));
-            return Optional.of(responseMetricNameField + ":" + orNames);
+            return Optional.of(fieldToFilter + ":" + orNames);
         }
+    }
+
+    private Optional<String> buildSolrFilterFromTags(JsonObject tags) {
+        if (tags == null || tags.isEmpty())
+            return Optional.empty();
+        String filters = tags.fieldNames().stream()
+                .map(tagName -> {
+                    String value = tags.getString(tagName);
+                    return tagName + ":\"" + value + "\"";
+                })
+                .collect(Collectors.joining(" OR ", "", ""));
+        return Optional.of(filters);
     }
 
     @Override
@@ -354,19 +331,21 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     @Override
-    public HistorianService addTimeSeries(JsonArray timeseries, Handler<AsyncResult<JsonObject>> resultHandler) {
+    public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
 
         Handler<Promise<JsonObject>> getMetricsNameHandler = p -> {
             try {
+                final String chunkOrigin = timeseriesObject.getString(CHUNK_ORIGIN, "ingestion-json");
+                JsonArray timeseriesPoints = timeseriesObject.getJsonArray(POINTS_REQUEST_FIELD);
                 JsonObject response = new JsonObject();
                 Collection<SolrInputDocument> documents = new ArrayList<>();
                 int numChunk = 0;
                 int numPoints = 0;
-                for (Object timeserieObject : timeseries) {
+                for (Object timeserieObject : timeseriesPoints) {
                     JsonObject timeserie = (JsonObject) timeserieObject;
                     SolrInputDocument document;
                     LOGGER.info("building SolrDocument from a chunk");
-                    document = chunkTimeSerie(timeserie);
+                    document = chunkTimeSerie(timeserie, chunkOrigin);
                     documents.add(document);
                     int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
                     numChunk++;
@@ -393,11 +372,12 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    private SolrInputDocument chunkTimeSerie(JsonObject timeserie) {
+
+    private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
+        JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk(chunkOrigin);
         SolrInputDocument doc = jsonObjectToChunk.chunkIntoSolrDocument(timeserie);
         return doc;
     }
-
 
     /**
      * nombre point < LIMIT_TO_DEFINE ==> Extract points from chunk
@@ -408,6 +388,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
     @Override
     public HistorianService getTimeSeries(JsonObject myParams, Handler<AsyncResult<JsonObject>> myResult) {
         final SolrQuery query = buildTimeSeriesChunkQuery(myParams);
+        //    FILTER
+        buildSolrFilterFromArray(myParams.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
+                .ifPresent(query::addFilterQuery);
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
             MetricsSizeInfo metricsInfo;
             try {
@@ -668,7 +651,22 @@ public class SolrHistorianServiceImpl implements HistorianService {
     private JsonObject convertDoc(SolrDocument doc) {
         final JsonObject json = new JsonObject();
         doc.getFieldNames().forEach(f -> {
-            json.put(f, doc.get(f));
+            Object value = doc.get(f);
+            if (value instanceof Date) {
+                value = value.toString();
+            }
+            if (value != null && value instanceof List) {
+                List<Object> newListWithoutDate = new ArrayList<>();
+                for (Object elem : (List<Object>) value) {
+                    if (elem instanceof Date) {
+                        newListWithoutDate.add(elem.toString());
+                    } else {
+                        newListWithoutDate.add(elem);
+                    }
+                }
+                value = newListWithoutDate;
+            }
+            json.put(f, value);
         });
         return json;
     }

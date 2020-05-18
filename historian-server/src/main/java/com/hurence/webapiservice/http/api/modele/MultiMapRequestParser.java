@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http;
+package com.hurence.webapiservice.http.api.modele;
 
 import io.vertx.reactivex.core.MultiMap;
 

@@ -3,9 +3,9 @@ package com.hurence.historian
 
 import com.hurence.historian.LoaderMode.LoaderMode
 import com.hurence.historian.processor.HistorianContext
-import com.hurence.logisland.record.TimeseriesRecord
-import org.apache.commons.cli.{ GnuParser, Option, OptionBuilder, Options}
-import org.apache.spark.sql.{Encoder,  SaveMode, SparkSession}
+import com.hurence.logisland.record.TimeSeriesRecord
+import org.apache.commons.cli.{GnuParser, Option, OptionBuilder, Options}
+import org.apache.spark.sql.{Encoder, SaveMode, SparkSession}
 import org.apache.spark.sql.functions._
 import org.slf4j.{Logger, LoggerFactory}
 
@@ -254,7 +254,7 @@ object App {
     val n = testDF.agg(countDistinct($"name")).collect().head.getLong(0).toInt
 
 
-    implicit val enc: Encoder[TimeseriesRecord] = org.apache.spark.sql.Encoders.kryo[TimeseriesRecord]
+    implicit val enc: Encoder[TimeSeriesRecord] = org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord]
 
     val tsDF = testDF.repartition(n, $"name")
       .sortWithinPartitions($"name", $"time_ms")
