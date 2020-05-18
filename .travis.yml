@@ -18,6 +18,9 @@ script:
 jdk:
   - openjdk8
 
+env:
+  - PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin/:$PATH
+
 install:
   - sudo sysctl -w vm.max_map_count=262144
 
