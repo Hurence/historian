@@ -12,7 +12,7 @@
       "chunk_end": 3,
       "chunk_size": 3,
       "chunk_window_ms": 2,
-      "date": "14-01-99",
+      "date":["Wed Apr 11 01:00:00 CET 14"],
       "chunk_value": "H4sIAAAAAAAAAOPi1DQGg8/2XNwKjJoMEODAxS0A43A4CDAAAHn0278nAAAA",
       "chunk_size_bytes": 45,
       "chunk_first": 1.2,

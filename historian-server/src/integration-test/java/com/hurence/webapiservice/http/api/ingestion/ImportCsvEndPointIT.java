@@ -36,7 +36,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.TIMESTAMP_UNIT;
 import static com.hurence.webapiservice.http.HttpServerVerticle.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.*;
 

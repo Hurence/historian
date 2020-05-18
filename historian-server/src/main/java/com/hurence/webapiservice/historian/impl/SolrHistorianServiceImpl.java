@@ -651,7 +651,22 @@ public class SolrHistorianServiceImpl implements HistorianService {
     private JsonObject convertDoc(SolrDocument doc) {
         final JsonObject json = new JsonObject();
         doc.getFieldNames().forEach(f -> {
-            json.put(f, doc.get(f));
+            Object value = doc.get(f);
+            if (value instanceof Date) {
+                value = value.toString();
+            }
+            if (value != null && value instanceof List) {
+                List<Object> newListWithoutDate = new ArrayList<>();
+                for (Object elem : (List<Object>) value) {
+                    if (elem instanceof Date) {
+                        newListWithoutDate.add(elem.toString());
+                    } else {
+                        newListWithoutDate.add(elem);
+                    }
+                }
+                value = newListWithoutDate;
+            }
+            json.put(f, value);
         });
         return json;
     }
