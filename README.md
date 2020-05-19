@@ -159,6 +159,9 @@ rm historian-1.3.4-SNAPSHOT.tgz
 # create the HDH schema and collection in SolR
 cd $HDH_HOME/historian-1.3.4-SNAPSHOT
 bin/create-historian-collection.sh
+
+# download a needed dependecy
+wget -O $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
     
 # and launch the historian REST server
 bin/historian-server.sh
