@@ -190,7 +190,22 @@ Exemple de réponse
 
 === _POST_ Export Csv
 
-TODO
+Permet de rechercher des points et les exporter en csv pour les métriques désirées.
+
+Ce endpoint utilise la même requête que l'endpoint query mais il donne la réponse en csv.
+
+Exemple de réponse :
+
+[source,csv]
+----
+metric,value,date
+temp_a,622.1,1477895624866
+temp_a,-3.0,1477916224866
+temp_a,365.0,1477917224866
+temp_b,861.0,1477895624866
+temp_b,767.0,1477917224866
+----
+
 
 === _POST_ Annotations compatible avec simpleJsonPlugin
 
@@ -486,3 +501,9 @@ TODO
 
 
 ==  _POST_ Ingestion
+
+Cet endpoint renvoie une réponse 200 'OK' si l’historian fonctionne correctement. De plus il y a autres
+sous endpoint à /historian-server/ingestion/ :
+
+=== _POST_ Ingestion/CSV
+
