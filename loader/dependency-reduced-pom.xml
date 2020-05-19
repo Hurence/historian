@@ -3,7 +3,7 @@
   <parent>
     <artifactId>historian</artifactId>
     <groupId>com.hurence.historian</groupId>
-    <version>1.3.3-SNAPSHOT</version>
+    <version>1.3.4-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
   <artifactId>loader</artifactId>
@@ -70,7 +70,7 @@
             </goals>
             <configuration>
               <overwrite>true</overwrite>
-              <outputDirectory>src/test/resources/shared-resources</outputDirectory>
+              <outputDirectory>src/integration-test/resources/shared-resources</outputDirectory>
               <resources>
                 <resource>
                   <directory>../integration-tests/src/main/resources/shared-resources</directory>
@@ -89,7 +89,7 @@
         <plugins>
           <plugin>
             <artifactId>maven-shade-plugin</artifactId>
-            <version>3.2.1</version>
+            <version>3.2.3</version>
             <executions>
               <execution>
                 <phase>package</phase>
@@ -142,6 +142,29 @@
       <id>depsOnly</id>
       <build>
         <plugins>
+          <plugin>
+            <groupId>org.scalatest</groupId>
+            <artifactId>scalatest-maven-plugin</artifactId>
+            <version>1.0</version>
+            <executions>
+              <execution>
+                <id>test</id>
+                <goals>
+                  <goal>test</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <stderr />
+              <junitxml>.</junitxml>
+              <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
+              <argLine>-ea -XX:MaxPermSize=${MaxPermSize}</argLine>
+              <systemProperties>
+                <java.awt.headless>true</java.awt.headless>
+                <java.io.tmpdir>${project.build.directory}/tmp</java.io.tmpdir>
+              </systemProperties>
+            </configuration>
+          </plugin>
           <plugin>
             <artifactId>maven-shade-plugin</artifactId>
             <executions>
@@ -199,218 +222,84 @@
   </repositories>
   <dependencies>
     <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-core_2.11</artifactId>
-      <version>2.3.2.3.1.4.0-315</version>
-      <scope>provided</scope>
+      <groupId>org.scalatest</groupId>
+      <artifactId>scalatest_2.11</artifactId>
+      <version>3.0.3</version>
+      <scope>test</scope>
       <exclusions>
         <exclusion>
-          <artifactId>avro</artifactId>
-          <groupId>org.apache.avro</groupId>
+          <artifactId>scalactic_2.11</artifactId>
+          <groupId>org.scalactic</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.solr</groupId>
+      <artifactId>solr-test-framework</artifactId>
+      <version>8.2.0</version>
+      <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>commons-compiler</artifactId>
+          <groupId>org.codehaus.janino</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>avro-mapred</artifactId>
-          <groupId>org.apache.avro</groupId>
+          <artifactId>janino</artifactId>
+          <groupId>org.codehaus.janino</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>chill_2.11</artifactId>
-          <groupId>com.twitter</groupId>
+          <artifactId>antlr4-runtime</artifactId>
+          <groupId>org.antlr</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>chill-java</artifactId>
-          <groupId>com.twitter</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xbean-asm5-shaded</artifactId>
-          <groupId>org.apache.xbean</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>hadoop-client</artifactId>
+          <artifactId>hadoop-annotations</artifactId>
           <groupId>org.apache.hadoop</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>spark-launcher_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
+          <artifactId>hadoop-hdfs-client</artifactId>
+          <groupId>org.apache.hadoop</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>spark-kvstore_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
+          <artifactId>lucene-test-framework</artifactId>
+          <groupId>org.apache.lucene</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>spark-network-common_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
+          <artifactId>junit4-ant</artifactId>
+          <groupId>com.carrotsearch.randomizedtesting</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>spark-network-shuffle_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
+          <artifactId>randomizedtesting-runner</artifactId>
+          <groupId>com.carrotsearch.randomizedtesting</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>spark-unsafe_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
+          <artifactId>opentracing-mock</artifactId>
+          <groupId>io.opentracing</groupId>
         </exclusion>
         <exclusion>
-          <artifactId>activation</artifactId>
-          <groupId>javax.activation</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jsr305</artifactId>
-          <groupId>com.google.code.findbugs</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jul-to-slf4j</artifactId>
-          <groupId>org.slf4j</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>compress-lzf</artifactId>
-          <groupId>com.ning</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>lz4-java</artifactId>
-          <groupId>org.lz4</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>zstd-jni</artifactId>
-          <groupId>com.github.luben</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>RoaringBitmap</artifactId>
-          <groupId>org.roaringbitmap</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>commons-net</artifactId>
-          <groupId>commons-net</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>json4s-jackson_2.11</artifactId>
-          <groupId>org.json4s</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jersey-client</artifactId>
-          <groupId>org.glassfish.jersey.core</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jersey-common</artifactId>
-          <groupId>org.glassfish.jersey.core</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jersey-server</artifactId>
-          <groupId>org.glassfish.jersey.core</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jersey-container-servlet</artifactId>
-          <groupId>org.glassfish.jersey.containers</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>jersey-container-servlet-core</artifactId>
-          <groupId>org.glassfish.jersey.containers</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>netty-all</artifactId>
-          <groupId>io.netty</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>stream</artifactId>
-          <groupId>com.clearspring.analytics</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>metrics-json</artifactId>
-          <groupId>io.dropwizard.metrics</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>ivy</artifactId>
-          <groupId>org.apache.ivy</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>oro</artifactId>
-          <groupId>oro</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>pyrolite</artifactId>
-          <groupId>net.razorvine</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>py4j</artifactId>
-          <groupId>net.sf.py4j</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>spark-tags_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>commons-crypto</artifactId>
-          <groupId>org.apache.commons</groupId>
+          <artifactId>ant</artifactId>
+          <groupId>org.apache.ant</groupId>
         </exclusion>
       </exclusions>
     </dependency>
     <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-sql_2.11</artifactId>
-      <version>2.3.2.3.1.4.0-315</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>univocity-parsers</artifactId>
-          <groupId>com.univocity</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>spark-sketch_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>spark-catalyst_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>orc-core</artifactId>
-          <groupId>org.apache.orc</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>orc-mapreduce</artifactId>
-          <groupId>org.apache.orc</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>parquet-column</artifactId>
-          <groupId>org.apache.parquet</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>parquet-hadoop</artifactId>
-          <groupId>org.apache.parquet</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>arrow-vector</artifactId>
-          <groupId>org.apache.arrow</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>spark-tags_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xbean-asm5-shaded</artifactId>
-          <groupId>org.apache.xbean</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.spark</groupId>
-      <artifactId>spark-sql-kafka-0-10_2.11</artifactId>
-      <version>2.3.2.3.1.4.0-315</version>
-      <scope>provided</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>kafka-clients</artifactId>
-          <groupId>org.apache.kafka</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>spark-tags_2.11</artifactId>
-          <groupId>org.apache.spark</groupId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-nop</artifactId>
-      <version>2.0.0-alpha1</version>
+      <groupId>com.hurence.historian</groupId>
+      <artifactId>integration-tests</artifactId>
+      <version>1.3.4-SNAPSHOT</version>
       <scope>test</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>historian-resources</artifactId>
+          <groupId>com.hurence.historian</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>testcontainers</artifactId>
+          <groupId>org.testcontainers</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>vertx-core</artifactId>
+          <groupId>io.vertx</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>junit</groupId>
@@ -466,13 +355,15 @@
     </dependencies>
   </dependencyManagement>
   <properties>
-    <scala.version>2.11.12</scala.version>
-    <scala.binary.version>2.11</scala.binary.version>
-    <jackson.version>2.9.10</jackson.version>
-    <spark.solr>3.6.6</spark.solr>
     <encoding>UTF-8</encoding>
-    <maven.compiler.source>1.8</maven.compiler.source>
-    <spark.version>2.3.2.3.1.4.0-315</spark.version>
     <maven.compiler.target>1.8</maven.compiler.target>
+    <scala.binary.version>2.11</scala.binary.version>
+    <spark.solr>3.6.6</spark.solr>
+    <solr.version>8.2.0</solr.version>
+    <MaxPermSize>128m</MaxPermSize>
+    <jackson.version>2.9.10</jackson.version>
+    <scala.version>2.11.12</scala.version>
+    <spark.version>2.3.2.3.1.4.0-315</spark.version>
+    <maven.compiler.source>1.8</maven.compiler.source>
   </properties>
 </project>

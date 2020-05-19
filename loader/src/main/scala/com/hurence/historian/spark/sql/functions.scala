@@ -1,5 +1,8 @@
 package com.hurence.historian.spark.sql
 
+import java.nio.charset.StandardCharsets
+
+import com.google.common.hash.Hashing
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
 import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
@@ -16,6 +19,10 @@ object functions {
 
   private val converter = new BinaryCompactionConverterOfRecord.Builder().build
 
+
+  val sha256 = udf { toHash: String =>
+    Hashing.sha256.hashString(toHash, StandardCharsets.UTF_8).toString
+  }
 
   val toDateUTC = udf { (epochMilliUTC: Long, dateFormat: String) =>
     val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
