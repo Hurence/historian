@@ -6,6 +6,7 @@ import com.hurence.historian.spark.sql.writer.Writer
 import org.apache.spark.sql.{Column, Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 import org.apache.spark.sql.functions._
+import com.hurence.historian.spark.sql.functions._
 
 /**
   * val options.config = Map(
@@ -40,7 +41,7 @@ class SolrChunksWriter extends Writer[ChunkRecordV0] {
     ds
       .withColumn("value", col("chunk"))
       .select(mainCols ::: tagCols: _*)
-      .withColumn("id", base64(col("chunk_value")))
+      .withColumn("id", sha256(col("chunk_value")))
       .write
       .format("solr")
       .options(config)
