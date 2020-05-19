@@ -6,7 +6,7 @@ import com.hurence.historian.spark.solr.SolrCloudUtil
 import com.hurence.historian.spark.solr.util.EventsimUtil
 
 // Builder to be used by all the tests that need Eventsim data. All test methods will re-use the same collection name
-trait EventsimBuilder extends TestSuiteBuilder {
+trait EventsimBuilder extends SparkSolrTests {
 
   val collectionName: String = "EventsimTest-" + UUID.randomUUID().toString
 
