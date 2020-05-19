@@ -4,6 +4,9 @@ import java.util.UUID
 
 import com.hurence.historian.SolrCloudUtilForTests
 import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.modele.SchemaVersion
+import com.hurence.historian.solr.util.SolrITHelper
+import com.hurence.historian.spark.compactor.job.ChunkModele
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
@@ -17,7 +20,7 @@ import org.apache.spark.sql.types._
 class SparkSolrTest extends SparkSolrTests {
 
   test("Solr version") {
-    val solrVersion = SolrSupport.getSolrVersion(zkHost)
+    val solrVersion = SolrSupport.getSolrVersion(zkAddressSolr)
     assert(solrVersion == "8.2.0")
     assert(SolrSupport.isSolrVersionAtleast(solrVersion, 7, 5, 0))
     assert(SolrSupport.isSolrVersionAtleast(solrVersion, 7, 3, 0))
@@ -57,26 +60,26 @@ class SparkSolrTest extends SparkSolrTests {
       ack08.show()
 
       // 3. write those chunks to SolR
-      val solrOpts = Map("zkhost" -> zkHost, "collection" -> collectionName)
+      val solrOpts = Map("zkhost" -> zkAddressSolr, "collection" -> collectionName)
 
 
       val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
       writer.write(sql.Options(collectionName, Map(
-        "zkhost" -> zkHost,
+        "zkhost" -> zkAddressSolr,
         "collection" -> collectionName,
         "tag_names" -> "metric_id,min,max,warn,crit"
       )), ack08)
 
 
       // 4. Explicit commit to make sure all docs are visible
-      val solrCloudClient = SolrSupport.getCachedCloudClient(zkHost)
+      val solrCloudClient = SolrSupport.getCachedCloudClient(zkAddressSolr)
       solrCloudClient.commit(collectionName, true, true)
 
 
       // 5. load back those chunks to verify
       val reader = ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
       val solrDF = reader.read(sql.Options(collectionName, Map(
-        "zkhost" -> zkHost,
+        "zkhost" -> zkAddressSolr,
         "collection" -> collectionName,
         "tag_names" -> "metric_id"
       )))
@@ -98,14 +101,15 @@ class SparkSolrTest extends SparkSolrTests {
 
   test("vary queried columns") {
     val collectionName = "testQuerying-" + UUID.randomUUID().toString
+    val solrUrl = "http://" + zkHost
     SolrCloudUtilForTests.buildCollection(collectionName, null, 1, cloudClient)
     try {
       val csvDF = buildTestData()
-      val solrOpts = Map("zkhost" -> zkHost, "collection" -> collectionName)
+      val solrOpts = Map("zkhost" -> zkAddressSolr, "collection" -> collectionName)
       csvDF.write.format("solr").options(solrOpts).mode(Overwrite).save()
 
       // Explicit commit to make sure all docs are visible
-      val solrCloudClient = SolrSupport.getCachedCloudClient(zkHost)
+      val solrCloudClient = SolrSupport.getCachedCloudClient(zkAddressSolr)
       solrCloudClient.commit(collectionName, true, true)
 
       val solrDF = sparkSession.read.format("solr").options(solrOpts).load()

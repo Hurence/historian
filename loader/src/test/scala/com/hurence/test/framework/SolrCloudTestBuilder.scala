@@ -16,6 +16,10 @@ trait SolrCloudTestBuilder extends BeforeAndAfterAll with LazyLogging { this: Su
 
   @transient var cluster: MiniSolrCloudCluster = _
   @transient var cloudClient: CloudSolrClient = _
+//  var slrHost: String = _
+  //zkAddress is like "host:port/solr"
+  var zkAddressSolr: String = _
+  //zkHost is like "host:port"
   var zkHost: String = _
   var testWorkingDir: File = _
 
@@ -48,7 +52,8 @@ trait SolrCloudTestBuilder extends BeforeAndAfterAll with LazyLogging { this: Su
     cloudClient.connect()
 
     assertTrue(!cloudClient.getZkStateReader.getClusterState.getLiveNodes.isEmpty)
-    zkHost = cluster.getZkServer.getZkAddress
+    zkAddressSolr = cluster.getZkServer.getZkAddress
+    zkHost = cluster.getZkServer.getZkHost
   }
 
   override def afterAll(): Unit = {

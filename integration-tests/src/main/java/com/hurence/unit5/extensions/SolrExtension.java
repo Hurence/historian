@@ -25,10 +25,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.*;
-
-import static com.hurence.historian.solr.util.SolrITHelper.*;
 
 /**
  * A JUnit rule which starts an embedded elastic-search docker container.
