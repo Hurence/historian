@@ -19,11 +19,11 @@ trait MovielensBuilder extends SparkSolrTests with BeforeAndAfterAll with Before
   override def beforeAll(): Unit = {
     super.beforeAll()
     createCollections()
-    MovielensBuilder.indexMovieLensDataset(sparkSession, zkHost, uuid)
-    SolrSupport.getCachedCloudClient(zkHost).commit(moviesColName)
-    SolrSupport.getCachedCloudClient(zkHost).commit(ratingsColName)
+    MovielensBuilder.indexMovieLensDataset(sparkSession, zkAddressSolr, uuid)
+    SolrSupport.getCachedCloudClient(zkAddressSolr).commit(moviesColName)
+    SolrSupport.getCachedCloudClient(zkAddressSolr).commit(ratingsColName)
     val opts = Map(
-      "zkhost" -> zkHost,
+      "zkhost" -> zkAddressSolr,
       "collection" -> moviesColName)
     val df = sparkSession.read.format("solr").options(opts).load()
     df.createOrReplaceTempView(moviesColName)

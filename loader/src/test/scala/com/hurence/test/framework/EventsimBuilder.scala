@@ -14,7 +14,7 @@ trait EventsimBuilder extends SparkSolrTests {
     super.beforeAll()
     SolrCloudUtilForTests.buildCollection(collectionName, null, numShards, cloudClient)
     EventsimUtil.defineTextFields(cloudClient, collectionName)
-    EventsimUtil.loadEventSimDataSet(zkHost, collectionName, sparkSession)
+    EventsimUtil.loadEventSimDataSet(zkAddressSolr, collectionName, sparkSession)
   }
 
   override def afterAll(): Unit = {

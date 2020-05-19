@@ -4,10 +4,10 @@ import java.util
 
 import com.hurence.historian.AbstractReducingChunkSizeTest.LOGGER
 import com.hurence.historian.modele.SchemaVersion
-import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
 import com.hurence.historian.solr.injector.GeneralSolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.historian.spark.compactor.ChunkCompactor
+import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
 import com.hurence.logisland.record.{Point, TimeSeriesRecord}
 import com.hurence.solr.SparkSolrUtils
 import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}

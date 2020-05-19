@@ -1,20 +1,3 @@
-/*
- *  Copyright (c) 2017 Red Hat, Inc. and/or its affiliates.
- *  Copyright (c) 2017 INSA Lyon, CITI Laboratory.
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package com.hurence.historian.solr.util;
 
 import com.hurence.historian.modele.HistorianCollections;
@@ -32,7 +15,6 @@ import org.apache.solr.common.util.NamedList;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.Container;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.ByteArrayOutputStream;
@@ -99,12 +81,7 @@ public class SolrITHelper {
                 "--new-field", fieldName);
         LOGGER.info("start process to add field {} in collection {}", fieldName, COLLECTION_HISTORIAN);
         Process process = p.start();
-        int exitCode = process.waitFor();
-        LOGGER.info("standard output :\n\n{}", convertInputStreamToString(process.getInputStream()));
-        LOGGER.info("process exited with code {}", exitCode);
-        if (exitCode != 0) {
-            LOGGER.error("error output :\n\n{}", convertInputStreamToString(process.getErrorStream()));
-        }
+        waitProcessFinishedAndPrintResult(process);
     }
 
 
@@ -121,7 +98,7 @@ public class SolrITHelper {
     }
 
     private static List<ProcessBuilder> startProcessesToCreateCollections(String solrUrl, String modelVersion) {
-        ProcessBuilder pbChunkCollection = getChunkCollectionCreationProcessBuilder(solrUrl, modelVersion);
+        ProcessBuilder pbChunkCollection = getChunkCollectionCreationProcessBuilder(COLLECTION_HISTORIAN, solrUrl, modelVersion);
         ProcessBuilder pbAnnotationCollection = getAnnotationCollectionCreationProcessBuilder(solrUrl, modelVersion);
         ProcessBuilder pbReportCollection = getReportCollectionCreationProcessBuilder(solrUrl, modelVersion);
         return Arrays.asList(pbChunkCollection, pbAnnotationCollection, pbReportCollection);
@@ -150,77 +127,49 @@ public class SolrITHelper {
     }
 
     @NotNull
-    private static ProcessBuilder getChunkCollectionCreationProcessBuilder(String solrUrl, String modelVersion) {
+    private static ProcessBuilder getChunkCollectionCreationProcessBuilder(String collectionName, String solrUrl, String modelVersion) {
         String chunkCollectionScriptPath = SolrITHelper.class.getResource("/shared-resources/create-historian-chunk-collection.sh").getFile();
         return new ProcessBuilder("bash", chunkCollectionScriptPath,
                 "--solr-host", solrUrl + "/solr",
-                "--solr-collection", COLLECTION_HISTORIAN,
+                "--solr-collection", collectionName,
                 "--replication-factor", "1",
                 "--num-shards", "2",
                 "--model-version", modelVersion);
     }
 
     public static void createReportCollection(SolrClient client, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {
-        getReportCollectionCreationProcessBuilder(solrUrl, modelVersion).start().waitFor();
-//        checkReportCollectionHasBeenCreated(client);
-//        checkReportSchema(client);
+        Process process = getReportCollectionCreationProcessBuilder(solrUrl, modelVersion).start();
+        waitProcessFinishedAndPrintResult(process);
     }
 
+    private static void waitProcessFinishedAndPrintResult(Process process) throws IOException, InterruptedException {
+        int exitCode = process.waitFor();
+        LOGGER.info("standard output :\n\n{}", convertInputStreamToString(process.getInputStream()));
+        LOGGER.info("process exited with code {}", exitCode);
+        if (exitCode != 0) {
+            LOGGER.error("error output :\n\n{}", convertInputStreamToString(process.getErrorStream()));
+        }
+    }
+
+    public static void createChunkCollection(String collectionName, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {
+        Process process = getChunkCollectionCreationProcessBuilder(collectionName, solrUrl, modelVersion).start();
+        waitProcessFinishedAndPrintResult(process);
+    }
+
+    @Deprecated
     public static void createChunkCollection(SolrClient client, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {
-        getChunkCollectionCreationProcessBuilder(solrUrl, modelVersion).start().waitFor();
-//        checkHistorianCollectionHasBeenCreated(client);
-//        checkHistorianSchema(client);
+        Process process = getChunkCollectionCreationProcessBuilder(COLLECTION_HISTORIAN, solrUrl, modelVersion).start();
+        waitProcessFinishedAndPrintResult(process);
     }
 
     public static void createAnnotationCollection(SolrClient client, String solrUrl, SchemaVersion modelVersion) throws IOException, InterruptedException, SolrServerException {
         createAnnotationCollection(client, solrUrl, modelVersion.toString());
     }
 
+    @Deprecated
     public static void createAnnotationCollection(SolrClient client, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {
-        getAnnotationCollectionCreationProcessBuilder(solrUrl, modelVersion).start().waitFor();
-//        checkAnnotationCollectionHasBeenCreated(client);
-//        checkAnnotationSchema(client);
+        Process process = getAnnotationCollectionCreationProcessBuilder(solrUrl, modelVersion).start();
+        waitProcessFinishedAndPrintResult(process);
     }
 
-    private static void checkReportSchema(SolrClient client) throws SolrServerException, IOException {
-        checkSchema(client, COLLECTION_REPORT);
-    }
-
-    private static void checkHistorianSchema(SolrClient client) throws SolrServerException, IOException {
-        checkSchema(client, COLLECTION_HISTORIAN);
-    }
-
-    private static void checkSchema(SolrClient client, String collectionHistorian) throws SolrServerException, IOException {
-        SchemaRequest schemaRequest = new SchemaRequest();
-        SchemaResponse schemaResponse = schemaRequest.process(client, collectionHistorian);
-        List<Map<String, Object>> schema = schemaResponse.getSchemaRepresentation().getFields();
-        LOGGER.debug(collectionHistorian + "schema is {}", new JsonArray(schema).encodePrettily());
-    }
-
-    private static void checkAnnotationSchema(SolrClient client) throws SolrServerException, IOException {
-        checkSchema(client, COLLECTION_ANNOTATION);
-    }
-
-    private static void checkHistorianCollectionHasBeenCreated(SolrClient client) throws SolrServerException, IOException {
-        checkCollectionHasBeenCreated(client, COLLECTION_HISTORIAN);
-    }
-
-    private static void checkAnnotationCollectionHasBeenCreated(SolrClient client) throws SolrServerException, IOException {
-        checkCollectionHasBeenCreated(client, COLLECTION_ANNOTATION);
-    }
-
-    private static void checkReportCollectionHasBeenCreated(SolrClient client) throws SolrServerException, IOException {
-        checkCollectionHasBeenCreated(client, COLLECTION_REPORT);
-    }
-
-    private static void checkCollectionHasBeenCreated(SolrClient client, String collectionAnnotation) throws SolrServerException, IOException {
-        final SolrRequest request = CollectionAdminRequest.collectionStatus(collectionAnnotation);
-        final NamedList<Object> rsp = client.request(request);
-        final NamedList<Object> responseHeader = (NamedList<Object>) rsp.get("responseHeader");
-        int status = (int) responseHeader.get("status");
-        if (status != 0) {
-            throw new RuntimeException(String.format("collection %s is not ready or does not exist !", collectionAnnotation));
-        }
-        LOGGER.info("collection {} is up and running !", collectionAnnotation);
-    }
 }
