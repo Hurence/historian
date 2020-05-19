@@ -9,7 +9,7 @@ import org.apache.spark.sql.SparkSession
 import org.apache.spark.sql.functions.udf
 import org.scalatest.{BeforeAndAfterAll, BeforeAndAfterEach}
 
-trait MovielensBuilder extends TestSuiteBuilder with BeforeAndAfterAll with BeforeAndAfterEach {
+trait MovielensBuilder extends SparkSolrTests with BeforeAndAfterAll with BeforeAndAfterEach {
 
   val uuid = UUID.randomUUID().toString.replace("-", "_")
   val moviesColName: String = s"movielens_movies_$uuid"
