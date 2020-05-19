@@ -11,7 +11,6 @@ import org.apache.solr.cloud.MiniSolrCloudCluster
 import org.apache.solr.common.SolrInputDocument
 import org.apache.solr.common.cloud._
 import org.apache.solr.common.params.{CollectionParams, CoreAdminParams, ModifiableSolrParams}
-import org.apache.spark.SparkContext
 import org.junit.Assert._
 import org.noggit.{CharArr, JSONWriter}
 
@@ -167,35 +166,32 @@ object SolrCloudUtil extends LazyLogging {
 
   def buildCollection(zkHost: String,
                       collection: String,
-                      cloudClient: CloudSolrClient,
-                      sc: SparkContext): Unit = {
+                      cloudClient: CloudSolrClient): Unit = {
     val inputDocs: Array[String] = Array(
       collection + "-1,foo,bar,1,[a;b],[1;2]",
       collection + "-2,foo,baz,2,[c;d],[3;4]",
       collection + "-3,bar,baz,3,[e;f],[5;6]"
     )
-    buildCollection(zkHost, collection, inputDocs, 2, cloudClient, sc)
+    buildCollection(zkHost, collection, inputDocs, 2, cloudClient)
   }
 
   def buildCollection(zkHost: String,
                       collection: String,
                       numDocs: Int,
                       numShards: Int,
-                      cloudClient: CloudSolrClient,
-                      sc: SparkContext): Unit = {
+                      cloudClient: CloudSolrClient): Unit = {
     val inputDocs: Array[String] = new Array[String](numDocs)
     for (n: Int <- 0 to numDocs-1) {
       inputDocs.update(n, collection + "-" + n + ",foo" + n + ",bar" + n + "," + n + ",[a;b],[1;2]")
     }
-    buildCollection(zkHost, collection, inputDocs, numShards, cloudClient, sc)
+    buildCollection(zkHost, collection, inputDocs, numShards, cloudClient)
   }
 
   def buildCollection(zkHost: String,
                       collection: String,
                       inputDocs: Array[String],
                       numShards: Int,
-                      cloudClient: CloudSolrClient,
-                      sc: SparkContext): Unit = {
+                      cloudClient: CloudSolrClient): Unit = {
     val confName = "testConfig"
    // val confDir = new File("src/test/resources/conf")
     val confDir = new File(this.getClass.getClassLoader.getResource("conf").getPath)

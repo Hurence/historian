@@ -1,6 +1,5 @@
 package com.hurence.test.framework
 
-import com.lucidworks.spark.LazyLogging
 import org.scalatest.{FunSuite, Outcome}
 
 /**

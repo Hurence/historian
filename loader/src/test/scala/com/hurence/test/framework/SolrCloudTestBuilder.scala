@@ -3,7 +3,6 @@ package com.hurence.test.framework
 import java.io.File
 
 import com.hurence.historian.TestSolrCloudClusterSupport
-import com.lucidworks.spark.LazyLogging
 import org.apache.commons.io.FileUtils
 import org.apache.solr.client.solrj.impl.CloudSolrClient
 import org.apache.solr.cloud.MiniSolrCloudCluster
@@ -24,7 +23,7 @@ trait SolrCloudTestBuilder extends BeforeAndAfterAll with LazyLogging { this: Su
 
     System.setProperty("jetty.testMode", "true")
    // val solrXml = new File("src/test/resources/solr.xml")
-    val solrXml = new File(this.getClass.getClassLoader.getResource("solr.xml").getPath)
+    val solrXml = new File(this.getClass.getClassLoader.getResource("solr-embedded-conf/solr.xml").getPath)
     val solrXmlContents: String = TestSolrCloudClusterSupport.readSolrXml(solrXml)
 
     val targetDir = new File("target")
