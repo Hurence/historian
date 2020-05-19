@@ -288,10 +288,6 @@
       <scope>test</scope>
       <exclusions>
         <exclusion>
-          <artifactId>historian-resources</artifactId>
-          <groupId>com.hurence.historian</groupId>
-        </exclusion>
-        <exclusion>
           <artifactId>testcontainers</artifactId>
           <groupId>org.testcontainers</groupId>
         </exclusion>
