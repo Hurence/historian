@@ -1,4 +1,5 @@
-package com.hurence.test.framework
+package com.hurence.solr
+
 import org.slf4j.{Logger, LoggerFactory}
 
 trait LazyLogging {

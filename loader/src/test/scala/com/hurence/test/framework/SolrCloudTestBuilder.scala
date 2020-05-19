@@ -3,6 +3,7 @@ package com.hurence.test.framework
 import java.io.File
 
 import com.hurence.historian.TestSolrCloudClusterSupport
+import com.hurence.solr.LazyLogging
 import org.apache.commons.io.FileUtils
 import org.apache.solr.client.solrj.impl.CloudSolrClient
 import org.apache.solr.cloud.MiniSolrCloudCluster

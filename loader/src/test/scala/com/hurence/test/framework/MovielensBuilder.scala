@@ -2,7 +2,7 @@ package com.hurence.test.framework
 
 import java.util.UUID
 
-import com.hurence.historian.spark.solr.SolrCloudUtil
+import com.hurence.historian.SolrCloudUtilForTests
 import com.lucidworks.spark.example.ml.DateConverter
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.spark.sql.SparkSession
@@ -35,14 +35,14 @@ trait MovielensBuilder extends SparkSolrTests with BeforeAndAfterAll with Before
   }
 
   def createCollections(): Unit = {
-    SolrCloudUtil.buildCollection(zkHost, moviesColName, null, 1, cloudClient)
-    SolrCloudUtil.buildCollection(zkHost, ratingsColName, null, 1, cloudClient)
+    SolrCloudUtilForTests.buildCollection(moviesColName, null, 1, cloudClient)
+    SolrCloudUtilForTests.buildCollection(ratingsColName, null, 1, cloudClient)
 //    SolrCloudUtil.buildCollection(zkHost, userColName, null, 1, cloudClient, sc)
   }
 
   def deleteCollections(): Unit = {
-    SolrCloudUtil.deleteCollection(ratingsColName, cluster)
-    SolrCloudUtil.deleteCollection(moviesColName, cluster)
+    SolrCloudUtilForTests.deleteCollection(ratingsColName, cloudClient)
+    SolrCloudUtilForTests.deleteCollection(moviesColName, cloudClient)
 //    SolrCloudUtil.deleteCollection(userColName, cluster)
   }
 }
