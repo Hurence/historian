@@ -1,11 +1,15 @@
 package com.hurence.historian.spark.sql
 
+import java.nio.charset.StandardCharsets
+
+import com.google.common.hash.Hashing
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
-import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter}
+import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter, SaxAnalyzer}
 import com.hurence.logisland.util.DateUtil
 import com.hurence.logisland.util.string.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
+import spire.std.int
 
 import scala.collection.mutable
 import scala.collection.JavaConverters._
@@ -16,6 +20,10 @@ object functions {
 
   private val converter = new BinaryCompactionConverterOfRecord.Builder().build
 
+
+  val sha256 = udf { toHash: String =>
+    Hashing.sha256.hashString(toHash, StandardCharsets.UTF_8).toString
+  }
 
   val toDateUTC = udf { (epochMilliUTC: Long, dateFormat: String) =>
     val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
@@ -89,24 +97,61 @@ object functions {
 
 
   /**
-    * Encoding function: returns the sax string of the values.
+    * Best guess function: returns the best guess parameters.
     *
     *
     *
     */
-  val guess = udf { (alphabetSize: Int, values: mutable.WrappedArray[Double]) =>
-
-
-    val guessSasxParams = new GuessSaxParameters.Builder()
-      .alphabetSize(alphabetSize)
-      .build()
+  val guess = udf { ( values: mutable.WrappedArray[Double]) =>
 
     val list = values.map(Double.box).asJava
 
+    GuessSaxParameters.computeBestParam(list).toString
 
-    guessSasxParams.computeBestParam(list).asScala
+  }
 
-    // mutable.WrappedArray(guessParm)
+  /**
+   * Encoding function: returns the sax string of the values using the best guess.
+   */
+  val sax_best_guess = udf { ( nThreshold: Float ,values: mutable.WrappedArray[Double]) =>
+
+    val list = values.map(Double.box).asJava
+    val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
+    val paaSize =best_guess(1).toString.toInt
+    val alphabetSize = best_guess(2).toString.toInt
+
+    val saxConverter = new SaxConverter.Builder()
+      .alphabetSize(alphabetSize)
+      .nThreshold(nThreshold)
+      .paaSize(paaSize)
+      .build()
+
+    saxConverter.getSaxStringFromValues(list)
+
+  }
+  val sax_best_guess_paa_fixed = udf { ( nThreshold: Float, paaSize: Int ,values: mutable.WrappedArray[Double]) =>
+
+    val list = values.map(Double.box).asJava
+    val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
+    //val paaSize =best_guess(1).toString.toInt
+    val alphabetSize = best_guess(2).toString.toInt
+
+    val saxConverter = new SaxConverter.Builder()
+      .alphabetSize(alphabetSize)
+      .nThreshold(nThreshold)
+      .paaSize(paaSize)
+      .build()
+
+    saxConverter.getSaxStringFromValues(list)
+
+  }
+  /**
+   * Encoding function: returns the sax string of the values using the best guess.
+   */
+  val anomalie_test = udf { ( str: String) =>
+
+    val saxThreshold =  SaxAnalyzer.saxThreshold(str,0.1)
+    SaxAnalyzer.anomalyDetect(str,saxThreshold).toString
 
   }
 }
