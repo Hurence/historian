@@ -223,7 +223,7 @@ ds.show()
 
   }
 
-  @Test
+ // @Test
   def testChunksV0Guess() = {
 
 
@@ -249,7 +249,7 @@ ds.show()
 //   assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample1(6)(16))
   }
 
-  @Test
+ // @Test
   def testChunksV0Sax_best_guess() = {
 
 
@@ -271,7 +271,7 @@ ds.show()
     //assertEquals("adebdcdcddbddddccfdfegfffghigiihhgggifghffcfgfffff", sample1(2)(16))
 
   }
-  @Test
+  //@Test
   def testChunksV0Sax_anomaly() = {
 
 
