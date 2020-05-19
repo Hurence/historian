@@ -2,9 +2,9 @@ package com.hurence.historian.spark.sql
 
 import java.util.UUID
 
+import com.hurence.historian.SolrCloudUtilForTests
 import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.ml.Chunkyfier
-import com.hurence.historian.spark.solr.SolrCloudUtil
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
@@ -32,7 +32,7 @@ class SparkSolrTest extends SparkSolrTests {
     val spark = SparkSession.getActiveSession.get
     import spark.implicits._
     val collectionName = "testHistorian-" + UUID.randomUUID().toString
-    SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient)
+    SolrCloudUtilForTests.buildCollection(collectionName, null, 1, cloudClient)
     try {
       // 1. load measures from parquet file
       val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
@@ -91,14 +91,14 @@ class SparkSolrTest extends SparkSolrTests {
         firstRow.foreach(col => assert(col != null))            // no missing values*/
 
     } finally {
-      SolrCloudUtil.deleteCollection(collectionName, cluster)
+      SolrCloudUtilForTests.deleteCollection(collectionName, cloudClient)
     }
   }
 
 
   test("vary queried columns") {
     val collectionName = "testQuerying-" + UUID.randomUUID().toString
-    SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient)
+    SolrCloudUtilForTests.buildCollection(collectionName, null, 1, cloudClient)
     try {
       val csvDF = buildTestData()
       val solrOpts = Map("zkhost" -> zkHost, "collection" -> collectionName)
@@ -118,7 +118,7 @@ class SparkSolrTest extends SparkSolrTests {
       firstRow.foreach(col => assert(col != null)) // no missing values
 
     } finally {
-      SolrCloudUtil.deleteCollection(collectionName, cluster)
+      SolrCloudUtilForTests.deleteCollection(collectionName, cloudClient)
     }
   }
 

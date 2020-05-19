@@ -1,5 +1,6 @@
 package com.hurence.test.framework
 
+import com.hurence.solr.LazyLogging
 import org.scalatest.{FunSuite, Outcome}
 
 /**

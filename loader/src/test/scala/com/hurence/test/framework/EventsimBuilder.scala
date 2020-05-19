@@ -2,7 +2,7 @@ package com.hurence.test.framework
 
 import java.util.UUID
 
-import com.hurence.historian.spark.solr.SolrCloudUtil
+import com.hurence.historian.SolrCloudUtilForTests
 import com.hurence.historian.spark.solr.util.EventsimUtil
 
 // Builder to be used by all the tests that need Eventsim data. All test methods will re-use the same collection name
@@ -12,13 +12,13 @@ trait EventsimBuilder extends SparkSolrTests {
 
   override def beforeAll(): Unit = {
     super.beforeAll()
-    SolrCloudUtil.buildCollection(zkHost, collectionName, null, numShards, cloudClient)
+    SolrCloudUtilForTests.buildCollection(collectionName, null, numShards, cloudClient)
     EventsimUtil.defineTextFields(cloudClient, collectionName)
     EventsimUtil.loadEventSimDataSet(zkHost, collectionName, sparkSession)
   }
 
   override def afterAll(): Unit = {
-    SolrCloudUtil.deleteCollection(collectionName, cluster)
+    SolrCloudUtilForTests.deleteCollection(collectionName, cloudClient)
     super.afterAll()
   }
 

@@ -1,29 +1,24 @@
-package com.hurence.historian.spark.solr
+package com.hurence.historian
 
 import java.io.File
 
-import com.lucidworks.spark.LazyLogging
-import org.apache.solr.client.solrj.SolrQuery
+import com.hurence.solr.{LazyLogging, SolrCloudUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrClient
 import org.apache.solr.client.solrj.request.{CollectionAdminRequest, QueryRequest, UpdateRequest}
 import org.apache.solr.client.solrj.response.QueryResponse
-import org.apache.solr.cloud.MiniSolrCloudCluster
+import org.apache.solr.client.solrj.{SolrClient, SolrQuery}
 import org.apache.solr.common.SolrInputDocument
 import org.apache.solr.common.cloud._
 import org.apache.solr.common.params.{CollectionParams, CoreAdminParams, ModifiableSolrParams}
-import org.junit.Assert._
+import org.junit.Assert.{assertNotNull, assertTrue, fail}
 import org.noggit.{CharArr, JSONWriter}
 
 import scala.collection.JavaConversions._
 
-object SolrCloudUtil extends LazyLogging {
+object SolrCloudUtilForTests extends LazyLogging {
 
-  def deleteCollection(collectionName: String, cluster: MiniSolrCloudCluster): Unit = {
-    try {
-      CollectionAdminRequest.deleteCollection(collectionName).process(cluster.getSolrClient)
-    } catch {
-      case e: Exception => logger.error("Failed to delete collection " + collectionName + " due to: " + e)
-    }
+  def deleteCollection(collectionName: String, client: SolrClient): Unit = {
+    SolrCloudUtil.deleteCollection(collectionName, client)
   }
 
   def createCollection(collectionName: String,
@@ -63,7 +58,7 @@ object SolrCloudUtil extends LazyLogging {
     ensureAllReplicasAreActive(collectionName, numShards, replicationFactor, 20, cloudClient)
   }
 
-  def ensureAllReplicasAreActive(collectionName: String,
+  private def ensureAllReplicasAreActive(collectionName: String,
                                  numShards: Int,
                                  replicationFactor: Int,
                                  maxWaitSecs: Int,
@@ -120,41 +115,27 @@ object SolrCloudUtil extends LazyLogging {
 
     if (!allReplicasUp)
       fail("Didn't see all replicas for " + collectionName +
-        " come up within " + maxWaitMs + " ms! ClusterState: " + printClusterStateInfo(collectionName, cloudClient))
+        " come up within " + maxWaitMs + " ms! ClusterState: " + getClusterStateInfo(collectionName, cloudClient))
 
     val diffMs = System.currentTimeMillis() - startMs
     logger.info("Took '" + diffMs + "' ms to see all replicas become active for " + collectionName)
   }
 
-  def printClusterStateInfo(collectionName: String, cloudClient: CloudSolrClient): String = {
-    cloudClient.getZkStateReader.updateLiveNodes()
-    var cs: String = null
-    val clusterState: ClusterState = cloudClient.getZkStateReader.getClusterState
-    if (collectionName != null) {
-      cs = clusterState.getCollection(collectionName).toString
-    } else {
-      val map = Map.empty[String, DocCollection]
-      clusterState.getCollectionsMap.keySet().foreach(coll => {
-        map + (coll -> clusterState.getCollection(coll))
-      })
-      val out: CharArr = new CharArr()
-      new JSONWriter(out, 2).write(map)
-      cs = out.toString
-    }
-    cs
+  def getClusterStateInfo(collectionName: String, cloudClient: CloudSolrClient): String = {
+    SolrCloudUtil.getClusterStateInfo(collectionName, cloudClient)
   }
 
-  def dumpSolrCollection(collectionName: String, cloudClient: CloudSolrClient): Unit = {
+  def dumpSolrCollection(collectionName: String, cloudClient: SolrClient): Unit = {
     dumpSolrCollection(collectionName, 100, cloudClient)
   }
 
-  def dumpSolrCollection(collectionName: String, maxRows: Int, cloudClient: CloudSolrClient): Unit = {
+  def dumpSolrCollection(collectionName: String, maxRows: Int, cloudClient: SolrClient): Unit = {
     val q = new SolrQuery("*:*")
     q.setRows(maxRows)
     dumpSolrCollection(collectionName, q, cloudClient)
   }
 
-  def dumpSolrCollection(collectionName: String, solrQuery: SolrQuery, cloudClient: CloudSolrClient): Unit = {
+  def dumpSolrCollection(collectionName: String, solrQuery: SolrQuery, cloudClient: SolrClient): Unit = {
     val qr: QueryResponse = cloudClient.query(collectionName, solrQuery)
     logger.info("Found " + qr.getResults.getNumFound + " docs in " + collectionName)
     var i = 0
@@ -164,18 +145,17 @@ object SolrCloudUtil extends LazyLogging {
     }
   }
 
-  def buildCollection(zkHost: String,
-                      collection: String,
-                      cloudClient: CloudSolrClient): Unit = {
+  def buildCollectionWithSampleData(collection: String,
+                                    cloudClient: CloudSolrClient): Unit = {
     val inputDocs: Array[String] = Array(
       collection + "-1,foo,bar,1,[a;b],[1;2]",
       collection + "-2,foo,baz,2,[c;d],[3;4]",
       collection + "-3,bar,baz,3,[e;f],[5;6]"
     )
-    buildCollection(zkHost, collection, inputDocs, 2, cloudClient)
+    buildCollection(collection, inputDocs, 2, cloudClient)
   }
 
-  def buildCollection(zkHost: String,
+  def buildCollection(
                       collection: String,
                       numDocs: Int,
                       numShards: Int,
@@ -184,23 +164,23 @@ object SolrCloudUtil extends LazyLogging {
     for (n: Int <- 0 to numDocs-1) {
       inputDocs.update(n, collection + "-" + n + ",foo" + n + ",bar" + n + "," + n + ",[a;b],[1;2]")
     }
-    buildCollection(zkHost, collection, inputDocs, numShards, cloudClient)
+    buildCollection(collection, inputDocs, numShards, cloudClient)
   }
 
-  def buildCollection(zkHost: String,
-                      collection: String,
+  def buildCollection(collection: String,
                       inputDocs: Array[String],
                       numShards: Int,
                       cloudClient: CloudSolrClient): Unit = {
     val confName = "testConfig"
    // val confDir = new File("src/test/resources/conf")
-    val confDir = new File(this.getClass.getClassLoader.getResource("conf").getPath)
+    //TODO here replace with script creation
+    val confDir = new File(this.getClass.getClassLoader.getResource("solr-embedded-conf/conf").getPath)
     val replicationFactor: Int = 1
     createCollection(collection, numShards, replicationFactor, numShards, confName, confDir, cloudClient)
 
     // index some docs in to the new collection
     if (inputDocs != null) {
-      val numDocsIndexed: Int = indexDocs(zkHost, collection, inputDocs, cloudClient)
+      val numDocsIndexed: Int = indexDocs(collection, inputDocs, cloudClient)
       Thread.sleep(1000L)
       // verify docs got indexed .. relies on soft auto-commits firing frequently
       val solrParams = new ModifiableSolrParams()
@@ -212,8 +192,7 @@ object SolrCloudUtil extends LazyLogging {
     }
   }
 
-  def indexDocs(zkHost: String,
-                collection: String,
+  def indexDocs(collection: String,
                 inputDocs: Array[String],
                 cloudClient: CloudSolrClient): Int = {
     val updateRequest = new UpdateRequest()

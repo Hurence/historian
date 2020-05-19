@@ -11,10 +11,6 @@ import org.apache.solr.client.solrj.{SolrClient, SolrQuery}
 import org.apache.solr.common.params.SolrParams
 
 object SolrUtils {
-  def createReportCollection(client: SolrClient) = {
-    val createrequest = CollectionAdminRequest.createCollection(CompactorJobReport.DEFAULT_COLLECTION, SOLR_CONF_TEMPLATE_REPORT, 1, 1)
-    client.request(createrequest)
-  }
 
   def numberOfDocsInCollection(client: SolrClient, collection: String) = {
     val params: SolrParams = new SolrQuery("*:*");
