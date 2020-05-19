@@ -1,13 +1,15 @@
 package com.hurence.historian
 
+import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxParametersGuess}
 import com.hurence.unit5.extensions.SparkExtension
 import org.apache.log4j.{Level, Logger}
 import org.apache.spark.sql.{SaveMode, SparkSession}
 import org.apache.spark.sql.functions.{concat, from_unixtime, lit}
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import collection.JavaConverters._
 
-import scala.collection.mutable.{WrappedArray => ArrayDF}
+
 
 @ExtendWith(Array(classOf[SparkExtension]))
 class MetricsParameterCalculationTest extends Serializable {
@@ -47,11 +49,16 @@ class MetricsParameterCalculationTest extends Serializable {
       .rdd
       .reduceByKey((g1, g2) => g1 ::: g2)
       .map(r => (r._1, r._2.sortWith((l1, l2) => l1._1 < l2._1)))
-      .map( r => (r._1._1, r._1._2,
+      .map( f = r => (r._1._1, r._1._2,
+        func(r._2.map(_._2))
+        , r._2.map(_._2).min
+        , r._2.map(_._2).max
 
-        func(r._2.map(_._2))))
-      .toDF("day", "metric", "values")
-    df.show(5,50)
+        ,GuessSaxParameters.computeBestParam(r._2.map(_._2).map(Double.box).asJava).toString
+        ,GuessSaxParameters.computeBestParam(r._2.map(_._2).map(Double.box).asJava).asScala.toList(2).toString.toInt
+
+      )).toDF("day", "metric", "values_count","values_min","values_max","guess","Alphabet_size")
+    df.show(5,200)
     df.printSchema()
 
     //val values = df.map(r => r.getAs[ArrayDF[Double]]("_2"))
