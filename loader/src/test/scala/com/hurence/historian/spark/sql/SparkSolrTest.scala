@@ -3,19 +3,16 @@ package com.hurence.historian.spark.sql
 import java.util.UUID
 
 import com.hurence.historian.model.ChunkRecordV0
-import org.apache.spark.sql.functions.{base64, col}
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.solr.SolrCloudUtil
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.hurence.test.framework.SparkSolrTests
-import com.lucidworks.spark.LazyLogging
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.spark.sql.SaveMode.Overwrite
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
-import org.scalatest.FunSuite
 
 class SparkSolrTest extends SparkSolrTests {
 
@@ -35,7 +32,7 @@ class SparkSolrTest extends SparkSolrTests {
     val spark = SparkSession.getActiveSession.get
     import spark.implicits._
     val collectionName = "testHistorian-" + UUID.randomUUID().toString
-    SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient, sc)
+    SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient)
     try {
       // 1. load measures from parquet file
       val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
@@ -101,7 +98,7 @@ class SparkSolrTest extends SparkSolrTests {
 
   test("vary queried columns") {
     val collectionName = "testQuerying-" + UUID.randomUUID().toString
-    SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient, sc)
+    SolrCloudUtil.buildCollection(zkHost, collectionName, null, 1, cloudClient)
     try {
       val csvDF = buildTestData()
       val solrOpts = Map("zkhost" -> zkHost, "collection" -> collectionName)
