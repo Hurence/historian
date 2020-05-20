@@ -165,7 +165,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         //    FIELDS_TO_FETCH
         query.setFields(RESPONSE_CHUNK_START_FIELD,
                 RESPONSE_CHUNK_END_FIELD,
-                RESPONSE_CHUNK_SIZE_FIELD,
+                RESPONSE_CHUNK_COUNT_FIELD,
                 NAME);
         //    SORT
         query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
@@ -347,7 +347,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                     LOGGER.info("building SolrDocument from a chunk");
                     document = chunkTimeSerie(timeserie, chunkOrigin);
                     documents.add(document);
-                    int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_SIZE_FIELD);
+                    int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_COUNT_FIELD);
                     numChunk++;
                     numPoints = numPoints + totalNumPointsInChunk;
                 }
@@ -388,6 +388,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
     @Override
     public HistorianService getTimeSeries(JsonObject myParams, Handler<AsyncResult<JsonObject>> myResult) {
         final SolrQuery query = buildTimeSeriesChunkQuery(myParams);
+        LOGGER.debug("solrQuery : {}", query.toQueryString());
+
         //    FILTER
         buildSolrFilterFromArray(myParams.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
                 .ifPresent(query::addFilterQuery);
@@ -620,10 +622,10 @@ public class SolrHistorianServiceImpl implements HistorianService {
                         .append(",fq=\"").append(filterQuery).append("\"");
             }
         }
-        exprBuilder.append(",fl=\"").append(RESPONSE_CHUNK_SIZE_FIELD).append(", ")
+        exprBuilder.append(",fl=\"").append(RESPONSE_CHUNK_COUNT_FIELD).append(", ")
                 .append(NAME).append("\"")
                 .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\")")
-                .append(",over=\"name\", sum(chunk_size), count(*))");
+                .append(",over=\"name\", sum(chunk_count), count(*))");
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
         paramsLoc.set("expr", exprBuilder.toString());
@@ -639,7 +641,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             MetricSizeInfo metric = new MetricSizeInfo();
             metric.metricName = tuple.getString("name");
             metric.totalNumberOfChunks = tuple.getLong("count(*)");
-            metric.totalNumberOfPoints = tuple.getLong("sum(chunk_size)");
+            metric.totalNumberOfPoints = tuple.getLong("sum(chunk_count)");
             metricsInfo.setMetricInfo(metric);
             tuple = solrStream.read();
         }

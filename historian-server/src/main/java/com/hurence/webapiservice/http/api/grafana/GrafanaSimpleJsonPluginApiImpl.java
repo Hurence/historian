@@ -14,7 +14,6 @@ import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.AnnotationRequest;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -171,6 +170,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
         final QueryRequestParam request;
         try {
             JsonObject requestBody = context.getBodyAsJson();
+            LOGGER.debug("requestBody : {}", requestBody.toString());
             /*
                 When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
@@ -186,7 +186,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
         }
 
         final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
-
+        LOGGER.debug("getTimeSeriesChunkParams : {}", getTimeSeriesChunkParams.toString());
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
                 .map(sampledTimeSeries -> {
@@ -225,7 +225,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
                 .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_SIZE_FIELD)
+                .add(RESPONSE_CHUNK_COUNT_FIELD)
                 .add(NAME);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()

@@ -24,7 +24,7 @@ public class HistorianChunkCollectionFieldsVersion0 {
     public static String CHUNK_MIN = TimeSeriesRecord.CHUNK_MIN;
     public static String CHUNK_END = TimeSeriesRecord.CHUNK_END;
     public static String CHUNK_AVG = TimeSeriesRecord.CHUNK_AVG;
-    public static String CHUNK_SIZE = TimeSeriesRecord.CHUNK_SIZE;
+    public static String CHUNK_COUNT = TimeSeriesRecord.CHUNK_COUNT;
     public static String CHUNK_SIZE_BYTES = TimeSeriesRecord.CHUNK_SIZE_BYTES;
     public static String CHUNK_SAX = TimeSeriesRecord.CHUNK_SAX;
     public static String CHUNK_TREND = TimeSeriesRecord.CHUNK_TREND;

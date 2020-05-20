@@ -2,7 +2,6 @@ package com.hurence.webapiservice.http.api.ingestion;
 
 import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.DateInfo;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
@@ -64,7 +63,7 @@ public class JsonObjectToChunk {
         doc.addField(NAME, chunk.getName());
         doc.addField(RESPONSE_CHUNK_START_FIELD, chunk.getStart());
         doc.addField(RESPONSE_CHUNK_END_FIELD, chunk.getEnd());
-        doc.addField(RESPONSE_CHUNK_SIZE_FIELD, chunk.getValues().size());
+        doc.addField(RESPONSE_CHUNK_COUNT_FIELD, chunk.getValues().size());
         chunk.attributes().keySet().forEach(key -> {
             doc.addField(key, chunk.attribute(key));
         });

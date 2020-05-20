@@ -11,7 +11,7 @@ public class ChunkUtil {
 
     public static int countTotalNumberOfPointInChunks(List<JsonObject> chunks) throws UnsupportedOperationException {
         return chunks.stream()
-                .mapToInt(chunk -> chunk.getInteger(HistorianFields.RESPONSE_CHUNK_SIZE_FIELD))
+                .mapToInt(chunk -> chunk.getInteger(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD))
                 .sum();
     }
 }

@@ -43,7 +43,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     @Override
     public void addChunk(JsonObject chunk) {
         totalChunkCounter++;
-        pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_SIZE_FIELD);
+        pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD);
         chunks.add(chunk);
         if (isBufferFull()) {
             samplePointsInBufferThenReset();

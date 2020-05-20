@@ -42,7 +42,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
 
   private def loadChunksFromSolR(spark: SparkSession): DataFrame = {
     val fields = s"${HistorianChunkCollectionFieldsVersion0.ID},${HistorianChunkCollectionFieldsVersion0.NAME},${HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE},${HistorianChunkCollectionFieldsVersion0.CHUNK_START}," +
-      s"${HistorianChunkCollectionFieldsVersion0.CHUNK_END},${HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE},${HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR}," +
+      s"${HistorianChunkCollectionFieldsVersion0.CHUNK_END},${HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT},${HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR}," +
       s"${HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH},${HistorianChunkCollectionFieldsVersion0.CHUNK_DAY}"
 
     val solrOpts = Map(
@@ -70,7 +70,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
 
   private def loadTaggedChunksFromSolR(spark: SparkSession): DataFrame = {
     val fields = s"${HistorianChunkCollectionFieldsVersion0.ID},${HistorianChunkCollectionFieldsVersion0.NAME},${HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE},${HistorianChunkCollectionFieldsVersion0.CHUNK_START}," +
-      s"${HistorianChunkCollectionFieldsVersion0.CHUNK_END},${HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE},${HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR}," +
+      s"${HistorianChunkCollectionFieldsVersion0.CHUNK_END},${HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT},${HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR}," +
       s"${HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH},${HistorianChunkCollectionFieldsVersion0.CHUNK_DAY}"
 
     val solrOpts = Map(
@@ -103,7 +103,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
         r.getField(HistorianChunkCollectionFieldsVersion0.CHUNK_START).asLong(),
         r.getField(HistorianChunkCollectionFieldsVersion0.CHUNK_END).asLong(),
         r.getField(TimeSeriesRecord.CHUNK_WINDOW_MS).asLong(),
-        r.getField(HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE).asInteger(),
+        r.getField(HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT).asInteger(),
         r.getField(TimeSeriesRecord.CHUNK_FIRST_VALUE).asDouble(),
         r.getField(HistorianChunkCollectionFieldsVersion0.CHUNK_AVG).asDouble(),
         r.getField(HistorianChunkCollectionFieldsVersion0.CHUNK_MIN).asDouble(),
@@ -125,7 +125,7 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
         HistorianChunkCollectionFieldsVersion0.CHUNK_START,
         HistorianChunkCollectionFieldsVersion0.CHUNK_END,
         TimeSeriesRecord.CHUNK_WINDOW_MS,
-        HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE,
+        HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT,
         TimeSeriesRecord.CHUNK_FIRST_VALUE,
         HistorianChunkCollectionFieldsVersion0.CHUNK_AVG,
         HistorianChunkCollectionFieldsVersion0.CHUNK_MIN,
@@ -212,11 +212,11 @@ class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrate
         col(HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH),
         col(HistorianChunkCollectionFieldsVersion0.CHUNK_DAY))
       .agg(
-        sum(col(HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE)).as(totalNumberOfPointColumnName),
+        sum(col(HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT)).as(totalNumberOfPointColumnName),
         f.collect_list(col(HistorianChunkCollectionFieldsVersion0.CHUNK_START)).as(startsColumnName),
         f.collect_list(col(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE)).as(valuesColumnName),
         f.collect_list(col(HistorianChunkCollectionFieldsVersion0.CHUNK_END)).as(endsColumnName),
-        f.collect_list(col(HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE)).as(sizesColumnName),
+        f.collect_list(col(HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT)).as(sizesColumnName),
         f.first(col(HistorianChunkCollectionFieldsVersion0.NAME)).as(nameColumnName)
       )
 
