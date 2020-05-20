@@ -85,7 +85,7 @@ The following commands will bootstrap your setup with folder and conf files need
 ```bash
 # create the workspace anywhere you want
 mkdir ~/hdh_workspace
-export $HDH_HOME=~/hdh_workspace
+export HDH_HOME=~/hdh_workspace
 
 # create 2 data folders for SolR data
 mkdir -p $HDH_HOME/data/solr/node1 $HDH_HOME/data/solr/node2
@@ -142,6 +142,10 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2/  -p 7574 -z localhost:9983
 
 Please verify that you have two running SolR core by browsing solr admin at [http://localhost:8983/solr/#/~cloud](http://localhost:8983/solr/#/~cloud)
 
+
+
+
+
 ### Install Hurence Data Historian
 Hurence Data Historian is a set of scripts and binaries that get you work with timeseries Chunks
 
@@ -158,11 +162,14 @@ rm historian-1.3.4-SNAPSHOT.tgz
 
 # create the HDH schema and collection in SolR
 cd $HDH_HOME/historian-1.3.4-SNAPSHOT
-bin/create-historian-collection.sh
+bin/create-historian-chunk-collection.sh
     
 # and launch the historian REST server
-bin/historian-server.sh
+bin/historian-server.sh start
 ```
+
+
+
 
 ### Install Grafana
 Install Grafana for your platform as described here : `https://grafana.com/docs/grafana/latest/installation/requirements/ `
@@ -177,6 +184,8 @@ To install this plugin using the grafana-cli tool:
     sudo service grafana-server restart
 
     
+    
+    
 ### Install Apache Spark
 This step is not mandatory if you don't want to process your data with spark framework for big data analysis.
 However to setup spark, you'll need to unpack the following Spark archive : [https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz](https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz)
@@ -189,7 +198,16 @@ cd $HDH_HOME
 wget https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz
 tar -xvf spark-2.3.4-bin-without-hadoop.tgz
 rm spark-2.3.4-bin-without-hadoop.tgz
+
+
+# add two additional jars to spark to handle our framework
+wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
+mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/ 
+cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/ 
+
 ```
+
+
 
 
 ## Tear down and cleanup
@@ -208,6 +226,10 @@ if you want to reset manually your data
     
 don't forget then to bootstrap your setup again as described previously.
 
+
+
+
+
 # Data management
 Now that we have a working setup of HDH we can start to play with data. There are several entry points depneding on your culture and needs.
 
@@ -223,15 +245,14 @@ curl --location --request POST 'http://localhost:8080/api/grafana/query' \
 --data-raw '{
   "panelId": 1,
   "range": {
-    "from": "2020-03-01T00:00:00.000Z",
+    "from": "2019-03-01T00:00:00.000Z",
     "to": "2020-03-01T23:59:59.000Z"
   },
   "interval": "30s",
   "intervalMs": 30000,
   "targets": [
     {
-      "target": "\"U81.PT232.F_CV\"",
-      "refId": "U81.PT232.F_CV",
+      "target": "\"ack\"",
       "type": "timeserie"
     }
   ],

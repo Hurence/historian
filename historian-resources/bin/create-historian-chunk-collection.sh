@@ -233,7 +233,7 @@ declare SOLR_COLLECTION="historian"
 declare REPLICATION_FACTOR=1
 declare NUM_SHARDS=2
 declare DRY_RUN=false
-declare MODEL_VERSION=0
+declare MODEL_VERSION="VERSION_0"
 declare SOLR_UPDATE_QUERY=""
 
 # color setup

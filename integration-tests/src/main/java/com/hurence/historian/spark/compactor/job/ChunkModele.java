@@ -84,7 +84,7 @@ public class ChunkModele {
         JsonObject json = new JsonObject();
         json.put(HistorianFields.RESPONSE_CHUNK_ID_FIELD, id);
         json.put(HistorianFields.RESPONSE_CHUNK_START_FIELD, this.start);
-        json.put(HistorianFields.RESPONSE_CHUNK_SIZE_FIELD, this.points.size());
+        json.put(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD, this.points.size());
         json.put(HistorianFields.RESPONSE_CHUNK_END_FIELD, this.end);
         json.put(HistorianFields.RESPONSE_CHUNK_SAX_FIELD, this.sax);
         json.put(HistorianFields.RESPONSE_CHUNK_VALUE_FIELD, this.compressedPoints);
@@ -106,7 +106,7 @@ public class ChunkModele {
         tagsAsKeyValue.forEach(doc::addField);
         doc.addField(HistorianFields.RESPONSE_CHUNK_ID_FIELD, id);
         doc.addField(HistorianFields.RESPONSE_CHUNK_START_FIELD, this.start);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_SIZE_FIELD, this.points.size());
+        doc.addField(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD, this.points.size());
         doc.addField(HistorianFields.RESPONSE_CHUNK_END_FIELD, this.end);
         doc.addField(HistorianFields.RESPONSE_CHUNK_SAX_FIELD, this.sax);
         doc.addField(HistorianFields.RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(this.compressedPoints));

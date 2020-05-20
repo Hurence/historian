@@ -43,7 +43,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         List<JsonObject> bucketOfChunks = new ArrayList<>();
         for (JsonObject chunk: chunks) {
             bucketOfChunks.add(chunk);
-            currentPointNumber += chunk.getInteger(RESPONSE_CHUNK_SIZE_FIELD);
+            currentPointNumber += chunk.getInteger(RESPONSE_CHUNK_COUNT_FIELD);
             if (currentPointNumber >= bucketSize) {
                 groupedChunks.add(bucketOfChunks);
                 bucketOfChunks = new ArrayList<>();
@@ -70,7 +70,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                         .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
                         .sum();
                 long numberOfPoint = chunks.stream()
-                        .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_SIZE_FIELD))
+                        .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_COUNT_FIELD))
                         .sum();
                 aggValue = BigDecimal.valueOf(sum)
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)

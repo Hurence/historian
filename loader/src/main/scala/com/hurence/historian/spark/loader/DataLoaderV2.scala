@@ -197,7 +197,7 @@ object DataLoaderV2 {
       .setSaxStringLength(options.saxStringLength)
 
 
-    val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0]
+    val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0].repartition(1)
 
 
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)

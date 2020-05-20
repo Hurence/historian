@@ -2,21 +2,14 @@ package com.hurence.webapiservice.http.api.test;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieJsonRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.LogislandTimeSeriesModeler;
-import com.hurence.webapiservice.timeseries.TimeSeriesModeler;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
@@ -85,7 +78,7 @@ public class TestHistorianApiImpl implements TestHistorianApi {
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
                 .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_SIZE_FIELD)
+                .add(RESPONSE_CHUNK_COUNT_FIELD)
                 .add(NAME);
         request.getAggs().forEach(agg -> {
             final String aggField;
@@ -100,7 +93,7 @@ public class TestHistorianApiImpl implements TestHistorianApi {
                     aggField = RESPONSE_CHUNK_AVG_FIELD;
                     break;
                 case COUNT:
-                    aggField = RESPONSE_CHUNK_SIZE_FIELD;
+                    aggField = RESPONSE_CHUNK_COUNT_FIELD;
                     break;
                 case SUM:
                     aggField = RESPONSE_CHUNK_SUM_FIELD;

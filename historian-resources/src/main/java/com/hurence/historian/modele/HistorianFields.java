@@ -62,7 +62,7 @@ public class HistorianFields {
     public static String RESPONSE_CHUNK_END_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_END;
     public static String RESPONSE_CHUNK_FIRST_VALUE_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_FIRST;
     public static String RESPONSE_CHUNK_AVG_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_AVG;
-    public static String RESPONSE_CHUNK_SIZE_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE;
+    public static String RESPONSE_CHUNK_COUNT_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT;
     public static String RESPONSE_CHUNK_SUM_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SUM;
     public static String RESPONSE_CHUNK_SAX_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SAX;
     public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeSeriesRecord.CHUNK_WINDOW_MS;
