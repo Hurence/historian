@@ -144,7 +144,7 @@ public class HistorianVerticleIT {
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_AVG_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
+                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_COUNT_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SAX_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_MIN_FIELD));
