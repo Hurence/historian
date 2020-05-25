@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChunkModele {
+public class ChunkModeleVersion0 {
     private static int ddcThreshold = 0;
 
     public List<Point> points;
@@ -24,7 +24,6 @@ public class ChunkModele {
     public double max;
     public double sum;
     public double firstValue;
-    public boolean trend;
     public String name;
     public String sax;
     public List<String> tags;
@@ -34,7 +33,7 @@ public class ChunkModele {
     public String chunk_origin;
     public Map<String, String> tagsAsKeyValue = new HashMap<>();
 
-    public static ChunkModele fromPoints(String metricName, List<Point> points) {
+    public static ChunkModeleVersion0 fromPoints(String metricName, List<Point> points) {
         return fromPoints(metricName, 2000, 12, 13, "logisland", points);
     }
 
@@ -44,18 +43,18 @@ public class ChunkModele {
      * @param value
      * @return himself for fluent api
      */
-    public ChunkModele addTag(String key, String value) {
+    public ChunkModeleVersion0 addTag(String key, String value) {
         tagsAsKeyValue.put(key, value);
         return this;
     }
 
-    public static ChunkModele fromPoints(String metricName,
-                                         int year,
-                                         int month,
-                                         int day,
-                                         String chunk_origin,
-                                         List<Point> points) {
-        ChunkModele chunk = new ChunkModele();
+    public static ChunkModeleVersion0 fromPoints(String metricName,
+                                                 int year,
+                                                 int month,
+                                                 int day,
+                                                 String chunk_origin,
+                                                 List<Point> points) {
+        ChunkModeleVersion0 chunk = new ChunkModeleVersion0();
         chunk.points = points;
         chunk.compressedPoints = compressPoints(chunk.points);
         chunk.start = chunk.points.stream().mapToLong(Point::getTimestamp).min().getAsLong();
@@ -90,11 +89,11 @@ public class ChunkModele {
         json.put(HistorianFields.RESPONSE_CHUNK_VALUE_FIELD, this.compressedPoints);
         json.put(HistorianFields.RESPONSE_CHUNK_AVG_FIELD, this.avg);
         json.put(HistorianFields.RESPONSE_CHUNK_MIN_FIELD, this.min);
-        json.put(HistorianFields.RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
+//        json.put(HistorianFields.RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
         json.put(HistorianFields.NAME, this.name);
-        json.put(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
+//        json.put(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
         json.put(HistorianFields.RESPONSE_CHUNK_MAX_FIELD, this.max);
-        json.put(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
+//        json.put(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
         json.put(HistorianFields.RESPONSE_CHUNK_SUM_FIELD, this.sum);
         json.put(HistorianFields.RESPONSE_TAG_NAME_FIELD, this.tags);
         json.put(HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD, this.firstValue);
@@ -112,11 +111,11 @@ public class ChunkModele {
         doc.addField(HistorianFields.RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(this.compressedPoints));
         doc.addField(HistorianFields.RESPONSE_CHUNK_AVG_FIELD, this.avg);
         doc.addField(HistorianFields.RESPONSE_CHUNK_MIN_FIELD, this.min);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
+//        doc.addField(HistorianFields.RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
         doc.addField(HistorianFields.NAME, this.name);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
+//        doc.addField(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
         doc.addField(HistorianFields.RESPONSE_CHUNK_MAX_FIELD, this.max);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
+//        doc.addField(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
         doc.addField(HistorianFields.RESPONSE_CHUNK_SUM_FIELD, this.sum);
         doc.addField(HistorianFields.RESPONSE_TAG_NAME_FIELD, this.tags);
         doc.addField(HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD, this.firstValue);

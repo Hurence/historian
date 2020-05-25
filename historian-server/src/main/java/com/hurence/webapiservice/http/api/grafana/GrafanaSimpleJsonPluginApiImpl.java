@@ -72,7 +72,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
-            request = new SearchRequestParser().parseRequest(requestBody);
+            request = new SearchRequestParser("target", "limit").parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);

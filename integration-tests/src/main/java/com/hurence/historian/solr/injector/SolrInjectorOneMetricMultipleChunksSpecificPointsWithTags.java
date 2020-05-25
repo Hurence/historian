@@ -1,7 +1,7 @@
 package com.hurence.historian.solr.injector;
 
 import com.hurence.logisland.record.Point;
-import com.hurence.historian.spark.compactor.job.ChunkModele;
+import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,16 +22,16 @@ public class SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags extends A
     }
 
     @Override
-    protected List<ChunkModele> buildListOfChunks() {
-        List<ChunkModele> chunks = IntStream
+    protected List<ChunkModeleVersion0> buildListOfChunks() {
+        List<ChunkModeleVersion0> chunks = IntStream
                 .range(0, Math.min(tags.size(), pointsByChunk.size()))
                 .mapToObj(this::buildChunk)
                 .collect(Collectors.toList());
         return chunks;
     }
 
-    private ChunkModele buildChunk(int index) {
-        ChunkModele chunk = ChunkModele.fromPoints(metricName, pointsByChunk.get(index));
+    private ChunkModeleVersion0 buildChunk(int index) {
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints(metricName, pointsByChunk.get(index));
         chunk.tags = tags.get(index);
         return chunk;
     }

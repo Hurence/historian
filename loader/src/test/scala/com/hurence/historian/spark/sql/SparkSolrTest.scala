@@ -2,23 +2,18 @@ package com.hurence.historian.spark.sql
 
 import java.util.UUID
 
-import com.hurence.historian.{SolrCloudUtilForTests, SolrUtils}
 import com.hurence.historian.model.ChunkRecordV0
-import com.hurence.historian.modele.SchemaVersion
-import com.hurence.historian.solr.util.SolrITHelper
-import com.hurence.historian.spark.compactor.job.ChunkModele
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import com.hurence.historian.{SolrCloudUtilForTests, SolrUtils}
 import com.hurence.test.framework.SparkSolrTests
 import com.lucidworks.spark.util.SolrSupport
 import io.vertx.core.json.JsonArray
 import org.apache.spark.sql.SaveMode.Overwrite
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
-
-import scala.util.parsing.json.JSONArray
 
 class SparkSolrTest extends SparkSolrTests {
 

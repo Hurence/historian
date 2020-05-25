@@ -12,12 +12,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.http.api.grafana.util.DateRequestParserUtil.parseDate;
+import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.parseDate;
 
 public class QueryRequestParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRequestParser.class);
-
 
     public QueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse requestBody : {}", requestBody);
