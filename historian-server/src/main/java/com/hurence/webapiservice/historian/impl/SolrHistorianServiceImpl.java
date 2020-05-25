@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.Schema;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
@@ -21,8 +22,10 @@ import org.apache.solr.client.solrj.io.stream.SolrStream;
 import org.apache.solr.client.solrj.io.stream.StreamContext;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.apache.solr.client.solrj.request.schema.SchemaRequest;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.response.schema.SchemaResponse;
 import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
@@ -35,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
@@ -55,11 +59,29 @@ public class SolrHistorianServiceImpl implements HistorianService {
         LOGGER.debug("limitNumberOfPoint : {}", solrHistorianConf.limitNumberOfPoint);
         LOGGER.debug("limitNumberOfChunks : {}", solrHistorianConf.limitNumberOfChunks);
         LOGGER.debug("version of schema to be used : {}", solrHistorianConf.schemaVersion.toString());
-        Handler<Promise<Integer>> colPinghandler = createPingHandler(solrHistorianConf.sleepDurationBetweenTry, solrHistorianConf.numberOfRetryToConnect);
-        Handler<AsyncResult<Integer>> statusHandler = h -> {
+        Handler<Promise<Integer>> pingHandler = createPingHandler(solrHistorianConf.sleepDurationBetweenTry, solrHistorianConf.numberOfRetryToConnect);
+        Handler<Promise<Optional<String>>> checkSchemaHandler = createCheckSchemaHandler();
+        Handler<AsyncResult<Optional<String>>> historianStatusHandler = h -> {
+            if (h.succeeded()) {
+                if (!h.result().isPresent()) {
+                    LOGGER.debug("historianStatusHandler");
+                    readyHandler.handle(Future.succeededFuture(this));
+                } else {
+                    readyHandler.handle(Future.failedFuture(new IllegalArgumentException(
+                            String.format("historian chunk schema collection '%s' is not as expected :\n%s",
+                                    solrHistorianConf.chunkCollection,
+                                    h.result().get())
+                    )));
+                }
+            } else {
+                readyHandler.handle(Future.failedFuture(h.cause()));
+            }
+        };
+        Handler<AsyncResult<Integer>> pingResponseHandler = h -> {
             if (h.succeeded()) {
                 if (h.result() == 0) {
-                    readyHandler.handle(Future.succeededFuture(this));
+                    LOGGER.debug("pingResponseHandler");
+                    vertx.executeBlocking(checkSchemaHandler, historianStatusHandler);
                 } else {
                     readyHandler.handle(Future.failedFuture(new IllegalArgumentException(
                             String.format("historian collection ping command returned status %d", h.result())
@@ -69,8 +91,79 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 readyHandler.handle(Future.failedFuture(h.cause()));
             }
         };
-        //TODO check schema is as expected after ping
-        vertx.executeBlocking(colPinghandler, statusHandler);
+        vertx.executeBlocking(pingHandler, pingResponseHandler);
+    }
+
+    private Handler<Promise<Optional<String>>> createCheckSchemaHandler() {
+        return p -> {
+            try {
+                p.complete(checkSchema());
+            } catch (IOException e) {
+                LOGGER.error("IOException while pinging solr", e);
+                p.fail(e);
+            } catch (SolrServerException e) {
+                LOGGER.error("SolrServerException while pinging solr", e);
+                p.fail(e);
+            }
+        };
+    }
+
+    private Optional<String> checkSchema() throws IOException, SolrServerException {
+        SchemaRequest schemaRequest = new SchemaRequest();
+        SchemaResponse schemaResponse = schemaRequest.process(solrHistorianConf.client, solrHistorianConf.chunkCollection);
+        List<Map<String, Object>> schema = schemaResponse.getSchemaRepresentation().getFields();
+        Map<String, Map<String, Object>> schemaGroupedByName = schema.stream()
+                .collect(
+                        Collectors.toMap(
+                                map -> {
+                                    return (String) map.get("name");
+                                },
+                                map -> {
+                                    return map;
+                                }
+
+                        ));
+        Schema expectedSchema = Schema.getChunkSchema(solrHistorianConf.schemaVersion);
+        List<String> errors = expectedSchema.getFields().stream().flatMap(f -> {
+            if (!schemaGroupedByName.containsKey(f.getName())) {
+                return Stream.of(String.format(
+                        "* schema does not contain field '%s'", f
+                ));
+            }
+            Map<String, Object> fieldConf = schemaGroupedByName.get(f.getName());
+            String errMsg = null;
+            if (fieldConf.get("type") != null && !fieldConf.get("type").equals(f.getType())) {
+                errMsg = String.format(
+                        "* field '%s' type is %s instead of '%s'", f.getName(), fieldConf.get("type"), f.getType());
+            }
+            if (fieldConf.get("multiValued") != null && !fieldConf.get("multiValued").equals(f.getMultivalued())) {
+                errMsg += String.format(
+                        "\n* field '%s' has multivalued set to %s instead of '%s'", f.getName(), fieldConf.get("multiValued"), f.getMultivalued());
+            }
+            if (fieldConf.get("indexed") != null && !fieldConf.get("indexed").equals(f.getIndexed())) {
+                errMsg += String.format(
+                        "\n* field '%s' has indexed set to %s instead of '%s'", f.getName(), fieldConf.get("indexed"), f.getIndexed());
+            }
+            if (fieldConf.get("required") != null && !fieldConf.get("required").equals(f.getRequired())) {
+                errMsg += String.format(
+                        "\n* field '%s' has required set to %s instead of '%s'", f.getName(), fieldConf.get("required"), f.getRequired());
+            }
+            if (fieldConf.get("stored") != null && !fieldConf.get("stored").equals(f.getStored())) {
+                errMsg += String.format(
+                        "\n* field '%s' has stored set to %s instead of '%s'", f.getName(), fieldConf.get("stored"), f.getStored());
+            }
+            if (errMsg != null) {
+                return Stream.of(errMsg);
+            }
+            return Stream.empty();
+        }).collect(Collectors.toList());
+        LOGGER.debug(solrHistorianConf.chunkCollection + " schema is {}", new JsonArray(schema).encodePrettily());
+        if (errors.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(
+                errors.stream().collect(Collectors.joining("\n\n"))
+        );
     }
 
     private Handler<Promise<Integer>> createPingHandler(long sleepDurationMilli, int numberOfRetry) {
@@ -626,7 +719,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
         exprBuilder.append(",fl=\"").append(RESPONSE_CHUNK_COUNT_FIELD).append(", ")
                 .append(NAME).append("\"")
                 .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\")")
-                .append(",over=\"name\", sum(chunk_count), count(*))");
+                .append(",over=\"").append(NAME).append("\"")
+                .append(", sum(").append(RESPONSE_CHUNK_COUNT_FIELD).append("), count(*))");
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
         paramsLoc.set("expr", exprBuilder.toString());
