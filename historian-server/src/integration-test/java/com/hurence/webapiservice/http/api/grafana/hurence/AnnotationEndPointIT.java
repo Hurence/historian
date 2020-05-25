@@ -53,6 +53,7 @@ public class AnnotationEndPointIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         SolrITHelper.createAnnotationCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", COLLECTION_ANNOTATION);
         final SolrInputDocument doc = new SolrInputDocument();
