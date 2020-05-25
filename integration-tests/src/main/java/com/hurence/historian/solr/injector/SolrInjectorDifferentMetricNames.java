@@ -1,6 +1,6 @@
 package com.hurence.historian.solr.injector;
 
-import com.hurence.historian.spark.compactor.job.ChunkModele;
+import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.logisland.record.Point;
 
 
@@ -22,8 +22,8 @@ public class SolrInjectorDifferentMetricNames extends AbstractSolrInjector {
     }
 
     @Override
-    protected List<ChunkModele> buildListOfChunks() {
-        List<ChunkModele> chunks = IntStream.range(0, this.size)
+    protected List<ChunkModeleVersion0> buildListOfChunks() {
+        List<ChunkModeleVersion0> chunks = IntStream.range(0, this.size)
                 .mapToObj(i -> "metric_" + i)
                 .map(this::buildChunkWithMetricName)
                 .flatMap(this::createMoreChunkForMetric)
@@ -31,8 +31,8 @@ public class SolrInjectorDifferentMetricNames extends AbstractSolrInjector {
         return chunks;
     }
 
-    private ChunkModele buildChunkWithMetricName(String metricName) {
-        return ChunkModele.fromPoints(metricName, Arrays.asList(
+    private ChunkModeleVersion0 buildChunkWithMetricName(String metricName) {
+        return ChunkModeleVersion0.fromPoints(metricName, Arrays.asList(
                 new Point(0, 1L, 5),
                 new Point(0, 2L, 8),
                 new Point(0, 3L, 1.2),
@@ -40,11 +40,11 @@ public class SolrInjectorDifferentMetricNames extends AbstractSolrInjector {
         ));
     }
 
-    private Stream<ChunkModele> createMoreChunkForMetric(ChunkModele chunk) {
-        List<ChunkModele> chunks = IntStream.range(0, this.numberOfChunkByMetric)
+    private Stream<ChunkModeleVersion0> createMoreChunkForMetric(ChunkModeleVersion0 chunk) {
+        List<ChunkModeleVersion0> chunks = IntStream.range(0, this.numberOfChunkByMetric)
                 .mapToObj(i -> {
                     //TODO eventually change chunk content if needed
-                    ChunkModele cloned = chunk;
+                    ChunkModeleVersion0 cloned = chunk;
                     return cloned;
                 })
                 .collect(Collectors.toList());

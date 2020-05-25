@@ -9,11 +9,12 @@ import org.slf4j.LoggerFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.util.Map;
 import java.util.TimeZone;
 
-public class DateRequestParserUtil {
+public class RequestParserUtil {
 
-    private DateRequestParserUtil () {};
+    private RequestParserUtil() {};
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueryRequestParser.class);
     //DOES NOT MAKE this variable global because it can be used in a multi threaded way !
@@ -46,6 +47,26 @@ public class DateRequestParserUtil {
         }
         throw new IllegalArgumentException(
                 String.format("'%s' json pointer value '%s' is not a string !",
+                        pointer, fromObj));
+    }
+
+    public static Map<String,String> parseMapStringString(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof Map) {
+            try {
+                return (Map<String,String>) fromObj;
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid Map<String,String> !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not a Map<String,String> !",
                         pointer, fromObj));
     }
 

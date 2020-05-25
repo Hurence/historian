@@ -69,6 +69,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 readyHandler.handle(Future.failedFuture(h.cause()));
             }
         };
+        //TODO check schema is as expected after ping
         vertx.executeBlocking(colPinghandler, statusHandler);
     }
 

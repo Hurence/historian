@@ -23,4 +23,6 @@ public interface TimeSeriesRequest {
     List<String> getMetricNames();
 
     Map<String, String> getTags();
+
+    String getRequestId();
 }

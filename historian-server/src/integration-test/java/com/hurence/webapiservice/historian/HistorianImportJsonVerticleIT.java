@@ -226,8 +226,6 @@ assertEquals("7e52004b840e5fabbcd033384149d843390d4c7a118e47719798695e7ecd4216",
         assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
 //        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
 //        assertEquals(20600000, doc1.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
-        assertEquals(38,doc1.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
 
         assertEquals("openSpaceSensors.Temperature666",doc2.getString(NAME));
@@ -236,7 +234,6 @@ assertEquals("7e52004b840e5fabbcd033384149d843390d4c7a118e47719798695e7ecd4216",
         assertEquals(2,doc2.getLong(RESPONSE_CHUNK_COUNT_FIELD));
         assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQ4HLj4BA6sfMmpOWsmCCg6CDAAAFASLIkdAAAA", doc2.getString(RESPONSE_CHUNK_VALUE_FIELD));
 //        assertEquals(20600000,doc2.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-        assertEquals(45,doc2.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
     }
 
 }

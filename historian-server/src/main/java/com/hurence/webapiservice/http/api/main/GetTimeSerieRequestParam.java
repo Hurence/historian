@@ -98,6 +98,11 @@ public class GetTimeSerieRequestParam implements TimeSeriesRequest {
         return tags;
     }
 
+    @Override
+    public String getRequestId() {
+        return "not defined";
+    }
+
     private void setTags(Map<String,String> tags) {
         this.tags = tags;
     }
