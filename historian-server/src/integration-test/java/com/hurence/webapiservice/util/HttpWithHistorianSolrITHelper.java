@@ -78,7 +78,7 @@ public abstract class HttpWithHistorianSolrITHelper {
                 .put(HttpServerVerticle.CONFIG_DEBUG_MODE, true);
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
 
-        return HistorianSolrITHelper.deployHistorienVerticle(container, vertx, historianConf)
+        return HistorianSolrITHelper.deployHistorianVerticle(container, vertx, historianConf)
                 .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
                 .map(id -> {
                     LOGGER.info("HistorianVerticle with id '{}' deployed", id);
@@ -94,7 +94,7 @@ public abstract class HttpWithHistorianSolrITHelper {
                 .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,maxLimitFromConfig);
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
 
-        return HistorianSolrITHelper.deployHistorienVerticle(container, vertx)
+        return HistorianSolrITHelper.deployHistorianVerticle(container, vertx)
                 .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
                 .map(id -> {
                     LOGGER.info("HistorianVerticle with id '{}' deployed", id);

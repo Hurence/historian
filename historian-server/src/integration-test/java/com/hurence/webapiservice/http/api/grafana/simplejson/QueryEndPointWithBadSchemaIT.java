@@ -3,7 +3,9 @@ package com.hurence.webapiservice.http.api.grafana.simplejson;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
+import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
@@ -26,9 +28,11 @@ public class QueryEndPointWithBadSchemaIT extends QueryEndPointIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        SolrITHelper.createChunkCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString());
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.EVOA0);
         injectChunksIntoSolr(client, vertx);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
+        JsonObject historianConf = new JsonObject();
+        historianConf.put(HistorianVerticle.CONFIG_SCHEMA_VERSION, SchemaVersion.EVOA0.toString());
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));

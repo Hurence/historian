@@ -102,7 +102,7 @@ public class AnnotationEndPointIT {
                 .put(HttpServerVerticle.GRAFANA,
                         new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
         DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
-        HistorianSolrITHelper.deployHistorienVerticle(container, vertx)
+        HistorianSolrITHelper.deployHistorianVerticle(container, vertx)
                 .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
                 .map(id -> {
                     LOGGER.info("HistorianVerticle with id '{}' deployed", id);
@@ -123,48 +123,48 @@ public class AnnotationEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithTypeEqualsAll(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/hurencedatasource/annotation/testWithTypeEqualsAll/request.json",
-                "/http/grafana/hurencedatasource/annotation/testWithTypeEqualsAll/expectedResponse.json");
+                "/http/grafana/hurence/annotation/testWithTypeEqualsAll/request.json",
+                "/http/grafana/hurence/annotation/testWithTypeEqualsAll/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsTrue(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsTrue/request.json",
-                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsTrue/expectedResponse.json");
+                "/http/grafana/hurence/annotation/testMatchAnyEqualsTrue/request.json",
+                "/http/grafana/hurence/annotation/testMatchAnyEqualsTrue/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithMatchAnyEqualsFalse(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsFalse/request.json",
-                "/http/grafana/hurencedatasource/annotation/testMatchAnyEqualsFalse/expectedResponse.json");
+                "/http/grafana/hurence/annotation/testMatchAnyEqualsFalse/request.json",
+                "/http/grafana/hurence/annotation/testMatchAnyEqualsFalse/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithLimit(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/hurencedatasource/annotation/testLimitNumberOfTags/request.json",
-                "/http/grafana/hurencedatasource/annotation/testLimitNumberOfTags/expectedResponse.json");
+                "/http/grafana/hurence/annotation/testLimitNumberOfTags/request.json",
+                "/http/grafana/hurence/annotation/testLimitNumberOfTags/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithNoTime(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
-                "/http/grafana/hurencedatasource/annotation/testRequestWithNoTime/request.json",
-                "/http/grafana/hurencedatasource/annotation/testRequestWithNoTime/expectedResponse.json");
+                "/http/grafana/hurence/annotation/testRequestWithNoTime/request.json",
+                "/http/grafana/hurence/annotation/testRequestWithNoTime/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAnnotationWithEmptyQuery(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveObjectResponseFromFile(vertx, testContext,
-                "/http/grafana/hurencedatasource/annotation/testEmptyQuery/request.json",
-                "/http/grafana/hurencedatasource/annotation/testEmptyQuery/expectedResponse.json");
+                "/http/grafana/hurence/annotation/testEmptyQuery/request.json",
+                "/http/grafana/hurence/annotation/testEmptyQuery/expectedResponse.json");
     }
 
 

@@ -1,0 +1,13 @@
+{
+  "from": "2016-10-31T06:33:44.866Z",
+  "to": "2020-10-31T12:33:44.866Z",
+  "names": ["metric_7_chunk"],
+  "format": "json",
+  "maxDataPoints": 4,
+  "tags": {
+    "sensor" : "sensor_1"
+  },
+  "sampling":{
+    "algorithm": "FIRST"
+  }
+}
