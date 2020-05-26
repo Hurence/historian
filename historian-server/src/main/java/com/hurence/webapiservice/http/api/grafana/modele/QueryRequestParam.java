@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.hurence.webapiservice.http.api.grafana.GrafanaSimpleJsonPluginApiImpl.FILTER_KEYS;
+
 public class QueryRequestParam implements TimeSeriesRequest {
 
     public static final int DEFAULT_BUCKET_SIZE = 1;//will be recomputed later by historian if necessary depending on maxDataPoints
@@ -133,22 +135,9 @@ public class QueryRequestParam implements TimeSeriesRequest {
 
     @Override
     public Map<String, String> getTags() {
-        return Collections.emptyMap();
-    }
-
-    private List<String> getTagsFromFilter() {
         return getAdHocFilters().stream()
-                .filter(adhoc -> GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY.equals(adhoc.getKey()))
-                .map(AdHocFilter::getValue)
-                .collect(Collectors.toList());
-    }
-
-    public List<String> getTagsValuesToFilter() {
-        if (containFilter(GrafanaSimpleJsonPluginApiImpl.FILTER_TAG_KEY)) {
-            return getTagsFromFilter();
-        } else {
-            return Collections.emptyList();
-        }
+                .filter(adhoc -> !FILTER_KEYS.contains(adhoc.getKey()))
+                .collect(Collectors.toMap(AdHocFilter::getKey, AdHocFilter::getValue));
     }
 
     public static final class Builder {

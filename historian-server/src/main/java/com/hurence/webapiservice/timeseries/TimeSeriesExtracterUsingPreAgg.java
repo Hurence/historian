@@ -76,7 +76,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
                         .doubleValue();
                 break;
-            case FIRST_ITEM:
+            case FIRST:
                 aggValue = chunks.stream()
                         .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_FIRST_VALUE_FIELD))
                         .findFirst()

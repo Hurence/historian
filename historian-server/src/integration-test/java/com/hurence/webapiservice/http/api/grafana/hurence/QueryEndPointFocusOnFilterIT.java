@@ -1,15 +1,18 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.webapiservice.WebApiServiceMainVerticle;
 import com.hurence.webapiservice.http.HttpServerVerticle;
+import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -27,6 +30,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -38,16 +42,28 @@ public class QueryEndPointFocusOnFilterIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HttpWithHistorianSolrITHelper
-                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+        SolrITHelper.addFieldToChunkSchema(container, "usine");
+        SolrITHelper.addFieldToChunkSchema(container, "pays");
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        SolrInjector injector = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
+        SolrInjector injector = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "metric_to_filter",
                 Arrays.asList(
-                        Arrays.asList("Berlin"),
-                        Arrays.asList("France", "Berlin"),
-                        Arrays.asList("usine_1"),
-                        Arrays.asList("France")
+                        new HashMap<String, String>(){{
+                            put("pays", "Berlin");
+
+                        }},
+                        new HashMap<String, String>(){{
+                            put("pays", "France");
+
+                        }},
+                        new HashMap<String, String>(){{
+                            put("usine", "usine_1");
+                            put("pays", "Berlin");
+                        }},
+                        new HashMap<String, String>(){{
+                            put("pays", "France");
+                        }}
                 ),
                 Arrays.asList(
                         Arrays.asList(
@@ -72,6 +88,13 @@ public class QueryEndPointFocusOnFilterIT {
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.GRAFANA_QUERY_ENDPOINT);
+        JsonObject httpConf = new JsonObject()
+                .put(HttpServerVerticle.GRAFANA,
+                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, httpConf).subscribe(id -> {
+                    context.completeNow();
+                },
+                t -> context.failNow(t));
     }
 
     @AfterAll

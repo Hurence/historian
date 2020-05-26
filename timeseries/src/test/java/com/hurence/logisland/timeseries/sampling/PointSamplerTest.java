@@ -61,7 +61,7 @@ public class PointSamplerTest {
 
     @Test
     public void testFirstItemSampler() {
-        Sampler<Point> sampler = SamplerFactory.getPointSampler(SamplingAlgorithm.FIRST_ITEM, 3);
+        Sampler<Point> sampler = SamplerFactory.getPointSampler(SamplingAlgorithm.FIRST, 3);
         List<Point> sampled = sampler.sample(getPoints());
         Assertions.assertEquals(1, sampled.size());
         Point point1 = sampled.get(0);
@@ -71,7 +71,7 @@ public class PointSamplerTest {
 
     @Test
     public void testFirstItemSamplerNoFullBucket() {
-        Sampler<Point> sampler = SamplerFactory.getPointSampler(SamplingAlgorithm.FIRST_ITEM,2);
+        Sampler<Point> sampler = SamplerFactory.getPointSampler(SamplingAlgorithm.FIRST,2);
         List<Point> sampled = sampler.sample(getPoints());
         Assertions.assertEquals(2, sampled.size());
         Point point1 = sampled.get(0);

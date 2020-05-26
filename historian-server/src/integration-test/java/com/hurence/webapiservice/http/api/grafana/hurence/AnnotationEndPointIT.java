@@ -9,6 +9,7 @@ import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
+import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -96,18 +97,9 @@ public class AnnotationEndPointIT {
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.ANNOTATIONS_ENDPOINT);
         JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
-                .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
                 .put(HttpServerVerticle.GRAFANA,
                         new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
-        DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
-        HistorianSolrITHelper.deployHistorianVerticle(container, vertx)
-                .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
-                .map(id -> {
-                    LOGGER.info("HistorianVerticle with id '{}' deployed", id);
-                    return id;
-                }).subscribe(id -> {
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, httpConf).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));

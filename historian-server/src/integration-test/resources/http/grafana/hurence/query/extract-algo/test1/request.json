@@ -4,5 +4,5 @@
   "to": "2020-10-31T12:33:44.866Z",
   "names": ["temp_a", "temp_b"],
   "format": "json",
-  "maxDataPoints": 550
+  "max_data_points": 550
 }

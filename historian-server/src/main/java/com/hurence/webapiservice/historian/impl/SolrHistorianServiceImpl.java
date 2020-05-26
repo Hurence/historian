@@ -343,8 +343,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 .map(tagName -> {
                     String value = tags.getString(tagName);
                     return tagName + ":\"" + value + "\"";
+//                    return "\"" + tagName + "\":\"" + value + "\"";
                 })
-                .collect(Collectors.joining(" OR ", "", ""));
+                .collect(Collectors.joining(" AND ", "", ""));
         return Optional.of(filters);
     }
 
@@ -484,9 +485,20 @@ public class SolrHistorianServiceImpl implements HistorianService {
         final SolrQuery query = buildTimeSeriesChunkQuery(myParams);
         LOGGER.debug("solrQuery : {}", query.toQueryString());
 
-        //    FILTER
-        buildSolrFilterFromArray(myParams.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
-                .ifPresent(query::addFilterQuery);
+        //FILTER
+        if (myParams.containsKey(HistorianFields.TAGS)) {
+            Object tags = myParams.getValue(HistorianFields.TAGS);
+            if (tags instanceof JsonObject) {
+                buildSolrFilterFromTags(myParams.getJsonObject(HistorianFields.TAGS))
+                        .ifPresent(query::addFilterQuery);
+            } else if (tags instanceof JsonArray) {
+                buildSolrFilterFromArray(myParams.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
+                        .ifPresent(query::addFilterQuery);
+            } else {
+                throw new IllegalArgumentException(HistorianFields.TAGS + " field were neither a map neither an array.");
+            }
+        }
+
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
             MetricsSizeInfo metricsInfo;
             try {
@@ -556,7 +568,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 case NONE:
                     query.addField(RESPONSE_CHUNK_VALUE_FIELD);
                     break;
-                case FIRST_ITEM:
+                case FIRST:
                     query.addField(RESPONSE_CHUNK_FIRST_VALUE_FIELD);
                     break;
                 case AVERAGE:
@@ -709,11 +721,11 @@ public class SolrHistorianServiceImpl implements HistorianService {
 //        String cexpr = "rollup(search(historian, q=\"*:*\", fl=\"chunk_size, name\", qt=\"/export\", sort=\"name asc\"),\n" +
 //                "\t\t\t\t over=\"name\", sum(chunk_size))";
         StringBuilder exprBuilder = new StringBuilder("rollup(search(").append(solrHistorianConf.chunkCollection)
-                .append(",q=\"").append(query.getQuery()).append("\"");
+                .append(",q=").append(query.getQuery());
         if (query.getFilterQueries() != null) {
             for (String filterQuery : query.getFilterQueries()) {
                 exprBuilder
-                        .append(",fq=\"").append(filterQuery).append("\"");
+                        .append(",fq=").append(filterQuery);
             }
         }
         exprBuilder.append(",fl=\"").append(RESPONSE_CHUNK_COUNT_FIELD).append(", ")

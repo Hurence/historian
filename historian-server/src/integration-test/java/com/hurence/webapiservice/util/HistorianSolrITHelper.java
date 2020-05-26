@@ -88,11 +88,11 @@ public class HistorianSolrITHelper {
     }
 
     public static DeploymentOptions getDeploymentOptions(DockerComposeContainer container) {
-        JsonObject historianConf = getHistorianConf(container);
+        JsonObject historianConf = getDefaultHistorianConf(container);
         return new DeploymentOptions().setConfig(historianConf);
     }
 
-    private static JsonObject getHistorianConf(DockerComposeContainer container) {
+    private static JsonObject getDefaultHistorianConf(DockerComposeContainer container) {
         String zkUrl = container.getServiceHost(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT)
                 + ":" +
                 container.getServicePort(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT);
@@ -119,7 +119,7 @@ public class HistorianSolrITHelper {
 
     public static DeploymentOptions getDeploymentOptions(DockerComposeContainer container,
                                                          JsonObject customHistorianConf) {
-        JsonObject historianConf = getHistorianConf(container);
+        JsonObject historianConf = getDefaultHistorianConf(container);
         return new DeploymentOptions().setConfig(historianConf.mergeIn(customHistorianConf));
     }
 

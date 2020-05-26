@@ -8,13 +8,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class SolrInjectorOneMetricMultipleChunksSpecificPoints extends AbstractSolrInjector {
+public class Version0SolrInjectorOneMetricMultipleChunksSpecificPoints extends AbstractVersion0SolrInjector {
 
     private final String metricName;
     private final List<List<Point>> pointsByChunk;
 
-    public SolrInjectorOneMetricMultipleChunksSpecificPoints(String metricName,
-                                                             List<List<Point>> pointsByChunk) {
+    public Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(String metricName,
+                                                                     List<List<Point>> pointsByChunk) {
         this.metricName = metricName;
         this.pointsByChunk = pointsByChunk;
     }
