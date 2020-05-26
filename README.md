@@ -352,7 +352,7 @@ Run the following command in the root directory of historian source checkout.
 
     git clone git@github.com:Hurence/historian.git
     cd historian
-    mvn clean install -DskipTests
+    mvn clean install -DskipTests -Pbuild-integration-tests
 
 ## Install datasource plugin in your grafana instance
 

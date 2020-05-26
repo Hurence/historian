@@ -166,7 +166,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .put(TO, request.getTo())
                 .put(FIELDS, fieldsToFetch)
                 .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTagsValuesToFilter())
+                .put(HistorianFields.TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());

@@ -5,7 +5,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
-import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -32,6 +32,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.*;
@@ -49,12 +50,12 @@ public class HistorianVerticleIT {
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempA = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
+        Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempA = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_a",
                 Arrays.asList(
-                        Collections.emptyList(),
-                        Collections.emptyList(),
-                        Collections.emptyList()
+                        Collections.emptyMap(),
+                        Collections.emptyMap(),
+                        Collections.emptyMap()
                 ),
                 Arrays.asList(
                         Arrays.asList(
@@ -76,10 +77,10 @@ public class HistorianVerticleIT {
                                 new Point(0, 12L, 5.5)
                         )
                 ));
-        SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempB = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
+        Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempB = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_b",
                 Arrays.asList(
-                        Collections.emptyList()
+                        Collections.emptyMap()
                 ),
                 Arrays.asList(
                         Arrays.asList(

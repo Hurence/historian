@@ -25,7 +25,6 @@ public interface GrafanaApi {
     String ANNOTATIONS_ENDPOINT = "/annotations";
     String TAG_KEYS_ENDPOINT = "/tag-keys";
     String TAG_VALUES_ENDPOINT = "/tag-values";
-    String TARGET = "target";
 
     default Router getGraphanaRouter(Vertx vertx) {
         Router router = Router.router(vertx);

@@ -1,27 +1,24 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
-import com.hurence.historian.solr.injector.AbstractSolrInjector;
+import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.solr.injector.AbstractVersion0SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPoints;
+import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPoints;
+import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
-import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.http.HttpServerVerticle;
+import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
-import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.json.JsonObject;
-import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
-import io.vertx.reactivex.ext.web.client.WebClient;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +27,12 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class QueryEndPointFocusOnSamplingWithPreAgg {
+public class QueryEndPointFocusOnSamplingWithPreAggVersion0IT extends AbstractQueryEndPointFocusOnSamplingWithPreAgg {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointFocusOnSamplingWithPreAgg.class);
-    private static WebClient webClient;
-    private static AssertResponseGivenRequestHelper assertHelper;
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointFocusOnSamplingWithPreAggVersion0IT.class);
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
@@ -50,15 +44,21 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         buildInjector().injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.GRAFANA_QUERY_ENDPOINT);
     }
 
     public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+        SolrITHelper.addFieldToChunkSchema(container, "sensor");
+        JsonObject httpConf = new JsonObject()
+                .put(HttpServerVerticle.GRAFANA,
+                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
         JsonObject historianConf = buildHistorianConf();
         HttpWithHistorianSolrITHelper
-                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
-                        client, container, vertx, context, historianConf);
+                .deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
+                .subscribe(id -> {
+                            context.completeNow();
+                        },
+                        t -> context.failNow(t));
     }
 
     public static JsonObject buildHistorianConf() {
@@ -112,15 +112,15 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
                         new Point(0, 20L, 10.0)
                 )
         );
-        AbstractSolrInjector injector10chunk = new SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion0SolrInjector injector10chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_10_chunk", pointsByChunk10Chunks);
-        AbstractSolrInjector injector9chunk = new SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion0SolrInjector injector9chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_9_chunk", pointsByChunk10Chunks.stream().limit(9).collect(Collectors.toList()));
-        AbstractSolrInjector injector7chunk = new SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion0SolrInjector injector7chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_7_chunk", pointsByChunk10Chunks.stream().limit(7).collect(Collectors.toList()));
-        AbstractSolrInjector injector5chunk = new SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion0SolrInjector injector5chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_5_chunk", pointsByChunk10Chunks.stream().limit(5).collect(Collectors.toList()));
-        AbstractSolrInjector injector1chunkOf20Point = new SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion0SolrInjector injector1chunkOf20Point = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_1_chunk_of_20_points",
                 Arrays.asList(
                         pointsByChunk10Chunks.stream().flatMap(List::stream).collect(Collectors.toList())
@@ -131,65 +131,6 @@ public class QueryEndPointFocusOnSamplingWithPreAgg {
         injector10chunk.addChunk(injector5chunk);
         injector10chunk.addChunk(injector1chunkOf20Point);
         return injector10chunk;
-    }
-
-    @AfterAll
-    public static void afterAll(Vertx vertx, VertxTestContext context) {
-        webClient.close();
-        vertx.close(context.succeeding(rsp -> context.completeNow()));
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testSampleMetric10ChunkMax20(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/preagg-algo/testMetric10ChunkMaxPoint20/request.json",
-                "/http/grafana/hurence/query/preagg-algo/testMetric10ChunkMaxPoint20/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testSampleMetric10ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/preagg-algo/testMetric10ChunkMaxPoint4/request.json",
-                "/http/grafana/hurence/query/preagg-algo/testMetric10ChunkMaxPoint4/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testSampleMetric9ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/preagg-algo/testMetric9ChunkMaxPoint4/request.json",
-                "/http/grafana/hurence/query/preagg-algo/testMetric9ChunkMaxPoint4/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testSampleMetric7ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/preagg-algo/testMetric7ChunkMaxPoint4/request.json",
-                "/http/grafana/hurence/query/preagg-algo/testMetric7ChunkMaxPoint4/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testSampleMetric5ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/preagg-algo/testMetric5ChunkMaxPoint4/request.json",
-                "/http/grafana/hurence/query/preagg-algo/testMetric5ChunkMaxPoint4/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testSampleMetric1ChunkOf20PointMax4Point(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/preagg-algo/testMetric1ChunkOf20PointMaxPoint4/request.json",
-                "/http/grafana/hurence/query/preagg-algo/testMetric1ChunkOf20PointMaxPoint4/expectedResponse.json");
-    }
-
-    public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
-                                                  String requestFile, String responseFile) {
-        assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);
     }
 
 }

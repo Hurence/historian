@@ -27,7 +27,7 @@
     {
       "key": "Algo",
       "operator": "=",
-      "value": "FIRST_ITEM"
+      "value": "FIRST"
     }
   ]
 }

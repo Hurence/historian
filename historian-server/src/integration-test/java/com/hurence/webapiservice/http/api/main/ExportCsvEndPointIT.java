@@ -8,7 +8,7 @@ import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.SolrInjectorMultipleMetricSpecificPoints;
+import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
@@ -47,7 +47,7 @@ public class ExportCsvEndPointIT {
     public static void beforeAll(SolrClient client, Vertx vertx, DockerComposeContainer container) throws IOException, SolrServerException, InterruptedException {
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        SolrInjector injector = new SolrInjectorMultipleMetricSpecificPoints(
+        SolrInjector injector = new Version0SolrInjectorMultipleMetricSpecificPoints(
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
                 Arrays.asList(
                         Arrays.asList(

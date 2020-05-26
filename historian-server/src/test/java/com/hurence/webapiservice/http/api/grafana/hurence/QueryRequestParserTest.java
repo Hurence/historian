@@ -14,7 +14,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.IntStream;
 
 import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePliginApiImpl.*;
@@ -45,11 +44,11 @@ public class QueryRequestParserTest {
                 .writeJson(requestBody, SamplingAlgorithm.MIN.toString(), true);
         JsonPointer.from(REQUEST_ID_JSON_PATH)
                 .writeJson(requestBody, "REQUEST_0", true);
-        JsonPointer.from(MAX_DATAPOINTS_JSON_PATH)
+        JsonPointer.from(MAX_DATA_POINTS_JSON_PATH)
                 .writeJson(requestBody, 500, true);
 
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH,MAX_DATAPOINTS_JSON_PATH,FORMAT_JSON_PATH,
+                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH);
         final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
@@ -90,14 +89,14 @@ public class QueryRequestParserTest {
                 .writeJson(requestBody, SamplingAlgorithm.MIN.toString(), true);
         JsonPointer.from(REQUEST_ID_JSON_PATH)
                 .writeJson(requestBody, "REQUEST_0", true);
-        JsonPointer.from(MAX_DATAPOINTS_JSON_PATH)
+        JsonPointer.from(MAX_DATA_POINTS_JSON_PATH)
                 .writeJson(requestBody, 500, true);
         IntStream
                 .range(0, 10)
                 .parallel()
                 .forEach(i -> {
                     final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                            TO_JSON_PATH,NAMES_JSON_PATH,MAX_DATAPOINTS_JSON_PATH,FORMAT_JSON_PATH,
+                            TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                             TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH);
                     final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
         });
@@ -109,7 +108,7 @@ public class QueryRequestParserTest {
         JsonPointer.from(NAMES_JSON_PATH)
                 .writeJson(requestBody, Arrays.asList("metric_1"), true);
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH,MAX_DATAPOINTS_JSON_PATH,FORMAT_JSON_PATH,
+                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH);
         final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
@@ -127,7 +126,7 @@ public class QueryRequestParserTest {
     public void testparsingErrorEmptyRequest() {
         JsonObject requestBody = new JsonObject("{}");
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH,MAX_DATAPOINTS_JSON_PATH,FORMAT_JSON_PATH,
+                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH);
         Assertions.assertThrows(NullPointerException.class, () -> {
             final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);

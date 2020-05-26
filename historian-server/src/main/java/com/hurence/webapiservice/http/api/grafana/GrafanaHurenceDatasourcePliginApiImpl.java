@@ -2,15 +2,12 @@ package com.hurence.webapiservice.http.api.grafana;
 
 
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.record.FieldDictionary;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
-import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
-import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
@@ -100,7 +97,7 @@ public class GrafanaHurenceDatasourcePliginApiImpl extends GrafanaSimpleJsonPlug
     public final static String FROM_JSON_PATH = "/to";
     public final static String TO_JSON_PATH = "/from";
     public final static String NAMES_JSON_PATH = "/names";
-    public final static String MAX_DATAPOINTS_JSON_PATH = "/max_data_points";
+    public final static String MAX_DATA_POINTS_JSON_PATH = "/max_data_points";
     public final static String FORMAT_JSON_PATH = "/format";
     public final static String TAGS_JSON_PATH = "/tags";
     public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
@@ -172,7 +169,7 @@ public class GrafanaHurenceDatasourcePliginApiImpl extends GrafanaSimpleJsonPlug
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                    TO_JSON_PATH,NAMES_JSON_PATH,MAX_DATAPOINTS_JSON_PATH,FORMAT_JSON_PATH,
+                    TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                     TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH)
                     .parseRequest(requestBody);
         } catch (Exception ex) {

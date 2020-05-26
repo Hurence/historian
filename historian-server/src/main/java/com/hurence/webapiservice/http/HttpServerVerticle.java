@@ -40,7 +40,7 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     public static final String MAIN_API_ENDPOINT = "/api/historian/v0";
     public static final String GRAFANA_API_ENDPOINT = "/api/grafana";
-    public static final String INGESTION_API_ENDPOINT = "/historian-server/ingestion";
+    public static final String INGESTION_API_ENDPOINT = MAIN_API_ENDPOINT + "/import";
     public static final String TEST_API_ENDPOINT = "/test/api";
     public static final GrafanaApiVersion GRAFANA_API_VEFSION_DEFAULT = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
     public static final String IMPORT_CSV_ENDPOINT = HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.CSV_ENDPOINT;
@@ -66,12 +66,12 @@ public class HttpServerVerticle extends AbstractVerticle {
         Router mainApi = new MainHistorianApiImpl(historianService, maxDataPointsAllowedForExportCsv).getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
 
+        Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
+        router.mountSubRouter(INGESTION_API_ENDPOINT, importApi);
+
         GrafanaApiVersion grafanaApiVersion = getGrafanaApiVersion();
         Router graphanaApi = GrafanaApi.fromVersion(grafanaApiVersion, historianService).getGraphanaRouter(vertx);
         router.mountSubRouter(GRAFANA_API_ENDPOINT, graphanaApi);
-
-        Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
-        router.mountSubRouter(INGESTION_API_ENDPOINT, importApi);
 
         if (debugMode) {
             Router debugApi = new TestHistorianApiImpl(historianService).getMainRouter(vertx);

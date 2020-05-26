@@ -1,5 +1,6 @@
 package com.hurence.historian.spark.compactor.job;
 
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.converter.common.Compression;
@@ -12,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class ChunkModeleVersion0 {
+public class ChunkModeleVersion0 implements ChunkModele {
     private static int ddcThreshold = 0;
 
     public List<Point> points;
@@ -27,7 +28,6 @@ public class ChunkModeleVersion0 {
     public boolean trend;
     public String name;
     public String sax;
-    public List<String> tags;
     public int year;
     public int month;
     public String day;
@@ -82,47 +82,47 @@ public class ChunkModeleVersion0 {
 
     public JsonObject toJson(String id) {
         JsonObject json = new JsonObject();
-        json.put(HistorianFields.RESPONSE_CHUNK_ID_FIELD, id);
-        json.put(HistorianFields.RESPONSE_CHUNK_START_FIELD, this.start);
-        json.put(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD, this.points.size());
-        json.put(HistorianFields.RESPONSE_CHUNK_END_FIELD, this.end);
-        json.put(HistorianFields.RESPONSE_CHUNK_SAX_FIELD, this.sax);
-        json.put(HistorianFields.RESPONSE_CHUNK_VALUE_FIELD, this.compressedPoints);
-        json.put(HistorianFields.RESPONSE_CHUNK_AVG_FIELD, this.avg);
-        json.put(HistorianFields.RESPONSE_CHUNK_MIN_FIELD, this.min);
-        json.put(HistorianFields.NAME, this.name);
-        json.put(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
-        json.put(HistorianFields.RESPONSE_CHUNK_MAX_FIELD, this.max);
-//        json.put(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
-        json.put(HistorianFields.RESPONSE_CHUNK_SUM_FIELD, this.sum);
-        json.put(HistorianFields.RESPONSE_TAG_NAME_FIELD, this.tags);
-        json.put(HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD, this.firstValue);
+        this.tagsAsKeyValue.forEach(json::put);
+        json.put(HistorianChunkCollectionFieldsVersion0.ID, id);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_START, this.start);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT, this.points.size());
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_END, this.end);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_SAX, this.sax);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE, this.compressedPoints);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_AVG, this.avg);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_MIN, this.min);
+        json.put(HistorianChunkCollectionFieldsVersion0.NAME, this.name);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_TREND, this.trend);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_MAX, this.max);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_SUM, this.sum);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_FIRST, this.firstValue);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_DAY, this.day);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH, this.month);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR, this.year);
+        json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN, this.chunk_origin);
         return json;
     }
 
     public SolrInputDocument buildSolrDocument(String id) {
         final SolrInputDocument doc = new SolrInputDocument();
         tagsAsKeyValue.forEach(doc::addField);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_ID_FIELD, id);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_START_FIELD, this.start);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD, this.points.size());
-        doc.addField(HistorianFields.RESPONSE_CHUNK_END_FIELD, this.end);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_SAX_FIELD, this.sax);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(this.compressedPoints));
-        doc.addField(HistorianFields.RESPONSE_CHUNK_AVG_FIELD, this.avg);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_MIN_FIELD, this.min);
-//        doc.addField(HistorianFields.RESPONSE_CHUNK_WINDOW_MS_FIELD, 11855);
-        doc.addField(HistorianFields.NAME, this.name);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_TREND_FIELD, this.trend);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_MAX_FIELD, this.max);
-//        doc.addField(HistorianFields.RESPONSE_CHUNK_SIZE_BYTES_FIELD, this.compressedPoints.length);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_SUM_FIELD, this.sum);
-        doc.addField(HistorianFields.RESPONSE_TAG_NAME_FIELD, this.tags);
-        doc.addField(HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD, this.firstValue);
-        doc.addField(HistorianFields.CHUNK_DAY, this.day);
-        doc.addField(HistorianFields.CHUNK_MONTH, this.month);
-        doc.addField(HistorianFields.CHUNK_YEAR, this.year);
-        doc.addField(HistorianFields.CHUNK_ORIGIN, this.chunk_origin);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.ID, id);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_START, this.start);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT, this.points.size());
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_END, this.end);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_SAX, this.sax);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE, Base64.getEncoder().encodeToString(this.compressedPoints));
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_AVG, this.avg);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_MIN, this.min);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.NAME, this.name);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_TREND, this.trend);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_MAX, this.max);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_SUM, this.sum);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_FIRST, this.firstValue);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_DAY, this.day);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH, this.month);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR, this.year);
+        doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN, this.chunk_origin);
         return doc;
     }
 }

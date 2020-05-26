@@ -6,7 +6,7 @@ import com.hurence.logisland.record.Point;
 import java.util.ArrayList;
 import java.util.List;
 
-public class GeneralSolrInjector extends AbstractSolrInjector {
+public class GeneralVersion0SolrInjector extends AbstractVersion0SolrInjector {
 
     private List<ChunkModeleVersion0> chunks = new ArrayList<>();
 
