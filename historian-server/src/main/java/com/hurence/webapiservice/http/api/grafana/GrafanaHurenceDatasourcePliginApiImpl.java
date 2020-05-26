@@ -97,15 +97,15 @@ public class GrafanaHurenceDatasourcePliginApiImpl extends GrafanaSimpleJsonPlug
                 .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
-    public final static String FROM_JSON_PATH = "to";
-    public final static String TO_JSON_PATH = "from";
-    public final static String NAMES_JSON_PATH = "names";
-    public final static String MAX_DATAPOINTS_JSON_PATH = "max_data_points";
-    public final static String FORMAT_JSON_PATH = "format";
-    public final static String TAGS_JSON_PATH = "tags";
+    public final static String FROM_JSON_PATH = "/to";
+    public final static String TO_JSON_PATH = "/from";
+    public final static String NAMES_JSON_PATH = "/names";
+    public final static String MAX_DATAPOINTS_JSON_PATH = "/max_data_points";
+    public final static String FORMAT_JSON_PATH = "/format";
+    public final static String TAGS_JSON_PATH = "/tags";
     public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
-    public final static String REQUEST_ID_JSON_PATH = "request_id";
+    public final static String REQUEST_ID_JSON_PATH = "/request_id";
 
     /**
      *  used to query metrics datapoints in grafana panels.

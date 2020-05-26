@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;
@@ -9,8 +10,11 @@ import org.slf4j.LoggerFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 public class RequestParserUtil {
 
@@ -56,9 +60,14 @@ public class RequestParserUtil {
         Object fromObj = jsonPointer.queryJson(requestBody);
         if (fromObj == null)
             return null;
-        if (fromObj instanceof Map) {
+        if (fromObj instanceof JsonObject) {
             try {
-                return (Map<String,String>) fromObj;
+                JsonObject jsonObject = (JsonObject) fromObj;
+                Map<String,String> mapToReturn =new HashMap<String,String>();
+                for (Map.Entry<String, Object> entry : jsonObject.getMap().entrySet()) {
+                    mapToReturn.put(entry.getKey(), (String) entry.getValue());
+                }
+                return mapToReturn;
             } catch (ClassCastException e) {
                 throw new IllegalArgumentException(
                         String.format("'%s' json pointer value '%s' could not be cast as a valid Map<String,String> !",
@@ -68,6 +77,53 @@ public class RequestParserUtil {
         throw new IllegalArgumentException(
                 String.format("'%s' json pointer value '%s' is not a Map<String,String> !",
                         pointer, fromObj));
+    }
+
+    public static List<String> parseListString(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof JsonArray) {
+            try {
+                JsonArray jsonArray = (JsonArray) fromObj;
+                return jsonArray.stream()
+                .map(String.class::cast)
+                .collect(Collectors.toList());
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid List<String> !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not a List<String> !",
+                        pointer, fromObj));
+    }
+
+    public static String parseString(JsonObject requestBody, String pointer) {
+        return parse(requestBody, pointer, String.class);
+    }
+
+    public static <T> T parse(JsonObject requestBody, String pointer, Class<T> clazz) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (clazz.isInstance(fromObj)) {
+            try {
+                return clazz.cast(fromObj);
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid %s !",
+                                pointer, fromObj, clazz), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not of class %s !",
+                        pointer, fromObj, clazz));
     }
 
 }

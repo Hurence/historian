@@ -93,7 +93,7 @@ public class HistorianVerticleIT {
         injectorTempA.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         HistorianSolrITHelper
-                .deployHistorienVerticle(container, vertx)
+                .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
                             historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();
@@ -149,13 +149,11 @@ public class HistorianVerticleIT {
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_MIN_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_MAX_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_TREND_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SUM_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_FIRST_VALUE_FIELD));
-                        assertEquals(20, doc1.size());
+                        assertEquals(18, doc1.size());
                         assertEquals("id0", doc1.getString("id"));
                         assertEquals(1L, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
                         assertEquals(4L, doc1.getLong(RESPONSE_CHUNK_END_FIELD));

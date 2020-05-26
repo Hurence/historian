@@ -26,7 +26,7 @@ public class QueryEndPointFocusOnSamplingWithPreAggWithBadSchemaIT extends Query
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        SolrITHelper.createChunkCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString());
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.EVOA0);
         injectChunksIntoSolr(client, vertx);
         JsonObject historianConf = buildHistorianConf();
         historianConf.put(HistorianVerticle.CONFIG_SCHEMA_VERSION, SchemaVersion.EVOA0.toString());

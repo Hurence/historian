@@ -44,7 +44,7 @@ public class HistorianAnnotationVerticleIT {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
         HistorianSolrITHelper
-                .deployHistorienVerticle(container, vertx)
+                .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
                             historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();

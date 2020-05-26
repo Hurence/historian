@@ -61,13 +61,13 @@ public class HistorianSolrITHelper {
                                                       SchemaVersion version) throws IOException, SolrServerException, InterruptedException {
         createChunkCollection(client, container, version);
         LOGGER.info("Initializing Verticles");
-        deployHistorienVerticle(container, vertx).subscribe(id -> {
+        deployHistorianVerticle(container, vertx).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
     }
 
-    public static Single<String> deployHistorienVerticle(DockerComposeContainer container, Vertx vertx) {
+    public static Single<String> deployHistorianVerticle(DockerComposeContainer container, Vertx vertx) {
         DeploymentOptions historianOptions = getDeploymentOptions(container);
         return vertx.rxDeployVerticle(new HistorianVerticle(), historianOptions)
                 .map(id -> {
@@ -76,7 +76,7 @@ public class HistorianSolrITHelper {
                 });
     }
 
-    public static Single<String> deployHistorienVerticle(DockerComposeContainer container,
+    public static Single<String> deployHistorianVerticle(DockerComposeContainer container,
                                                          Vertx vertx,
                                                          JsonObject customHistorianConf) {
         DeploymentOptions historianOptions = getDeploymentOptions(container, customHistorianConf);
