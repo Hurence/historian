@@ -1,21 +1,22 @@
 package com.hurence.webapiservice.http.api.main;
 
 import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.solr.injector.SolrInjector;
+import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
-import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.core.buffer.Buffer;
 import io.vertx.reactivex.core.file.FileSystem;
+import io.vertx.reactivex.ext.web.client.WebClient;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.AfterAll;
@@ -31,7 +32,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.http.HttpServerVerticle.MAIN_API_ENDPOINT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -41,7 +41,7 @@ public class ExportCsvEndPointIT {
     private static Logger LOGGER = LoggerFactory.getLogger(ExportCsvEndPointIT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
-    private static String exportEndpoint = MAIN_API_ENDPOINT + MainHistorianApi.EXPORT_ENDPOINT;
+    private static String exportEndpoint =  HttpServerVerticle.CSV_EXPORT_ENDPOINT;
 
     @BeforeAll
     public static void beforeAll(SolrClient client, Vertx vertx, DockerComposeContainer container) throws IOException, SolrServerException, InterruptedException {
