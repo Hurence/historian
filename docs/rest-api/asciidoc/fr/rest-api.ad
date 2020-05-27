@@ -190,7 +190,22 @@ Exemple de réponse
 
 === _POST_ Export Csv
 
-TODO
+Permet de rechercher des points et les exporter en csv pour les métriques désirées.
+
+Ce endpoint utilise la même requête que l'endpoint query mais il donne la réponse en csv.
+
+Exemple de réponse :
+
+[source,csv]
+----
+metric,value,date
+temp_a,622.1,1477895624866
+temp_a,-3.0,1477916224866
+temp_a,365.0,1477917224866
+temp_b,861.0,1477895624866
+temp_b,767.0,1477917224866
+----
+
 
 === _POST_ Annotations compatible avec simpleJsonPlugin
 
@@ -483,3 +498,232 @@ These are the values available for the corresponding keys.
 Permet de chercher les différentes métrics disponibles.
 
 TODO
+
+
+==  _POST_ Ingestion
+
+Cet endpoint renvoie une réponse 200 'OK' si l’historian fonctionne correctement. De plus il y a autres
+sous endpoint à /historian-server/ingestion/ :
+
+=== _POST_ Ingestion/CSV
+
+
+Permet de injecter des points au Solr à partir des fichiers csv
+
+Exemple de commonde curl minimal :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/historian-server/ingestion/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv'
+----
+
+Exemple csv minimal :
+
+[source,csv]
+----
+metric,timestamp,value
+metric_1, 1, 1.2
+metric_1, 2, 2
+metric_1, 3, 3
+----
+
+Exemple de commande curl :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/historian-server/ingestion/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@path/de/mon/csv/file2.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F timestamp_unit=MILLISECONDS_EPOCH \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-D-m HH:mm:ss.SSS \
+-F timezone_date=UTC \
+----
+
+Exemple de fichier csv :
+
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| attribut | type | description | requis | valeurs possible | valeur par défaut
+
+|my_csv_file
+|String
+|le path du fichier csv a importer.
+|Oui
+|
+|
+
+|mapping.name
+|String
+|le nom du colonne qui correspond à "name".
+|Non
+|
+|"metric"
+
+|mapping.value
+|String
+|le nom du colonne qui correspond à "value".
+|Non
+|
+|"value"
+
+|mapping.timestamp
+|String
+|le nom du colonne qui correspond à "timestamp".
+|Non
+|
+|"timestamp"
+
+|mapping.quality
+|String
+|le nom du colonne qui correspond à "quality".
+|Non
+|
+|"quality"
+
+|mapping.tags
+|String
+|le nom du colonne à considérer comme un tag.
+|Non
+|doit être un parmis les noms des colonne
+|"name"
+
+|timestamp_unit
+|String
+|l'unité du timestamp, si le temps est en timestamp.
+|Non
+|doit être un parmis: MILLISECONDS_EPOCH, SECONDS_EPOCH, MICROSECONDS_EPOCH ou NANOSECONDS_EPOCH
+|"MILLISECONDS_EPOCH"
+
+|group_by
+|String
+|le nom du champs qu'on va utiliser pour grouper avec.
+|Non
+|doit être un parmis les champs qu'on a considéré comme tag.
+|"name"
+
+|format_date
+|String
+|la format du date dans le csv.
+|Non
+|doit être une format de date valide.
+|
+
+|timezone_date
+|String
+|le timezone du date dans le csv.
+|Non
+|doit être un timezone valide.
+|"UTC"
+
+|===
+
+
+
+* Si c'est bien passé on a une reponse 201 CREATED :
+
+avec la requête :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/historian-server/ingestion/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@path/de/mon/csv/file.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F timestamp_unit=MILLISECONDS_EPOCH \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-D-m HH:mm:ss.SSS \
+-F timezone_date=UTC \
+----
+et le fichier "file.csv" :
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+on recoit cette réponse :
+[source,json]
+----
+{
+  "tags": ["sensor", "code_install"],
+  "grouped_by": ["name", "sensor"],
+  "report" : [
+    {
+      "name": "metric_1",
+      "sensor": "sensor_1",
+      "number_of_points_injected": 4,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    },
+    {
+      "name": "metric_1",
+      "sensor": "sensor_2",
+      "number_of_points_injected": 2,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    },
+    {
+      "name": "metric_2",
+      "sensor": "sensor_2",
+      "number_of_points_injected": 2,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    }
+  ]
+}
+----
+(on remarque ici on'a utilisé le même fichier deux fois.)
+
+.Paramètres de la réponse
+[cols="13,10,40"]
+|===
+| json path | type | description
+
+|tags
+|array
+|les tags existantes.
+
+|grouped_by
+|array
+|les champs qui sont utilisés pour le group by.
+
+|report
+|json object
+|un rapport sur les chunks qui ont été injectés.
+
+|===
+
+
+* Si il y a un problème avec la requête on a une réponse 400 BAD_REQUEST.
+
+* Si il y a un autre problème on a une réponse 500.
