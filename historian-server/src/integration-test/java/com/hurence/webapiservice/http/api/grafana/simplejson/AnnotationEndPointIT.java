@@ -86,7 +86,7 @@ public class AnnotationEndPointIT {
         client.commit(COLLECTION_ANNOTATION);
         LOGGER.info("Indexed some documents in {} collection", COLLECTION_ANNOTATION);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.ANNOTATIONS_ENDPOINT);
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.SIMPLE_JSON_GRAFANA_ANNOTATIONS_API_ENDPOINT);
     }
 
     @AfterAll
@@ -153,7 +153,7 @@ public class AnnotationEndPointIT {
                                                                    String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post(HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.ANNOTATIONS_ENDPOINT)
+        webClient.post(HttpServerVerticle.SIMPLE_JSON_GRAFANA_ANNOTATIONS_API_ENDPOINT)
                 .as(BodyCodec.jsonArray())
                 .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {

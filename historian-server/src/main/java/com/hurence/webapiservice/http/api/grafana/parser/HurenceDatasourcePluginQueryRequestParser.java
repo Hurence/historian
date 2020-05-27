@@ -64,6 +64,11 @@ public class HurenceDatasourcePluginQueryRequestParser {
         List<String> metricNames = parseMetricNames(requestBody);
         if (metricNames != null) {
             builder.withMetricNames(metricNames);
+        } else {
+            throw new IllegalArgumentException(String.format(
+                    "request json should contain at least one name metric at path '%s'." +
+                            "\nrequest received is %s", namesJsonPath, requestBody.encodePrettily()
+            ));
         }
         Integer maxDataPoints = parseMaxDataPoints(requestBody);
         if (maxDataPoints != null) {

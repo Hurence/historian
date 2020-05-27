@@ -38,15 +38,39 @@ public class HttpServerVerticle extends AbstractVerticle {
 
     private HistorianService historianService;
 
-    public static final String MAIN_API_ENDPOINT = "/api/historian/v0";
-    public static final String GRAFANA_API_ENDPOINT = "/api/grafana";
-    public static final String INGESTION_API_ENDPOINT = MAIN_API_ENDPOINT + "/import";
-    public static final String TEST_API_ENDPOINT = "/test/api";
-    public static final GrafanaApiVersion GRAFANA_API_VEFSION_DEFAULT = GrafanaApiVersion.SIMPLE_JSON_PLUGIN;
-    public static final String IMPORT_CSV_ENDPOINT = HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.CSV_ENDPOINT;
-    public static final String IMPORT_JSON_ENDPOINT = HttpServerVerticle.INGESTION_API_ENDPOINT + IngestionApi.JSON_ENDPOINT;
-    public static final String GRAFANA_QUERY_ENDPOINT = HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.QUERY_ENDPOINT;
-    public static final String MAIN_QUERY_ENDPOINT = HttpServerVerticle.MAIN_API_ENDPOINT + MainHistorianApi.QUERY_ENDPOINT;
+    //main
+    private static final String MAIN_API_ENDPOINT = "/api/historian/v0";
+    public static final String CSV_EXPORT_ENDPOINT = MAIN_API_ENDPOINT + MainHistorianApi.EXPORT_ENDPOINT;
+    private static final String IMPORT_ENDPOINT = MAIN_API_ENDPOINT + "/import";
+    public static final String IMPORT_CSV_ENDPOINT = IMPORT_ENDPOINT + IngestionApi.CSV_ENDPOINT;
+    public static final String IMPORT_JSON_ENDPOINT = IMPORT_ENDPOINT + IngestionApi.JSON_ENDPOINT;
+    //grafana
+    private static final String GRAFANA_API_ENDPOINT = "/api/grafana";
+    private static final String SIMPLE_JSON_GRAFANA_API_ENDPOINT = GRAFANA_API_ENDPOINT + "/simplejson";
+    public static final String SIMPLE_JSON_GRAFANA_QUERY_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
+            GrafanaApi.QUERY_ENDPOINT;
+    public static final String SIMPLE_JSON_GRAFANA_SEARCH_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
+            GrafanaApi.SEARCH_ENDPOINT;
+    public static final String SIMPLE_JSON_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
+            GrafanaApi.ANNOTATIONS_ENDPOINT;
+    public static final String SIMPLE_JSON_GRAFANA_TAG_KEYS_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
+            GrafanaApi.TAG_KEYS_ENDPOINT;
+    public static final String SIMPLE_JSON_GRAFANA_TAG_VALUES_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
+            GrafanaApi.TAG_VALUES_ENDPOINT;
+    private static final String HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT = GRAFANA_API_ENDPOINT + "/v0";
+    public static final String HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
+            GrafanaApi.QUERY_ENDPOINT;
+    public static final String HURENCE_DATASOURCE_GRAFANA_SEARCH_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
+            GrafanaApi.SEARCH_ENDPOINT;
+    public static final String HURENCE_DATASOURCE_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
+            GrafanaApi.ANNOTATIONS_ENDPOINT;
+    public static final String HURENCE_DATASOURCE_GRAFANA_TAG_KEYS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
+            GrafanaApi.TAG_KEYS_ENDPOINT;
+    public static final String HURENCE_DATASOURCE_GRAFANA_TAG_VALUES_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
+            GrafanaApi.TAG_VALUES_ENDPOINT;
+
+    //test endpoints
+    private static final String TEST_API_ENDPOINT = "/test/api";
     public static final String TEST_CHUNK_QUERY_ENDPOINT = HttpServerVerticle.TEST_API_ENDPOINT + TestHistorianApi.QUERY_CHUNK_ENDPOINT;
 
     @Override
@@ -62,17 +86,18 @@ public class HttpServerVerticle extends AbstractVerticle {
         Router router = Router.router(vertx);
 
         router.route().handler(BodyHandler.create());
-
+        //main
         Router mainApi = new MainHistorianApiImpl(historianService, maxDataPointsAllowedForExportCsv).getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
-
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
-        router.mountSubRouter(INGESTION_API_ENDPOINT, importApi);
+        router.mountSubRouter(IMPORT_ENDPOINT, importApi);
+        //grafana
+        Router hurenceGraphanaApi = GrafanaApi.fromVersion(GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN, historianService).getGraphanaRouter(vertx);
+        Router simpleJsonGraphanaApi = GrafanaApi.fromVersion(GrafanaApiVersion.SIMPLE_JSON_PLUGIN, historianService).getGraphanaRouter(vertx);
+        router.mountSubRouter(SIMPLE_JSON_GRAFANA_API_ENDPOINT, simpleJsonGraphanaApi);
+        router.mountSubRouter(HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT, hurenceGraphanaApi);
 
-        GrafanaApiVersion grafanaApiVersion = getGrafanaApiVersion();
-        Router graphanaApi = GrafanaApi.fromVersion(grafanaApiVersion, historianService).getGraphanaRouter(vertx);
-        router.mountSubRouter(GRAFANA_API_ENDPOINT, graphanaApi);
-
+        //test
         if (debugMode) {
             Router debugApi = new TestHistorianApiImpl(historianService).getMainRouter(vertx);
             router.mountSubRouter(TEST_API_ENDPOINT, debugApi);
@@ -95,14 +120,14 @@ public class HttpServerVerticle extends AbstractVerticle {
                 });
     }
 
-    private GrafanaApiVersion getGrafanaApiVersion() {
-        String apiversion;
-        try {
-            apiversion = config().getJsonObject(GRAFANA).getString(VERSION, GRAFANA_API_VEFSION_DEFAULT.toString());
-        } catch (Exception ex) {
-            LOGGER.info("grafana version is not defined. We will use default version which is " +  GRAFANA_API_VEFSION_DEFAULT);
-            return GRAFANA_API_VEFSION_DEFAULT;
-        }
-        return GrafanaApiVersion.valueOf(apiversion.toUpperCase());
-    }
+//    private GrafanaApiVersion getGrafanaApiVersion() {
+//        String apiversion;
+//        try {
+//            apiversion = config().getJsonObject(GRAFANA).getString(VERSION, GRAFANA_API_VEFSION_DEFAULT.toString());
+//        } catch (Exception ex) {
+//            LOGGER.info("grafana version is not defined. We will use default version which is " +  GRAFANA_API_VEFSION_DEFAULT);
+//            return GRAFANA_API_VEFSION_DEFAULT;
+//        }
+//        return GrafanaApiVersion.valueOf(apiversion.toUpperCase());
+//    }
 }

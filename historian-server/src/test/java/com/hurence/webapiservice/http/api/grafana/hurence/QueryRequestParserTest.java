@@ -16,7 +16,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.stream.IntStream;
 
-import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePliginApiImpl.*;
+import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryRequestParserTest {

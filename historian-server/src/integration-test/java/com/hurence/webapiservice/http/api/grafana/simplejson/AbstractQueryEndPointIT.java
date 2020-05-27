@@ -26,7 +26,7 @@ public abstract class AbstractQueryEndPointIT {
 
     @BeforeAll
     public static void setupClient(Vertx vertx) {
-        assertHelper = new AssertResponseGivenRequestHelper(HttpITHelper.buildWebClient(vertx), HttpServerVerticle.GRAFANA_QUERY_ENDPOINT);
+        assertHelper = new AssertResponseGivenRequestHelper(HttpITHelper.buildWebClient(vertx), HttpServerVerticle.SIMPLE_JSON_GRAFANA_QUERY_API_ENDPOINT);
     }
 
     @AfterAll
