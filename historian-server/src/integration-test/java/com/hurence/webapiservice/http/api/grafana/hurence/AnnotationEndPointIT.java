@@ -95,7 +95,7 @@ public class AnnotationEndPointIT {
         client.commit(COLLECTION_ANNOTATION);
         LOGGER.info("Indexed some documents in {} collection", COLLECTION_ANNOTATION);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.ANNOTATIONS_ENDPOINT);
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_ANNOTATIONS_API_ENDPOINT);
         JsonObject httpConf = new JsonObject()
                 .put(HttpServerVerticle.GRAFANA,
                         new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
@@ -169,7 +169,7 @@ public class AnnotationEndPointIT {
                                                                    String requestFile, String responseFile) {
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post(HttpServerVerticle.GRAFANA_API_ENDPOINT + GrafanaApi.ANNOTATIONS_ENDPOINT)
+        webClient.post(HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_ANNOTATIONS_API_ENDPOINT)
                 .as(BodyCodec.jsonObject())
                 .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {

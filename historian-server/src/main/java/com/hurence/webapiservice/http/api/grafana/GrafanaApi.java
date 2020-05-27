@@ -14,7 +14,7 @@ public interface GrafanaApi {
             case SIMPLE_JSON_PLUGIN:
                 return new GrafanaSimpleJsonPluginApiImpl(historianService);
             case HURENCE_DATASOURCE_PLUGIN:
-                return new GrafanaHurenceDatasourcePliginApiImpl(historianService);
+                return new GrafanaHurenceDatasourcePluginApiImpl(historianService);
             default:
                 throw new IllegalArgumentException(String.format("version %s is not yet supported !", grafanaApiVersion));
         }

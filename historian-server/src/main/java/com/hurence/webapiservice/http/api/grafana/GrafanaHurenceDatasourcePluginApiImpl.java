@@ -21,11 +21,11 @@ import org.slf4j.LoggerFactory;
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
-public class GrafanaHurenceDatasourcePliginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
+public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GrafanaHurenceDatasourcePliginApiImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GrafanaHurenceDatasourcePluginApiImpl.class);
 
-    public GrafanaHurenceDatasourcePliginApiImpl(HistorianService service) {
+    public GrafanaHurenceDatasourcePluginApiImpl(HistorianService service) {
         super(service);
     }
 

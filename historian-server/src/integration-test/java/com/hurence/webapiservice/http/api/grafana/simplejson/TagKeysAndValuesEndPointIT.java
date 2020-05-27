@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.simplejson;
 
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.reactivex.ext.web.client.WebClient;
@@ -37,8 +38,8 @@ public class TagKeysAndValuesEndPointIT {
         HttpWithHistorianSolrITHelper
                 .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertTagKeyHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/tag-keys");
-        assertTagValueHelper = new AssertResponseGivenRequestHelper(webClient, "/api/grafana/tag-values");
+        assertTagKeyHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.SIMPLE_JSON_GRAFANA_TAG_KEYS_API_ENDPOINT);
+        assertTagValueHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.SIMPLE_JSON_GRAFANA_TAG_VALUES_API_ENDPOINT);
     }
 
     @AfterAll

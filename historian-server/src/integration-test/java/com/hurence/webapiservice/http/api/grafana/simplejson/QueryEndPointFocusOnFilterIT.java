@@ -87,7 +87,7 @@ public class QueryEndPointFocusOnFilterIT {
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.GRAFANA_QUERY_ENDPOINT);
+        assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.SIMPLE_JSON_GRAFANA_QUERY_API_ENDPOINT);
         JsonObject httpConf = new JsonObject()
                 .put(HttpServerVerticle.GRAFANA,
                         new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.SIMPLE_JSON_PLUGIN.toString()));
