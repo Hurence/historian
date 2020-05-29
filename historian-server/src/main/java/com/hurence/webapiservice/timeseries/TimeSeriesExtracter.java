@@ -1,7 +1,10 @@
 package com.hurence.webapiservice.timeseries;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
+
+import java.util.List;
 
 public interface TimeSeriesExtracter {
 
@@ -21,4 +24,6 @@ public interface TimeSeriesExtracter {
     long chunkCount();
 
     long pointCount();
+
+    void calculateAggreg();
 }

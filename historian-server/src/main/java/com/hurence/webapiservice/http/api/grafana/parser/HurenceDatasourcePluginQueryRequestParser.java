@@ -25,6 +25,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
     private final String samplingAlgoJsonPath;
     private final String bucketSizeJsonPath;
     private final String requestIdJsonPath;
+    private final String aggregationPath;
 
     public HurenceDatasourcePluginQueryRequestParser(String fromJsonPath,
                                                      String toJsonPath,
@@ -34,7 +35,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                                      String tagsJsonPath,
                                                      String samplingAlgoJsonPath,
                                                      String bucketSizeJsonPath,
-                                                     String requestIdJsonPath) {
+                                                     String requestIdJsonPath,
+                                                     String aggregationPath) {
         this.fromJsonPath = fromJsonPath;
         this.toJsonPath = toJsonPath;
         this.namesJsonPath = namesJsonPath;
@@ -44,6 +46,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.samplingAlgoJsonPath = samplingAlgoJsonPath;
         this.bucketSizeJsonPath = bucketSizeJsonPath;
         this.requestIdJsonPath = requestIdJsonPath;
+        this.aggregationPath= aggregationPath;
     }
 
     public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
@@ -90,7 +93,15 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (requestId != null) {
             builder.withRequestId(requestId);
         }
+        List<String> agreg = parseAggreg(requestBody);
+        if (agreg != null) {
+            builder.withAggreg(agreg);
+        }
         return builder.build();
+    }
+
+    private List<String> parseAggreg(JsonObject requestBody) {
+        return parseListString(requestBody, aggregationPath);
     }
 
     private String parseRequestId(JsonObject requestBody) {

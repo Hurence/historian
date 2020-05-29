@@ -103,6 +103,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
     public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
+    public final static String AGGREGATION_JSON_PATH = "/agreg";
 
     /**
      *  used to query metrics datapoints in grafana panels.
@@ -170,7 +171,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH)
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH)
                     .parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
@@ -232,7 +233,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(HistorianFields.TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
+                .put(AGGREGATION, request.getAggs());
     }
     /**
      *  used to the find annotations.

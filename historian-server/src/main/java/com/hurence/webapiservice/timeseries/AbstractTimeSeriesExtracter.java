@@ -2,16 +2,19 @@ package com.hurence.webapiservice.timeseries;
 
 import com.hurence.logisland.record.Point;
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.hurence.historian.modele.HistorianFields.*;
 
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
 
@@ -23,17 +26,20 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
+    List<AGG> aggregList = new ArrayList<>();
+    final Map<String, Double> aggregValuesList = new HashMap<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
 
     public AbstractTimeSeriesExtracter(String metricName, long from, long to,
                                        SamplingConf samplingConf,
-                                       long totalNumberOfPoint) {
+                                       long totalNumberOfPoint, List<AGG> aggregList) {
         this.metricName = metricName;
         this.from = from;
         this.to = to;
         this.samplingConf = TimeSeriesExtracterUtil.calculSamplingConf(samplingConf, totalNumberOfPoint);
+        this.aggregList = aggregList;
         LOGGER.debug("Initialized {}  with samplingConf : {}", this.getClass(), this.samplingConf);
     }
 
@@ -43,6 +49,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD);
         chunks.add(chunk);
         if (isBufferFull()) {
+            calculateAggreg(); // is this correct
             samplePointsInBufferThenReset();
         }
     }
@@ -55,6 +62,14 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     public void flush() {
         if (!chunks.isEmpty())
             samplePointsInBufferThenReset();
+    }
+
+    /**
+     * Calcule the aggregations from the list of aggregations and the Lst of chunks . Add them into aggreg values list.
+     */
+    @Override
+    public void calculateAggreg() {
+     
     }
 
     /**

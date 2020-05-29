@@ -610,6 +610,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         SamplingConf requestedSamplingConf = getSamplingConf(params);
         MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf);
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
+        fillingExtractorWithAggregToReturn(timeSeriesExtracter,params);
         return timeSeriesExtracter;
     }
 
@@ -620,7 +621,11 @@ public class SolrHistorianServiceImpl implements HistorianService {
         SamplingConf requestedSamplingConf = getSamplingConf(params);
         MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf);
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
+        fillingExtractorWithAggregToReturn(timeSeriesExtracter,params);
         return timeSeriesExtracter;
+    }
+
+    private void fillingExtractorWithAggregToReturn(MultiTimeSeriesExtracterImpl timeSeriesExtracter, JsonObject params) {
     }
 
     private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,
@@ -644,6 +649,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
             timeSeriesExtracter.addChunk(chunk);
             chunk = stream.read();
         }
+        timeSeriesExtracter.calculateAggreg();
         timeSeriesExtracter.flush();
         LOGGER.debug("read {} chunks in stream", stream.getNumberOfDocRead());
         LOGGER.debug("extractTimeSeries response metric : {}", chunk.encodePrettily());
@@ -659,7 +665,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
     private JsonObject buildTimeSeriesResponse(MultiTimeSeriesExtracter timeSeriesExtracter) {
         return new JsonObject()
                 .put(TOTAL_POINTS, timeSeriesExtracter.pointCount())
-                .put(TIMESERIES, timeSeriesExtracter.getTimeSeries());
+                .put(TIMESERIES, timeSeriesExtracter.getTimeSeries())
+                .put(AGGREGATION, timeSeriesExtracter.getAggregation());
     }
 
     private JsonStream queryStream(SolrQuery query) {

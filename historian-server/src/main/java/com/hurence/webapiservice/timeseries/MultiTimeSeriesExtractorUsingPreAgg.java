@@ -10,6 +10,6 @@ public class MultiTimeSeriesExtractorUsingPreAgg extends MultiTimeSeriesExtracte
 
     @Override
     protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {
-        return new TimeSeriesExtracterUsingPreAgg(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName));
+        return new TimeSeriesExtracterUsingPreAgg(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName), aggregList);
     }
 }

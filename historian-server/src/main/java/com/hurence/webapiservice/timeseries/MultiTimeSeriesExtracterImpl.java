@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.timeseries;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -18,6 +19,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     private Map<String, TimeSeriesExtracter> bucketerByMetrics = new HashMap<>();
     Map<String, Long> totalNumberOfPointByMetrics = new HashMap<>();
+    List<AGG> aggregList;
     final long from;
     final long to;
     final SamplingConf samplingConf;
@@ -43,8 +45,16 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
                 .forEach(TimeSeriesExtracter::flush);
     }
 
+    /**
+     * Calcule the aggregations. Add them into aggreg Values List
+     */
+    public void calculateAggreg() {
+        bucketerByMetrics.values()
+                .forEach(TimeSeriesExtracter::calculateAggreg);
+    }
+
     protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {
-        return new TimeSeriesExtracterImpl(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName));
+        return new TimeSeriesExtracterImpl(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName), aggregList);
     }
 
     public void setTotalNumberOfPointForMetric(String metric, long totalNumberOfPoints) {
@@ -59,6 +69,10 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
         JsonArray toReturn = new JsonArray(timeseries);
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
+    }
+
+    public JsonObject getAggregation() {
+        return null;
     }
 
     @Override

@@ -3,6 +3,7 @@ package com.hurence.webapiservice.timeseries;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.Sampler;
 import com.hurence.logisland.timeseries.sampling.SamplerFactory;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
@@ -21,8 +22,9 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     public TimeSeriesExtracterImpl(String metricName, long from, long to,
                                    SamplingConf samplingConf,
-                                   long totalNumberOfPoint) {
-        super(metricName, from, to, samplingConf, totalNumberOfPoint);
+                                   long totalNumberOfPoint,
+                                   List<AGG> aggregList) {
+        super(metricName, from, to, samplingConf, totalNumberOfPoint, aggregList);
         sampler = SamplerFactory.getPointSampler(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
     }
 

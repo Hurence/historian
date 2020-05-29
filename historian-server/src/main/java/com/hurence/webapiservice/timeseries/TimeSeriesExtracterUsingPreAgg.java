@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.timeseries;
 
 import com.hurence.logisland.record.Point;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
@@ -19,8 +20,8 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterUsingPreAgg.class);
 
-    public TimeSeriesExtracterUsingPreAgg(String metricName, long from, long to, SamplingConf samplingConf, long totalNumberOfPoint) {
-        super(metricName, from, to, samplingConf, totalNumberOfPoint);
+    public TimeSeriesExtracterUsingPreAgg(String metricName, long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
+        super(metricName, from, to, samplingConf, totalNumberOfPoint, aggregList);
     }
 
     @Override

@@ -30,10 +30,11 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     private final int bucketSize;
     private final Map<String, String> tags;
     private final String requestId;
+    private final List<AGG> aggregList;  // TODO here i can make the agreg a Map<String,AGG> if i want a diff agreg for diff metrics
 
     private HurenceDatasourcePluginQueryRequestParam(List<String> metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
-                                                     Map<String, String> tags, String requestId) {
+                                                 Map<String, String> tags, String requestId, List<AGG> aggregList) {
         Objects.requireNonNull(metricNames);
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
@@ -45,6 +46,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         this.bucketSize = bucketSize;
         this.tags = tags;
         this.requestId = requestId;
+        this.aggregList = aggregList;
     }
 
     @Override
@@ -54,7 +56,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
 
     @Override
     public List<AGG> getAggs() {
-        return Collections.emptyList();
+        return aggregList;
     }
 
     @Override
@@ -92,6 +94,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         private int bucketSize = DEFAULT_BUCKET_SIZE;
         private Map<String, String> tags = DEFAULT_TAGS;
         private String requestId = DEFAULT_REQUEST_ID;
+        private List<AGG> aggreg;
 
         public Builder withMetricNames(List<String> metricNames) {
             this.metricNames = metricNames;
@@ -140,7 +143,11 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
 
         public HurenceDatasourcePluginQueryRequestParam build() {
             return new HurenceDatasourcePluginQueryRequestParam(metricNames, from, to, format, maxDataPoints,
-                    samplingAlgo, bucketSize, tags, requestId);
+                    samplingAlgo, bucketSize, tags, requestId, aggreg);
+        }
+
+        public void withAggreg(List<String> agreg) {
+            this.aggreg = aggreg;
         }
     }
 }
