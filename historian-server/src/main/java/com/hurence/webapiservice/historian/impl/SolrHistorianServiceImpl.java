@@ -626,6 +626,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     private void fillingExtractorWithAggregToReturn(MultiTimeSeriesExtracterImpl timeSeriesExtracter, JsonObject params) {
+        timeSeriesExtracter.setAggregationList(params.getJsonArray("agreg", new JsonArray()));
     }
 
     private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,
@@ -665,8 +666,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     private JsonObject buildTimeSeriesResponse(MultiTimeSeriesExtracter timeSeriesExtracter) {
         return new JsonObject()
                 .put(TOTAL_POINTS, timeSeriesExtracter.pointCount())
-                .put(TIMESERIES, timeSeriesExtracter.getTimeSeries())
-                .put(AGGREGATION, timeSeriesExtracter.getAggregation());
+                .put(TIMESERIES, timeSeriesExtracter.getTimeSeries());
     }
 
     private JsonStream queryStream(SolrQuery query) {

@@ -69,7 +69,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
      */
     @Override
     public void calculateAggreg() {
-     
+
     }
 
     /**
@@ -105,7 +105,8 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_NAME, metricName)
-                .put(TIMESERIE_POINT, new JsonArray(points));
+                .put(TIMESERIE_POINT, new JsonArray(points))
+                .put(AGGREGATION, aggregValuesList);
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
     }

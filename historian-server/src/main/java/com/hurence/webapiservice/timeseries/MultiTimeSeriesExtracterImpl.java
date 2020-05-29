@@ -53,6 +53,11 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
                 .forEach(TimeSeriesExtracter::calculateAggreg);
     }
 
+    @Override
+    public void setAggregationList(JsonArray aggregationList) {
+        aggregList = aggregationList.getList();
+    }
+
     protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {
         return new TimeSeriesExtracterImpl(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName), aggregList);
     }
