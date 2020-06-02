@@ -316,60 +316,26 @@ Exemple de requête minimal :
 ]
 ----
 
-.Paramètres de la requête
+Le corp de la requête attendue est une liste json d'objet. Chaque objet doit être composé des attribut suivants :
+
+
+.Propriété des objets json
 [cols="13,10,40,7,20,10"]
 |===
-| json path | type | description | requis | valeurs possible | valeur par défaut
+| json path | type | description | requis
 
-|/targets
-|array
-|Permet de renseigner les métriques pour lesquelles on souhaite obtenir des points.
+|/name
+|String
+|Le nom de la métrique pour laquelle on va injecter les points.
 |Oui
-|
-|
 
-|/targets/target
-|String
-|Le nom d'une métrique pour laquelle on souhaite obtenir des points.
-|Oui (au moins une métrique doit être renseigné)
-|
-|
+|/points
+|Array d'array
+|Les points pour créer un chunk avec le nom ed métrique assigné à 'name'. Les points sont a renseigné sous la forme
+[[timestsamp<long>, value<double>],..,[timestsamp<long>, value<double>]].
+|Oui
 
-|/range/from
-|String
-|La date de début pour rechercher les points. Il ne sera retourner que les points avec une
-date supérieur ou égal à cette date.
-|Non
-|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
-|Le 1 Janvier 1960 (UTC)
-
-|/range/to
-|String
-|La date de fin pour rechercher les points. Il ne sera retourner que les points avec une
-date inférieur ou égal à cette date.
-|Non
-|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
-|La valeur par défaut est l'infini
-
-|/maxDataPoints
-|long
-|Le nombre maximum de point désirer pour chaque métrique (En effet le but est de tracer des points sur un graphe).
-Si nécessaire les points seront echantilloné avec un algorithm sa sampling par défaut.
-|Non
-|positif
-|1000
-
-|/adhocFilters
-|String
-|Utiliser par grafana
-|Non
-|
-|
 |===
-
-
-NOTE: Le reste des paramètres sont des paramètres qui sont envoyé par grafana
-mais qui ne sont pas exploité pour le moment.
 
 Exemple de réponse
 
@@ -393,10 +359,6 @@ Exemple de réponse
 ]
 ----
 
-
-
-
-TODO
 
 === Export de données
 
@@ -806,32 +768,18 @@ Exemple de requête :
 [source,json]
 ----
 {
-    "panelId": 1,
-    "range": {
-        "from": "2016-10-31T06:33:44.866Z",
-        "to": "2016-10-31T12:33:44.866Z",
-        "raw": {
-            "from": "now-6h",
-            "to": "now"
-        }
-    },
-    "rangeRaw": {
-        "from": "now-6h",
-        "to": "now"
-    },
-    "interval": "30s",
-    "intervalMs": 30000,
-    "targets": [
-        { "target": "upper_50", "refId": "A", "type": "timeserie" },
-        { "target": "upper_75", "refId": "B", "type": "timeserie" }
-    ],
-    "adhocFilters": [{
-        "key": "City",
-        "operator": "=",
-        "value": "Berlin"
-    }],
-    "format": "json",
-    "maxDataPoints": 550
+  "from": "2016-10-31T06:33:44.866Z",
+  "to": "2020-10-31T12:33:44.866Z",
+  "names": ["metric_1"],
+  "format": "json",
+  "max_data_points": 30,
+  "tags": {
+      "sensor" : "sensor_1"
+  },
+  "sampling":{
+     "algorithm": "MIN",
+     "bucket_size" : 100
+  }
 }
 ----
 
@@ -839,33 +787,51 @@ Exemple de requête minimal :
 
 [source,json]
 ----
-{
-    "targets": [
-      { "target": "upper_50" }
-    ]
-}
+[
+    {
+        "name": "metric_1",
+        "datapoints": [
+            [
+                622,
+                1477895624866
+            ],
+            [
+                -3,
+                1477916224866
+            ],
+            [
+                365,
+                1477917224866
+            ]
+        ]
+    }
+]
 ----
+
+
+{
+"tags": {
+"sensor" : "sensor_1"
+},
+"sampling":{
+"algorithm": "MIN",
+"bucket_size" : 100
+}
+}
 
 .Paramètres de la requête
 [cols="13,10,40,7,20,10"]
 |===
 | json path | type | description | requis | valeurs possible | valeur par défaut
 
-|/targets
+|/names
 |array
 |Permet de renseigner les métriques pour lesquelles on souhaite obtenir des points.
 |Oui
 |
 |
 
-|/targets/target
-|String
-|Le nom d'une métrique pour laquelle on souhaite obtenir des points.
-|Oui (au moins une métrique doit être renseigné)
-|
-|
-
-|/range/from
+|from
 |String
 |La date de début pour rechercher les points. Il ne sera retourner que les points avec une
 date supérieur ou égal à cette date.
@@ -873,7 +839,7 @@ date supérieur ou égal à cette date.
 |Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
 |Le 1 Janvier 1960 (UTC)
 
-|/range/to
+|to
 |String
 |La date de fin pour rechercher les points. Il ne sera retourner que les points avec une
 date inférieur ou égal à cette date.
@@ -881,7 +847,7 @@ date inférieur ou égal à cette date.
 |Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
 |La valeur par défaut est l'infini
 
-|/maxDataPoints
+|/max_data_points
 |long
 |Le nombre maximum de point désirer pour chaque métrique (En effet le but est de tracer des points sur un graphe).
 Si nécessaire les points seront echantilloné avec un algorithm sa sampling par défaut.
@@ -889,17 +855,39 @@ Si nécessaire les points seront echantilloné avec un algorithm sa sampling par
 |positif
 |1000
 
-|/adhocFilters
+|/sampling
 |String
-|Utiliser par grafana
+|Un objet qui va contenir les information des paramètres à utiliser pour l'echantillonage des points si le nombre de points
+a retourner est supérieur au nombre maximum de point demandé.
 |Non
 |
 |
+
+|/sampling/algorithm
+|String
+|L'algorithme a utilisé pour l'échantillonage
+|Non
+|les valeurs possibles sont ["NONE", "AVERAGE", "FIRST", "MIN", "MAX"]
+|AVERAGE (la moyenne des points pour chaque bucket, le timestamp utilisé est celui du premier point du bucket)
+
+|/sampling/bucket_size
+|Int
+|La taille des buckets souhaité pour échantillonné les données. Attention cette taille peut être changé par le serveur
+si cela est incompatible avec le nombre maximum de point retourné souhaité.
+|Non
+|
+|Calculer automatiquement par le serveur afin d'obtenir au plus le nombre maximum de points.
+
+|/tags
+|String
+|Permet d'obtenir uniquement les points des chunks qui contiennent les tags renseignés. Les tags doivent être indiqué
+sous la forme d'une map de clé valeur.
+|Non
+|
+|Pas de tags.
+
 |===
 
-
-NOTE: Le reste des paramètres sont des paramètres qui sont envoyé par grafana
-mais qui ne sont pas exploité pour le moment.
 
 Exemple de réponse
 
@@ -907,14 +895,14 @@ Exemple de réponse
 ----
 [
   {
-    "target":"upper_75",
+    "name":"upper_75",
     "datapoints":[
       [622,1450754160000],
       [365,1450754220000]
     ]
   },
   {
-    "target":"upper_90",
+    "name":"upper_90",
     "datapoints":[
       [861,1450754160000],
       [767,1450754220000]
@@ -922,8 +910,6 @@ Exemple de réponse
   }
 ]
 ----
-
-TODO modify request and response
 
 [[grafana-hurence-datasource-search]]
 ===== POST /api/grafana/v0/search
@@ -935,7 +921,10 @@ Exemple de requête :
 
 [source,json]
 ----
-{ "target": "upper_50" }
+{
+  "name": "upper_50",
+  "limit": 5
+}
 ----
 
 .Paramètres de la requête
@@ -943,12 +932,20 @@ Exemple de requête :
 |===
 | json path | type | description | requis | valeurs possible | valeur par défaut
 
-|/target
+|/name
 |String
-|Une partie du nom de la métric recherché.
+|Une partie du nom de la métrique recherché.
 |Non
 |
 |
+
+|/limit
+|Int
+|Le nombre maximum de nom de métrique a retourné.
+|Non
+|
+|
+
 |===
 
 NOTE: Le corps de la requête est optionnel.
@@ -960,8 +957,6 @@ Exemple de réponse :
 ["upper_25","upper_50","upper_75","upper_90","upper_95"]
 ----
 
-TODO check différences
-
 [[grafana-hurence-datasource-annotations]]
 ===== POST /api/grafana/v0/annotations
 
@@ -972,10 +967,8 @@ Exemple de requête :
 [source,json]
 ----
 {
-  "range": {
-    "from": "2020-2-14T01:43:14.070Z",
-    "to": "2020-2-14T06:50:14.070Z"
-  },
+  "from": "2020-2-14T01:43:14.070Z",
+  "to": "2020-2-14T06:50:14.070Z",
   "limit" : 100,
   "tags": ["tag1", "tag2"],
   "matchAny": false,
@@ -1009,7 +1002,7 @@ Exemple de réponse actuelle
 |===
 | json path | type | description | requis | valeurs possible | valeur par défaut
 
-|/range/from
+|/from
 |String
 |La date de début pour rechercher les annotations. Il ne sera retourner que les annotations avec une
 date supérieur ou égal à cette date.
@@ -1017,7 +1010,7 @@ date supérieur ou égal à cette date.
 |Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
 |Le 1 Janvier 1960 (UTC)
 
-|/range/to
+|/to
 |String
 |La date de fin pour rechercher les annotations. Il ne sera retourner que les annotations avec une
 date inférieur ou égal à cette date.
@@ -1074,65 +1067,18 @@ Exemple de réponse :
 [source,json]
 ----
 [
-    {"type":"string","text":"City"},
-    {"type":"string","text":"Country"}
+    {
+        "type": "string",
+        "text": "Algo"
+    },
+    {
+        "type": "int",
+        "text": "Bucket size"
+    }
 ]
 ----
 
 Les valeurs dans text sont les valeurs utilsable comme clé dans l'endpoint tag-values.
-
-.Paramètres de la requête
-[cols="13,10,40,7,20,10"]
-|===
-| json path | type | description | requis | valeurs possible | valeur par défaut
-
-|/range/from
-|String
-|La date de début pour rechercher les annotations. Il ne sera retourner que les annotations avec une
-date supérieur ou égal à cette date.
-|Non
-|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
-|Le 1 Janvier 1960 (UTC)
-
-|/range/to
-|String
-|La date de fin pour rechercher les annotations. Il ne sera retourner que les annotations avec une
-date inférieur ou égal à cette date.
-|Non
-|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
-|La valeur par défaut est l'infini
-
-|/limit
-|Integer
-|Le nombre maximum d'annotation a renvoyer
-|Non
-|entier positif
-|100
-
-|/tags
-|Liste de string
-|Le nom des tags pour filtrer les annotations. Le comportement dépend de la valeur du champs _/type_
-|Non
-|
-|[] (empty array)
-
-|/matchAny
-|Boolean
-|Si le champs _type_ vaut _TAGS_. Si _true_ les annotations doivent avoir au moins un des tags du champs _tags_
-sinon les annotations doivent contenir tous les tags.
-|Non
-|
-|true
-
-|/type
-|String
-|Le type de requête. Si la valeur est "ALL", toutes les annotations dans l'interval de temps sera renvoyé.
-Si le type est "TAGS", les annotations devront en plus contenir des tags (soit tous soit au moins un selon
-la valeur de _matchAny_.
-|Non
-|une valeur parmis [ALL, TAGS]
-|ALL
-|===
 
 [[grafana-hurence-datasource-tag-values]]
 ===== POST /api/grafana/simplejson/tag-values
@@ -1143,7 +1089,7 @@ Exemple de requête :
 
 [source,json]
 ----
-{"key": "City"}
+{"key": "Algo"}
 ----
 
 Exemple de réponse :
@@ -1151,9 +1097,21 @@ Exemple de réponse :
 [source,json]
 ----
 [
-    {"text": "Eins!"},
-    {"text": "Zwei"},
-    {"text": "Drei!"}
+    {
+        "text": "NONE"
+    },
+    {
+        "text": "AVERAGE"
+    },
+    {
+        "text": "FIRST"
+    },
+    {
+        "text": "MIN"
+    },
+    {
+        "text": "MAX"
+    }
 ]
 ----
 
