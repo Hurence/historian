@@ -42,7 +42,7 @@ public class HistorianSearchVerticleIT {
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         HistorianSolrITHelper
-                .deployHistorienVerticle(container, vertx)
+                .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
                             historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();

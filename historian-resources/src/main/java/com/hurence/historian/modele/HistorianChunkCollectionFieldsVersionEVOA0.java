@@ -24,8 +24,18 @@ public class HistorianChunkCollectionFieldsVersionEVOA0 {
     public static String CHUNK_MIN = TimeSeriesRecord.CHUNK_MIN;
     public static String CHUNK_END = TimeSeriesRecord.CHUNK_END;
     public static String CHUNK_AVG = TimeSeriesRecord.CHUNK_AVG;
+    public static String CHUNK_COUNT = TimeSeriesRecord.CHUNK_COUNT;
     public static String CHUNK_SIZE = TimeSeriesRecord.CHUNK_SIZE;
     public static String CHUNK_SIZE_BYTES = TimeSeriesRecord.CHUNK_SIZE_BYTES;
+    public static String CHUNK_WINDOW_MS = TimeSeriesRecord.CHUNK_WINDOW_MS;
+    public static String CODE_INSTALL = "code_install";
+    public static String NUMERIC_TYPE = "numeric_type";
+    public static String SENSOR = "sensor";
+    public static String VALUE = "value";
+    public static String TIMESTAMP = "timestamp";
+    public static String QUALITY = "quality";
+    public static String DELETE = "delete";
+    public static String FILE_PATH = "file_path";
     public static String CHUNK_SAX = TimeSeriesRecord.CHUNK_SAX;
     public static String CHUNK_TREND = TimeSeriesRecord.CHUNK_TREND;
     public static String CHUNK_ORIGIN = TimeSeriesRecord.CHUNK_ORIGIN;
@@ -37,7 +47,9 @@ public class HistorianChunkCollectionFieldsVersionEVOA0 {
     public static String CHUNK_MONTH = "month";
     public static String CHUNK_DAY = "day";
     public static String CHUNK_HOUR = "hour";
+    public static String CHUNK_WEEK = "week";
     public static String CHUNK_STDDEV = "chunk_stddev";
+    public static String TAGS = "tagname";
 }
 
 

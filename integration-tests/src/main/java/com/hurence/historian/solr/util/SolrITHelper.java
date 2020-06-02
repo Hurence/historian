@@ -151,6 +151,10 @@ public class SolrITHelper {
         }
     }
 
+    public static void createChunkCollection(String collectionName, String solrUrl, SchemaVersion modelVersion) throws IOException, InterruptedException, SolrServerException {
+        createChunkCollection(collectionName, solrUrl, modelVersion.toString());
+    }
+
     public static void createChunkCollection(String collectionName, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {
         Process process = getChunkCollectionCreationProcessBuilder(collectionName, solrUrl, modelVersion).start();
         waitProcessFinishedAndPrintResult(process);

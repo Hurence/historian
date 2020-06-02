@@ -14,7 +14,7 @@ public interface GrafanaApi {
             case SIMPLE_JSON_PLUGIN:
                 return new GrafanaSimpleJsonPluginApiImpl(historianService);
             case HURENCE_DATASOURCE_PLUGIN:
-                return new GrafanaHurenceDatasourcePliginApiImpl(historianService);
+                return new GrafanaHurenceDatasourcePluginApiImpl(historianService);
             default:
                 throw new IllegalArgumentException(String.format("version %s is not yet supported !", grafanaApiVersion));
         }
@@ -25,7 +25,6 @@ public interface GrafanaApi {
     String ANNOTATIONS_ENDPOINT = "/annotations";
     String TAG_KEYS_ENDPOINT = "/tag-keys";
     String TAG_VALUES_ENDPOINT = "/tag-values";
-    String TARGET = "target";
 
     default Router getGraphanaRouter(Vertx vertx) {
         Router router = Router.router(vertx);

@@ -26,6 +26,7 @@
     <field name="chunk_day" type="string" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_end" type="plong" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_first" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_origin" type="string" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_hour" type="pint" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_last" type="pdouble" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_max" type="pdouble" multiValued="false" indexed="true" stored="true"/>

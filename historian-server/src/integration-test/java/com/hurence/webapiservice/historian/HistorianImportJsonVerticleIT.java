@@ -40,7 +40,7 @@ public class HistorianImportJsonVerticleIT {
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         HistorianSolrITHelper
-                .deployHistorienVerticle(container, vertx)
+                .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
                             historian = HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();
@@ -76,7 +76,7 @@ public class HistorianImportJsonVerticleIT {
                 .doAfterSuccess(t -> {
                     JsonObject params1 = new JsonObject("{\""+FROM+"\":1477895614866," +
                             "\""+TO+"\": 1477916925845," +
-                            "\""+FIELDS+"\":[\""+RESPONSE_CHUNK_VALUE_FIELD+"\",\""+RESPONSE_CHUNK_START_FIELD+"\",\""+RESPONSE_CHUNK_END_FIELD+"\",\""+RESPONSE_CHUNK_SIZE_FIELD+"\",\""+NAME+"\"]," +
+                            "\""+FIELDS+"\":[\""+RESPONSE_CHUNK_VALUE_FIELD+"\",\""+RESPONSE_CHUNK_START_FIELD+"\",\""+RESPONSE_CHUNK_END_FIELD+"\",\""+RESPONSE_CHUNK_COUNT_FIELD+"\",\""+NAME+"\"]," +
                             "\""+NAMES+"\":[\"openSpaceSensors.Temperature000\"]," +
                             "\""+TAGS+"\":[]," +
                             "\""+SAMPLING_ALGO+"\":\"AVERAGE\"," +
@@ -93,8 +93,8 @@ public class HistorianImportJsonVerticleIT {
                                     JsonArray docs = rsp.getJsonArray(TIMESERIES);
                                     assertEquals(1, docs.size());
                                     JsonObject doc1 = docs.getJsonObject(0);
-                                    assertEquals("openSpaceSensors.Temperature000", doc1.getString(TARGET_RESPONSE_FIELD));
-                                    JsonArray datapoints1 = doc1.getJsonArray(DATAPOINTS_RESPONSE_FIELD);
+                                    assertEquals("openSpaceSensors.Temperature000", doc1.getString(NAME));
+                                    JsonArray datapoints1 = doc1.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[2.0,1477895624866],[4.0,1477916224866]]"), datapoints1);
                                     testContext.completeNow();
                                 });
@@ -127,7 +127,7 @@ public class HistorianImportJsonVerticleIT {
                 .doAfterSuccess(t -> {
                     JsonObject params1 = new JsonObject("{\""+FROM+"\":1477895614866," +
                             "\""+TO+"\": 1477916925845," +
-                            "\""+FIELDS+"\":[\""+RESPONSE_CHUNK_VALUE_FIELD+"\",\""+RESPONSE_CHUNK_START_FIELD+"\",\""+RESPONSE_CHUNK_END_FIELD+"\",\""+RESPONSE_CHUNK_SIZE_FIELD+"\",\""+NAME+"\"]," +
+                            "\""+FIELDS+"\":[\""+RESPONSE_CHUNK_VALUE_FIELD+"\",\""+RESPONSE_CHUNK_START_FIELD+"\",\""+RESPONSE_CHUNK_END_FIELD+"\",\""+RESPONSE_CHUNK_COUNT_FIELD+"\",\""+NAME+"\"]," +
                             "\""+NAMES+"\":[\"openSpaceSensors.Temperature111\",\"openSpaceSensors.Temperature222\"," +
                             "\"openSpaceSensors.Temperature333\"," +
                             "\"openSpaceSensors.Temperature444\"]," +
@@ -146,20 +146,20 @@ public class HistorianImportJsonVerticleIT {
                                     JsonArray docs = rsp.getJsonArray(TIMESERIES);
                                     assertEquals(4, docs.size());
                                     JsonObject doc1 = docs.getJsonObject(3);
-                                    assertEquals("openSpaceSensors.Temperature111", doc1.getString(TARGET_RESPONSE_FIELD));
-                                    JsonArray datapoints1 = doc1.getJsonArray(DATAPOINTS_RESPONSE_FIELD);
+                                    assertEquals("openSpaceSensors.Temperature111", doc1.getString(NAME));
+                                    JsonArray datapoints1 = doc1.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[2.0,1477895624866],[4.0,1477916224866]]"), datapoints1);
                                     JsonObject doc2 = docs.getJsonObject(2);
-                                    assertEquals("openSpaceSensors.Temperature222", doc2.getString(TARGET_RESPONSE_FIELD));
-                                    JsonArray datapoints2 = doc2.getJsonArray(DATAPOINTS_RESPONSE_FIELD);
+                                    assertEquals("openSpaceSensors.Temperature222", doc2.getString(NAME));
+                                    JsonArray datapoints2 = doc2.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[3.1,1477895624866],[8.8,1477916224866]]"), datapoints2);
                                     JsonObject doc3 = docs.getJsonObject(1);
-                                    assertEquals("openSpaceSensors.Temperature333", doc3.getString(TARGET_RESPONSE_FIELD));
-                                    JsonArray datapoints3 = doc3.getJsonArray(DATAPOINTS_RESPONSE_FIELD);
+                                    assertEquals("openSpaceSensors.Temperature333", doc3.getString(NAME));
+                                    JsonArray datapoints3 = doc3.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[4.1,1477895724888],[6.5,1477916924845]]"), datapoints3);
                                     JsonObject doc4 = docs.getJsonObject(0);
-                                    assertEquals("openSpaceSensors.Temperature444", doc4.getString(TARGET_RESPONSE_FIELD));
-                                    JsonArray datapoints4 = doc4.getJsonArray(DATAPOINTS_RESPONSE_FIELD);
+                                    assertEquals("openSpaceSensors.Temperature444", doc4.getString(NAME));
+                                    JsonArray datapoints4 = doc4.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[0.0,1477895724888],[9.1,1477916924845]]"), datapoints4);
                                     testContext.completeNow();
                                 });
@@ -220,23 +220,20 @@ public class HistorianImportJsonVerticleIT {
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
 assertEquals("7e52004b840e5fabbcd033384149d843390d4c7a118e47719798695e7ecd4216",doc1.getString(RESPONSE_CHUNK_ID_FIELD));
 
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_FIELD));
-        assertEquals(2,doc1.getLong(RESPONSE_CHUNK_SIZE_FIELD));
+        assertTrue(doc1.containsKey(RESPONSE_CHUNK_COUNT_FIELD));
+        assertEquals(2,doc1.getLong(RESPONSE_CHUNK_COUNT_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
         assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
 //        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
 //        assertEquals(20600000, doc1.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
-        assertEquals(38,doc1.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
 
         assertEquals("openSpaceSensors.Temperature666",doc2.getString(NAME));
         assertEquals(time1, doc2.getLong(RESPONSE_CHUNK_START_FIELD));
         assertEquals(time2, doc2.getLong(RESPONSE_CHUNK_END_FIELD));
-        assertEquals(2,doc2.getLong(RESPONSE_CHUNK_SIZE_FIELD));
+        assertEquals(2,doc2.getLong(RESPONSE_CHUNK_COUNT_FIELD));
         assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQ4HLj4BA6sfMmpOWsmCCg6CDAAAFASLIkdAAAA", doc2.getString(RESPONSE_CHUNK_VALUE_FIELD));
 //        assertEquals(20600000,doc2.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-        assertEquals(45,doc2.getLong(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
     }
 
 }

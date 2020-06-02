@@ -51,29 +51,28 @@ As you can see from a Measure points to a Chunk of Measures, the `timestamp` fie
 In SolR the chunks will be stored according to  the following schema
 
 ```xml
-  <field name="chunk_avg" type="pdouble"/>
-  <field name="chunk_day" type="string"/>
-  <field name="chunk_end" type="plong"/>
-  <field name="chunk_first" type="pdouble"/>
-  <field name="chunk_hour" type="pint"/>
-  <field name="chunk_last" type="pdouble"/>
-  <field name="chunk_max" type="pdouble"/>
-  <field name="chunk_min" type="pdouble"/>
-  <field name="chunk_month" type="pint"/>
-  <field name="chunk_origin" type="string"/>
-  <field name="chunk_outlier" type="boolean"/>
-  <field name="chunk_sax" type="ngramtext"/>
-  <field name="chunk_size" type="pint"/>
-  <field name="chunk_size_bytes" type="pint"/>
-  <field name="chunk_start" type="plong"/>
-  <field name="chunk_stddev" type="pdouble"/>
-  <field name="chunk_sum" type="pdouble"/>
-  <field name="chunk_trend" type="boolean"/>
-  <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
-  <field name="chunk_year" type="pint"/>
-  <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
-  <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
-  <field name="name" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+    <field name="chunk_avg" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
+    <field name="chunk_count" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_day" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_end" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_first" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_hour" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_last" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_max" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_min" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_month" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="name" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_outlier" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_qualities" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="chunk_sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_start" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_stddev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="tags" type="text_en" multiValued="true" indexed="true" stored="true"/>
+    <field name="chunk_timestamp" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_trend" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_year" type="pint" multiValued="false" indexed="true" stored="true"/>
 ```
 
 
@@ -144,10 +143,6 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2/  -p 7574 -z localhost:9983
 ```
 
 Please verify that you have two running SolR core by browsing solr admin at [http://localhost:8983/solr/#/~cloud](http://localhost:8983/solr/#/~cloud)
-
-
-
-
 
 ### Install Hurence Data Historian
 Hurence Data Historian is a set of scripts and binaries that get you work with timeseries Chunks
@@ -369,7 +364,7 @@ Run the following command in the root directory of historian source checkout.
 
     git clone git@github.com:Hurence/historian.git
     cd historian
-    mvn clean install -DskipTests
+    mvn clean install -DskipTests -Pbuild-integration-tests
 
 ## Install datasource plugin in your grafana instance
 

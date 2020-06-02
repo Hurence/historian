@@ -2,6 +2,7 @@ package com.hurence.historian
 
 import java.io.File
 
+import com.hurence.historian.modele.SchemaVersion
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.solr.{LazyLogging, SolrCloudUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrClient
@@ -153,7 +154,7 @@ object SolrCloudUtilForTests extends LazyLogging {
       collection + "-2,foo,baz,2,[c;d],[3;4]",
       collection + "-3,bar,baz,3,[e;f],[5;6]"
     )
-    buildCollection(collection, inputDocs, 2, cloudClient)
+    buildChunkCollection(collection, inputDocs, 2, cloudClient)
   }
 
   def buildCollection(
@@ -165,17 +166,19 @@ object SolrCloudUtilForTests extends LazyLogging {
     for (n: Int <- 0 to numDocs-1) {
       inputDocs.update(n, collection + "-" + n + ",foo" + n + ",bar" + n + "," + n + ",[a;b],[1;2]")
     }
-    buildCollection(collection, inputDocs, numShards, cloudClient)
+    buildChunkCollection(collection, inputDocs, numShards, cloudClient)
   }
 
-  def buildCollection(collection: String,
-                      inputDocs: Array[String],
-                      numShards: Int,
-                      cloudClient: CloudSolrClient): Unit = {
+  def buildChunkCollection(collection: String,
+                           inputDocs: Array[String],
+                           numShards: Int,
+                           cloudClient: CloudSolrClient,
+                           version: SchemaVersion): Unit = {
+    val confDir = version match {
+      case SchemaVersion.VERSION_0 => new File(this.getClass.getClassLoader.getResource("solr-embedded-conf/historian-chunk-conf").getPath)
+      case _ => throw new UnsupportedOperationException("This version is not yet supported")
+    }
     val confName = "testConfig"
-   // val confDir = new File("src/test/resources/conf")
-    //TODO here replace with script creation
-    val confDir = new File(this.getClass.getClassLoader.getResource("solr-embedded-conf/conf").getPath)
     val replicationFactor: Int = 1
     createCollection(collection, numShards, replicationFactor, numShards, confName, confDir, cloudClient)
 
@@ -191,6 +194,13 @@ object SolrCloudUtilForTests extends LazyLogging {
       val numFound = response.getResults.getNumFound
       assertTrue("expected " + numDocsIndexed + " docs in query results from " + collection + ", but got " + numFound, numFound == numDocsIndexed)
     }
+  }
+
+  def buildChunkCollection(collection: String,
+                           inputDocs: Array[String],
+                           numShards: Int,
+                           cloudClient: CloudSolrClient): Unit = {
+    buildChunkCollection(collection, inputDocs, numShards, cloudClient, SchemaVersion.VERSION_0)
   }
 
   def indexDocs(collection: String,

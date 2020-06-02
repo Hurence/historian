@@ -1,11 +1,3 @@
 {
-  "targets": [
-    {
-      "target": "metric_1"
-    },
-    {
-      "target": "metric_2"
-    }
-  ],
-  "maxDataPoints": 550
+  "names": ["metric_1", "metric_2"]
 }

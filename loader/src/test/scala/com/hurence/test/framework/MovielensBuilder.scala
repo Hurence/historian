@@ -35,8 +35,8 @@ trait MovielensBuilder extends SparkSolrTests with BeforeAndAfterAll with Before
   }
 
   def createCollections(): Unit = {
-    SolrCloudUtilForTests.buildCollection(moviesColName, null, 1, cloudClient)
-    SolrCloudUtilForTests.buildCollection(ratingsColName, null, 1, cloudClient)
+    SolrCloudUtilForTests.buildChunkCollection(moviesColName, null, 1, cloudClient)
+    SolrCloudUtilForTests.buildChunkCollection(ratingsColName, null, 1, cloudClient)
 //    SolrCloudUtil.buildCollection(zkHost, userColName, null, 1, cloudClient, sc)
   }
 
