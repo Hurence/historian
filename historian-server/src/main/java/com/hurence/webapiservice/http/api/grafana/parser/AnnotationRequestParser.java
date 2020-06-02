@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.hurence.webapiservice.http.api.grafana.util.DateRequestParserUtil.*;
+import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
 
 public class AnnotationRequestParser {
 

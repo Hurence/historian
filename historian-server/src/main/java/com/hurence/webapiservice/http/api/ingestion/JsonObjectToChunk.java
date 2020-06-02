@@ -69,7 +69,6 @@ public class JsonObjectToChunk {
         });
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(chunk);
         doc.addField(RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
-        doc.addField(RESPONSE_CHUNK_SIZE_BYTES_FIELD, compressedPoints.length);
         computeAndSetMetrics(doc, chunk);
         DateInfo dateInfo = TimeSeriesUtil.calculDateFields(chunk.getStart());
         doc.addField(CHUNK_YEAR, dateInfo.year);

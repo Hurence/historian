@@ -21,7 +21,6 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.http.HttpServerVerticle;
 import io.reactivex.Single;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -34,8 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
-
-import static com.hurence.webapiservice.util.HistorianSolrITHelper.HISTORIAN_ADRESS;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public abstract class HttpWithHistorianSolrITHelper {
@@ -51,7 +48,7 @@ public abstract class HttpWithHistorianSolrITHelper {
     }
 
     public static Single<String> deployHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx) {
-        return deployHttpAndHistorianVerticle(container, vertx, new JsonObject());
+        return deployHttpAndCustomHistorianVerticle(container, vertx, new JsonObject());
     }
 
     public static void initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(
@@ -63,43 +60,36 @@ public abstract class HttpWithHistorianSolrITHelper {
         LOGGER.info("Initializing Historian annotation collection");
         HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Initializing Verticles");
-        deployHttpAndHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
+        deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
     }
 
-    public static Single<String> deployHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, JsonObject historianConf) {
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
-                .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
-                .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, 10000)
-                .put(HttpServerVerticle.CONFIG_DEBUG_MODE, true);
-        DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
-
-        return HistorianSolrITHelper.deployHistorienVerticle(container, vertx, historianConf)
-                .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
+    public static Single<String> deployCustomHttpAndCustomHistorianVerticle(DockerComposeContainer container, Vertx vertx,
+                                                                            JsonObject historianConf, JsonObject httpConf) {
+        return HistorianSolrITHelper.deployHistorianVerticle(container, vertx, historianConf)
+                .flatMap(id -> HttpITHelper.deployHttpVerticle(vertx, httpConf))
                 .map(id -> {
                     LOGGER.info("HistorianVerticle with id '{}' deployed", id);
                     return id;
                 });
     }
 
-    public static Single<String> deployCustomHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, int maxLimitFromConfig) {
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
-                .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
-                .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED,maxLimitFromConfig);
-        DeploymentOptions httpOptions = new DeploymentOptions().setConfig(httpConf);
+    public static Single<String> deployHttpAndCustomHistorianVerticle(DockerComposeContainer container, Vertx vertx,
+                                                                      JsonObject historianConf) {
+        return deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, new JsonObject());
+    }
 
-        return HistorianSolrITHelper.deployHistorienVerticle(container, vertx)
-                .flatMap(id -> vertx.rxDeployVerticle(new HttpServerVerticle(), httpOptions))
-                .map(id -> {
-                    LOGGER.info("HistorianVerticle with id '{}' deployed", id);
-                    return id;
-                });
+    public static Single<String> deployCustomHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx,
+                                                                      JsonObject httpConf) {
+        return deployCustomHttpAndCustomHistorianVerticle(container, vertx, new JsonObject(), httpConf);
+    }
+
+    public static Single<String> deployCustomHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, int maxLimitFromConfig) {
+        return deployCustomHttpAndCustomHistorianVerticle(container, vertx, new JsonObject(),
+                new JsonObject().put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, maxLimitFromConfig)
+        );
     }
 
 }

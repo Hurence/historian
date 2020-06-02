@@ -68,11 +68,20 @@ public class HistorianService {
     return delegate;
   }
 
+  /**
+   * @param myParams as a json object <pre> {  : "content of chunks as an array",  : "total chunk matching query",  : "total chunk matching query",  : "content of chunks as an array",  : "content of chunks as an array",  : "content of chunks as an array",  : "content of chunks as an array" } </pre> explanation : [Optional] if  not specified will search from 0 [Optional] if  not specified will search to Max.Long* [Optional] use  to search for specific timeseries having one of those tags [Optional] use  to search a specific timeseries name [Required] use  is the algorithm to use if sampling is needed [Required] use  is the bucket size to use if sampling is needed [Required] use  is the max number of point to return by metric name
+   * @param myResult return chunks of timeseries as an array of <pre> {  : "the total number of point returned",  : [ {  : "the metric name",  : [ [value(double), timestamp(long)], ... ] } ] } </pre>
+   * @return himself
+   */
   public com.hurence.webapiservice.historian.reactivex.HistorianService getTimeSeries(JsonObject myParams, Handler<AsyncResult<JsonObject>> myResult) { 
     delegate.getTimeSeries(myParams, myResult);
     return this;
   }
 
+  /**
+   * @param myParams as a json object <pre> {  : "content of chunks as an array",  : "total chunk matching query",  : "total chunk matching query",  : "content of chunks as an array",  : "content of chunks as an array",  : "content of chunks as an array",  : "content of chunks as an array" } </pre> explanation : [Optional] if  not specified will search from 0 [Optional] if  not specified will search to Max.Long* [Optional] use  to search for specific timeseries having one of those tags [Optional] use  to search a specific timeseries name [Required] use  is the algorithm to use if sampling is needed [Required] use  is the bucket size to use if sampling is needed [Required] use  is the max number of point to return by metric name
+   * @return himself
+   */
   public Single<JsonObject> rxGetTimeSeries(JsonObject myParams) { 
     return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
       getTimeSeries(myParams, handler);

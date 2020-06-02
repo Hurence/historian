@@ -10,6 +10,14 @@ public class SearchRequestParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchRequestParser.class);
 
+    private final String metricNameField;
+    private final String limitField;
+
+    public SearchRequestParser(String metricNameField,
+                               String limitField) {
+        this.metricNameField = metricNameField;
+        this.limitField = limitField;
+    }
 
     public SearchRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse requestBody : {}", requestBody);
@@ -22,10 +30,10 @@ public class SearchRequestParser {
     }
 
     private String parseMetricName(JsonObject requestBody) {
-        return requestBody.getString("target");
+        return requestBody.getString(metricNameField);
     }
 
     private Integer parseMaxNumberOfMetricToReturn(JsonObject requestBody) {
-        return requestBody.getInteger("limit");
+        return requestBody.getInteger(limitField);
     }
 }

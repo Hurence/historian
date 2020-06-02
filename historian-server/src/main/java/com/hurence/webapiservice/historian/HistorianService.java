@@ -2,6 +2,7 @@ package com.hurence.webapiservice.historian;
 
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import com.hurence.webapiservice.historian.impl.SolrHistorianServiceImpl;
+import com.hurence.webapiservice.timeseries.TimeSeriesExtracter;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -9,7 +10,6 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import com.hurence.historian.modele.HistorianFields;
 
@@ -35,7 +35,45 @@ public interface HistorianService {
         );
     }
 
-
+    /**
+     * @param myParams        as a json object
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#FROM} : "content of chunks as an array",
+     *                          {@value HistorianFields#TO} : "total chunk matching query",
+     *                          {@value HistorianFields#TAGS} : "total chunk matching query",
+     *                          {@value HistorianFields#NAMES} : "content of chunks as an array",
+     *                          {@value HistorianFields#SAMPLING_ALGO} : "content of chunks as an array",
+     *                          {@value HistorianFields#BUCKET_SIZE} : "content of chunks as an array",
+     *                          {@value HistorianFields#MAX_POINT_BY_METRIC} : "content of chunks as an array"
+     *                      }
+     *                      </pre>
+     *                      explanation :
+     *                      [Optional] if {@value HistorianFields#FROM} not specified will search from 0
+     *                      [Optional] if {@value HistorianFields#TO} not specified will search to Max.Long*
+     *                      [Optional] use {@value HistorianFields#TAGS} to search for specific timeseries having one of those tags
+     *                      [Optional] use {@value HistorianFields#NAMES} to search a specific timeseries name
+     *                      [Required] use {@value HistorianFields#SAMPLING_ALGO} is the algorithm to use if sampling is needed
+     *                      [Required] use {@value HistorianFields#BUCKET_SIZE} is the bucket size to use if sampling is needed
+     *                      [Required] use {@value HistorianFields#MAX_POINT_BY_METRIC} is the max number of point to return by metric name
+     *
+     * @param myResult return chunks of timeseries as an array of
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#TOTAL_POINTS} : "the total number of point returned",
+     *                          {@value HistorianFields#TIMESERIES} : [
+     *                              {
+     *                                  {@value HistorianFields#NAME} : "the metric name",
+     *                                  {@value HistorianFields#DATAPOINTS} : [
+     *                                      [value(double), timestamp(long)],
+     *                                      ...
+     *                                  ]
+     *                              }
+     *                          ]
+     *                      }
+     *                      </pre>
+     * @return himself
+     */
     @Fluent
     HistorianService getTimeSeries(JsonObject myParams, Handler<AsyncResult<JsonObject>> myResult);
 

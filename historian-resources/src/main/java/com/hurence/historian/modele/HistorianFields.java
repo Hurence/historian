@@ -15,9 +15,8 @@ import com.hurence.logisland.record.TimeSeriesRecord;
 public class HistorianFields {
     private HistorianFields() {}
 
-    public static String DATAPOINTS_RESPONSE_FIELD = "datapoints";
+    public static String DATAPOINTS = "datapoints";
     public static String ERRORS_RESPONSE_FIELD = "error";
-    public static String TARGET_RESPONSE_FIELD = "target";
     public static String POINTS_REQUEST_FIELD = "points";
     public static String FROM = "from";
     public static String TO = "to";

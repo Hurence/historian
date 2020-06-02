@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.http.api.grafana.util.DateRequestParserUtil.parseDate;
+import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.parseDate;
 import static com.hurence.webapiservice.http.api.main.modele.QueryFields.*;
 
 public class GetTimeSerieJsonRequestParser {

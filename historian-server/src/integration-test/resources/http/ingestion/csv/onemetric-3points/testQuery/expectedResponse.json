@@ -1,6 +1,6 @@
 [
   {
-    "target": "metric_1",
+    "name": "metric_1",
     "datapoints": [
       [1.2, 1],
       [2.0, 2],

@@ -4,7 +4,7 @@ import java.util
 
 import com.hurence.historian.AbstractReducingChunkSizeTest.LOGGER
 import com.hurence.historian.modele.SchemaVersion
-import com.hurence.historian.solr.injector.GeneralSolrInjector
+import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.historian.spark.compactor.ChunkCompactor
 import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
@@ -127,7 +127,7 @@ object AbstractReducingChunkSizeTest {
     SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.CODE_INSTALL)
     SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.SENSOR)
     LOGGER.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
-    val injector: GeneralSolrInjector = new GeneralSolrInjector()
+    val injector: GeneralVersion0SolrInjector = new GeneralVersion0SolrInjector()
     injector.addChunk(metricA, year, month, day, chunkOrigin,
       util.Arrays.asList(
         new Point(0, 1477895624866L, 622),
