@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class TimeSeriesExtracterImplTest {
 
@@ -41,7 +42,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3);
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Collections.emptyList());
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -60,7 +61,7 @@ public class TimeSeriesExtracterImplTest {
     public void testAvgSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 3);
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 3, Collections.emptyList());
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -78,7 +79,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSamplerWithIntersectingChunks() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 6), 6);
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 6), 6, Collections.emptyList());
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.flush();
@@ -101,7 +102,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSamplerWithIntersectingChunks2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 2), 6);
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 2), 6, Collections.emptyList());
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.flush();

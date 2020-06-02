@@ -19,7 +19,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     private Map<String, TimeSeriesExtracter> bucketerByMetrics = new HashMap<>();
     Map<String, Long> totalNumberOfPointByMetrics = new HashMap<>();
-    List<AGG> aggregList;
+    List<String> aggregList;
     final long from;
     final long to;
     final SamplingConf samplingConf;

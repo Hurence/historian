@@ -26,7 +26,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
-    List<AGG> aggregList = new ArrayList<>();
+    List<String> aggregList = new ArrayList<>();
     final Map<String, Double> aggregValuesList = new HashMap<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
@@ -34,7 +34,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
 
     public AbstractTimeSeriesExtracter(String metricName, long from, long to,
                                        SamplingConf samplingConf,
-                                       long totalNumberOfPoint, List<AGG> aggregList) {
+                                       long totalNumberOfPoint, List<String> aggregList) {
         this.metricName = metricName;
         this.from = from;
         this.to = to;
@@ -67,9 +67,52 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     /**
      * Calcule the aggregations from the list of aggregations and the Lst of chunks . Add them into aggreg values list.
      */
-    @Override
     public void calculateAggreg() {
-
+        aggregList.stream().map(AGG::valueOf).forEach(agg -> {
+            double aggValue;
+            switch (agg) {
+                case AVG:
+                    double avg = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_AVG_FIELD))
+                            .sum();
+                    long numberOfPoint = chunks.stream()
+                            .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_COUNT_FIELD))
+                            .sum();
+                    aggValue = BigDecimal.valueOf(avg)
+                            .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
+                            .doubleValue();
+                    aggregValuesList.put("AVG", aggValue);
+                    break;
+                case SUM:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
+                            .sum();
+                    aggregValuesList.put("SUM", aggValue);
+                    break;
+                case MIN:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
+                            .min()
+                            .getAsDouble();
+                    aggregValuesList.put("MIN", aggValue);
+                    break;
+                case MAX:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
+                            .max()
+                            .getAsDouble();
+                    aggregValuesList.put("MAX", aggValue);
+                    break;
+                case COUNT:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
+                            .count();
+                    aggregValuesList.put("COUNT", aggValue);
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported aggregation: " + agg);
+            }
+        });
     }
 
     /**
@@ -105,8 +148,10 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_NAME, metricName)
-                .put(TIMESERIE_POINT, new JsonArray(points))
-                .put(AGGREGATION, aggregValuesList);
+                .put(TIMESERIE_POINT, new JsonArray(points));
+        if (aggregValuesList != null) {
+            toReturn.put(AGGREGATION, aggregValuesList);
+        }
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
     }

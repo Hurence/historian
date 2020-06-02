@@ -5,10 +5,8 @@ import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesRequest {
 
@@ -20,6 +18,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     public static final String DEFAULT_FORMAT = "json";
     public static final String DEFAULT_REQUEST_ID = "Not defined";
     public static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
+    public static final List<String> DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
 
     private final List<String> metricNames;
     private final long from;
@@ -30,11 +29,11 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     private final int bucketSize;
     private final Map<String, String> tags;
     private final String requestId;
-    private final List<AGG> aggregList;  // TODO here i can make the agreg a Map<String,AGG> if i want a diff agreg for diff metrics
+    private final List<String> aggregList;  // TODO here i can make the agreg a Map<String,AGG> if i want a diff agreg for diff metrics
 
     private HurenceDatasourcePluginQueryRequestParam(List<String> metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
-                                                 Map<String, String> tags, String requestId, List<AGG> aggregList) {
+                                                 Map<String, String> tags, String requestId, List<String> aggregList) {
         Objects.requireNonNull(metricNames);
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
@@ -56,7 +55,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
 
     @Override
     public List<AGG> getAggs() {
-        return aggregList;
+        return aggregList.stream().map(AGG::valueOf).collect(Collectors.toList());
     }
 
     @Override
@@ -94,7 +93,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         private int bucketSize = DEFAULT_BUCKET_SIZE;
         private Map<String, String> tags = DEFAULT_TAGS;
         private String requestId = DEFAULT_REQUEST_ID;
-        private List<AGG> aggreg;
+        private List<String> aggreg = DEFAULT_AGGREGATION;
 
         public Builder withMetricNames(List<String> metricNames) {
             this.metricNames = metricNames;
@@ -146,7 +145,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
                     samplingAlgo, bucketSize, tags, requestId, aggreg);
         }
 
-        public void withAggreg(List<String> agreg) {
+        public void withAggreg(List<String> aggreg) {
             this.aggreg = aggreg;
         }
     }

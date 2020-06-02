@@ -6,6 +6,7 @@ import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
@@ -36,11 +37,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.modele.AGG.*;
 
 public class SolrHistorianServiceImpl implements HistorianService {
 
@@ -498,6 +502,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 throw new IllegalArgumentException(HistorianFields.TAGS + " field were neither a map neither an array.");
             }
         }
+        addFieldsThatWillBeNeededByAggregations(myParams, query);
 
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
             MetricsSizeInfo metricsInfo;
@@ -560,6 +565,27 @@ public class SolrHistorianServiceImpl implements HistorianService {
         SamplingConf requestedSamplingConf = getSamplingConf(myParams);
         Set<SamplingAlgorithm> samplingAlgos = determineSamplingAlgoThatWillBeUsed(requestedSamplingConf, metricsInfo);
         addNecessaryFieldToQuery(query, samplingAlgos);
+    }
+
+    public void addFieldsThatWillBeNeededByAggregations (JsonObject myParams, SolrQuery query) {
+        myParams.getJsonArray(AGGREGATION, new JsonArray()).stream().map(String::valueOf).map(AGG::valueOf).forEach(agg -> {
+            switch (agg) {
+                case AVG:
+                    query.addField(RESPONSE_CHUNK_AVG_FIELD);
+                    break;
+                case SUM:
+                    query.addField(RESPONSE_CHUNK_SUM_FIELD);
+                    break;
+                case MIN:
+                    query.addField(RESPONSE_CHUNK_MIN_FIELD);
+                    break;
+                case MAX:
+                    query.addField(RESPONSE_CHUNK_MAX_FIELD);
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported aggregation: " + agg);
+            }
+        });
     }
 
     private void addNecessaryFieldToQuery(SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
@@ -626,7 +652,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     private void fillingExtractorWithAggregToReturn(MultiTimeSeriesExtracterImpl timeSeriesExtracter, JsonObject params) {
-        timeSeriesExtracter.setAggregationList(params.getJsonArray("agreg", new JsonArray()));
+        timeSeriesExtracter.setAggregationList(params.getJsonArray(AGGREGATION, new JsonArray()));
     }
 
     private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,

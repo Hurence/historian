@@ -12,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 public class TimeSeriesExtracterUsingPreAggTest {
 
@@ -75,7 +76,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testNoSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 9);
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 9, Collections.emptyList());
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -91,7 +92,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testAvgSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 15);
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 15, Collections.emptyList());
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -110,7 +111,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testAvgSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 12);
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 12, Collections.emptyList());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -130,7 +131,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testMinSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15);
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Collections.emptyList());
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -150,7 +151,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testMinSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 12);
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 12, Collections.emptyList());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());

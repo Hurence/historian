@@ -18,6 +18,8 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.stream.Collectors;
+
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
@@ -103,7 +105,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
     public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
-    public final static String AGGREGATION_JSON_PATH = "/agreg";
+    public final static String AGGREGATION_JSON_PATH = "/aggregation";
 
     /**
      *  used to query metrics datapoints in grafana panels.
@@ -234,7 +236,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
-                .put(AGGREGATION, request.getAggs());
+                .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()));
     }
     /**
      *  used to the find annotations.
