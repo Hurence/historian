@@ -63,7 +63,7 @@ public class HurenceDatasourcePluginAnnotationRequestParser {
             builder.withType(type);
         }
         return builder.build();
-    }
+    } 
 
     private List<String> parseTags(JsonObject requestBody) {
         return parseListString(requestBody, tagsJsonPath);
