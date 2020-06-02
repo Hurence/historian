@@ -10,8 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.parseDate;
-import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.parseMapStringString;
+import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
 
 public class HurenceDatasourcePluginQueryRequestParser {
 
@@ -65,6 +64,11 @@ public class HurenceDatasourcePluginQueryRequestParser {
         List<String> metricNames = parseMetricNames(requestBody);
         if (metricNames != null) {
             builder.withMetricNames(metricNames);
+        } else {
+            throw new IllegalArgumentException(String.format(
+                    "request json should contain at least one name metric at path '%s'." +
+                            "\nrequest received is %s", namesJsonPath, requestBody.encodePrettily()
+            ));
         }
         Integer maxDataPoints = parseMaxDataPoints(requestBody);
         if (maxDataPoints != null) {
@@ -90,7 +94,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
     }
 
     private String parseRequestId(JsonObject requestBody) {
-        return requestBody.getString(requestIdJsonPath);
+        return parseString(requestBody, requestIdJsonPath);
     }
 
     private Map<String, String> parseTags(JsonObject requestBody) {
@@ -98,18 +102,17 @@ public class HurenceDatasourcePluginQueryRequestParser {
     }
 
     private Integer parseBucketSize(JsonObject requestBody) {
-        return requestBody.getInteger(bucketSizeJsonPath);
+        return parse(requestBody, bucketSizeJsonPath, Integer.class);
     }
 
     private SamplingAlgorithm parseSamplingAlgo(JsonObject requestBody) {
-        String algoStr  = requestBody.getString(samplingAlgoJsonPath);
-        return SamplingAlgorithm.valueOf(algoStr);
+        String algoStr  = parseString(requestBody, samplingAlgoJsonPath);
+        if (algoStr == null) return null;
+        return SamplingAlgorithm.valueOf(algoStr.toUpperCase());
     }
 
     private List<String> parseMetricNames(JsonObject requestBody) {
-        return requestBody.getJsonArray(namesJsonPath).stream()
-                .map(String.class::cast)
-                .collect(Collectors.toList());
+        return parseListString(requestBody, namesJsonPath);
     }
 
     private Long parseFrom(JsonObject requestBody) {
@@ -121,11 +124,11 @@ public class HurenceDatasourcePluginQueryRequestParser {
     }
 
     private String parseFormat(JsonObject requestBody) {
-        return requestBody.getString(formatJsonPath);
+        return parseString(requestBody, formatJsonPath);
     }
 
     private Integer parseMaxDataPoints(JsonObject requestBody) {
-        return requestBody.getInteger(maxDatapointsJsonPath);
+        return parse(requestBody, maxDatapointsJsonPath, Integer.class);
     }
 
 }

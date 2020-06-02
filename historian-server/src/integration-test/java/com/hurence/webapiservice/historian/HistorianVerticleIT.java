@@ -5,7 +5,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
-import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -32,6 +32,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.*;
@@ -49,12 +50,12 @@ public class HistorianVerticleIT {
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempA = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
+        Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempA = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_a",
                 Arrays.asList(
-                        Collections.emptyList(),
-                        Collections.emptyList(),
-                        Collections.emptyList()
+                        Collections.emptyMap(),
+                        Collections.emptyMap(),
+                        Collections.emptyMap()
                 ),
                 Arrays.asList(
                         Arrays.asList(
@@ -76,10 +77,10 @@ public class HistorianVerticleIT {
                                 new Point(0, 12L, 5.5)
                         )
                 ));
-        SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempB = new SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
+        Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempB = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
                 "temp_b",
                 Arrays.asList(
-                        Collections.emptyList()
+                        Collections.emptyMap()
                 ),
                 Arrays.asList(
                         Arrays.asList(
@@ -93,7 +94,7 @@ public class HistorianVerticleIT {
         injectorTempA.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         HistorianSolrITHelper
-                .deployHistorienVerticle(container, vertx)
+                .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
                             historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();
@@ -149,13 +150,11 @@ public class HistorianVerticleIT {
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_MIN_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_MAX_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_TREND_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SIZE_BYTES_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_SUM_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
                         assertTrue(doc1.containsKey(RESPONSE_CHUNK_FIRST_VALUE_FIELD));
-                        assertEquals(20, doc1.size());
+                        assertEquals(18, doc1.size());
                         assertEquals("id0", doc1.getString("id"));
                         assertEquals(1L, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
                         assertEquals(4L, doc1.getLong(RESPONSE_CHUNK_END_FIELD));

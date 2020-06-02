@@ -24,14 +24,14 @@
   "format": "json",
   "adhocFilters": [
     {
-      "key": "Tag",
-      "operator": "=",
-      "value": "France"
-    },
-    {
-      "key": "Tag",
+      "key": "pays",
       "operator": "=",
       "value": "Berlin"
+    },
+    {
+      "key": "usine",
+      "operator": "=",
+      "value": "usine_1"
     }
   ],
   "maxDataPoints": 1000

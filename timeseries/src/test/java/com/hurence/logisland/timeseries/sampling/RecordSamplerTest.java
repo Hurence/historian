@@ -20,7 +20,6 @@ import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.StandardRecord;
 import com.hurence.logisland.timeseries.sampling.record.RecordSampler;
 import com.hurence.logisland.util.runner.MockRecord;
-import org.apache.commons.math3.stat.descriptive.SummaryStatistics;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -28,7 +27,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class RecordSamplerTest {
 
@@ -78,7 +76,7 @@ public class RecordSamplerTest {
 
     @Test
     public void testFirstItemSampler() {
-        RecordSampler sampler = SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST_ITEM, VALUE, TIMESTAMP, 3);
+        RecordSampler sampler = SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST, VALUE, TIMESTAMP, 3);
         List<Record> sampled = sampler.sample(getRecords());
         Assertions.assertEquals(1, sampled.size());
         MockRecord record1 = new MockRecord(sampled.get(0));
@@ -88,7 +86,7 @@ public class RecordSamplerTest {
 
     @Test
     public void testFirstItemSamplerNoFullBucket() {
-        RecordSampler sampler = SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST_ITEM, VALUE, TIMESTAMP, 2);
+        RecordSampler sampler = SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST, VALUE, TIMESTAMP, 2);
         List<Record> sampled = sampler.sample(getRecords());
         Assertions.assertEquals(2, sampled.size());
         MockRecord record1 = new MockRecord(sampled.get(0));

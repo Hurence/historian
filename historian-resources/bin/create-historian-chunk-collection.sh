@@ -143,6 +143,7 @@ create_schema() {
         "EVOA0")
             add_field_name_type "chunk_start" "plong"
             add_field_name_type "chunk_end" "plong"
+            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"compactions_running\", \"type\":\"string\", \"indexed\":true, \"multiValued\":true, \"stored\" : true }"
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"chunk_value\", \"type\":\"string\", \"indexed\":false, \"multiValued\":false }"
             add_field_name_type "chunk_origin" "text_general"
             add_field_name_type "numeric_type" "text_general"
@@ -178,11 +179,11 @@ create_schema() {
             add_field_name_type "hour" "pint"
             add_field_name_type "delete" "text_general"
             add_field_name_type "file_path" "text_general"
-#            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
+            add_field_name_type "chunk_last" "pdouble"
+            add_field_name_type "chunk_stddev" "pdouble"
             ;;
         "VERSION_0")
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"name\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
-#            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"id\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"compactions_running\", \"type\":\"string\", \"indexed\":true, \"multiValued\":true, \"stored\" : true }"
             add_field_not_indexed "chunk_value" "string"
             add_field_name_type "chunk_start" "plong"

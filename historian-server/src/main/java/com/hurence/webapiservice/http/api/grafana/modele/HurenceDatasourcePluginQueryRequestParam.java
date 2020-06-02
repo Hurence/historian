@@ -1,17 +1,14 @@
 package com.hurence.webapiservice.http.api.grafana.modele;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.http.api.grafana.GrafanaSimpleJsonPluginApiImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesRequest {
 
@@ -21,6 +18,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     public static final long DEFAULT_TO = Long.MAX_VALUE;
     public static final int DEFAULT_MAX_DATAPOINTS = 1000;
     public static final String DEFAULT_FORMAT = "json";
+    public static final String DEFAULT_REQUEST_ID = "Not defined";
     public static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
 
     private final List<String> metricNames;
@@ -36,6 +34,8 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     private HurenceDatasourcePluginQueryRequestParam(List<String> metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
                                                      Map<String, String> tags, String requestId) {
+        if (metricNames == null) throw new IllegalArgumentException("metricNames should not be null !");
+        if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
         this.from = from;
         this.to = to;
@@ -91,7 +91,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         private SamplingAlgorithm samplingAlgo = DEFAULT_SAMPLING_ALGORITHM;
         private int bucketSize = DEFAULT_BUCKET_SIZE;
         private Map<String, String> tags = DEFAULT_TAGS;
-        private String requestId = "Not defined";
+        private String requestId = DEFAULT_REQUEST_ID;
 
         public Builder withMetricNames(List<String> metricNames) {
             this.metricNames = metricNames;
