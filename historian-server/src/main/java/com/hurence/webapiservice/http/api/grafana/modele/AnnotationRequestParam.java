@@ -76,12 +76,12 @@ public class AnnotationRequestParam implements AnnotationRequest {
 
 
     public static final class Builder {
-        private List<String> tags;
-        private Long from;
-        private Long to;
-        private Integer maxAnnotation;
-        private Boolean matchAny;
-        private AnnotationRequestType type;
+        private List<String> tags = DEFAULT_TAGS;
+        private Long from = DEFAULT_FROM;
+        private Long to = DEFAULT_TO;
+        private Integer maxAnnotation = DEFAULT_MAX_ANNOTATION_TO_RETURN;
+        private Boolean matchAny = DEFAULT_MATCH_ANY;
+        private AnnotationRequestType type = DEFAULT_TYPE;
 
         public Builder() { }
 
