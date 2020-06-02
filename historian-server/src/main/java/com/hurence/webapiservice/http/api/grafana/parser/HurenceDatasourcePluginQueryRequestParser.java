@@ -55,7 +55,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         }
         Long to = parseTo(requestBody);
         if (to != null) {
-            builder.withFrom(to);
+            builder.withTo(to);
         }
         String format = parseFormat(requestBody);
         if (format != null) {
