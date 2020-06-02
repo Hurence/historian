@@ -149,7 +149,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_NAME, metricName)
                 .put(TIMESERIE_POINT, new JsonArray(points));
-        if (aggregValuesList != null) {
+        if (!aggregValuesList.isEmpty()) {
             toReturn.put(AGGREGATION, aggregValuesList);
         }
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
