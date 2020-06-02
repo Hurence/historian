@@ -78,31 +78,32 @@ public class DataConverter {
     }
 
     public static Object toNumber(Object value, MultiMap multiMap) {
-        if (multiMap.get(FORMAT_DATE) == null && multiMap.get(TIMEZONE_DATE) == null) {
-            try {
-                long l = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
-                if ((multiMap.get(TIMESTAMP_UNIT) == null) || (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.MILLISECONDS_EPOCH.toString())))
-                    return l;
-                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.SECONDS_EPOCH.toString()))
-                    return l*1000;
-                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.MICROSECONDS_EPOCH.toString()))
-                    return l/1000;
-                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.NANOSECONDS_EPOCH.toString()))
-                    return l/1000000;
-            } catch (Exception e) {
-                LOGGER.debug("error in parsing date", e);
-                return value;
-            }
-        } else if (multiMap.get(TIMEZONE_DATE) == null)
+        // here you should take timestamps in diff timezones and store only in utc.
+        try {
+            long l = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
+            if ((multiMap.get(FORMAT_DATE) == null) || (multiMap.get(FORMAT_DATE).equals(TimestampUnit.MILLISECONDS_EPOCH.toString())))
+                return l;
+            else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.SECONDS_EPOCH.toString()))
+                return l*1000;
+            else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.MICROSECONDS_EPOCH.toString()))
+                return l/1000;
+            else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.NANOSECONDS_EPOCH.toString()))
+                return l/1000000;
+            // here you should add else throw error : TIMESTAMP_UNIT is not correct.
+        } catch (Exception e) {
+            LOGGER.debug("error in parsing date", e);
+            return value;
+        }
+        if (multiMap.get(TIMEZONE_DATE) == null)
             multiMap.add(TIMEZONE_DATE, "UTC");
         long date = 0;
         try {
             date = createDateFormat(multiMap.get(FORMAT_DATE),multiMap.get(TIMEZONE_DATE)).parse(value.toString()).getTime();
+            return date;
         } catch (ParseException e) {
             LOGGER.debug("error in parsing date", e);
             return value;
         }
-        return date;
     }
 
     private Object toDouble(Object value) {
