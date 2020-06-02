@@ -25,6 +25,9 @@ public abstract class AbstractSolrInjector<T extends ChunkModele> implements Sol
             client.add(COLLECTION, buildSolrDocument(chunkExpected, "id" + i));
         }
         UpdateResponse updateRsp = client.commit(COLLECTION, true, true);
+        if (updateRsp.getStatus() != 0) {
+            throw new RuntimeException("injection failed status is not 0 ! Response is :" + updateRsp.getResponse().toString());
+        }
     }
 
     public void addChunk(T chunk) {
