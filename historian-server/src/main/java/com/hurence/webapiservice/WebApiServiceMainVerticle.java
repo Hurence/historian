@@ -20,6 +20,8 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
 
   @Override
   public void start(Promise<Void> promise) throws Exception {
+    //set this property so vertx use slf4j logging.
+    System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
     vertx.getOrCreateContext();
     LOGGER.debug("deploying {} verticle with config : {}", WebApiServiceMainVerticle.class.getSimpleName(), config().encodePrettily());
     Single<String> dbVerticleDeployment = deployHistorianVerticle();
