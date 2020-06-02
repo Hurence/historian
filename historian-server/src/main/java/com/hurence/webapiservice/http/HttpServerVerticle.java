@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http;
 
+import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
@@ -10,6 +11,7 @@ import com.hurence.webapiservice.http.api.main.MainHistorianApiImpl;
 import com.hurence.webapiservice.http.api.test.TestHistorianApi;
 import com.hurence.webapiservice.http.api.test.TestHistorianApiImpl;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.AbstractVerticle;
 import io.vertx.reactivex.core.http.HttpServer;
 import io.vertx.reactivex.ext.web.Router;
@@ -73,21 +75,20 @@ public class HttpServerVerticle extends AbstractVerticle {
     private static final String TEST_API_ENDPOINT = "/test/api";
     public static final String TEST_CHUNK_QUERY_ENDPOINT = HttpServerVerticle.TEST_API_ENDPOINT + TestHistorianApi.QUERY_CHUNK_ENDPOINT;
 
+
+    private HttpVerticleConf conf;
+
     @Override
     public void start(Promise<Void> promise) throws Exception {
-        LOGGER.debug("deploying {} verticle with config : {}", HttpServerVerticle.class.getSimpleName(), config().encodePrettily());
-        boolean debugMode = config().getBoolean(CONFIG_DEBUG_MODE, false);
-        String historianServiceAdr = config().getString(CONFIG_HISTORIAN_ADDRESS, "historian");
-        int maxDataPointsAllowedForExportCsv = config().getInteger(CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);
-        historianService = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), historianServiceAdr);
+        this.conf = parseConfig(config());
+        LOGGER.info("deploying {} verticle with config : {}", HistorianVerticle.class.getSimpleName(), this.conf);
 
+        historianService = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), conf.getHistorianServiceAdr());
         HttpServer server = vertx.createHttpServer();
-
         Router router = Router.router(vertx);
-
         router.route().handler(BodyHandler.create());
         //main
-        Router mainApi = new MainHistorianApiImpl(historianService, maxDataPointsAllowedForExportCsv).getMainRouter(vertx);
+        Router mainApi = new MainHistorianApiImpl(historianService, conf.getMaxDataPointsAllowedForExportCsv()).getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
         router.mountSubRouter(IMPORT_ENDPOINT, importApi);
@@ -98,13 +99,13 @@ public class HttpServerVerticle extends AbstractVerticle {
         router.mountSubRouter(HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT, hurenceGraphanaApi);
 
         //test
-        if (debugMode) {
+        if (conf.isDebugModeEnabled()) {
             Router debugApi = new TestHistorianApiImpl(historianService).getMainRouter(vertx);
             router.mountSubRouter(TEST_API_ENDPOINT, debugApi);
         }
 
-        int portNumber = config().getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
-        String host = config().getString(CONFIG_HTTP_SERVER_HOSTNAME, "localhost");
+        int portNumber = conf.getHttpPort();
+        String host = conf.getHostName();
         server
                 .requestHandler(router)
                 .listen(portNumber, host, ar -> {
@@ -120,14 +121,7 @@ public class HttpServerVerticle extends AbstractVerticle {
                 });
     }
 
-//    private GrafanaApiVersion getGrafanaApiVersion() {
-//        String apiversion;
-//        try {
-//            apiversion = config().getJsonObject(GRAFANA).getString(VERSION, GRAFANA_API_VEFSION_DEFAULT.toString());
-//        } catch (Exception ex) {
-//            LOGGER.info("grafana version is not defined. We will use default version which is " +  GRAFANA_API_VEFSION_DEFAULT);
-//            return GRAFANA_API_VEFSION_DEFAULT;
-//        }
-//        return GrafanaApiVersion.valueOf(apiversion.toUpperCase());
-//    }
+    public HttpVerticleConf parseConfig(JsonObject config) {
+        return new HttpVerticleConf(config);
+    }
 }
