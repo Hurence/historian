@@ -75,6 +75,10 @@ In SolR the chunks will be stored according to  the following schema
 
 ## Setup
 
+## Requierement
+
+Java SE Development Kit is requiered for the future
+https://www.oracle.com/java/technologies/javase/javase-jdk8-downloads.html
 
 ### Workspace boostrap
 make a workspace directory called `hdh_workspace` for example. we'll refer to it as `$HDH_HOME`
@@ -123,6 +127,8 @@ touch ${HDH_HOME}/data/solr/node1/zoo.cfg
 
 ### Install Apache SolR
 Apache SolR is the underlying datastore of HDH, it can be replaced by any other search engine or even S3 storage.
+
+
 
 To follow along with this tutorial, you will need to unpack the following solr archive : [https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz](https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz) into your `$HDH_HOME` directory and then start 2 solr cores locally with data store into `$HDH_HOME/data` folder
 
