@@ -11,11 +11,11 @@ The key concepts are simple :
 - **Chunk** is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and eventually some tags
 
 The main purpose of this tool is to help creating, storing and retrieving these chunks of timeseries.
-We use chunking instead of raw storage in order to save some disk space and reduce costs at scale. Also chunking is very usefull to pre-compute some arggregation and to facilitae down-sampling
+We use chunking instead of raw storage in order to save some disk space and reduce costs at scale. Also chunking is very usefull to pre-compute some arggregation and to facilitate down-sampling
 
 ### Data model
 
-A Measure is identified by the following fields
+A Measure point is identified by the following fields
 ```scala
 case class Measure(name: String,
                    value: Double,
@@ -26,6 +26,7 @@ case class Measure(name: String,
                    hour: Int,
                    tags: Map[String,String])
 ```
+
 
 A Chunk is identified by the following fields
 ```scala
@@ -44,6 +45,8 @@ case class Chunk(name: String,
      sax: String,
      tags: Map[String,String])
 ```
+As you can see from a Measure points to a Chunk of Measures, the `timestamp` field has been replaced by a `start` and `stop` interval and the `value` is now a base64 encoded string named `chunk`.
+ 
 
 In SolR the chunks will be stored according to  the following schema
 
@@ -184,8 +187,6 @@ To install this plugin using the grafana-cli tool:
     sudo service grafana-server restart
 
     
-    
-    
 ### Install Apache Spark
 This step is not mandatory if you don't want to process your data with spark framework for big data analysis.
 However to setup spark, you'll need to unpack the following Spark archive : [https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz](https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz)
@@ -262,7 +263,6 @@ curl --location --request POST 'http://localhost:8080/api/grafana/query' \
 ```
 
 
-
 Get all metrics names
 
 ```bash
@@ -276,9 +276,21 @@ curl --location --request POST 'http://localhost:8080/api/grafana/search' \
 
 ```
 
+Get some measures points within a time range
 
-
-
+```bash
+curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+	 "range": {
+          "from": "2019-11-25T23:59:59.999Z",
+          "to": "2019-11-30T23:59:59.999Z"
+      },
+      "targets": [
+        { "target": "ack" }
+      ]
+}'
+```
 
 ## Retrieve data from REST API
 
