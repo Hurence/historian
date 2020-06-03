@@ -33,6 +33,10 @@ hs_err_pid*
 **/*.ipr
 **/*.iws
 **/dependency-reduced-pom.xml
+**/.project
+**/.settings
+**/.classpath
+**/.factorypath
 
 # maven files
 **/pom.xml.versionsBackup
