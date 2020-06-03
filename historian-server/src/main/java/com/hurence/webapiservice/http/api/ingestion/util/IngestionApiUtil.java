@@ -4,10 +4,12 @@ import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.webapiservice.http.api.ingestion.ImportRequestParser;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.FileUpload;
+import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,112 +26,14 @@ public class IngestionApiUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiUtil.class);
 
-    public static ImportRequestParser.CorrectPointsAndFailedPointsOfAllFiles fromUploadsToCorrectPointsAndFailedPointsOfAllFiles(Set<FileUpload> uploads, MultiMap multiMap) {
-        ImportRequestParser.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles = new ImportRequestParser.CorrectPointsAndFailedPointsOfAllFiles();
-        for (FileUpload currentFileUpload : uploads) {
-            LOGGER.info("uploaded currentFileUpload : {} of size : {}", currentFileUpload.fileName(), currentFileUpload.size());
-            LOGGER.info("contentType currentFileUpload : {} of contentTransferEncoding : {}", currentFileUpload.contentType(), currentFileUpload.contentTransferEncoding());
-            LOGGER.info("uploaded uploadedFileName : {} ", currentFileUpload.uploadedFileName());
-            LOGGER.info("uploaded charSet : {} ", currentFileUpload.charSet());
-            String fileName = currentFileUpload.uploadedFileName();
-            File uploadedFile = new File(fileName);
-
-            final ImportRequestParser.CorrectPointsAndFailedPoints correctPointsAndFailedPoints;
-            JsonArray fileInArray;
-            try {
-                fileInArray = ConvertCsvFileToJson(uploadedFile, multiMap);
-            } catch (IOException e) {
-                String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+MAX_LINES_FOR_CSV_FILE;
-                JsonObject errorObject = new JsonObject().put(FILE, currentFileUpload.fileName()).put(CAUSE, errorMessage);
-                correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.add(errorObject);
-                continue;
-            }
-
-            correctPointsAndFailedPoints = new ImportRequestParser().parseCsvImportRequest(fileInArray, multiMap);
-
-            if (!correctPointsAndFailedPoints.correctPoints.isEmpty())
-                correctPointsAndFailedPointsOfAllFiles.correctPoints.addAll(correctPointsAndFailedPoints.correctPoints);
-            if (!correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.isEmpty())
-                correctPointsAndFailedPointsOfAllFiles.numberOfFailedPointsPerMetric.mergeIn(correctPointsAndFailedPoints.numberOfFailedPointsPerMetric);
-        }
-        return correctPointsAndFailedPointsOfAllFiles;
+    public static void constructCsvFileConvertors(MultiCsvFilesConvertor multiCsvFilesConvertor) {
+        multiCsvFilesConvertor.uploads.forEach(file -> multiCsvFilesConvertor.csvFileConvertors.add(new CsvFileConvertor(multiCsvFilesConvertor.multiMap, file)));
+        multiCsvFilesConvertor.parseFiles();
+        multiCsvFilesConvertor.fillingAllFilesConvertor();
     }
 
-    /**
-     * @param file        the csv File to be converted to json
-     *
-     * @param multiMap    the MultiMap that comes with the file
-     *
-     * @return result      a json array containing json Objects, each one has the points grouped by the name, the date and the tags if there is any to
-     *                      group by with
-     *                                       [
-     *                                        {
-     *                                            "name": ... ,
-     *                                            "tags": {
-     *                                              "sensor": "sensor_1",
-     *                                              "code_install": "code_1"
-     *                                              }
-     *                                            "points": [
-     *                                               [time, value],
-     *                                               [time, value]
-     *                                            ]
-     *                                        },
-     *                                       {
-     *                                            "name": ... ,
-     *                                            "tags": {
-     *                                                    "sensor": "sensor_2",
-     *                                                    "code_install": "code_2"
-     *                                                    }
-     *                                            "points": [
-     *                                                [time, value],
-     *                                                [time, value]
-     *                                            ]
-     *                                       }
-     *                                       ]
-     */
-
-    public static JsonArray ConvertCsvFileToJson(File file, MultiMap multiMap) throws IOException {
-        CsvMapper csvMapper = new CsvMapper();
-        MappingIterator<Map> rows = csvMapper
-                .readerWithSchemaFor(Map.class)
-                .with(CsvSchema.emptySchema().withHeader())
-                .readValues(file);
-
-        List<LineWithDateInfo> linesWithDateInfo = addDateInfoToEachLine(rows, multiMap);
-
-        DataConverter converter = new DataConverter(multiMap);
-        JsonArray result = converter.toGroupedByMetricDataPoints(linesWithDateInfo);
-        if (result.size() > MAX_LINES_FOR_CSV_FILE) {
-            throw new IOException(String.valueOf(result.size()));
-        }
-        return result;
-    }
-
-    private static List<LineWithDateInfo> addDateInfoToEachLine(MappingIterator<Map> rows, MultiMap multiMap) throws IOException {
-        List<Map> listFromRows = rows.readAll();
-        List<LineWithDateInfo> linesWithDateInfos = new LinkedList<>();
-        listFromRows.forEach(i -> {
-            try {
-                String date = generateDateFromTime(i, multiMap);
-                linesWithDateInfos.add(new LineWithDateInfo(i,date));
-            }catch (Exception e) {
-                LOGGER.debug("error in parsing date", e);
-            }
-        });
-        return linesWithDateInfos;
-    }
-    private static String generateDateFromTime (Map map, MultiMap multiMap) {
-        if (multiMap.get(MAPPING_TIMESTAMP) == null)
-            multiMap.add(MAPPING_TIMESTAMP, "timestamp");
-        Object date1 = map.get(multiMap.get(MAPPING_TIMESTAMP));
-        long date = (long) DataConverter.toNumber(date1, multiMap);
-        Date d = new Date(date);
-        DateFormat f = new SimpleDateFormat("yyyy-MM-dd");
-        return f.format(d);
-    }
-
-
-    public static JsonObject constructFinalResponseCsv(ImportRequestParser.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles, io.vertx.reactivex.core.MultiMap multiMap) {
+    public static JsonObject constructFinalResponseCsv(MultiCsvFilesConvertor.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles,
+                                                       io.vertx.reactivex.core.MultiMap multiMap) {
 
         JsonArray result = getGroupedByReportFromInjectedPoints(correctPointsAndFailedPointsOfAllFiles, multiMap);
         JsonObject finalResponse = new JsonObject();
@@ -141,9 +45,9 @@ public class IngestionApiUtil {
             finalResponse.put(ERRORS, correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles);
         return finalResponse;
     }
-    public static JsonArray getGroupedByReportFromInjectedPoints(ImportRequestParser.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles, io.vertx.reactivex.core.MultiMap multiMap) {
+    public static JsonArray getGroupedByReportFromInjectedPoints(MultiCsvFilesConvertor.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles,
+                                                                 io.vertx.reactivex.core.MultiMap multiMap) {
 
-        final JsonObject failedPoints = correctPointsAndFailedPointsOfAllFiles.numberOfFailedPointsPerMetric;
         List<Map<String, Object>> resultForCsvImport = new LinkedList<>();
         try {
             JsonArray timeseriesPoints = correctPointsAndFailedPointsOfAllFiles.correctPoints;
@@ -163,14 +67,14 @@ public class IngestionApiUtil {
                 groupedByFieldsForThisChunk.put("totalPointsForThisChunk", String.valueOf(totalNumPointsInChunk));
                 groupedByFieldsForEveryChunk.add(groupedByFieldsForThisChunk);
             }
-            resultForCsvImport.addAll(prepareOneReport(groupedByFieldsForEveryChunk, groupedByFields, failedPoints));
+            resultForCsvImport.addAll(prepareOneReport(groupedByFieldsForEveryChunk, groupedByFields, correctPointsAndFailedPointsOfAllFiles.numberOfFailedPointsPerMetric));
         } catch (Exception e) {
             LOGGER.error("unexpected exception");
         }
         return new JsonArray(sortTheCsvIngestionResult(resultForCsvImport));
     }
-    static List<Map<String, Object>> prepareOneReport(List<HashMap<String, String>> groupedByFieldsForEveryChunk, JsonArray groupBdByFields, JsonObject failedPoints) {
-        return groupedByFieldsForEveryChunk.stream()
+    static List<Map<String, Object>> prepareOneReport(List<HashMap<String, String>> groupedByFieldsForEveryChunk, JsonArray groupBdByFields, LinkedHashMap failedPoints) {
+        List<Map<String, Object>> listOfReports = groupedByFieldsForEveryChunk.stream()
                 .collect(Collectors.groupingBy(map -> {
                             HashMap<String, String> groupedByFieldsForThisMap = new LinkedHashMap<String,String>();
                             groupBdByFields.forEach(f -> groupedByFieldsForThisMap.put(f.toString(), map.get(f)));
@@ -185,13 +89,21 @@ public class IngestionApiUtil {
                     entry.getKey().forEach(resultObject::put);
                     totalNumberOfPointsPerGroupedFildes = entry.getValue().stream().mapToInt(Integer::valueOf).sum();
                     resultObject.put("number_of_points_injected", totalNumberOfPointsPerGroupedFildes);
-                    entry.getKey().entrySet().forEach(entry1 -> {
-                        groupByListForThisChunk.add(entry1.getValue());
-                    });
-                    resultObject.put("number_of_point_failed", failedPoints.getInteger(groupByListForThisChunk.toString(), 0));
+                    entry.getKey().forEach((key, value) -> groupByListForThisChunk.add(value));
+                    int integer = (int) failedPoints.get(entry.getKey());
+                    resultObject.put("number_of_point_failed", integer);
+                    failedPoints.remove(entry.getKey());
                     resultObject.put("number_of_chunk_created", chunkNumber);
                     return resultObject;
                 }).collect(Collectors.toList());
+        failedPoints.forEach((i,j) -> {
+            Map<String, Object> resultObject = new LinkedHashMap<>();
+            LinkedHashMap<String, String> fields = (LinkedHashMap<String, String>) i;
+            fields.forEach((y,z) -> resultObject.put(y, z));
+            resultObject.put("number_of_point_failed", j);
+            listOfReports.add(resultObject);
+        });
+        return listOfReports;
     }
 
     public static JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
