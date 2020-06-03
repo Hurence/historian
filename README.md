@@ -235,6 +235,10 @@ Now that we have a working setup of HDH we can start to play with data. There ar
 ## Load data from REST API
 
 
+
+
+
+
 ```json
 curl --location --request POST 'http://localhost:8080/api/grafana/query' \
 --header 'Content-Type: application/json' \

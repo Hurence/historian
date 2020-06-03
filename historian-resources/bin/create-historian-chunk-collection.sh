@@ -25,8 +25,16 @@ parse_args() {
                 SOLR_HOST="$2"
                 shift # past argument
             ;;
-            -c|--solr-collection)
+            -c|--collection)
                 SOLR_COLLECTION="$2"
+                shift # past argument
+            ;;
+            -fn|--field-name)
+                SOLR_FIELD_NAME="$2"
+                shift # past argument
+            ;;
+            -ft|--field-type)
+                SOLR_FIELD_TYPE="$2"
                 shift # past argument
             ;;
             -rf|--replication-factor)
@@ -49,6 +57,10 @@ parse_args() {
                 DRY_RUN=true
                 shift # past argument
             ;;
+            -m|--update-mode)
+                UPDATE_MODE="$2"
+                shift # past argument
+            ;;
             -h|--help)
                 print_usage
                 exit 0
@@ -68,7 +80,7 @@ parse_args() {
     echo "DRY_RUN is set to '${DRY_RUN}'"
     echo "MODEL_VERSION is set to '${MODEL_VERSION}'"
 
-    echo -e "${GREEN}Creating collection for historian on ${SOLR_HOST} ${NOCOLOR}"
+
 }
 
 
@@ -137,7 +149,7 @@ delete_field() {
 
 create_schema() {
 
-    echo -e "${GREEN}Creating schema of chunk collection for historian version ${MODEL_VERSION} ${NOCOLOR}"
+    echo -e "${GREEN}Creating schema of chunk collection for ${SOLR_COLLECTION} version ${MODEL_VERSION} ${NOCOLOR}"
 
     case ${MODEL_VERSION} in
         "EVOA0")
@@ -221,8 +233,25 @@ create_schema() {
 ####################################################################
 main() {
     parse_args "$@"
-    create_collection
-    create_schema
+    case ${UPDATE_MODE} in
+        "create-collection")
+            echo -e "${GREEN}Creating collection for ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+            create_collection
+            create_schema
+            ;;
+
+        "add-field")
+            echo -e "${GREEN}Add field ${SOLR_FIELD_NAME} of type ${SOLR_FIELD_TYPE} to collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+            add_field ${SOLR_FIELD_NAME} ${SOLR_FIELD_TYPE}
+            curl -X POST -H 'Content-type:application/json' "http://${SOLR_HOST}/${SOLR_COLLECTION}/schema" --data-binary "{ ${SOLR_UPDATE_QUERY} }"
+            ;;
+
+        *)
+            echo -e "${RED}Unknown update mode option ${UPDATE_MODE}, doing nothing and exiting...${NOCOLOR}"
+            exit 0
+            ;;
+    esac
+
 }
 
 ################################
@@ -230,11 +259,16 @@ main() {
 ################################
 declare SOLR_HOST="localhost:8983/solr"
 declare SOLR_COLLECTION="historian"
+declare SOLR_FIELD_NAME=""
+declare SOLR_FIELD_TYPE="text_general"
 declare REPLICATION_FACTOR=1
 declare NUM_SHARDS=2
 declare DRY_RUN=false
 declare MODEL_VERSION="VERSION_0"
 declare SOLR_UPDATE_QUERY=""
+declare UPDATE_MODE="create-collection"
+
+
 
 # color setup
 NOCOLOR='\033[0m'
