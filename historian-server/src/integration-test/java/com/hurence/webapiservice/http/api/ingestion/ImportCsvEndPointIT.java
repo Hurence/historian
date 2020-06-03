@@ -297,7 +297,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
-                .attribute(FORMAT_DATE, "TIMESTAMP_IN_MILLISECONDS")
+                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .attribute(GROUP_BY, DEFAULT_TIMESTAMP_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
@@ -611,6 +611,37 @@ public class ImportCsvEndPointIT {
                 new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_second_date.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithFailedPoints(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_failed_points.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "timestamp")
+                .attribute(MAPPING_NAME, "metric")
+                .attribute(MAPPING_VALUE, "value")
+                .attribute(MAPPING_QUALITY, "quality")
+                .attribute(MAPPING_TAGS, "sensor")
+                .attribute(MAPPING_TAGS, "code_install")
+                .attribute(FORMAT_DATE, "yyyy-D-m HH:mm:ss.SSS")
+                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "tags.sensor")
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_with_failed_points.json",
+                        CREATED, StatusMessages.CREATED,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request3.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_with_failed_points.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
         );

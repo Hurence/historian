@@ -1,0 +1,17 @@
+{
+  "targets": [
+    {
+      "target": "metric_1"
+    },
+    {
+      "target": "metric_2"
+    },
+    {
+      "target": "metric_3"
+    },
+    {
+      "target": "metric_4"
+    }
+  ],
+  "maxDataPoints": 550
+}
