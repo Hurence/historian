@@ -17,8 +17,6 @@
 
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -26,11 +24,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -65,74 +61,20 @@ public class HistorianVerticle extends AbstractVerticle {
   public static final String CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT = "number_of_connection_attempt";
   public static final String MAX_NUMBER_OF_TARGET_RETURNED = "max_number_of_target_returned";
 
-  private SolrClient client;
+
+  private HistorianVerticleConf conf;
 
   @Override
   public void start(Promise<Void> promise) throws Exception {
-    LOGGER.debug("deploying {} verticle with config : {}", HistorianVerticle.class.getSimpleName(), config().encodePrettily());
+    this.conf = parseConfig(config());
+    LOGGER.info("deploying {} verticle with config : {}", HistorianVerticle.class.getSimpleName(), this.conf);
 
-    final JsonObject slrConfig = config().getJsonObject(CONFIG_ROOT_SOLR);
-    final int connectionTimeout = slrConfig.getInteger(CONFIG_SOLR_CONNECTION_TIMEOUT, 10000);
-    final int socketTimeout = slrConfig.getInteger(CONFIG_SOLR_SOCKET_TIMEOUT, 60000);
-    final boolean useZookeeper = slrConfig.getBoolean(CONFIG_SOLR_USE_ZOOKEEPER, false);
-
-    if (!slrConfig.containsKey(CONFIG_SOLR_STREAM_ENDPOINT))
-      throw new IllegalArgumentException(String.format("key %s is needed in solr config of historian verticle conf.",
-              CONFIG_SOLR_STREAM_ENDPOINT));
-    final String streamEndpoint = slrConfig.getString(CONFIG_SOLR_STREAM_ENDPOINT);
-
-
-    CloudSolrClient.Builder clientBuilder;
-    if (useZookeeper) {
-      LOGGER.info("Zookeeper mode");
-      clientBuilder = new CloudSolrClient.Builder(
-                getStringListIfExist(slrConfig, CONFIG_SOLR_ZOOKEEPER_URLS).orElse(Collections.emptyList()),
-                Optional.ofNullable(slrConfig.getString(CONFIG_SOLR_ZOOKEEPER_ROOT))
-      );
-    } else {
-      LOGGER.info("Client without zookeeper");
-      clientBuilder = new CloudSolrClient.Builder(
-              getStringListIfExist(slrConfig, CONFIG_SOLR_URLS)
-                      .orElseThrow(IllegalArgumentException::new)
-      );
-    }
-
-    if (useZookeeper) {
-      this.client = clientBuilder
-              .withConnectionTimeout(connectionTimeout)
-              .withSocketTimeout(socketTimeout)
-              .build();
-    }else {
-
-
-      this.client = new HttpSolrClient.Builder(getStringListIfExist(slrConfig, CONFIG_SOLR_URLS).get().get(0) ).build();
-    }
-
-    final String chunkCollection = slrConfig.getString(CONFIG_SOLR_CHUNK_COLLECTION, "historian");
-    final String annotationCollection = slrConfig.getString(CONFIG_SOLR_ANNOTATION_COLLECTION, "annotation");
-    final String address = config().getString(CONFIG_HISTORIAN_ADDRESS, "historian");
-    final long limitNumberOfPoint = config().getLong(CONFIG_LIMIT_NUMBER_OF_POINT, 50000L);
-    final long limitNumberOfChunks = config().getLong(CONFIG_LIMIT_NUMBER_OF_CHUNK, 50000L);
-    final int maxNumberOfTargetReturned = getMaxNumberOfTargetReturned();
-    SolrHistorianConf historianConf = new SolrHistorianConf();
-    historianConf.client = client;
-    historianConf.chunkCollection = chunkCollection;
-    historianConf.annotationCollection = annotationCollection;
-    historianConf.streamEndPoint = streamEndpoint;
-    historianConf.limitNumberOfPoint = limitNumberOfPoint;
-    historianConf.limitNumberOfChunks = limitNumberOfChunks;
-    historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);;
-    historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);;
-    historianConf.maxNumberOfTargetReturned = maxNumberOfTargetReturned;
-    String schemaVersion = config().getString(CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
-    historianConf.schemaVersion = SchemaVersion.valueOf(schemaVersion);
-
-    HistorianService.create(vertx, historianConf, ready -> {
+    HistorianService.create(vertx, conf.getHistorianConf(), ready -> {
       if (ready.succeeded()) {
         ServiceBinder binder = new ServiceBinder(vertx);
-        binder.setAddress(address)
+        binder.setAddress(conf.getHistorianServiceAddress())
                 .register(HistorianService.class, ready.result());
-        LOGGER.info("{} deployed on address : '{}'", HistorianService.class.getSimpleName(), address);
+        LOGGER.info("{} deployed on address : '{}'", HistorianService.class.getSimpleName(), conf.getHistorianServiceAddress());
         promise.complete();
       } else {
         promise.fail(ready.cause());
@@ -140,32 +82,23 @@ public class HistorianVerticle extends AbstractVerticle {
     });
   }
 
-  private int getMaxNumberOfTargetReturned() {
-    if (config().containsKey(CONFIG_API_HISTORAIN) &&
-            config().getJsonObject(CONFIG_API_HISTORAIN).containsKey(CONFIG_GRAFANA_HISTORAIN) &&
-            config().getJsonObject(CONFIG_API_HISTORAIN).getJsonObject(CONFIG_GRAFANA_HISTORAIN).containsKey(CONFIG_SEARCH_HISTORAIN)
-    ) {
-      return config().getJsonObject(CONFIG_API_HISTORAIN)
-              .getJsonObject(CONFIG_GRAFANA_HISTORAIN)
-              .getJsonObject(CONFIG_SEARCH_HISTORAIN)
-              .getInteger(CONFIG_DEFAULT_SIZE_HISTORAIN, 100);
-    }
-    return 100;
+  public HistorianVerticleConf parseConfig(JsonObject config) {
+    return new HistorianVerticleConf(config);
   }
 
-  private Optional<List<String>> getStringListIfExist(JsonObject config, String key) {
-    JsonArray array = config.getJsonArray(key);
-    if (array == null) return Optional.empty();
-    return Optional.of(array.stream()
-            .map(Object::toString)
-            .collect(Collectors.toList()));
-  }
 
   @Override
   public void stop(Promise<Void> promise) throws Exception {
-    if (client != null) {
-      client.close();
+    if (this.getClient() != null) {
+      getClient().close();
     }
     promise.complete();
+  }
+
+  private SolrClient getClient() {
+    if (this.conf != null && this.conf.getHistorianConf() != null) {
+      return this.conf.getHistorianConf().client;
+    }
+    return null;
   }
 }

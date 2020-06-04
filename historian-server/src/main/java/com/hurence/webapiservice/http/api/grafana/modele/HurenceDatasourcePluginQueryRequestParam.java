@@ -34,7 +34,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     private HurenceDatasourcePluginQueryRequestParam(List<String> metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
                                                  Map<String, String> tags, String requestId, List<String> aggregList) {
-        Objects.requireNonNull(metricNames);
+        if (metricNames == null) throw new IllegalArgumentException("metricNames should not be null !");
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
         this.from = from;
