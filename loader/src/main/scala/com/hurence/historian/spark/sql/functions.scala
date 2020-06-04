@@ -141,9 +141,9 @@ object functions {
   /**
    * Encoding function: returns the sax string of the values using the best guess.
    */
-  val anomalie_test = udf { ( str: String) =>
+  val anomalie_test = udf { (str: String, Thresh : Float) =>
 
-    val saxThreshold =  SaxAnalyzer.saxThreshold(str,0.1)
+    val saxThreshold =  SaxAnalyzer.saxThreshold(str,Thresh)
     SaxAnalyzer.anomalyDetect(str,saxThreshold).toString
 
   }
