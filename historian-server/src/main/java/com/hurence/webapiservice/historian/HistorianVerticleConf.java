@@ -21,9 +21,9 @@ public class HistorianVerticleConf {
 
     private final String historianAdress;
     private final boolean usingZookeeper;
-    private final List<String> solrUrls;
-    private final List<String> solrZookeeperUrls;
-    private final String zookeeperRoot;
+    private List<String> solrUrls;
+    private List<String> solrZookeeperUrls;
+    private String zookeeperRoot;
     private final int connectionTimeout;
     private final int socketTimeout;
     private final SolrHistorianConf solrHistorianConf;
@@ -34,15 +34,14 @@ public class HistorianVerticleConf {
         this.connectionTimeout = slrConfig.getInteger(CONFIG_SOLR_CONNECTION_TIMEOUT, 10000);
         this.socketTimeout = slrConfig.getInteger(CONFIG_SOLR_SOCKET_TIMEOUT, 60000);
         this.usingZookeeper = slrConfig.getBoolean(CONFIG_SOLR_USE_ZOOKEEPER, false);
-        this.solrZookeeperUrls = getStringListIfExist(slrConfig, CONFIG_SOLR_ZOOKEEPER_URLS).orElse(Collections.emptyList());
-        this.zookeeperRoot = slrConfig.getString(CONFIG_SOLR_ZOOKEEPER_ROOT);
         if (!usingZookeeper) {
             this.solrUrls = getStringListIfExist(slrConfig, CONFIG_SOLR_URLS)
                     .orElseThrow(() -> new IllegalArgumentException(String.format(
                             "property %s is needed when not using zookeeper", CONFIG_ROOT_SOLR + "/" + CONFIG_SOLR_URLS
                     )));
         } else {
-            this.solrUrls = getStringListIfExist(slrConfig, CONFIG_SOLR_URLS).orElse(Collections.emptyList());
+            this.solrZookeeperUrls = getStringListIfExist(slrConfig, CONFIG_SOLR_ZOOKEEPER_URLS).orElse(Collections.emptyList());//TODO exception ?
+            this.zookeeperRoot = slrConfig.getString(CONFIG_SOLR_ZOOKEEPER_ROOT);
         }
         this.solrHistorianConf = parseSolrHistorianConf(conf);
     }
@@ -61,10 +60,6 @@ public class HistorianVerticleConf {
 
     public Optional<String> getZookeeperRoot() {
         return Optional.ofNullable(zookeeperRoot);
-    }
-
-    public List<String> getSolrUrls() {
-        return solrUrls;
     }
 
     public int getConnectionTimeout() {
@@ -98,9 +93,7 @@ public class HistorianVerticleConf {
         historianConf.limitNumberOfPoint = limitNumberOfPoint;
         historianConf.limitNumberOfChunks = limitNumberOfChunks;
         historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);
-        ;
         historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);
-        ;
         historianConf.maxNumberOfTargetReturned = maxNumberOfTargetReturned;
         String schemaVersion = conf.getString(CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
         historianConf.schemaVersion = SchemaVersion.valueOf(schemaVersion);
@@ -131,9 +124,7 @@ public class HistorianVerticleConf {
             );
         } else {
             LOGGER.info("Client without zookeeper");
-            clientBuilder = new CloudSolrClient.Builder(
-                    this.getSolrUrls()
-            );
+            clientBuilder = new CloudSolrClient.Builder(this.solrUrls);
         }
         return clientBuilder
                 .withConnectionTimeout(this.getConnectionTimeout())
