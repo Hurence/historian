@@ -91,15 +91,31 @@ public class DataConverter {
         // here you should take timestamps in diff timezones and store only in utc.
         try {
             long longValue = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
-
-            if ((multiMap.get(FORMAT_DATE) == null) || (multiMap.get(FORMAT_DATE).equals(TimestampUnit.MILLISECONDS_EPOCH.toString())))
+            String format = multiMap.get(FORMAT_DATE);
+            if (format != null)
+                switch (format) {
+                    case SECONDS_EPOCH:
+                        longValue = longValue*1000;
+                        break;
+                    case MICROSECONDS_EPOCH:
+                        longValue = longValue/1000;
+                        break;
+                    case NANOSECONDS_EPOCH:
+                        longValue = longValue/1000000;
+                    case MILLISECONDS_EPOCH:
+                        break;
+                    default:
+                        throw  new IllegalArgumentException("TIMESTAMP_UNIT is not correct.");
+                }
+            return longValue;
+            /*if ((multiMap.get(FORMAT_DATE) == null) || (multiMap.get(FORMAT_DATE).equals(TimestampUnit.MILLISECONDS_EPOCH.toString())))
                 return longValue;
             else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.SECONDS_EPOCH.toString()))
                 return longValue*1000;
             else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.MICROSECONDS_EPOCH.toString()))
                 return longValue/1000;
             else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.NANOSECONDS_EPOCH.toString()))
-                return longValue/1000000;
+                return longValue/1000000;*/
         } catch (Exception e) {
             LOGGER.debug("error in parsing date", e);
             if (multiMap.get(TIMEZONE_DATE) == null)
@@ -113,7 +129,6 @@ public class DataConverter {
                 return value;
             }
         }
-        return null;
     }
 
     private Object toDouble(Object value) {
