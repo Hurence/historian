@@ -238,17 +238,6 @@ ds.show()
     println(sample(0))
     assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample(0)(16))
 
-
-//    val sample1 = it4MetricsChunksDS
-//            .where("name = 'ack' AND day = '2019-11-29'")
-//            .withColumn("guess", guess(  $"values"))
-//          //.agg(count($"tags.metric_id").as("count_metric"))
-//          //.as[ChunkRecordV0]
-//         // .show(32,200)
-//           .collect()
-//
-//    sample1.foreach(x => println(x))
-//   assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample1(6)(16))
   }
 
   @Test
@@ -257,43 +246,31 @@ ds.show()
 
   //simply recompute sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
 
-    val sample1 = it4MetricsChunksDS
+    val sample = it4MetricsChunksDS
       .where("name = 'consumers' AND day = '2019-11-29' ")
-     // .withColumn("guess", guess( $"values"))
       .withColumn("sax_best_guess", sax_best_guess( lit(0.05),  $"values"))
       //.as[ChunkRecordV0]
       .drop("chunk", "timestamps","values","tags")
-      .show(32,200)
-     // .collect()
+     .collect()
 
-    //sample1.foreach(x => println(x))
-    //assertEquals("adebdcdcddbddddccfdfegfffghigiihhgggifghffcfgfffff", sample1(2)(16))
+    //sample.foreach(x => println(x))
+    assertEquals("bb", sample(0)(12))
 
   }
   @Test
   def testChunksV0Sax_anomaly() = {
 
 
-             //simply check for anomalies in the sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-            val sample = it4MetricsChunksDS
-              .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-              .withColumn("sax_best_guess", sax_best_guess( lit(0.05),  $"values"))
-              .withColumn("anomaly_test", anomalie_test(lit(0.1),$"sax_best_guess"))
-              //.as[ChunkRecordV0]
-              .collect()
-            println(sample(0))
-            assertEquals("[-1]", sample(0)(17))
-
-//    val sample = it4MetricsChunksDS
-//      .where("name = 'ack' AND day = '2019-11-29'")
-//      .withColumn("sax_best_guess", sax_best_guess_paa_fixed( lit(0.05),lit(50),  $"values"))
-//      .withColumn("anomaly_test", anomalie_test($"sax"))
-      //.agg(count($"tags.metric_id").as("count_metric"))
+    //simply check for anomalies in the sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
+    val sample = it4MetricsChunksDS
+      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+      .withColumn("sax_best_guess_paa_fixed", sax_best_guess_paa_fixed( lit(0.01),lit(50),  $"values"))
+      .withColumn("anomaly_test", anomalie_test($"sax_best_guess_paa_fixed",lit(0.1)))
       //.as[ChunkRecordV0]
- //     .show(32,200)
-//      .collect()
-//        sample.foreach(x => println(x))
-//        assertEquals("[2, 41]", sample(2)(17))
+      .collect()
+    println(sample(0))
+    assertEquals("[15, 41]", sample(0)(17))
+
   }
 
   @Test
@@ -307,16 +284,12 @@ ds.show()
       .dropDuplicates("values")
       .withColumn("guess", guess( $"values"))
       .withColumn("sax_best_guess_paa_fixed", sax_best_guess_paa_fixed( lit(0.05), lit(20),  $"values"))
-      .withColumn("anomaly_test", anomalie_test($"sax_best_guess_paa_fixed", lit(0.12)))
+      .withColumn("anomaly_test", anomalie_test($"sax_best_guess_paa_fixed", lit(0.11)))
       .orderBy("day")
       .groupBy("tags.metric_id")
       .agg(first("name") as "name",collect_list("day") as "day",collect_list("sax_best_guess_paa_fixed")as "sax",collect_list("anomaly_test") as "anomaly")
       .drop("start","end","chunk", "timestamps","values","count","avg","stddev","guess")
       .show(16,200)
-
-
-
-
   }
 
 }
