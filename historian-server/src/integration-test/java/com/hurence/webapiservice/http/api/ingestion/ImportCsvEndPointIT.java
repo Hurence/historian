@@ -644,7 +644,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_with_failed_points.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request3.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_with_failed_points.json",
                         OK, StatusMessages.OK,

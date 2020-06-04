@@ -1,12 +1,12 @@
 [
   {
-    "target":"metric_3",
+    "name":"metric_3",
     "datapoints":[
       [3.2,4]
     ]
   },
   {
-    "target":"metric_2",
+    "name":"metric_2",
     "datapoints":[
       [4.0,4],
       [2.0,4],
@@ -14,7 +14,7 @@
     ]
   },
   {
-    "target":"metric_1",
+    "name":"metric_1",
     "datapoints":[
       [1.2,1],
       [2.0,86400002],
