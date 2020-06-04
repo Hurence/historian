@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.DEFAULT_TIMESTAMP_COLUMN_MAPPING;
 
 public class IngestionApiUtil {
 

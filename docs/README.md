@@ -17,7 +17,7 @@ If you are editing the doc and want to test if its work, you can run only your d
 mvn clean <plugin-prefix>:<plugin-goal>@<execution-id>
 ```
 
-Fir example if i want to only generate the french user guide in pdf I would execute
+For example if you want to only generate the french user guide in pdf I would execute
 
 ```shell script
 mvn clean asciidoctor:process-asciidoc@fr-usermanual-to-pdf

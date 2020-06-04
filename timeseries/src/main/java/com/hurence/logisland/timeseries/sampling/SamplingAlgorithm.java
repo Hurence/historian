@@ -17,7 +17,7 @@ package com.hurence.logisland.timeseries.sampling;
 
 public enum SamplingAlgorithm {
     NONE,
-    FIRST_ITEM,
+    FIRST,
     AVERAGE,
     MODE_MEDIAN,
     LTTB,

@@ -1,5 +1,6 @@
 package com.hurence.historian.model
 
+import com.hurence.historian.spark.sql.reader.ModelVersion
 
 
 trait HistorianRecord {
@@ -14,7 +15,7 @@ trait HistorianRecord {
   */
 sealed trait Chunk extends HistorianRecord {
 
-  def apiVersion: String = "v0"
+  def apiVersion: String = ModelVersion.V0.toString
 
   def name: String
 
@@ -32,10 +33,15 @@ sealed trait Chunk extends HistorianRecord {
 
   def max: Double
 
+//  def sum: Double
+
   def avg: Double
+
+  def stddev: Double
 
   def sax: String
 
+//  def origin: String
 }
 
 
@@ -60,6 +66,9 @@ sealed trait Chunk extends HistorianRecord {
   */
 case class ChunkRecordV0(name: String,
                          day:String,
+//                         month: Int,
+//                         year: Int,
+//                         hour: Int,
                          start: Long,
                          end: Long,
                          chunk: String,
@@ -68,8 +77,11 @@ case class ChunkRecordV0(name: String,
                          stddev: Double,
                          min: Double,
                          max: Double,
+//                         sum: Double,
                          first: Double,
                          last: Double,
                          sax: String,
+//                         origin: String,
+//                         compactions_running : List[String],
                          tags: Map[String,String]) extends Chunk
 

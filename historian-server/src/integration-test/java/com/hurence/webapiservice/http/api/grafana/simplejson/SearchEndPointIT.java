@@ -1,8 +1,10 @@
 package com.hurence.webapiservice.http.api.grafana.simplejson;
 
 
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
@@ -39,9 +41,8 @@ public class SearchEndPointIT {
     private static String COLLECTION = HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     @BeforeAll
-    public static void beforeAll(SolrClient client) throws IOException, SolrServerException {
-        HistorianSolrITHelper
-                .initHistorianSolr(client);
+    public static void beforeAll(SolrClient client, DockerComposeContainer container) throws IOException, SolrServerException, InterruptedException {
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("id", UUID.randomUUID().toString());
@@ -157,7 +158,7 @@ public class SearchEndPointIT {
         WebClient webClient = HttpITHelper.buildWebClient(vertx);
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/api/grafana/search")
+        webClient.post(HttpServerVerticle.SIMPLE_JSON_GRAFANA_SEARCH_API_ENDPOINT)
                 .as(BodyCodec.jsonArray())
                 .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
@@ -186,7 +187,7 @@ public class SearchEndPointIT {
         WebClient webClient = HttpITHelper.buildWebClient(vertx);
         final FileSystem fs = vertx.fileSystem();
         Buffer requestBuffer = fs.readFileBlocking(AssertResponseGivenRequestHelper.class.getResource(requestFile).getFile());
-        webClient.post("/api/grafana/search")
+        webClient.post(HttpServerVerticle.SIMPLE_JSON_GRAFANA_SEARCH_API_ENDPOINT)
                 .as(BodyCodec.jsonArray())
                 .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {

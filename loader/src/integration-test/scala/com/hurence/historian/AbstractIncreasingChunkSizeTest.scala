@@ -2,7 +2,8 @@ package com.hurence.historian
 
 import java.util
 
-import com.hurence.historian.solr.injector.GeneralSolrInjector
+import com.hurence.historian.modele.SchemaVersion
+import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.historian.spark.compactor.ChunkCompactor
 import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
@@ -121,18 +122,21 @@ object AbstractIncreasingChunkSizeTest {
   private val metricB = "temp_b"
 
   @BeforeAll
-  def initHistorianAndDeployVerticle(client: SolrClient): Unit = {
-    SolrITHelper.initHistorianSolr(client)
-    SolrUtils.createReportCollection(client)
+  def initHistorianAndDeployVerticle(client: SolrClient,
+                                     container: (DockerComposeContainer[SELF]) forSome
+                                     {type SELF <: DockerComposeContainer[SELF]}): Unit = {
+    SolrITHelper.creatingAllCollections(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString)
+    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.CODE_INSTALL)
+    SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.SENSOR)
     LOGGER.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
-    val injector: GeneralSolrInjector = new GeneralSolrInjector()
+    val injector: GeneralVersion0SolrInjector = new GeneralVersion0SolrInjector()
     addSeveralChunksForMetric(injector, metricA)
     addSeveralChunksForMetric(injector, metricB)
     injector.injectChunks(client)
     LOGGER.info("Indexed some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
   }
 
-   def addSeveralChunksForMetric(injector: GeneralSolrInjector, metric: String) = {
+   def addSeveralChunksForMetric(injector: GeneralVersion0SolrInjector, metric: String) = {
     injector.addChunk(metric, year, month, day, chunkOrigin,
       util.Arrays.asList(
         new Point(0, 1477895624866L, 622)

@@ -17,6 +17,7 @@
 
 package com.hurence.webapiservice.util;
 
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.historian.HistorianVerticle;
@@ -49,21 +50,24 @@ public class HistorianSolrITHelper {
     public static String COLLECTION_ANNOTATION = SolrITHelper.COLLECTION_ANNOTATION;
     public static String HISTORIAN_ADRESS = "historian_service";
 
-    public static void initHistorianSolr(SolrClient client) throws IOException, SolrServerException {
-        SolrITHelper.initHistorianSolr(client);
+    public static void createChunkCollection(SolrClient client, DockerComposeContainer container, SchemaVersion version) throws IOException, SolrServerException, InterruptedException {
+        SolrITHelper.createChunkCollection(client, SolrExtension.getSolr1Url(container), version.toString());
     }
 
     @BeforeAll
-    public static void initHistorianAndDeployVerticle(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
-        initHistorianSolr(client);
+    public static void initHistorianAndDeployVerticle(SolrClient client,
+                                                      DockerComposeContainer container,
+                                                      Vertx vertx, VertxTestContext context,
+                                                      SchemaVersion version) throws IOException, SolrServerException, InterruptedException {
+        createChunkCollection(client, container, version);
         LOGGER.info("Initializing Verticles");
-        deployHistorienVerticle(container, vertx).subscribe(id -> {
+        deployHistorianVerticle(container, vertx).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
     }
 
-    public static Single<String> deployHistorienVerticle(DockerComposeContainer container, Vertx vertx) {
+    public static Single<String> deployHistorianVerticle(DockerComposeContainer container, Vertx vertx) {
         DeploymentOptions historianOptions = getDeploymentOptions(container);
         return vertx.rxDeployVerticle(new HistorianVerticle(), historianOptions)
                 .map(id -> {
@@ -72,7 +76,7 @@ public class HistorianSolrITHelper {
                 });
     }
 
-    public static Single<String> deployHistorienVerticle(DockerComposeContainer container,
+    public static Single<String> deployHistorianVerticle(DockerComposeContainer container,
                                                          Vertx vertx,
                                                          JsonObject customHistorianConf) {
         DeploymentOptions historianOptions = getDeploymentOptions(container, customHistorianConf);
@@ -84,11 +88,11 @@ public class HistorianSolrITHelper {
     }
 
     public static DeploymentOptions getDeploymentOptions(DockerComposeContainer container) {
-        JsonObject historianConf = getHistorianConf(container);
+        JsonObject historianConf = getDefaultHistorianConf(container);
         return new DeploymentOptions().setConfig(historianConf);
     }
 
-    private static JsonObject getHistorianConf(DockerComposeContainer container) {
+    private static JsonObject getDefaultHistorianConf(DockerComposeContainer container) {
         String zkUrl = container.getServiceHost(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT)
                 + ":" +
                 container.getServicePort(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT);
@@ -115,7 +119,11 @@ public class HistorianSolrITHelper {
 
     public static DeploymentOptions getDeploymentOptions(DockerComposeContainer container,
                                                          JsonObject customHistorianConf) {
-        JsonObject historianConf = getHistorianConf(container);
+        JsonObject historianConf = getDefaultHistorianConf(container);
         return new DeploymentOptions().setConfig(historianConf.mergeIn(customHistorianConf));
+    }
+
+    public static void createAnnotationCollection(SolrClient client, DockerComposeContainer container, SchemaVersion version) throws IOException, SolrServerException, InterruptedException {
+        SolrITHelper.createAnnotationCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
     }
 }

@@ -81,7 +81,27 @@ public class AssertResponseGivenRequestHelper {
                         RESPONSE expectedBody = conf.getExpectedResponse();
                         assertEquals(expectedBody, body);
                     });
-                }).ignoreElement();
+                })
+                .doOnError(error -> {
+                    /*If you get an error like
+                    -----
+                    io.vertx.core.json.DecodeException: Failed to decode: Unexpected character ('<' (code 60)):
+                    expected a valid value (number, String, array, object, 'true', 'false' or 'null')
+                        at [Source: (io.netty.buffer.ByteBufInputStream); line: 1, column: 2]
+                    -----
+                    This probably means there is a problem with the request file. Maybe your target folder it not up to date ?
+                    Try rebuilding module and verify the file is in target.
+
+                    Another thing can be that your endpoint has not been mounted on the router !
+                    */
+                    LOGGER.error("query to endpoint '" + conf.getEndPointRequest() + "' failed",error);
+                    LOGGER.error("query to endpoint '{}' failed, isMultipartForm : {}\n request was {}\n expected response was {}",
+                            conf.getEndPointRequest(),
+                            conf.isMultipart(),
+                            conf.getRequestBody().toString(),
+                            conf.getExpectedResponse().toString());
+                })
+                .ignoreElement();
     }
 
     public static <T> void assertRequestGiveResponseFromFileAndFinishTest(WebClient webClient,
@@ -112,6 +132,9 @@ public class AssertResponseGivenRequestHelper {
         assertRequestGiveResponseFromFile(webClient, testContext, confs)
                 .subscribe(() -> {
                             testContext.completeNow();
+                        },error -> {
+                            LOGGER.error("error in sery of request", error);
+                            testContext.failNow(error);
                         });
     }
 }

@@ -36,7 +36,7 @@ public class IngestionApiImpl implements IngestionApi {
      * @return void
      */
     @Override
-    public void importJson (RoutingContext context) {
+    public void importJson(RoutingContext context) {
         ImportRequestParser.CorrectPointsAndErrorMessages correctPointsAndErrorMessages;
         try {
             JsonArray jsonImportRequest = context.getBodyAsJsonArray();

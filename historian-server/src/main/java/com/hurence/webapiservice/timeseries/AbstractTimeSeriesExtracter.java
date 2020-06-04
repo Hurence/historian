@@ -17,9 +17,6 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
 
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractTimeSeriesExtracter.class);
 
-    public static String TIMESERIE_NAME = "target";
-    public static String TIMESERIE_POINT = "datapoints";
-    public static String TIMESERIE_AGGS = "aggs";
     final long from;
     final long to;
     final SamplingConf samplingConf;
@@ -43,7 +40,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     @Override
     public void addChunk(JsonObject chunk) {
         totalChunkCounter++;
-        pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_SIZE_FIELD);
+        pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD);
         chunks.add(chunk);
         if (isBufferFull()) {
             samplePointsInBufferThenReset();

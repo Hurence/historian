@@ -14,15 +14,18 @@ import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.AnnotationRequest;
 import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Arrays;
+import java.util.List;
+
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.modele.StatusCodes.*;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.NOT_FOUND;
 
 public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
 
@@ -31,8 +34,8 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
 
     public final static String ALGO_TAG_KEY = "Algo";
     public final static String BUCKET_SIZE_TAG_KEY = "Bucket size";
-    public final static String FILTER_TAG_KEY = "Tag";
-
+    public final static List<String> FILTER_KEYS = Arrays.asList(ALGO_TAG_KEY, BUCKET_SIZE_TAG_KEY);
+    public final static String TARGET = "target";
 
     public GrafanaSimpleJsonPluginApiImpl(HistorianService service) {
         this.service = service;
@@ -73,7 +76,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
-            request = new SearchRequestParser().parseRequest(requestBody);
+            request = new SearchRequestParser("target", "limit").parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
@@ -171,6 +174,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
         final QueryRequestParam request;
         try {
             JsonObject requestBody = context.getBodyAsJson();
+            LOGGER.debug("requestBody : {}", requestBody.toString());
             /*
                 When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
@@ -186,7 +190,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
         }
 
         final JsonObject getTimeSeriesChunkParams = buildHistorianRequest(request);
-
+        LOGGER.debug("getTimeSeriesChunkParams : {}", getTimeSeriesChunkParams.toString());
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
                 .map(sampledTimeSeries -> {
@@ -204,6 +208,14 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                                 sampledTimeSeries.getLong(TOTAL_POINTS, 0L),
                                 System.currentTimeMillis() - startRequest);
                     }
+                    return timeseries;
+                })
+                .map(timeseries -> {
+                    timeseries.forEach(timeserie -> {
+                        JsonObject timeserieJson = (JsonObject) timeserie;
+                        timeserieJson.put(TARGET, timeserieJson.getValue(NAME));
+                        timeserieJson.remove(NAME);
+                    });
                     return timeseries;
                 })
                 .doOnError(ex -> {
@@ -225,7 +237,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
                 .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_SIZE_FIELD)
+                .add(RESPONSE_CHUNK_COUNT_FIELD)
                 .add(NAME);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
@@ -233,7 +245,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 .put(TO, request.getTo())
                 .put(FIELDS, fieldsToFetch)
                 .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTagsValuesToFilter())
+                .put(HistorianFields.TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
@@ -352,7 +364,6 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
         context.response().end(new JsonArray()
                 .add(new JsonObject().put("type", "string").put("text", ALGO_TAG_KEY))
                 .add(new JsonObject().put("type", "int").put("text", BUCKET_SIZE_TAG_KEY))
-                .add(new JsonObject().put("type", "string").put("text", FILTER_TAG_KEY))
                 .encode()
         );
     }
@@ -386,9 +397,6 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                         .add(new JsonObject().put("text", "250"))
                         .add(new JsonObject().put("text", "500"));
                 break;
-            case FILTER_TAG_KEY:
-                response = new JsonArray()
-                        .add(new JsonObject().put("text", "your tag"));
             default:
                 LOGGER.warn("there is no tag with this key !");
                 context.response().setStatusCode(NOT_FOUND);
@@ -417,7 +425,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
         return new JsonArray()
                 .add(new JsonObject().put("text", SamplingAlgorithm.NONE))
                 .add(new JsonObject().put("text", SamplingAlgorithm.AVERAGE))
-                .add(new JsonObject().put("text", SamplingAlgorithm.FIRST_ITEM))
+                .add(new JsonObject().put("text", SamplingAlgorithm.FIRST))
                 .add(new JsonObject().put("text", SamplingAlgorithm.MIN))
                 .add(new JsonObject().put("text", SamplingAlgorithm.MAX));
     }

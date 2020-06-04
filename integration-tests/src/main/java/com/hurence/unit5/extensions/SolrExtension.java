@@ -18,8 +18,6 @@ package com.hurence.unit5.extensions;
 
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.solr.common.cloud.SolrZkClient;
-import org.apache.solr.common.cloud.ZkConfigManager;
 import org.junit.jupiter.api.extension.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,11 +25,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * A JUnit rule which starts an embedded elastic-search docker container.
@@ -46,6 +40,7 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
     public final static String SOLR2_SERVICE_NAME = "solr2_1";
     public final static String SOLR1_SERVICE_NAME = "solr1_1";
     public final static int SOLR_1_PORT = 8983;
+    public final static int SOLR_2_PORT = 8983;
     public final static String ZOOKEEPER_SERVICE_NAME = "zookeeper_1";
     public final static int ZOOKEEPER_PORT = 2181;
     private final static String IMAGE = "solr:8";
@@ -85,7 +80,8 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
                 new File(getClass().getResource("/shared-resources/docker-compose-test.yml").getFile())
         )
                 .withExposedService(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT, Wait.forListeningPort())
-                .withExposedService(SOLR1_SERVICE_NAME, SOLR_1_PORT, Wait.forListeningPort());
+                .withExposedService(SOLR1_SERVICE_NAME, SOLR_1_PORT, Wait.forListeningPort())
+                .waitingFor(SOLR2_SERVICE_NAME, Wait.forListeningPort());
 
         this.dockerComposeContainer.start();
 
@@ -103,18 +99,6 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
                 .withConnectionTimeout(10000)
                 .withSocketTimeout(60000)
                 .build();
-
-        try (SolrZkClient zkClient = new SolrZkClient(zkUrl, 15000)) {
-            ZkConfigManager manager = new ZkConfigManager(zkClient);
-            manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/historian-current/conf").getFile()), SOLR_CONF_TEMPLATE_HISTORIAN_CURRENT);
-            manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/historian-version-0/conf").getFile()), SOLR_CONF_TEMPLATE_HISTORIAN_VERSION_0);
-            manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/annotation/conf").getFile()), SOLR_CONF_TEMPLATE_ANNOTATION);
-            manager.uploadConfigDir(Paths.get(getClass().getResource("/shared-resources/solr/configsets/report/conf").getFile()), SOLR_CONF_TEMPLATE_REPORT);
-        } catch (IOException ex) {
-            logger.error("error copying conf of solr" ,ex);
-        } catch (Exception ex) {
-            logger.error("unexpected exception while copying conf of solr" , ex);
-        }
     }
 
     @Override

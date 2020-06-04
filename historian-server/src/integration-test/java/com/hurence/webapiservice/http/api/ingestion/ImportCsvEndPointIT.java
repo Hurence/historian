@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
@@ -44,7 +45,6 @@ import static com.hurence.webapiservice.http.api.modele.StatusCodes.*;
 public class ImportCsvEndPointIT {
 
     private static WebClient webClient;
-    private static AssertResponseGivenRequestHelper assertHelper1;
     private static final Logger LOGGER = LoggerFactory.getLogger(ImportCsvEndPointIT.class);
     public static String DEFAULT_TIMESTAMP_FIELD = "timestamp";
     public static String DEFAULT_NAME_FIELD = "name";
@@ -62,10 +62,15 @@ public class ImportCsvEndPointIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HttpWithHistorianSolrITHelper
-                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+
+        SolrITHelper.createChunkCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString());
+        SolrITHelper.addCodeInstallAndSensor(container);
+        SolrITHelper.addFieldToChunkSchema(container, "date");
         webClient = HttpITHelper.buildWebClient(vertx);
-        assertHelper1 = new AssertResponseGivenRequestHelper(webClient, IMPORT_CSV_ENDPOINT);
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
+                    context.completeNow();
+                },
+                t -> context.failNow(t));
     }
 
     @AfterEach
@@ -97,7 +102,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -147,7 +152,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -175,7 +180,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -198,12 +203,12 @@ public class ImportCsvEndPointIT {
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                new MultipartRequestResponseConf<>(IMPORT_CSV_ENDPOINT,
                         multipartForm,
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -228,12 +233,12 @@ public class ImportCsvEndPointIT {
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                new MultipartRequestResponseConf<>(IMPORT_CSV_ENDPOINT,
                         multipartForm,
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_with_tags.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -250,7 +255,7 @@ public class ImportCsvEndPointIT {
     }
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+//    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testCsvFileImportGroupByWithSensorTag(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_tags.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
@@ -270,7 +275,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_grouped_by_sensor.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -329,7 +334,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -355,7 +360,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -381,7 +386,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -404,7 +409,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -415,7 +420,7 @@ public class ImportCsvEndPointIT {
     }
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+//    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testCsvFileImportWithATagDate(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_date_tag.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
@@ -453,7 +458,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse2.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request2.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse2.json",
                         OK, StatusMessages.OK,
@@ -512,7 +517,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_some_files_too_big.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse.json",
                         OK, StatusMessages.OK,
@@ -534,7 +539,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_on_several_days.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_on_several_days.json",
                         OK, StatusMessages.OK,
@@ -562,7 +567,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_second_date.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_second_date.json",
                         OK, StatusMessages.OK,
@@ -585,7 +590,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_second_date.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_second_date.json",
                         OK, StatusMessages.OK,
@@ -608,7 +613,7 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_second_date.json",
                         CREATED, StatusMessages.CREATED,
                         BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT,
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/ingestion/csv/onemetric-3points/testQuery/request.json",
                         "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse_second_date.json",
                         OK, StatusMessages.OK,

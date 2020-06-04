@@ -116,7 +116,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
                 .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_SIZE_FIELD)
+                .add(RESPONSE_CHUNK_COUNT_FIELD)
                 .add(NAME);
         request.getAggs().forEach(agg -> {
             final String aggField;
@@ -131,7 +131,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                     aggField = RESPONSE_CHUNK_AVG_FIELD;
                     break;
                 case COUNT:
-                    aggField = RESPONSE_CHUNK_SIZE_FIELD;
+                    aggField = RESPONSE_CHUNK_COUNT_FIELD;
                     break;
                 case SUM:
                     aggField = RESPONSE_CHUNK_SUM_FIELD;
@@ -158,7 +158,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
                 .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_SIZE_FIELD)
+                .add(RESPONSE_CHUNK_COUNT_FIELD)
                 .add(NAME);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
@@ -166,7 +166,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .put(TO, request.getTo())
                 .put(FIELDS, fieldsToFetch)
                 .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTagsValuesToFilter())
+                .put(HistorianFields.TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());

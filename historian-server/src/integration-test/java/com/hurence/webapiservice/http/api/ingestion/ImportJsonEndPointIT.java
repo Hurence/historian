@@ -27,10 +27,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT;
+import static com.hurence.webapiservice.http.HttpServerVerticle.IMPORT_JSON_ENDPOINT;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
-import static com.hurence.webapiservice.http.HttpServerVerticle.IMPORT_JSON_ENDPOINT;
-import static com.hurence.webapiservice.http.HttpServerVerticle.GRAFANA_QUERY_ENDPOINT;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -218,7 +218,7 @@ public class ImportJsonEndPointIT {
                                                        String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "Created", BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
@@ -228,7 +228,7 @@ public class ImportJsonEndPointIT {
                                                  String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "Created", BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(GRAFANA_QUERY_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);

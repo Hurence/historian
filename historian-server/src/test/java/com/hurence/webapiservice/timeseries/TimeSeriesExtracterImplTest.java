@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.historian.spark.compactor.job.ChunkModele;
+import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -19,7 +19,7 @@ public class TimeSeriesExtracterImplTest {
 
 
     JsonObject getChunk1() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477895624866L, 1),
                 new Point(0, 1477916224866L, 2),
                 new Point(0, 1477917224866L, 3)
@@ -29,7 +29,7 @@ public class TimeSeriesExtracterImplTest {
 
 
     JsonObject getChunk2() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477916224866L, 4),
                 new Point(0, 1477916224867L, 5),
                 new Point(0, 1477916224868L, 6)

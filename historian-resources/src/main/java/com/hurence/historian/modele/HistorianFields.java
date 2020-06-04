@@ -15,9 +15,8 @@ import com.hurence.logisland.record.TimeSeriesRecord;
 public class HistorianFields {
     private HistorianFields() {}
 
-    public static String DATAPOINTS_RESPONSE_FIELD = "datapoints";
+    public static String DATAPOINTS = "datapoints";
     public static String ERRORS_RESPONSE_FIELD = "error";
-    public static String TARGET_RESPONSE_FIELD = "target";
     public static String POINTS_REQUEST_FIELD = "points";
     public static String FROM = "from";
     public static String TO = "to";
@@ -47,31 +46,29 @@ public class HistorianFields {
     public static String TOTAL = "total";
     public static String TOTAL_HIT = "total_hit";
     public static String NAME = "name";
-    public static String RESPONSE_TAG_NAME_FIELD = "tagname";
-    public static String RESPONSE_CHUNK_ID_FIELD = "id";
-    public static String RESPONSE_CHUNK_VERSION_FIELD = "_version_";
-    public static String RESPONSE_CHUNK_VALUE_FIELD = TimeSeriesRecord.CHUNK_VALUE;
-    public static String RESPONSE_CHUNK_MAX_FIELD = TimeSeriesRecord.CHUNK_MAX;
-    public static String RESPONSE_CHUNK_MIN_FIELD = TimeSeriesRecord.CHUNK_MIN;
-    public static String RESPONSE_CHUNK_START_FIELD = TimeSeriesRecord.CHUNK_START;
-    public static String RESPONSE_CHUNK_END_FIELD = TimeSeriesRecord.CHUNK_END;
-    public static String RESPONSE_CHUNK_FIRST_VALUE_FIELD = TimeSeriesRecord.CHUNK_FIRST_VALUE;
-    public static String RESPONSE_CHUNK_AVG_FIELD = TimeSeriesRecord.CHUNK_AVG;
-    public static String RESPONSE_CHUNK_SIZE_FIELD = TimeSeriesRecord.CHUNK_SIZE;
-    public static String RESPONSE_CHUNK_SUM_FIELD = TimeSeriesRecord.CHUNK_SUM;
-    public static String RESPONSE_CHUNK_SAX_FIELD = TimeSeriesRecord.CHUNK_SAX;
-    public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeSeriesRecord.CHUNK_WINDOW_MS;
-    public static String RESPONSE_CHUNK_TREND_FIELD = TimeSeriesRecord.CHUNK_TREND;
-    public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = TimeSeriesRecord.CHUNK_SIZE_BYTES;
+
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
     public static String RESPONSE_TOTAL_ADDED_POINTS = "total_added_points";
     public static String RESPONSE_TOTAL_ADDED_CHUNKS = "total_added_chunks";
+    public static String RESPONSE_TAG_NAME_FIELD = "tagname";
+
+    public static String RESPONSE_CHUNK_ID_FIELD = HistorianChunkCollectionFieldsVersion0.ID;
+    public static String RESPONSE_CHUNK_VERSION_FIELD = "_version_";
+    public static String RESPONSE_CHUNK_VALUE_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE;
+    public static String RESPONSE_CHUNK_MAX_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_MAX;
+    public static String RESPONSE_CHUNK_MIN_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_MIN;
+    public static String RESPONSE_CHUNK_START_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_START;
+    public static String RESPONSE_CHUNK_END_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_END;
+    public static String RESPONSE_CHUNK_FIRST_VALUE_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_FIRST;
+    public static String RESPONSE_CHUNK_AVG_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_AVG;
+    public static String RESPONSE_CHUNK_COUNT_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT;
+    public static String RESPONSE_CHUNK_SUM_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SUM;
+    public static String RESPONSE_CHUNK_SAX_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SAX;
+    public static String RESPONSE_CHUNK_WINDOW_MS_FIELD = TimeSeriesRecord.CHUNK_WINDOW_MS;
+    public static String RESPONSE_CHUNK_TREND_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_TREND;
+    public static String RESPONSE_CHUNK_SIZE_BYTES_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SIZE_BYTES;
 
     //schema historian
-    public static String CHUNK_YEAR = "year";
-    public static String CHUNK_MONTH = "month";
-    public static String CHUNK_DAY = "day";
-    public static String CHUNK_ORIGIN = "chunk_origin";
 
     //Csv fields
     public static int MAX_LINES_FOR_CSV_FILE = 5000;
@@ -97,6 +94,10 @@ public class HistorianFields {
     public static String GROUP_BY = "group_by";
     public static String TIMEZONE_DATE = "timezone_date";
 
+    public static String CHUNK_YEAR = HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR;
+    public static String CHUNK_MONTH = HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH;
+    public static String CHUNK_DAY = HistorianChunkCollectionFieldsVersion0.CHUNK_DAY;
+    public static String CHUNK_ORIGIN = HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
 }
 
 

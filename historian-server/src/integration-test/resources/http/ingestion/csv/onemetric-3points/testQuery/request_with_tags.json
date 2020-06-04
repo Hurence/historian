@@ -1,5 +1,5 @@
 {
-  "metrics": ["metric_1"],
+  "names": ["metric_1"],
   "tags": {
     "sensor" : "sensor_1"
   }

@@ -3,7 +3,7 @@ package com.hurence.historian.spark.sql
 import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
-import com.hurence.historian.spark.sql.functions.{chunk, guess, sax}
+import com.hurence.historian.spark.sql.functions.{chunk, guess, sax, sax_best_guess,anomalie_test,sax_best_guess_paa_fixed}
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import org.apache.spark.sql.functions._
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -107,7 +107,6 @@ class LoaderTests extends SparkSessionTestWrapper {
 
   @Test
   def testChunksV0() = {
-
 
     it4MetricsChunksDS.show()
 
@@ -224,5 +223,78 @@ ds.show()
 
   }
 
+ // @Test
+  def testChunksV0Guess() = {
+
+
+     //simply recompute sax string's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
+    val sample = it4MetricsChunksDS
+      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+      .withColumn("guess", guess( $"values"))
+      //.as[ChunkRecordV0]
+      .collect()
+    println(sample(0))
+    assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample(0)(16))
+
+
+//    val sample1 = it4MetricsChunksDS
+//            .where("name = 'ack' AND day = '2019-11-29'")
+//            .withColumn("guess", guess(  $"values"))
+//          //.agg(count($"tags.metric_id").as("count_metric"))
+//          //.as[ChunkRecordV0]
+//         // .show(32,200)
+//           .collect()
+//
+//    sample1.foreach(x => println(x))
+//   assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample1(6)(16))
+  }
+
+ // @Test
+  def testChunksV0Sax_best_guess() = {
+
+
+  //simply recompute sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
+
+    val sample1 = it4MetricsChunksDS
+      .where("name = 'ack' AND day = '2019-11-29'")
+      .withColumn("guess", guess( $"values"))
+      .withColumn("sax_best_guess", sax_best_guess( lit(0.05),  $"values"))
+      .withColumn("sax_best_paa_fixed", sax_best_guess_paa_fixed( lit(0.05),lit(50),  $"values"))
+     // .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
+      //.agg(count($"tags.metric_id").as("count_metric"))
+      //.as[ChunkRecordV0]
+      .drop("chunk", "timestamps","values","tags")
+      .show(32,200)
+     // .collect()
+
+    //sample1.foreach(x => println(x))
+    //assertEquals("adebdcdcddbddddccfdfegfffghigiihhgggifghffcfgfffff", sample1(2)(16))
+
+  }
+  //@Test
+  def testChunksV0Sax_anomaly() = {
+
+
+             //simply check for anomalies in the sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
+            val sample = it4MetricsChunksDS
+              .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+              .withColumn("sax_best_guess", sax_best_guess( lit(0.01),lit(50),  $"values"))
+              .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
+              //.as[ChunkRecordV0]
+              .collect()
+            println(sample(0))
+            assertEquals("[15, 41]", sample(0)(17))
+
+//    val sample = it4MetricsChunksDS
+//      .where("name = 'ack' AND day = '2019-11-29'")
+//      .withColumn("sax_best_guess", sax_best_guess( lit(0.01),lit(50),  $"values"))
+//      .withColumn("anomaly_test", anomalie_test($"sax"))
+//      //.agg(count($"tags.metric_id").as("count_metric"))
+//      //.as[ChunkRecordV0]
+//      //.show(32,200)
+//      .collect()
+//        sample.foreach(x => println(x))
+//        assertEquals("[2, 41]", sample(2)(17))
+  }
 
 }

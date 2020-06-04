@@ -33,7 +33,21 @@ hs_err_pid*
 **/*.ipr
 **/*.iws
 **/dependency-reduced-pom.xml
+**/.project
+**/.settings
+**/.classpath
+**/.factorypath
 
 # maven files
 **/pom.xml.versionsBackup
 
+# generated test files
+historian-server/src/integration-test/resources/shared-resources
+loader/src/integration-test/resources/shared-resources
+integration-tests/src/main/resources/shared-resources/create-historian-annotation-collection.sh
+integration-tests/src/main/resources/shared-resources/create-historian-chunk-collection.sh
+integration-tests/src/main/resources/shared-resources/create-historian-collection.sh
+integration-tests/src/main/resources/shared-resources/create-historian-report-collection.sh
+integration-tests/src/main/resources/shared-resources/modify-collection-schema.sh
+loader/dependency-tree-before
+loader/dependency-tree-now

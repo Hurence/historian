@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.historian;
 
+import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
@@ -27,7 +28,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.grafana.GrafanaApi.TARGET;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -40,9 +40,9 @@ public class HistorianSearchVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.initHistorianSolr(client);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
         HistorianSolrITHelper
-                .deployHistorienVerticle(container, vertx)
+                .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
                             historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();

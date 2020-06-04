@@ -3,12 +3,11 @@ package com.hurence.historian.spark.loader
 import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.functions.{chunk, guess, sax}
+import com.hurence.historian.spark.sql.functions._
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
-import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev}
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 
@@ -162,8 +161,6 @@ object DataLoaderV2 {
     */
   def main(args: Array[String]): Unit = {
 
-    val dataLoader = new DataLoaderV2()
-
     // get arguments
    // val options = dataLoader.parseCommandLine(args)
     val options = DataLoaderOptions("local[*]", "zookeeper:9983", "historian", Some("/Users/tom/Documents/workspace/historian/loader/src/test/resources/it-data-4metrics.csv.gz"), None, 1440, 7, 20, useKerberos = false)
@@ -176,13 +173,20 @@ object DataLoaderV2 {
 
     import spark.implicits._
 
-    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
-    val measuresDS = reader.read(sql.Options(options.csvFilePath.get, Map(
-      "inferSchema" -> "true",
-      "delimiter" -> ",",
-      "header" -> "true",
-      "dateFormat" -> ""
-    )))
+
+    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val measuresDS = reader.read(sql.Options(
+      options.csvFilePath.get,
+      Map(
+        "inferSchema" -> "true",
+        "delimiter" -> ",",
+        "header" -> "true",
+        "nameField" -> "metric_name",
+        "timestampField" -> "timestamp",
+        "timestampDateFormat" -> "s",
+        "valueField" -> "value",
+        "tagsFields" -> "metric_id,warn,crit"
+      )))
 
 
     val chunkyfier = new Chunkyfier()
@@ -193,14 +197,14 @@ object DataLoaderV2 {
       .setSaxStringLength(options.saxStringLength)
 
 
-    val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0]
+    val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0].repartition(1)
 
 
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
     writer.write(sql.Options(options.collectionName, Map(
       "zkhost" -> options.zkHosts,
       "collection" -> options.collectionName,
-      "tag_names" -> "metric_id,min,max,warn,crit"
+      "tag_names" -> "metric_id,warn,crit"
     )), chunksDS)
 
 

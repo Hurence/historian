@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.historian.spark.compactor.job.ChunkModele;
+import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -19,7 +19,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
 
     JsonObject getChunk1() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477895624866L, 1),
                 new Point(0, 1477916224866L, 1),
                 new Point(0, 1477916224867L, 1),
@@ -35,7 +35,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     }
 
     JsonObject getChunk2() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477917224866L, 2),
                 new Point(0, 1477917224867L, 2),
                 new Point(0, 1477917224868L, 2)
@@ -45,7 +45,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
 
     JsonObject getChunk3() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477917224868L, 3),
                 new Point(0, 1477917224869L, 3),
                 new Point(0, 1477917224870L, 3)
@@ -54,7 +54,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     }
 
     JsonObject getChunk4() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477917224870L, 4),
                 new Point(0, 1477917224871L, 4),
                 new Point(0, 1477917224872L, 4)
@@ -63,7 +63,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     }
 
     JsonObject getChunk5() {
-        ChunkModele chunk = ChunkModele.fromPoints("fake", Arrays.asList(
+        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new Point(0, 1477917224873L, 5),
                 new Point(0, 1477917224874L, 5),
                 new Point(0, 1477917224875L, 5)

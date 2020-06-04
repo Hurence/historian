@@ -37,7 +37,7 @@ public class SamplerFactory {
         switch (algorithm) {
             case LTTB:
                 return new LTTBRecordSampler(valueFieldName, timeFieldName, parameter);
-            case FIRST_ITEM:
+            case FIRST:
                 return new FirstItemRecordSampler(valueFieldName, timeFieldName, parameter);
             case AVERAGE:
                 return new AverageRecordSampler(valueFieldName, timeFieldName, parameter);
@@ -63,7 +63,7 @@ public class SamplerFactory {
      */
     public static Sampler<Point> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
         switch (algorithm) {
-            case FIRST_ITEM:
+            case FIRST:
                 return new FirstItemSampler<Point>(bucketSize);
             case AVERAGE:
                 return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketSize);
@@ -84,7 +84,7 @@ public class SamplerFactory {
     //TODO
     public static Sampler<Point> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
         switch (algorithm) {
-            case FIRST_ITEM:
+            case FIRST:
                 return new FirstItemSamplerWithSpecificBucketing<Point>(bucketingStrategy);
             case AVERAGE:
 //                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);

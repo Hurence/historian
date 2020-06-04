@@ -24,7 +24,7 @@
   "format": "json",
   "adhocFilters": [
     {
-      "key": "Tag",
+      "key": "pays",
       "operator": "=",
       "value": "France"
     }
