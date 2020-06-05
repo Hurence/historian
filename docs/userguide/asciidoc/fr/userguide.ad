@@ -7,6 +7,8 @@
 :revnumber: v1.0
 :revdate: 18.02.2020
 :revremark: First draft
+:toc:
+:toclevels: 4
 
 include::./_introduction.ad[]
 

@@ -1,0 +1,119 @@
+=== Installation standalone
+
+==== Pre-requis pour une installation mono serveur en production
+
+La configuration minimale du serveur pour une installation de test du data historian est:
+
+- un OS CentOS ou Redhat 7.x
+- 6 Gigabits de RAM
+- 6 vcores de CPU
+- 30 Giga octets de disque
+- Java 8
+
+==== Installation de l'historian
+
+Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les timeseries
+et les chunks. Téléchargez la dernière version de l'historian à l'adresse suivante
+https://github.com/Hurence/historian/releases/download/v1.3.4/historian-1.3.4-SNAPSHOT.tgz[historian-1.3.4-SNAPSHOT.tgz].
+Décompressez l'archive et entrez dedans, ensuite commencez l'installation en tapant la commande suivante :
+
+[source,bash]
+----
+sudo ./bin/install.sh
+----
+
+Il sera alors demander à l'utilisateur plusieurs informations, comme nous allons procéder à une isntallation de test
+en mode standalone vous pouvez laisser les valeur par défaut et juste taper sur la touche entrée pour chaque question.
+Le programme va télécharger er installer des versions embarqués de solr, grafana. Dans ce tutorial nous n'utiliseront pas
+spark.
+
+Attention cependant au chemin ou vous installez l'historian (par défaut /opt/hdh). En effet l'espace disque doit être
+suffisant pour stoquer les binaires, les scripts et surtout les données de timeseries que vous allez injecter.
+
+Voici un aperçu de l'installation :
+
+TODO remplacer par un screenshot
+
+[source,bash]
+----
+Where do you want to install Hurence Data Historian ? [/opt/hdh]
+>
+Will you use an existing solr install or let the historian install an embedded solr (version 8.2.0 rquired) ? Standalone(S)/Existing(E) [S]
+>
+Which name to use for the solr collection which will be storing timeseries ? [TODO]
+>
+do you want to install an embedded grafana (version TODO rquired) ? Yes(Y)/No(N) [Y]
+>
+----
+
+Dans la suite, on appellera le chemin indiqué pour l'installation de l'historian '$HDH_HOME'.
+
+A l'issue de ce script, si vous décidez d'utiliser tous les paramètres par défaut vous aurez :
+
+* Un serveur solr 8.2 installé dans $HDH_HOME/solr-8.2.0
+* Le script à démarrer ce serveur solr, vous pouvez vérifier cela à l'adresse suivante :
+http://localhost:8983/solr/#/~cloud[solr UI]. Vous pouvez regarder la documentation solr pour
+interagir avec solr (Notamment pour démarrer le cluster et l'éteindre).
+* Un serveur grafana version-TODO installé dans $HDH_HOME/grafana
+* Le plugin https://github.com/Hurence/grafana-historian-datasource[datasource grafana de l'historian]
+installer sur ce serveur grafana.
+* Le serveur grafana a du être lancé par le script, vous pouvez vérifier à l'adresse suivante :
+http://localhost:3000/[http://localhost:3000/]. Vous pouvez regarder la documentation solr pour
+interagir avec grafana (Notamment pour démarrer le serveur et l'éteindre).
+
+Voici la structure de $HDH_HOME a l'issue de l'installation par défaut :
+* $HDH_HOME/data : TODO
+* $HDH_HOME/solr-8.2.0 : TODO
+* $HDH_HOME/bin/historian-server.sh : Permet de lancer et arrêter l'api REST de l'historian.
+* $HDH_HOME/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
+* $HDH_HOME/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
+* $HDH_HOME/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l'api rest de l'historian.
+
+Le script $HDH_HOME/bin/historian-server.sh sert à lancer/arrêter l'api rest de l'historian.
+
+Pour lancer l'historian taper la commande suivante :
+
+[source,bash]
+----
+./bin/historian-server.sh start
+----
+
+Pour arrêter l'historian taper la commande suivante :
+
+[source,bash]
+----
+./bin/historian-server.sh stop
+----
+
+Attention ces commandes n'affectent ni grafana ni solr qui sont des services indépendants.
+
+===== Description du fichier de configuration de l'historian
+
+include::./_description_conf_file.ad[]
+
+TODO éventuellement générer un fichier de configuration pendant le script d'install selon les informations renseignées ?
+
+===== Description des composants installer par le script d'installation
+
+====== Installation de Apache SolR
+
+Apache SolR est la base de donnée utilisé par l'historian, elle peut être remplacée par un autre moteur de recherche.
+
+Le script d'installation a installer solr au chemin '$HDH_HOME/solr-8.2.0' que nous appelleront '$SOLR_HOME'.
+Il a également lancé deux cores solr localement dans le répertoire `$SOLR_HOME/data`.
+
+====== Pour démarrer solr
+
+Si vous avez couper solr ou bien que vous avez rédémarrer votre ordinateur vous pouvez relancer le solr avec les commandes suivantes :
+
+[source,bash]
+----
+cd $SOLR_HOME
+# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node1 -p 8983
+# démarre un second core Solr localement qui va utiliser le serveur zookeeper précédamment créer.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983
+----
+
+Vérifiez que votre instance solr fonctionne correctement en allant sur l'interface graphique à l'adresse suivante :
+(http://localhost:8983/solr/#/~cloud)[local solr UI]
