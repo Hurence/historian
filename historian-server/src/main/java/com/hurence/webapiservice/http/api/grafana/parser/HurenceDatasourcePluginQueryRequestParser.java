@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.parser;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
+import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         }
         Long to = parseTo(requestBody);
         if (to != null) {
-            builder.withFrom(to);
+            builder.withTo(to);
         }
         String format = parseFormat(requestBody);
         if (format != null) {
@@ -93,15 +94,15 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (requestId != null) {
             builder.withRequestId(requestId);
         }
-        List<String> agreg = parseAggreg(requestBody);
+        List<AGG> agreg = parseAggreg(requestBody);
         if (agreg != null) {
             builder.withAggreg(agreg);
         }
         return builder.build();
     }
 
-    private List<String> parseAggreg(JsonObject requestBody) {
-        return parseListString(requestBody, aggregationPath);
+    private List<AGG> parseAggreg(JsonObject requestBody) {
+        return parseListAGG(requestBody, aggregationPath);
     }
 
     private String parseRequestId(JsonObject requestBody) {
