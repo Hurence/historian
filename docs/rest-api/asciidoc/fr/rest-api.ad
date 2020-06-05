@@ -7,62 +7,394 @@
 :revnumber: v1.0
 :revdate: 18.02.2020
 :revremark: First draft
-
-Cette section décrit l'api rest de l'historian.
+:toc:
+:toclevels: 4
 
 == Introduction
 
-L'api REST de l'historian est actuellement séparé en 2 endpoints principal :
+L'api REST de l'historian est actuellement composé des endpoints ci-dessous :
 
-* GET _/api/grafana_ : L'api principal pour interagir avec nos plugins grafana.
-* POST _/timeseries_ : Notre api principal pour requêter les points des metrics.
+* _/api/historian/v0_ : L'api principal de l'historian qui ne contient actuellement que des endpoints pour l'import et l'export de données.
+  * POST <<import-csv,_/api/historian/v0/import/csv_>>: Un endpoint pour importer des points depuis des fichiers csv.
+  * POST <<import-json,_/api/historian/v0/import/json_>>: Un endpoint pour importer des points au format json envoyé dans le corps de la requête.
+  * POST <<export-csv,_/api/historian/v0/export/csv_>>: Un endpoint pour exporter des points au format csv.
+* GET <<grafana-simplejson-root,_/api/grafana/simplejson_>>: L'api pour interagir avec Grafana en utilisant le plugin datasource "SimpleJson".
+  * POST <<grafana-simplejson-query,_/api/grafana/simplejson/query_>>: Permet d'obtenir les points de l'historian.
+  * POST <<grafana-simplejson-search,_/api/grafana/simplejson/search_>>: Permet d'obtenir les noms des métriques de l'historian.
+  * POST <<grafana-simplejson-annotations,_/api/grafana/simplejson/annotations_>>: Permet d'obtenir les annotations enregistrées dans l'historian.
+  * POST <<grafana-simplejson-tag-keys,_/api/grafana/simplejson/tag-keys_>>: Permet d'obtenir les clés disponibles pour utiliser l'endpoint '_/api/grafana/simplejson/tag-values_'.
+  * POST <<grafana-simplejson-tag-values,_/api/grafana/simplejson/tag-values_>>: Permet d'obtenir les valeurs possibles pour la clé indiquer.
+* GET <<grafana-hurence-datasource-root,_/api/grafana/v0_>>: L'api pour interagir avec Grafana en utilisant le plugin datasource de hurence "Hurence-Historian".
+  * POST <<grafana-hurence-datasource-query,_/api/grafana/v0/query_>>: Permet d'obtenir les points de l'historian.
+  * POST <<grafana-hurence-datasource-search,_/api/grafana/v0/search_>>: Permet d'obtenir les noms des métriques de l'historian.
+  * POST <<grafana-hurence-datasource-annotations,_/api/grafana/v0/annotations_>>: Permet d'obtenir les annotations enregistrées dans l'historian.
+  * POST <<grafana-hurence-datasource-tag-keys,_/api/grafana/v0/tag-keys_>>: Permet d'obtenir les clés disponibles pour utiliser l'endpoint '_/api/grafana/v0/tag-values_'.
+  * POST <<grafana-hurence-datasource-tag-values,_/api/grafana/v0/tag-values_>>: Permet d'obtenir les valeurs possibles pour la clé indiquer.
 
-== Grafana
+Les endpoints 'tag-keys' et 'tag-values' ne sont utile que pour Grafana.
 
-Cet endpoint renvoie une réponse 200 'OK' si l'historian fonctionne correctement.
-De plus il y a 6 sous endpoint à /api/grafana/ :
+== Description détaillée des endpoints
 
-* POST _/search_ : Permet de chercher les différentes métrics disponibles.
-* POST _/query_ : Permet de récupérer les points des métrics spécifiés dans un interval de temps donnée au format json.
-* POST _/export/csv_ : Permet de récupérer les points des métrics spécifiés dans un interval de temps donnée au format csv.
-* POST _/annotations_ : Permet de récupérer des annotations (qui peuvent être affichés sur les graphes grafana).
-* POST _/tag-keys_ : Permet de savoir les valeur que l'on peut mettre comme clé dans les adhoc filter dans la requête de __/query__
-* POST _/tag-values_ : Permet de savoir les valeur que l'on peut mettre comme valeur dans les adhoc filter dans la requête de __/query__
+=== Ingestion de données
 
-=== _POST_ Search
+Ces endpoints servent à injecter des points dans l'historian :
 
-Permet de chercher les différentes métrics disponibles.
+[[import-csv]]
+==== POST /api/historian/v0/import/csv
+
+Permet d'injecter des points dans l'historian à partir de fichiers csv.
+Le format de la requête attendue est une requête avec Content-Type: multipart/form-data;
+
+
+.Paramètres de la requête
+[cols="10,7,39,7,30,7"]
+|===
+| attribut | multivalué | description | requis | valeurs possible | valeur par défaut
+
+|my_csv_file
+|Oui
+|le chemin des fichier csv a importer. Attention chaque fichier est importé individuellement de manière indépendante.
+Autrement dit, joindre plusieurs fichiers ou faire une requête par fichier est équivalent. Cependant les autres paramètres
+ de la requêtes sont commun à tous les fichiers joints. Les fichiers doivent obligatoirement contenir un header.
+|Oui
+|
+|
+
+|mapping.name
+|Non
+|le nom de la colonne qui correspond à "name". C'est l'identifiant principal d'une métrique.
+|Non
+|doit être un nom de colonne des fichiers csv joints.
+|"metric"
+
+|mapping.value
+|Non
+|le nom de la colonne qui correspond à "value". C'est la valeur du point.
+Les valeurs de cette colonne doivent être des valeurs numériques.
+|Non
+|Doit être un nom de colonne des fichiers csv joints.
+|"value"
+
+|mapping.timestamp
+|Non
+|Le nom de la colonne qui correspond à "timestamp". C'est la date du point.
+Par défaut cette colonne doit contenir des un timestamp epoch en milliseconde (voir <<import-csv-format_date,format_date>>)
+|Non
+|Doit être un nom de colonne des fichiers csv joints.
+|"timestamp"
+
+|mapping.quality
+|Non
+|Le nom de la colonne qui correspond à "quality". C'est la qualité du point
+(pour le moment la qualité n'est pas stocker dans l'historian)
+|Non
+|Doit être un nom de colonne des fichiers csv joints.
+|"quality"
+
+|mapping.tags
+|Oui
+|Les noms des colonnes à considérer comme un tag. Les tags sont des notions qui décrivent la métrique en plus de son
+nom (colonne "name"). Toutes les colonnes non renseigné dans le mapping seront ignorées lors de l'injection.
+TODO expliquer on prend le first
+|Non
+|Doit être un nom de colonne des fichiers csv joints.
+|
+
+[[import-csv-format_date]]
+|format_date
+|Non
+|Le format attendu pour les valeurs de la colonne "timestamp".
+|Non
+|Doit être soit une valeur parmi: [MILLISECONDS_EPOCH,SECONDS_EPOCH,MICROSECONDS_EPOCH,NANOSECONDS_EPOCH]
+NANOSECONDS_EPOCH :  la valeur doit être le nombre de nanosecondes depuis le 1 janvier 1970 UTC.
+MICROSECONDS_EPOCH :  la valeur doit être le nombre de microsecondes depuis le 1 janvier 1970 UTC.
+MILLISECONDS_EPOCH :  la valeur doit être le nombre de millisecondes depuis le 1 janvier 1970 UTC.
+SECONDS_EPOCH :  la valeur doit être le nombre de secondes depuis le 1 janvier 1970 UTC.
+Soit une autre valeur, dans ce cas cette valeur doit être un format de date valide, par exemple "yyyy-mm-dd".
+|"MILLISECONDS_EPOCH"
+
+|timezone_date
+|Non
+|le timezone du date dans le csv.
+|Non
+|doit être un timezone valide.
+|"UTC"
+
+|group_by
+|Oui
+|Ce paramètre est très important ! Si il est mal utilisé il est possible de corrompre les données déjà existantes.
+Il faut lister ici tous les champs qui vont être utiliser pour construire les chunks. Par défaut on groupe les points
+en chunk uniquement en fonction de leur nom. Cependant il est possible de grouper également en fonction de la valeur de
+certains tags. Il faut savoir que cela va impacter la manière dont les données sont récupérer par la suite.
+Par exemple si on injecte des données en groupant par "name" et le tag "usine". Alors on pourra requêter les valeurs
+pour chaque usine en filtrant sur la bonne valeur du tag usine (voir l'api pour requêter les points). Seulement si
+par la suite quelqu'un injecte d'autres données sans grouper par le tag "usine" alors les données vont se retrouver mélanger.
+|Non
+|Les valeurs acceptés sont "name" (peu importe le mapping utilisez "name" et non le nom de la colonne dans le csv).
+Sinon les autres valeurs acceptées sont les noms de colonnes ajouter comme tag.
+|"name"
+
+|===
+
+* S’il y a un problème avec la requête on reçoit une réponse 400 BAD_REQUEST.
+
+* Si tout s'est bien passé on reçoit une réponse 201 CREATED :
+
+.Description de la réponse
+[cols="13,10,40"]
+|===
+| json path | type | description
+
+|tags
+|array
+|les tags renseignés dans la requête.
+
+|grouped_by
+|array
+|les champs qui sont utilisés pour le group by (renseignés dans la requête).
+
+|report
+|json object
+|un rapport sur les chunks qui ont été injectés.
+
+|===
+
+Exemple de commande curl minimal :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/historian-server/ingestion/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv'
+----
+
+Exemple csv minimal :
+
+[source,csv]
+----
+metric,timestamp,value
+metric_1, 1, 1.2
+metric_1, 2, 2
+metric_1, 3, 3
+----
+
+Exemple de commande curl :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/historian-server/ingestion/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@path/de/mon/csv/file2.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F timestamp_unit=MILLISECONDS_EPOCH \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-D-m HH:mm:ss.SSS \
+-F timezone_date=UTC \
+----
+
+Exemple de fichier csv :
+
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+
+
+
+avec la requête suivante :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/historian-server/ingestion/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@path/de/mon/csv/file.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F timestamp_unit=MILLISECONDS_EPOCH \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-D-m HH:mm:ss.SSS \
+-F timezone_date=UTC \
+----
+et le fichier "file.csv" :
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+on recoit cette réponse :
+[source,json]
+----
+{
+  "tags": ["sensor", "code_install"],
+  "grouped_by": ["name", "sensor"],
+  "report" : [
+    {
+      "name": "metric_1",
+      "sensor": "sensor_1",
+      "number_of_points_injected": 4,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    },
+    {
+      "name": "metric_1",
+      "sensor": "sensor_2",
+      "number_of_points_injected": 2,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    },
+    {
+      "name": "metric_2",
+      "sensor": "sensor_2",
+      "number_of_points_injected": 2,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    }
+  ]
+}
+----
+(on remarque ici on'a utilisé le même fichier deux fois.)
+
+[[import-json]]
+==== POST /api/historian/v0/import/json
+
+Permet d'injecter des points dans l'historian à partir d'un corp de requête au format json.
+Le format de la requête attendue est une requête avec Content-Type: application/json;
 
 Exemple de requête :
 
 [source,json]
 ----
-{ "target": "upper_50" }
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
+]
 ----
 
-.Paramètres de la requête
-[cols="13,10,40,7,20,10"]
-|===
-| json path | type | description | requis | valeurs possible | valeur par défaut
-
-|/target
-|String
-|Une partie du nom de la métric recherché.
-|Non
-|
-|
-|===
-
-NOTE: Le corps de la requête est optionnel.
-
-Exemple de réponse :
+Exemple de requête minimal :
 
 [source,json]
 ----
-["upper_25","upper_50","upper_75","upper_90","upper_95"]
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0]
+        ]
+    }
+]
 ----
 
-=== _POST_ Query
+Le corp de la requête attendue est une liste json d'objet. Chaque objet doit être composé des attribut suivants :
+
+
+.Propriété des objets json
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis
+
+|/name
+|String
+|Le nom de la métrique pour laquelle on va injecter les points.
+|Oui
+
+|/points
+|Array d'array
+|Les points pour créer un chunk avec le nom ed métrique assigné à 'name'. Les points sont a renseigné sous la forme
+[[timestsamp<long>, value<double>],..,[timestsamp<long>, value<double>]].
+|Oui
+
+|===
+
+Exemple de réponse
+
+[source,json]
+----
+[
+  {
+    "target":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "target":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----
+
+
+=== Export de données
+
+[[export-csv]]
+==== POST /api/historian/v0/export/csv
+
+Permet de rechercher des points et les exporter en csv pour les métriques désirées.
+
+Ce endpoint utilise la même requête que l'endpoint query mais il donne la réponse en csv.
+
+Exemple de réponse :
+
+[source,csv]
+----
+metric,value,date
+temp_a,622.1,1477895624866
+temp_a,-3.0,1477916224866
+temp_a,365.0,1477917224866
+temp_b,861.0,1477895624866
+temp_b,767.0,1477917224866
+----
+
+=== Interactions avec Grafana
+
+Les api ci-dessous sont utilisées pour interagir avec Grafana en utilisant certaines datasources (une notion de Grafana).
+
+==== Api compatible avec le plugin "SimpleJson"
+
+[[grafana-simplejson-root]]
+===== GET /api/grafana/simplejson
+
+Cet endpoint renvoie une réponse 200 'OK' si l'historian fonctionne correctement.
+
+[[grafana-simplejson-query]]
+===== POST /api/grafana/simplejson/query
+
 
 Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponible.
 
@@ -188,26 +520,46 @@ Exemple de réponse
 ]
 ----
 
-=== _POST_ Export Csv
 
-Permet de rechercher des points et les exporter en csv pour les métriques désirées.
 
-Ce endpoint utilise la même requête que l'endpoint query mais il donne la réponse en csv.
+[[grafana-simplejson-search]]
+===== POST /api/grafana/simplejson/search
+
+
+Permet de chercher les différentes métrics disponibles.
+
+Exemple de requête :
+
+[source,json]
+----
+{ "target": "upper_50" }
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/target
+|String
+|Une partie du nom de la métric recherché.
+|Non
+|
+|
+|===
+
+NOTE: Le corps de la requête est optionnel.
 
 Exemple de réponse :
 
-[source,csv]
+[source,json]
 ----
-metric,value,date
-temp_a,622.1,1477895624866
-temp_a,-3.0,1477916224866
-temp_a,365.0,1477917224866
-temp_b,861.0,1477895624866
-temp_b,767.0,1477917224866
+["upper_25","upper_50","upper_75","upper_90","upper_95"]
 ----
 
 
-=== _POST_ Annotations compatible avec simpleJsonPlugin
+[[grafana-simplejson-annotations]]
+===== POST /api/grafana/simplejson/annotations
 
 Permet de chercher les annotations.
 
@@ -295,102 +647,9 @@ la valeur de _matchAny_.
 |ALL
 |===
 
-=== _POST_ Annotations actuelle
 
-Permet de chercher les annotations.
-
-Exemple de requête :
-
-[source,json]
-----
-{
-  "range": {
-    "from": "2020-2-14T01:43:14.070Z",
-    "to": "2020-2-14T06:50:14.070Z"
-  },
-  "limit" : 100,
-  "tags": ["tag1", "tag2"],
-  "matchAny": false,
-  "type": "tags"
-}
-----
-
-Exemple de réponse actuelle
-
-[source,json]
-----
-{
-  "annotations" : [
-    {
-      "time": 1581669794070,
-      "text": "annotation 7",
-      "tags": ["tag2","tag3"]
-    },
-    {
-      "time": 1581666194070,
-      "text": "annotation 6",
-      "tags": ["tag3","tag5"]
-    }
-  ],
-  "total_hit" : 2
-}
-----
-
-.Paramètres de la requête
-[cols="13,10,40,7,20,10"]
-|===
-| json path | type | description | requis | valeurs possible | valeur par défaut
-
-|/range/from
-|String
-|La date de début pour rechercher les annotations. Il ne sera retourner que les annotations avec une
-date supérieur ou égal à cette date.
-|Non
-|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
-|Le 1 Janvier 1960 (UTC)
-
-|/range/to
-|String
-|La date de fin pour rechercher les annotations. Il ne sera retourner que les annotations avec une
-date inférieur ou égal à cette date.
-|Non
-|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
-|La valeur par défaut est l'infini
-
-|/limit
-|Integer
-|Le nombre maximum d'annotation a renvoyer
-|Non
-|entier positif
-|100
-
-|/tags
-|Liste de string
-|Le nom des tags pour filtrer les annotations. Le comportement dépend de la valeur du champs _/type_
-|Non
-|
-|[] (empty array)
-
-|/matchAny
-|Boolean
-|Si le champs _type_ vaut _TAGS_. Si _true_ les annotations doivent avoir au moins un des tags du champs _tags_
-sinon les annotations doivent contenir tous les tags.
-|Non
-|
-|true
-
-|/type
-|String
-|Le type de requête. Si la valeur est "ALL", toutes les annotations dans l'interval de temps sera renvoyé.
-Si le type est "TAGS", les annotations devront en plus contenir des tags (soit tous soit au moins un selon
-la valeur de _matchAny_.
-|Non
-|une valeur parmis [ALL, TAGS]
-|ALL
-|===
-
-
-=== _POST_ tag-keys
+[[grafana-simplejson-tag-keys]]
+===== POST /api/grafana/simplejson/tag-keys
 
 Permet de savoir les clés utilisable dans l'endpoint _tag_values_.
 
@@ -466,8 +725,8 @@ la valeur de _matchAny_.
 |ALL
 |===
 
-
-=== _POST_ tag-values
+[[grafana-simplejson-tag-values]]
+===== POST /api/grafana/simplejson/tag-values
 
 Permet de chercher les différentes métrics disponibles.
 
@@ -491,239 +750,369 @@ Exemple de réponse :
 
 These are the values available for the corresponding keys.
 
+==== Api compatible avec le plugin "Hurence-Historian"
+
+[[grafana-hurence-datasource-root]]
+===== GET /api/grafana/v0
+
+Cet endpoint renvoie une réponse 200 'OK' si l'historian fonctionne correctement.
+
+[[grafana-hurence-datasource-query]]
+===== POST /api/grafana/v0/query
 
 
-==  _POST_ Timeseries
+Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponible.
+
+Exemple de requête :
+
+[source,json]
+----
+{
+  "from": "2016-10-31T06:33:44.866Z",
+  "to": "2020-10-31T12:33:44.866Z",
+  "names": ["metric_1"],
+  "format": "json",
+  "max_data_points": 30,
+  "tags": {
+      "sensor" : "sensor_1"
+  },
+  "sampling":{
+     "algorithm": "MIN",
+     "bucket_size" : 100
+  }
+}
+----
+
+Exemple de requête minimal :
+
+[source,json]
+----
+[
+    {
+        "name": "metric_1",
+        "datapoints": [
+            [
+                622,
+                1477895624866
+            ],
+            [
+                -3,
+                1477916224866
+            ],
+            [
+                365,
+                1477917224866
+            ]
+        ]
+    }
+]
+----
+
+
+{
+"tags": {
+"sensor" : "sensor_1"
+},
+"sampling":{
+"algorithm": "MIN",
+"bucket_size" : 100
+}
+}
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/names
+|array
+|Permet de renseigner les métriques pour lesquelles on souhaite obtenir des points.
+|Oui
+|
+|
+
+|from
+|String
+|La date de début pour rechercher les points. Il ne sera retourner que les points avec une
+date supérieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
+
+|to
+|String
+|La date de fin pour rechercher les points. Il ne sera retourner que les points avec une
+date inférieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
+
+|/max_data_points
+|long
+|Le nombre maximum de point désirer pour chaque métrique (En effet le but est de tracer des points sur un graphe).
+Si nécessaire les points seront echantilloné avec un algorithm sa sampling par défaut.
+|Non
+|positif
+|1000
+
+|/sampling
+|String
+|Un objet qui va contenir les information des paramètres à utiliser pour l'echantillonage des points si le nombre de points
+a retourner est supérieur au nombre maximum de point demandé.
+|Non
+|
+|
+
+|/sampling/algorithm
+|String
+|L'algorithme a utilisé pour l'échantillonage
+|Non
+|les valeurs possibles sont ["NONE", "AVERAGE", "FIRST", "MIN", "MAX"]
+|AVERAGE (la moyenne des points pour chaque bucket, le timestamp utilisé est celui du premier point du bucket)
+
+|/sampling/bucket_size
+|Int
+|La taille des buckets souhaité pour échantillonné les données. Attention cette taille peut être changé par le serveur
+si cela est incompatible avec le nombre maximum de point retourné souhaité.
+|Non
+|
+|Calculer automatiquement par le serveur afin d'obtenir au plus le nombre maximum de points.
+
+|/tags
+|String
+|Permet d'obtenir uniquement les points des chunks qui contiennent les tags renseignés. Les tags doivent être indiqué
+sous la forme d'une map de clé valeur.
+|Non
+|
+|Pas de tags.
+
+|===
+
+
+Exemple de réponse
+
+[source,json]
+----
+[
+  {
+    "name":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "name":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----
+
+[[grafana-hurence-datasource-search]]
+===== POST /api/grafana/v0/search
+
 
 Permet de chercher les différentes métrics disponibles.
 
-TODO
+Exemple de requête :
 
-
-==  _POST_ Ingestion
-
-Cet endpoint renvoie une réponse 200 'OK' si l’historian fonctionne correctement. De plus il y a autres
-sous endpoint à /historian-server/ingestion/ :
-
-=== _POST_ Ingestion/CSV
-
-
-Permet de injecter des points au Solr à partir des fichiers csv
-
-Exemple de commonde curl minimal :
-
-[source,curl]
+[source,json]
 ----
-curl -X POST \
-http://localhost:8080/historian-server/ingestion/csv \
--F 'my_csv_file=@path/de/mon/csv/file.csv'
-----
-
-Exemple csv minimal :
-
-[source,csv]
-----
-metric,timestamp,value
-metric_1, 1, 1.2
-metric_1, 2, 2
-metric_1, 3, 3
-----
-
-Exemple de commande curl :
-
-[source,curl]
-----
-curl -X POST \
-http://localhost:8080/historian-server/ingestion/csv \
--F 'my_csv_file=@path/de/mon/csv/file.csv' \
--F 'my_csv_file2=@path/de/mon/csv/file2.csv' \
--F mapping.name=metric_name_2 \
--F mapping.value=value_2 \
--F mapping.timestamp=timestamp \
--F mapping.quality=quality \
--F mapping.tags=sensor \
--F mapping.tags=code_install \
--F timestamp_unit=MILLISECONDS_EPOCH \
--F group_by=name \
--F group_by=tags.sensor \
--F format_date=yyyy-D-m HH:mm:ss.SSS \
--F timezone_date=UTC \
-----
-
-Exemple de fichier csv :
-
-[source,yml]
-----
-metric_name_2,timestamp,value_2,quality,sensor,code_install
-metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
-metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
+{
+  "name": "upper_50",
+  "limit": 5
+}
 ----
 
 .Paramètres de la requête
 [cols="13,10,40,7,20,10"]
 |===
-| attribut | type | description | requis | valeurs possible | valeur par défaut
+| json path | type | description | requis | valeurs possible | valeur par défaut
 
-|my_csv_file
+|/name
 |String
-|le path du fichier csv a importer.
-|Oui
-|
-|
-
-|mapping.name
-|String
-|le nom du colonne qui correspond à "name".
+|Une partie du nom de la métrique recherché.
 |Non
 |
-|"metric"
-
-|mapping.value
-|String
-|le nom du colonne qui correspond à "value".
-|Non
-|
-|"value"
-
-|mapping.timestamp
-|String
-|le nom du colonne qui correspond à "timestamp".
-|Non
-|
-|"timestamp"
-
-|mapping.quality
-|String
-|le nom du colonne qui correspond à "quality".
-|Non
-|
-|"quality"
-
-|mapping.tags
-|String
-|le nom du colonne à considérer comme un tag.
-|Non
-|doit être un parmis les noms des colonne
-|"name"
-
-|timestamp_unit
-|String
-|l'unité du timestamp, si le temps est en timestamp.
-|Non
-|doit être un parmis: MILLISECONDS_EPOCH, SECONDS_EPOCH, MICROSECONDS_EPOCH ou NANOSECONDS_EPOCH
-|"MILLISECONDS_EPOCH"
-
-|group_by
-|String
-|le nom du champs qu'on va utiliser pour grouper avec.
-|Non
-|doit être un parmis les champs qu'on a considéré comme tag.
-|"name"
-
-|format_date
-|String
-|la format du date dans le csv.
-|Non
-|doit être une format de date valide.
 |
 
-|timezone_date
-|String
-|le timezone du date dans le csv.
+|/limit
+|Int
+|Le nombre maximum de nom de métrique a retourné.
 |Non
-|doit être un timezone valide.
-|"UTC"
+|
+|
 
 |===
 
+NOTE: Le corps de la requête est optionnel.
 
+Exemple de réponse :
 
-* Si c'est bien passé on a une reponse 201 CREATED :
+[source,json]
+----
+["upper_25","upper_50","upper_75","upper_90","upper_95"]
+----
 
-avec la requête :
+[[grafana-hurence-datasource-annotations]]
+===== POST /api/grafana/v0/annotations
 
-[source,curl]
-----
-curl -X POST \
-http://localhost:8080/historian-server/ingestion/csv \
--F 'my_csv_file=@path/de/mon/csv/file.csv' \
--F 'my_csv_file2=@path/de/mon/csv/file.csv' \
--F mapping.name=metric_name_2 \
--F mapping.value=value_2 \
--F mapping.timestamp=timestamp \
--F mapping.quality=quality \
--F mapping.tags=sensor \
--F mapping.tags=code_install \
--F timestamp_unit=MILLISECONDS_EPOCH \
--F group_by=name \
--F group_by=tags.sensor \
--F format_date=yyyy-D-m HH:mm:ss.SSS \
--F timezone_date=UTC \
-----
-et le fichier "file.csv" :
-[source,yml]
-----
-metric_name_2,timestamp,value_2,quality,sensor,code_install
-metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
-metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
-----
-on recoit cette réponse :
+Permet de chercher les annotations.
+
+Exemple de requête :
+
 [source,json]
 ----
 {
-  "tags": ["sensor", "code_install"],
-  "grouped_by": ["name", "sensor"],
-  "report" : [
-    {
-      "name": "metric_1",
-      "sensor": "sensor_1",
-      "number_of_points_injected": 4,
-      "number_of_point_failed": 0,
-      "number_of_chunk_created": 2
-    },
-    {
-      "name": "metric_1",
-      "sensor": "sensor_2",
-      "number_of_points_injected": 2,
-      "number_of_point_failed": 0,
-      "number_of_chunk_created": 2
-    },
-    {
-      "name": "metric_2",
-      "sensor": "sensor_2",
-      "number_of_points_injected": 2,
-      "number_of_point_failed": 0,
-      "number_of_chunk_created": 2
-    }
-  ]
+  "from": "2020-2-14T01:43:14.070Z",
+  "to": "2020-2-14T06:50:14.070Z",
+  "limit" : 100,
+  "tags": ["tag1", "tag2"],
+  "matchAny": false,
+  "type": "tags"
 }
 ----
-(on remarque ici on'a utilisé le même fichier deux fois.)
 
-.Paramètres de la réponse
-[cols="13,10,40"]
+Exemple de réponse actuelle
+
+[source,json]
+----
+{
+  "annotations" : [
+    {
+      "time": 1581669794070,
+      "text": "annotation 7",
+      "tags": ["tag2","tag3"]
+    },
+    {
+      "time": 1581666194070,
+      "text": "annotation 6",
+      "tags": ["tag3","tag5"]
+    }
+  ],
+  "total_hit" : 2
+}
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
 |===
-| json path | type | description
+| json path | type | description | requis | valeurs possible | valeur par défaut
 
-|tags
-|array
-|les tags existantes.
+|/from
+|String
+|La date de début pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date supérieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
 
-|grouped_by
-|array
-|les champs qui sont utilisés pour le group by.
+|/to
+|String
+|La date de fin pour rechercher les annotations. Il ne sera retourner que les annotations avec une
+date inférieur ou égal à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
 
-|report
-|json object
-|un rapport sur les chunks qui ont été injectés.
+|/limit
+|Integer
+|Le nombre maximum d'annotation a renvoyer
+|Non
+|entier positif
+|100
 
+|/tags
+|Liste de string
+|Le nom des tags pour filtrer les annotations. Le comportement dépend de la valeur du champs _/type_
+|Non
+|
+|[] (empty array)
+
+|/matchAny
+|Boolean
+|Si le champs _type_ vaut _TAGS_. Si _true_ les annotations doivent avoir au moins un des tags du champs _tags_
+sinon les annotations doivent contenir tous les tags.
+|Non
+|
+|true
+
+|/type
+|String
+|Le type de requête. Si la valeur est "ALL", toutes les annotations dans l'interval de temps sera renvoyé.
+Si le type est "TAGS", les annotations devront en plus contenir des tags (soit tous soit au moins un selon
+la valeur de _matchAny_.
+|Non
+|une valeur parmis [ALL, TAGS]
+|ALL
 |===
 
+[[grafana-hurence-datasource-tag-keys]]
+===== POST /api/grafana/v0/tag-keys
 
-* Si il y a un problème avec la requête on a une réponse 400 BAD_REQUEST.
+Permet de savoir les clés utilisable dans l'endpoint _tag_values_.
 
-* Si il y a un autre problème on a une réponse 500.
+Exemple de requête :
+
+[source,json]
+----
+{}
+----
+
+Exemple de réponse :
+
+[source,json]
+----
+[
+    {
+        "type": "string",
+        "text": "Algo"
+    },
+    {
+        "type": "int",
+        "text": "Bucket size"
+    }
+]
+----
+
+Les valeurs dans text sont les valeurs utilsable comme clé dans l'endpoint tag-values.
+
+[[grafana-hurence-datasource-tag-values]]
+===== POST /api/grafana/simplejson/tag-values
+
+Permet de chercher les différentes métrics disponibles.
+
+Exemple de requête :
+
+[source,json]
+----
+{"key": "Algo"}
+----
+
+Exemple de réponse :
+
+[source,json]
+----
+[
+    {
+        "text": "NONE"
+    },
+    {
+        "text": "AVERAGE"
+    },
+    {
+        "text": "FIRST"
+    },
+    {
+        "text": "MIN"
+    },
+    {
+        "text": "MAX"
+    }
+]
+----
+
+These are the values available for the corresponding keys.

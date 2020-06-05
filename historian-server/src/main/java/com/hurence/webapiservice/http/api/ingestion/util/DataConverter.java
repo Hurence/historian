@@ -18,6 +18,10 @@ public class DataConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(DataConverter.class);
     public MultiMap multiMap;
 
+    public static final String DEFAULT_NAME_COLUMN_MAPPING = "metric";
+    public static final String DEFAULT_VALUE_COLUMN_MAPPING = "value";
+    public static final String DEFAULT_TIMESTAMP_COLUMN_MAPPING = "timestamp";
+
     public DataConverter (MultiMap multiMap) {
         this.multiMap = multiMap;
     }
@@ -25,11 +29,11 @@ public class DataConverter {
     public JsonArray toGroupedByMetricDataPoints(List<IngestionApiUtil.LineWithDateInfo> LinesWithDateInfo) {
 
         if (multiMap.get(MAPPING_NAME) == null)
-            multiMap.add(MAPPING_NAME, "metric");
+            multiMap.add(MAPPING_NAME, DEFAULT_NAME_COLUMN_MAPPING);
         if (multiMap.get(MAPPING_VALUE) == null)
-            multiMap.add(MAPPING_VALUE, "value");
+            multiMap.add(MAPPING_VALUE, DEFAULT_VALUE_COLUMN_MAPPING);
         if (multiMap.get(MAPPING_TIMESTAMP) == null)
-            multiMap.add(MAPPING_TIMESTAMP, "timestamp");
+            multiMap.add(MAPPING_TIMESTAMP, DEFAULT_TIMESTAMP_COLUMN_MAPPING);
         if (multiMap.getAll(GROUP_BY).isEmpty())
             multiMap.add(GROUP_BY, DEFAULT_NAME_FIELD);
 

@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.DEFAULT_TIMESTAMP_COLUMN_MAPPING;
 
 public class IngestionApiUtil {
 
@@ -120,7 +121,7 @@ public class IngestionApiUtil {
     }
     private static String generateDateFromTime (Map map, MultiMap multiMap) {
         if (multiMap.get(MAPPING_TIMESTAMP) == null)
-            multiMap.add(MAPPING_TIMESTAMP, "timestamp");
+            multiMap.add(MAPPING_TIMESTAMP, DEFAULT_TIMESTAMP_COLUMN_MAPPING);
         Object date1 = map.get(multiMap.get(MAPPING_TIMESTAMP));
         long date = (long) DataConverter.toNumber(date1, multiMap);
         Date d = new Date(date);

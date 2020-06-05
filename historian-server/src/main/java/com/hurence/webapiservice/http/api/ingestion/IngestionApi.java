@@ -14,6 +14,7 @@ public interface IngestionApi {
     default Router getImportRouter(Vertx vertx) {
         Router router = Router.router(vertx);
         router.post(CSV_ENDPOINT)
+                .consumes("multipart/form-data")
                 .produces("application/json")
                 .handler(this::importCsv);
         router.post(JSON_ENDPOINT)

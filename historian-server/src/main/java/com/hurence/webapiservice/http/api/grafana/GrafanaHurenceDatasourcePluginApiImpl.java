@@ -7,6 +7,7 @@ import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser;
+import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginAnnotationRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -96,8 +97,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
-    public final static String FROM_JSON_PATH = "/to";
-    public final static String TO_JSON_PATH = "/from";
+    public final static String FROM_JSON_PATH = "/from";
+    public final static String TO_JSON_PATH = "/to";
     public final static String NAMES_JSON_PATH = "/names";
     public final static String MAX_DATA_POINTS_JSON_PATH = "/max_data_points";
     public final static String FORMAT_JSON_PATH = "/format";
@@ -238,6 +239,11 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
                 .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()));
     }
+
+    public final static String LIMIT_JSON_PATH = "/limit";
+    public final static String MATCH_ANY_JSON_PATH = "/matchAny";
+    public final static String TYPE_JSON_PATH = "/type";
+
     /**
      *  used to the find annotations.
      * @param context
@@ -245,18 +251,12 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
      * Expected request exemple :
      * <pre>
      * {
-     *   "range": {
      *     "from": "2020-2-14T01:43:14.070Z",
-     *     "to": "2020-2-14T06:50:14.070Z"
-     *   },
-     *   "rangeRaw": {
-     *     "from": "now-1h",
-     *     "to": "now"
-     *   },
-     *   "limit" : 100,
-     *   "tags": ["tag1", "tag2"],
-     *   "matchAny": false,
-     *   "type": "tags"
+     *     "to": "2020-2-14T06:50:14.070Z",
+     *     "limit" : 100,
+     *     "tags": ["tag1", "tag2"],
+     *     "matchAny": false,
+     *     "type": "tags"
      * }
      * </pre>
      * response Exemple :
@@ -282,7 +282,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
         final AnnotationRequestParam request;
         try {
             JsonObject requestBody = context.getBodyAsJson();
-            request = new AnnotationRequestParser().parseRequest(requestBody);
+            request = new HurenceDatasourcePluginAnnotationRequestParser(
+                    FROM_JSON_PATH, TO_JSON_PATH, TAGS_JSON_PATH, TYPE_JSON_PATH, LIMIT_JSON_PATH, MATCH_ANY_JSON_PATH
+            ).parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);

@@ -37,4 +37,19 @@ public class SolrHistorianConf {
     }
 
 
+    @Override
+    public String toString() {
+        return "SolrHistorianConf{" +
+                "client=" + client +
+                ", chunkCollection='" + chunkCollection + '\'' +
+                ", annotationCollection='" + annotationCollection + '\'' +
+                ", streamEndPoint='" + streamEndPoint + '\'' +
+                ", limitNumberOfPoint=" + limitNumberOfPoint +
+                ", limitNumberOfChunks=" + limitNumberOfChunks +
+                ", sleepDurationBetweenTry=" + sleepDurationBetweenTry +
+                ", numberOfRetryToConnect=" + numberOfRetryToConnect +
+                ", maxNumberOfTargetReturned=" + maxNumberOfTargetReturned +
+                ", schemaVersion=" + schemaVersion +
+                '}';
+    }
 }
