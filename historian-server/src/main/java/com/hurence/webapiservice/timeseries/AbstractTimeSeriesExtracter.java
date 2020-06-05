@@ -74,13 +74,13 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
             double aggValue;
             switch (agg) {
                 case AVG:
-                    double avg = chunks.stream()
-                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_AVG_FIELD))
+                    double sum = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
                             .sum();
                     long numberOfPoint = chunks.stream()
                             .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_COUNT_FIELD))
                             .sum();
-                    aggValue = BigDecimal.valueOf(avg)
+                    aggValue = BigDecimal.valueOf(sum)
                             .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
                             .doubleValue();
                     aggregValuesMap.put(AVG, aggValue);
@@ -108,7 +108,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 case COUNT:
                     aggValue = chunks.stream()
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
-                            .count();
+                            .sum();
                     aggregValuesMap.put(COUNT, aggValue);
                     break;
                 default:
