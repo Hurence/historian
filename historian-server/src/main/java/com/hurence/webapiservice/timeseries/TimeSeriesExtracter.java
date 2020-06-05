@@ -25,5 +25,4 @@ public interface TimeSeriesExtracter {
 
     long pointCount();
 
-    void calculateAggreg();
 }

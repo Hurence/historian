@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
+import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
@@ -124,6 +125,29 @@ public class RequestParserUtil {
         throw new IllegalArgumentException(
                 String.format("'%s' json pointer value '%s' is not of class %s !",
                         pointer, fromObj, clazz));
+    }
+
+    public static List<AGG> parseListAGG(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof JsonArray) {
+            try {
+                JsonArray jsonArray = (JsonArray) fromObj;
+                return jsonArray.stream()
+                        .map(i -> AGG.valueOf(i.toString()))
+                        .collect(Collectors.toList());
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid List<AGG> !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not a List<String> !",
+                        pointer, fromObj));
     }
 
 }

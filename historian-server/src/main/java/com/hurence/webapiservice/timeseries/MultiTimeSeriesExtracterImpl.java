@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,7 +20,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     private Map<String, TimeSeriesExtracter> bucketerByMetrics = new HashMap<>();
     Map<String, Long> totalNumberOfPointByMetrics = new HashMap<>();
-    List<String> aggregList;
+    List<AGG> aggregList = new ArrayList<>();
     final long from;
     final long to;
     final SamplingConf samplingConf;
@@ -45,17 +46,10 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
                 .forEach(TimeSeriesExtracter::flush);
     }
 
-    /**
-     * Calcule the aggregations. Add them into aggreg Values List
-     */
-    public void calculateAggreg() {
-        bucketerByMetrics.values()
-                .forEach(TimeSeriesExtracter::calculateAggreg);
-    }
 
-    @Override
+
     public void setAggregationList(JsonArray aggregationList) {
-        aggregList = aggregationList.getList();
+        aggregationList.forEach(agg -> aggregList.add(AGG.valueOf(agg.toString())));
     }
 
     protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {

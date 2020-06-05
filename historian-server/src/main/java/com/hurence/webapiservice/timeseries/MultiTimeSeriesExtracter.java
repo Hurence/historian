@@ -18,7 +18,4 @@ public interface MultiTimeSeriesExtracter {
 
     long pointCount();
 
-    void calculateAggreg();
-
-    void setAggregationList(JsonArray aggregationList);
 }

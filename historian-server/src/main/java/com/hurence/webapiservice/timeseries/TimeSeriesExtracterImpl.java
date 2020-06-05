@@ -23,7 +23,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
     public TimeSeriesExtracterImpl(String metricName, long from, long to,
                                    SamplingConf samplingConf,
                                    long totalNumberOfPoint,
-                                   List<String> aggregList) {
+                                   List<AGG> aggregList) {
         super(metricName, from, to, samplingConf, totalNumberOfPoint, aggregList);
         sampler = SamplerFactory.getPointSampler(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
     }

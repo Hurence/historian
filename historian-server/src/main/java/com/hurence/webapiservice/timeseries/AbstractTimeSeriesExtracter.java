@@ -15,6 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.modele.AGG.*;
 
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
 
@@ -26,15 +27,15 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
-    List<String> aggregList = new ArrayList<>();
-    final Map<String, Double> aggregValuesList = new HashMap<>();
+    List<AGG> aggregList = new ArrayList<>();
+    final Map<AGG, Double> aggregValuesMap = new HashMap<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
 
     public AbstractTimeSeriesExtracter(String metricName, long from, long to,
                                        SamplingConf samplingConf,
-                                       long totalNumberOfPoint, List<String> aggregList) {
+                                       long totalNumberOfPoint, List<AGG> aggregList) {
         this.metricName = metricName;
         this.from = from;
         this.to = to;
@@ -61,14 +62,15 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     @Override
     public void flush() {
         if (!chunks.isEmpty())
+            calculateAggreg();
             samplePointsInBufferThenReset();
     }
 
     /**
      * Calcule the aggregations from the list of aggregations and the Lst of chunks . Add them into aggreg values list.
      */
-    public void calculateAggreg() {
-        aggregList.stream().map(AGG::valueOf).forEach(agg -> {
+    private void calculateAggreg() {
+        aggregList.forEach(agg -> {
             double aggValue;
             switch (agg) {
                 case AVG:
@@ -81,33 +83,33 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                     aggValue = BigDecimal.valueOf(avg)
                             .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
                             .doubleValue();
-                    aggregValuesList.put("AVG", aggValue);
+                    aggregValuesMap.put(AVG, aggValue);
                     break;
                 case SUM:
                     aggValue = chunks.stream()
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
                             .sum();
-                    aggregValuesList.put("SUM", aggValue);
+                    aggregValuesMap.put(SUM, aggValue);
                     break;
                 case MIN:
                     aggValue = chunks.stream()
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
                             .min()
                             .getAsDouble();
-                    aggregValuesList.put("MIN", aggValue);
+                    aggregValuesMap.put(MIN, aggValue);
                     break;
                 case MAX:
                     aggValue = chunks.stream()
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
                             .max()
                             .getAsDouble();
-                    aggregValuesList.put("MAX", aggValue);
+                    aggregValuesMap.put(MAX, aggValue);
                     break;
                 case COUNT:
                     aggValue = chunks.stream()
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
                             .count();
-                    aggregValuesList.put("COUNT", aggValue);
+                    aggregValuesMap.put(COUNT, aggValue);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported aggregation: " + agg);
@@ -149,8 +151,8 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_NAME, metricName)
                 .put(TIMESERIE_POINT, new JsonArray(points));
-        if (!aggregValuesList.isEmpty()) {
-            toReturn.put(AGGREGATION, aggregValuesList);
+        if (!aggregValuesMap.isEmpty()) {
+            toReturn.put(AGGREGATION, aggregValuesMap);
         }
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;

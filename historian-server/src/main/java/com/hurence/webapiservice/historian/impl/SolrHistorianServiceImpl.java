@@ -582,6 +582,9 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 case MAX:
                     query.addField(RESPONSE_CHUNK_MAX_FIELD);
                     break;
+                case COUNT:
+                    query.addField(RESPONSE_CHUNK_COUNT_FIELD);
+                    break;
                 default:
                     throw new IllegalStateException("Unsupported aggregation: " + agg);
             }
@@ -676,7 +679,6 @@ public class SolrHistorianServiceImpl implements HistorianService {
             timeSeriesExtracter.addChunk(chunk);
             chunk = stream.read();
         }
-        timeSeriesExtracter.calculateAggreg();
         timeSeriesExtracter.flush();
         LOGGER.debug("read {} chunks in stream", stream.getNumberOfDocRead());
         LOGGER.debug("extractTimeSeries response metric : {}", chunk.encodePrettily());
