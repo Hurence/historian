@@ -3,6 +3,7 @@ package com.hurence.webapiservice.timeseries;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -76,7 +77,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testNoSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 9, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 9, Arrays.asList(AGG.MAX, AGG.MIN, AGG.SUM));
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -84,15 +85,17 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
         Assert.assertEquals(new JsonObject()
-                .put("target", "fake")
-                .put("datapoints", expectedPoints), extractor.getTimeSeries());
+                .put("name", "fake")
+                .put("datapoints", expectedPoints)
+                .put("aggregation", new JsonObject().put("MIN",1.0).put("SUM", 9.0).put("MAX", 1.0))
+                , extractor.getTimeSeries());
     }
 
     @Test
     public void testAvgSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 15, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 15, Arrays.asList(AGG.SUM));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -103,15 +106,17 @@ public class TimeSeriesExtracterUsingPreAggTest {
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.5, 1477917224866L)));
         Assert.assertEquals(new JsonObject()
-                .put("target", "fake")
-                .put("datapoints", expectedPoints), extractor.getTimeSeries());
+                .put("name", "fake")
+                .put("datapoints", expectedPoints)
+                .put("aggregation", new JsonObject().put("SUM", 24.0))
+                , extractor.getTimeSeries());
     }
 
     @Test
     public void testAvgSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 12, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 12, Arrays.asList(AGG.SUM));
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -123,15 +128,17 @@ public class TimeSeriesExtracterUsingPreAggTest {
         expectedPoints.add(new JsonArray(Arrays.asList(2.5, 1477917224866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(4.5, 1477917224870L)));
         Assert.assertEquals(new JsonObject()
-                .put("target", "fake")
-                .put("datapoints", expectedPoints), extractor.getTimeSeries());
+                .put("name", "fake")
+                .put("datapoints", expectedPoints)
+                .put("aggregation", new JsonObject().put("SUM", 42.0))
+                , extractor.getTimeSeries());
     }
 
     @Test
     public void testMinSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.SUM));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -142,8 +149,9 @@ public class TimeSeriesExtracterUsingPreAggTest {
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477917224866L)));
         Assert.assertEquals(new JsonObject()
-                        .put("target", "fake")
+                        .put("name", "fake")
                         .put("datapoints", expectedPoints)
+                        .put("aggregation", new JsonObject().put("SUM", 24.0))
                 , extractor.getTimeSeries());
     }
 
@@ -151,7 +159,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testMinSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 12, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 12, Arrays.asList(AGG.SUM));
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -160,11 +168,12 @@ public class TimeSeriesExtracterUsingPreAggTest {
         Assert.assertEquals(4, extractor.chunkCount());
         Assert.assertEquals(12, extractor.pointCount());
         JsonArray expectedPoints = new JsonArray();
-        expectedPoints.add(new JsonArray(Arrays.asList(2, 1477917224866L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(4, 1477917224870L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477917224866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(4.0, 1477917224870L)));
         Assert.assertEquals(new JsonObject()
-                        .put("target", "fake")
+                        .put("name", "fake")
                         .put("datapoints", expectedPoints)
+                        .put("aggregation", new JsonObject().put("SUM", 42.0))
                 , extractor.getTimeSeries());
     }
 

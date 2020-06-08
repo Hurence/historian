@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.modele.AGG.*;
 
 public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter {
 
@@ -25,9 +26,99 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
     }
 
     @Override
-    protected void samplePointsFromChunks(long from, long to, List<JsonObject> chunks) {
+    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
         List<Point> sampledPoint = extractPoints(chunks);
         this.sampledPoints.addAll(sampledPoint);
+        calculateAggreg();
+    }
+
+    @Override
+    protected void calculateAggreg() {
+        aggregList.forEach(agg -> {
+            double aggValue;
+            switch (agg) {
+                case AVG:
+                    double sum = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
+                            .sum();
+                    long numberOfPoint = chunks.stream()
+                            .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_COUNT_FIELD))
+                            .sum();
+                    aggValue = BigDecimal.valueOf(sum)
+                            .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
+                            .doubleValue();
+                    if(aggregValuesMap.containsKey(AVG)) {
+                        double currentAvg = aggregValuesMap.get(AVG);
+                        double newAvg =  BigDecimal.valueOf(currentAvg+aggValue)
+                                .divide(BigDecimal.valueOf(2), 3, RoundingMode.HALF_UP)
+                                .doubleValue();
+                        aggregValuesMap.put(AVG, newAvg);
+                    }else {
+                        aggregValuesMap.put(AVG, aggValue);
+                    }
+                    break;
+                case SUM:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
+                            .sum();
+                    if(aggregValuesMap.containsKey(SUM)) {
+                        double currentSum = aggregValuesMap.get(SUM);
+                        double newSum =  BigDecimal.valueOf(currentSum+aggValue)
+                                .doubleValue();
+                        aggregValuesMap.put(SUM, newSum);
+                    }else {
+                        aggregValuesMap.put(SUM, aggValue);
+                    }
+                    break;
+                case MIN:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
+                            .min()
+                            .getAsDouble();
+                    if(aggregValuesMap.containsKey(MIN)) {
+                        double currentMin = aggregValuesMap.get(MIN);
+                        double newMin = 0;
+                        if (aggValue < currentMin) {
+                            newMin = aggValue;
+                        }
+                        aggregValuesMap.put(MIN, newMin);
+                    }else {
+                        aggregValuesMap.put(MIN, aggValue);
+                    }
+                    break;
+                case MAX:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
+                            .max()
+                            .getAsDouble();
+                    if(aggregValuesMap.containsKey(MAX)) {
+                        double currentMax = aggregValuesMap.get(MAX);
+                        double newMax = 0;
+                        if (aggValue < currentMax) {
+                            newMax = aggValue;
+                        }
+                        aggregValuesMap.put(MAX, newMax);
+                    }else {
+                        aggregValuesMap.put(MAX, aggValue);
+                    }
+                    break;
+                case COUNT:
+                    aggValue = chunks.stream()
+                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
+                            .sum();
+                    if(aggregValuesMap.containsKey(COUNT)) {
+                        double currentCount = aggregValuesMap.get(COUNT);
+                        double newCount =  BigDecimal.valueOf(currentCount + aggValue)
+                                .doubleValue();
+                        aggregValuesMap.put(COUNT, newCount);
+                    }else {
+                        aggregValuesMap.put(COUNT, aggValue);
+                    }
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported aggregation: " + agg);
+            }
+        });
     }
 
     private List<Point> extractPoints(List<JsonObject> chunks) {

@@ -3,6 +3,7 @@ package com.hurence.webapiservice.timeseries;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -42,18 +43,38 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Arrays.asList(AGG.MAX, AGG.MIN));
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
         Assert.assertEquals(3, extractor.pointCount());
         JsonArray expectedPoints = new JsonArray();
-        expectedPoints.add(new JsonArray(Arrays.asList(1, 1477895624866L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(2, 1477916224866L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(3, 1477917224866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477916224866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(3.0, 1477917224866L)));
         Assert.assertEquals(new JsonObject()
-                        .put("target", "fake")
+                        .put("name", "fake")
                         .put("datapoints", expectedPoints)
+                        .put("aggregation", new JsonObject().put("MIN",1.0).put("MAX", 3.0))
+                , extractor.getTimeSeries());
+    }
+
+    @Test
+    public void testNoSamplerPartOfOneChunk() {
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+                1477895624865L , 1477916224867L,
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Arrays.asList(AGG.MAX, AGG.MIN));
+        extractor.addChunk(getChunk1());
+        extractor.flush();
+        Assert.assertEquals(1, extractor.chunkCount());
+        Assert.assertEquals(3, extractor.pointCount());
+        JsonArray expectedPoints = new JsonArray();
+        expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477916224866L)));
+        Assert.assertEquals(new JsonObject()
+                        .put("name", "fake")
+                        .put("datapoints", expectedPoints)
+                        .put("aggregation", new JsonObject().put("MIN",1.0).put("MAX", 2.0))
                 , extractor.getTimeSeries());
     }
 
@@ -61,17 +82,18 @@ public class TimeSeriesExtracterImplTest {
     public void testAvgSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 3, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 3, Arrays.asList(AGG.MAX, AGG.MIN));
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
         Assert.assertEquals(3, extractor.pointCount());
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.5, 1477895624866L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(3, 1477917224866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(3.0, 1477917224866L)));
         Assert.assertEquals(new JsonObject()
-                .put("target", "fake")
+                .put("name", "fake")
                 .put("datapoints", expectedPoints)
+                .put("aggregation", new JsonObject().put("MAX", 3.0).put("MIN",1.0))
                 , extractor.getTimeSeries());
     }
 
@@ -79,22 +101,23 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSamplerWithIntersectingChunks() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 6), 6, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 6), 6, Arrays.asList(AGG.MAX, AGG.MIN));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.flush();
         Assert.assertEquals(2, extractor.chunkCount());
         Assert.assertEquals(6, extractor.pointCount());
         JsonArray expectedPoints = new JsonArray();
-        expectedPoints.add(new JsonArray(Arrays.asList(1, 1477895624866L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(2, 1477916224866L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(4, 1477916224866L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(5, 1477916224867L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(6, 1477916224868L)));
-        expectedPoints.add(new JsonArray(Arrays.asList(3, 1477917224866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477916224866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(4.0, 1477916224866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(5.0, 1477916224867L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(6.0, 1477916224868L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(3.0, 1477917224866L)));
         Assert.assertEquals(new JsonObject()
-                        .put("target", "fake")
+                        .put("name", "fake")
                         .put("datapoints", expectedPoints)
+                        .put("aggregation", new JsonObject().put("MIN",1.0).put("MAX", 6.0))
                 , extractor.getTimeSeries());
     }
 
@@ -102,7 +125,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSamplerWithIntersectingChunks2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 2), 6, Collections.emptyList());
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 2), 6, Arrays.asList(AGG.MAX, AGG.MIN));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.flush();
@@ -112,7 +135,7 @@ public class TimeSeriesExtracterImplTest {
         expectedPoints.add(new JsonArray(Arrays.asList(1, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(5, 1477916224867L)));
         Assert.assertEquals(new JsonObject()
-                        .put("target", "fake")
+                        .put("name", "fake")
                         .put("datapoints", expectedPoints)
                 , extractor.getTimeSeries());
     }

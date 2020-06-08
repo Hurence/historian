@@ -27,6 +27,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
+    List<Point> points = new ArrayList<>();
     List<AGG> aggregList = new ArrayList<>();
     final Map<AGG, Double> aggregValuesMap = new HashMap<>();
     private long totalChunkCounter = 0L;
@@ -50,8 +51,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD);
         chunks.add(chunk);
         if (isBufferFull()) {
-            calculateAggreg(); // is this correct
-            samplePointsInBufferThenReset();
+            samplePointsInBufferAndCalculAggregThenReset();
         }
     }
 
@@ -62,70 +62,19 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     @Override
     public void flush() {
         if (!chunks.isEmpty())
-            calculateAggreg();
-            samplePointsInBufferThenReset();
+            samplePointsInBufferAndCalculAggregThenReset();
     }
 
-    /**
-     * Calcule the aggregations from the list of aggregations and the Lst of chunks . Add them into aggreg values list.
-     */
-    private void calculateAggreg() {
-        aggregList.forEach(agg -> {
-            double aggValue;
-            switch (agg) {
-                case AVG:
-                    double sum = chunks.stream()
-                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
-                            .sum();
-                    long numberOfPoint = chunks.stream()
-                            .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_COUNT_FIELD))
-                            .sum();
-                    aggValue = BigDecimal.valueOf(sum)
-                            .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
-                            .doubleValue();
-                    aggregValuesMap.put(AVG, aggValue);
-                    break;
-                case SUM:
-                    aggValue = chunks.stream()
-                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
-                            .sum();
-                    aggregValuesMap.put(SUM, aggValue);
-                    break;
-                case MIN:
-                    aggValue = chunks.stream()
-                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
-                            .min()
-                            .getAsDouble();
-                    aggregValuesMap.put(MIN, aggValue);
-                    break;
-                case MAX:
-                    aggValue = chunks.stream()
-                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
-                            .max()
-                            .getAsDouble();
-                    aggregValuesMap.put(MAX, aggValue);
-                    break;
-                case COUNT:
-                    aggValue = chunks.stream()
-                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
-                            .sum();
-                    aggregValuesMap.put(COUNT, aggValue);
-                    break;
-                default:
-                    throw new IllegalStateException("Unsupported aggregation: " + agg);
-            }
-        });
-    }
 
     /**
      * Extract/Sample points from the list of chunks in buffer using a strategy. Add them into sampled points then reset buffer
      */
-    protected void samplePointsInBufferThenReset() {
+    protected void samplePointsInBufferAndCalculAggregThenReset() {
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("sample points in buffer has been called with chunks : {}",
                     chunks.stream().map(JsonObject::encodePrettily).collect(Collectors.joining("\n")));
         }
-        samplePointsFromChunks(from, to, chunks);
+        samplePointsFromChunksAndCalculAggreg(from, to, chunks);
         chunks.clear();
         toatlPointCounter+=pointCounter;
         pointCounter = 0;
@@ -134,7 +83,12 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     /**
      * Sample points from the list of chunks using a strategy. Add them into sampled points then reset buffer
      */
-    protected abstract void samplePointsFromChunks(long from, long to, List<JsonObject> chunks);
+    protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks);
+
+    /**
+     * Calcule the aggregations from the list of aggregations and the Lst of chunks . Add them into aggreg values list.
+     */
+    protected abstract void calculateAggreg();
 
     @Override
     public JsonObject getTimeSeries() {

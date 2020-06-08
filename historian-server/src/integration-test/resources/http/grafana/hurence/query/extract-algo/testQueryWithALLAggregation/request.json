@@ -5,5 +5,5 @@
   "names": ["temp_a", "temp_b"],
   "format": "json",
   "max_data_points": 550,
-  "aggregation": ["MAX", "MIN", "AVG", "SUM"]
+  "aggregation": true
 }

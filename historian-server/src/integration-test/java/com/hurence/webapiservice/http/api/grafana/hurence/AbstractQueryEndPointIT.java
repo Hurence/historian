@@ -36,7 +36,7 @@ public abstract class AbstractQueryEndPointIT {
     }
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    /*@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)*/
     public void testQuery(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/extract-algo/test1/request.json",
@@ -151,6 +151,14 @@ public abstract class AbstractQueryEndPointIT {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/extract-algo/testQueryWithAggregation/request.json",
                 "/http/grafana/hurence/query/extract-algo/testQueryWithAggregation/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithALLAggregation(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/extract-algo/testQueryWithALLAggregation/request.json",
+                "/http/grafana/hurence/query/extract-algo/testQueryWithALLAggregation/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,

@@ -8,6 +8,8 @@ import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.hurence.webapiservice.modele.AGG.*;
+
 public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesRequest {
 
     public static final int DEFAULT_BUCKET_SIZE = 1;//will be recomputed later by historian if necessary depending on maxDataPoints
@@ -18,7 +20,8 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     public static final String DEFAULT_FORMAT = "json";
     public static final String DEFAULT_REQUEST_ID = "Not defined";
     public static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
-    public static final List<String> DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
+    public static final List DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
+    public static final List<AGG> DEFAULT_ALL_AGGREGATION_LIST = Arrays.asList(MAX, MIN, SUM, AVG, COUNT);
 
     private final List<String> metricNames;
     private final long from;
@@ -93,7 +96,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         private int bucketSize = DEFAULT_BUCKET_SIZE;
         private Map<String, String> tags = DEFAULT_TAGS;
         private String requestId = DEFAULT_REQUEST_ID;
-        private List<AGG> aggreg;
+        private List<AGG> aggreg = DEFAULT_AGGREGATION;
 
         public Builder withMetricNames(List<String> metricNames) {
             this.metricNames = metricNames;
