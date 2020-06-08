@@ -1,16 +1,13 @@
 package com.hurence.webapiservice.timeseries;
 
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
-
-import java.util.List;
 
 public interface TimeSeriesExtracter {
 
     String TIMESERIE_NAME = HistorianFields.NAME;
     String TIMESERIE_POINT = HistorianFields.DATAPOINTS;
-    String TIMESERIE_AGGS = "aggs";
+    String TIMESERIE_AGGS = HistorianFields.AGGREGATION;
 
     void addChunk(JsonObject chunk);
 

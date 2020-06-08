@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.logisland.record.Point;
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.logisland.record.Point;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
@@ -9,13 +9,10 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.modele.AGG.*;
+import static com.hurence.historian.modele.HistorianFields.AGGREGATION;
 
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
 
@@ -106,7 +103,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 .put(TIMESERIE_NAME, metricName)
                 .put(TIMESERIE_POINT, new JsonArray(points));
         if (!aggregValuesMap.isEmpty()) {
-            toReturn.put(AGGREGATION, aggregValuesMap);
+            toReturn.put(TIMESERIE_AGGS, aggregValuesMap);
         }
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
