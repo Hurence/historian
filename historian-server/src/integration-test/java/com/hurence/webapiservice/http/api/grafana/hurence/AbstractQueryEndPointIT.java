@@ -36,7 +36,7 @@ public abstract class AbstractQueryEndPointIT {
     }
 
     @Test
-    /*@Timeout(value = 5, timeUnit = TimeUnit.SECONDS)*/
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQuery(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/extract-algo/test1/request.json",

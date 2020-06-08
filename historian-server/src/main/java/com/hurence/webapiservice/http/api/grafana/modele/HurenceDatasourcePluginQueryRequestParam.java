@@ -32,7 +32,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     private final int bucketSize;
     private final Map<String, String> tags;
     private final String requestId;
-    private final List<AGG> aggregList;  // TODO here i can make the agreg a Map<String,AGG> if i want a diff agreg for diff metrics
+    private final List<AGG> aggregList;
 
     private HurenceDatasourcePluginQueryRequestParam(List<String> metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
