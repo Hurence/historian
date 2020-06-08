@@ -655,7 +655,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     private void fillingExtractorWithAggregToReturn(MultiTimeSeriesExtracterImpl timeSeriesExtracter, JsonObject params) {
-        timeSeriesExtracter.setAggregationList(params.getJsonArray(AGGREGATION, new JsonArray()));
+        timeSeriesExtracter.setAggregationList(params.getJsonArray(AGGREGATION, new JsonArray()).getList());
     }
 
     private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,

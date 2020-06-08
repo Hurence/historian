@@ -48,8 +48,8 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
 
 
-    public void setAggregationList(JsonArray aggregationList) {
-        aggregationList.forEach(agg -> aggregList.add(AGG.valueOf(agg.toString())));
+    public void setAggregationList(List<String> aggregationList) {
+        aggregationList.forEach(agg -> aggregList.add(AGG.valueOf(agg)));
     }
 
     protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {
@@ -68,10 +68,6 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
         JsonArray toReturn = new JsonArray(timeseries);
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
-    }
-
-    public JsonObject getAggregation() {
-        return null;
     }
 
     @Override
