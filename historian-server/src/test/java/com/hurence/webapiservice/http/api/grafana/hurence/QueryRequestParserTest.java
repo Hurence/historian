@@ -58,8 +58,8 @@ public class QueryRequestParserTest {
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
         final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
-        assertEquals(1604147624866L, request.getFrom());
-        assertEquals(9223372036854775807L, request.getTo());
+        assertEquals(1477895624866L, request.getFrom());
+        assertEquals(1604147624866L, request.getTo());
         assertEquals(Collections.emptyList(), request.getAggs());
         assertEquals(Arrays.asList("metric_1"), request.getMetricNames());
         assertEquals(new HashMap<String, String>() {{
@@ -134,7 +134,7 @@ public class QueryRequestParserTest {
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
-        Assertions.assertThrows(NullPointerException.class, () -> {
+        Assertions.assertThrows(IllegalArgumentException.class, () -> {
             final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
         });
     }

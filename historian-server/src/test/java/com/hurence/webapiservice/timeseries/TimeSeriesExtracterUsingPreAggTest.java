@@ -14,6 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+
+import static com.hurence.webapiservice.modele.AGG.*;
 
 public class TimeSeriesExtracterUsingPreAggTest {
 
@@ -77,17 +80,21 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testNoSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 9, Arrays.asList(AGG.MAX, AGG.MIN, AGG.SUM));
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 9, Arrays.asList(AGG.MAX, AGG.MIN, SUM));
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
         Assert.assertEquals(9, extractor.pointCount());
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(MIN, 1.0);
+        aggregation.put(SUM, 9.0);
+        aggregation.put(MAX, 1.0);
         Assert.assertEquals(new JsonObject()
                 .put("name", "fake")
                 .put("datapoints", expectedPoints)
-                .put("aggregation", new JsonObject().put("MIN",1.0).put("SUM", 9.0).put("MAX", 1.0))
+                .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -95,7 +102,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testAvgSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 15, Arrays.asList(AGG.SUM));
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 15, Arrays.asList(SUM));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -105,10 +112,12 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.5, 1477917224866L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(SUM, 24.0);
         Assert.assertEquals(new JsonObject()
                 .put("name", "fake")
                 .put("datapoints", expectedPoints)
-                .put("aggregation", new JsonObject().put("SUM", 24.0))
+                .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -116,7 +125,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testAvgSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 12, Arrays.asList(AGG.SUM));
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 12, Arrays.asList(SUM));
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -127,10 +136,12 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(2.5, 1477917224866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(4.5, 1477917224870L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(SUM, 42.0);
         Assert.assertEquals(new JsonObject()
                 .put("name", "fake")
                 .put("datapoints", expectedPoints)
-                .put("aggregation", new JsonObject().put("SUM", 42.0))
+                .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -138,7 +149,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testMinSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.SUM));
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(SUM));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -148,10 +159,12 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477917224866L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(SUM, 24.0);
         Assert.assertEquals(new JsonObject()
                         .put("name", "fake")
                         .put("datapoints", expectedPoints)
-                        .put("aggregation", new JsonObject().put("SUM", 24.0))
+                        .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -159,7 +172,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testMinSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 12, Arrays.asList(AGG.SUM));
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 12, Arrays.asList(SUM));
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -170,10 +183,12 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477917224866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(4.0, 1477917224870L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(SUM, 42.0);
         Assert.assertEquals(new JsonObject()
                         .put("name", "fake")
                         .put("datapoints", expectedPoints)
-                        .put("aggregation", new JsonObject().put("SUM", 42.0))
+                        .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 

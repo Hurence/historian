@@ -14,6 +14,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+
+import static com.hurence.webapiservice.modele.AGG.MAX;
+import static com.hurence.webapiservice.modele.AGG.MIN;
 
 public class TimeSeriesExtracterImplTest {
 
@@ -43,7 +47,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Arrays.asList(AGG.MAX, AGG.MIN));
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Arrays.asList(MAX, MIN));
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -52,10 +56,13 @@ public class TimeSeriesExtracterImplTest {
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477916224866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(3.0, 1477917224866L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(MIN, 1.0);
+        aggregation.put(MAX, 3.0);
         Assert.assertEquals(new JsonObject()
                         .put("name", "fake")
                         .put("datapoints", expectedPoints)
-                        .put("aggregation", new JsonObject().put("MIN",1.0).put("MAX", 3.0))
+                        .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -63,7 +70,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSamplerPartOfOneChunk() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624865L , 1477916224867L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Arrays.asList(AGG.MAX, AGG.MIN));
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3), 3, Arrays.asList(MAX, MIN));
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -71,10 +78,13 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477916224866L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(MIN, 1.0);
+        aggregation.put(MAX, 2.0);
         Assert.assertEquals(new JsonObject()
                         .put("name", "fake")
                         .put("datapoints", expectedPoints)
-                        .put("aggregation", new JsonObject().put("MIN",1.0).put("MAX", 2.0))
+                        .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -82,7 +92,7 @@ public class TimeSeriesExtracterImplTest {
     public void testAvgSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 3, Arrays.asList(AGG.MAX, AGG.MIN));
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3), 3, Arrays.asList(MAX, MIN));
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -90,10 +100,13 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.5, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(3.0, 1477917224866L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(MAX, 3.0);
+        aggregation.put(MIN, 1.0);
         Assert.assertEquals(new JsonObject()
                 .put("name", "fake")
                 .put("datapoints", expectedPoints)
-                .put("aggregation", new JsonObject().put("MAX", 3.0).put("MIN",1.0))
+                .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -101,7 +114,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSamplerWithIntersectingChunks() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 6), 6, Arrays.asList(AGG.MAX, AGG.MIN));
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 6), 6, Arrays.asList(MAX, MIN));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.flush();
@@ -114,10 +127,13 @@ public class TimeSeriesExtracterImplTest {
         expectedPoints.add(new JsonArray(Arrays.asList(5.0, 1477916224867L)));
         expectedPoints.add(new JsonArray(Arrays.asList(6.0, 1477916224868L)));
         expectedPoints.add(new JsonArray(Arrays.asList(3.0, 1477917224866L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(MAX, 6.0);
+        aggregation.put(MIN, 1.0);
         Assert.assertEquals(new JsonObject()
                         .put("name", "fake")
                         .put("datapoints", expectedPoints)
-                        .put("aggregation", new JsonObject().put("MIN",1.0).put("MAX", 6.0))
+                        .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
@@ -125,7 +141,7 @@ public class TimeSeriesExtracterImplTest {
     public void testNoSamplerWithIntersectingChunks2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
                 1477895624866L , 1477917224866L,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 2), 6, Arrays.asList(AGG.MAX, AGG.MIN));
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 2), 6, Arrays.asList(MAX, MIN));
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.flush();
@@ -134,9 +150,13 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1, 1477895624866L)));
         expectedPoints.add(new JsonArray(Arrays.asList(5, 1477916224867L)));
+        HashMap<AGG, Double> aggregation = new HashMap<>();
+        aggregation.put(MAX, 6.0);
+        aggregation.put(MIN, 1.0);
         Assert.assertEquals(new JsonObject()
                         .put("name", "fake")
                         .put("datapoints", expectedPoints)
+                        .put("aggregation", aggregation)
                 , extractor.getTimeSeries());
     }
 
