@@ -60,16 +60,12 @@ nécessaire pour consulter des dashboard basé sur notre historian.
 [[install-production-hurence-datasource-grafana-plugin]]
 ===== Installation Plugin Grafana pour utiliser le data historian Hurence
 
-Install Json Simple Datasource as described here :
+Pour consulter les données de l'historian via des dashboard nous utilisons grafana. Dans ce but nous avons développer
+nos propres plugins grafana que nous ferons évoluer avec l'historian.
 
-https://grafana.com/grafana/plugins/grafana-simple-json-datasource
+Pour installer le plugin datasource suivez les https://github.com/Hurence/grafana-historian-datasource#installation[instruction sur le projet correspondant]
 
-
-To install this plugin using the grafana-cli tool:
-
-    sudo grafana-cli plugins install grafana-simple-json-datasource
-    sudo service grafana-server restart
-
+TODO pointer sur une release !
 
 
 ==== Installation de l'historian
