@@ -38,41 +38,44 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         Stream<Point> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
         Stream<Point> sortedPoints = extractedPoints
                 .sorted(Comparator.comparing(Point::getTimestamp));
-        this.points = sortedPoints.collect(Collectors.toList());
+        List<Point> points = sortedPoints.collect(Collectors.toList());
         List<Point> sampledPoints = sampler.sample(points);
         this.sampledPoints.addAll(sampledPoints);
-        calculateAggreg();
+        calculateAggreg(points);
     }
 
-    @Override
-    protected void calculateAggreg() {
+    protected void calculateAggreg(List<Point> points) {
         if (!points.isEmpty())
             aggregList.forEach(agg -> {
-                double aggValue;
                 switch (agg) {
                     case AVG:
                         long numberOfPoint = points.size();
+                        long newNumberOfPoint = this.currentNumberOfPoints + numberOfPoint;
                         double current = 0;
-                        for (Point sampledPoint : points) {
-                            current += sampledPoint.getValue();
+                        for (Point point : points) {
+                            current += point.getValue();
                         }
-                        aggValue = BigDecimal.valueOf(current)
+                        double aggValue = BigDecimal.valueOf(current)
                                 .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
                                 .doubleValue();
                         if(aggregValuesMap.containsKey(AVG)) {
                             double currentAvg = aggregValuesMap.get(AVG);
-                            double newAvg =  BigDecimal.valueOf(currentAvg+aggValue)
-                                    .divide(BigDecimal.valueOf(2), 3, RoundingMode.HALF_UP)
+                            double oldTotalValue = BigDecimal.valueOf(currentAvg)
+                                    .multiply(BigDecimal.valueOf(currentNumberOfPoints))
+                                    .doubleValue();
+                            double newAvg =  BigDecimal.valueOf(current+oldTotalValue)
+                                    .divide(BigDecimal.valueOf(newNumberOfPoint), 3, RoundingMode.HALF_UP)
                                     .doubleValue();
                             aggregValuesMap.put(AVG, newAvg);
                         }else {
                             aggregValuesMap.put(AVG, aggValue);
                         }
+                        this.currentNumberOfPoints = newNumberOfPoint;
                         break;
                     case SUM:
                         double sum = 0;
-                        for (Point sampledPoint : points) {
-                            sum += sampledPoint.getValue();
+                        for (Point point : points) {
+                            sum += point.getValue();
                         }
                         aggValue = sum;
                         if(aggregValuesMap.containsKey(SUM)) {
@@ -86,8 +89,8 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
                         break;
                     case MIN:
                         double min = points.get(0).getValue();
-                        for (Point sampledPoint : points) {
-                            double next = sampledPoint.getValue();
+                        for (Point point : points) {
+                            double next = point.getValue();
                             if (next < min) {
                                 min = next;
                             }
@@ -95,19 +98,17 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
                         aggValue = min;
                         if(aggregValuesMap.containsKey(MIN)) {
                             double currentMin = aggregValuesMap.get(MIN);
-                            double newMin = 0;
                             if (aggValue < currentMin) {
-                                newMin = aggValue;
+                                aggregValuesMap.put(MIN, aggValue);
                             }
-                            aggregValuesMap.put(MIN, newMin);
                         }else {
                             aggregValuesMap.put(MIN, aggValue);
                         }
                         break;
                     case MAX:
                         double max = points.get(0).getValue();
-                        for (Point sampledPoint : points) {
-                            double next = sampledPoint.getValue();
+                        for (Point point : points) {
+                            double next = point.getValue();
                             if (next > max) {
                                 max = next;
                             }
@@ -115,11 +116,10 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
                         aggValue = max;
                         if(aggregValuesMap.containsKey(MAX)) {
                             double currentMax = aggregValuesMap.get(MAX);
-                            double newMax = 0;
-                            if (aggValue < currentMax) {
-                                newMax = aggValue;
+                            if (aggValue > currentMax) {
+                                aggregValuesMap.put(MAX, aggValue);
                             }
-                            aggregValuesMap.put(MAX, newMax);
+
                         }else {
                             aggregValuesMap.put(MAX, aggValue);
                         }

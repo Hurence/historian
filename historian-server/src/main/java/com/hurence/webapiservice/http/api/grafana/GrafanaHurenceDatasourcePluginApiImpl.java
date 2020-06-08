@@ -106,7 +106,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
     public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
-    public final static String AGGREGATION_JSON_PATH = "/aggregation";
+    public final static String AGGREGATION_JSON_PATH = "/aggregations";
 
     /**
      *  used to query metrics datapoints in grafana panels.

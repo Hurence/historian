@@ -154,7 +154,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         aggregation.put(SUM, 42.0);
         aggregation.put(MAX, 5.0);
         aggregation.put(COUNT, 12);
-        aggregation.put(AVG, 3.4);
+        aggregation.put(AVG, 3.5);
         Assert.assertEquals(new JsonObject()
                 .put(TIMESERIE_NAME, "fake")
                 .put(TIMESERIE_POINT, expectedPoints)
@@ -213,7 +213,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         aggregation.put(SUM, 42.0);
         aggregation.put(MAX, 5.0);
         aggregation.put(COUNT, 12);
-        aggregation.put(AVG, 3.4);
+        aggregation.put(AVG, 3.5);
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
@@ -245,7 +245,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         aggregation.put(SUM, 51.0);
         aggregation.put(MAX, 5.0);
         aggregation.put(COUNT, 21);
-        aggregation.put(AVG, 2.42d);
+        aggregation.put(AVG, 2.429);
         JsonObject result = extractor.getTimeSeries();
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_AGGS, aggregation)

@@ -24,7 +24,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
-    List<Point> points = new ArrayList<>();
+    long currentNumberOfPoints = 0;
     List<AGG> aggregList = new ArrayList<>();
     final Map<AGG, Double> aggregValuesMap = new HashMap<>();
     private long totalChunkCounter = 0L;
@@ -82,10 +82,6 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
      */
     protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks);
 
-    /**
-     * Calcule the aggregations from the list of aggregations and the Lst of chunks . Add them into aggreg values list.
-     */
-    protected abstract void calculateAggreg();
 
     @Override
     public JsonObject getTimeSeries() {

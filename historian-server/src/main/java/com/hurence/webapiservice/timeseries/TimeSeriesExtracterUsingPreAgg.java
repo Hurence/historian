@@ -32,7 +32,6 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         calculateAggreg();
     }
 
-    @Override
     protected void calculateAggreg() {
         aggregList.forEach(agg -> {
             double aggValue;
@@ -47,15 +46,20 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                     aggValue = BigDecimal.valueOf(sum)
                             .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
                             .doubleValue();
+                    long newNumberOfPoint = this.currentNumberOfPoints + numberOfPoint;
                     if(aggregValuesMap.containsKey(AVG)) {
                         double currentAvg = aggregValuesMap.get(AVG);
-                        double newAvg =  BigDecimal.valueOf(currentAvg+aggValue)
-                                .divide(BigDecimal.valueOf(2), 3, RoundingMode.HALF_UP)
+                        double oldTotalValue = BigDecimal.valueOf(currentAvg)
+                                .multiply(BigDecimal.valueOf(currentNumberOfPoints))
+                                .doubleValue();
+                        double newAvg =  BigDecimal.valueOf(sum+oldTotalValue)
+                                .divide(BigDecimal.valueOf(newNumberOfPoint), 3, RoundingMode.HALF_UP)
                                 .doubleValue();
                         aggregValuesMap.put(AVG, newAvg);
                     }else {
                         aggregValuesMap.put(AVG, aggValue);
                     }
+                    this.currentNumberOfPoints = newNumberOfPoint;
                     break;
                 case SUM:
                     aggValue = chunks.stream()

@@ -567,7 +567,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
         addNecessaryFieldToQuery(query, samplingAlgos);
     }
 
-    public void addFieldsThatWillBeNeededByAggregations (JsonObject myParams, SolrQuery query) {
+    private void addFieldsThatWillBeNeededByAggregations (JsonObject myParams, SolrQuery query) {
         myParams.getJsonArray(AGGREGATION, new JsonArray()).stream().map(String::valueOf).map(AGG::valueOf).forEach(agg -> {
             switch (agg) {
                 case AVG:

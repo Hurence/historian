@@ -143,7 +143,7 @@ public class RequestParserUtil {
                             try {
                                 return AGG.valueOf(i.toString());
                             } catch (IllegalArgumentException e) {
-                                throw new IllegalArgumentException(i.toString()+ " is not a recognized aggregation, the accepted aggregations are : [MAX, MIN, SUM, AVG, COUNT]");
+                                throw new IllegalArgumentException(i.toString()+ " is not a recognized aggregation, the accepted aggregations are : " + Arrays.toString(values()));
                             }
                         })
                         .collect(Collectors.toList());
@@ -159,7 +159,7 @@ public class RequestParserUtil {
                 if(aggregBoolean)
                     return DEFAULT_ALL_AGGREGATION_LIST;
                 else
-                    throw new IllegalArgumentException();
+                    throw new IllegalArgumentException("aggregations value could not be other then true");
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException(
                         String.format("'%s' json pointer value '%s' is not a valid value here !",

@@ -247,7 +247,7 @@ public class TimeSeriesExtracterImplTest {
         aggregation.put(MIN, 1.0);
         aggregation.put(SUM, 36.0);
         aggregation.put(MAX, 6.0);
-        aggregation.put(COUNT, 9);
+        aggregation.put(COUNT, 9.0);
         aggregation.put(AVG, 4.0);
         JsonObject result = extractor.getTimeSeries();
         Assert.assertEquals(new JsonObject()

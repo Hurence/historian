@@ -21,7 +21,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     public static final String DEFAULT_REQUEST_ID = "Not defined";
     public static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
     public static final List DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
-    public static final List<AGG> DEFAULT_ALL_AGGREGATION_LIST = Arrays.asList(MAX, MIN, SUM, AVG, COUNT);
+    public static final List<AGG> DEFAULT_ALL_AGGREGATION_LIST = Arrays.asList(values());
 
     private final List<String> metricNames;
     private final long from;
