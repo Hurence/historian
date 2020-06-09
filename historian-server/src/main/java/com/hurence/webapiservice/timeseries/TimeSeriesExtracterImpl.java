@@ -11,8 +11,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -24,6 +23,8 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterImpl.class);
 
     final Sampler<Point> sampler;
+    List<AGG> aggListForAvg = new ArrayList<>();
+    Map<AGG, Double> aggregationsMap = new HashMap<>();
 
     public TimeSeriesExtracterImpl(String metricName, long from, long to,
                                    SamplingConf samplingConf,
@@ -41,98 +42,94 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         List<Point> points = sortedPoints.collect(Collectors.toList());
         List<Point> sampledPoints = sampler.sample(points);
         this.sampledPoints.addAll(sampledPoints);
-        calculateAggreg(points);
+        aggListForAvg.addAll(aggregList);
+        if(aggregList.contains(AVG)){
+            aggListForAvg.remove(AVG);
+            if (!aggListForAvg.contains(SUM))
+                aggListForAvg.add(SUM);
+            if (!aggListForAvg.contains(COUNT))
+                aggListForAvg.add(COUNT);
+            calculateAggreg(points);
+            calculateAvg();
+        }else {
+            calculateAggreg(points);
+        }
+        getAggregationsMap();
+    }
+
+    private void getAggregationsMap() {
+        aggregList.forEach(agg -> aggregValuesMap.put(agg, aggregationsMap.get(agg)));
+        aggListForAvg = new ArrayList<>();
+    }
+
+    private void calculateAvg() {
+        double avg = BigDecimal.valueOf(aggregationsMap.get(SUM))
+                .divide(BigDecimal.valueOf(aggregationsMap.get(COUNT)), 3, RoundingMode.HALF_UP)
+                .doubleValue();
+        aggregationsMap.put(AVG, avg);
     }
 
     protected void calculateAggreg(List<Point> points) {
         if (!points.isEmpty())
-            aggregList.forEach(agg -> {
+            aggListForAvg.forEach(agg -> {
                 switch (agg) {
-                    case AVG:
-                        long numberOfPoint = points.size();
-                        long newNumberOfPoint = this.currentNumberOfPoints + numberOfPoint;
-                        double current = 0;
-                        for (Point point : points) {
-                            current += point.getValue();
-                        }
-                        double aggValue = BigDecimal.valueOf(current)
-                                .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
-                                .doubleValue();
-                        if(aggregValuesMap.containsKey(AVG)) {
-                            double currentAvg = aggregValuesMap.get(AVG);
-                            double oldTotalValue = BigDecimal.valueOf(currentAvg)
-                                    .multiply(BigDecimal.valueOf(currentNumberOfPoints))
-                                    .doubleValue();
-                            double newAvg =  BigDecimal.valueOf(current+oldTotalValue)
-                                    .divide(BigDecimal.valueOf(newNumberOfPoint), 3, RoundingMode.HALF_UP)
-                                    .doubleValue();
-                            aggregValuesMap.put(AVG, newAvg);
-                        }else {
-                            aggregValuesMap.put(AVG, aggValue);
-                        }
-                        this.currentNumberOfPoints = newNumberOfPoint;
-                        break;
                     case SUM:
                         double sum = 0;
                         for (Point point : points) {
                             sum += point.getValue();
                         }
-                        aggValue = sum;
-                        if(aggregValuesMap.containsKey(SUM)) {
-                            double currentSum = aggregValuesMap.get(SUM);
+                        double aggValue = sum;
+                        if(aggregationsMap.containsKey(SUM)) {
+                            double currentSum = aggregationsMap.get(SUM);
                             double newSum =  BigDecimal.valueOf(currentSum+aggValue)
                                     .doubleValue();
-                            aggregValuesMap.put(SUM, newSum);
+                            aggregationsMap.put(SUM, newSum);
                         }else {
-                            aggregValuesMap.put(SUM, aggValue);
+                            aggregationsMap.put(SUM, aggValue);
                         }
                         break;
                     case MIN:
                         double min = points.get(0).getValue();
                         for (Point point : points) {
                             double next = point.getValue();
-                            if (next < min) {
-                                min = next;
-                            }
+                            min = Math.min(min, next);
                         }
                         aggValue = min;
-                        if(aggregValuesMap.containsKey(MIN)) {
-                            double currentMin = aggregValuesMap.get(MIN);
+                        if(aggregationsMap.containsKey(MIN)) {
+                            double currentMin = aggregationsMap.get(MIN);
                             if (aggValue < currentMin) {
-                                aggregValuesMap.put(MIN, aggValue);
+                                aggregationsMap.put(MIN, aggValue);
                             }
                         }else {
-                            aggregValuesMap.put(MIN, aggValue);
+                            aggregationsMap.put(MIN, aggValue);
                         }
                         break;
                     case MAX:
                         double max = points.get(0).getValue();
                         for (Point point : points) {
                             double next = point.getValue();
-                            if (next > max) {
-                                max = next;
-                            }
+                            max = Math.max(max, next);
                         }
                         aggValue = max;
-                        if(aggregValuesMap.containsKey(MAX)) {
-                            double currentMax = aggregValuesMap.get(MAX);
+                        if(aggregationsMap.containsKey(MAX)) {
+                            double currentMax = aggregationsMap.get(MAX);
                             if (aggValue > currentMax) {
-                                aggregValuesMap.put(MAX, aggValue);
+                                aggregationsMap.put(MAX, aggValue);
                             }
 
                         }else {
-                            aggregValuesMap.put(MAX, aggValue);
+                            aggregationsMap.put(MAX, aggValue);
                         }
                         break;
                     case COUNT:
                         aggValue = points.size();
-                        if(aggregValuesMap.containsKey(COUNT)) {
-                            double currentCount = aggregValuesMap.get(COUNT);
+                        if(aggregationsMap.containsKey(COUNT)) {
+                            double currentCount = aggregationsMap.get(COUNT);
                             double newCount =  BigDecimal.valueOf(currentCount + aggValue)
                                     .doubleValue();
-                            aggregValuesMap.put(COUNT, newCount);
+                            aggregationsMap.put(COUNT, newCount);
                         }else {
-                            aggregValuesMap.put(COUNT, aggValue);
+                            aggregationsMap.put(COUNT, aggValue);
                         }
                         break;
                     default:

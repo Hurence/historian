@@ -9,9 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
@@ -20,6 +18,9 @@ import static com.hurence.webapiservice.modele.AGG.*;
 public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterUsingPreAgg.class);
+
+    List<AGG> aggListForAvg = new ArrayList<>();
+    Map<AGG, Double> aggregationsMap = new HashMap<>();
 
     public TimeSeriesExtracterUsingPreAgg(String metricName, long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
         super(metricName, from, to, samplingConf, totalNumberOfPoint, aggregList);
@@ -30,48 +31,48 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         List<Point> sampledPoint = extractPoints(chunks);
         this.sampledPoints.addAll(sampledPoint);
         calculateAggreg();
+        aggListForAvg.addAll(aggregList);
+        if(aggregList.contains(AVG)){
+            aggListForAvg.remove(AVG);
+            if (!aggListForAvg.contains(SUM))
+                aggListForAvg.add(SUM);
+            if (!aggListForAvg.contains(COUNT))
+                aggListForAvg.add(COUNT);
+            calculateAggreg();
+            calculateAvg();
+        }else {
+            calculateAggreg();
+        }
+        getAggregationsMap();
+    }
+
+    private void getAggregationsMap() {
+        aggregList.forEach(agg -> aggregValuesMap.put(agg, aggregationsMap.get(agg)));
+        aggListForAvg = new ArrayList<>();
+    }
+
+    private void calculateAvg() {
+        double avg = BigDecimal.valueOf(aggregationsMap.get(SUM))
+                .divide(BigDecimal.valueOf(aggregationsMap.get(COUNT)), 3, RoundingMode.HALF_UP)
+                .doubleValue();
+        aggregationsMap.put(AVG, avg);
     }
 
     protected void calculateAggreg() {
-        aggregList.forEach(agg -> {
+        aggListForAvg.forEach(agg -> {
             double aggValue;
             switch (agg) {
-                case AVG:
-                    double sum = chunks.stream()
-                            .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
-                            .sum();
-                    long numberOfPoint = chunks.stream()
-                            .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_COUNT_FIELD))
-                            .sum();
-                    aggValue = BigDecimal.valueOf(sum)
-                            .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
-                            .doubleValue();
-                    long newNumberOfPoint = this.currentNumberOfPoints + numberOfPoint;
-                    if(aggregValuesMap.containsKey(AVG)) {
-                        double currentAvg = aggregValuesMap.get(AVG);
-                        double oldTotalValue = BigDecimal.valueOf(currentAvg)
-                                .multiply(BigDecimal.valueOf(currentNumberOfPoints))
-                                .doubleValue();
-                        double newAvg =  BigDecimal.valueOf(sum+oldTotalValue)
-                                .divide(BigDecimal.valueOf(newNumberOfPoint), 3, RoundingMode.HALF_UP)
-                                .doubleValue();
-                        aggregValuesMap.put(AVG, newAvg);
-                    }else {
-                        aggregValuesMap.put(AVG, aggValue);
-                    }
-                    this.currentNumberOfPoints = newNumberOfPoint;
-                    break;
                 case SUM:
                     aggValue = chunks.stream()
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
                             .sum();
-                    if(aggregValuesMap.containsKey(SUM)) {
-                        double currentSum = aggregValuesMap.get(SUM);
+                    if(aggregationsMap.containsKey(SUM)) {
+                        double currentSum = aggregationsMap.get(SUM);
                         double newSum =  BigDecimal.valueOf(currentSum+aggValue)
                                 .doubleValue();
-                        aggregValuesMap.put(SUM, newSum);
+                        aggregationsMap.put(SUM, newSum);
                     }else {
-                        aggregValuesMap.put(SUM, aggValue);
+                        aggregationsMap.put(SUM, aggValue);
                     }
                     break;
                 case MIN:
@@ -79,15 +80,15 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
                             .min()
                             .getAsDouble();
-                    if(aggregValuesMap.containsKey(MIN)) {
-                        double currentMin = aggregValuesMap.get(MIN);
+                    if(aggregationsMap.containsKey(MIN)) {
+                        double currentMin = aggregationsMap.get(MIN);
                         double newMin = 0;
                         if (aggValue < currentMin) {
                             newMin = aggValue;
                         }
-                        aggregValuesMap.put(MIN, newMin);
+                        aggregationsMap.put(MIN, newMin);
                     }else {
-                        aggregValuesMap.put(MIN, aggValue);
+                        aggregationsMap.put(MIN, aggValue);
                     }
                     break;
                 case MAX:
@@ -95,28 +96,28 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
                             .max()
                             .getAsDouble();
-                    if(aggregValuesMap.containsKey(MAX)) {
-                        double currentMax = aggregValuesMap.get(MAX);
+                    if(aggregationsMap.containsKey(MAX)) {
+                        double currentMax = aggregationsMap.get(MAX);
                         double newMax = 0;
                         if (aggValue < currentMax) {
                             newMax = aggValue;
                         }
-                        aggregValuesMap.put(MAX, newMax);
+                        aggregationsMap.put(MAX, newMax);
                     }else {
-                        aggregValuesMap.put(MAX, aggValue);
+                        aggregationsMap.put(MAX, aggValue);
                     }
                     break;
                 case COUNT:
                     aggValue = chunks.stream()
                             .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
                             .sum();
-                    if(aggregValuesMap.containsKey(COUNT)) {
-                        double currentCount = aggregValuesMap.get(COUNT);
+                    if(aggregationsMap.containsKey(COUNT)) {
+                        double currentCount = aggregationsMap.get(COUNT);
                         double newCount =  BigDecimal.valueOf(currentCount + aggValue)
                                 .doubleValue();
-                        aggregValuesMap.put(COUNT, newCount);
+                        aggregationsMap.put(COUNT, newCount);
                     }else {
-                        aggregValuesMap.put(COUNT, aggValue);
+                        aggregationsMap.put(COUNT, aggValue);
                     }
                     break;
                 default:

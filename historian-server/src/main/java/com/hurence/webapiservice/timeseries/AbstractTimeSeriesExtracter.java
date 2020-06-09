@@ -24,7 +24,6 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
-    long currentNumberOfPoints = 0;
     List<AGG> aggregList = new ArrayList<>();
     final Map<AGG, Double> aggregValuesMap = new HashMap<>();
     private long totalChunkCounter = 0L;

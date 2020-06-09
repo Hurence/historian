@@ -47,9 +47,8 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     }
 
 
-
-    public void setAggregationList(List aggregationList) {
-        aggregationList.forEach(agg -> aggregList.add(AGG.valueOf((String) agg)));
+    public void setAggregationList(List<AGG> aggregationList) {
+        aggregList.addAll(aggregationList);
     }
 
     protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {
