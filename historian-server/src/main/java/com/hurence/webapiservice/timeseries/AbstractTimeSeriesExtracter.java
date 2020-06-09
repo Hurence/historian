@@ -12,8 +12,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.AGGREGATION;
-
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractTimeSeriesExtracter.class);
@@ -25,7 +23,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
     List<AGG> aggregList = new ArrayList<>();
-    final Map<AGG, Double> aggregValuesMap = new HashMap<>();
+    final Map<AGG, Double> finalAggregationsMap = new HashMap<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
@@ -97,8 +95,8 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_NAME, metricName)
                 .put(TIMESERIE_POINT, new JsonArray(points));
-        if (!aggregValuesMap.isEmpty()) {
-            toReturn.put(TIMESERIE_AGGS, aggregValuesMap);
+        if (!finalAggregationsMap.isEmpty()) {
+            toReturn.put(TIMESERIE_AGGS, finalAggregationsMap);
         }
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;

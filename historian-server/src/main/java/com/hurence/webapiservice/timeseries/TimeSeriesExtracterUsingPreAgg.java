@@ -19,8 +19,8 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterUsingPreAgg.class);
 
-    List<AGG> aggListForAvg = new ArrayList<>();
-    Map<AGG, Double> aggregationsMap = new HashMap<>();
+    List<AGG> aggregationListWithoutAVG = new ArrayList<>();
+    Map<AGG, Double> preliminaryAggregationsMap = new HashMap<>();
 
     public TimeSeriesExtracterUsingPreAgg(String metricName, long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
         super(metricName, from, to, samplingConf, totalNumberOfPoint, aggregList);
@@ -35,18 +35,18 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
     }
 
     /**
-     * if we have AVG in the aggregList, we will calculate the aggregations withou the AVG and with SUM and COUNT added if not exist,then calculate the AVG
+     * if we have AVG in the aggregList, we will calculate the aggregations without the AVG and with SUM and COUNT added if not exist,then calculate the AVG
      * else, we just calculate the aggregations.
-     * either way we store the aggregations values in aggListForAvg which is not always what we want to return.
+     * either way we store the aggregations values in preliminaryAggregationsMap which is not always what we want to return.
      */
     private void calculateAggregations() {
-        aggListForAvg.addAll(aggregList);
+        aggregationListWithoutAVG.addAll(aggregList);
         if(aggregList.contains(AVG)){
-            aggListForAvg.remove(AVG);
-            if (!aggListForAvg.contains(SUM))
-                aggListForAvg.add(SUM);
-            if (!aggListForAvg.contains(COUNT))
-                aggListForAvg.add(COUNT);
+            aggregationListWithoutAVG.remove(AVG);
+            if (!aggregationListWithoutAVG.contains(SUM))
+                aggregationListWithoutAVG.add(SUM);
+            if (!aggregationListWithoutAVG.contains(COUNT))
+                aggregationListWithoutAVG.add(COUNT);
             calculateAggregWithoutAVG();
             calculateAvg();
         }else {
@@ -55,21 +55,25 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
     }
 
     /**
-     * filling aggregValuesMap which has the final aggregations response to return and reset the aggListWithAvg which used to calculate the average
+     * filling finalAggregationsMap which has the final aggregations response to return and reset the aggListWithAvg which used to calculate the average
      */
     private void fillingAggregValuesMapAndResetAggListWithAvg() {
-
+        aggregList.forEach(agg -> finalAggregationsMap.put(agg, preliminaryAggregationsMap.get(agg)));
+        aggregationListWithoutAVG = new ArrayList<>();
     }
 
     /**
      * calculate the AVG from the SUM and the COUNT.
      */
     private void calculateAvg() {
-
+        double avg = BigDecimal.valueOf(preliminaryAggregationsMap.get(SUM))
+                .divide(BigDecimal.valueOf(preliminaryAggregationsMap.get(COUNT)), 3, RoundingMode.HALF_UP)
+                .doubleValue();
+        preliminaryAggregationsMap.put(AVG, avg);
     }
 
     protected void calculateAggregWithoutAVG() {
-        aggListForAvg.forEach(agg -> {
+        aggregationListWithoutAVG.forEach(agg -> {
             switch (agg) {
                 case SUM:
                     calculateSum();
@@ -93,13 +97,13 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         double aggValue = chunks.stream()
                 .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
                 .sum();
-        if(aggregationsMap.containsKey(SUM)) {
-            double currentSum = aggregationsMap.get(SUM);
+        if(preliminaryAggregationsMap.containsKey(SUM)) {
+            double currentSum = preliminaryAggregationsMap.get(SUM);
             double newSum =  BigDecimal.valueOf(currentSum+aggValue)
                     .doubleValue();
-            aggregationsMap.put(SUM, newSum);
+            preliminaryAggregationsMap.put(SUM, newSum);
         }else {
-            aggregationsMap.put(SUM, aggValue);
+            preliminaryAggregationsMap.put(SUM, aggValue);
         }
     }
     private void calculateMin() {
@@ -107,15 +111,15 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
                 .min()
                 .getAsDouble();
-        if(aggregationsMap.containsKey(MIN)) {
-            double currentMin = aggregationsMap.get(MIN);
+        if(preliminaryAggregationsMap.containsKey(MIN)) {
+            double currentMin = preliminaryAggregationsMap.get(MIN);
             double newMin = 0;
             if (aggValue < currentMin) {
                 newMin = aggValue;
             }
-            aggregationsMap.put(MIN, newMin);
+            preliminaryAggregationsMap.put(MIN, newMin);
         }else {
-            aggregationsMap.put(MIN, aggValue);
+            preliminaryAggregationsMap.put(MIN, aggValue);
         }
     }
     private void calculateMax() {
@@ -123,28 +127,28 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
                 .max()
                 .getAsDouble();
-        if(aggregationsMap.containsKey(MAX)) {
-            double currentMax = aggregationsMap.get(MAX);
+        if(preliminaryAggregationsMap.containsKey(MAX)) {
+            double currentMax = preliminaryAggregationsMap.get(MAX);
             double newMax = 0;
             if (aggValue < currentMax) {
                 newMax = aggValue;
             }
-            aggregationsMap.put(MAX, newMax);
+            preliminaryAggregationsMap.put(MAX, newMax);
         }else {
-            aggregationsMap.put(MAX, aggValue);
+            preliminaryAggregationsMap.put(MAX, aggValue);
         }
     }
     private void calculateCount() {
         double aggValue = chunks.stream()
                 .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
                 .sum();
-        if(aggregationsMap.containsKey(COUNT)) {
-            double currentCount = aggregationsMap.get(COUNT);
+        if(preliminaryAggregationsMap.containsKey(COUNT)) {
+            double currentCount = preliminaryAggregationsMap.get(COUNT);
             double newCount =  BigDecimal.valueOf(currentCount + aggValue)
                     .doubleValue();
-            aggregationsMap.put(COUNT, newCount);
+            preliminaryAggregationsMap.put(COUNT, newCount);
         }else {
-            aggregationsMap.put(COUNT, aggValue);
+            preliminaryAggregationsMap.put(COUNT, aggValue);
         }
     }
     private List<Point> extractPoints(List<JsonObject> chunks) {
