@@ -58,18 +58,14 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
      * filling finalAggregationsMap which has the final aggregations response to return and reset the aggListWithAvg which used to calculate the average
      */
     private void fillingAggregValuesMapAndResetAggListWithAvg() {
-        aggregList.forEach(agg -> finalAggregationsMap.put(agg, preliminaryAggregationsMap.get(agg)));
-        aggregationListWithoutAVG = new ArrayList<>();
+
     }
 
     /**
      * calculate the AVG from the SUM and the COUNT.
      */
     private void calculateAvg() {
-        double avg = BigDecimal.valueOf(preliminaryAggregationsMap.get(SUM))
-                .divide(BigDecimal.valueOf(preliminaryAggregationsMap.get(COUNT)), 3, RoundingMode.HALF_UP)
-                .doubleValue();
-        preliminaryAggregationsMap.put(AVG, avg);
+
     }
 
     protected void calculateAggregWithoutAVG() {
