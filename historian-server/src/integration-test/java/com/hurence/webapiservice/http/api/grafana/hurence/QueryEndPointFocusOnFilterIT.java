@@ -107,24 +107,24 @@ public class QueryEndPointFocusOnFilterIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testFilterOnTagsBerlin(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testWithAdhocFilters/testFilterOnTags/berlin/request.json",
-                "/http/grafana/hurence/query/extract-algo/testWithAdhocFilters/testFilterOnTags/berlin/expectedResponse.json");
+                "/http/grafana/hurence/query/tags/berlin/request.json",
+                "/http/grafana/hurence/query/tags/berlin/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testFilterOnTagsFrance(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testWithAdhocFilters/testFilterOnTags/france/request.json",
-                "/http/grafana/hurence/query/extract-algo/testWithAdhocFilters/testFilterOnTags/france/expectedResponse.json");
+                "/http/grafana/hurence/query/tags/france/request.json",
+                "/http/grafana/hurence/query/tags/france/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testFilterOnTagsBerlinAndFrance(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testWithAdhocFilters/testFilterOnTags/franceAndBerlin/request.json",
-                "/http/grafana/hurence/query/extract-algo/testWithAdhocFilters/testFilterOnTags/franceAndBerlin/expectedResponse.json");
+                "/http/grafana/hurence/query/tags/franceAndBerlin/request.json",
+                "/http/grafana/hurence/query/tags/franceAndBerlin/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
