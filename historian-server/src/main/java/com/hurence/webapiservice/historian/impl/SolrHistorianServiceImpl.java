@@ -1,38 +1,17 @@
 package com.hurence.webapiservice.historian.impl;
 
-import com.hurence.historian.modele.HistorianFields;
 import com.hurence.historian.modele.Schema;
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.historian.handler.*;
-import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
-import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
-import com.hurence.webapiservice.modele.AGG;
-import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
-import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtractorUsingPreAgg;
-import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.io.Tuple;
-import org.apache.solr.client.solrj.io.stream.SolrStream;
-import org.apache.solr.client.solrj.io.stream.StreamContext;
-import org.apache.solr.client.solrj.io.stream.TupleStream;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
 import org.apache.solr.client.solrj.request.schema.SchemaRequest;
-import org.apache.solr.client.solrj.response.FacetField;
-import org.apache.solr.client.solrj.response.QueryResponse;
 import org.apache.solr.client.solrj.response.schema.SchemaResponse;
-import org.apache.solr.common.SolrDocument;
-import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.SolrException;
-import org.apache.solr.common.SolrInputDocument;
-import org.apache.solr.common.params.ModifiableSolrParams;
 import org.apache.solr.common.util.NamedList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,8 +20,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import static com.hurence.historian.modele.HistorianFields.*;
 
 public class SolrHistorianServiceImpl implements HistorianService {
 
@@ -218,7 +195,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        GetMetricsNameRequestHandler requestHandler = new GetMetricsNameRequestHandler(solrHistorianConf);
+        GetMetricsNameHandler requestHandler = new GetMetricsNameHandler(solrHistorianConf);
         Handler<Promise<JsonObject>> getMetricsNameHandler = requestHandler.getHandler(params);
         vertx.executeBlocking(getMetricsNameHandler, resultHandler);
         return this;
@@ -234,7 +211,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
-        AddTimeSeriesRequestHandler requestHandler = new AddTimeSeriesRequestHandler(solrHistorianConf);
+        AddTimeSeriesHandler requestHandler = new AddTimeSeriesHandler(solrHistorianConf);
         Handler<Promise<JsonObject>> addHandler = requestHandler.getHandler(timeseriesObject);
         vertx.executeBlocking(addHandler, resultHandler);
         return this;
@@ -242,7 +219,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getTimeSeries(JsonObject myParams, Handler<AsyncResult<JsonObject>> myResult) {
-        GetTimeSeriesRequestHandler requestHandler = new GetTimeSeriesRequestHandler(solrHistorianConf);
+        GetTimeSeriesHandler requestHandler = new GetTimeSeriesHandler(solrHistorianConf);
         Handler<Promise<JsonObject>>  getTimeSeriesHandler = requestHandler.getTimeSeriesHandler(myParams);
         vertx.executeBlocking(getTimeSeriesHandler, myResult);
         return this;

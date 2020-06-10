@@ -11,7 +11,6 @@ import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtractorUs
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterUtil;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -32,12 +31,12 @@ import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
-public class GetTimeSeriesRequestHandler {
+public class GetTimeSeriesHandler {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(GetTimeSeriesRequestHandler.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(GetTimeSeriesHandler.class);
     SolrHistorianConf solrHistorianConf;
 
-    public GetTimeSeriesRequestHandler(SolrHistorianConf solrHistorianConf) {
+    public GetTimeSeriesHandler(SolrHistorianConf solrHistorianConf) {
         this.solrHistorianConf = solrHistorianConf;
     }
 

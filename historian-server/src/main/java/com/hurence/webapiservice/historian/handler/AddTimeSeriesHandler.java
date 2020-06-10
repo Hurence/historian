@@ -17,13 +17,13 @@ import java.util.Collection;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
-public class AddTimeSeriesRequestHandler {
+public class AddTimeSeriesHandler {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(AddTimeSeriesRequestHandler.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(AddTimeSeriesHandler.class);
     SolrHistorianConf solrHistorianConf;
 
 
-    public AddTimeSeriesRequestHandler(SolrHistorianConf solrHistorianConf) {
+    public AddTimeSeriesHandler(SolrHistorianConf solrHistorianConf) {
         this.solrHistorianConf = solrHistorianConf;
     }
 

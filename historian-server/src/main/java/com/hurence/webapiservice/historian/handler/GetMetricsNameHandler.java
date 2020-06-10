@@ -20,13 +20,13 @@ import java.util.stream.Collectors;
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.historian.modele.HistorianFields.METRICS;
 
-public class GetMetricsNameRequestHandler {
+public class GetMetricsNameHandler {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(GetMetricsNameRequestHandler.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(GetMetricsNameHandler.class);
     SolrHistorianConf solrHistorianConf;
 
 
-    public GetMetricsNameRequestHandler(SolrHistorianConf solrHistorianConf) {
+    public GetMetricsNameHandler(SolrHistorianConf solrHistorianConf) {
         this.solrHistorianConf = solrHistorianConf;
     }
 
