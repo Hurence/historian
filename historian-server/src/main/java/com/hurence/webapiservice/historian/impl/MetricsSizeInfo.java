@@ -1,12 +1,14 @@
 package com.hurence.webapiservice.historian.impl;
 
+import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
+
 import java.util.Set;
 
 public interface MetricsSizeInfo {
 
-    public Set<String> getMetrics();
+    public Set<MetricRequest> getMetricRequests();
 
-    public MetricSizeInfo getMetricInfo(String metric);
+    public MetricSizeInfo getMetricInfo(MetricRequest metric);
 
     public long getTotalNumberOfPoints();
 

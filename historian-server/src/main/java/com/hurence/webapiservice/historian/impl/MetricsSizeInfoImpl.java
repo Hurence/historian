@@ -1,20 +1,22 @@
 package com.hurence.webapiservice.historian.impl;
 
+import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 public class MetricsSizeInfoImpl implements MetricsSizeInfo {
 
-    private Map<String, MetricSizeInfo> metricsInfo = new HashMap<>();
+    private Map<MetricRequest, MetricSizeInfo> metricsInfo = new HashMap<>();
 
     @Override
-    public Set<String> getMetrics() {
+    public Set<MetricRequest> getMetricRequests() {
         return metricsInfo.keySet();
     }
 
     @Override
-    public MetricSizeInfo getMetricInfo(String metric) {
+    public MetricSizeInfo getMetricInfo(MetricRequest metric) {
         return metricsInfo.get(metric);
     }
 
@@ -34,7 +36,7 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
     }
 
     public void setMetricInfo(MetricSizeInfo metricInfo) {
-        metricsInfo.put(metricInfo.metricName, metricInfo);
+        metricsInfo.put(metricInfo.metricRequest, metricInfo);
     }
 
     @Override

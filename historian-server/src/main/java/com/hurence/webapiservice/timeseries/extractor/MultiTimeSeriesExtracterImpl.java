@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
@@ -18,31 +17,40 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(MultiTimeSeriesExtracterImpl.class);
 
-    private Map<String, TimeSeriesExtracter> bucketerByMetrics = new HashMap<>();
-    Map<String, Long> totalNumberOfPointByMetrics = new HashMap<>();
+    private final List<MetricRequest> metricRequests;
+    private Map<MetricRequest, TimeSeriesExtracter> extractorByMetricRequest;
+    Map<MetricRequest, Long> totalNumberOfPointByMetrics = new HashMap<>();
     List<AGG> aggregList = new ArrayList<>();
     final long from;
     final long to;
     final SamplingConf samplingConf;
 
-    public MultiTimeSeriesExtracterImpl(long from, long to, SamplingConf samplingConf) {
+    public MultiTimeSeriesExtracterImpl(long from,
+                                        long to,
+                                        SamplingConf samplingConf,
+                                        List<MetricRequest> metricRequests) {
         this.from = from;
         this.to = to;
         this.samplingConf = samplingConf;
+        this.extractorByMetricRequest = new HashMap<>();
+        this.metricRequests = metricRequests;
     }
 
 
     @Override
     public void addChunk(JsonObject chunk) {
-        String metricName = chunk.getString(HistorianFields.NAME);
-        bucketerByMetrics
-                .computeIfAbsent(metricName, this::createTimeSeriesExtractor)
-                .addChunk(chunk);
+        metricRequests.forEach(metricRequest -> {
+            if (metricRequest.isChunkMatching(chunk)) {
+                extractorByMetricRequest
+                        .computeIfAbsent(metricRequest, this::createTimeSeriesExtractor)
+                        .addChunk(chunk);
+            }
+        });
     }
 
     @Override
     public void flush() {
-        bucketerByMetrics.values()
+        extractorByMetricRequest.values()
                 .forEach(TimeSeriesExtracter::flush);
     }
 
@@ -51,18 +59,23 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
         aggregList.addAll(aggregationList);
     }
 
-    protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {
-        return new TimeSeriesExtracterImpl(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName), aggregList);
+    protected TimeSeriesExtracter createTimeSeriesExtractor(MetricRequest metricRequest) {
+        return new TimeSeriesExtracterImpl(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList);
     }
 
-    public void setTotalNumberOfPointForMetric(String metric, long totalNumberOfPoints) {
+    public void setTotalNumberOfPointForMetric(MetricRequest metric, long totalNumberOfPoints) {
         totalNumberOfPointByMetrics.put(metric, totalNumberOfPoints);
     }
 
     @Override
     public JsonArray getTimeSeries() {
-        List<JsonObject> timeseries = bucketerByMetrics.values().stream()
-                .map(TimeSeriesExtracter::getTimeSeries)
+        List<JsonObject> timeseries = extractorByMetricRequest.entrySet().stream()
+                .map(entry -> {
+                    JsonObject timeSerie = entry.getValue().getTimeSeries();
+                    timeSerie.put(TIMESERIE_NAME, entry.getKey().getName());
+                    timeSerie.put(TIMESERIE_TAGS, entry.getKey().getTags());
+                    return timeSerie;
+                })
                 .collect(Collectors.toList());
         JsonArray toReturn = new JsonArray(timeseries);
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
@@ -71,14 +84,14 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     @Override
     public long chunkCount() {
-        return bucketerByMetrics.values().stream()
+        return extractorByMetricRequest.values().stream()
                 .mapToLong(TimeSeriesExtracter::chunkCount)
                 .sum();
     }
 
     @Override
     public long pointCount() {
-        return bucketerByMetrics.values().stream()
+        return extractorByMetricRequest.values().stream()
                 .mapToLong(TimeSeriesExtracter::pointCount)
                 .sum();
     }

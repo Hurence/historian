@@ -117,9 +117,9 @@ public class GetTimeSeriesChunkHandler {
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
         //TODO filter on names AND tags
-//        buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
-//                .ifPresent(query::addFilterQuery);
-        //    FIELDS_TO_FETCH
+        buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
+                .ifPresent(query::addFilterQuery);
+//            FIELDS_TO_FETCH
         query.setFields(RESPONSE_CHUNK_START_FIELD,
                 RESPONSE_CHUNK_END_FIELD,
                 RESPONSE_CHUNK_COUNT_FIELD,
@@ -129,5 +129,18 @@ public class GetTimeSeriesChunkHandler {
         query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
         query.setRows(params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000));
         return query;
+    }
+
+    private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String fieldToFilter) {
+        if (jsonArray == null || jsonArray.isEmpty())
+            return Optional.empty();
+        if (jsonArray.size() == 1) {
+            return Optional.of(fieldToFilter + ":\"" + jsonArray.getString(0) + "\"");
+        } else {
+            String orNames = jsonArray.stream()
+                    .map(String.class::cast)
+                    .collect(Collectors.joining("\" OR \"", "(\"", "\")"));
+            return Optional.of(fieldToFilter + ":" + orNames);
+        }
     }
 }

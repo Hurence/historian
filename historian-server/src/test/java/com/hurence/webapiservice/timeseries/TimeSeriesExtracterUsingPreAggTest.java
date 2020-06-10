@@ -20,6 +20,7 @@ import java.util.HashMap;
 
 import static com.hurence.webapiservice.modele.AGG.*;
 import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
+import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.*;
 
 public class TimeSeriesExtracterUsingPreAggTest {
 
@@ -82,7 +83,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testNoSampler() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
                 9, Arrays.asList(AGG.values()));
@@ -109,7 +110,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAvgSampler() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 15, Arrays.asList(AGG.values()));
@@ -137,7 +138,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAvgSampler2() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 12, Arrays.asList(AGG.values()));
@@ -167,7 +168,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testMinSampler() {
-                TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+                TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                         Long.MIN_VALUE , Long.MAX_VALUE,
                                 new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.values()));
                 extractor.addChunk(getChunk1());
@@ -196,7 +197,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testMinSampler2() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                  Long.MIN_VALUE, Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.MIN, 2, 3),
                 12, Arrays.asList(AGG.values()));
@@ -226,7 +227,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAggsWithSeveralFlush() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 21, Arrays.asList(AGG.values()));

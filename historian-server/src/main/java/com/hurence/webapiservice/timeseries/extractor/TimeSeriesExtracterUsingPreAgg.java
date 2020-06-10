@@ -23,8 +23,8 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     final ChunkAggsCalculator aggsCalculator;
 
-    public TimeSeriesExtracterUsingPreAgg(String metricName, long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
-        super(metricName, from, to, samplingConf, totalNumberOfPoint);
+    public TimeSeriesExtracterUsingPreAgg(long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
+        super(from, to, samplingConf, totalNumberOfPoint);
         aggsCalculator = new ChunkAggsCalculator(aggregList);
     }
 

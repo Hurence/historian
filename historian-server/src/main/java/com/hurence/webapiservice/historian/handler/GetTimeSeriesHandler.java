@@ -1,14 +1,10 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
-import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtractorUsingPreAgg;
-import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterUtil;
+import com.hurence.webapiservice.timeseries.extractor.*;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -23,10 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
@@ -47,36 +40,25 @@ public class GetTimeSeriesHandler {
      * but should using agg on solr side (using key partition, by month, daily ? yearly ?)
      */
     public Handler<Promise<JsonObject>> getTimeSeriesHandler(JsonObject myParams) {
-        final SolrQuery query = buildTimeSeriesQuery(myParams);
+        Request request = new Request(myParams);
+        return getTimeSeriesHandler(request);
+    }
+
+    private Handler<Promise<JsonObject>> getTimeSeriesHandler(Request request) {
+        List<AGG> aggregationList = request.getAggs();
+        final SolrQuery query = buildTimeSeriesQuery(request);
         LOGGER.debug("solrQuery : {}", query.toQueryString());
-
-        //FILTER
-        if (myParams.containsKey(HistorianFields.TAGS)) {
-            Object tags = myParams.getValue(HistorianFields.TAGS);
-            if (tags instanceof JsonObject) {
-                buildSolrFilterFromTags(myParams.getJsonObject(HistorianFields.TAGS))
-                        .ifPresent(query::addFilterQuery);
-            } else if (tags instanceof JsonArray) {
-                buildSolrFilterFromArray(myParams.getJsonArray(HistorianFields.TAGS), RESPONSE_TAG_NAME_FIELD)
-                        .ifPresent(query::addFilterQuery);
-            } else {
-                throw new IllegalArgumentException(HistorianFields.TAGS + " field were neither a map neither an array.");
-            }
-        }
-        List<AGG> aggregationList = myParams.getJsonArray(AGGREGATION, new JsonArray()).stream().map(String::valueOf).map(AGG::valueOf).collect(Collectors.toList());
-        addFieldsThatWillBeNeededByAggregations(aggregationList, query);
-
-        Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
+        return p -> {
             MetricsSizeInfo metricsInfo;
             try {
                 metricsInfo = getNumberOfPointsByMetricInRequest(query);
                 LOGGER.debug("metrics info to query : {}", metricsInfo);
                 if (metricsInfo.isEmpty()) {
-                    final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(myParams, metricsInfo, aggregationList);
+                    final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
                     p.complete(buildTimeSeriesResponse(timeSeriesExtracter));
                     return;
                 }
-                final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(myParams, query, metricsInfo, aggregationList);
+                final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(request, query, metricsInfo, aggregationList);
                 requestSolrAndBuildTimeSeries(query, p, timeSeriesExtracter);
             } catch (IOException e) {
                 LOGGER.error("unexpected io exception", e);
@@ -86,38 +68,81 @@ public class GetTimeSeriesHandler {
                 p.fail(e);
             }
         };
-        return null;
     }
 
-    private SolrQuery buildTimeSeriesQuery(JsonObject params) {
+
+    private SolrQuery buildTimeSeriesQuery(Request request) {
         StringBuilder queryBuilder = new StringBuilder();
-        if (params.getLong(TO) != null) {
-            LOGGER.trace("requesting timeseries to {}", params.getLong(TO));
-            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO)).append("]");
+        if (request.getTo() != null) {
+            LOGGER.trace("requesting timeseries to {}", request.getTo());
+            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
         }
-        if (params.getLong(FROM) != null) {
-            LOGGER.trace("requesting timeseries from {}", params.getLong(FROM));
+        if (request.getFrom()  != null) {
+            LOGGER.trace("requesting timeseries from {}", request.getFrom());
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(RESPONSE_CHUNK_END_FIELD).append(":[").append(params.getLong(FROM)).append(" TO *]");
+            queryBuilder.append(RESPONSE_CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
-        //TODO filter on names AND tags
-//        buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
-//                .ifPresent(query::addFilterQuery);
+
+        //FILTER
+        buildFilters(request, query);
         //    FIELDS_TO_FETCH
         query.setFields(RESPONSE_CHUNK_START_FIELD,
                 RESPONSE_CHUNK_END_FIELD,
                 RESPONSE_CHUNK_COUNT_FIELD,
                 NAME);
+        addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
         query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
         query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
-        query.setRows(params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000));
+        query.setRows(request.getMaxTotalChunkToRetrieve());
+
         return query;
+    }
+
+    private void buildFilters(Request request, SolrQuery query) {
+        Map<String, String> rootTags = request.getRootTags();
+        List<MetricRequest> metricOptions = request.getMetricRequests();
+        List<String> metricFilters = buildFilterForEachMetric(rootTags, metricOptions);
+        String finalFilter = buildFinalFilterQuery(metricFilters);
+        query.addFilterQuery(finalFilter);
+    }
+
+    /**
+     *        Joins every metric filter by a "OR"
+     * @param metricFilters
+     * @return final filter query should be
+     * <pre>
+     *     (filter1) OR (filter2) OR ... OR (filtern)
+     * </pre>
+     *
+     */
+    private String buildFinalFilterQuery(List<String> metricFilters) {
+        //TODO
+        return null;
+    }
+
+    /**
+     * filter query for each metric
+     *     each string should looks like "(name:A && usine:usine_1 && sensor:sensor_1)"
+     *     we filter on metric name and on every tags we get. we use tags of metricOptions and of rootTags.
+     *     If there is conflict then tags of metricOptions have priority.
+     * @param rootTags
+     * @param metricOptions
+     * @return filter query for each metric
+     *         each string should looks like :
+     *         <pre>
+     *             name:"A" AND usine:"usine_1" AND sensor:"sensor_1"
+     *         </pre>
+     *
+     *
+     */
+    private List<String> buildFilterForEachMetric(Map<String, String> rootTags, List<MetricRequest> metricOptions) {
+        return null;//TODO
     }
 
     private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String fieldToFilter) {
@@ -170,9 +195,7 @@ public class GetTimeSeriesHandler {
         });
     }
 
-    private MetricsSizeInfo getNumberOfPointsByMetricInRequest(SolrQuery query) throws IOException {//TODO better handling of exception
-//        String cexpr = "rollup(search(historian, q=\"*:*\", fl=\"chunk_size, name\", qt=\"/export\", sort=\"name asc\"),\n" +
-//                "\t\t\t\t over=\"name\", sum(chunk_size))";
+    private MetricsSizeInfo getNumberOfPointsByMetricInRequest(SolrQuery query) throws IOException {
         StringBuilder exprBuilder = new StringBuilder("rollup(search(").append(solrHistorianConf.chunkCollection)
                 .append(",q=").append(query.getQuery());
         if (query.getFilterQueries() != null) {
@@ -181,6 +204,8 @@ public class GetTimeSeriesHandler {
                         .append(",fq=").append(filterQuery);
             }
         }
+        //TODO add tags name to fields to retrieve
+        //TODO over tags name as well
         exprBuilder.append(",fl=\"").append(RESPONSE_CHUNK_COUNT_FIELD).append(", ")
                 .append(NAME).append("\"")
                 .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\")")
@@ -196,10 +221,13 @@ public class GetTimeSeriesHandler {
         solrStream.open();
         Tuple tuple = solrStream.read();
         MetricsSizeInfoImpl metricsInfo = new MetricsSizeInfoImpl();
+        //TODO here fill by MetricRequest instead of just metricName
+
         while (!tuple.EOF) {
             LOGGER.trace("tuple : {}", tuple.jsonStr());
             MetricSizeInfo metric = new MetricSizeInfo();
-            metric.metricName = tuple.getString("name");
+//            metric.metricRequest = tuple.getString("name");
+            //TODO here we have tag name values as well ! Retrieve it and add counter to corresponding metrics
             metric.totalNumberOfChunks = tuple.getLong("count(*)");
             metric.totalNumberOfPoints = tuple.getLong("sum(chunk_count)");
             metricsInfo.setMetricInfo(metric);
@@ -211,25 +239,25 @@ public class GetTimeSeriesHandler {
     }
 
 
-    public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(JsonObject myParams, SolrQuery query, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
+    public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(Request request, SolrQuery query, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         //TODO make three different group for each metrics, not use a single strategy globally for all metrics.
         final MultiTimeSeriesExtracter timeSeriesExtracter;
         if (metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint ||
-                metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(myParams).getMaxPoint()) {
+                metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint()) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
             query.addField(RESPONSE_CHUNK_VALUE_FIELD);
-            timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(myParams, metricsInfo, aggregationList);
+            timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (metricsInfo.getTotalNumberOfChunks() < solrHistorianConf.limitNumberOfChunks) {
             LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
-            addFieldsThatWillBeNeededBySamplingAlgorithms(myParams, query, metricsInfo);
-            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(myParams, metricsInfo, aggregationList);
+            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
+            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         } else {
             LOGGER.debug("QUERY MODE 3 : else");
             //TODO Sample points with chunk aggs depending on alg (min, avg),
             // but should using agg on solr side (using key partition, by month, daily ? yearly ?)
             // For the moment we use the stream api without partitionning
-            addFieldsThatWillBeNeededBySamplingAlgorithms(myParams, query, metricsInfo);
-            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(myParams, metricsInfo, aggregationList);
+            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
+            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         }
         return timeSeriesExtracter;
     }
@@ -245,8 +273,8 @@ public class GetTimeSeriesHandler {
         }
     }
 
-    public void addFieldsThatWillBeNeededBySamplingAlgorithms(JsonObject myParams, SolrQuery query, MetricsSizeInfo metricsInfo) {
-        SamplingConf requestedSamplingConf = getSamplingConf(myParams);
+    public void addFieldsThatWillBeNeededBySamplingAlgorithms(Request request, SolrQuery query, MetricsSizeInfo metricsInfo) {
+        SamplingConf requestedSamplingConf = getSamplingConf(request);
         Set<SamplingAlgorithm> samplingAlgos = determineSamplingAlgoThatWillBeUsed(requestedSamplingConf, metricsInfo);
         addNecessaryFieldToQuery(query, samplingAlgos);
     }
@@ -287,31 +315,31 @@ public class GetTimeSeriesHandler {
             singletonSet.add(askedSamplingConf.getAlgo());
             return singletonSet;
         }
-        return metricsSizeInfo.getMetrics().stream()
-                .map(metricName -> {
-                    MetricSizeInfo metricInfo = metricsSizeInfo.getMetricInfo(metricName);
+        return metricsSizeInfo.getMetricRequests().stream()
+                .map(metricrequest -> {
+                    MetricSizeInfo metricInfo = metricsSizeInfo.getMetricInfo(metricrequest);
                     SamplingAlgorithm algo = TimeSeriesExtracterUtil.calculSamplingAlgorithm(askedSamplingConf, metricInfo.totalNumberOfPoints);
                     return algo;
                 }).collect(Collectors.toSet());
     }
 
     //TODO from, to and SamplingConf as parameter. So calcul SampligConf before this method not in MultiTimeSeriesExtractorUsingPreAgg
-    private MultiTimeSeriesExtracter createTimeSerieExtractorUsingChunks(JsonObject params, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
-        long from = params.getLong(FROM);
-        long to = params.getLong(TO);
-        SamplingConf requestedSamplingConf = getSamplingConf(params);
-        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf);
+    private MultiTimeSeriesExtracter createTimeSerieExtractorUsingChunks(Request request, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
+        long from = request.getFrom();
+        long to = request.getTo();
+        SamplingConf requestedSamplingConf = getSamplingConf(request);
+        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequests());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
     }
 
     //TODO from, to and SamplingConf as parameter. So calcul SampligConf before this method not in MultiTimeSeriesExtracterImpl
-    private MultiTimeSeriesExtracter createTimeSerieExtractorSamplingAllPoints(JsonObject params, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
-        long from = params.getLong(FROM);
-        long to = params.getLong(TO);
-        SamplingConf requestedSamplingConf = getSamplingConf(params);
-        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf);
+    private MultiTimeSeriesExtracter createTimeSerieExtractorSamplingAllPoints(Request request, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
+        long from = request.getFrom();
+        long to = request.getTo();
+        SamplingConf requestedSamplingConf = getSamplingConf(request);
+        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequests());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -323,15 +351,15 @@ public class GetTimeSeriesHandler {
 
     private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,
                                                      MetricsSizeInfo metricsInfo) {
-        metricsInfo.getMetrics().forEach(metric -> {
-            timeSeriesExtracter.setTotalNumberOfPointForMetric(metric, metricsInfo.getMetricInfo(metric).totalNumberOfPoints);
+        metricsInfo.getMetricRequests().forEach(MetricRequest -> {
+            timeSeriesExtracter.setTotalNumberOfPointForMetric(MetricRequest, metricsInfo.getMetricInfo(MetricRequest).totalNumberOfPoints);
         });
     }
 
-    private SamplingConf getSamplingConf(JsonObject params) {
-        SamplingAlgorithm algo = SamplingAlgorithm.valueOf(params.getString(SAMPLING_ALGO));
-        int bucketSize = params.getInteger(BUCKET_SIZE);
-        int maxPoint = params.getInteger(MAX_POINT_BY_METRIC);
+    private SamplingConf getSamplingConf(Request request) {
+        SamplingAlgorithm algo = request.getSamplingAlgo();
+        int bucketSize = request.getBucketSize();
+        int maxPoint = request.getMaxPoint();
         return new SamplingConf(algo, bucketSize, maxPoint);
     }
 
@@ -383,5 +411,56 @@ public class GetTimeSeriesHandler {
         StreamContext context = new StreamContext();
         solrStream.setStreamContext(context);
         return JsonStreamSolrStream.forVersion(solrHistorianConf.schemaVersion, solrStream);
+    }
+
+    private static class Request {
+
+        JsonObject params;
+
+        public Request(JsonObject params) {
+            this.params = params;
+        }
+
+        public List<AGG> getAggs() {
+            return params.getJsonArray(AGGREGATION, new JsonArray())
+                    .stream()
+                    .map(String::valueOf)
+                    .map(AGG::valueOf)
+                    .collect(Collectors.toList());
+        }
+
+        public Long getTo() {
+            return params.getLong(TO);
+        }
+
+        public Long getFrom() {
+            return params.getLong(FROM);
+        }
+
+        public Integer getMaxTotalChunkToRetrieve() {
+            return params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
+        }
+
+        public Map<String, String> getRootTags() {
+            //TODO
+            return null;
+        }
+
+        public List<MetricRequest> getMetricRequests() {
+            //TODO
+            return null;
+        }
+
+        public int getMaxPoint() {
+            return params.getInteger(MAX_POINT_BY_METRIC);
+        }
+
+        public int getBucketSize() {
+            return params.getInteger(BUCKET_SIZE);
+        }
+
+        public SamplingAlgorithm getSamplingAlgo() {
+            return SamplingAlgorithm.valueOf(params.getString(SAMPLING_ALGO));
+        }
     }
 }
