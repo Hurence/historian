@@ -3,10 +3,9 @@ package com.hurence.webapiservice.http.api.grafana.modele;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.modele.AGG.*;
 

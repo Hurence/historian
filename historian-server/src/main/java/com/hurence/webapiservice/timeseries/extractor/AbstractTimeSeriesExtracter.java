@@ -1,9 +1,10 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.record.Point;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
+import com.hurence.webapiservice.timeseries.aggs.AggsCalculator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
@@ -22,20 +23,17 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
-    List<AGG> aggregList = new ArrayList<>();
-    final Map<AGG, Double> finalAggregationsMap = new HashMap<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
 
     public AbstractTimeSeriesExtracter(String metricName, long from, long to,
                                        SamplingConf samplingConf,
-                                       long totalNumberOfPoint, List<AGG> aggregList) {
+                                       long totalNumberOfPoint) {
         this.metricName = metricName;
         this.from = from;
         this.to = to;
         this.samplingConf = TimeSeriesExtracterUtil.calculSamplingConf(samplingConf, totalNumberOfPoint);
-        this.aggregList = aggregList;
         LOGGER.debug("Initialized {}  with samplingConf : {}", this.getClass(), this.samplingConf);
     }
 
@@ -79,6 +77,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
      */
     protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks);
 
+    protected abstract Optional<JsonObject> getAggsAsJson();
 
     @Override
     public JsonObject getTimeSeries() {
@@ -95,9 +94,8 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_NAME, metricName)
                 .put(TIMESERIE_POINT, new JsonArray(points));
-        if (!finalAggregationsMap.isEmpty()) {
-            toReturn.put(TIMESERIE_AGGS, finalAggregationsMap);
-        }
+        getAggsAsJson()
+                .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
     }

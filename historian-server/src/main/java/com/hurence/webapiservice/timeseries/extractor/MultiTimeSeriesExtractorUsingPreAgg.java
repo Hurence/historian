@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.webapiservice.modele.SamplingConf;
 

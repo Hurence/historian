@@ -2,7 +2,6 @@ package com.hurence.webapiservice.historian;
 
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import com.hurence.webapiservice.historian.impl.SolrHistorianServiceImpl;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracter;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;

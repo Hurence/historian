@@ -12,8 +12,8 @@ import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.AnnotationRequest;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
+import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;

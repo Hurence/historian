@@ -3,10 +3,8 @@ package com.hurence.webapiservice.http.api.grafana.hurence;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
-import com.hurence.webapiservice.http.api.ingestion.ImportRequestParser;
 import com.hurence.webapiservice.modele.AGG;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
-import io.vertx.core.json.JsonArray;
+import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.junit.jupiter.api.Assertions;
@@ -17,11 +15,7 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.IntStream;
 
-import static com.hurence.historian.modele.HistorianFields.AGGREGATION;
-import static com.hurence.historian.modele.HistorianFields.NAMES;
 import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
-import static com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam.DEFAULT_BUCKET_SIZE;
-import static com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam.DEFAULT_SAMPLING_ALGORITHM;
 import static com.hurence.webapiservice.modele.AGG.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -8,10 +8,10 @@ import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
-import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtractorUsingPreAgg;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
+import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
+import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracterImpl;
+import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtractorUsingPreAgg;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -37,14 +37,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.modele.AGG.*;
 
 public class SolrHistorianServiceImpl implements HistorianService {
 

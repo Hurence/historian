@@ -5,6 +5,9 @@ import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterUsingPreAgg;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.Assert;
@@ -13,11 +16,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 
 import static com.hurence.webapiservice.modele.AGG.*;
-import static com.hurence.webapiservice.timeseries.TimeSeriesExtracter.*;
+import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
 
 public class TimeSeriesExtracterUsingPreAggTest {
 

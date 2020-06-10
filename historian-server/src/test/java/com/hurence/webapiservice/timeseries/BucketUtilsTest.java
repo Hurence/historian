@@ -1,13 +1,8 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.logisland.timeseries.sampling.BucketSegmentationElement;
-import com.hurence.logisland.timeseries.sampling.BucketingStrategy;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
-import java.util.List;
-
-import static com.hurence.webapiservice.timeseries.BucketUtils.calculBucketSize;
+import static com.hurence.webapiservice.timeseries.util.BucketUtils.calculBucketSize;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BucketUtilsTest {
