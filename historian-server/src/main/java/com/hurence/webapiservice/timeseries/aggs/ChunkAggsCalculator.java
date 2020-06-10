@@ -23,7 +23,15 @@ public class ChunkAggsCalculator implements AggsCalculator<JsonObject> {
     }
 
     private List<AGG> calculNeededAggList(List<AGG> aggregList) {
-        return null;
+        List<AGG> neededAggList = new ArrayList<>(aggregList);
+        if (aggregList.contains(AVG)){
+            if(!aggregList.contains(SUM))
+                neededAggList.add(SUM);
+            if (!aggregList.contains(COUNT))
+                neededAggList.add(COUNT);
+            neededAggList.remove(AVG);
+        }
+        return neededAggList;
     }
 
     /**
@@ -32,11 +40,21 @@ public class ChunkAggsCalculator implements AggsCalculator<JsonObject> {
      */
     public Optional<JsonObject> getAggsAsJson() {
         calculAvgIfNeeded();
-        return null;//TODO
+        JsonObject askedAggValuesAsJsonObject = new JsonObject();
+        aggValues.forEach((key, value) -> {
+            if (askedAggList.contains(key))
+                askedAggValuesAsJsonObject.put(key.toString(), value.doubleValue());
+        });
+        if (askedAggValuesAsJsonObject.isEmpty())
+            return Optional.empty();
+        else
+            return Optional.of(askedAggValuesAsJsonObject);
     }
 
     private void calculAvgIfNeeded() {
-        //TODO
+        if (askedAggList.contains(AVG))
+            aggValues.put(AVG, BigDecimal.valueOf(aggValues.get(SUM).doubleValue())
+                .divide(BigDecimal.valueOf(aggValues.get(COUNT).doubleValue()), RoundingMode.HALF_UP));
     }
 
     /**
@@ -68,20 +86,64 @@ public class ChunkAggsCalculator implements AggsCalculator<JsonObject> {
      * update sum value to aggValues
      */
     private void calculateSum(List<JsonObject> chunks) {
-        //TODO do not use for loop, instead user List/Stream api.
+        double sum = chunks.stream()
+                .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
+                .sum();
+        if(aggValues.containsKey(SUM)) {
+            double currentSum = aggValues.get(SUM).doubleValue();
+            Number updatedSum =  BigDecimal.valueOf(currentSum+sum);
+            aggValues.put(SUM, updatedSum);
+        }else {
+            aggValues.put(SUM, sum);
+        }
     }
 
     /**
      * update min value to aggValues
      */
     private void calculateMin(List<JsonObject> chunks) {
-        //TODO do not use for loop, instead user List/Stream api. use java.lang.Math library
+        double min;
+        if (chunks.stream()
+                .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
+                .min().isPresent()) {
+            min = chunks.stream()
+                    .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
+                    .min()
+                    .getAsDouble();
+            if(aggValues.containsKey(MIN)) {
+                double currentMin = aggValues.get(MIN).doubleValue();
+                min = Math.min(min, currentMin);
+            }
+            aggValues.put(MIN, min);
+        }
     }
     private void calculateMax(List<JsonObject> chunks) {
-        //TODO do not use for loop, instead user List/Stream api. use java.lang.Math library
+        double max;
+        if (chunks.stream()
+                .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
+                .max().isPresent()) {
+            max = chunks.stream()
+                    .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
+                    .max()
+                    .getAsDouble();
+            if(aggValues.containsKey(MAX)) {
+                double currentMax = aggValues.get(MAX).doubleValue();
+                max = Math.max(max, currentMax);
+            }
+            aggValues.put(MAX, max);
+        }
     }
     private void calculateCount(List<JsonObject> chunks) {
-        //TODO do not use for loop, instead user List/Stream api.
+        double count = chunks.stream()
+                .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
+                .sum();
+        if(aggValues.containsKey(COUNT)) {
+            double currentCount = aggValues.get(COUNT).doubleValue();
+            Number newCount =  BigDecimal.valueOf(currentCount + count);
+            aggValues.put(COUNT, newCount);
+        }else {
+            aggValues.put(COUNT, count);
+        }
     }
 
 }

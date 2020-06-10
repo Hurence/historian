@@ -73,12 +73,12 @@ public class TimeSeriesExtracterImplTest {
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, MIDDLE_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(3.0, END_CHUNK_1)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 6.0);
-        aggregation.put(MAX, 3.0);
-        aggregation.put(COUNT, 3);
-        aggregation.put(AVG, 2.0);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 3.0);
+        aggregation.put(SUM.toString(), 6.0);
+        aggregation.put(COUNT.toString(), 3.0);
+        aggregation.put(AVG.toString(), 2.0);
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
@@ -99,12 +99,12 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, MIDDLE_CHUNK_1)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 3.0);
-        aggregation.put(MAX, 2.0);
-        aggregation.put(COUNT, 2);
-        aggregation.put(AVG, 1.5);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 2.0);
+        aggregation.put(SUM.toString(), 3.0);
+        aggregation.put(COUNT.toString(), 2.0);
+        aggregation.put(AVG.toString(), 1.5);
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
@@ -125,12 +125,12 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.5, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(3.0, END_CHUNK_1)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 6.0);
-        aggregation.put(MAX, 3.0);
-        aggregation.put(COUNT, 3);
-        aggregation.put(AVG, 2.0);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 3.0);
+        aggregation.put(SUM.toString(), 6.0);
+        aggregation.put(COUNT.toString(), 3.0);
+        aggregation.put(AVG.toString(), 2.0);
         Assert.assertEquals(new JsonObject()
                 .put(TIMESERIE_NAME, "fake")
                 .put(TIMESERIE_POINT, expectedPoints)
@@ -153,12 +153,12 @@ public class TimeSeriesExtracterImplTest {
         expectedPoints.add(new JsonArray(Arrays.asList(1.5, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(3.5, END_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(5.5, MIDDLE_CHUNK_2)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 21.0);
-        aggregation.put(MAX, 6.0);
-        aggregation.put(COUNT, 6);
-        aggregation.put(AVG, 3.5);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 6.0);
+        aggregation.put(SUM.toString(), 21.0);
+        aggregation.put(COUNT.toString(), 6.0);
+        aggregation.put(AVG.toString(), 3.5);
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
@@ -188,12 +188,12 @@ public class TimeSeriesExtracterImplTest {
         expectedPoints.add(new JsonArray(Arrays.asList(5.0, 1477895624870L)));
         expectedPoints.add(new JsonArray(Arrays.asList(6.0, 1477895624870L)));
         expectedPoints.add(new JsonArray(Arrays.asList(6.0, END_CHUNK_2)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 36.0);
-        aggregation.put(MAX, 6.0);
-        aggregation.put(COUNT, 9);
-        aggregation.put(AVG, 4.0);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 6.0);
+        aggregation.put(SUM.toString(), 36.0);
+        aggregation.put(COUNT.toString(), 9.0);
+        aggregation.put(AVG.toString(), 4.0);
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
@@ -216,12 +216,12 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(2.8, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(5.5, 1477895624869L)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 36.0);
-        aggregation.put(MAX, 6.0);
-        aggregation.put(COUNT, 9);
-        aggregation.put(AVG, 4.0);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 6.0);
+        aggregation.put(SUM.toString(), 36.0);
+        aggregation.put(COUNT.toString(), 9.0);
+        aggregation.put(AVG.toString(), 4.0);
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
@@ -244,12 +244,12 @@ public class TimeSeriesExtracterImplTest {
         extractor.flush();
         Assert.assertEquals(3, extractor.chunkCount());
         Assert.assertEquals(9, extractor.pointCount());
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 36.0);
-        aggregation.put(MAX, 6.0);
-        aggregation.put(COUNT, 9.0);
-        aggregation.put(AVG, 4.0);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 6.0);
+        aggregation.put(SUM.toString(), 36.0);
+        aggregation.put(COUNT.toString(), 9.0);
+        aggregation.put(AVG.toString(), 4.0);
         JsonObject result = extractor.getTimeSeries();
         Assert.assertEquals(new JsonObject()
                 .put(TIMESERIE_AGGS, aggregation)
