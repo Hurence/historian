@@ -12,30 +12,26 @@ import static com.hurence.webapiservice.modele.AGG.*;
 
 public class PointsAggsCalculator implements AggsCalculator<Point> {
 
-    private final List<AGG> askedAggList;
-    private final List<AGG> neededAggList;
+    private final Set<AGG> askedAggSet = new HashSet<>();
+    private final Set<AGG> neededAggSet;
     private final Map<AGG, Number> aggValues = new HashMap<>();
 
     public PointsAggsCalculator(List<AGG> aggregList) {
-        this.askedAggList = aggregList;
-        this.neededAggList = calculNeededAggList(aggregList);
+        this.askedAggSet.addAll(aggregList);
+        this.neededAggSet = calculNeededAggList();
     }
 
     /**
      *
-     * @param aggregList
      * @return list of aggs needed to be calculated. Indeed some aggs can be calculated using others.
      */
-    private List<AGG> calculNeededAggList(List<AGG> aggregList) {
-        List<AGG> neededAggList = new ArrayList<>(aggregList);
-        if (aggregList.contains(AVG)){
-            if(!aggregList.contains(SUM))
-                neededAggList.add(SUM);
-            if (!aggregList.contains(COUNT))
-                neededAggList.add(COUNT);
-            neededAggList.remove(AVG);
+    private Set<AGG> calculNeededAggList() {
+        Set<AGG> neededAggSet = new HashSet<>(askedAggSet);
+        if (neededAggSet.remove(AVG)){
+            neededAggSet.add(SUM);
+            neededAggSet.add(COUNT);
         }
-        return neededAggList;
+        return neededAggSet;
     }
 
     /**
@@ -46,43 +42,45 @@ public class PointsAggsCalculator implements AggsCalculator<Point> {
         calculAvgIfNeeded();
         JsonObject askedAggValuesAsJsonObject = new JsonObject();
         aggValues.forEach((key, value) -> {
-            if (askedAggList.contains(key))
+            if (askedAggSet.contains(key))
                 askedAggValuesAsJsonObject.put(key.toString(), value.doubleValue());
         });
         if (askedAggValuesAsJsonObject.isEmpty())
             return Optional.empty();
         else
             return Optional.of(askedAggValuesAsJsonObject);
+
     }
 
     /**
      * add Avg If needed
      */
     private void calculAvgIfNeeded() {
-        if (askedAggList.contains(AVG))
+        if (askedAggSet.contains(AVG))
             aggValues.put(AVG, BigDecimal.valueOf(aggValues.get(SUM).doubleValue())
                 .divide(BigDecimal.valueOf(aggValues.get(COUNT).doubleValue()), RoundingMode.HALF_UP));
     }
 
     public void updateAggs(List<Point> points) {
-        neededAggList.forEach(agg -> {
-            switch (agg) {
-                case SUM:
-                    calculateSum(points);
-                    break;
-                case MIN:
-                    calculateMin(points);
-                    break;
-                case MAX:
-                    calculateMax(points);
-                    break;
-                case COUNT:
-                    calculateCount(points);
-                    break;
-                default:
-                    throw new IllegalStateException("Unsupported aggregation: " + agg);
-            }
-        });
+        if (!points.isEmpty())
+            neededAggSet.forEach(agg -> {
+                switch (agg) {
+                    case SUM:
+                        calculateSum(points);
+                        break;
+                    case MIN:
+                        calculateMin(points);
+                        break;
+                    case MAX:
+                        calculateMax(points);
+                        break;
+                    case COUNT:
+                        calculateCount(points);
+                        break;
+                    default:
+                        throw new IllegalStateException("Unsupported aggregation: " + agg);
+                }
+            });
     }
 
     /**
@@ -103,9 +101,9 @@ public class PointsAggsCalculator implements AggsCalculator<Point> {
      * update min value to aggValues
      */
     private void calculateMin(List<Point> points) {
-        double min;
-        if (points.stream().mapToDouble(Point::getValue).min().isPresent()) {
-            min = points.stream().mapToDouble(Point::getValue).min().getAsDouble();
+        OptionalDouble minMap = points.stream().mapToDouble(Point::getValue).min();
+        if (minMap.isPresent()) {
+            double min = minMap.getAsDouble();
             if (aggValues.containsKey(MIN)) {
                 double currentMin = aggValues.get(MIN).doubleValue();
                 min = Math.min(min, currentMin);
@@ -114,9 +112,9 @@ public class PointsAggsCalculator implements AggsCalculator<Point> {
         }
     }
     private void calculateMax(List<Point> points) {
-        double max;
-        if (points.stream().mapToDouble(Point::getValue).max().isPresent()) {
-            max = points.stream().mapToDouble(Point::getValue).max().getAsDouble();
+        OptionalDouble maxMap = points.stream().mapToDouble(Point::getValue).max();
+        if (maxMap.isPresent()) {
+            double max = maxMap.getAsDouble();
             if (aggValues.containsKey(MAX)) {
                 double currentMax = aggValues.get(MAX).doubleValue();
                 max = Math.max(max, currentMax);
