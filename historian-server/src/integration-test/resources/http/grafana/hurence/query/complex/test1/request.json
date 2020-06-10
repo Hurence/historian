@@ -5,20 +5,12 @@
     "temp_b",
     {
       "name": "temp_a",
-      "sampling": {
-        "algorithm": "FIRST",
-        "bucket_size": 100
-      },
       "tags": {
         "sensor": "sensor_1"
       }
     },
     {
       "name": "temp_a",
-      "sampling": {
-        "algorithm": "AVG",
-        "bucket_size": 10
-      },
       "tags": {
         "sensor": "sensor_2"
       }
@@ -26,9 +18,6 @@
   ],
   "format": "json",
   "max_data_points": 400,
-  "sampling": {
-    "algorithm": "FIRST"
-  },
   "tags": {
     "usine": "usine_1",
     "sensor": "sensor_3"
