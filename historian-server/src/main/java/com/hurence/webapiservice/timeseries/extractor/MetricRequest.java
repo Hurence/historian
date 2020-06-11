@@ -57,4 +57,5 @@ public class MetricRequest {
         // Attention aux NPE ! Bien réfléchir a ce qui peut être null ou non a ce stade du code.
         return name.equals(chunkName);
     }
+    
 }

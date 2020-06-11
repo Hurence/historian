@@ -195,7 +195,7 @@ public class GetTimeSeriesHandler {
         });
     }
 
-    private MetricsSizeInfo getNumberOfPointsByMetricInRequest(SolrQuery query) throws IOException {
+    private MetricsSizeInfo getNumberOfPointsByMetricInRequest(List<MetricRequest> requests, SolrQuery query) throws IOException {
         StringBuilder exprBuilder = new StringBuilder("rollup(search(").append(solrHistorianConf.chunkCollection)
                 .append(",q=").append(query.getQuery());
         if (query.getFilterQueries() != null) {
@@ -204,12 +204,16 @@ public class GetTimeSeriesHandler {
                         .append(",fq=").append(filterQuery);
             }
         }
-        //TODO add tags name to fields to retrieve
-        //TODO over tags name as well
-        exprBuilder.append(",fl=\"").append(RESPONSE_CHUNK_COUNT_FIELD).append(", ")
-                .append(NAME).append("\"")
+
+        List<String> neededFields = findNeededTagsName(requests);
+        neededFields.add(NAME);
+        List<String> overFields = new ArrayList<>(neededFields);
+        String overString = joinListAsString(overFields);
+        neededFields.add(RESPONSE_CHUNK_COUNT_FIELD);
+        String flString = joinListAsString(neededFields);
+        exprBuilder.append(",fl=\"").append(flString).append("\"")
                 .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\")")
-                .append(",over=\"").append(NAME).append("\"")
+                .append(",over=\"").append(overString).append("\"")
                 .append(", sum(").append(RESPONSE_CHUNK_COUNT_FIELD).append("), count(*))");
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
@@ -221,21 +225,59 @@ public class GetTimeSeriesHandler {
         solrStream.open();
         Tuple tuple = solrStream.read();
         MetricsSizeInfoImpl metricsInfo = new MetricsSizeInfoImpl();
-        //TODO here fill by MetricRequest instead of just metricName
-
         while (!tuple.EOF) {
             LOGGER.trace("tuple : {}", tuple.jsonStr());
-            MetricSizeInfo metric = new MetricSizeInfo();
-//            metric.metricRequest = tuple.getString("name");
-            //TODO here we have tag name values as well ! Retrieve it and add counter to corresponding metrics
-            metric.totalNumberOfChunks = tuple.getLong("count(*)");
-            metric.totalNumberOfPoints = tuple.getLong("sum(chunk_count)");
-            metricsInfo.setMetricInfo(metric);
+            for (MetricRequest request: requests) {
+                if (isTupleMatchingMetricRequest(request, tuple)) {
+                    metricsInfo.increaseNumberOfChunksForMetricRequest(request, tuple.getLong("count(*)"));
+                    metricsInfo.increaseNumberOfPointsForMetricRequest(request, tuple.getLong("sum(chunk_count)"));
+                }
+            }
             tuple = solrStream.read();
         }
         LOGGER.debug("metric response : {}", tuple.jsonStr());
-        solrStream.close(); //TODO could be try-with-resources
+        solrStream.close();
         return metricsInfo;
+    }
+
+    /**
+     * join string so that we got somthing like <pre>elem1,elem2,elem3</pre>
+     * @param neededFields
+     * @return
+     */
+    private String joinListAsString(List<String> neededFields) {
+        return null;
+    }
+
+    /**
+     * return all tags name needed for querying metrics.
+     * @param requests
+     * @return
+     */
+    private List<String> findNeededTagsName(List<MetricRequest> requests) {
+        //TODO
+        return null;
+    }
+
+    /**
+     * return true if the tuple (one document response from solr) match the query for MetricRequest
+     *
+     * @param request the asked query. This is a combinaison of "name" and tags.
+     * @param tuple the count of chunks and points for all chunk matching the query.
+     *              There is a tuple for each combinaison of name/tag found.
+     *
+     *              for example something like that (each line is a tuple except the header)
+     *              <pre>
+     *              name    | usine     | sensor    | count(*) | sum(chunk_count)
+     *              temp_a  | usine_1   | sensor_1  | 100      | 1000
+     *              temp_a  | usine_1   | sensor_2  | 10       | 100
+     *              temp_b  | usine_1   | null      | 100      | 1000
+     *              </pre>
+     * @return
+     */
+    private boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
+        //TODO
+        return false;
     }
 
 

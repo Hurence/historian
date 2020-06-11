@@ -39,6 +39,26 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
         metricsInfo.put(metricInfo.metricRequest, metricInfo);
     }
 
+    /**
+     * increase the number of point of MetricSizeInfo corresponding to this metricRequest if it already exist otherwise add a
+     * new MetricSizeInfo with this metricRequest initialized with numberOfPoints.
+     * @param metric
+     * @param numberOfPoints
+     */
+    public void increaseNumberOfPointsForMetricRequest(MetricRequest metric, long numberOfPoints) {
+        //TODO
+    }
+
+    /**
+     * increase the number of chunks of MetricSizeInfo corresponding to this metricRequest if it already exist otherwise add a
+     * new MetricSizeInfo with this metricRequest initialized with numberOfChunks.
+     * @param metric
+     * @param numberOfChunks
+     */
+    public void increaseNumberOfChunksForMetricRequest(MetricRequest metric, long numberOfChunks) {
+        //TODO
+    }
+
     @Override
     public String toString() {
         StringBuilder strBuilder = new StringBuilder("MetricsSizeInfoImpl{");
