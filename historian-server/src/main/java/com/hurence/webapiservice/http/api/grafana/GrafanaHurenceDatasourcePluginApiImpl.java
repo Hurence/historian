@@ -12,7 +12,6 @@ import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
-import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -220,7 +219,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 }).subscribe();
     }
 
-    private JsonObject buildGetTimeSeriesRequest(TimeSeriesRequest request) {
+    private JsonObject buildGetTimeSeriesRequest(HurenceDatasourcePluginQueryRequestParam request) {
         JsonArray fieldsToFetch = new JsonArray()
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)

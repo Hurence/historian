@@ -51,7 +51,7 @@ public class GetTimeSeriesHandler {
         return p -> {
             MetricsSizeInfo metricsInfo;
             try {
-                metricsInfo = getNumberOfPointsByMetricInRequest(query);
+                metricsInfo = getNumberOfPointsByMetricInRequest(request.getMetricRequests(), query);
                 LOGGER.debug("metrics info to query : {}", metricsInfo);
                 if (metricsInfo.isEmpty()) {
                     final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);

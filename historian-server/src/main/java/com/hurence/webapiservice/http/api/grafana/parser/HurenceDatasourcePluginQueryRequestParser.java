@@ -1,9 +1,12 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.modele.AGG;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +68,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (format != null) {
             builder.withFormat(format);
         }
-        List<String> metricNames = parseMetricNames(requestBody);
+        JsonArray metricNames = parseMetricNames(requestBody);
         if (metricNames != null) {
             builder.withMetricNames(metricNames);
         } else {
@@ -123,8 +126,34 @@ public class HurenceDatasourcePluginQueryRequestParser {
         return SamplingAlgorithm.valueOf(algoStr.toUpperCase());
     }
 
-    private List<String> parseMetricNames(JsonObject requestBody) {
-        return parseListString(requestBody, namesJsonPath);
+    private JsonArray parseMetricNames(JsonObject requestBody) {
+        try {
+            JsonPointer jsonPointer = JsonPointer.from(namesJsonPath);
+            JsonArray jsonArray = (JsonArray) jsonPointer.queryJson(requestBody);
+            if (jsonArray == null) return null;
+            List<Object> jsonArrayAsList = jsonArray.stream()
+                    .map(el -> {
+                        if (el instanceof String) return el;
+                        if (el instanceof JsonObject) {
+                            JsonObject jsonObject = (JsonObject) el;
+                            Map<String, String> tags = parseTags(jsonObject);
+                            return new JsonObject()
+                                    .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME))
+                                    .put(HistorianFields.TAGS, tags);
+                        }
+                        throw new IllegalArgumentException(String.format(
+                                "field at path '%s' is not well formed. " +
+                                        "Expected an array containing string or object with a name and optionnaly tags",
+                                namesJsonPath));
+                    }).collect(Collectors.toList());
+            return new JsonArray(jsonArrayAsList);
+        } catch (Exception ex) {
+            LOGGER.error("error while decoding '" + namesJsonPath + "'",ex);
+            throw new IllegalArgumentException(String.format(
+                    "field at path '%s' is not well formed. " +
+                            "Expected an array containing string or object with a name and optionnaly tags",
+                    namesJsonPath), ex);
+        }
     }
 
     private Long parseFrom(JsonObject requestBody) {
