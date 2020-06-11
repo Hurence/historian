@@ -3,13 +3,11 @@ package com.hurence.webapiservice.timeseries.aggs;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.*;
+
 import java.util.stream.DoubleStream;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.modele.AGG.*;
 
 public class ChunkAggsCalculator extends AbstractAggsCalculator<JsonObject> {
 
