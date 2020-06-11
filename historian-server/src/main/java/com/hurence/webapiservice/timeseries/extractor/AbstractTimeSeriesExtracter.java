@@ -1,16 +1,16 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.logisland.record.Point;
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.logisland.record.Point;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
+import com.hurence.webapiservice.timeseries.aggs.AggsCalculator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
@@ -43,7 +43,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD);
         chunks.add(chunk);
         if (isBufferFull()) {
-            samplePointsInBufferThenReset();
+            samplePointsInBufferAndCalculAggregThenReset();
         }
     }
 
@@ -54,18 +54,19 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     @Override
     public void flush() {
         if (!chunks.isEmpty())
-            samplePointsInBufferThenReset();
+            samplePointsInBufferAndCalculAggregThenReset();
     }
+
 
     /**
      * Extract/Sample points from the list of chunks in buffer using a strategy. Add them into sampled points then reset buffer
      */
-    protected void samplePointsInBufferThenReset() {
+    protected void samplePointsInBufferAndCalculAggregThenReset() {
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("sample points in buffer has been called with chunks : {}",
                     chunks.stream().map(JsonObject::encodePrettily).collect(Collectors.joining("\n")));
         }
-        samplePointsFromChunks(from, to, chunks);
+        samplePointsFromChunksAndCalculAggreg(from, to, chunks);
         chunks.clear();
         toatlPointCounter+=pointCounter;
         pointCounter = 0;
@@ -74,7 +75,9 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     /**
      * Sample points from the list of chunks using a strategy. Add them into sampled points then reset buffer
      */
-    protected abstract void samplePointsFromChunks(long from, long to, List<JsonObject> chunks);
+    protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks);
+
+    protected abstract Optional<JsonObject> getAggsAsJson();
 
     @Override
     public JsonObject getTimeSeries() {
@@ -91,6 +94,8 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_NAME, metricName)
                 .put(TIMESERIE_POINT, new JsonArray(points));
+        getAggsAsJson()
+                .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
     }

@@ -35,6 +35,7 @@ public class HistorianFields {
     public static String METRIC = "metric";
     public static String KEY = "key";
     public static String VALUE = "value";
+    public static String AGGREGATION = "aggregation";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";

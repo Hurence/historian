@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.http.api.modele;
 
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 

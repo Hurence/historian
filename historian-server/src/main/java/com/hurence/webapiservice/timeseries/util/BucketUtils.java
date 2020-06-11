@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.timeseries.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.modele;
 
-import com.hurence.webapiservice.timeseries.AnnotationRequest;
+import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
 
 import java.util.Collections;
 import java.util.List;

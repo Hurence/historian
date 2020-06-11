@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.timeseries.extractor;
 
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

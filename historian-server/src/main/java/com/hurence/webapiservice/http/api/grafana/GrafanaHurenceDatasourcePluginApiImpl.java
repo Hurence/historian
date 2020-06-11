@@ -6,18 +6,19 @@ import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
-import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginAnnotationRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
+import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
@@ -104,6 +105,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
     public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
+    public final static String AGGREGATION_JSON_PATH = "/aggregations";
 
     /**
      *  used to query metrics datapoints in grafana panels.
@@ -171,7 +173,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH)
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH)
                     .parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
@@ -233,7 +235,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(HistorianFields.TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
+                .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()));
     }
 
     public final static String LIMIT_JSON_PATH = "/limit";

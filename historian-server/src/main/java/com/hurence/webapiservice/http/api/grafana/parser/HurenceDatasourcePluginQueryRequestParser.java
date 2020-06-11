@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.parser;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
+import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
     private final String samplingAlgoJsonPath;
     private final String bucketSizeJsonPath;
     private final String requestIdJsonPath;
+    private final String aggregationPath;
 
     public HurenceDatasourcePluginQueryRequestParser(String fromJsonPath,
                                                      String toJsonPath,
@@ -34,7 +36,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                                      String tagsJsonPath,
                                                      String samplingAlgoJsonPath,
                                                      String bucketSizeJsonPath,
-                                                     String requestIdJsonPath) {
+                                                     String requestIdJsonPath,
+                                                     String aggregationPath) {
         this.fromJsonPath = fromJsonPath;
         this.toJsonPath = toJsonPath;
         this.namesJsonPath = namesJsonPath;
@@ -44,6 +47,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.samplingAlgoJsonPath = samplingAlgoJsonPath;
         this.bucketSizeJsonPath = bucketSizeJsonPath;
         this.requestIdJsonPath = requestIdJsonPath;
+        this.aggregationPath= aggregationPath;
     }
 
     public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
@@ -90,7 +94,15 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (requestId != null) {
             builder.withRequestId(requestId);
         }
+        List<AGG> agreg = parseAggreg(requestBody);
+        if (agreg != null) {
+            builder.withAggreg(agreg);
+        }
         return builder.build();
+    }
+
+    private List<AGG> parseAggreg(JsonObject requestBody) {
+        return parseListAGG(requestBody, aggregationPath);
     }
 
     private String parseRequestId(JsonObject requestBody) {
