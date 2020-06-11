@@ -1,12 +1,14 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,6 +20,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     private Map<String, TimeSeriesExtracter> bucketerByMetrics = new HashMap<>();
     Map<String, Long> totalNumberOfPointByMetrics = new HashMap<>();
+    List<AGG> aggregList = new ArrayList<>();
     final long from;
     final long to;
     final SamplingConf samplingConf;
@@ -43,8 +46,13 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
                 .forEach(TimeSeriesExtracter::flush);
     }
 
+
+    public void setAggregationList(List<AGG> aggregationList) {
+        aggregList.addAll(aggregationList);
+    }
+
     protected TimeSeriesExtracter createTimeSeriesExtractor(String metricName) {
-        return new TimeSeriesExtracterImpl(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName));
+        return new TimeSeriesExtracterImpl(metricName, from, to, samplingConf, totalNumberOfPointByMetrics.get(metricName), aggregList);
     }
 
     public void setTotalNumberOfPointForMetric(String metric, long totalNumberOfPoints) {

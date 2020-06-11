@@ -2,7 +2,7 @@ package com.hurence.webapiservice.http.api.grafana;
 
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Assertions;

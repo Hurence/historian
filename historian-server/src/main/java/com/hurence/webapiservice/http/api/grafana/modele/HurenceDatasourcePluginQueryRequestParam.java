@@ -3,12 +3,11 @@ package com.hurence.webapiservice.http.api.grafana.modele;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+
+import static com.hurence.webapiservice.modele.AGG.*;
 
 public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesRequest {
 
@@ -20,6 +19,8 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     public static final String DEFAULT_FORMAT = "json";
     public static final String DEFAULT_REQUEST_ID = "Not defined";
     public static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
+    public static final List DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
+    public static final List<AGG> DEFAULT_ALL_AGGREGATION_LIST = Arrays.asList(values());
 
     private final List<String> metricNames;
     private final long from;
@@ -30,11 +31,12 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     private final int bucketSize;
     private final Map<String, String> tags;
     private final String requestId;
+    private final List<AGG> aggregList;
 
     private HurenceDatasourcePluginQueryRequestParam(List<String> metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
-                                                     Map<String, String> tags, String requestId) {
-        if (metricNames == null) throw new IllegalArgumentException("metricNames should not be null !");
+                                                 Map<String, String> tags, String requestId, List<AGG> aggregList) {
+        Objects.requireNonNull(metricNames);
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
         this.from = from;
@@ -45,6 +47,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         this.bucketSize = bucketSize;
         this.tags = tags;
         this.requestId = requestId;
+        this.aggregList = aggregList;
     }
 
     @Override
@@ -54,7 +57,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
 
     @Override
     public List<AGG> getAggs() {
-        return Collections.emptyList();
+        return aggregList;
     }
 
     @Override
@@ -92,6 +95,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         private int bucketSize = DEFAULT_BUCKET_SIZE;
         private Map<String, String> tags = DEFAULT_TAGS;
         private String requestId = DEFAULT_REQUEST_ID;
+        private List<AGG> aggreg = DEFAULT_AGGREGATION;
 
         public Builder withMetricNames(List<String> metricNames) {
             this.metricNames = metricNames;
@@ -140,7 +144,11 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
 
         public HurenceDatasourcePluginQueryRequestParam build() {
             return new HurenceDatasourcePluginQueryRequestParam(metricNames, from, to, format, maxDataPoints,
-                    samplingAlgo, bucketSize, tags, requestId);
+                    samplingAlgo, bucketSize, tags, requestId, aggreg);
+        }
+
+        public void withAggreg(List<AGG> aggreg) {
+            this.aggreg = aggreg;
         }
     }
 }

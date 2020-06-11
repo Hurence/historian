@@ -6,11 +6,12 @@ import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracter;
-import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.MultiTimeSeriesExtractorUsingPreAgg;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracterUtil;
+import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
+import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracterImpl;
+import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtractorUsingPreAgg;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterUtil;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -498,6 +499,8 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 throw new IllegalArgumentException(HistorianFields.TAGS + " field were neither a map neither an array.");
             }
         }
+        List<AGG> aggregationList = myParams.getJsonArray(AGGREGATION, new JsonArray()).stream().map(String::valueOf).map(AGG::valueOf).collect(Collectors.toList());
+        addFieldsThatWillBeNeededByAggregations(aggregationList, query);
 
         Handler<Promise<JsonObject>> getTimeSeriesHandler = p -> {
             MetricsSizeInfo metricsInfo;
@@ -505,11 +508,11 @@ public class SolrHistorianServiceImpl implements HistorianService {
                 metricsInfo = getNumberOfPointsByMetricInRequest(query);
                 LOGGER.debug("metrics info to query : {}", metricsInfo);
                 if (metricsInfo.isEmpty()) {
-                    final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(myParams, metricsInfo);
+                    final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(myParams, metricsInfo, aggregationList);
                     p.complete(buildTimeSeriesResponse(timeSeriesExtracter));
                     return;
                 }
-                final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(myParams, query, metricsInfo);
+                final MultiTimeSeriesExtracter timeSeriesExtracter = getMultiTimeSeriesExtracter(myParams, query, metricsInfo, aggregationList);
                 requestSolrAndBuildTimeSeries(query, p, timeSeriesExtracter);
             } catch (IOException e) {
                 LOGGER.error("unexpected io exception", e);
@@ -523,25 +526,25 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
-    public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(JsonObject myParams, SolrQuery query, MetricsSizeInfo metricsInfo) {
+    public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(JsonObject myParams, SolrQuery query, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         //TODO make three different group for each metrics, not use a single strategy globally for all metrics.
         final MultiTimeSeriesExtracter timeSeriesExtracter;
         if (metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint ||
                 metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(myParams).getMaxPoint()) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
             query.addField(RESPONSE_CHUNK_VALUE_FIELD);
-            timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(myParams, metricsInfo);
+            timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(myParams, metricsInfo, aggregationList);
         } else if (metricsInfo.getTotalNumberOfChunks() < solrHistorianConf.limitNumberOfChunks) {
             LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
             addFieldsThatWillBeNeededBySamplingAlgorithms(myParams, query, metricsInfo);
-            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(myParams, metricsInfo);
+            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(myParams, metricsInfo, aggregationList);
         } else {
             LOGGER.debug("QUERY MODE 3 : else");
             //TODO Sample points with chunk aggs depending on alg (min, avg),
             // but should using agg on solr side (using key partition, by month, daily ? yearly ?)
             // For the moment we use the stream api without partitionning
             addFieldsThatWillBeNeededBySamplingAlgorithms(myParams, query, metricsInfo);
-            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(myParams, metricsInfo);
+            timeSeriesExtracter = createTimeSerieExtractorUsingChunks(myParams, metricsInfo, aggregationList);
         }
         return timeSeriesExtracter;
     }
@@ -560,6 +563,30 @@ public class SolrHistorianServiceImpl implements HistorianService {
         SamplingConf requestedSamplingConf = getSamplingConf(myParams);
         Set<SamplingAlgorithm> samplingAlgos = determineSamplingAlgoThatWillBeUsed(requestedSamplingConf, metricsInfo);
         addNecessaryFieldToQuery(query, samplingAlgos);
+    }
+
+private void addFieldsThatWillBeNeededByAggregations (List<AGG> aggregationList, SolrQuery query) {
+        aggregationList.forEach(agg -> {
+            switch (agg) {
+                case AVG:
+                    query.addField(RESPONSE_CHUNK_AVG_FIELD);
+                    break;
+                case SUM:
+                    query.addField(RESPONSE_CHUNK_SUM_FIELD);
+                    break;
+                case MIN:
+                    query.addField(RESPONSE_CHUNK_MIN_FIELD);
+                    break;
+                case MAX:
+                    query.addField(RESPONSE_CHUNK_MAX_FIELD);
+                    break;
+                case COUNT:
+                    query.addField(RESPONSE_CHUNK_COUNT_FIELD);
+                    break;
+                default:
+                    throw new IllegalStateException("Unsupported aggregation: " + agg);
+            }
+        });
     }
 
     private void addNecessaryFieldToQuery(SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
@@ -604,23 +631,29 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     //TODO from, to and SamplingConf as parameter. So calcul SampligConf before this method not in MultiTimeSeriesExtractorUsingPreAgg
-    private MultiTimeSeriesExtracter createTimeSerieExtractorUsingChunks(JsonObject params, MetricsSizeInfo metricsInfo) {
+    private MultiTimeSeriesExtracter createTimeSerieExtractorUsingChunks(JsonObject params, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         long from = params.getLong(FROM);
         long to = params.getLong(TO);
         SamplingConf requestedSamplingConf = getSamplingConf(params);
         MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf);
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
+        fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
     }
 
     //TODO from, to and SamplingConf as parameter. So calcul SampligConf before this method not in MultiTimeSeriesExtracterImpl
-    private MultiTimeSeriesExtracter createTimeSerieExtractorSamplingAllPoints(JsonObject params, MetricsSizeInfo metricsInfo) {
+    private MultiTimeSeriesExtracter createTimeSerieExtractorSamplingAllPoints(JsonObject params, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         long from = params.getLong(FROM);
         long to = params.getLong(TO);
         SamplingConf requestedSamplingConf = getSamplingConf(params);
         MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf);
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
+        fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
+    }
+
+    private void fillingExtractorWithAggregToReturn(MultiTimeSeriesExtracterImpl timeSeriesExtracter, List<AGG> aggregationList) {
+        timeSeriesExtracter.setAggregationList(aggregationList);
     }
 
     private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,

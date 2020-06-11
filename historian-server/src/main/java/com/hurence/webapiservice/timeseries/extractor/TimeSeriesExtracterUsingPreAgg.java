@@ -1,32 +1,43 @@
-package com.hurence.webapiservice.timeseries;
+package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.logisland.record.Point;
+import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
+import com.hurence.webapiservice.timeseries.aggs.ChunkAggsCalculator;
+import com.hurence.webapiservice.timeseries.aggs.PointsAggsCalculator;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.modele.AGG.*;
 
 public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterUsingPreAgg.class);
 
-    public TimeSeriesExtracterUsingPreAgg(String metricName, long from, long to, SamplingConf samplingConf, long totalNumberOfPoint) {
+    final ChunkAggsCalculator aggsCalculator;
+
+    public TimeSeriesExtracterUsingPreAgg(String metricName, long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
         super(metricName, from, to, samplingConf, totalNumberOfPoint);
+        aggsCalculator = new ChunkAggsCalculator(aggregList);
     }
 
     @Override
-    protected void samplePointsFromChunks(long from, long to, List<JsonObject> chunks) {
+    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
         List<Point> sampledPoint = extractPoints(chunks);
         this.sampledPoints.addAll(sampledPoint);
+        aggsCalculator.updateAggs(chunks);
+    }
+
+    @Override
+    protected Optional<JsonObject> getAggsAsJson() {
+        return aggsCalculator.getAggsAsJson();
     }
 
     private List<Point> extractPoints(List<JsonObject> chunks) {

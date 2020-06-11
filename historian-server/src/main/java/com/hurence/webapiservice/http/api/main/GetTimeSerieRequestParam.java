@@ -1,11 +1,9 @@
 package com.hurence.webapiservice.http.api.main;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.http.api.grafana.modele.AdHocFilter;
-import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 
 import java.util.Collections;
 import java.util.List;

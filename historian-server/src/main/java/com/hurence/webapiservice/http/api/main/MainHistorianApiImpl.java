@@ -5,15 +5,11 @@ import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.historian.util.HistorianResponseHelper;
 import com.hurence.webapiservice.historian.util.models.ResponseAsList;
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.LogislandTimeSeriesModeler;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.TimeSeriesModeler;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -22,8 +18,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
@@ -35,8 +29,6 @@ public class MainHistorianApiImpl implements MainHistorianApi {
     private HistorianService service;
     private int maxDataPointsAllowedForExportCsv;
 
-    private static TimeSeriesModeler timeserieModeler = new LogislandTimeSeriesModeler();
-
     public MainHistorianApiImpl(HistorianService service, int maxDataPointsAllowedForExportCsv) {
         this.service = service;
         this.maxDataPointsAllowedForExportCsv = maxDataPointsAllowedForExportCsv;
@@ -47,129 +39,6 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         context.response()
                 .setStatusCode(200)
                 .end("Historian grafana api is Working fine");
-    }
-
-    @Override
-    public void search(RoutingContext context) {
-        final JsonObject getMetricsParam = context.getBodyAsJson();
-        service.rxGetMetricsName(getMetricsParam)
-                .doOnError(ex -> {
-                    LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(ex.getMessage());
-                })
-                .doOnSuccess(metricResponse -> {
-                    JsonArray array = metricResponse.getJsonArray(METRICS);
-                    context.response().setStatusCode(200);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(array.encode());
-                }).subscribe();
-    }
-
-    @Override
-    public void getTimeSeries(RoutingContext context) {
-        final TimeSeriesRequest request;
-        try {
-            JsonObject body = context.getBodyAsJson();
-            request =  new GetTimeSerieJsonRequestParser().parseRequest(body);
-        } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
-            return;
-        }
-
-        final JsonObject getTimeSeriesChunkParams = buildGetTimeSeriesChunkRequest(request);
-
-        service
-                .rxGetTimeSeriesChunk(getTimeSeriesChunkParams)
-                .map(chunkResponse -> {
-                    List<JsonObject> chunks = HistorianResponseHelper.extractChunks(chunkResponse);
-                    Map<String, List<JsonObject>> chunksByName = chunks.stream().collect(
-                            Collectors.groupingBy(chunk ->  chunk.getString(NAME))
-                    );
-                    return TimeSeriesModeler.buildTimeSeries(request, chunksByName, timeserieModeler);
-                })
-                .doOnError(ex -> {
-                    LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(ex.getMessage());
-                })
-                .doOnSuccess(timeseries -> {
-                    JsonObject response = new JsonObject();
-                    response
-                            .put("query", context.getBodyAsJson())
-                            .put("total_timeseries", timeseries.size())
-                            .put("timeseries", timeseries);
-                    context.response().setStatusCode(200);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(response.encode());
-                }).subscribe();
-    }
-
-    private JsonObject buildGetTimeSeriesChunkRequest(TimeSeriesRequest request) {
-        JsonArray fieldsToFetch = new JsonArray()
-                .add(RESPONSE_CHUNK_VALUE_FIELD)
-                .add(RESPONSE_CHUNK_START_FIELD)
-                .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_COUNT_FIELD)
-                .add(NAME);
-        request.getAggs().forEach(agg -> {
-            final String aggField;
-            switch (agg) {
-                case MIN:
-                    aggField = RESPONSE_CHUNK_MIN_FIELD;
-                    break;
-                case MAX:
-                    aggField = RESPONSE_CHUNK_MAX_FIELD;
-                    break;
-                case AVG:
-                    aggField = RESPONSE_CHUNK_AVG_FIELD;
-                    break;
-                case COUNT:
-                    aggField = RESPONSE_CHUNK_COUNT_FIELD;
-                    break;
-                case SUM:
-                    aggField = RESPONSE_CHUNK_SUM_FIELD;
-                    break;
-                default:
-                    throw new IllegalStateException("Unsupported aggregation: " + agg);
-            }
-            fieldsToFetch.add(aggField);
-        });
-        SamplingConf samplingConf = request.getSamplingConf();
-        return new JsonObject()
-                .put(FROM, request.getFrom())
-                .put(TO, request.getTo())
-                .put(FIELDS, fieldsToFetch)
-                .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTags())
-                .put(SAMPLING_ALGO, samplingConf.getAlgo())
-                .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
-    }
-
-    private JsonObject buildGetTimeSeriesRequest(QueryRequestParam request) {
-        JsonArray fieldsToFetch = new JsonArray()
-                .add(RESPONSE_CHUNK_VALUE_FIELD)
-                .add(RESPONSE_CHUNK_START_FIELD)
-                .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_COUNT_FIELD)
-                .add(NAME);
-        SamplingConf samplingConf = request.getSamplingConf();
-        return new JsonObject()
-                .put(FROM, request.getFrom())
-                .put(TO, request.getTo())
-                .put(FIELDS, fieldsToFetch)
-                .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTags())
-                .put(SAMPLING_ALGO, samplingConf.getAlgo())
-                .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
     @Override
@@ -255,4 +124,23 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 }).subscribe();
     }
 
+
+    private JsonObject buildGetTimeSeriesRequest(QueryRequestParam request) {
+        JsonArray fieldsToFetch = new JsonArray()
+                .add(RESPONSE_CHUNK_VALUE_FIELD)
+                .add(RESPONSE_CHUNK_START_FIELD)
+                .add(RESPONSE_CHUNK_END_FIELD)
+                .add(RESPONSE_CHUNK_COUNT_FIELD)
+                .add(NAME);
+        SamplingConf samplingConf = request.getSamplingConf();
+        return new JsonObject()
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(FIELDS, fieldsToFetch)
+                .put(NAMES, request.getMetricNames())
+                .put(HistorianFields.TAGS, request.getTags())
+                .put(SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+    }
 }
