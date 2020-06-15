@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.ingestion.util;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
+import org.joda.time.IllegalFieldValueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,6 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.ingestion.util.TimeStampUnit.*;
 
 public class DataConverter {
 
@@ -37,14 +39,7 @@ public class DataConverter {
         if (multiMap.getAll(GROUP_BY).isEmpty())
             multiMap.add(GROUP_BY, DEFAULT_NAME_FIELD);
 
-        List<String> groupByList = multiMap.getAll(GROUP_BY).stream().map(s -> {
-            if (s.startsWith(TAGS+".")) {
-                 return s.substring(5);
-            }else if (s.equals(NAME))
-                return multiMap.get(MAPPING_NAME);
-            else
-                throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
-        }).collect(Collectors.toList());
+        List<String> groupByList = getGroupByList();
 
         List<Map<String, Object>> finalGroupedPoints = LinesWithDateInfo.stream()
             //group by metric,tag,date -> [value, date] ( in case where group by just metric : metric,date -> [value, date])
@@ -81,32 +76,59 @@ public class DataConverter {
         return new JsonArray(finalGroupedPoints);
     }
 
+    private List<String> getGroupByList() {
+        return multiMap.getAll(GROUP_BY).stream().map(s -> {
+            if (s.startsWith(TAGS+".")) {
+                return s.substring(5);
+            }else if (s.equals(NAME))
+                return multiMap.get(MAPPING_NAME);
+            else
+                throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
+        }).collect(Collectors.toList());
+    }
+
     public static Object toNumber(Object value, MultiMap multiMap) {
-        if (multiMap.get(FORMAT_DATE) == null && multiMap.get(TIMEZONE_DATE) == null) {
+        // here you should take timestamps in diff timezones and store only in utc.
+        try {
+            long longValue = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
+            String format = multiMap.get(FORMAT_DATE);
+            if (format != null)
+                switch (format) {
+                    case SECONDS_EPOCH:
+                        longValue = longValue*1000;
+                        break;
+                    case MICROSECONDS_EPOCH:
+                        longValue = longValue/1000;
+                        break;
+                    case NANOSECONDS_EPOCH:
+                        longValue = longValue/1000000;
+                    case MILLISECONDS_EPOCH:
+                        break;
+                    default:
+                        throw  new IllegalArgumentException("TIMESTAMP_UNIT is not correct.");
+                }
+            return longValue;
+            /*if ((multiMap.get(FORMAT_DATE) == null) || (multiMap.get(FORMAT_DATE).equals(TimestampUnit.MILLISECONDS_EPOCH.toString())))
+                return longValue;
+            else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.SECONDS_EPOCH.toString()))
+                return longValue*1000;
+            else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.MICROSECONDS_EPOCH.toString()))
+                return longValue/1000;
+            else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.NANOSECONDS_EPOCH.toString()))
+                return longValue/1000000;*/
+        } catch (Exception e) {
+            LOGGER.debug("error in parsing date", e);
+            if (multiMap.get(TIMEZONE_DATE) == null)
+                multiMap.add(TIMEZONE_DATE, "UTC");
+            long date = 0;
             try {
-                long l = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
-                if ((multiMap.get(TIMESTAMP_UNIT) == null) || (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.MILLISECONDS_EPOCH.toString())))
-                    return l;
-                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.SECONDS_EPOCH.toString()))
-                    return l*1000;
-                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.MICROSECONDS_EPOCH.toString()))
-                    return l/1000;
-                else if (multiMap.get(TIMESTAMP_UNIT).equals(TimestampUnit.NANOSECONDS_EPOCH.toString()))
-                    return l/1000000;
-            } catch (Exception e) {
-                LOGGER.debug("error in parsing date", e);
+                date = createDateFormat(multiMap.get(FORMAT_DATE),multiMap.get(TIMEZONE_DATE)).parse(value.toString()).getTime();
+                return date;
+            } catch (ParseException ex) {
+                LOGGER.debug("error in parsing date", ex);
                 return value;
             }
-        } else if (multiMap.get(TIMEZONE_DATE) == null)
-            multiMap.add(TIMEZONE_DATE, "UTC");
-        long date = 0;
-        try {
-            date = createDateFormat(multiMap.get(FORMAT_DATE),multiMap.get(TIMEZONE_DATE)).parse(value.toString()).getTime();
-        } catch (ParseException e) {
-            LOGGER.debug("error in parsing date", e);
-            return value;
         }
-        return date;
     }
 
     private Object toDouble(Object value) {

@@ -6,6 +6,7 @@ import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePlugin
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.junit.jupiter.api.Assertions;
@@ -52,6 +53,7 @@ public class QueryRequestParserTest {
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+
         LOGGER.info("request : {}", request);
         assertEquals(1477895624866L, request.getFrom());
         assertEquals(1604147624866L, request.getTo());
@@ -131,6 +133,7 @@ public class QueryRequestParserTest {
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+
         });
     }
 
@@ -192,8 +195,17 @@ public class QueryRequestParserTest {
         }).getMessage();
         assertEquals(message, "MA is not a recognized aggregation, the accepted aggregations are : " + Arrays.asList(AGG.values()));
     }
+
     @Test
     public void testParsingRequestWithALLAggregation() {
+        List<AGG> aggrs = new ArrayList<>();
+        aggrs.add(MAX);
+        aggrs.add(MIN);
+        aggrs.add(SUM);
+        aggrs.add(AVG);
+        aggrs.add(COUNT);
+
+
         JsonObject requestBody = new JsonObject();
         JsonPointer.from(FROM_JSON_PATH)
                 .writeJson(requestBody, "2019-11-14T02:56:53.285Z", true);

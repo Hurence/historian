@@ -20,7 +20,6 @@ import java.util.HashMap;
 
 import static com.hurence.webapiservice.modele.AGG.*;
 import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
-import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.*;
 
 public class TimeSeriesExtracterUsingPreAggTest {
 
@@ -93,14 +92,15 @@ public class TimeSeriesExtracterUsingPreAggTest {
         Assert.assertEquals(9, extractor.pointCount());
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, START_CHUNK_1)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 9.0);
-        aggregation.put(MAX, 1.0);
-        aggregation.put(COUNT, 9);
-        aggregation.put(AVG, 1.0);
+
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 1.0);
+        aggregation.put(SUM.toString(), 9.0);
+        aggregation.put(COUNT.toString(), 9.0);
+        aggregation.put(AVG.toString(), 1.0);
+
         Assert.assertEquals(new JsonObject()
-                .put(TIMESERIE_NAME, "fake")
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -123,14 +123,15 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.5, START_CHUNK_2)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 24.0);
-        aggregation.put(MAX, 3.0);
-        aggregation.put(COUNT, 15);
-        aggregation.put(AVG, 1.6);
+
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 3.0);
+        aggregation.put(SUM.toString(), 24.0);
+        aggregation.put(COUNT.toString(), 15.0);
+        aggregation.put(AVG.toString(), 1.6);
+
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -139,6 +140,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
     @Test
     public void testAvgSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 12, Arrays.asList(AGG.values()));
@@ -152,14 +154,13 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(2.5, START_CHUNK_2)));
         expectedPoints.add(new JsonArray(Arrays.asList(4.5, 1477917224870L)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 2.0);
-        aggregation.put(SUM, 42.0);
-        aggregation.put(MAX, 5.0);
-        aggregation.put(COUNT, 12);
-        aggregation.put(AVG, 3.5);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 2.0);
+        aggregation.put(MAX.toString(), 5.0);
+        aggregation.put(SUM.toString(), 42.0);
+        aggregation.put(COUNT.toString(), 12.0);
+        aggregation.put(AVG.toString(), 3.5);
         Assert.assertEquals(new JsonObject()
-                .put(TIMESERIE_NAME, "fake")
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -180,14 +181,13 @@ public class TimeSeriesExtracterUsingPreAggTest {
                 JsonArray expectedPoints = new JsonArray();
                 expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
                 expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477917224866L)));
-                HashMap<AGG, Number> aggregation = new HashMap<>();
-                aggregation.put(MIN, 1.0);
-                aggregation.put(SUM, 24.0);
-                aggregation.put(MAX, 3.0);
-                aggregation.put(COUNT, 15);
-                aggregation.put(AVG, 1.6);
+                JsonObject aggregation = new JsonObject();
+                aggregation.put(MIN.toString(), 1.0);
+                aggregation.put(MAX.toString(), 3.0);
+                aggregation.put(SUM.toString(), 24.0);
+                aggregation.put(COUNT.toString(), 15.0);
+                aggregation.put(AVG.toString(), 1.6);
                 Assert.assertEquals(new JsonObject()
-                                        .put(TIMESERIE_NAME, "fake")
                                         .put(TIMESERIE_POINT, expectedPoints)
                                         .put(TIMESERIE_AGGS, aggregation)
                                 , extractor.getTimeSeries());
@@ -211,14 +211,13 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, START_CHUNK_2)));
         expectedPoints.add(new JsonArray(Arrays.asList(4.0, 1477917224870L)));
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 2.0);
-        aggregation.put(SUM, 42.0);
-        aggregation.put(MAX, 5.0);
-        aggregation.put(COUNT, 12);
-        aggregation.put(AVG, 3.5);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 2.0);
+        aggregation.put(MAX.toString(), 5.0);
+        aggregation.put(SUM.toString(), 42.0);
+        aggregation.put(COUNT.toString(), 12.0);
+        aggregation.put(AVG.toString(), 3.5);
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -243,12 +242,12 @@ public class TimeSeriesExtracterUsingPreAggTest {
         extractor.flush();
         Assert.assertEquals(5, extractor.chunkCount());
         Assert.assertEquals(21, extractor.pointCount());
-        HashMap<AGG, Number> aggregation = new HashMap<>();
-        aggregation.put(MIN, 1.0);
-        aggregation.put(SUM, 51.0);
-        aggregation.put(MAX, 5.0);
-        aggregation.put(COUNT, 21);
-        aggregation.put(AVG, 2.429);
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 5.0);
+        aggregation.put(SUM.toString(), 51.0);
+        aggregation.put(COUNT.toString(), 21.0);
+        aggregation.put(AVG.toString(), 2.4);
         JsonObject result = extractor.getTimeSeries();
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_AGGS, aggregation)

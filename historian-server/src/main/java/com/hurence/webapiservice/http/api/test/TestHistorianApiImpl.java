@@ -5,6 +5,7 @@ import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieJsonRequestParser;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
