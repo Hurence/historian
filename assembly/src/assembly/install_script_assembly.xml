@@ -1,0 +1,47 @@
+<assembly xmlns="http://maven.apache.org/ASSEMBLY/2.0.0"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/ASSEMBLY/2.0.0 http://maven.apache.org/xsd/assembly-2.0.0.xsd">
+    <id>script</id>
+    <formats>
+        <format>dir</format>
+        <format>tgz</format>
+    </formats>
+    <includeBaseDirectory>false</includeBaseDirectory>
+
+    <moduleSets>
+        <moduleSet>
+
+            <!-- Enable access to all projects in the current multimodule build! -->
+            <useAllReactorProjects>false</useAllReactorProjects>
+
+            <!-- Now, select which projects to include in this module-set. -->
+
+            <binaries>
+                <directoryMode>0770</directoryMode>
+                <fileMode>0660</fileMode>
+                <outputDirectory>.</outputDirectory>
+                <includeDependencies>false</includeDependencies>
+                <unpack>false</unpack>
+            </binaries>
+        </moduleSet>
+    </moduleSets>
+    <fileSets>
+        <fileSet>
+            <directory>../historian-resources/bin</directory>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0770</fileMode>
+            <outputDirectory>.</outputDirectory>
+            <includes>
+                <include>install.sh</include>
+            </includes>
+        </fileSet>
+
+        <fileSet>
+            <directory>target</directory>
+            <outputDirectory></outputDirectory>
+            <includes>
+                <include>*bin.tgz</include>
+            </includes>
+        </fileSet>
+    </fileSets>
+</assembly>
