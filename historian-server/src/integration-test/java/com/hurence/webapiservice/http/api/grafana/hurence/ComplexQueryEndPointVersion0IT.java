@@ -62,7 +62,7 @@ public class ComplexQueryEndPointVersion0IT {
     public static void injectChunksIntoSolr(SolrClient client, Vertx vertx) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralVersion0SolrInjector injector = new GeneralVersion0SolrInjector();
-        ChunkModeleVersion0 chunkTempbUsine1Sensor3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
+        ChunkModeleVersion0 chunkTempbUsine1Sensor3 = ChunkModeleVersion0.fromPoints("temp_b", Arrays.asList(
                 new Point(0, 1, 1)
         ));
         chunkTempbUsine1Sensor3.addTag("sensor", "sensor_3");

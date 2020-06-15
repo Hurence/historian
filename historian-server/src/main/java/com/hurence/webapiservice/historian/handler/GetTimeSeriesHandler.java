@@ -5,8 +5,10 @@ import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.*;
+import com.sun.javafx.geom.transform.GeneralTransform3D;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -95,6 +97,7 @@ public class GetTimeSeriesHandler {
                 RESPONSE_CHUNK_END_FIELD,
                 RESPONSE_CHUNK_COUNT_FIELD,
                 NAME);
+        addAllTagsAsFields(request.getMetricRequests(), query);
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
         query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
@@ -102,6 +105,12 @@ public class GetTimeSeriesHandler {
         query.setRows(request.getMaxTotalChunkToRetrieve());
 
         return query;
+    }
+
+    private void addAllTagsAsFields(List<MetricRequest> metricRequests, SolrQuery query) {
+        Set<String> tags = new HashSet<>();
+        metricRequests.forEach(metricRequest -> tags.addAll(metricRequest.getTags().keySet()));
+        tags.forEach(query::addField);
     }
 
     private void buildFilters(Request request, SolrQuery query) {
@@ -123,7 +132,7 @@ public class GetTimeSeriesHandler {
      */
     private String buildFinalFilterQuery(List<String> metricFilters) {
         //TODO
-        return null;
+        return metricFilters.stream().collect(Collectors.joining(") OR (", "(", ")"));
     }
 
     /**
@@ -142,7 +151,22 @@ public class GetTimeSeriesHandler {
      *
      */
     private List<String> buildFilterForEachMetric(Map<String, String> rootTags, List<MetricRequest> metricOptions) {
-        return null;//TODO
+        //TODO
+        List<String> finalStringList = new ArrayList<>();
+        metricOptions.forEach(i -> {
+            Map<String,String> finalTagsForMetric = new HashMap<>();
+            rootTags.forEach(finalTagsForMetric::put);
+            i.getTags().forEach(finalTagsForMetric::put);
+            List<String> stringList = new ArrayList<>();
+            finalTagsForMetric.forEach((key, value) -> {
+                stringList.add(key+":\""+value+"\"");
+            });
+            if(!stringList.isEmpty())
+                finalStringList.add(stringList.stream().collect(Collectors.joining(" AND ", "name:\""+i.getName()+"\" AND ", "")));
+            else
+                finalStringList.add("name:\""+i.getName()+"\"");
+        });
+        return finalStringList;
     }
 
     private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String fieldToFilter) {
@@ -246,7 +270,7 @@ public class GetTimeSeriesHandler {
      * @return
      */
     private String joinListAsString(List<String> neededFields) {
-        return null;
+        return String.join(",", neededFields);
     }
 
     /**
@@ -256,7 +280,11 @@ public class GetTimeSeriesHandler {
      */
     private List<String> findNeededTagsName(List<MetricRequest> requests) {
         //TODO
-        return null;
+        Set<String> tagsSet = new HashSet<>();
+        requests.forEach(metricRequest -> {
+            tagsSet.addAll(metricRequest.getTags().keySet());
+        });
+        return new ArrayList<>(tagsSet);
     }
 
     /**
@@ -277,7 +305,19 @@ public class GetTimeSeriesHandler {
      */
     private boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
         //TODO
-        return false;
+        if (!request.getName().equals(tuple.fields.get(NAME))){
+            return false;
+        }else {
+            boolean isTupleMatchingMetricRequest = true;
+            for (Map.Entry<String, String> entry : request.getTags().entrySet()) {
+                if (!tuple.fields.get(entry.getKey()).toString().equals(entry.getValue()))
+                    isTupleMatchingMetricRequest = false;
+                if (!isTupleMatchingMetricRequest)
+                    break;
+            }
+            return isTupleMatchingMetricRequest;
+        }
+
     }
 
 
@@ -485,12 +525,34 @@ public class GetTimeSeriesHandler {
 
         public Map<String, String> getRootTags() {
             //TODO
-            return null;
+            Map<String,String> tagsMap = new HashMap<>();
+            params.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+            return tagsMap;
         }
 
+        /**
+         * return the metric name desired with the associated tags.
+         * The tags must be the result of the merge of specific tags and rootTags
+         * @return
+         */
         public List<MetricRequest> getMetricRequests() {
             //TODO
-            return null;
+            return params.getJsonArray(NAMES).stream().map(i -> {
+                try {
+                    JsonObject metricObject = new JsonObject(i.toString());
+                    String name = metricObject.getString(NAME);
+                    Map<String,String> tagsMap = new HashMap<>();
+                    getRootTags().forEach(tagsMap::put);
+                    metricObject.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+                    return new MetricRequest(name, tagsMap);
+                }catch (Exception ex) {
+                    String name = i.toString();
+                    Map<String,String> tagsMap = new HashMap<>();
+                    getRootTags().forEach(tagsMap::put);
+                    return new MetricRequest(name, tagsMap);
+                }
+            })
+            .collect(Collectors.toList());
         }
 
         public int getMaxPoint() {

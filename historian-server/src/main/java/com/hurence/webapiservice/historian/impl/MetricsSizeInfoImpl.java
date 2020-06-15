@@ -47,6 +47,14 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
      */
     public void increaseNumberOfPointsForMetricRequest(MetricRequest metric, long numberOfPoints) {
         //TODO
+        if (metricsInfo.containsKey(metric)) {
+            metricsInfo.get(metric).totalNumberOfPoints += numberOfPoints;
+        } else {
+            MetricSizeInfo metricInfo = new MetricSizeInfo();
+            metricInfo.totalNumberOfPoints = numberOfPoints;
+            metricInfo.metricRequest = metric;
+            setMetricInfo(metricInfo);
+        }
     }
 
     /**
@@ -57,6 +65,14 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
      */
     public void increaseNumberOfChunksForMetricRequest(MetricRequest metric, long numberOfChunks) {
         //TODO
+        if (metricsInfo.containsKey(metric)) {
+            metricsInfo.get(metric).totalNumberOfChunks += numberOfChunks;
+        } else {
+            MetricSizeInfo metricInfo = new MetricSizeInfo();
+            metricInfo.totalNumberOfChunks = numberOfChunks;
+            metricInfo.metricRequest = metric;
+            setMetricInfo(metricInfo);
+        }
     }
 
     @Override

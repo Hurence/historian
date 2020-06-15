@@ -6,6 +6,8 @@ import io.vertx.core.json.JsonObject;
 import java.util.Map;
 import java.util.Objects;
 
+import static com.hurence.historian.modele.HistorianFields.NAME;
+
 public class MetricRequest {
     private final String name;
     private final Map<String, String> tags;
@@ -53,9 +55,23 @@ public class MetricRequest {
      */
     public boolean isChunkMatching(JsonObject chunk) {
         final String chunkName = chunk.getString(HistorianFields.NAME);
+        if (!getName().equals(chunkName)) {
+            return false;
+        }
+        boolean isChunkMatching = true;
+        for(Map.Entry<String, String> entry : getTags().entrySet()) {
+            if (!chunk.containsKey(entry.getKey())) {
+                return false;
+            } else {
+                if (!chunk.getString(entry.getKey()).equals(entry.getValue())) {
+                    isChunkMatching = false;
+                    break;
+                }
+            }
+        }
+        return isChunkMatching;
         //TODO feiz, need to adjust this method to be sure to keep chunk matching all tags !
         // Attention aux NPE ! Bien réfléchir a ce qui peut être null ou non a ce stade du code.
-        return name.equals(chunkName);
     }
     
 }
