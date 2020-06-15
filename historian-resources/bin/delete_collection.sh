@@ -21,6 +21,7 @@ read chunk_collection_name           #variable stocké dans $chunk_collection_na
 
 curl "http://${solr_cluster_path}/admin/collections?action=DELETE&name=${chunk_collection_name}"
 
+}
 
 main() {
     parse_args "$@"

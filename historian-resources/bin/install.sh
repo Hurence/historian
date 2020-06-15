@@ -116,6 +116,10 @@ select solr_install in Standalone Existing; do
                 echo "Please choose 1 or 2"
         fi
 done
+
+echo -e "\n"
+echo "Which name to use for the solr report collection ?"
+read report_collection_name           #variable stocké dans $chunk_collection_name
 echo -e "\n"
 
 #GRAFANA
@@ -200,13 +204,22 @@ echo '{
   }
 }'>historian-server-conf.json
 
-# create the HDH schema and collection in SolR
+# create collection in SolR
 cd $HDH_HOME/historian-1.3.4-SNAPSHOT
 bin/create-historian-chunk-collection.sh -c $chunk_collection_name -s $solr_cluster_path
+echo -e "\n"
+bin/create-historian-chunk-collection.sh -s $solr_cluster_path
+echo -e "\n"
+# create report collection in SolR
+bin/create-historian-report-collection.sh -c $report_collection_name -s $solr_cluster_path
+echo -e "\n"
+bin/create-historian-report-collection.sh -c historian_report -s $solr_cluster_path
+echo -e "\n"
+
 # and launch the historian REST server
 bin/historian-server.sh start
 
-echo "Install complete!"
+echo "Install complete"
 
 exit 0
 }
