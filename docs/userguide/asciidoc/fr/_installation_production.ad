@@ -11,9 +11,9 @@ La configuration minimale du serveur pour une installation mono serveur (en prod
 - Java 8
 - Spark 2.3.4
 - Solr 8.2.0
-- Grafana TODO
+- Grafana 7.0.3
 
-Dans cette section nous avons prévu des petits guides pour vous aider a installer solr 8.2.0, spark TODO et grafana TODO.
+Dans cette section nous avons prévu des petits guides pour vous aider a installer solr 8.2.0, spark 2.3.4 et grafana 7.0.3.
 Mais nous recommandons de vous référer à la documentation officiel pour des installations de production.
 Si vous avez déjà des serveurs existants vous pouvez directement passer à cette <<install-production-hurence-datasource-grafana-plugin,section>>
 
@@ -54,13 +54,11 @@ cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/sp
 ==== Installation de Grafana
 
 Installez Grafana pour votre plateforme comme décrit ici : `https://grafana.com/docs/grafana/latest/installation/requirements/`.
-Une fois l'installation de votre cluster grafana nous allons passer à l'installation de notre plugin grafana datasource
+Une fois l'installation de votre cluster grafana effectué nous allons passer à l'installation de notre plugin grafana datasource
 nécessaire pour consulter des dashboard basé sur notre historian.
 
 [[install-production-hurence-datasource-grafana-plugin]]
 ===== Installation Plugin Grafana pour utiliser le data historian Hurence
-
-TODO
 
 Install Json Simple Datasource as described here :
 
@@ -90,21 +88,7 @@ Il sera alors demander à l'utilisateur plusieurs informations.
 
 Voici un exemple :
 
-TODO remplacer par un screenshot
-
-[source,bash]
-----
-Where do you want to install Hurence Data Historian ? [/opt/hdh]
->
-Will you use an existing solr install or let the historian install an embedded solr (version 8.2.0 rquired) ? Standalone(S)/Existing(E) [S]
-> E
-What is the path to the solr cluster ? We will use the solr REST api to create collection.
-> http://mysolrhost:myport/solr
-Which name to use for the solr collection which will be storing timeseries ? [TODO]
->
-do you want to install an embedded grafana (version TODO rquired) ? Yes(Y)/No(N) [Y]
-> N
-----
+image::../../../resources/images/screenshot_install_mono_noeud.png[]
 
 Dans la suite, on appellera le chemin indiqué pour l'installation de l'historian '$HDH_HOME'.
 
@@ -112,7 +96,7 @@ A l'issue de ce script, vous aurez :
 
 * l'historian installer au chemin indiqué $HDH_HOME.
 * Le plugin https://github.com/Hurence/grafana-historian-datasource[datasource grafana de l'historian]
-installer sur le serveur grafana indiqué lors de l'installation TODO ?
+installé sur le serveur grafana indiqué lors de l'installation
 
 
 Voici la structure de $HDH_HOME a l'issue de l'installation par défaut :
@@ -143,4 +127,4 @@ Attention ces commandes n'affectent ni grafana ni solr qui sont des services ind
 
 include::./_description_conf_file.ad[]
 
-TODO éventuellement générer un fichier de configuration pendant le script d'install selon les informations renseignées ?
+Generation un fichier de configuration pendant le script d'install selon les informations renseignées
