@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
+        import com.hurence.logisland.record.Point;
         import com.hurence.webapiservice.modele.AGG;
         import com.hurence.webapiservice.modele.SamplingConf;
         import io.vertx.core.json.JsonArray;
@@ -7,10 +8,7 @@ package com.hurence.webapiservice.timeseries.extractor;
         import org.slf4j.Logger;
         import org.slf4j.LoggerFactory;
 
-        import java.util.ArrayList;
-        import java.util.HashMap;
-        import java.util.List;
-        import java.util.Map;
+        import java.util.*;
         import java.util.stream.Collectors;
 
 public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
@@ -70,10 +68,13 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     @Override
     public JsonArray getTimeSeries() {
         List<JsonObject> timeseries = extractorByMetricRequest.entrySet().stream()
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(MetricRequest::getName)))
                 .map(entry -> {
-                    JsonObject timeSerie = entry.getValue().getTimeSeries();
+                    JsonObject timeSerie = new JsonObject();
                     timeSerie.put(TIMESERIE_NAME, entry.getKey().getName());
-                    timeSerie.put(TIMESERIE_TAGS, entry.getKey().getTags());
+                    if (!entry.getKey().getTags().isEmpty())
+                        timeSerie.put(TIMESERIE_TAGS, entry.getKey().getTags());
+                    timeSerie.mergeIn(entry.getValue().getTimeSeries());
                     return timeSerie;
                 })
                 .collect(Collectors.toList());
