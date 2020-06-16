@@ -70,28 +70,30 @@ public class ComplexQueryEndPointVersion0IT {
         injector.addChunk(chunkTempbUsine1Sensor3);
 
         ChunkModeleVersion0 chunkTempaUsine1Sensor1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 1, 2)
+                new Point(0, 2, 2),
+                new Point(0, 3, 3),
+                new Point(0, 4, 4)
         ));
         chunkTempaUsine1Sensor1.addTag("sensor", "sensor_1");
         chunkTempaUsine1Sensor1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1Sensor1);
 
         ChunkModeleVersion0 chunkTempaUsine1Sensor2 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 1, 3)
+                new Point(0, 5, 3)
         ));
         chunkTempaUsine1Sensor2.addTag("sensor", "sensor_2");
         chunkTempaUsine1Sensor2.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1Sensor2);
 
         ChunkModeleVersion0 chunkTempaUsine2Sensor3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 1, 4)
+                new Point(0, 6, 4)
         ));
         chunkTempaUsine2Sensor3.addTag("sensor", "sensor_3");
         chunkTempaUsine2Sensor3.addTag("usine", "usine_2");
         injector.addChunk(chunkTempaUsine2Sensor3);
 
         ChunkModeleVersion0 chunkTempaUsine1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 1, 5)
+                new Point(0, 7, 5)
         ));
         chunkTempaUsine1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1);
@@ -154,6 +156,20 @@ public class ComplexQueryEndPointVersion0IT {
                 new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
                         "/http/grafana/hurence/query/complex/test3/request.json",
                         "/http/grafana/hurence/query/complex/test3/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithDifferentTags(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
+                        "/http/grafana/hurence/query/complex/test4/request.json",
+                        "/http/grafana/hurence/query/complex/test4/expectedResponse.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
         );

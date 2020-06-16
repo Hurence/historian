@@ -46,7 +46,6 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
      * @param numberOfPoints
      */
     public void increaseNumberOfPointsForMetricRequest(MetricRequest metric, long numberOfPoints) {
-        //TODO
         if (metricsInfo.containsKey(metric)) {
             metricsInfo.get(metric).totalNumberOfPoints += numberOfPoints;
         } else {
@@ -64,7 +63,6 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
      * @param numberOfChunks
      */
     public void increaseNumberOfChunksForMetricRequest(MetricRequest metric, long numberOfChunks) {
-        //TODO
         if (metricsInfo.containsKey(metric)) {
             metricsInfo.get(metric).totalNumberOfChunks += numberOfChunks;
         } else {

@@ -53,7 +53,7 @@ public class GetTimeSeriesHandler {
         return p -> {
             MetricsSizeInfo metricsInfo;
             try {
-                metricsInfo = getNumberOfPointsByMetricInRequest(request.getMetricRequests(), query);
+                metricsInfo = getNumberOfPointsByMetricInRequest(request.getMetricRequestsWithFinalTags(), query);
                 LOGGER.debug("metrics info to query : {}", metricsInfo);
                 if (metricsInfo.isEmpty()) {
                     final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
@@ -97,7 +97,7 @@ public class GetTimeSeriesHandler {
                 RESPONSE_CHUNK_END_FIELD,
                 RESPONSE_CHUNK_COUNT_FIELD,
                 NAME);
-        addAllTagsAsFields(request.getMetricRequests(), query);
+        addAllTagsAsFields(request.getMetricRequestsWithFinalTags(), query);
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
         query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
@@ -115,7 +115,8 @@ public class GetTimeSeriesHandler {
 
     private void buildFilters(Request request, SolrQuery query) {
         Map<String, String> rootTags = request.getRootTags();
-        List<MetricRequest> metricOptions = request.getMetricRequests();
+        //TODO Simplify : Here rootTags is not needed as merge is already done in getMetricRequestsWithFinalTags
+        List<MetricRequest> metricOptions = request.getMetricRequestsWithFinalTags();
         List<String> metricFilters = buildFilterForEachMetric(rootTags, metricOptions);
         String finalFilter = buildFinalFilterQuery(metricFilters);
         query.addFilterQuery(finalFilter);
@@ -131,7 +132,6 @@ public class GetTimeSeriesHandler {
      *
      */
     private String buildFinalFilterQuery(List<String> metricFilters) {
-        //TODO
         return metricFilters.stream().collect(Collectors.joining(") OR (", "(", ")"));
     }
 
@@ -151,48 +151,21 @@ public class GetTimeSeriesHandler {
      *
      */
     private List<String> buildFilterForEachMetric(Map<String, String> rootTags, List<MetricRequest> metricOptions) {
-        //TODO
         List<String> finalStringList = new ArrayList<>();
-        metricOptions.forEach(i -> {
+        metricOptions.forEach(metricRequest -> {
             Map<String,String> finalTagsForMetric = new HashMap<>();
             rootTags.forEach(finalTagsForMetric::put);
-            i.getTags().forEach(finalTagsForMetric::put);
-            List<String> stringList = new ArrayList<>();
+            metricRequest.getTags().forEach(finalTagsForMetric::put);
+            List<String> tagsFilter = new ArrayList<>();
             finalTagsForMetric.forEach((key, value) -> {
-                stringList.add(key+":\""+value+"\"");
+                tagsFilter.add(key+":\""+value+"\"");
             });
-            if(!stringList.isEmpty())
-                finalStringList.add(stringList.stream().collect(Collectors.joining(" AND ", "name:\""+i.getName()+"\" AND ", "")));
+            if(!tagsFilter.isEmpty())
+                finalStringList.add(tagsFilter.stream().collect(Collectors.joining(" AND ", "name:\""+metricRequest.getName()+"\" AND ", "")));
             else
-                finalStringList.add("name:\""+i.getName()+"\"");
+                finalStringList.add("name:\""+metricRequest.getName()+"\"");
         });
         return finalStringList;
-    }
-
-    private Optional<String> buildSolrFilterFromArray(JsonArray jsonArray, String fieldToFilter) {
-        if (jsonArray == null || jsonArray.isEmpty())
-            return Optional.empty();
-        if (jsonArray.size() == 1) {
-            return Optional.of(fieldToFilter + ":\"" + jsonArray.getString(0) + "\"");
-        } else {
-            String orNames = jsonArray.stream()
-                    .map(String.class::cast)
-                    .collect(Collectors.joining("\" OR \"", "(\"", "\")"));
-            return Optional.of(fieldToFilter + ":" + orNames);
-        }
-    }
-
-    private Optional<String> buildSolrFilterFromTags(JsonObject tags) {
-        if (tags == null || tags.isEmpty())
-            return Optional.empty();
-        String filters = tags.fieldNames().stream()
-                .map(tagName -> {
-                    String value = tags.getString(tagName);
-                    return tagName + ":\"" + value + "\"";
-//                    return "\"" + tagName + "\":\"" + value + "\"";
-                })
-                .collect(Collectors.joining(" AND ", "", ""));
-        return Optional.of(filters);
     }
 
     private void addFieldsThatWillBeNeededByAggregations(List<AGG> aggregationList, SolrQuery query) {
@@ -279,7 +252,6 @@ public class GetTimeSeriesHandler {
      * @return
      */
     private List<String> findNeededTagsName(List<MetricRequest> requests) {
-        //TODO
         Set<String> tagsSet = new HashSet<>();
         requests.forEach(metricRequest -> {
             tagsSet.addAll(metricRequest.getTags().keySet());
@@ -304,18 +276,14 @@ public class GetTimeSeriesHandler {
      * @return
      */
     private boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
-        //TODO
         if (!request.getName().equals(tuple.fields.get(NAME))){
             return false;
-        }else {
-            boolean isTupleMatchingMetricRequest = true;
+        } else {
             for (Map.Entry<String, String> entry : request.getTags().entrySet()) {
                 if (!tuple.fields.get(entry.getKey()).toString().equals(entry.getValue()))
-                    isTupleMatchingMetricRequest = false;
-                if (!isTupleMatchingMetricRequest)
-                    break;
+                    return false;
             }
-            return isTupleMatchingMetricRequest;
+            return true;
         }
 
     }
@@ -410,7 +378,7 @@ public class GetTimeSeriesHandler {
         long from = request.getFrom();
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
-        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequests());
+        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTags());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -421,7 +389,7 @@ public class GetTimeSeriesHandler {
         long from = request.getFrom();
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
-        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequests());
+        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTags());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -455,12 +423,6 @@ public class GetTimeSeriesHandler {
         timeSeriesExtracter.flush();
         LOGGER.debug("read {} chunks in stream", stream.getNumberOfDocRead());
         LOGGER.debug("extractTimeSeries response metric : {}", chunk.encodePrettily());
-        return buildTimeSeriesResponse(timeSeriesExtracter);
-    }
-
-    private JsonObject extractTimeSeriesThenBuildResponse(List<JsonObject> chunks, MultiTimeSeriesExtracter timeSeriesExtracter) {
-        chunks.forEach(timeSeriesExtracter::addChunk);
-        timeSeriesExtracter.flush();
         return buildTimeSeriesResponse(timeSeriesExtracter);
     }
 
@@ -524,7 +486,6 @@ public class GetTimeSeriesHandler {
         }
 
         public Map<String, String> getRootTags() {
-            //TODO
             Map<String,String> tagsMap = new HashMap<>();
             params.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
             return tagsMap;
@@ -535,8 +496,7 @@ public class GetTimeSeriesHandler {
          * The tags must be the result of the merge of specific tags and rootTags
          * @return
          */
-        public List<MetricRequest> getMetricRequests() {
-            //TODO
+        public List<MetricRequest> getMetricRequestsWithFinalTags() {
             return params.getJsonArray(NAMES).stream().map(i -> {
                 try {
                     JsonObject metricObject = new JsonObject(i.toString());
