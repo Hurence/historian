@@ -20,6 +20,7 @@ import java.util.HashMap;
 import static com.hurence.webapiservice.modele.AGG.*;
 import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
 
+
 public class TimeSeriesExtracterImplTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterImplTest.class);
@@ -61,7 +62,7 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSampler() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
                 3, Arrays.asList(AGG.values()));
@@ -80,7 +81,6 @@ public class TimeSeriesExtracterImplTest {
         aggregation.put(COUNT.toString(), 3.0);
         aggregation.put(AVG.toString(), 2.0);
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -88,7 +88,7 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSamplerPartOfOneChunk() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , MIDDLE_CHUNK_1,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
                 3, Arrays.asList(AGG.values()));
@@ -99,14 +99,13 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.0, MIDDLE_CHUNK_1)));
-        JsonObject aggregation = new JsonObject();
+        HashMap<String, Number> aggregation = new HashMap<>();
         aggregation.put(MIN.toString(), 1.0);
-        aggregation.put(MAX.toString(), 2.0);
         aggregation.put(SUM.toString(), 3.0);
+        aggregation.put(MAX.toString(), 2.0);
         aggregation.put(COUNT.toString(), 2.0);
         aggregation.put(AVG.toString(), 1.5);
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -114,7 +113,7 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testAvgSampler() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , END_CHUNK_1,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 3, Arrays.asList(AGG.values()));
@@ -125,14 +124,15 @@ public class TimeSeriesExtracterImplTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.5, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(3.0, END_CHUNK_1)));
+
         JsonObject aggregation = new JsonObject();
         aggregation.put(MIN.toString(), 1.0);
         aggregation.put(MAX.toString(), 3.0);
         aggregation.put(SUM.toString(), 6.0);
         aggregation.put(COUNT.toString(), 3.0);
         aggregation.put(AVG.toString(), 2.0);
+
         Assert.assertEquals(new JsonObject()
-                .put(TIMESERIE_NAME, "fake")
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -140,7 +140,7 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testAvgSampler2() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 6, Arrays.asList(AGG.values()));
@@ -160,7 +160,6 @@ public class TimeSeriesExtracterImplTest {
         aggregation.put(COUNT.toString(), 6.0);
         aggregation.put(AVG.toString(), 3.5);
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -168,7 +167,7 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSamplerWithIntersectingChunks() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 9),
                 9, Arrays.asList(AGG.values()));
@@ -188,14 +187,13 @@ public class TimeSeriesExtracterImplTest {
         expectedPoints.add(new JsonArray(Arrays.asList(5.0, 1477895624870L)));
         expectedPoints.add(new JsonArray(Arrays.asList(6.0, 1477895624870L)));
         expectedPoints.add(new JsonArray(Arrays.asList(6.0, END_CHUNK_2)));
-        JsonObject aggregation = new JsonObject();
+        HashMap<String, Number> aggregation = new HashMap<>();
         aggregation.put(MIN.toString(), 1.0);
-        aggregation.put(MAX.toString(), 6.0);
         aggregation.put(SUM.toString(), 36.0);
+        aggregation.put(MAX.toString(), 6.0);
         aggregation.put(COUNT.toString(), 9.0);
         aggregation.put(AVG.toString(), 4.0);
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -203,7 +201,7 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSamplerWithIntersectingChunks2() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 2),
                 9, Arrays.asList(AGG.values()));
@@ -223,7 +221,6 @@ public class TimeSeriesExtracterImplTest {
         aggregation.put(COUNT.toString(), 9.0);
         aggregation.put(AVG.toString(), 4.0);
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -232,7 +229,7 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testAggsWithSeveralFlush() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 9, Arrays.asList(AGG.values()));
@@ -250,6 +247,7 @@ public class TimeSeriesExtracterImplTest {
         aggregation.put(SUM.toString(), 36.0);
         aggregation.put(COUNT.toString(), 9.0);
         aggregation.put(AVG.toString(), 4.0);
+
         JsonObject result = extractor.getTimeSeries();
         Assert.assertEquals(new JsonObject()
                 .put(TIMESERIE_AGGS, aggregation)

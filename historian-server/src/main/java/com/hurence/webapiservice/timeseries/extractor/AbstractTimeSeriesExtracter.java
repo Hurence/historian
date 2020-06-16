@@ -2,15 +2,16 @@ package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.record.Point;
-import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.aggs.AggsCalculator;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
@@ -20,17 +21,15 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     final long from;
     final long to;
     final SamplingConf samplingConf;
-    private final String metricName;
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
 
-    public AbstractTimeSeriesExtracter(String metricName, long from, long to,
+    public AbstractTimeSeriesExtracter(long from, long to,
                                        SamplingConf samplingConf,
                                        long totalNumberOfPoint) {
-        this.metricName = metricName;
         this.from = from;
         this.to = to;
         this.samplingConf = TimeSeriesExtracterUtil.calculSamplingConf(samplingConf, totalNumberOfPoint);
@@ -92,7 +91,6 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 .map(p -> new JsonArray().add(p.getValue()).add(p.getTimestamp()))
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()
-                .put(TIMESERIE_NAME, metricName)
                 .put(TIMESERIE_POINT, new JsonArray(points));
         getAggsAsJson()
                 .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));

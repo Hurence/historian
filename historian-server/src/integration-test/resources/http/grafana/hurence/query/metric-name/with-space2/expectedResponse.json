@@ -1,13 +1,13 @@
 [
   {
-    "name":"temp_b",
+    "name":"metric with spaces",
     "datapoints":[
       [861, 1477895624866],
       [767, 1477917224866]
     ]
   },
   {
-    "name":"metric with spaces",
+    "name":"temp_b",
     "datapoints":[
       [861, 1477895624866],
       [767, 1477917224866]

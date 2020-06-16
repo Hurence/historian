@@ -5,6 +5,9 @@ import io.vertx.core.json.JsonObject;
 
 public interface MultiTimeSeriesExtracter {
 
+    public static String TIMESERIE_TAGS = "tags";
+    public static String TIMESERIE_NAME = "name";
+
     void addChunk(JsonObject chunk);
 
     /**

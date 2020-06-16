@@ -1,0 +1,55 @@
+[
+  {
+    "name":"temp_a",
+    "tags" : {
+      "sensor": "sensor_1",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [2.0,2],
+      [3.0,3],
+      [4.0,4]
+    ],
+    "aggregation":{
+      "MIN":2.0,
+      "AVG":3.0,
+      "MAX":4.0,
+      "COUNT":3.0,
+      "SUM":9.0
+    }
+  },
+  {
+    "name":"temp_a",
+    "tags" : {
+      "sensor": "sensor_2",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [3.0,5]
+    ],
+    "aggregation":{
+      "MIN":3.0,
+      "AVG":3.0,
+      "MAX":3.0,
+      "COUNT":1.0,
+      "SUM":3.0
+    }
+  },
+  {
+    "name":"temp_b",
+    "tags" : {
+      "sensor": "sensor_3",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [1.0,1]
+    ],
+    "aggregation":{
+      "MIN":1.0,
+      "AVG":1.0,
+      "MAX":1.0,
+      "COUNT":1.0,
+      "SUM":1.0
+    }
+  }
+]
