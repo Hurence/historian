@@ -3,6 +3,7 @@ package com.hurence.webapiservice.timeseries.aggs;
 import com.hurence.logisland.record.Point;
 import com.hurence.webapiservice.modele.AGG;
 
+
 import java.util.*;
 import java.util.stream.DoubleStream;
 

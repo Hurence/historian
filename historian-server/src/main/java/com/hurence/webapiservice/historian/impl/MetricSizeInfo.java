@@ -1,15 +1,17 @@
 package com.hurence.webapiservice.historian.impl;
 
+import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
+
 public class MetricSizeInfo {
 
-    public String metricName;
+    public MetricRequest metricRequest;
     public long totalNumberOfPoints;
     public long totalNumberOfChunks;
 
     @Override
     public String toString() {
         return "MetricSizeInfo{" +
-                "metricName='" + metricName + '\'' +
+                "metricRequest='" + metricRequest + '\'' +
                 ", totalNumberOfPoints=" + totalNumberOfPoints +
                 ", totalNumberOfChunks=" + totalNumberOfChunks +
                 '}';

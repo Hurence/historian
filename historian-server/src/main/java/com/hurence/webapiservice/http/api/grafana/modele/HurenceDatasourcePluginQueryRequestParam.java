@@ -3,13 +3,13 @@ package com.hurence.webapiservice.http.api.grafana.modele;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
+import io.vertx.core.json.JsonArray;
 
 import java.util.*;
 
-import static com.hurence.webapiservice.modele.AGG.*;
+import static com.hurence.webapiservice.modele.AGG.values;
 
-public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesRequest {
+public class HurenceDatasourcePluginQueryRequestParam {
 
     public static final int DEFAULT_BUCKET_SIZE = 1;//will be recomputed later by historian if necessary depending on maxDataPoints
     public static final SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.AVERAGE;
@@ -22,7 +22,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     public static final List DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
     public static final List<AGG> DEFAULT_ALL_AGGREGATION_LIST = Arrays.asList(values());
 
-    private final List<String> metricNames;
+    private final JsonArray metricNames;
     private final long from;
     private final long to;
     private final String format;
@@ -33,9 +33,9 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
     private final String requestId;
     private final List<AGG> aggregList;
 
-    private HurenceDatasourcePluginQueryRequestParam(List<String> metricNames, long from, long to, String format,
+    private HurenceDatasourcePluginQueryRequestParam(JsonArray metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
-                                                 Map<String, String> tags, String requestId, List<AGG> aggregList) {
+                                                     Map<String, String> tags, String requestId, List<AGG> aggregList) {
         Objects.requireNonNull(metricNames);
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
@@ -50,43 +50,43 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         this.aggregList = aggregList;
     }
 
-    @Override
+
     public long getFrom() {
         return from;
     }
 
-    @Override
+
     public List<AGG> getAggs() {
         return aggregList;
     }
 
-    @Override
+
     public long getTo() {
         return to;
     }
 
-    @Override
+
     public SamplingConf getSamplingConf() {
         return new SamplingConf(samplingAlgo, bucketSize, maxDataPoints);
     }
 
-    @Override
-    public List<String> getMetricNames() {
+
+    public JsonArray getMetricNames() {
         return metricNames;
     }
 
-    @Override
+
     public Map<String, String> getTags() {
         return tags;
     }
 
-    @Override
+
     public String getRequestId() {
         return requestId;
     }
 
     public static class Builder {
-        private List<String> metricNames;
+        private JsonArray metricNames;
         private long from = DEFAULT_FROM;
         private long to = DEFAULT_TO;
         private String format = DEFAULT_FORMAT;
@@ -97,7 +97,7 @@ public class HurenceDatasourcePluginQueryRequestParam implements TimeSeriesReque
         private String requestId = DEFAULT_REQUEST_ID;
         private List<AGG> aggreg = DEFAULT_AGGREGATION;
 
-        public Builder withMetricNames(List<String> metricNames) {
+        public Builder withMetricNames(JsonArray metricNames) {
             this.metricNames = metricNames;
             return this;
         }

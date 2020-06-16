@@ -1,10 +1,12 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.modele.AGG;
-import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
+import io.vertx.core.json.JsonArray;
+
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.junit.jupiter.api.Assertions;
@@ -50,12 +52,13 @@ public class QueryRequestParserTest {
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
-        final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+
         LOGGER.info("request : {}", request);
         assertEquals(1477895624866L, request.getFrom());
         assertEquals(1604147624866L, request.getTo());
         assertEquals(Collections.emptyList(), request.getAggs());
-        assertEquals(Arrays.asList("metric_1"), request.getMetricNames());
+        assertEquals(new JsonArray(Arrays.asList("metric_1")), request.getMetricNames());
         assertEquals(new HashMap<String, String>() {{
             put("sensor", "sensor_1");
         }}, request.getTags());
@@ -98,7 +101,7 @@ public class QueryRequestParserTest {
                     final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                             TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                             TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
-                    final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+                    final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         });
     }
 
@@ -110,14 +113,14 @@ public class QueryRequestParserTest {
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
-        final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_FROM, request.getFrom());
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_TO, request.getTo());
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_MAX_DATAPOINTS, request.getSamplingConf().getMaxPoint());
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_BUCKET_SIZE, request.getSamplingConf().getBucketSize());
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_SAMPLING_ALGORITHM, request.getSamplingConf().getAlgo());
-        assertEquals(Arrays.asList("metric_1"), request.getMetricNames());
+        assertEquals(new JsonArray(Arrays.asList("metric_1")), request.getMetricNames());
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_TAGS, request.getTags());
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_REQUEST_ID, request.getRequestId());
     }
@@ -129,7 +132,8 @@ public class QueryRequestParserTest {
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+            final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+
         });
     }
 
@@ -157,12 +161,12 @@ public class QueryRequestParserTest {
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
-        final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(1573700213285L, request.getFrom());
         assertEquals(1573721813285L, request.getTo());
         assertEquals(aggrs, request.getAggs());
-        assertEquals(Arrays.asList("metric_1"), request.getMetricNames());
+        assertEquals(new JsonArray(Arrays.asList("metric_1")), request.getMetricNames());
         assertEquals(500, request.getSamplingConf().getMaxPoint());
     }
 
@@ -189,8 +193,9 @@ public class QueryRequestParserTest {
         String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             queryRequestParser.parseRequest(requestBody);
         }).getMessage();
-        assertEquals(message, "MA is not a recognized aggregation, the accepted aggregations are : [MAX, MIN, SUM, AVG, COUNT]");
+        assertEquals(message, "MA is not a recognized aggregation, the accepted aggregations are : " + Arrays.asList(AGG.values()));
     }
+
     @Test
     public void testParsingRequestWithALLAggregation() {
         List<AGG> aggrs = new ArrayList<>();
@@ -215,12 +220,12 @@ public class QueryRequestParserTest {
         final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
-        final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(1573700213285L, request.getFrom());
         assertEquals(1573721813285L, request.getTo());
-        assertEquals(aggrs, request.getAggs());
-        assertEquals(Arrays.asList("metric_1"), request.getMetricNames());
+        assertEquals(Arrays.asList(AGG.values()), request.getAggs());
+        assertEquals(new JsonArray(Arrays.asList("metric_1")), request.getMetricNames());
         assertEquals(500, request.getSamplingConf().getMaxPoint());
     }
 
@@ -247,6 +252,38 @@ public class QueryRequestParserTest {
         String message = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             queryRequestParser.parseRequest(requestBody);
         }).getMessage();
-        assertEquals(message, "'/aggregation' json pointer value 'false' is not a valid value here !");
+        assertEquals(message, "'" +AGGREGATION_JSON_PATH+"' json pointer value 'false' is not a valid value here !");
+    }
+
+    @Test
+    public void testParsingNamesWithComplexTypes() {
+        JsonArray names = new JsonArray(Arrays.asList("temp_b",
+                new JsonObject().put(HistorianFields.NAME, "temp_a")
+                        .put(HistorianFields.TAGS, new JsonObject()
+                                .put("sensor", "sensor_1")
+                        ),
+                new JsonObject().put(HistorianFields.NAME, "temp_a")
+                        .put(HistorianFields.TAGS, new JsonObject()
+                                .put("sensor", "sensor_2")
+                        )
+        ));
+        JsonObject requestBody = new JsonObject();
+        JsonPointer.from(NAMES_JSON_PATH)
+                .writeJson(requestBody, names, true);
+        JsonPointer.from(TAGS_JSON_PATH)
+                .writeJson(requestBody, new HashMap<String, String>() {{
+                    put("usine", "usine_1");
+                    put("sensor", "sensor_3");
+                }}, true);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
+                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
+                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+        LOGGER.info("request : {}", request);
+        assertEquals(names, request.getMetricNames());
+        assertEquals(new HashMap<String, String>() {{
+            put("usine", "usine_1");
+            put("sensor", "sensor_3");
+        }}, request.getTags());
     }
 }

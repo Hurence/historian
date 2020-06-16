@@ -82,7 +82,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testNoSampler() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
                 9, Arrays.asList(AGG.values()));
@@ -92,14 +92,15 @@ public class TimeSeriesExtracterUsingPreAggTest {
         Assert.assertEquals(9, extractor.pointCount());
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, START_CHUNK_1)));
+
         JsonObject aggregation = new JsonObject();
         aggregation.put(MIN.toString(), 1.0);
         aggregation.put(MAX.toString(), 1.0);
         aggregation.put(SUM.toString(), 9.0);
         aggregation.put(COUNT.toString(), 9.0);
         aggregation.put(AVG.toString(), 1.0);
+
         Assert.assertEquals(new JsonObject()
-                .put(TIMESERIE_NAME, "fake")
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -109,7 +110,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAvgSampler() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 15, Arrays.asList(AGG.values()));
@@ -122,14 +123,15 @@ public class TimeSeriesExtracterUsingPreAggTest {
         JsonArray expectedPoints = new JsonArray();
         expectedPoints.add(new JsonArray(Arrays.asList(1.0, START_CHUNK_1)));
         expectedPoints.add(new JsonArray(Arrays.asList(2.5, START_CHUNK_2)));
+
         JsonObject aggregation = new JsonObject();
         aggregation.put(MIN.toString(), 1.0);
         aggregation.put(MAX.toString(), 3.0);
         aggregation.put(SUM.toString(), 24.0);
         aggregation.put(COUNT.toString(), 15.0);
         aggregation.put(AVG.toString(), 1.6);
+
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -137,7 +139,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAvgSampler2() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 12, Arrays.asList(AGG.values()));
@@ -158,7 +161,6 @@ public class TimeSeriesExtracterUsingPreAggTest {
         aggregation.put(COUNT.toString(), 12.0);
         aggregation.put(AVG.toString(), 3.5);
         Assert.assertEquals(new JsonObject()
-                .put(TIMESERIE_NAME, "fake")
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -167,7 +169,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testMinSampler() {
-                TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+                TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                         Long.MIN_VALUE , Long.MAX_VALUE,
                                 new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.values()));
                 extractor.addChunk(getChunk1());
@@ -186,7 +188,6 @@ public class TimeSeriesExtracterUsingPreAggTest {
                 aggregation.put(COUNT.toString(), 15.0);
                 aggregation.put(AVG.toString(), 1.6);
                 Assert.assertEquals(new JsonObject()
-                                        .put(TIMESERIE_NAME, "fake")
                                         .put(TIMESERIE_POINT, expectedPoints)
                                         .put(TIMESERIE_AGGS, aggregation)
                                 , extractor.getTimeSeries());
@@ -196,7 +197,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testMinSampler2() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                  Long.MIN_VALUE, Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.MIN, 2, 3),
                 12, Arrays.asList(AGG.values()));
@@ -217,7 +218,6 @@ public class TimeSeriesExtracterUsingPreAggTest {
         aggregation.put(COUNT.toString(), 12.0);
         aggregation.put(AVG.toString(), 3.5);
         Assert.assertEquals(new JsonObject()
-                        .put(TIMESERIE_NAME, "fake")
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
                 , extractor.getTimeSeries());
@@ -226,7 +226,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAggsWithSeveralFlush() {
-        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl("fake",
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
                 21, Arrays.asList(AGG.values()));

@@ -4,7 +4,6 @@ import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.GrafanaSimpleJsonPluginApiImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.http.api.modele.TimeSeriesRequest;
 
 import java.util.Collections;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.http.api.grafana.GrafanaSimpleJsonPluginApiImpl.FILTER_KEYS;
 
-public class QueryRequestParam implements TimeSeriesRequest {
+public class QueryRequestParam {
 
     public static final int DEFAULT_BUCKET_SIZE = 1;//will be recomputed later by historian if necessary depending on maxDataPoints
     public static final SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.AVERAGE;
@@ -126,14 +125,14 @@ public class QueryRequestParam implements TimeSeriesRequest {
                 .findAny();
     }
 
-    @Override
+
     public List<String> getMetricNames() {
         return getTargets().stream()
                 .map(Target::getTarget)
                 .collect(Collectors.toList());
     }
 
-    @Override
+
     public Map<String, String> getTags() {
         return getAdHocFilters().stream()
                 .filter(adhoc -> !FILTER_KEYS.contains(adhoc.getKey()))

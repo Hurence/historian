@@ -1,6 +1,9 @@
 [
   {
     "name":"metric_to_filter",
+    "tags" : {
+      "pays": "France"
+    },
     "datapoints":[
       [2.0, 1477917224868],
       [2.0, 1477917224886],
