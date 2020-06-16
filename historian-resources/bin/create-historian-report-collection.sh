@@ -3,11 +3,20 @@
 
 print_usage(){
     cat << EOF
-    create-historian-collection.sh [options]
+bash create-historian-report-collection.sh [options]
 
-    by Hurence, 09/01/2019
+[options]:
 
-    The script creates a collection for historian solr
+             -s|--solr-host
+             -c|--collection
+            -rf|--replication-factor
+            -ns|--num-shards
+             -d|--dry-run
+             -v|--model-version
+
+by Hurence, 09/01/2019
+
+The script creates a report collection for historian solr
 
 EOF
 }
@@ -165,7 +174,7 @@ declare SOLR_COLLECTION="historian"
 declare REPLICATION_FACTOR=1
 declare NUM_SHARDS=2
 declare DRY_RUN=false
-declare MODEL_VERSION=0
+declare MODEL_VERSION="VERSION_0"
 declare SOLR_UPDATE_QUERY=""
 
 # color setup

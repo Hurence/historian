@@ -3,11 +3,18 @@
 
 print_usage(){
     cat << EOF
-    create-historian-collection.sh [options]
+echo modify-collection-schema.sh [options]
 
-    by Hurence, 09/01/2019
+[options]:
 
-    The script creates a collection for historian solr
+             -s|--solr-host
+             -c|--collection
+            -rf|--replication-factor
+             -f|--new-field
+
+by Hurence, 09/01/2019
+
+The script modify collections of historian solr
 
 EOF
 }

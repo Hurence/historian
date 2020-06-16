@@ -3,11 +3,20 @@
 
 print_usage(){
     cat << EOF
-    create-historian-collection.sh [options]
+echo create-historian-annotation-collection.sh [options]
 
-    by Hurence, 09/01/2019
+[options]:
 
-    The script creates a collection for historian solr
+             -s|--solr-host
+             -c|--collection
+            -rf|--replication-factor
+            -ns|--num-shards
+             -d|--dry-run
+             -v|--model-version
+
+by Hurence, 09/01/2019
+
+The script creates annotation for historian solr
 
 EOF
 }
