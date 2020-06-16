@@ -176,4 +176,18 @@ public class ComplexQueryEndPointVersion0IT {
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithRefIds(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
+                        "/http/grafana/hurence/query/complex/test5/request.json",
+                        "/http/grafana/hurence/query/complex/test5/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
 }
