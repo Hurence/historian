@@ -1,15 +1,15 @@
 [
   {
+    "name": "openSpaceSensors.Temperature13",
+    "datapoints": [
+      [4.0, 1477916224866]
+    ]
+  },
+  {
     "name": "openSpaceSensors.Temperature14",
     "datapoints": [
       [43.0, 1477895624866],
       [8.0, 1477917224866]
-    ]
-  },
-  {
-    "name": "openSpaceSensors.Temperature13",
-    "datapoints": [
-      [4.0, 1477916224866]
     ]
   }
 ]

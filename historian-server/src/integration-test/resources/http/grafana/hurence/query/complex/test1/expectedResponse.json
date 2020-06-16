@@ -1,15 +1,5 @@
 [
   {
-    "name":"temp_b",
-    "tags" : {
-      "sensor": "sensor_3",
-      "usine": "usine_1"
-    },
-    "datapoints":[
-      [1.0,1]
-    ]
-  },
-  {
     "name":"temp_a",
     "tags" : {
       "sensor": "sensor_1",
@@ -27,6 +17,16 @@
     },
     "datapoints":[
       [3.0,1]
+    ]
+  },
+  {
+    "name":"temp_b",
+    "tags" : {
+      "sensor": "sensor_3",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [1.0,1]
     ]
   }
 ]

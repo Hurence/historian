@@ -1,19 +1,17 @@
 [
   {
-    "name":"temp_b",
-    "tags" : {},
-    "datapoints":[
-      [1.0,1]
-    ]
-  },
-  {
     "name":"temp_a",
-    "tags" : {},
     "datapoints":[
       [2.0,1],
       [3.0,1],
       [5.0,1],
       [4.0,1]
+    ]
+  },
+  {
+    "name":"temp_b",
+    "datapoints":[
+      [1.0,1]
     ]
   }
 ]
