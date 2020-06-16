@@ -39,6 +39,9 @@
             <includes>
                 <include>**/*</include>
             </includes>
+            <excludes>
+                <exclude>install.sh</exclude>
+            </excludes>
         </fileSet>
 
         <fileSet>
