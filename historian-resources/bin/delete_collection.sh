@@ -3,7 +3,6 @@
 
 print_usage(){
     cat << EOF
-    create-historian-collection.sh [options]
 
     by Hurence, 09/01/2019
 
@@ -12,7 +11,8 @@ EOF
 }
 
 parse_args() {
-
+echo "This script will delete a collection"
+echo -e "\n"
 echo "Path to the solr cluster ?"
 read solr_cluster_path               #variable stocké dans $solr_cluster_path
 echo -e "\n"
