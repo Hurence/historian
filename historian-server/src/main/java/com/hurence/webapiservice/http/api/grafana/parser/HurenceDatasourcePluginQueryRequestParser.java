@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.hurence.historian.modele.HistorianFields.REF_ID;
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
 
 public class HurenceDatasourcePluginQueryRequestParser {
@@ -138,9 +139,12 @@ public class HurenceDatasourcePluginQueryRequestParser {
                         if (el instanceof JsonObject) {
                             JsonObject jsonObject = (JsonObject) el;
                             Map<String, String> tags = parseTags(jsonObject);
-                            return new JsonObject()
+                            JsonObject toReturn = new JsonObject()
                                     .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME))
                                     .put(HistorianFields.TAGS, tags);
+                            if (jsonObject.containsKey(REF_ID))
+                                toReturn.put(REF_ID, jsonObject.getString(REF_ID));
+                            return toReturn;
                         }
                         throw new IllegalArgumentException(String.format(
                                 "field at path '%s' is not well formed. " +

@@ -11,6 +11,8 @@ package com.hurence.webapiservice.timeseries.extractor;
         import java.util.*;
         import java.util.stream.Collectors;
 
+        import static com.hurence.historian.modele.HistorianFields.REF_ID;
+
 public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(MultiTimeSeriesExtracterImpl.class);
@@ -71,6 +73,8 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(MetricRequest::getName)))
                 .map(entry -> {
                     JsonObject timeSerie = new JsonObject();
+                    if (entry.getKey().getRefId().isPresent())
+                        timeSerie.put(REF_ID, entry.getKey().getRefId().get());
                     timeSerie.put(TIMESERIE_NAME, entry.getKey().getName());
                     if (!entry.getKey().getTags().isEmpty())
                         timeSerie.put(TIMESERIE_TAGS, entry.getKey().getTags());

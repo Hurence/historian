@@ -504,12 +504,14 @@ public class GetTimeSeriesHandler {
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     metricObject.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
-                    return new MetricRequest(name, tagsMap);
+                    if (metricObject.containsKey(REF_ID))
+                        return new MetricRequest(name, tagsMap, metricObject.getString(REF_ID));
+                    return new MetricRequest(name, tagsMap, null);
                 }catch (Exception ex) {
                     String name = i.toString();
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
-                    return new MetricRequest(name, tagsMap);
+                    return new MetricRequest(name, tagsMap, null);
                 }
             })
             .collect(Collectors.toList());
