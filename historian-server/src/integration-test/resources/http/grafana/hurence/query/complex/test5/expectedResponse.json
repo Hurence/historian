@@ -1,0 +1,36 @@
+[
+  {
+    "refId": "A",
+    "name":"temp_a",
+    "tags" : {
+      "sensor": "sensor_1",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [2.0,2],
+      [3.0,3],
+      [4.0,4]
+    ]
+  },
+  {
+    "refId": "B",
+    "name":"temp_a",
+    "tags" : {
+      "sensor": "sensor_2",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [3.0,5]
+    ]
+  },
+  {
+    "name":"temp_b",
+    "tags" : {
+      "sensor": "sensor_3",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [1.0,1]
+    ]
+  }
+]

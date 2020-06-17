@@ -5,7 +5,6 @@ import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;
@@ -16,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 
 public class HurenceDatasourcePluginQueryRequestParser {
 
@@ -138,9 +138,12 @@ public class HurenceDatasourcePluginQueryRequestParser {
                         if (el instanceof JsonObject) {
                             JsonObject jsonObject = (JsonObject) el;
                             Map<String, String> tags = parseTags(jsonObject);
-                            return new JsonObject()
+                            JsonObject toReturn = new JsonObject()
                                     .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME))
                                     .put(HistorianFields.TAGS, tags);
+                            if (jsonObject.containsKey(QUERY_PARAM_REF_ID))
+                                toReturn.put(QUERY_PARAM_REF_ID, jsonObject.getString(QUERY_PARAM_REF_ID));
+                            return toReturn;
                         }
                         throw new IllegalArgumentException(String.format(
                                 "field at path '%s' is not well formed. " +

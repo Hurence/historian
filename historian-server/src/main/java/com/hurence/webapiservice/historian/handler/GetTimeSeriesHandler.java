@@ -5,10 +5,8 @@ import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.*;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.SolrQuery;

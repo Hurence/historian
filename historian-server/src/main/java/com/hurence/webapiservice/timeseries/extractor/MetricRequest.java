@@ -6,8 +6,6 @@ import io.vertx.core.json.JsonObject;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.hurence.historian.modele.HistorianFields.NAME;
-
 public class MetricRequest {
     private final String name;
     private final Map<String, String> tags;
@@ -15,6 +13,7 @@ public class MetricRequest {
     public MetricRequest(String name, Map<String, String> tags) {
         this.name = name;
         this.tags = tags;
+
     }
 
     public String getName() {
@@ -70,8 +69,6 @@ public class MetricRequest {
             }
         }
         return isChunkMatching;
-        //TODO feiz, need to adjust this method to be sure to keep chunk matching all tags !
-        // Attention aux NPE ! Bien réfléchir a ce qui peut être null ou non a ce stade du code.
     }
     
 }
