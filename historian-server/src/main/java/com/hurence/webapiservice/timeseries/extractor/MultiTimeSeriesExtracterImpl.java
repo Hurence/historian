@@ -1,15 +1,14 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-        import com.hurence.logisland.record.Point;
-        import com.hurence.webapiservice.modele.AGG;
-        import com.hurence.webapiservice.modele.SamplingConf;
-        import io.vertx.core.json.JsonArray;
-        import io.vertx.core.json.JsonObject;
-        import org.slf4j.Logger;
-        import org.slf4j.LoggerFactory;
+import com.hurence.webapiservice.modele.AGG;
+import com.hurence.webapiservice.modele.SamplingConf;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-        import java.util.*;
-        import java.util.stream.Collectors;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
