@@ -194,20 +194,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
         LOGGER.debug("getTimeSeriesChunkParams : {}", getTimeSeriesChunkParams.toString());
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
-                .map(sampledTimeSeries -> {
-                    List<RefIdInfo> refIdList = getRefIdInfos(request);
-                    List<JsonObject> timeseriesAsList = sampledTimeSeries.getJsonArray(TIMESERIES).stream().map(timeserieWithoutRefId -> {
-                        JsonObject timeserieWithoutRefIdObject = (JsonObject) timeserieWithoutRefId;
-                        JsonObject timeserieWithRefIdIfExist = new JsonObject();
-                        for (RefIdInfo refIdInfo : refIdList){
-                            if (refIdInfo.isMetricMatching(timeserieWithoutRefIdObject)) {
-                                timeserieWithRefIdIfExist.put(QUERY_PARAM_REF_ID, refIdInfo.getRefId());
-                            }
-                        }
-                        timeserieWithRefIdIfExist.mergeIn(timeserieWithoutRefIdObject);
-                        return timeserieWithRefIdIfExist;
-                    }).collect(Collectors.toList());
-                    JsonArray timeseries = new JsonArray(timeseriesAsList);
+                .map(sampledTimeSeriesRsp -> {
+                    JsonArray timeseries = sampledTimeSeriesRsp.getJsonArray(TIMESERIES);
                     if (LOGGER.isDebugEnabled()) {
                         timeseries.forEach(metric -> {
                             JsonObject el = (JsonObject) metric;
@@ -218,10 +206,18 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                         });
                         LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
                                 request.getRequestId(),
-                                sampledTimeSeries.getLong(TOTAL_POINTS, 0L),
+                                sampledTimeSeriesRsp.getLong(TOTAL_POINTS, 0L),
                                 System.currentTimeMillis() - startRequest);
                     }
                     return timeseries;
+                }).map(sampledTimeSeries -> {
+                    List<RefIdInfo> refIdList = getRefIdInfos(request);
+                    List<JsonObject> timeseriesAsList = sampledTimeSeries.stream().map(timeserieWithoutRefId -> {
+                        JsonObject timeserieWithRefIdIfExist = (JsonObject) timeserieWithoutRefId;
+                        addRefIdIfExist(refIdList, timeserieWithRefIdIfExist);
+                        return timeserieWithRefIdIfExist;
+                    }).collect(Collectors.toList());
+                    return new JsonArray(timeseriesAsList);
                 })
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
@@ -235,6 +231,14 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                     context.response().end(timeseries.encode());
                     LOGGER.debug("body :: {}", timeseries);
                 }).subscribe();
+    }
+
+    private void addRefIdIfExist(List<RefIdInfo> refIdList, JsonObject timeserieWithoutRefId) {
+        for (RefIdInfo refIdInfo : refIdList){
+            if (refIdInfo.isMetricMatching(timeserieWithoutRefId)) {
+                timeserieWithoutRefId.put(QUERY_PARAM_REF_ID, refIdInfo.getRefId());
+            }
+        }
     }
 
     private List<RefIdInfo> getRefIdInfos(HurenceDatasourcePluginQueryRequestParam request) {
