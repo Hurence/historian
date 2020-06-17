@@ -6,9 +6,11 @@ import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
+import com.hurence.webapiservice.http.api.grafana.modele.SearchValuesRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginAnnotationRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
+import com.hurence.webapiservice.http.api.grafana.parser.SearchValuesRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
@@ -21,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
 public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
@@ -95,6 +98,46 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(METRIC, request.getStringToUseToFindMetrics())
                 .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
+
+    @Override
+    public void searchValues(RoutingContext context) {
+        final SearchValuesRequestParam request;
+        try {
+            JsonObject requestBody = context.getBodyAsJson();
+
+            request = new SearchValuesRequestParser(QUERY_PARAM_FIELD, QUERY_PARAM_QUERY, QUERY_PARAM_LIMIT).parseRequest(requestBody);
+        } catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
+        final JsonObject getFieldValuesParam = buildGetFieldValuesParam(request);
+
+        service.rxGetFieldValues(getFieldValuesParam)
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(valuesResponse -> {
+                    JsonArray array = valuesResponse.getJsonArray(METRICS);
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(array.encode());
+                }).subscribe();
+    }
+
+    private JsonObject buildGetFieldValuesParam(SearchValuesRequestParam request) {
+        return new JsonObject()
+                .put(QUERY_PARAM_FIELD, request.getFieldToSearch())
+                .put(QUERY_PARAM_QUERY, request.getQueryToUseInSearch())
+                .put(QUERY_PARAM_LIMIT, request.getMaxNumberOfMetricNameToReturn());
+    }
+
 
     public final static String FROM_JSON_PATH = "/from";
     public final static String TO_JSON_PATH = "/to";

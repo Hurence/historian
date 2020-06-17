@@ -204,6 +204,14 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     @Override
+    public HistorianService getFieldValues(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
+        GetFieldValuesHandler requestHandler = new GetFieldValuesHandler(solrHistorianConf);
+        Handler<Promise<JsonObject>> getFieldValuesHandler = requestHandler.getHandler(params);
+        vertx.executeBlocking(getFieldValuesHandler, resultHandler);
+        return this;
+    }
+
+    @Override
     public HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
         GetAnnotationsHandler requestHandler = new GetAnnotationsHandler(solrHistorianConf);
         Handler<Promise<JsonObject>> annotationHandler = requestHandler.getHandler(params);

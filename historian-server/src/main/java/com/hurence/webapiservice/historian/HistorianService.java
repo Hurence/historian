@@ -145,6 +145,9 @@ public interface HistorianService {
     @Fluent
     HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
 
+    @Fluent
+    HistorianService getFieldValues(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
+
     /**
      * @param params        as a json object
      *                      <pre>

@@ -64,6 +64,8 @@ public class HttpServerVerticle extends AbstractVerticle {
             GrafanaApi.QUERY_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_SEARCH_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
             GrafanaApi.SEARCH_ENDPOINT;
+    public static final String HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
+            GrafanaApi.SEARCH_VALUES_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
             GrafanaApi.ANNOTATIONS_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_TAG_KEYS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +

@@ -21,6 +21,8 @@ public interface GrafanaApi {
     }
 
     String SEARCH_ENDPOINT = "/search";
+    String SEARCH_VALUES = "/values";
+    String SEARCH_VALUES_ENDPOINT = SEARCH_ENDPOINT+SEARCH_VALUES;
     String QUERY_ENDPOINT = "/query";
     String ANNOTATIONS_ENDPOINT = "/annotations";
     String TAG_KEYS_ENDPOINT = "/tag-keys";
@@ -30,6 +32,7 @@ public interface GrafanaApi {
         Router router = Router.router(vertx);
         router.get("/").handler(this::root);
         router.post(SEARCH_ENDPOINT).handler(this::search);
+        router.post(SEARCH_VALUES_ENDPOINT).handler(this::searchValues);
         router.post(QUERY_ENDPOINT)
                 .produces("application/json")
                 .handler(this::query);
@@ -38,6 +41,7 @@ public interface GrafanaApi {
         router.post(TAG_VALUES_ENDPOINT).handler(this::tagValues);
         return router;
     }
+
 
     /**
      * should return 200 ok
@@ -49,6 +53,11 @@ public interface GrafanaApi {
      * should return metrics name based on input.
      */
     void search(RoutingContext context);
+
+    /**
+     * should return fields values based on input.
+     */
+    void searchValues(RoutingContext context);
 
     /**
      * should return datapoints of metrics based on input.

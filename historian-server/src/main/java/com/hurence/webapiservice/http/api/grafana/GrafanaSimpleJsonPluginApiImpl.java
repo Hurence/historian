@@ -103,6 +103,11 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                 }).subscribe();
     }
 
+    @Override
+    public void searchValues(RoutingContext context) {
+
+    }
+
     private JsonObject buildGetMetricsParam(SearchRequestParam request) {
         return new JsonObject()
                 .put(METRIC, request.getStringToUseToFindMetrics())
