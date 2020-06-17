@@ -130,6 +130,11 @@ public class HistorianServiceVertxProxyHandler extends ProxyHandler {
                         HelperUtils.createHandler(msg));
           break;
         }
+        case "getFieldValues": {
+          service.getFieldValues((io.vertx.core.json.JsonObject)json.getValue("params"),
+                        HelperUtils.createHandler(msg));
+          break;
+        }
         case "getAnnotations": {
           service.getAnnotations((io.vertx.core.json.JsonObject)json.getValue("params"),
                         HelperUtils.createHandler(msg));
