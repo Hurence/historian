@@ -27,6 +27,7 @@ L'api REST de l'historian est actuellement composé des endpoints ci-dessous :
 * GET <<grafana-hurence-datasource-root,_/api/grafana/v0_>>: L'api pour interagir avec Grafana en utilisant le plugin datasource de hurence "Hurence-Historian".
   * POST <<grafana-hurence-datasource-query,_/api/grafana/v0/query_>>: Permet d'obtenir les points de l'historian.
   * POST <<grafana-hurence-datasource-search,_/api/grafana/v0/search_>>: Permet d'obtenir les noms des métriques de l'historian.
+* POST <<grafana-hurence-datasource-search-values,_/api/grafana/v0/search/values_>>: Permet d'obtenir les valeurs pour la clé indiquer.
   * POST <<grafana-hurence-datasource-annotations,_/api/grafana/v0/annotations_>>: Permet d'obtenir les annotations enregistrées dans l'historian.
   * POST <<grafana-hurence-datasource-tag-keys,_/api/grafana/v0/tag-keys_>>: Permet d'obtenir les clés disponibles pour utiliser l'endpoint '_/api/grafana/v0/tag-values_'.
   * POST <<grafana-hurence-datasource-tag-values,_/api/grafana/v0/tag-values_>>: Permet d'obtenir les valeurs possibles pour la clé indiquer.
@@ -949,6 +950,60 @@ Exemple de requête :
 |===
 
 NOTE: Le corps de la requête est optionnel.
+
+Exemple de réponse :
+
+[source,json]
+----
+["upper_25","upper_50","upper_75","upper_90","upper_95"]
+----
+
+[[grafana-hurence-datasource-search-values]]
+===== POST /api/grafana/v0/search/values
+
+
+Permet de chercher les différentes valeurs pour la clé indiquer.
+
+Exemple de requête :
+
+[source,json]
+----
+{
+  "field": "name",
+  "query": "up",
+  "limit": 5
+}
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/field
+|String
+|la clé recherché.
+|Oui
+|
+|
+
+|/query
+|String
+|Une partie du nom de la clé recherché.
+|Oui
+|
+|
+
+|/limit
+|Int
+|Le nombre maximum de nom de métrique a retourné.
+|Non
+|
+|
+
+|===
+
+NOTE: Le query et la limit de la requête sont optionnel.
 
 Exemple de réponse :
 
