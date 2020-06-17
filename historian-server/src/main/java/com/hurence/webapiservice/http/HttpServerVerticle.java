@@ -49,28 +49,24 @@ public class HttpServerVerticle extends AbstractVerticle {
     private static final String GRAFANA_API_ENDPOINT = "/api/grafana";
     private static final String SIMPLE_JSON_GRAFANA_API_ENDPOINT = GRAFANA_API_ENDPOINT + "/simplejson";
     public static final String SIMPLE_JSON_GRAFANA_QUERY_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.QUERY_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.QUERY_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_SEARCH_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.SEARCH_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.SEARCH_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.ANNOTATIONS_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.ANNOTATIONS_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_TAG_KEYS_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_KEYS_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.TAG_KEYS_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_TAG_VALUES_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_VALUES_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.TAG_VALUES_ENDPOINT;
     private static final String HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT = GRAFANA_API_ENDPOINT + "/v0";
     public static final String HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.QUERY_ENDPOINT;
+            GrafanaHurenceDatasourcePluginApi.QUERY_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_SEARCH_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.SEARCH_ENDPOINT;
+            GrafanaHurenceDatasourcePluginApi.SEARCH_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.SEARCH_VALUES_ENDPOINT;
+            GrafanaHurenceDatasourcePluginApi.SEARCH_VALUES_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.ANNOTATIONS_ENDPOINT;
-    public static final String HURENCE_DATASOURCE_GRAFANA_TAG_KEYS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_KEYS_ENDPOINT;
-    public static final String HURENCE_DATASOURCE_GRAFANA_TAG_VALUES_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_VALUES_ENDPOINT;
+            GrafanaHurenceDatasourcePluginApi.ANNOTATIONS_ENDPOINT;
 
     //test endpoints
     private static final String TEST_API_ENDPOINT = "/test/api";
