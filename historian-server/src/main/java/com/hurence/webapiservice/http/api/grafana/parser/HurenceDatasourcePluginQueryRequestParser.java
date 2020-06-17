@@ -5,7 +5,6 @@ import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
-
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;
@@ -15,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.REF_ID;
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.REF_ID;
 
 public class HurenceDatasourcePluginQueryRequestParser {
 

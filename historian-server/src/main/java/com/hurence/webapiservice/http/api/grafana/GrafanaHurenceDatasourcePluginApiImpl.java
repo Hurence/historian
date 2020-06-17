@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.grafana;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.webapiservice.historian.util.RefIdInfo;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
@@ -10,7 +11,6 @@ import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePlugin
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -18,10 +18,17 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.REF_ID;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_NAME;
+import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_TAGS;
 
 public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
 
@@ -189,11 +196,23 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
                 .map(sampledTimeSeries -> {
-                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES);
+                    List<RefIdInfo> refIdList = getRefIdInfos(request);
+                    List<JsonObject> timeseriesAsList = sampledTimeSeries.getJsonArray(TIMESERIES).stream().map(timeserieWithoutRefId -> {
+                        JsonObject timeserieWithoutRefIdObject = (JsonObject) timeserieWithoutRefId;
+                        JsonObject timeserieWithRefIdIfExist = new JsonObject();
+                        for (RefIdInfo refIdInfo : refIdList){
+                            if (refIdInfo.isMetricMatching(timeserieWithoutRefIdObject)) {
+                                timeserieWithRefIdIfExist.put(REF_ID, refIdInfo.getRefId());
+                            }
+                        }
+                        timeserieWithRefIdIfExist.mergeIn(timeserieWithoutRefIdObject);
+                        return timeserieWithRefIdIfExist;
+                    }).collect(Collectors.toList());
+                    JsonArray timeseries = new JsonArray(timeseriesAsList);
                     if (LOGGER.isDebugEnabled()) {
                         timeseries.forEach(metric -> {
                             JsonObject el = (JsonObject) metric;
-                            String metricName = el.getString(MultiTimeSeriesExtracter.TIMESERIE_NAME);
+                            String metricName = el.getString(TIMESERIE_NAME);
                             int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
                             LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
                                     request.getRequestId(),size, metricName);
@@ -217,6 +236,24 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                     context.response().end(timeseries.encode());
                     LOGGER.debug("body :: {}", timeseries);
                 }).subscribe();
+    }
+
+    private List<RefIdInfo> getRefIdInfos(HurenceDatasourcePluginQueryRequestParam request) {
+        List<RefIdInfo> refIdList = new ArrayList<>();
+        for (Object metricInfo : request.getMetricNames()) {
+            if (metricInfo instanceof JsonObject && ((JsonObject) metricInfo).containsKey(REF_ID)) {
+                JsonObject metricInfoObject = new JsonObject(metricInfo.toString());
+                Map<String, String> finalTagsForThisMetric = new HashMap<>(request.getTags());
+                if (metricInfoObject.containsKey(TAGS))
+                    for (Map.Entry<String, Object> tagsEntry : metricInfoObject.getJsonObject(TAGS).getMap().entrySet()){
+                        finalTagsForThisMetric.put(tagsEntry.getKey() ,tagsEntry.getValue().toString());
+                    }
+                refIdList.add(new RefIdInfo(metricInfoObject.getString(NAME),
+                        metricInfoObject.getString(REF_ID),
+                        finalTagsForThisMetric));
+            }
+        }
+        return refIdList;
     }
 
     private JsonObject buildGetTimeSeriesRequest(HurenceDatasourcePluginQueryRequestParam request) {

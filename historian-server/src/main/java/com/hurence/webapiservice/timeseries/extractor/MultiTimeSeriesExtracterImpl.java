@@ -1,17 +1,14 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-        import com.hurence.logisland.record.Point;
-        import com.hurence.webapiservice.modele.AGG;
-        import com.hurence.webapiservice.modele.SamplingConf;
-        import io.vertx.core.json.JsonArray;
-        import io.vertx.core.json.JsonObject;
-        import org.slf4j.Logger;
-        import org.slf4j.LoggerFactory;
+import com.hurence.webapiservice.modele.AGG;
+import com.hurence.webapiservice.modele.SamplingConf;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-        import java.util.*;
-        import java.util.stream.Collectors;
-
-        import static com.hurence.historian.modele.HistorianFields.REF_ID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
@@ -73,8 +70,6 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(MetricRequest::getName)))
                 .map(entry -> {
                     JsonObject timeSerie = new JsonObject();
-                    if (entry.getKey().getRefId().isPresent())
-                        timeSerie.put(REF_ID, entry.getKey().getRefId().get());
                     timeSerie.put(TIMESERIE_NAME, entry.getKey().getName());
                     if (!entry.getKey().getTags().isEmpty())
                         timeSerie.put(TIMESERIE_TAGS, entry.getKey().getTags());

@@ -29,7 +29,6 @@ public class HistorianFields {
     public static String TIME = "time";
     public static String TEXT = "text";
     public static String TAGS = "tags";
-    public static String REF_ID = "refId";
     public static String LIMIT = "limit";
     public static String MATCH_ANY = "matchAny";
     public static String TYPE = "type";

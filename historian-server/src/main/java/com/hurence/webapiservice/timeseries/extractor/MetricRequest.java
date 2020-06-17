@@ -5,20 +5,15 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 
 public class MetricRequest {
     private final String name;
     private final Map<String, String> tags;
-    private final Optional<String> refId;
 
-    public MetricRequest(String name, Map<String, String> tags, String refId) {
+    public MetricRequest(String name, Map<String, String> tags) {
         this.name = name;
         this.tags = tags;
-        if(refId == null)
-            this.refId = Optional.empty();
-        else
-            this.refId = Optional.of(refId);
+
     }
 
     public String getName() {
@@ -27,10 +22,6 @@ public class MetricRequest {
 
     public Map<String, String> getTags() {
         return tags;
-    }
-
-    public Optional<String> getRefId() {
-        return refId;
     }
 
     @Override
@@ -78,8 +69,6 @@ public class MetricRequest {
             }
         }
         return isChunkMatching;
-        //TODO feiz, need to adjust this method to be sure to keep chunk matching all tags !
-        // Attention aux NPE ! Bien réfléchir a ce qui peut être null ou non a ce stade du code.
     }
     
 }

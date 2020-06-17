@@ -5,10 +5,8 @@ import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.*;
-
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
-
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -504,14 +502,12 @@ public class GetTimeSeriesHandler {
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     metricObject.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
-                    if (metricObject.containsKey(REF_ID))
-                        return new MetricRequest(name, tagsMap, metricObject.getString(REF_ID));
-                    return new MetricRequest(name, tagsMap, null);
+                    return new MetricRequest(name, tagsMap);
                 }catch (Exception ex) {
                     String name = i.toString();
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
-                    return new MetricRequest(name, tagsMap, null);
+                    return new MetricRequest(name, tagsMap);
                 }
             })
             .collect(Collectors.toList());
