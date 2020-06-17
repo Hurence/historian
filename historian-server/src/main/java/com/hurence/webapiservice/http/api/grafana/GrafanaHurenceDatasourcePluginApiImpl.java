@@ -25,10 +25,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.main.modele.QueryFields.REF_ID;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_NAME;
-import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_TAGS;
 
 public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
 
@@ -202,7 +201,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                         JsonObject timeserieWithRefIdIfExist = new JsonObject();
                         for (RefIdInfo refIdInfo : refIdList){
                             if (refIdInfo.isMetricMatching(timeserieWithoutRefIdObject)) {
-                                timeserieWithRefIdIfExist.put(REF_ID, refIdInfo.getRefId());
+                                timeserieWithRefIdIfExist.put(QUERY_PARAM_REF_ID, refIdInfo.getRefId());
                             }
                         }
                         timeserieWithRefIdIfExist.mergeIn(timeserieWithoutRefIdObject);
@@ -241,7 +240,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
     private List<RefIdInfo> getRefIdInfos(HurenceDatasourcePluginQueryRequestParam request) {
         List<RefIdInfo> refIdList = new ArrayList<>();
         for (Object metricInfo : request.getMetricNames()) {
-            if (metricInfo instanceof JsonObject && ((JsonObject) metricInfo).containsKey(REF_ID)) {
+            if (metricInfo instanceof JsonObject && ((JsonObject) metricInfo).containsKey(QUERY_PARAM_REF_ID)) {
                 JsonObject metricInfoObject = new JsonObject(metricInfo.toString());
                 Map<String, String> finalTagsForThisMetric = new HashMap<>(request.getTags());
                 if (metricInfoObject.containsKey(TAGS))
@@ -249,7 +248,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                         finalTagsForThisMetric.put(tagsEntry.getKey() ,tagsEntry.getValue().toString());
                     }
                 refIdList.add(new RefIdInfo(metricInfoObject.getString(NAME),
-                        metricInfoObject.getString(REF_ID),
+                        metricInfoObject.getString(QUERY_PARAM_REF_ID),
                         finalTagsForThisMetric));
             }
         }

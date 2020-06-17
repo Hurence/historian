@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
-import static com.hurence.webapiservice.http.api.main.modele.QueryFields.REF_ID;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 
 public class HurenceDatasourcePluginQueryRequestParser {
 
@@ -141,8 +141,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
                             JsonObject toReturn = new JsonObject()
                                     .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME))
                                     .put(HistorianFields.TAGS, tags);
-                            if (jsonObject.containsKey(REF_ID))
-                                toReturn.put(REF_ID, jsonObject.getString(REF_ID));
+                            if (jsonObject.containsKey(QUERY_PARAM_REF_ID))
+                                toReturn.put(QUERY_PARAM_REF_ID, jsonObject.getString(QUERY_PARAM_REF_ID));
                             return toReturn;
                         }
                         throw new IllegalArgumentException(String.format(

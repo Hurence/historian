@@ -9,5 +9,5 @@ public class QueryFields {
     public static final String QUERY_PARAM_SAMPLING = "samplingAlgo";
     public static final String QUERY_PARAM_BUCKET_SIZE = "bucketSize";
     public static final String QUERY_PARAM_MAX_POINT = "maxPoints";
-    public static String REF_ID = "refId";
+    public static String QUERY_PARAM_REF_ID = "refId";
 }
