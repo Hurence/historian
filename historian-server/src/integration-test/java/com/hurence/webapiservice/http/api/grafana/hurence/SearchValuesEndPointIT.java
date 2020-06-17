@@ -13,8 +13,10 @@ import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.reactivex.Completable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.junit5.Timeout;
+import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.client.WebClient;
@@ -24,6 +26,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -31,11 +34,13 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 
+@ExtendWith({VertxExtension.class, SolrExtension.class})
 public class SearchValuesEndPointIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(SearchValuesEndPointIT.class);
@@ -43,11 +48,21 @@ public class SearchValuesEndPointIT {
 
     @BeforeAll
     public static void initSolrAnderticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        initSolrAndVerticles(client, container, vertx, context);
-        injectChunksIntoSolr(client, vertx);
+        Completable solrAndVerticlesDeployed = initSolrAndVerticles(container, vertx, context);
+        Completable injectIntoSolr = Completable.fromCallable(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                injectChunksIntoSolr(client);
+                return null;
+            }
+        });
+        solrAndVerticlesDeployed
+                .andThen(injectIntoSolr)
+                .subscribe(context::completeNow,
+                        context::failNow);
     }
 
-    public static void injectChunksIntoSolr(SolrClient client, Vertx vertx) throws SolrServerException, IOException {
+    public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralVersion0SolrInjector injector = new GeneralVersion0SolrInjector();
         ChunkModeleVersion0 chunkTempbUsine1Sensor3 = ChunkModeleVersion0.fromPoints("temp_b", Arrays.asList(
@@ -90,14 +105,11 @@ public class SearchValuesEndPointIT {
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
-    public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
+    public static Completable initSolrAndVerticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         SolrITHelper.addFieldToChunkSchema(container, "usine");
         SolrITHelper.addFieldToChunkSchema(container, "sensor");
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
-                    context.completeNow();
-                },
-                t -> context.failNow(t));
+        return HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).ignoreElement();
     }
 
     @BeforeAll
