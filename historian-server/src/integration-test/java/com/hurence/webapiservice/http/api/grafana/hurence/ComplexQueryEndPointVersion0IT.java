@@ -18,6 +18,9 @@ import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.reactivex.Completable;
+import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
@@ -39,6 +42,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT;
@@ -55,11 +59,23 @@ public class ComplexQueryEndPointVersion0IT {
 
     @BeforeAll
     public static void initSolrAnderticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        initSolrAndVerticles(client, container, vertx, context);
-        injectChunksIntoSolr(client, vertx);
+        Completable solrAndVerticlesDeployed = initSolrAndVerticles(container, vertx, context);
+        Completable injectIntoSolr = Completable.fromCallable(new Callable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                injectChunksIntoSolr(client);
+                return null;
+            }
+        });
+        solrAndVerticlesDeployed
+                .andThen(injectIntoSolr)
+                .subscribe(context::completeNow,
+                        context::failNow);
+
+
     }
 
-    public static void injectChunksIntoSolr(SolrClient client, Vertx vertx) throws SolrServerException, IOException {
+    public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralVersion0SolrInjector injector = new GeneralVersion0SolrInjector();
         ChunkModeleVersion0 chunkTempbUsine1Sensor3 = ChunkModeleVersion0.fromPoints("temp_b", Arrays.asList(
@@ -102,14 +118,11 @@ public class ComplexQueryEndPointVersion0IT {
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
 
-    public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
+    public static Completable initSolrAndVerticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         SolrITHelper.addFieldToChunkSchema(container, "usine");
         SolrITHelper.addFieldToChunkSchema(container, "sensor");
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
-                    context.completeNow();
-                },
-                t -> context.failNow(t));
+        return HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).ignoreElement();
     }
 
     @BeforeAll
@@ -136,6 +149,7 @@ public class ComplexQueryEndPointVersion0IT {
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
+
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryWithNoTags(Vertx vertx, VertxTestContext testContext) {
@@ -149,6 +163,7 @@ public class ComplexQueryEndPointVersion0IT {
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
+
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryWithAggregations(Vertx vertx, VertxTestContext testContext) {
