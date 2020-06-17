@@ -57,18 +57,19 @@ public class GetFieldValuesHandler {
                 if (facetFieldsCount.size() == 0) {
                     p.complete(new JsonObject()
                             .put(TOTAL, 0)
-                            .put(METRICS, new JsonArray())
+                            .put(QUERY_PARAM_VALUES, new JsonArray())
                     );
                     return;
                 }
                 LOGGER.debug("Found " + facetField.getValueCount() + " different values");
                 JsonArray metrics = new JsonArray(facetFieldsCount.stream()
                         .map(FacetField.Count::getName)
+                        .sorted()
                         .collect(Collectors.toList())
                 );
                 p.complete(new JsonObject()
                         .put(TOTAL, facetField.getValueCount())
-                        .put(METRICS, metrics)
+                        .put(QUERY_PARAM_VALUES, metrics)
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);

@@ -124,7 +124,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(valuesResponse -> {
-                    JsonArray array = valuesResponse.getJsonArray(METRICS);
+                    JsonArray array = valuesResponse.getJsonArray(QUERY_PARAM_VALUES);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(array.encode());
