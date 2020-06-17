@@ -2,8 +2,7 @@ package com.hurence.webapiservice.http;
 
 import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
+import com.hurence.webapiservice.http.api.grafana.*;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApi;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
 import com.hurence.webapiservice.http.api.main.MainHistorianApi;
@@ -95,8 +94,8 @@ public class HttpServerVerticle extends AbstractVerticle {
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
         router.mountSubRouter(IMPORT_ENDPOINT, importApi);
         //grafana
-        Router hurenceGraphanaApi = GrafanaApi.fromVersion(GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN, historianService).getGraphanaRouter(vertx);
-        Router simpleJsonGraphanaApi = GrafanaApi.fromVersion(GrafanaApiVersion.SIMPLE_JSON_PLUGIN, historianService).getGraphanaRouter(vertx);
+        Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService).getGraphanaRouter(vertx);
+        Router simpleJsonGraphanaApi = new  GrafanaSimpleJsonPluginApiImpl(historianService).getGraphanaRouter(vertx);
         router.mountSubRouter(SIMPLE_JSON_GRAFANA_API_ENDPOINT, simpleJsonGraphanaApi);
         router.mountSubRouter(HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT, hurenceGraphanaApi);
 

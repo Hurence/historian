@@ -11,6 +11,7 @@ import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePlugin
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchValuesRequestParser;
+import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
@@ -25,12 +26,14 @@ import java.util.stream.Collectors;
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
-public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
+public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceDatasourcePluginApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrafanaHurenceDatasourcePluginApiImpl.class);
 
+    protected HistorianService service;
+
     public GrafanaHurenceDatasourcePluginApiImpl(HistorianService service) {
-        super(service);
+        this.service = service;
     }
 
 
@@ -372,5 +375,15 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(annotations.encode());
                 }).subscribe();
+    }
+
+    protected JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
+        return new JsonObject()
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(TAGS, request.getTags())
+                .put(LIMIT, request.getMaxAnnotation())
+                .put(MATCH_ANY, request.getMatchAny())
+                .put(TYPE, request.getType());
     }
 }

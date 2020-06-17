@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 public class SearchValuesRequestParser {
     private static final Logger LOGGER = LoggerFactory.getLogger(SearchRequestParser.class);
 
+    public static final int DEFAULT_MAX_DATAPOINTS = 1000;
+
     private final String field;
     private final String query;
     private final String limitField;
@@ -29,7 +31,7 @@ public class SearchValuesRequestParser {
         builder.withField(fieldToSearch);
         builder.withQuery(queryToUseInSearch);
         Integer maxNumberOfMetricNameToReturn = parseMaxNumberOfMetricToReturn(requestBody);;
-        builder.withMaxNumberOfMetricToReturn(maxNumberOfMetricNameToReturn == null ? QueryRequestParam.DEFAULT_MAX_DATAPOINTS : maxNumberOfMetricNameToReturn);
+        builder.withMaxNumberOfMetricToReturn(maxNumberOfMetricNameToReturn == null ? DEFAULT_MAX_DATAPOINTS : maxNumberOfMetricNameToReturn);
         return builder.build();
     }
 

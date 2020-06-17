@@ -28,7 +28,7 @@ import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.NOT_FOUND;
 
-public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
+public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrafanaSimpleJsonPluginApiImpl.class);
     protected HistorianService service;
@@ -101,11 +101,6 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(array.encode());
                 }).subscribe();
-    }
-
-    @Override
-    public void searchValues(RoutingContext context) {
-
     }
 
     private JsonObject buildGetMetricsParam(SearchRequestParam request) {
