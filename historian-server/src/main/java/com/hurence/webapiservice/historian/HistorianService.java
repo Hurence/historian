@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.historian;
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import com.hurence.webapiservice.historian.impl.SolrHistorianServiceImpl;
 import io.vertx.codegen.annotations.Fluent;
@@ -10,7 +11,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import com.hurence.historian.modele.HistorianFields;
 
 
 /**
@@ -145,6 +145,24 @@ public interface HistorianService {
     @Fluent
     HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
 
+    /**
+     * @param params        as a json object
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#FIELD} : "A string of the field to search for it's values",
+     *                          {@value HistorianFields#QUERY} : "a query to use in searching the values",
+     *                          {@value HistorianFields#LIMIT} : <maximum number of metric to return>(int)
+     *                      }
+     *                      </pre>
+     * @param resultHandler return names of metrics as an array of
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#RESPONSE_VALUES} : "all field values matching the query",
+     *                          {@value HistorianFields#TOTAL} : <Number of metric returned>(int)
+     *                      }
+     *                      </pre>
+     * @return himself
+     */
     @Fluent
     HistorianService getFieldValues(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
 

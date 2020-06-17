@@ -101,6 +101,18 @@ public class SearchValuesEndPointIT {
         chunkTempaUsine1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1);
 
+        ChunkModeleVersion0 chunkTempaUsine3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
+                new Point(0, 7, 5)
+        ));
+        chunkTempaUsine1.addTag("usine", "usine_3");
+        injector.addChunk(chunkTempaUsine3);
+
+        ChunkModeleVersion0 chunkTempaNoUsine = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
+                new Point(0, 7, 5)
+        ));
+        chunkTempaUsine1.addTag("usine", "no_usine");
+        injector.addChunk(chunkTempaNoUsine);
+
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
@@ -156,6 +168,32 @@ public class SearchValuesEndPointIT {
                 new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
                         "/http/grafana/hurence/searchValues/testSearchNameValues/request.json",
                         "/http/grafana/hurence/searchValues/testSearchNameValues/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchUsineValuesWithQuery(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithQuery/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithQuery/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchUsineValuesWithLimit(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithLimit/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithLimit/expectedResponse.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
         );

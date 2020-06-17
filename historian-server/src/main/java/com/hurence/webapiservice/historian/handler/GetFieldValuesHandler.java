@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -18,8 +17,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.historian.modele.HistorianFields.METRICS;
-import static com.hurence.webapiservice.http.api.main.modele.QueryFields.*;
 
 public class GetFieldValuesHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(GetMetricsNameHandler.class);
@@ -32,21 +29,19 @@ public class GetFieldValuesHandler {
 
     public Handler<Promise<JsonObject>> getHandler(JsonObject params) {
 
-        String field = params.getString(QUERY_PARAM_FIELD);
-        String query = params.getString(QUERY_PARAM_QUERY);
-        int limit = params.getInteger(QUERY_PARAM_LIMIT, solrHistorianConf.maxNumberOfTargetReturned);
+        String field = params.getString(FIELD);
+        String query = params.getString(QUERY);
+        int limit = params.getInteger(LIMIT, solrHistorianConf.maxNumberOfTargetReturned);
         String queryString = field +":*";
         if (query!=null && !query.isEmpty()) {
             queryString = field + ":*" + query + "*";
         }
         SolrQuery solrQuery = new SolrQuery(queryString);
         solrQuery.setFilterQueries(queryString);
-        solrQuery.setRows(0);//we only need distinct values of metrics
+        solrQuery.setRows(0);
         solrQuery.setFacet(true);
-//        query.setFacetSort("index");
-//        query.setFacetPrefix("per");
         solrQuery.setFacetLimit(limit);
-        solrQuery.setFacetMinCount(1);//number of doc matching the query is at least 1
+        solrQuery.setFacetMinCount(1);
         solrQuery.addFacetField(field);
         //  EXECUTE REQUEST
         return p -> {
@@ -57,7 +52,7 @@ public class GetFieldValuesHandler {
                 if (facetFieldsCount.size() == 0) {
                     p.complete(new JsonObject()
                             .put(TOTAL, 0)
-                            .put(QUERY_PARAM_VALUES, new JsonArray())
+                            .put(RESPONSE_VALUES, new JsonArray())
                     );
                     return;
                 }
@@ -69,7 +64,7 @@ public class GetFieldValuesHandler {
                 );
                 p.complete(new JsonObject()
                         .put(TOTAL, facetField.getValueCount())
-                        .put(QUERY_PARAM_VALUES, metrics)
+                        .put(RESPONSE_VALUES, metrics)
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);

@@ -48,10 +48,14 @@ public class HistorianFields {
     public static String TOTAL_HIT = "total_hit";
     public static String NAME = "name";
 
+    public static final String FIELD = "field";
+    public static final String QUERY = "query";
+
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
     public static String RESPONSE_TOTAL_ADDED_POINTS = "total_added_points";
     public static String RESPONSE_TOTAL_ADDED_CHUNKS = "total_added_chunks";
     public static String RESPONSE_TAG_NAME_FIELD = "tagname";
+    public static final String RESPONSE_VALUES = "values";
 
     public static String RESPONSE_CHUNK_ID_FIELD = HistorianChunkCollectionFieldsVersion0.ID;
     public static String RESPONSE_CHUNK_VERSION_FIELD = "_version_";

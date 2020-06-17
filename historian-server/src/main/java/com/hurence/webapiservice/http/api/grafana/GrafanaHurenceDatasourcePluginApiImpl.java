@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.main.modele.QueryFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
 public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
@@ -99,13 +98,35 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
+    /**
+     *  used to get values of certain field
+     *
+     * @param context
+     *
+     * Expected request exemple :
+     * <pre>
+     *      {
+     *         "field": "name",
+     *         "query": "met",
+     *         "limit": 100
+     *      }
+     * </pre>
+     * "query" is optional.
+     * "limit" is optional.
+     *
+     * response Example :
+     * <pre>
+     *     ["metric_25","metric_50","metric_75","metric_90","metric_95"]
+     * </pre>
+     *
+     */
     @Override
     public void searchValues(RoutingContext context) {
         final SearchValuesRequestParam request;
         try {
             JsonObject requestBody = context.getBodyAsJson();
 
-            request = new SearchValuesRequestParser(QUERY_PARAM_FIELD, QUERY_PARAM_QUERY, QUERY_PARAM_LIMIT).parseRequest(requestBody);
+            request = new SearchValuesRequestParser(FIELD, QUERY, LIMIT).parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
@@ -124,7 +145,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(valuesResponse -> {
-                    JsonArray array = valuesResponse.getJsonArray(QUERY_PARAM_VALUES);
+                    JsonArray array = valuesResponse.getJsonArray(RESPONSE_VALUES);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(array.encode());
@@ -133,9 +154,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
 
     private JsonObject buildGetFieldValuesParam(SearchValuesRequestParam request) {
         return new JsonObject()
-                .put(QUERY_PARAM_FIELD, request.getFieldToSearch())
-                .put(QUERY_PARAM_QUERY, request.getQueryToUseInSearch())
-                .put(QUERY_PARAM_LIMIT, request.getMaxNumberOfMetricNameToReturn());
+                .put(FIELD, request.getFieldToSearch())
+                .put(QUERY, request.getQueryToUseInSearch())
+                .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
 
