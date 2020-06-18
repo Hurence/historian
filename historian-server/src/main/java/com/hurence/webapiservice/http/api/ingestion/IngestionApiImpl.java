@@ -93,22 +93,18 @@ public class IngestionApiImpl implements IngestionApi {
         }
         JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
                 .put(CHUNK_ORIGIN, "ingestion-csv");
-        try {
-            service.rxAddTimeSeries(pointsToBeInjected)
-                    .doOnError(ex -> {
-                        LOGGER.error("Unexpected error : ", ex);
-                        context.response().setStatusCode(500);
-                        context.response().putHeader("Content-Type", "text/plain");
-                        context.response().end(ex.getMessage());
-                    })
-                    .doOnSuccess(response -> {
-                        context.response().setStatusCode(CREATED);
-                        context.response().putHeader("Content-Type", "application/json");
-                        context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
-                    }).subscribe();
+        service.rxAddTimeSeries(pointsToBeInjected)
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "text/plain");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(response -> {
+                    context.response().setStatusCode(CREATED);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+                }).subscribe();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

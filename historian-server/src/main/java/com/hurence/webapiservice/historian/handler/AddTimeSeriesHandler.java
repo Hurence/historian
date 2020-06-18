@@ -55,9 +55,9 @@ public class AddTimeSeriesHandler {
                 response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
                 p.complete(response);
             } catch (SolrServerException | IOException e) {
-                e.printStackTrace();
+                p.fail(e);
             } catch (Exception e) {
-                LOGGER.error("unexpected exception");
+                LOGGER.error("unexpected exception", e);
                 p.fail(e);
             }
         };

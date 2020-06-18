@@ -65,7 +65,9 @@ public class DataConverter {
                 groupByList.forEach(i -> {
                     if (i.equals(multiMap.get(MAPPING_NAME))) {
                         fieldsAndThereValues.put(NAME, entry.getKey().get(groupByList.indexOf(i)));
-                        fieldsAndThereValues.put(TAGS, entry.getValue().get(0).get(1));
+                        Map<String, Object> tags = ((JsonObject) entry.getValue().get(0).get(1)).getMap();
+                        while (tags.values().remove(null));
+                        fieldsAndThereValues.put(TAGS, tags);
                     }
                 });
                 List pointsList = new LinkedList();
@@ -117,7 +119,7 @@ public class DataConverter {
             else if (multiMap.get(FORMAT_DATE).equals(TimestampUnit.NANOSECONDS_EPOCH.toString()))
                 return longValue/1000000;*/
         } catch (Exception e) {
-            LOGGER.debug("error in parsing date", e);
+            LOGGER.trace("error in parsing date", e);
             if (multiMap.get(TIMEZONE_DATE) == null)
                 multiMap.add(TIMEZONE_DATE, "UTC");
             long date = 0;
@@ -125,7 +127,7 @@ public class DataConverter {
                 date = createDateFormat(multiMap.get(FORMAT_DATE),multiMap.get(TIMEZONE_DATE)).parse(value.toString()).getTime();
                 return date;
             } catch (ParseException ex) {
-                LOGGER.debug("error in parsing date", ex);
+                LOGGER.trace("error in parsing date", ex);
                 return value;
             }
         }
