@@ -653,5 +653,38 @@ public class ImportCsvEndPointIT {
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testBug18062020TagNotPresentInCsvShouldNotGenerateError(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/csv-exemple.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "timestamp")
+                .attribute(MAPPING_NAME, "metric_name_2")
+                .attribute(MAPPING_VALUE, "value_2")
+                .attribute(MAPPING_QUALITY, "quality")
+                .attribute(MAPPING_TAGS, "sensor")
+                .attribute(MAPPING_TAGS, "fruit")
+                .attribute(MAPPING_TAGS, "code_install")
+                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "tags.sensor")
+                .attribute(FORMAT_DATE, "yyyy-D-m HH:mm:ss.SSS")
+                .attribute(TIMEZONE_DATE, "UTC")
+                .textFileUpload("csv-exemple.csv", "csv-exemple.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/csv-exemple-expectedResponse.json",
+                        CREATED, StatusMessages.CREATED,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/csv-exemple-request.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/csv-exemple-expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
 }
 
