@@ -2,27 +2,19 @@ package com.hurence.webapiservice.http.api.grafana.hurence;
 
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector;
-import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.logisland.record.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.util.MultipartRequestResponseConf;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
-import com.hurence.webapiservice.http.HttpServerVerticle;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -45,16 +37,13 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT;
-import static com.hurence.webapiservice.http.HttpServerVerticle.IMPORT_CSV_ENDPOINT;
-import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
+import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 
-
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class ComplexQueryEndPointVersion0IT {
+public class SearchValuesEndPointIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ComplexQueryEndPointVersion0IT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(SearchValuesEndPointIT.class);
     private static WebClient webClient;
 
     @BeforeAll
@@ -71,8 +60,6 @@ public class ComplexQueryEndPointVersion0IT {
                 .andThen(injectIntoSolr)
                 .subscribe(context::completeNow,
                         context::failNow);
-
-
     }
 
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
@@ -114,6 +101,18 @@ public class ComplexQueryEndPointVersion0IT {
         chunkTempaUsine1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1);
 
+        ChunkModeleVersion0 chunkTempaUsine3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
+                new Point(0, 7, 5)
+        ));
+        chunkTempaUsine1.addTag("usine", "usine_3");
+        injector.addChunk(chunkTempaUsine3);
+
+        ChunkModeleVersion0 chunkTempaNoUsine = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
+                new Point(0, 7, 5)
+        ));
+        chunkTempaUsine1.addTag("usine", "no_usine");
+        injector.addChunk(chunkTempaNoUsine);
+
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
     }
@@ -138,11 +137,63 @@ public class ComplexQueryEndPointVersion0IT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQuery(Vertx vertx, VertxTestContext testContext) {
+    public void testSearchSensorsValues(Vertx vertx, VertxTestContext testContext) {
         List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
-                        "/http/grafana/hurence/query/complex/test1/request.json",
-                        "/http/grafana/hurence/query/complex/test1/expectedResponse.json",
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchSensorValues/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchSensorValues/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchUsinesValues(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchUsineValues/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchUsineValues/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchNamesValues(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchNameValues/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchNameValues/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchUsineValuesWithQuery(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithQuery/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithQuery/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchUsineValuesWithLimit(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithLimit/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchUsineValuesWithLimit/expectedResponse.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
         );
@@ -150,59 +201,4 @@ public class ComplexQueryEndPointVersion0IT {
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
 
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithNoTags(Vertx vertx, VertxTestContext testContext) {
-        List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
-                        "/http/grafana/hurence/query/complex/test2/request.json",
-                        "/http/grafana/hurence/query/complex/test2/expectedResponse.json",
-                        OK, StatusMessages.OK,
-                        BodyCodec.jsonArray(), vertx)
-        );
-        AssertResponseGivenRequestHelper
-                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithAggregations(Vertx vertx, VertxTestContext testContext) {
-        List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
-                        "/http/grafana/hurence/query/complex/test3/request.json",
-                        "/http/grafana/hurence/query/complex/test3/expectedResponse.json",
-                        OK, StatusMessages.OK,
-                        BodyCodec.jsonArray(), vertx)
-        );
-        AssertResponseGivenRequestHelper
-                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithDifferentTags(Vertx vertx, VertxTestContext testContext) {
-        List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
-                        "/http/grafana/hurence/query/complex/test4/request.json",
-                        "/http/grafana/hurence/query/complex/test4/expectedResponse.json",
-                        OK, StatusMessages.OK,
-                        BodyCodec.jsonArray(), vertx)
-        );
-        AssertResponseGivenRequestHelper
-                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithRefIds(Vertx vertx, VertxTestContext testContext) {
-        List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
-                        "/http/grafana/hurence/query/complex/test5/request.json",
-                        "/http/grafana/hurence/query/complex/test5/expectedResponse.json",
-                        OK, StatusMessages.OK,
-                        BodyCodec.jsonArray(), vertx)
-        );
-        AssertResponseGivenRequestHelper
-                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
-    }
 }

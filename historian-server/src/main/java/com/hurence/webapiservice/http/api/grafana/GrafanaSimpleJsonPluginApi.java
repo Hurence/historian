@@ -1,25 +1,10 @@
 package com.hurence.webapiservice.http.api.grafana;
 
-
-import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.Router;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
-public interface GrafanaApi {
-
-    static GrafanaApi fromVersion(GrafanaApiVersion grafanaApiVersion,
-                                  HistorianService historianService) {
-        switch (grafanaApiVersion) {
-            case SIMPLE_JSON_PLUGIN:
-                return new GrafanaSimpleJsonPluginApiImpl(historianService);
-            case HURENCE_DATASOURCE_PLUGIN:
-                return new GrafanaHurenceDatasourcePluginApiImpl(historianService);
-            default:
-                throw new IllegalArgumentException(String.format("version %s is not yet supported !", grafanaApiVersion));
-        }
-    }
-
+public interface GrafanaSimpleJsonPluginApi {
     String SEARCH_ENDPOINT = "/search";
     String QUERY_ENDPOINT = "/query";
     String ANNOTATIONS_ENDPOINT = "/annotations";
@@ -73,4 +58,6 @@ public interface GrafanaApi {
      * @param context
      */
     void tagValues(RoutingContext context);
+
+
 }

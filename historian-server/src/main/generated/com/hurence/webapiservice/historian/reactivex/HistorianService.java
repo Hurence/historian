@@ -128,6 +128,17 @@ public class HistorianService {
     });
   }
 
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getFieldValues(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { 
+    delegate.getFieldValues(params, resultHandler);
+    return this;
+  }
+
+  public Single<JsonObject> rxGetFieldValues(JsonObject params) { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getFieldValues(params, handler);
+    });
+  }
+
   /**
    * @param params as a json object <pre> {  : "start of the date range",  : "end of the date range",  : either "all" either "tags",  : if the request "type" is "tags" this is used to filter annotation by tags otherwise it is not used.,  : the max number of annotation to return,  : if true, we should return any annotation containing at leas one of the tags. If false we should return only annotation containing all the tags, } </pre>
    * @param resultHandler return annotations as an array of <pre> {  : "all annotation matching the query",  : "total annotations matching query" } </pre>

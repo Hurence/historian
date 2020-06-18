@@ -2,8 +2,7 @@ package com.hurence.webapiservice.http;
 
 import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
+import com.hurence.webapiservice.http.api.grafana.*;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApi;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
 import com.hurence.webapiservice.http.api.main.MainHistorianApi;
@@ -50,26 +49,24 @@ public class HttpServerVerticle extends AbstractVerticle {
     private static final String GRAFANA_API_ENDPOINT = "/api/grafana";
     private static final String SIMPLE_JSON_GRAFANA_API_ENDPOINT = GRAFANA_API_ENDPOINT + "/simplejson";
     public static final String SIMPLE_JSON_GRAFANA_QUERY_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.QUERY_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.QUERY_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_SEARCH_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.SEARCH_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.SEARCH_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.ANNOTATIONS_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.ANNOTATIONS_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_TAG_KEYS_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_KEYS_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.TAG_KEYS_ENDPOINT;
     public static final String SIMPLE_JSON_GRAFANA_TAG_VALUES_API_ENDPOINT = HttpServerVerticle.SIMPLE_JSON_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_VALUES_ENDPOINT;
+            GrafanaSimpleJsonPluginApi.TAG_VALUES_ENDPOINT;
     private static final String HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT = GRAFANA_API_ENDPOINT + "/v0";
     public static final String HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.QUERY_ENDPOINT;
+            GrafanaHurenceDatasourcePluginApi.QUERY_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_SEARCH_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.SEARCH_ENDPOINT;
+            GrafanaHurenceDatasourcePluginApi.SEARCH_ENDPOINT;
+    public static final String HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
+            GrafanaHurenceDatasourcePluginApi.SEARCH_VALUES_ENDPOINT;
     public static final String HURENCE_DATASOURCE_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.ANNOTATIONS_ENDPOINT;
-    public static final String HURENCE_DATASOURCE_GRAFANA_TAG_KEYS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_KEYS_ENDPOINT;
-    public static final String HURENCE_DATASOURCE_GRAFANA_TAG_VALUES_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
-            GrafanaApi.TAG_VALUES_ENDPOINT;
+            GrafanaHurenceDatasourcePluginApi.ANNOTATIONS_ENDPOINT;
 
     //test endpoints
     private static final String TEST_API_ENDPOINT = "/test/api";
@@ -93,8 +90,8 @@ public class HttpServerVerticle extends AbstractVerticle {
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
         router.mountSubRouter(IMPORT_ENDPOINT, importApi);
         //grafana
-        Router hurenceGraphanaApi = GrafanaApi.fromVersion(GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN, historianService).getGraphanaRouter(vertx);
-        Router simpleJsonGraphanaApi = GrafanaApi.fromVersion(GrafanaApiVersion.SIMPLE_JSON_PLUGIN, historianService).getGraphanaRouter(vertx);
+        Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService).getGraphanaRouter(vertx);
+        Router simpleJsonGraphanaApi = new  GrafanaSimpleJsonPluginApiImpl(historianService).getGraphanaRouter(vertx);
         router.mountSubRouter(SIMPLE_JSON_GRAFANA_API_ENDPOINT, simpleJsonGraphanaApi);
         router.mountSubRouter(HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT, hurenceGraphanaApi);
 
