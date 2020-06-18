@@ -25,7 +25,6 @@
     "solr" : {
       "use_zookeeper": true,
       "zookeeper_urls": ["localhost:9983"],
-      "collection": "historian",
       "stream_url" : "http://localhost:8983/solr/historian",
       "chunk_collection": "historian",
       "annotation_collection": "annotation"
