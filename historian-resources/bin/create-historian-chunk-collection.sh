@@ -53,10 +53,6 @@ parse_args() {
                 MODEL_VERSION="$2"
                 shift # past argument
             ;;
-            -d|--dry-run)
-                DRY_RUN=true
-                shift # past argument
-            ;;
             -m|--update-mode)
                 UPDATE_MODE="$2"
                 shift # past argument
@@ -94,9 +90,10 @@ create_collection() {
     echo -e "${GREEN}will create collection ${SOLR_COLLECTION} on ${SOLR_HOST} with ${NUM_SHARDS} shard and ${REPLICATION_FACTOR} replicas ${NOCOLOR}"
     curl "http://${SOLR_HOST}/admin/collections?action=CREATE&name=${SOLR_COLLECTION}&numShards=${NUM_SHARDS}&replicationFactor=${REPLICATION_FACTOR}"
 
-
     echo "waiting 5' for changes propagation"
     sleep 5
+    curl -X POST -H 'Content-type:application/json' -d "{\"set-user-property\": {\"update.autoCreateFields\":\"false\"}}}" "http://${SOLR_HOST}/${SOLR_COLLECTION}/config"
+    sleep 1
     
     SOLR_UPDATE_QUERY='
       "add-field-type" : {
