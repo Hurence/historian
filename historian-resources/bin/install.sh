@@ -42,7 +42,7 @@ maven_check=$(mvn 2>&1)
                 brew install maven
                 brew update
         else
-                echo "Maven is aldready installed"
+                echo "Maven is already installed"
         fi
 echo -e "\n"
 
@@ -119,20 +119,59 @@ done
 
 echo -e "\n"
 echo "Which name to use for the solr report collection ?"
-read report_collection_name           #variable stocké dans $chunk_collection_name
+read report_collection_name           #variable stocké dans $report_collection_name
 echo -e "\n"
+
+#Tags names
+echo "Do you want to add tags names for your points ?"
+select tags in Add_tags Skip; do
+        if [ "$tags" = "Add_tags" ]; then
+        echo -e "\n"
+        while [ -z $tags_names ] || [ $tags_names != 'STOP' ]
+        do
+        read -p 'Tag name (STOP when you want stop): ' tags_names
+        if [ $tags_names != 'STOP' ]
+        then
+        echo -e "\n"
+        bin/modify-collection-schema.sh -c $chunk_collection_name -s $solr_cluster_path -f $tags_names
+        echo -e "\n"
+        fi
+        done
+        break
+        elif [ "$tags" = "Skip" ]; then
+                break
+        else
+                echo "Please choose 1 or 2"
+        fi
+done
 
 #GRAFANA
 echo "Do you want to install an embedded grafana (version 7.0.3 required) ?"
 select grafana_install in Install_embedded_grafana Skip; do
         if [ "$grafana_install" = "Install_embedded_grafana" ]; then
                 cd $HDH_HOME
-                brew install grafana
-                #install this plugin using the grafana-cli tool:
-                sudo grafana-cli plugins install grafana-simple-json-datasource
+                wget https://dl.grafana.com/oss/release/grafana-7.0.3.darwin-amd64.tar.gz
+                tar -zxvf grafana-7.0.3.darwin-amd64.tar.gz
+                rm grafana-7.0.3.darwin-amd64.tar.gz
                 brew services restart grafana
                 break
         elif [ "$grafana_install" = "Skip" ]; then
+                break
+        else
+                echo "Please choose 1 or 2"
+        fi
+done
+echo -e "\n"
+#GRAFANA PLUGINS
+echo "Do you want to install historian data-source plugin for grafana?"
+select grafana_plugin_install in Install_grafana_plugin Skip; do
+        if [ "$grafana_plugin_install" = "Install_grafana_plugin" ]; then
+                cd $HDH_HOME
+                tar -zxvf grafana-data-source-plugin.tar.gz
+                rm grafana-data-source-plugin.tar.gz
+                mv grafana-data-source-plugin /usr/local/var/lib/grafana/plugins
+                break
+        elif [ "$grafana_plugin_install" = "Skip" ]; then
                 break
         else
                 echo "Please choose 1 or 2"
