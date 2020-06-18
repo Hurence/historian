@@ -5,15 +5,11 @@ import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApi;
 import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
-import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -41,7 +37,6 @@ import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.ANNOTATIONS;
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.COLLECTION_ANNOTATION;
-import static com.hurence.webapiservice.util.HistorianSolrITHelper.HISTORIAN_ADRESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
