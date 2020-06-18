@@ -9,7 +9,6 @@ echo modify-collection-schema.sh [options]
 
              -s|--solr-host
              -c|--collection
-            -rf|--replication-factor
              -f|--new-field
 
 by Hurence, 09/01/2019
@@ -82,7 +81,6 @@ main() {
 declare SOLR_HOST="localhost:8983/solr"
 declare SOLR_COLLECTION="historian"
 declare NEW_FIELD=""
-declare MODEL_VERSION=0
 declare SOLR_UPDATE_QUERY=""
 
 # color setup
