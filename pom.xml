@@ -153,6 +153,10 @@
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
+                            <!--                    <forkMode>always</forkMode>-->
+                            <systemPropertyVariables>
+                                <log4j.configuration>file:${project.basedir}/log4j-silent.properties</log4j.configuration>
+                            </systemPropertyVariables>
                         </configuration>
                         <executions>
                             <execution>
