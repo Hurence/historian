@@ -22,6 +22,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -128,14 +129,34 @@ public class HistorianService {
     });
   }
 
+  /**
+   * @param params as a json object <pre> {  : "A string of the field to search for it's values",  : "a query to use in searching the values",  : <maximum number of metric to return>(int) } </pre>
+   * @param resultHandler return names of metrics as an array of <pre> {  : "all field values matching the query",  : <Number of metric returned>(int) } </pre>
+   * @return himself
+   */
   public com.hurence.webapiservice.historian.reactivex.HistorianService getFieldValues(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) { 
     delegate.getFieldValues(params, resultHandler);
     return this;
   }
 
+  /**
+   * @param params as a json object <pre> {  : "A string of the field to search for it's values",  : "a query to use in searching the values",  : <maximum number of metric to return>(int) } </pre>
+   * @return himself
+   */
   public Single<JsonObject> rxGetFieldValues(JsonObject params) { 
     return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
       getFieldValues(params, handler);
+    });
+  }
+
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getTagNames(Handler<AsyncResult<JsonArray>> resultHandler) { 
+    delegate.getTagNames(resultHandler);
+    return this;
+  }
+
+  public Single<JsonArray> rxGetTagNames() { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getTagNames(handler);
     });
   }
 

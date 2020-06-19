@@ -13,9 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.NAME;
@@ -23,6 +21,11 @@ import static com.hurence.historian.modele.HistorianFields.NAME;
 public class GetTagNamesHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GetTagNamesHandler.class);
+    private static Set<String> fieldsThatAreNotTags = new HashSet<>(Arrays.asList(
+            "_nest_path_","_root_","_text_","_version_"
+    ));
+
+
     SolrHistorianConf solrHistorianConf;
 
 
@@ -38,16 +41,11 @@ public class GetTagNamesHandler {
                 SchemaResponse response = request.process(solrHistorianConf.client, solrHistorianConf.chunkCollection);
                 List<String> tags = response.getSchemaRepresentation().getFields().stream()
                         .map(fieldMap -> (String) fieldMap.get(NAME)).collect(Collectors.toList());
-                List<String> fieldsWithUnderScore = new ArrayList<>();
-                tags.forEach(field -> {
-                    if (field.startsWith("_") && field.endsWith("_"))
-                        fieldsWithUnderScore.add(field);
-                });
                 Collection<String> schemaFields = Schema.getChunkSchema(solrHistorianConf.schemaVersion).getFields()
                         .stream().map(Field::getName)
                         .collect(Collectors.toList());
                 tags.removeAll(schemaFields);
-                tags.removeAll(fieldsWithUnderScore);
+                tags.removeAll(fieldsThatAreNotTags);
                 if (tags.size() == 0) {
                     p.complete(new JsonArray()
                     );
