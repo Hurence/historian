@@ -146,7 +146,7 @@ create_schema_universal() {
 ####################################################################
 main() {
     parse_args "$@"
-    create_collection
+    create_collection "${SOLR_HOST}" "${SOLR_COLLECTION}"
     create_schema
 }
 
