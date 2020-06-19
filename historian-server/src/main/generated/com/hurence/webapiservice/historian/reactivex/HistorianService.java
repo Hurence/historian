@@ -22,6 +22,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Single;
 import io.reactivex.Completable;
 import io.reactivex.Maybe;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -145,6 +146,17 @@ public class HistorianService {
   public Single<JsonObject> rxGetFieldValues(JsonObject params) { 
     return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
       getFieldValues(params, handler);
+    });
+  }
+
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getTagNames(Handler<AsyncResult<JsonArray>> resultHandler) { 
+    delegate.getTagNames(resultHandler);
+    return this;
+  }
+
+  public Single<JsonArray> rxGetTagNames() { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getTagNames(handler);
     });
   }
 
