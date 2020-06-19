@@ -110,6 +110,7 @@ public class TimeSeriesExtracterUtil {
     public static SamplingConf calculSamplingConf(SamplingConf samplingConf, long totalNumberOfPoint) {
         SamplingAlgorithm algorithm = calculSamplingAlgorithm(samplingConf, totalNumberOfPoint);
         int bucketSize = samplingConf.getBucketSize();
+        if (bucketSize == 0) throw new IllegalArgumentException("bucket size can not be '0' !");
         long numberOfPointToReturnWithCurrentBucket = totalNumberOfPoint / bucketSize;
         if (totalNumberOfPoint > samplingConf.getMaxPoint() &&
                 numberOfPointToReturnWithCurrentBucket > samplingConf.getMaxPoint()) {
