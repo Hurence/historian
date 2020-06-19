@@ -28,9 +28,9 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
   val historianCollection: String = SolrITHelper.COLLECTION_HISTORIAN
 
   val chunkSize = 10
-  val year = AbstractIncreasingChunkSizeTest.year
-  val month = AbstractIncreasingChunkSizeTest.month
-  val day = AbstractIncreasingChunkSizeTest.day
+  val year: Int = AbstractIncreasingChunkSizeTest.year
+  val month: Int = AbstractIncreasingChunkSizeTest.month
+  val day: Int = AbstractIncreasingChunkSizeTest.day
 
   val metricA: String = AbstractIncreasingChunkSizeTest.metricA
   val metricB: String = AbstractIncreasingChunkSizeTest.metricB
@@ -39,6 +39,8 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
 
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
+    //sometime some documents seems to not have been commited ? Will see if sleeping solve this problem
+    Thread.sleep(1000)
     assertEquals(24, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
     assertEquals(4, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))

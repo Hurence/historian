@@ -39,6 +39,8 @@ abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer
 
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
+    //sometime some documents seems to not have been commited ? Will see if sleeping solve this problem
+    Thread.sleep(1000)
     val start = System.currentTimeMillis();
     assertEquals(2, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
