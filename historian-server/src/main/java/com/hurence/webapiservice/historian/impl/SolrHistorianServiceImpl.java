@@ -212,6 +212,14 @@ public class SolrHistorianServiceImpl implements HistorianService {
     }
 
     @Override
+    public HistorianService getTagNames(Handler<AsyncResult<JsonArray>> resultHandler) {
+        GetTagNamesHandler requestHandler = new GetTagNamesHandler(solrHistorianConf);
+        Handler<Promise<JsonArray>> getTagNamesHandler = requestHandler.getHandler();
+        vertx.executeBlocking(getTagNamesHandler, resultHandler);
+        return this;
+    }
+
+    @Override
     public HistorianService getAnnotations(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
         GetAnnotationsHandler requestHandler = new GetAnnotationsHandler(solrHistorianConf);
         Handler<Promise<JsonObject>> annotationHandler = requestHandler.getHandler(params);

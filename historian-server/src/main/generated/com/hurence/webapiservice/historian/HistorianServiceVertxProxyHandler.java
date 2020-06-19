@@ -41,6 +41,7 @@ import io.vertx.serviceproxy.ServiceException;
 import io.vertx.serviceproxy.ServiceExceptionMessageCodec;
 import io.vertx.serviceproxy.HelperUtils;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
@@ -133,6 +134,10 @@ public class HistorianServiceVertxProxyHandler extends ProxyHandler {
         case "getFieldValues": {
           service.getFieldValues((io.vertx.core.json.JsonObject)json.getValue("params"),
                         HelperUtils.createHandler(msg));
+          break;
+        }
+        case "getTagNames": {
+          service.getTagNames(HelperUtils.createHandler(msg));
           break;
         }
         case "getAnnotations": {

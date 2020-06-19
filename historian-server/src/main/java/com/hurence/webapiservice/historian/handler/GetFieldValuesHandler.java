@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 import static com.hurence.historian.modele.HistorianFields.*;
 
 public class GetFieldValuesHandler {
-    private static Logger LOGGER = LoggerFactory.getLogger(GetMetricsNameHandler.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(GetFieldValuesHandler.class);
     SolrHistorianConf solrHistorianConf;
 
 

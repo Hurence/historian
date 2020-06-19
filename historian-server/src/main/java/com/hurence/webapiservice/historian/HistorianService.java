@@ -10,6 +10,7 @@ import io.vertx.codegen.annotations.VertxGen;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 
@@ -165,6 +166,9 @@ public interface HistorianService {
      */
     @Fluent
     HistorianService getFieldValues(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
+
+    @Fluent
+    HistorianService getTagNames(Handler<AsyncResult<JsonArray>> resultHandler);
 
     /**
      * @param params        as a json object
