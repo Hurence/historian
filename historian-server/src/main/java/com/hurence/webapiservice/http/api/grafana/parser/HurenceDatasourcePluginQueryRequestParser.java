@@ -88,6 +88,10 @@ public class HurenceDatasourcePluginQueryRequestParser {
         }
         Integer bucketSize = parseBucketSize(requestBody);
         if (bucketSize != null) {
+            if (bucketSize <= 0) throw new IllegalArgumentException(String.format(
+                    "request json should contain an integer > 0 for bucket size at path '%s'." +
+                            "\nrequest received is %s", bucketSizeJsonPath, requestBody.encodePrettily()
+            ));
             builder.withBucketSize(bucketSize);
         }
         Map<String, String> tags = parseTags(requestBody);
