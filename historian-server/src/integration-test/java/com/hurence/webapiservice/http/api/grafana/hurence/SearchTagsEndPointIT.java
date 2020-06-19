@@ -20,6 +20,7 @@ import io.vertx.reactivex.ext.web.codec.BodyCodec;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
+import org.junit.Assert;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -71,7 +72,7 @@ public class SearchTagsEndPointIT {
     public void deleteCollection(SolrClient client) throws IOException, SolrServerException {
         final CollectionAdminRequest.Delete deleteCollectionRequest =
                 CollectionAdminRequest.deleteCollection(SolrITHelper.COLLECTION_HISTORIAN);
-        deleteCollectionRequest.process(client);
+        Assert.assertTrue(deleteCollectionRequest.process(client).isSuccess());
     }
 
     @Test
