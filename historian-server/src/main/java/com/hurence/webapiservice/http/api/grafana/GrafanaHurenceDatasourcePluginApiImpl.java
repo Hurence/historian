@@ -161,11 +161,28 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 }).subscribe();
     }
 
+
     private JsonObject buildGetFieldValuesParam(SearchValuesRequestParam request) {
         return new JsonObject()
                 .put(FIELD, request.getFieldToSearch())
                 .put(QUERY, request.getQueryToUseInSearch())
                 .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
+    }
+
+    @Override
+    public void searchTags(RoutingContext context) {
+        service.rxGetTagNames()
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(tagsList -> {
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(tagsList.encode());
+                }).subscribe();
     }
 
 
