@@ -2,7 +2,6 @@ package com.hurence.webapiservice.http.api.grafana;
 
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.junit.jupiter.api.Assertions;
@@ -86,7 +85,7 @@ public class QueryRequestParserTest {
                 .put(ADHOCFILTERS, new JsonArray()
                 );
         final QueryRequestParser queryRequestParser = new QueryRequestParser();
-        final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        final QueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(1573700213285L, request.getFrom());
         assertEquals(1573721813285L, request.getTo());
@@ -95,7 +94,7 @@ public class QueryRequestParserTest {
         assertEquals(DEFAULT_SAMPLING_ALGORITHM, request.getSamplingConf().getAlgo());
         assertEquals(Collections.emptyList(), request.getAggs());
         assertEquals(Arrays.asList("speed", "pressure", "rotation"), request.getMetricNames());
-        assertEquals(Collections.emptyList(), request.getTags());
+        assertEquals(Collections.emptyMap(), request.getTags());
     }
 
     /**
@@ -159,7 +158,7 @@ public class QueryRequestParserTest {
                         .add(new JsonObject().put(TARGET, "speed"))
                 );
         final QueryRequestParser queryRequestParser = new QueryRequestParser();
-        final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+        final QueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(QueryRequestParam.DEFAULT_FROM, request.getFrom());
         assertEquals(QueryRequestParam.DEFAULT_TO, request.getTo());
@@ -168,7 +167,7 @@ public class QueryRequestParserTest {
         assertEquals(DEFAULT_SAMPLING_ALGORITHM, request.getSamplingConf().getAlgo());
         assertEquals(Collections.emptyList(), request.getAggs());
         assertEquals(Arrays.asList("speed"), request.getMetricNames());
-        assertEquals(Collections.emptyList(), request.getTags());
+        assertEquals(Collections.emptyMap(), request.getTags());
     }
 
     @Test
@@ -176,7 +175,7 @@ public class QueryRequestParserTest {
         JsonObject requestBody = new JsonObject("{}");
         final QueryRequestParser queryRequestParser = new QueryRequestParser();
         Assertions.assertThrows(NullPointerException.class, () -> {
-            final TimeSeriesRequest request = queryRequestParser.parseRequest(requestBody);
+            final QueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         });
     }
 }

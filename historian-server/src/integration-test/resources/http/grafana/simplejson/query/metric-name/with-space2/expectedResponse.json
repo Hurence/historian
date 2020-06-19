@@ -1,13 +1,13 @@
 [
   {
-    "target":"temp_b",
+    "target":"metric with spaces",
     "datapoints":[
       [861, 1477895624866],
       [767, 1477917224866]
     ]
   },
   {
-    "target":"metric with spaces",
+    "target":"temp_b",
     "datapoints":[
       [861, 1477895624866],
       [767, 1477917224866]

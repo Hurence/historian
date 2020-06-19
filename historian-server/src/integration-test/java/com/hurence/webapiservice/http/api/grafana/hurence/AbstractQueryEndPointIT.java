@@ -39,8 +39,8 @@ public abstract class AbstractQueryEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQuery(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/test1/request.json",
-                "/http/grafana/hurence/query/extract-algo/test1/expectedResponse.json");
+                "/http/grafana/hurence/query/test1/request.json",
+                "/http/grafana/hurence/query/test1/expectedResponse.json");
     }
 
     //TODO use parametric tests so that we can add new tests by adding files without touching code
@@ -48,16 +48,16 @@ public abstract class AbstractQueryEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testMaxDataPoints5(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax5/request.json",
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax5/expectedResponse.json");
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax5/request.json",
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax5/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testMaxDataPoints6(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax6/request.json",
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax6/expectedResponse.json");
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax6/request.json",
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax6/expectedResponse.json");
     }
 
 
@@ -65,8 +65,8 @@ public abstract class AbstractQueryEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testMaxDataPoints7(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax7/request.json",
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax7/expectedResponse.json");
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax7/request.json",
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax7/expectedResponse.json");
     }
 
 
@@ -74,8 +74,8 @@ public abstract class AbstractQueryEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testMaxDataPoints8(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax8/request.json",
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax8/expectedResponse.json");
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax8/request.json",
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax8/expectedResponse.json");
     }
 
 
@@ -83,8 +83,8 @@ public abstract class AbstractQueryEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testMaxDataPoints9(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax9/request.json",
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax9/expectedResponse.json");
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax9/request.json",
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax9/expectedResponse.json");
     }
 
 
@@ -92,40 +92,40 @@ public abstract class AbstractQueryEndPointIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testMaxDataPoints10(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax10/request.json",
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax10/expectedResponse.json");
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax10/request.json",
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax10/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testMaxDataPoints15(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax15/request.json",
-                "/http/grafana/hurence/query/extract-algo/testMaxDataPoints/testMax15/expectedResponse.json");
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax15/request.json",
+                "/http/grafana/hurence/query/testMaxDataPoints/testMax15/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAlgoAverageDefaultBucket(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testWithAlgo/average/default-bucket/request.json",
-                "/http/grafana/hurence/query/extract-algo/testWithAlgo/average/default-bucket/expectedResponse.json");
+                "/http/grafana/hurence/query/testWithAlgo/average/default-bucket/request.json",
+                "/http/grafana/hurence/query/testWithAlgo/average/default-bucket/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAlgoAverageBucketSize2(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testWithAlgo/average/bucket-2/request.json",
-                "/http/grafana/hurence/query/extract-algo/testWithAlgo/average/bucket-2/expectedResponse.json");
+                "/http/grafana/hurence/query/testWithAlgo/average/bucket-2/request.json",
+                "/http/grafana/hurence/query/testWithAlgo/average/bucket-2/expectedResponse.json");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testAlgoAverageBucketSize3(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/extract-algo/testWithAlgo/average/bucket-3/request.json",
-                "/http/grafana/hurence/query/extract-algo/testWithAlgo/average/bucket-3/expectedResponse.json");
+                "/http/grafana/hurence/query/testWithAlgo/average/bucket-3/request.json",
+                "/http/grafana/hurence/query/testWithAlgo/average/bucket-3/expectedResponse.json");
     }
 
 
@@ -143,6 +143,22 @@ public abstract class AbstractQueryEndPointIT {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/metric-name/with-space2/request.json",
                 "/http/grafana/hurence/query/metric-name/with-space2/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithAggregation(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/aggregations/testQueryWithAggregation/request.json",
+                "/http/grafana/hurence/query/aggregations/testQueryWithAggregation/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithALLAggregation(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/aggregations/testQueryWithALLAggregation/request.json",
+                "/http/grafana/hurence/query/aggregations/testQueryWithALLAggregation/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,

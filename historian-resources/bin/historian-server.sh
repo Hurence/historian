@@ -92,11 +92,11 @@ start() {
         COMMAND=(java)
         if [ $DEBUG_MODE ]
         then
-          COMMAND+=("-Dlog4j.configuration=file:./conf/log4j.properties")
-          COMMAND+=("-Dlog4j.configurationFile=file:./conf/log4j.properties")
-        else
           COMMAND+=("-Dlog4j.configuration=file:./conf/log4j-debug.properties")
           COMMAND+=("-Dlog4j.configurationFile=file:./conf/log4j-debug.properties")
+        else
+          COMMAND+=("-Dlog4j.configuration=file:./conf/log4j.properties")
+          COMMAND+=("-Dlog4j.configurationFile=file:./conf/log4j.properties")
         fi
         COMMAND+=(-jar lib/historian-server-*.jar -conf conf/historian-server-conf.json)
         echo "run below command"

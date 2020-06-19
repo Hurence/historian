@@ -3,8 +3,9 @@ package com.hurence.webapiservice.http.api.test;
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieJsonRequestParser;
+import com.hurence.webapiservice.http.api.main.GetTimeSerieRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -32,7 +33,7 @@ public class TestHistorianApiImpl implements TestHistorianApi {
 
     @Override
     public void getTimeSerieChunks(RoutingContext context) {
-        final TimeSeriesRequest request;
+        final GetTimeSerieRequestParam request;
         try {
             JsonObject body = context.getBodyAsJson();
             request =  new GetTimeSerieJsonRequestParser().parseRequest(body);
@@ -73,7 +74,7 @@ public class TestHistorianApiImpl implements TestHistorianApi {
                 }).subscribe();
     }
 
-    private JsonObject buildHistorianRequest(TimeSeriesRequest request) {
+    private JsonObject buildHistorianRequest(GetTimeSerieRequestParam request) {
         JsonArray fieldsToFetch = new JsonArray()
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)

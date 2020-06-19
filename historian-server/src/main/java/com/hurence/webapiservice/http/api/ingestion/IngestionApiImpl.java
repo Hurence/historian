@@ -1,6 +1,8 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil;
+import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
@@ -75,12 +77,11 @@ public class IngestionApiImpl implements IngestionApi {
     @Override
     public void importCsv(RoutingContext context) {
         LOGGER.trace("received request at importCsv: {}", context.request());
-        Set<FileUpload> uploads = context.fileUploads();
-        MultiMap multiMap = context.request().formAttributes();
 
-        ImportRequestParser.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles;
+        MultiCsvFilesConvertor multiCsvFilesConvertor = new MultiCsvFilesConvertor(context);
+
         try {
-            correctPointsAndFailedPointsOfAllFiles = fromUploadsToCorrectPointsAndFailedPointsOfAllFiles(uploads, multiMap);
+            constructCsvFileConvertors(multiCsvFilesConvertor);
         } catch (Exception ex) {
             JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
@@ -90,24 +91,20 @@ public class IngestionApiImpl implements IngestionApi {
             context.response().end(String.valueOf(errorObject));
             return;
         }
-        JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, correctPointsAndFailedPointsOfAllFiles.correctPoints)
+        JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
                 .put(CHUNK_ORIGIN, "ingestion-csv");
-        try {
-            service.rxAddTimeSeries(pointsToBeInjected)
-                    .doOnError(ex -> {
-                        LOGGER.error("Unexpected error : ", ex);
-                        context.response().setStatusCode(500);
-                        context.response().putHeader("Content-Type", "text/plain");
-                        context.response().end(ex.getMessage());
-                    })
-                    .doOnSuccess(response -> {
-                        context.response().setStatusCode(CREATED);
-                        context.response().putHeader("Content-Type", "application/json");
-                        context.response().end(constructFinalResponseCsv(correctPointsAndFailedPointsOfAllFiles, multiMap).encodePrettily());
-                    }).subscribe();
+        service.rxAddTimeSeries(pointsToBeInjected)
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "text/plain");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(response -> {
+                    context.response().setStatusCode(CREATED);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+                }).subscribe();
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 }

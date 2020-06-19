@@ -1,8 +1,12 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
+import com.hurence.webapiservice.modele.AGG;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.reactivex.core.json.pointer.JsonPointer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,6 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 
 public class HurenceDatasourcePluginQueryRequestParser {
 
@@ -25,6 +30,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
     private final String samplingAlgoJsonPath;
     private final String bucketSizeJsonPath;
     private final String requestIdJsonPath;
+    private final String aggregationPath;
 
     public HurenceDatasourcePluginQueryRequestParser(String fromJsonPath,
                                                      String toJsonPath,
@@ -34,7 +40,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                                      String tagsJsonPath,
                                                      String samplingAlgoJsonPath,
                                                      String bucketSizeJsonPath,
-                                                     String requestIdJsonPath) {
+                                                     String requestIdJsonPath,
+                                                     String aggregationPath) {
         this.fromJsonPath = fromJsonPath;
         this.toJsonPath = toJsonPath;
         this.namesJsonPath = namesJsonPath;
@@ -44,6 +51,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.samplingAlgoJsonPath = samplingAlgoJsonPath;
         this.bucketSizeJsonPath = bucketSizeJsonPath;
         this.requestIdJsonPath = requestIdJsonPath;
+        this.aggregationPath= aggregationPath;
     }
 
     public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
@@ -61,7 +69,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (format != null) {
             builder.withFormat(format);
         }
-        List<String> metricNames = parseMetricNames(requestBody);
+        JsonArray metricNames = parseMetricNames(requestBody);
         if (metricNames != null) {
             builder.withMetricNames(metricNames);
         } else {
@@ -80,6 +88,10 @@ public class HurenceDatasourcePluginQueryRequestParser {
         }
         Integer bucketSize = parseBucketSize(requestBody);
         if (bucketSize != null) {
+            if (bucketSize <= 0) throw new IllegalArgumentException(String.format(
+                    "request json should contain an integer > 0 for bucket size at path '%s'." +
+                            "\nrequest received is %s", bucketSizeJsonPath, requestBody.encodePrettily()
+            ));
             builder.withBucketSize(bucketSize);
         }
         Map<String, String> tags = parseTags(requestBody);
@@ -90,7 +102,15 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (requestId != null) {
             builder.withRequestId(requestId);
         }
+        List<AGG> agreg = parseAggreg(requestBody);
+        if (agreg != null) {
+            builder.withAggreg(agreg);
+        }
         return builder.build();
+    }
+
+    private List<AGG> parseAggreg(JsonObject requestBody) {
+        return parseListAGG(requestBody, aggregationPath);
     }
 
     private String parseRequestId(JsonObject requestBody) {
@@ -111,8 +131,37 @@ public class HurenceDatasourcePluginQueryRequestParser {
         return SamplingAlgorithm.valueOf(algoStr.toUpperCase());
     }
 
-    private List<String> parseMetricNames(JsonObject requestBody) {
-        return parseListString(requestBody, namesJsonPath);
+    private JsonArray parseMetricNames(JsonObject requestBody) {
+        try {
+            JsonPointer jsonPointer = JsonPointer.from(namesJsonPath);
+            JsonArray jsonArray = (JsonArray) jsonPointer.queryJson(requestBody);
+            if (jsonArray == null) return null;
+            List<Object> jsonArrayAsList = jsonArray.stream()
+                    .map(el -> {
+                        if (el instanceof String) return el;
+                        if (el instanceof JsonObject) {
+                            JsonObject jsonObject = (JsonObject) el;
+                            Map<String, String> tags = parseTags(jsonObject);
+                            JsonObject toReturn = new JsonObject()
+                                    .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME))
+                                    .put(HistorianFields.TAGS, tags);
+                            if (jsonObject.containsKey(QUERY_PARAM_REF_ID))
+                                toReturn.put(QUERY_PARAM_REF_ID, jsonObject.getString(QUERY_PARAM_REF_ID));
+                            return toReturn;
+                        }
+                        throw new IllegalArgumentException(String.format(
+                                "field at path '%s' is not well formed. " +
+                                        "Expected an array containing string or object with a name and optionnaly tags",
+                                namesJsonPath));
+                    }).collect(Collectors.toList());
+            return new JsonArray(jsonArrayAsList);
+        } catch (Exception ex) {
+            LOGGER.error("error while decoding '" + namesJsonPath + "'",ex);
+            throw new IllegalArgumentException(String.format(
+                    "field at path '%s' is not well formed. " +
+                            "Expected an array containing string or object with a name and optionnaly tags",
+                    namesJsonPath), ex);
+        }
     }
 
     private Long parseFrom(JsonObject requestBody) {

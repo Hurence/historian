@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.historian;
 
+import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import com.hurence.webapiservice.historian.impl.SolrHistorianServiceImpl;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracter;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;
@@ -11,7 +11,6 @@ import io.vertx.core.AsyncResult;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import com.hurence.historian.modele.HistorianFields;
 
 
 /**
@@ -35,17 +34,18 @@ public interface HistorianService {
         );
     }
 
+
     /**
      * @param myParams        as a json object
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#FROM} : "content of chunks as an array",
-     *                          {@value HistorianFields#TO} : "total chunk matching query",
-     *                          {@value HistorianFields#TAGS} : "total chunk matching query",
-     *                          {@value HistorianFields#NAMES} : "content of chunks as an array",
-     *                          {@value HistorianFields#SAMPLING_ALGO} : "content of chunks as an array",
-     *                          {@value HistorianFields#BUCKET_SIZE} : "content of chunks as an array",
-     *                          {@value HistorianFields#MAX_POINT_BY_METRIC} : "content of chunks as an array"
+     *                          {@value HistorianFields#FROM} : start date,
+     *                          {@value HistorianFields#TO} : end date,
+     *                          {@value HistorianFields#TAGS} : as key value,
+     *                          {@value HistorianFields#NAMES} : list of metric to query with optionally more info,
+     *                          {@value HistorianFields#SAMPLING_ALGO} : algorithm name to use,
+     *                          {@value HistorianFields#BUCKET_SIZE} : buvket size to use for sampling,
+     *                          {@value HistorianFields#MAX_POINT_BY_METRIC} : maximum number of point desired
      *                      }
      *                      </pre>
      *                      explanation :
@@ -57,6 +57,20 @@ public interface HistorianService {
      *                      [Required] use {@value HistorianFields#BUCKET_SIZE} is the bucket size to use if sampling is needed
      *                      [Required] use {@value HistorianFields#MAX_POINT_BY_METRIC} is the max number of point to return by metric name
      *
+     *        {@value HistorianFields#NAMES} must be an array each element must be either a string either an object.
+     *        - When this is just a string, this should correspond to the metric name wanted. In this case
+     *          we will use tags an sampling options specified in root oject to query the metric.
+     *        - When this is just an object, it should contain at least a field {@value HistorianFields#NAMES}
+     *        corresponding to the metric name wanted. And it can also contains tags ans sampling options to use for this
+     *                        specific metric. Here an exemple containing all available options:
+     *          <pre>
+     *          {
+     *              {@value HistorianFields#NAME} : the metric name,
+     *              {@value HistorianFields#TAGS} : the tags asked for this metric
+     *          }
+     *          </pre>
+     *
+     *
      * @param myResult return chunks of timeseries as an array of
      *                      <pre>
      *                      {
@@ -64,6 +78,10 @@ public interface HistorianService {
      *                          {@value HistorianFields#TIMESERIES} : [
      *                              {
      *                                  {@value HistorianFields#NAME} : "the metric name",
+     *                                  {@value HistorianFields#TAGS} : {
+     *                                      "tag name 1" : "tag value",
+     *                                      ...
+     *                                  },
      *                                  {@value HistorianFields#DATAPOINTS} : [
      *                                      [value(double), timestamp(long)],
      *                                      ...
@@ -126,6 +144,27 @@ public interface HistorianService {
      */
     @Fluent
     HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
+
+    /**
+     * @param params        as a json object
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#FIELD} : "A string of the field to search for it's values",
+     *                          {@value HistorianFields#QUERY} : "a query to use in searching the values",
+     *                          {@value HistorianFields#LIMIT} : <maximum number of metric to return>(int)
+     *                      }
+     *                      </pre>
+     * @param resultHandler return names of metrics as an array of
+     *                      <pre>
+     *                      {
+     *                          {@value HistorianFields#RESPONSE_VALUES} : "all field values matching the query",
+     *                          {@value HistorianFields#TOTAL} : <Number of metric returned>(int)
+     *                      }
+     *                      </pre>
+     * @return himself
+     */
+    @Fluent
+    HistorianService getFieldValues(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler);
 
     /**
      * @param params        as a json object

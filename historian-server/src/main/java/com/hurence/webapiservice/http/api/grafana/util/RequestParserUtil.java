@@ -1,20 +1,23 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
+import com.hurence.logisland.timeseries.functions.aggregation.Max;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
+import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
+import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
+
+import static com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam.DEFAULT_ALL_AGGREGATION_LIST;
+import static com.hurence.webapiservice.modele.AGG.*;
 
 public class RequestParserUtil {
 
@@ -124,6 +127,48 @@ public class RequestParserUtil {
         throw new IllegalArgumentException(
                 String.format("'%s' json pointer value '%s' is not of class %s !",
                         pointer, fromObj, clazz));
+    }
+
+    public static List<AGG> parseListAGG(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof JsonArray) {
+            try {
+                JsonArray jsonArray = (JsonArray) fromObj;
+                return jsonArray.stream()
+                        .map(i -> {
+                            try {
+                                return AGG.valueOf(i.toString());
+                            } catch (IllegalArgumentException e) {
+                                throw new IllegalArgumentException(i.toString()+ " is not a recognized aggregation, the accepted aggregations are : " + Arrays.toString(values()));
+                            }
+                        })
+                        .collect(Collectors.toList());
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid List<AGG> !",
+                                pointer, fromObj), e);
+            }
+        }
+        if (fromObj instanceof Boolean) {
+            try {
+                boolean aggregBoolean = (boolean) fromObj;
+                if(aggregBoolean)
+                    return DEFAULT_ALL_AGGREGATION_LIST;
+                else
+                    throw new IllegalArgumentException("aggregations value could not be other then true");
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' is not a valid value here !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not a List<String> !",
+                        pointer, fromObj));
     }
 
 }

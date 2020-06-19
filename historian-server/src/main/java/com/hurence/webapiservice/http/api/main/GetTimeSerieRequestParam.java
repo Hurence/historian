@@ -1,17 +1,14 @@
 package com.hurence.webapiservice.http.api.main;
 
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.http.api.grafana.modele.AdHocFilter;
-import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public class GetTimeSerieRequestParam implements TimeSeriesRequest {
+public class GetTimeSerieRequestParam {
 
     public static final int DEFAULT_BUCKET_SIZE = 1;//will be recomputed later by historian if necessary depending on maxDataPoints
     public static final SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.AVERAGE;
@@ -53,7 +50,7 @@ public class GetTimeSerieRequestParam implements TimeSeriesRequest {
         return to;
     }
 
-    @Override
+
     public SamplingConf getSamplingConf() {
         return new SamplingConf(this.samplingAlgo, this.bucketSize, this.maxDataPoints);
     }
@@ -98,7 +95,7 @@ public class GetTimeSerieRequestParam implements TimeSeriesRequest {
         return tags;
     }
 
-    @Override
+
     public String getRequestId() {
         return "not defined";
     }

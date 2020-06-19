@@ -1,0 +1,22 @@
+[
+  {
+    "name":"metric_to_filter",
+    "tags" : {
+      "pays": "Berlin",
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [3.0, 1477917224980],
+      [3.0, 1477917224981]
+    ]
+  }
+]
+
+
+
+
+
+
+
+
+

@@ -3,31 +3,43 @@ package com.hurence.webapiservice.http.api.grafana;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.webapiservice.historian.util.RefIdInfo;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
-import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser;
+import com.hurence.webapiservice.http.api.grafana.modele.SearchValuesRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginAnnotationRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
+import com.hurence.webapiservice.http.api.grafana.parser.SearchValuesRequestParser;
+import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.TimeSeriesExtracterImpl;
-import com.hurence.webapiservice.timeseries.TimeSeriesRequest;
+import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPluginApiImpl implements GrafanaApi {
+import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
+import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
+import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_NAME;
+
+public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceDatasourcePluginApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrafanaHurenceDatasourcePluginApiImpl.class);
 
+    protected HistorianService service;
+
     public GrafanaHurenceDatasourcePluginApiImpl(HistorianService service) {
-        super(service);
+        this.service = service;
     }
 
 
@@ -95,6 +107,68 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
+    /**
+     *  used to get values of certain field
+     *
+     * @param context
+     *
+     * Expected request exemple :
+     * <pre>
+     *      {
+     *         "field": "name",
+     *         "query": "met",
+     *         "limit": 100
+     *      }
+     * </pre>
+     * "query" is optional.
+     * "limit" is optional.
+     *
+     * response Example :
+     * <pre>
+     *     ["metric_25","metric_50","metric_75","metric_90","metric_95"]
+     * </pre>
+     *
+     */
+    @Override
+    public void searchValues(RoutingContext context) {
+        final SearchValuesRequestParam request;
+        try {
+            JsonObject requestBody = context.getBodyAsJson();
+
+            request = new SearchValuesRequestParser(FIELD, QUERY, LIMIT).parseRequest(requestBody);
+        } catch (Exception ex) {
+            LOGGER.error("error parsing request", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(ex.getMessage());
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end();
+            return;
+        }
+        final JsonObject getFieldValuesParam = buildGetFieldValuesParam(request);
+
+        service.rxGetFieldValues(getFieldValuesParam)
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    context.response().setStatusCode(500);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(ex.getMessage());
+                })
+                .doOnSuccess(valuesResponse -> {
+                    JsonArray array = valuesResponse.getJsonArray(RESPONSE_VALUES);
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(array.encode());
+                }).subscribe();
+    }
+
+    private JsonObject buildGetFieldValuesParam(SearchValuesRequestParam request) {
+        return new JsonObject()
+                .put(FIELD, request.getFieldToSearch())
+                .put(QUERY, request.getQueryToUseInSearch())
+                .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
+    }
+
+
     public final static String FROM_JSON_PATH = "/from";
     public final static String TO_JSON_PATH = "/to";
     public final static String NAMES_JSON_PATH = "/names";
@@ -104,6 +178,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
     public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
+    public final static String AGGREGATION_JSON_PATH = "/aggregations";
 
     /**
      *  used to query metrics datapoints in grafana panels.
@@ -171,7 +246,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH)
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH)
                     .parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
@@ -186,22 +261,30 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
         LOGGER.debug("getTimeSeriesChunkParams : {}", getTimeSeriesChunkParams.toString());
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
-                .map(sampledTimeSeries -> {
-                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES);
+                .map(sampledTimeSeriesRsp -> {
+                    JsonArray timeseries = sampledTimeSeriesRsp.getJsonArray(TIMESERIES);
                     if (LOGGER.isDebugEnabled()) {
                         timeseries.forEach(metric -> {
                             JsonObject el = (JsonObject) metric;
-                            String metricName = el.getString(TimeSeriesExtracterImpl.TIMESERIE_NAME);
+                            String metricName = el.getString(TIMESERIE_NAME);
                             int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
                             LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
                                     request.getRequestId(),size, metricName);
                         });
                         LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
                                 request.getRequestId(),
-                                sampledTimeSeries.getLong(TOTAL_POINTS, 0L),
+                                sampledTimeSeriesRsp.getLong(TOTAL_POINTS, 0L),
                                 System.currentTimeMillis() - startRequest);
                     }
                     return timeseries;
+                }).map(sampledTimeSeries -> {
+                    List<RefIdInfo> refIdList = getRefIdInfos(request);
+                    List<JsonObject> timeseriesAsList = sampledTimeSeries.stream().map(timeserieWithoutRefId -> {
+                        JsonObject timeserieWithRefIdIfExist = (JsonObject) timeserieWithoutRefId;
+                        addRefIdIfExist(refIdList, timeserieWithRefIdIfExist);
+                        return timeserieWithRefIdIfExist;
+                    }).collect(Collectors.toList());
+                    return new JsonArray(timeseriesAsList);
                 })
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
@@ -217,7 +300,33 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 }).subscribe();
     }
 
-    private JsonObject buildGetTimeSeriesRequest(TimeSeriesRequest request) {
+    private void addRefIdIfExist(List<RefIdInfo> refIdList, JsonObject timeserieWithoutRefId) {
+        for (RefIdInfo refIdInfo : refIdList){
+            if (refIdInfo.isMetricMatching(timeserieWithoutRefId)) {
+                timeserieWithoutRefId.put(QUERY_PARAM_REF_ID, refIdInfo.getRefId());
+            }
+        }
+    }
+
+    private List<RefIdInfo> getRefIdInfos(HurenceDatasourcePluginQueryRequestParam request) {
+        List<RefIdInfo> refIdList = new ArrayList<>();
+        for (Object metricInfo : request.getMetricNames()) {
+            if (metricInfo instanceof JsonObject && ((JsonObject) metricInfo).containsKey(QUERY_PARAM_REF_ID)) {
+                JsonObject metricInfoObject = new JsonObject(metricInfo.toString());
+                Map<String, String> finalTagsForThisMetric = new HashMap<>(request.getTags());
+                if (metricInfoObject.containsKey(TAGS))
+                    for (Map.Entry<String, Object> tagsEntry : metricInfoObject.getJsonObject(TAGS).getMap().entrySet()){
+                        finalTagsForThisMetric.put(tagsEntry.getKey() ,tagsEntry.getValue().toString());
+                    }
+                refIdList.add(new RefIdInfo(metricInfoObject.getString(NAME),
+                        metricInfoObject.getString(QUERY_PARAM_REF_ID),
+                        finalTagsForThisMetric));
+            }
+        }
+        return refIdList;
+    }
+
+    private JsonObject buildGetTimeSeriesRequest(HurenceDatasourcePluginQueryRequestParam request) {
         JsonArray fieldsToFetch = new JsonArray()
                 .add(RESPONSE_CHUNK_VALUE_FIELD)
                 .add(RESPONSE_CHUNK_START_FIELD)
@@ -233,7 +342,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                 .put(HistorianFields.TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
+                .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()));
     }
 
     public final static String LIMIT_JSON_PATH = "/limit";
@@ -305,5 +415,15 @@ public class GrafanaHurenceDatasourcePluginApiImpl extends GrafanaSimpleJsonPlug
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(annotations.encode());
                 }).subscribe();
+    }
+
+    protected JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
+        return new JsonObject()
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(TAGS, request.getTags())
+                .put(LIMIT, request.getMaxAnnotation())
+                .put(MATCH_ANY, request.getMatchAny())
+                .put(TYPE, request.getType());
     }
 }

@@ -35,6 +35,7 @@ public class HistorianFields {
     public static String METRIC = "metric";
     public static String KEY = "key";
     public static String VALUE = "value";
+    public static String AGGREGATION = "aggregation";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";
@@ -47,10 +48,14 @@ public class HistorianFields {
     public static String TOTAL_HIT = "total_hit";
     public static String NAME = "name";
 
+    public static final String FIELD = "field";
+    public static final String QUERY = "query";
+
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
     public static String RESPONSE_TOTAL_ADDED_POINTS = "total_added_points";
     public static String RESPONSE_TOTAL_ADDED_CHUNKS = "total_added_chunks";
     public static String RESPONSE_TAG_NAME_FIELD = "tagname";
+    public static final String RESPONSE_VALUES = "values";
 
     public static String RESPONSE_CHUNK_ID_FIELD = HistorianChunkCollectionFieldsVersion0.ID;
     public static String RESPONSE_CHUNK_VERSION_FIELD = "_version_";
@@ -93,7 +98,6 @@ public class HistorianFields {
     public static String FORMAT_DATE = "format_date";
     public static String GROUP_BY = "group_by";
     public static String TIMEZONE_DATE = "timezone_date";
-    public static String TIMESTAMP_UNIT = "timestamp_unit";
 
     public static String CHUNK_YEAR = HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR;
     public static String CHUNK_MONTH = HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH;
