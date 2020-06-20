@@ -26,6 +26,8 @@ package com.hurence.logisland.timeseries
 import com.hurence.logisland.timeseries.distance.DistanceFunctionEnum
 import com.hurence.logisland.timeseries.distance.DistanceFunctionFactory
 import com.hurence.logisland.timeseries.dtw.FastDTW
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import spock.lang.Specification
 import spock.lang.Unroll
 
@@ -34,6 +36,7 @@ import spock.lang.Unroll
  * @author f.lautenschlager
  */
 class FastDTWIntegrationTest extends Specification {
+    private static Logger LOGGER = LoggerFactory.getLogger(FastDTWIntegrationTest.class);
 
     public static void main(String[] args) {
         def distFn = DistanceFunctionFactory.getDistanceFunction(DistanceFunctionEnum.EUCLIDEAN)
@@ -45,7 +48,7 @@ class FastDTWIntegrationTest extends Specification {
         def start = System.currentTimeMillis();
         def info = FastDTW.getWarpInfoBetween(tsI, tsJ, 1, distFn)
         def end = System.currentTimeMillis();
-        println "FastDTW for search radius: 1 took: ${end - start}"
+        LOGGER.trace( "FastDTW for search radius: 1 took: ${end - start}")
 
     }
 
@@ -69,7 +72,7 @@ class FastDTWIntegrationTest extends Specification {
         info.getNormalizedDistance() == normalizedDistance
         (end - start) < maxTime
 
-        println "FastDTW for search radius: $searchRadius took: ${end - start}"
+        LOGGER.trace( "FastDTW for search radius: $searchRadius took: ${end - start}")
 
         where:
         searchRadius << [1, 5, 10, 15, 20, 25, 30]
