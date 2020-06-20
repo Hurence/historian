@@ -110,6 +110,12 @@
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
             <version>${solr.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>log4j-slf4j-impl</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <!--        TEST-->
         <dependency>
@@ -167,6 +173,7 @@
                         <compilerArgs>
                             <arg>-Acodegen.output=${project.basedir}/src/main</arg>
                         </compilerArgs>
+                        <debug>false</debug>
                     </configuration>
                 </plugin>
                 <plugin>

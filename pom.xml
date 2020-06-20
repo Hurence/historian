@@ -156,12 +156,23 @@
                                 <bannedDependencies>
                                     <excludes>
                                         <exclude>org.slf4j:slf4j-simple</exclude>
+                                        <exclude>org.apache.logging.log4j:slf4j-simple</exclude>
+                                        <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>
+<!--                                        org.apache.logging.log4j:log4j-slf4j-impl-->
+<!--                                        <exclude>log4j:log4j-api</exclude>-->
+<!--                                        <exclude>log4j:log4j-core</exclude>-->
+<!--                                        <exclude>log4j:log4j-web</exclude>-->
                                     </excludes>
                                 </bannedDependencies>
                             </rules>
                         </configuration>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
             </plugin>
         </plugins>
     </build>
@@ -178,6 +189,7 @@
                     <plugin> <!-- Failsafe plugin is maven plugin for integration tests -->
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
                         <configuration>
                             <!-- Force *IT.java naming pattern. Otherwise it would allow to have someone create a
                             *Test.java test in the integration tests and it would also be executed by the surefire plugin
@@ -191,7 +203,7 @@
                             </includes>
                             <!--                    <forkMode>always</forkMode>-->
                             <systemPropertyVariables>
-                                <log4j.configuration>file:${project.basedir}/log4j-silent.properties</log4j.configuration>
+<!--                                <log4j.configuration>file:${project.basedir}/log4j-silent.properties</log4j.configuration>-->
                             </systemPropertyVariables>
                         </configuration>
                         <executions>
