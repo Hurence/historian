@@ -3,18 +3,21 @@ package com.hurence.historian.spark.sql
 import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
-import com.hurence.historian.spark.sql.functions.{chunk, guess, sax, sax_best_guess,anomalie_test,sax_best_guess_paa_fixed}
+import com.hurence.historian.spark.sql.functions.{anomalie_test, chunk, guess, sax, sax_best_guess, sax_best_guess_paa_fixed}
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import org.apache.spark.sql.functions._
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.{BeforeAll, Test, TestInstance}
+import org.slf4j.{Logger, LoggerFactory}
 
 
 @TestInstance(Lifecycle.PER_CLASS)
 class LoaderTests extends SparkSessionTestWrapper {
 
   import spark.implicits._
+
+  private val logger = LoggerFactory.getLogger(classOf[LoaderTests])
 
 
   @BeforeAll
@@ -49,7 +52,7 @@ class LoaderTests extends SparkSessionTestWrapper {
       .collect()
 
 
-    println(sample(0))
+    logger.debug(sample(0).toString);
     assertEquals(1574982082000L, sample(0).start)
     assertEquals(1575068166000L, sample(0).end)
     assertEquals("ack", sample(0).name)
@@ -88,7 +91,7 @@ class LoaderTests extends SparkSessionTestWrapper {
       .collect()
 
 
-    println(sample(0))
+    logger.debug(sample(0).toString)
     assertEquals(1574982082000L, sample(0).start)
     assertEquals(1575068166000L, sample(0).end)
     assertEquals("ack", sample(0).name)
@@ -108,14 +111,17 @@ class LoaderTests extends SparkSessionTestWrapper {
   @Test
   def testChunksV0() = {
 
-    it4MetricsChunksDS.show()
+    if (logger.isDebugEnabled) {
+      it4MetricsChunksDS.show()
+    }
+
 
     val sample = it4MetricsChunksDS
       .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
       //.withColumn("sax2", sax(lit(5),lit( 0.05), lit(50), $"values"))
       .collect()
 
-    println(sample(0))
+    logger.debug(sample(0).toString)
     assertEquals(1574982082000L, sample(0).start)
     assertEquals(1575068166000L, sample(0).end)
     assertEquals("ack", sample(0).name)
@@ -170,7 +176,10 @@ class LoaderTests extends SparkSessionTestWrapper {
       ))
 
     val ds = reader.read(options)
-ds.show()
+
+    if (logger.isDebugEnabled) {
+      ds.show()
+    }
 
   }
 
@@ -190,8 +199,9 @@ ds.show()
     val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
 
     val ds = itDataV0Reader.read(options)
-
-    ds.show()
+    if (logger.isDebugEnabled) {
+      ds.show()
+    }
   }
 
   @Test
@@ -203,9 +213,10 @@ ds.show()
 
     val ds = itDataV0Reader.read(options)
 
-
-    ds.printSchema()
-    ds.show()
+    if (logger.isDebugEnabled) {
+      ds.printSchema()
+      ds.show()
+    }
 
   }
 
@@ -218,8 +229,10 @@ ds.show()
     val reader = ReaderFactory.getChunksReader(ChunksReaderType.PARQUET)
     val ds = reader.read(options)
 
-    ds.printSchema()
-    ds.show()
+    if (logger.isDebugEnabled) {
+      ds.printSchema()
+      ds.show()
+    }
 
   }
 
@@ -233,20 +246,8 @@ ds.show()
       .withColumn("guess", guess( $"values"))
       //.as[ChunkRecordV0]
       .collect()
-    println(sample(0))
+    logger.debug(sample(0).toString)
     assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample(0)(16))
-
-
-//    val sample1 = it4MetricsChunksDS
-//            .where("name = 'ack' AND day = '2019-11-29'")
-//            .withColumn("guess", guess(  $"values"))
-//          //.agg(count($"tags.metric_id").as("count_metric"))
-//          //.as[ChunkRecordV0]
-//         // .show(32,200)
-//           .collect()
-//
-//    sample1.foreach(x => println(x))
-//   assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample1(6)(16))
   }
 
  // @Test
@@ -264,10 +265,8 @@ ds.show()
       //.agg(count($"tags.metric_id").as("count_metric"))
       //.as[ChunkRecordV0]
       .drop("chunk", "timestamps","values","tags")
-      .show(32,200)
      // .collect()
 
-    //sample1.foreach(x => println(x))
     //assertEquals("adebdcdcddbddddccfdfegfffghigiihhgggifghffcfgfffff", sample1(2)(16))
 
   }
@@ -282,19 +281,8 @@ ds.show()
               .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
               //.as[ChunkRecordV0]
               .collect()
-            println(sample(0))
+            logger.debug(sample(0).toString)
             assertEquals("[15, 41]", sample(0)(17))
-
-//    val sample = it4MetricsChunksDS
-//      .where("name = 'ack' AND day = '2019-11-29'")
-//      .withColumn("sax_best_guess", sax_best_guess( lit(0.01),lit(50),  $"values"))
-//      .withColumn("anomaly_test", anomalie_test($"sax"))
-//      //.agg(count($"tags.metric_id").as("count_metric"))
-//      //.as[ChunkRecordV0]
-//      //.show(32,200)
-//      .collect()
-//        sample.foreach(x => println(x))
-//        assertEquals("[2, 41]", sample(2)(17))
   }
 
 }

@@ -59,4 +59,29 @@ to retrieve the plugin
 
 
 
+# Bonne pratiques
+
+## Les logs
+
+* Never use println
+* Never use show() (Dataframe) or conditionnaly, for exemple :
+```
+ if (logger.isDebugEnabled) {
+        ack08.show()
+ }
+```
+* Log dependencies should only be set on root pom but never in childs. This way log management is the same in every module.
+In our case we use :
+  * slf4j-api
+  * slf4j-log4j12
+  * log4j
+If using slf4j, you only use an implementation. Here we use log4j, the dependence slf4j-log4j12 allow
+us to use log4j.properties files to configure log level. We have 2 log4j.properties per module in resources folders,
+one in main and one in test folders.
+  
+We added the enforcer plugin to ensure that all slf4j implementation embedded by transitive dependencies are excluded.
+If not you will get an error message and you have to exclude the conflicting dependency.
+
+  
+
 

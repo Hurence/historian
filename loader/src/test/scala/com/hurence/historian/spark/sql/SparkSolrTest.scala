@@ -55,7 +55,9 @@ class SparkSolrTest extends SparkSolrTests {
         .repartition(1)
         .as[ChunkRecordV0]
 
-      ack08.show()
+      if (logger.isDebugEnabled) {
+        ack08.show()
+      }
 
       // 3. write those chunks to SolR
       val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
@@ -80,7 +82,11 @@ class SparkSolrTest extends SparkSolrTests {
         "tag_names" -> "metric_id"
       )))
         .where("metric_id LIKE '08%'")
-      solrDF.show()
+
+      if (logger.isDebugEnabled) {
+        solrDF.show()
+      }
+
       assert(solrDF.count == 5)
       /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
         val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
