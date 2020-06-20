@@ -116,7 +116,11 @@
             <version>${junit.jupiter.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!--log dependencies-->
+        <!--log dependencies, enable to use log4j.properties files to conf log level in tests.
+        Need to exclude all other implementation of slf4j that would be embedded as transitive dependencies.
+        Indeed some module maintainer wrongly add slf4j implem as compiled dependency  in their pom !
+        Track them down thanks to mvn dependency:tree command
+        -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -135,6 +139,32 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+                                        <exclude>org.slf4j:slf4j-simple</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
