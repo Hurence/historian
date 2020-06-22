@@ -348,40 +348,10 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 ## Realtime data ingestion with logisland
 
 
-
-
-
-
-
-
-
-
 # Development
 
 Please see our documentation [here](DEVELOPMENT.md)
 
-## Build project
-This section is mainly for developers as it will guive some insight about compiling testing the framework.
-Hurence Historian is Open Source, distributed as Apache 2.0 licence and the source repository is hosted on github at [https://github.com/Hurence/historian](https://github.com/Hurence/historian)
-
-Run the following command in the root directory of historian source checkout.
-
-    git clone git@github.com:Hurence/historian.git
-    cd historian
-    mvn clean install -DskipTests -Pbuild-integration-tests
-
-## Install datasource plugin in your grafana instance
-
-You just need to copy the plugin folder **./grafana-historian-dataosurce** folder of the plugin into the plugin folder of your grafana instances.
-Look at your grafana.ini file, by default the path is **./data/plugins/**.
-
-So you could do something like
- 
- ``` shell script
-cp -r ./grafana-historian-dataosurce ${GRAFANA_HOME}/data/plugins/
-```
-
-You need to restart your grafana server so that the changes are taking in account.
 
 
 
