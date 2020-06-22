@@ -2,6 +2,7 @@ package com.hurence.historian
 
 import java.util
 
+import com.hurence.historian.AbstractReducingChunkSizeIT.LOGGER
 import com.hurence.historian.modele.SchemaVersion
 import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
@@ -22,18 +23,17 @@ import org.testcontainers.containers.DockerComposeContainer
 import scala.collection.JavaConversions._
 
 @ExtendWith(Array(classOf[SolrExtension], classOf[SparkExtension]))
-abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
+abstract class AbstractReducingChunkSizeIT(container : (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
 
   val zkUrl: String = SolrExtension.getZkUrl(container)
   val historianCollection: String = SolrITHelper.COLLECTION_HISTORIAN
+  val chunkSize = 2
+  val year = AbstractReducingChunkSizeIT.year
+  val month = AbstractReducingChunkSizeIT.month
+  val day = AbstractReducingChunkSizeIT.day
 
-  val chunkSize = 10
-  val year: Int = AbstractIncreasingChunkSizeTest.year
-  val month: Int = AbstractIncreasingChunkSizeTest.month
-  val day: Int = AbstractIncreasingChunkSizeTest.day
-
-  val metricA: String = AbstractIncreasingChunkSizeTest.metricA
-  val metricB: String = AbstractIncreasingChunkSizeTest.metricB
+  val metricA: String = AbstractReducingChunkSizeIT.metricA
+  val metricB: String = AbstractReducingChunkSizeIT.metricB
 
   def createCompactor: ChunkCompactor
 
@@ -41,14 +41,11 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
     //sometime some documents seems to not have been commited ? Will see if sleeping solve this problem
     Thread.sleep(1000)
-    assertEquals(24, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
+    val start = System.currentTimeMillis();
+    assertEquals(2, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
-    assertEquals(4, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
-    testChunks(sparkSession)
-    testReportEnd(client)
-  }
-
-  def testChunks(sparkSession: SparkSession) = {
+    assertEquals(12, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
+    val end = System.currentTimeMillis();
     //Test on chunks created
     val solrOpts = Map(
       "zkhost" -> zkUrl,
@@ -58,33 +55,33 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
     )
     val comapactedChunks = SparkSolrUtils.loadTimeSeriesFromSolR(sparkSession, solrOpts)
     val records: util.List[TimeSeriesRecord] = comapactedChunks.collectAsList()
-    assertEquals(4, records.size())
+    assertEquals(12, records.size())
     val recordsA: List[TimeSeriesRecord] = records
       .filter(r => r.getMetricName == metricA)
       .sortBy(r => r.getStartChunk)
       .toList
-    assertEquals(2, recordsA.size())
+    assertEquals(6, recordsA.size())
     //first
     assertEquals(1477895624866L, recordsA.get(0).getStartChunk)
-    assertEquals(1477924224866L, recordsA.get(0).getEndChunk)
-    assertEquals(10, recordsA.get(0).getChunkSize)
+    assertEquals(1477916224866L, recordsA.get(0).getEndChunk)
+    assertEquals(2, recordsA.get(0).getChunkSize)
     //last
-    assertEquals(1477925224866L, recordsA.get(1).getStartChunk)
-    assertEquals(1477926224866L, recordsA.get(1).getEndChunk)
-    assertEquals(2, recordsA.get(1).getChunkSize)
+    assertEquals(1477925224866L, recordsA.get(5).getStartChunk)
+    assertEquals(1477926224866L, recordsA.get(5).getEndChunk)
+    assertEquals(2, recordsA.get(5).getChunkSize)
     val recordsB: List[TimeSeriesRecord] = records
       .filter(r => r.getMetricName == metricB)
       .sortBy(r => r.getStartChunk)
       .toList
-    assertEquals(2, recordsB.size())
+    assertEquals(6, recordsB.size())
     //first
     assertEquals(1477895624866L, recordsB.get(0).getStartChunk)
-    assertEquals(1477924224866L, recordsB.get(0).getEndChunk)
-    assertEquals(10, recordsB.get(0).getChunkSize)
+    assertEquals(1477916224866L, recordsB.get(0).getEndChunk)
+    assertEquals(2, recordsB.get(0).getChunkSize)
     //last
-    assertEquals(1477925224866L, recordsB.get(1).getStartChunk)
-    assertEquals(1477926224866L, recordsB.get(1).getEndChunk)
-    assertEquals(2, recordsB.get(1).getChunkSize)
+    assertEquals(1477925224866L, recordsB.get(5).getStartChunk)
+    assertEquals(1477926224866L, recordsB.get(5).getEndChunk)
+    assertEquals(2, recordsB.get(5).getChunkSize)
 
     //Test on points of chunks
     val pointsA: List[Point] = recordsA.flatMap(_.getPoints)
@@ -96,6 +93,7 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
     assertEquals(1477895624866L, pointsA.head.getTimestamp)
     assertEquals(198, pointsA.last.getValue)
     assertEquals(1477926224866L, pointsA.last.getTimestamp)
+    LOGGER.info("compactor finished in {} s", (end - start) / 1000)
   }
 
   def testReportEnd(client: SolrClient): Unit = {
@@ -103,10 +101,10 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
     assertEquals(1, reports.size())
     val report = reports.getJsonObject(0)
     assertEquals(JobStatus.SUCCEEDED.toString, report.getString(CompactorJobReport.JOB_STATUS))
-    assertEquals(4, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT))
+    assertEquals(12, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_OUTPUT))
     assertEquals(CompactorJobReport.JOB_TYPE_VALUE, report.getString(CompactorJobReport.JOB_TYPE))
     assertEquals(null, report.getString(CompactorJobReport.JOB_ERROR))
-    assertEquals(24, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT))
+    assertEquals(2, report.getLong(CompactorJobReport.JOB_NUMBER_OF_CHUNK_INPUT))
     assertEquals(2, report.getLong(CompactorJobReport.JOB_TOTAL_METRICS_RECHUNKED))
     additionalTestsOnReportEnd(report)
   }
@@ -114,8 +112,8 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
   def additionalTestsOnReportEnd(report: JsonObject): Unit = {}
 }
 
-object AbstractIncreasingChunkSizeTest {
-  private val LOGGER = LoggerFactory.getLogger(classOf[AbstractIncreasingChunkSizeTest])
+object AbstractReducingChunkSizeIT {
+  private val LOGGER = LoggerFactory.getLogger(classOf[AbstractReducingChunkSizeIT])
   private val year = 1999;
   private val month = 10;
   private val day = 1;
@@ -126,83 +124,48 @@ object AbstractIncreasingChunkSizeTest {
   @BeforeAll
   def initHistorianAndDeployVerticle(client: SolrClient,
                                      container: (DockerComposeContainer[SELF]) forSome
-                                     {type SELF <: DockerComposeContainer[SELF]}): Unit = {
+                                    {type SELF <: DockerComposeContainer[SELF]}): Unit = {
     SolrITHelper.creatingAllCollections(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString)
     SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.CODE_INSTALL)
     SolrITHelper.addFieldToChunkSchema(SolrExtension.getSolr1Url(container), TimeSeriesRecord.SENSOR)
     LOGGER.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
     val injector: GeneralVersion0SolrInjector = new GeneralVersion0SolrInjector()
-    addSeveralChunksForMetric(injector, metricA)
-    addSeveralChunksForMetric(injector, metricB)
-    injector.injectChunks(client)
-    LOGGER.info("Indexed some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
-  }
-
-   def addSeveralChunksForMetric(injector: GeneralVersion0SolrInjector, metric: String) = {
-    injector.addChunk(metric, year, month, day, chunkOrigin,
+    injector.addChunk(metricA, year, month, day, chunkOrigin,
       util.Arrays.asList(
-        new Point(0, 1477895624866L, 622)
-      )
+        new Point(0, 1477895624866L, 622),
+        new Point(0, 1477916224866L, -3),
+        new Point(0, 1477917224866L, 365),
+        new Point(0, 1477918224866L, 120),
+        new Point(0, 1477919224866L, 15),
+        new Point(0, 1477920224866L, -100),
+        new Point(0, 1477921224866L, 0),
+        new Point(0, 1477922224866L, 120),
+        new Point(0, 1477923224866L, 250),
+        new Point(0, 1477924224866L, 275),
+        new Point(0, 1477925224866L, 288),
+        new Point(0, 1477926224866L, 198)
+      )//12
     )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
+    injector.addChunk(metricB, year, month, day, chunkOrigin,
       util.Arrays.asList(
-        new Point(0, 1477916224866L, -3)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477917224866L, 365)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477918224866L, 120)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477919224866L, 15)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477920224866L, -100)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477921224866L, 0)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477922224866L, 120)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477923224866L, 250)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477924224866L, 275)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
-        new Point(0, 1477925224866L, 288)
-      )
-    )
-    injector.addChunk(metric, year, month, day, chunkOrigin,
-      util.Arrays.asList(
+        new Point(0, 1477895624866L, 622),
+        new Point(0, 1477916224866L, -3),
+        new Point(0, 1477917224866L, 365),
+        new Point(0, 1477918224866L, 120),
+        new Point(0, 1477919224866L, 15),
+        new Point(0, 1477920224866L, -100),
+        new Point(0, 1477921224866L, 0),
+        new Point(0, 1477922224866L, 120),
+        new Point(0, 1477923224866L, 250),
+        new Point(0, 1477924224866L, 275),
+        new Point(0, 1477925224866L, 288),
         new Point(0, 1477926224866L, 198)
       )
     )
+    injector.injectChunks(client)
+    LOGGER.info("Indexed some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN)
   }
 }
-
-
 
 
 

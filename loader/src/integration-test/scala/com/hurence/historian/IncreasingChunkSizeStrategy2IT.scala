@@ -7,8 +7,8 @@ import io.vertx.core.json.JsonObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.testcontainers.containers.DockerComposeContainer
 
-class IncreasingChunkSizeStrategy2Test(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]})
-  extends AbstractIncreasingChunkSizeTest(container) {
+class IncreasingChunkSizeStrategy2IT(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]})
+  extends AbstractIncreasingChunkSizeIT(container) {
 
   val compactorConf: ChunkCompactorConfStrategy2 = ChunkCompactorConfStrategy2(zkUrl, historianCollection,
     CompactorJobReport.DEFAULT_COLLECTION,

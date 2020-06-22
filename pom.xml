@@ -155,13 +155,16 @@
                             <rules>
                                 <bannedDependencies>
                                     <excludes>
+<!--                                        implementation binding-->
+                                        <exclude>org.slf4j:slf4j-jdk14</exclude>
+                                        <exclude>org.slf4j:slf4j-nop</exclude>
                                         <exclude>org.slf4j:slf4j-simple</exclude>
-                                        <exclude>org.apache.logging.log4j:slf4j-simple</exclude>
-                                        <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>
-<!--                                        org.apache.logging.log4j:log4j-slf4j-impl-->
-<!--                                        <exclude>log4j:log4j-api</exclude>-->
-<!--                                        <exclude>log4j:log4j-core</exclude>-->
-<!--                                        <exclude>log4j:log4j-web</exclude>-->
+                                        <exclude>org.slf4j:slf4j-jcl</exclude>
+                                        <exclude>org.slf4j:logback-classic</exclude>
+<!--                                        <exclude>org.apache.logging.log4j:slf4j-simple</exclude>-->
+<!--                                        <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>-->
+<!--                                        cannot use log4j over slf4j as we use log4j implementation for slf4j-->
+                                        <exclude>org.slf4j:log4j-over-slf4j</exclude>
                                     </excludes>
                                 </bannedDependencies>
                             </rules>
