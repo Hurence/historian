@@ -3,11 +3,17 @@
 
 print_usage(){
     cat << EOF
-    create-historian-collection.sh [options]
+echo modify-collection-schema.sh [options]
 
-    by Hurence, 09/01/2019
+[options]:
 
-    The script creates a collection for historian solr
+             -s|--solr-host
+             -c|--collection
+             -f|--new-field
+
+by Hurence, 09/01/2019
+
+The script modify collections of historian solr
 
     -s|--solr-host solr host
     -c|--solr-collection collection
@@ -90,7 +96,6 @@ main() {
 ################################
 declare SOLR_HOST="localhost:8983/solr"
 declare SOLR_COLLECTION="historian"
-declare MODEL_VERSION=0
 declare SOLR_UPDATE_QUERY=""
 declare NEW_FIELD
 declare DELETE_FIELD

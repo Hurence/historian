@@ -55,11 +55,12 @@
             <groupId>net.seninp</groupId>
             <artifactId>jmotif-sax</artifactId>
             <version>1.1.4</version>
-        </dependency>
-        <dependency>
-            <groupId>net.seninp</groupId>
-            <artifactId>jmotif-sax</artifactId>
-            <version>1.1.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>net.seninp</groupId>

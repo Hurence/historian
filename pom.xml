@@ -116,7 +116,11 @@
             <version>${junit.jupiter.version}</version>
             <scope>runtime</scope>
         </dependency>
-        <!--log dependencies-->
+        <!--log dependencies, enable to use log4j.properties files to conf log level in tests.
+        Need to exclude all other implementation of slf4j that would be embedded as transitive dependencies.
+        Indeed some module maintainer wrongly add slf4j implem as compiled dependency  in their pom !
+        Track them down thanks to mvn dependency:tree command
+        -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -124,11 +128,57 @@
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-simple</artifactId>
+            <artifactId>slf4j-log4j12</artifactId>
             <version>${org.slf4j.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${org.log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+<!--                                        implementation binding-->
+                                        <exclude>org.slf4j:slf4j-jdk14</exclude>
+                                        <exclude>org.slf4j:slf4j-nop</exclude>
+                                        <exclude>org.slf4j:slf4j-simple</exclude>
+                                        <exclude>org.slf4j:slf4j-jcl</exclude>
+                                        <exclude>org.slf4j:logback-classic</exclude>
+<!--                                        <exclude>org.apache.logging.log4j:slf4j-simple</exclude>-->
+<!--                                        <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>-->
+<!--                                        cannot use log4j over slf4j as we use log4j implementation for slf4j-->
+                                        <exclude>org.slf4j:log4j-over-slf4j</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+        </plugins>
+    </build>
 
     <profiles>
         <profile>
@@ -142,6 +192,7 @@
                     <plugin> <!-- Failsafe plugin is maven plugin for integration tests -->
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
                         <configuration>
                             <!-- Force *IT.java naming pattern. Otherwise it would allow to have someone create a
                             *Test.java test in the integration tests and it would also be executed by the surefire plugin
@@ -153,6 +204,10 @@
                             <includes>
                                 <include>**/*IT.java</include>
                             </includes>
+                            <!--                    <forkMode>always</forkMode>-->
+                            <systemPropertyVariables>
+<!--                                <log4j.configuration>file:${project.basedir}/log4j-silent.properties</log4j.configuration>-->
+                            </systemPropertyVariables>
                         </configuration>
                         <executions>
                             <execution>

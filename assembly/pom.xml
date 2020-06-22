@@ -25,7 +25,7 @@
                 <configuration>
                     <finalName>historian-${project.version}</finalName>
                     <attach>false</attach>
-                    <appendAssemblyId>false</appendAssemblyId>
+                    <appendAssemblyId>true</appendAssemblyId>
                 </configuration>
                 <version>3.1.1</version>
                 <executions>
@@ -43,6 +43,7 @@
                             </archiverConfig>
                             <descriptors>
                                 <descriptor>src/assembly/assembly.xml</descriptor>
+                                <descriptor>src/assembly/install_script_assembly.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
