@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
-source solr-util.sh
+decalre -r SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+source SCRIPT_DIR/solr-util.sh
 
 
 ################################
