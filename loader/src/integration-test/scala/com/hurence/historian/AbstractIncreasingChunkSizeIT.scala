@@ -22,23 +22,25 @@ import org.testcontainers.containers.DockerComposeContainer
 import scala.collection.JavaConversions._
 
 @ExtendWith(Array(classOf[SolrExtension], classOf[SparkExtension]))
-abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
+abstract class AbstractIncreasingChunkSizeIT(container: (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
 
   val zkUrl: String = SolrExtension.getZkUrl(container)
   val historianCollection: String = SolrITHelper.COLLECTION_HISTORIAN
 
   val chunkSize = 10
-  val year = AbstractIncreasingChunkSizeTest.year
-  val month = AbstractIncreasingChunkSizeTest.month
-  val day = AbstractIncreasingChunkSizeTest.day
+  val year: Int = AbstractIncreasingChunkSizeIT.year
+  val month: Int = AbstractIncreasingChunkSizeIT.month
+  val day: Int = AbstractIncreasingChunkSizeIT.day
 
-  val metricA: String = AbstractIncreasingChunkSizeTest.metricA
-  val metricB: String = AbstractIncreasingChunkSizeTest.metricB
+  val metricA: String = AbstractIncreasingChunkSizeIT.metricA
+  val metricB: String = AbstractIncreasingChunkSizeIT.metricB
 
   def createCompactor: ChunkCompactor
 
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
+    //sometime some documents seems to not have been commited ? Will see if sleeping solve this problem
+    Thread.sleep(1000)
     assertEquals(24, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
     assertEquals(4, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
@@ -112,8 +114,8 @@ abstract class AbstractIncreasingChunkSizeTest(container: (DockerComposeContaine
   def additionalTestsOnReportEnd(report: JsonObject): Unit = {}
 }
 
-object AbstractIncreasingChunkSizeTest {
-  private val LOGGER = LoggerFactory.getLogger(classOf[AbstractIncreasingChunkSizeTest])
+object AbstractIncreasingChunkSizeIT {
+  private val LOGGER = LoggerFactory.getLogger(classOf[AbstractIncreasingChunkSizeIT])
   private val year = 1999;
   private val month = 10;
   private val day = 1;

@@ -18,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -28,17 +29,24 @@ import java.util.Map;
 
 public class SolrITHelper {
 
-    private SolrITHelper() {}
+    private SolrITHelper() {
+    }
 
     private static Logger LOGGER = LoggerFactory.getLogger(SolrITHelper.class);
     public static String COLLECTION_HISTORIAN = HistorianCollections.DEFAULT_COLLECTION_HISTORIAN;
     public static String COLLECTION_ANNOTATION = HistorianCollections.DEFAULT_COLLECTION_ANNOTATION;
     public static String COLLECTION_REPORT = HistorianCollections.DEFAULT_COLLECTION_REPORT;
+    public static File SHARED_RESSOURCE_FILE = new File(SolrITHelper.class.getResource("/shared-resources").getFile());
+    public static String MODIFY_COLLECTION_SCRIPT_PATH = "./modify-collection-schema.sh";
+    public static String CREATE_CHUNK_COLLECTION_SCRIPT_PATH = "./create-historian-chunk-collection.sh";
+    public static String CREATE_REPORT_COLLECTION_SCRIPT_PATH = "./create-historian-report-collection.sh";
+    public static String CREATE_ANNOTATION_COLLECTION_SCRIPT_PATH = "./create-historian-annotation-collection.sh";
 
     public static void creatingAllCollections(SolrClient client, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {
         List<ProcessBuilder> processBuilderList = startProcessesToCreateCollections(solrUrl, modelVersion);
         List<Process> processList = new ArrayList<>();
         for (ProcessBuilder processBuilder : processBuilderList) {
+            LOGGER.debug("working directory of processe is {}", processBuilder.directory());
             Process start = processBuilder.start();
             processList.add(start);
         }
@@ -73,12 +81,11 @@ public class SolrITHelper {
     }
 
     public static void addFieldToChunkSchema(String solrUrl, String fieldName) throws IOException, InterruptedException, SolrServerException {
-
-        String modifyCollectionScriptPath = SolrITHelper.class.getResource("/shared-resources/modify-collection-schema.sh").getFile();
-        ProcessBuilder p = new ProcessBuilder("bash", modifyCollectionScriptPath,
+        ProcessBuilder p = new ProcessBuilder("bash", MODIFY_COLLECTION_SCRIPT_PATH,
                 "--solr-host", solrUrl + "/solr",
                 "--solr-collection", COLLECTION_HISTORIAN,
-                "--new-field", fieldName);
+                "--new-field", fieldName)
+                .directory(SHARED_RESSOURCE_FILE);
         LOGGER.info("start process to add field {} in collection {}", fieldName, COLLECTION_HISTORIAN);
         Process process = p.start();
         waitProcessFinishedAndPrintResult(process);
@@ -106,35 +113,35 @@ public class SolrITHelper {
 
     @NotNull
     private static ProcessBuilder getReportCollectionCreationProcessBuilder(String solrUrl, String modelVersion) {
-        String reportCollectionScriptPath = SolrITHelper.class.getResource("/shared-resources/create-historian-report-collection.sh").getFile();
-        return new ProcessBuilder("bash", reportCollectionScriptPath,
+        return new ProcessBuilder("bash", CREATE_REPORT_COLLECTION_SCRIPT_PATH,
                 "--solr-host", solrUrl + "/solr",
                 "--solr-collection", COLLECTION_REPORT,
                 "--replication-factor", "1",
                 "--num-shards", "2",
-                "--model-version", modelVersion);
+                "--model-version", modelVersion)
+                .directory(SHARED_RESSOURCE_FILE);
     }
 
     @NotNull
     private static ProcessBuilder getAnnotationCollectionCreationProcessBuilder(String solrUrl, String modelVersion) {
-        String annotationCollectionScriptPath = SolrITHelper.class.getResource("/shared-resources/create-historian-annotation-collection.sh").getFile();
-        return new ProcessBuilder("bash", annotationCollectionScriptPath,
+        return new ProcessBuilder("bash", CREATE_ANNOTATION_COLLECTION_SCRIPT_PATH,
                 "--solr-host", solrUrl + "/solr",
                 "--solr-collection", COLLECTION_ANNOTATION,
                 "--replication-factor", "1",
                 "--num-shards", "2",
-                "--model-version", modelVersion);
+                "--model-version", modelVersion)
+                .directory(SHARED_RESSOURCE_FILE);
     }
 
     @NotNull
     private static ProcessBuilder getChunkCollectionCreationProcessBuilder(String collectionName, String solrUrl, String modelVersion) {
-        String chunkCollectionScriptPath = SolrITHelper.class.getResource("/shared-resources/create-historian-chunk-collection.sh").getFile();
-        return new ProcessBuilder("bash", chunkCollectionScriptPath,
+        return new ProcessBuilder("bash", CREATE_CHUNK_COLLECTION_SCRIPT_PATH,
                 "--solr-host", solrUrl + "/solr",
                 "--solr-collection", collectionName,
                 "--replication-factor", "1",
                 "--num-shards", "2",
-                "--model-version", modelVersion);
+                "--model-version", modelVersion)
+                .directory(SHARED_RESSOURCE_FILE);
     }
 
     public static void createReportCollection(SolrClient client, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {

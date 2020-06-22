@@ -1,2 +1,7 @@
 == Introduction
-Ce guide aidera l'utilisateur du data historian dans la compréhension de la plateforme, de son installation, de son utilisation. Le data historian ayant été conçu dans l'optique d'un déploiement sur une infrastructure Big Data, qui sont par nature des environnements complexes à mettre en oeuvre, nous n'aborderons dans ce guide que les déploiements sur une seule machine et de manière progressive. Pour un déploiement sur une infrastructure Big Data multi-serveurs et sa sécurisation, il faudra se référer à d'autres documentations ou contacter Hurence à contact@hurence.com.
+Ce guide aidera l'utilisateur du data historian dans la compréhension de la plateforme, de son installation,
+de son utilisation. Le data historian ayant été conçu dans l'optique d'un déploiement sur une infrastructure Big Data,
+qui sont par nature des environnements complexes à mettre en oeuvre, nous n'aborderons dans ce guide que les
+déploiements sur une seule machine et de manière progressive. Pour un déploiement sur une infrastructure
+Big Data multi-serveurs et sa sécurisation, il faudra se référer à d'autres documentations ou contacter Hurence à
+contact@hurence.com.

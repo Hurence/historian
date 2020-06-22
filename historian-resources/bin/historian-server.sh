@@ -16,13 +16,21 @@ USR=user
 
 print_usage(){
     cat << EOF
-    historian-server.sh [options]
 
-    -d|--debug if you want debug level logs.
+bash historian-server.sh [options]
 
-    by Hurence, 09/01/2019
+[options]:
 
-    The script start or stop the historian server.
+             start
+             stop
+             restart
+             status
+
+-d|--debug if you want debug level logs.
+
+by Hurence, 09/01/2019
+
+The script start or stop the historian server.
 
 EOF
 }

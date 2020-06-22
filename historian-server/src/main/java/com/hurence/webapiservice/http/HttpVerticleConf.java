@@ -13,7 +13,6 @@ public class HttpVerticleConf {
     private final String hostname;
 
     public HttpVerticleConf(JsonObject json) {
-
         this.isDebugModeEnabled = json.getBoolean(CONFIG_DEBUG_MODE, false);
         this.historianAdress = json.getString(CONFIG_HISTORIAN_ADDRESS, "historian");
         this.maxDataPointsAllowedForExportCsv = json.getInteger(CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);

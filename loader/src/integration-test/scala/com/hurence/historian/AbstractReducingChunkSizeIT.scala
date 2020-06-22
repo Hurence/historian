@@ -2,7 +2,7 @@ package com.hurence.historian
 
 import java.util
 
-import com.hurence.historian.AbstractReducingChunkSizeTest.LOGGER
+import com.hurence.historian.AbstractReducingChunkSizeIT.LOGGER
 import com.hurence.historian.modele.SchemaVersion
 import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector
 import com.hurence.historian.solr.util.SolrITHelper
@@ -23,22 +23,24 @@ import org.testcontainers.containers.DockerComposeContainer
 import scala.collection.JavaConversions._
 
 @ExtendWith(Array(classOf[SolrExtension], classOf[SparkExtension]))
-abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
+abstract class AbstractReducingChunkSizeIT(container : (DockerComposeContainer[SELF]) forSome {type SELF <: DockerComposeContainer[SELF]}) {
 
   val zkUrl: String = SolrExtension.getZkUrl(container)
   val historianCollection: String = SolrITHelper.COLLECTION_HISTORIAN
   val chunkSize = 2
-  val year = AbstractReducingChunkSizeTest.year
-  val month = AbstractReducingChunkSizeTest.month
-  val day = AbstractReducingChunkSizeTest.day
+  val year = AbstractReducingChunkSizeIT.year
+  val month = AbstractReducingChunkSizeIT.month
+  val day = AbstractReducingChunkSizeIT.day
 
-  val metricA: String = AbstractReducingChunkSizeTest.metricA
-  val metricB: String = AbstractReducingChunkSizeTest.metricB
+  val metricA: String = AbstractReducingChunkSizeIT.metricA
+  val metricB: String = AbstractReducingChunkSizeIT.metricB
 
   def createCompactor: ChunkCompactor
 
   @Test
   def testCompactor(sparkSession: SparkSession, client: SolrClient) = {
+    //sometime some documents seems to not have been commited ? Will see if sleeping solve this problem
+    Thread.sleep(1000)
     val start = System.currentTimeMillis();
     assertEquals(2, SolrUtils.numberOfDocsInCollection(client, SolrITHelper.COLLECTION_HISTORIAN))
     createCompactor.run(sparkSession)
@@ -110,8 +112,8 @@ abstract class AbstractReducingChunkSizeTest(container : (DockerComposeContainer
   def additionalTestsOnReportEnd(report: JsonObject): Unit = {}
 }
 
-object AbstractReducingChunkSizeTest {
-  private val LOGGER = LoggerFactory.getLogger(classOf[AbstractReducingChunkSizeTest])
+object AbstractReducingChunkSizeIT {
+  private val LOGGER = LoggerFactory.getLogger(classOf[AbstractReducingChunkSizeIT])
   private val year = 1999;
   private val month = 10;
   private val day = 1;

@@ -53,36 +53,43 @@ public class AnnotationEndPointIT {
         SolrITHelper.createAnnotationCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", COLLECTION_ANNOTATION);
         final SolrInputDocument doc = new SolrInputDocument();
+        doc.addField("id", "1");
         doc.addField("time", 1581648194070L);   // 2020-2-14T02:43:14.070Z
         doc.addField("text", "annotation 1");
         doc.addField("tags", new JsonArray().add("tag1").add("tag2"));
         final UpdateResponse updateResponse = client.add(COLLECTION_ANNOTATION, doc);
         final SolrInputDocument doc1 = new SolrInputDocument();
+        doc1.addField("id", "2");
         doc1.addField("time", 1581651794070L);  // 2020-2-14T03:43:14.070Z
         doc1.addField("text", "annotation 2");
         doc1.addField("tags", new JsonArray().add("tag3").add("tag2"));
         final UpdateResponse updateResponse1 = client.add(COLLECTION_ANNOTATION, doc1);
         final SolrInputDocument doc2 = new SolrInputDocument();
+        doc2.addField("id", "3");
         doc2.addField("time", 1581655394070L);  // 2020-2-14T04:43:14.070Z
         doc2.addField("text", "annotation 3");
         doc2.addField("tags", new JsonArray().add("tag1").add("tag3"));
         final UpdateResponse updateResponse2 = client.add(COLLECTION_ANNOTATION, doc2);
         final SolrInputDocument doc3 = new SolrInputDocument();
+        doc3.addField("id", "4");
         doc3.addField("time", 1581658994070L);  // 2020-2-14T05:43:14.070Z
         doc3.addField("text", "annotation 4");
         doc3.addField("tags", new JsonArray().add("tag4").add("tag2"));
         final UpdateResponse updateResponse3 = client.add(COLLECTION_ANNOTATION, doc3);
         final SolrInputDocument doc4 = new SolrInputDocument();
+        doc4.addField("id", "doc4");
         doc4.addField("time", 1581662594070L);  // 2020-2-14T06:43:14.070Z
         doc4.addField("text", "annotation 5");
         doc4.addField("tags", new JsonArray().add("tag3").add("tag4"));
         final UpdateResponse updateResponse4 = client.add(COLLECTION_ANNOTATION, doc4);
         final SolrInputDocument doc5 = new SolrInputDocument();
+        doc5.addField("id", "doc5");
         doc5.addField("time", 1581666194070L);  // 2020-2-14T07:43:14.070Z
         doc5.addField("text", "annotation 6");
         doc5.addField("tags", new JsonArray().add("tag3").add("tag5"));
         final UpdateResponse updateResponse5 = client.add(COLLECTION_ANNOTATION, doc5);
         final SolrInputDocument doc6 = new SolrInputDocument();
+        doc6.addField("id", "doc6");
         doc6.addField("time", 1581669794070L);  // 2020-2-14T08:43:14.070Z
         doc6.addField("text", "annotation 7");
         doc6.addField("tags", new JsonArray().add("tag2").add("tag3"));

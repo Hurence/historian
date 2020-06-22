@@ -1,17 +1,46 @@
 == Installation
 
-Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d'installation n'est pas décrite ici par simplification car elle concerne des experts en urbanisation d'infrastructures Big Data. 
+Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant
+conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes
+volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d'installation n'est pas
+décrite ici par simplification car elle concerne des experts en urbanisation d'infrastructures Big Data.
 
 [NOTE]
 Hurence propose de l'accompagnement pour installer le data historian pour des volumétries importantes.
 
-=== Pre-requis pour une installation mono serveur en production
+* <<install-standalone,Installation standalone>>(à utiliser seulement pour tester)
+* <<install-production-mono-noeud,Installation de production mono noeud>>.
+Cette installation se base sur des serveurs solr, grafana et spark (spark et grafana étant optionnels) installés de manières indépendantes.
+Ce guide contient des sections pour installer ces outils.
 
-La configuration minimale du serveur pour une installation mono serveur (en production) du data historian est:
+[[install-standalone]]
+include::./_installation_standalone.ad[]
 
-- un OS CentOS ou Redhat 7.x
-- 32 Gigabits de RAM
-- 32 vcores de CPU
-- 2 Tera octets de disque
+[[install-production-mono-noeud]]
+include::./_installation_production.ad[]
 
+
+== Tear down and cleanup
+This section shows how to stop the services and cleanup data if needed.
+
+=== Stop your SolR instances
+
+when you're done you can stop your SolR cores. Attention cette commande va éteindre Solr (cela pourrait impacter d'autres
+service utilisant solr).
+
+    cd $SOLR_HOME
+    bin/solr stop -all
+
+Si vous ête en mode standalone pour solr, vous pouvez effacer vos données en supprimer les fichiers suivants
+
+[source,bash]
+----
+rm -r $HDH_HOME/data/solr/node1 $HDH_HOME/data/solr/node2
+----
+
+TODO see what is needed to rebootstrap.
+  * Peut être prévoir un script de désinstall.
+  * Un script pour reset les données solr.
+
+don't forget then to bootstrap your setup again as described previously.
 

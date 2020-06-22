@@ -18,6 +18,8 @@ package com.hurence.logisland.timeseries.converter.serializer.protobuf
 import com.hurence.logisland.timeseries.converter.common.Compression
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.logisland.record.Point
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -32,6 +34,8 @@ import java.util.zip.GZIPInputStream
  * @author f.lautenschlager
  */
 class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
+
+    private static Logger LOGGER = LoggerFactory.getLogger(ProtoBufMetricGenericTimeSeriesSerializerTest.class);
 
     def "test from without range query"() {
         given:
@@ -338,7 +342,7 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
 
         when:
         rawTimeSeriesList.each {
-            println "Checking file ${it.key}"
+            LOGGER.trace("Checking file ${it.key}")
             def rawTimeSeries = it.value
             rawTimeSeries.sort()
 
@@ -346,7 +350,7 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
             def serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(rawTimeSeries.points().iterator())
             def end = System.currentTimeMillis()
 
-            println "Serialization took ${end - start} ms"
+            LOGGER.trace("Serialization took ${end - start} ms")
 
             def builder = new MetricTimeSeries.Builder("heap", "metric")
 
@@ -354,11 +358,11 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
             ProtoBufMetricTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), rawTimeSeries.start, rawTimeSeries.end, builder)
             end = System.currentTimeMillis()
 
-            println "Deserialization took ${end - start} ms"
+            LOGGER.trace("Deserialization took ${end - start} ms")
             def modifiedTimeSeries = builder.build()
 
             def count = rawTimeSeries.size()
-            println "Checking $count points for almost_equals = 0"
+            LOGGER.trace("Checking $count points for almost_equals = 0")
 
             for (int i = 0; i < count; i++) {
                 if (rawTimeSeries.getTime(i) != modifiedTimeSeries.getTime(i)) {
@@ -393,9 +397,9 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
 
         [0, 10, 25, 50, 100].eachWithIndex { def almostEquals, def almostEqualsIndex ->
 
-            println "============================================================="
-            println "===================     ${almostEquals} ms       ========================="
-            println "============================================================="
+            LOGGER.trace( "=============================================================" )
+            LOGGER.trace( "===================     ${almostEquals} ms       =========================")
+            LOGGER.trace( "=============================================================")
 
             def changes = 0
             def sumOfPoint = 0
@@ -468,29 +472,29 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
                         changesTS++
                     }
                 }
-                println "======================================================="
-                println "TS ${rawTimeSeries.getName()} start: ${Instant.ofEpochMilli(rawTimeSeries.getStart())} end: ${Instant.ofEpochMilli(rawTimeSeries.getEnd())}"
-                println "TS-MOD ${modTimeSeries.getName()} start: ${Instant.ofEpochMilli(modTimeSeries.getStart())} end: ${Instant.ofEpochMilli(modTimeSeries.getEnd())}"
-                println "Max deviation: $maxDeviationTS in milliseconds"
-                println "Raw: Sum of deltas: $indexwiseDeltaRawTS in minutes"
-                println "Mod: Sum of deltas: $indexwiseDeltaModTS in minutes"
-                println "Change rate per point: ${changesTS / sumOfPointTS}"
-                println "Average deviation per point: ${averageDeviationTS / sumOfPointTS}"
-                println "Bytes after serialization: $bytes"
-                println "Bytes before serialization: $rawBytes"
-                println "Safes: ${(1 - bytes / rawBytes) * 100} %"
-                println "Bytes per point: ${bytes / sumOfPointTS}"
-                println "Compressed Bytes per point: ${compressedBytes / sumOfPointTS}"
-                println "======================================================="
+                LOGGER.trace("=======================================================")
+                LOGGER.trace("TS ${rawTimeSeries.getName()} start: ${Instant.ofEpochMilli(rawTimeSeries.getStart())} end: ${Instant.ofEpochMilli(rawTimeSeries.getEnd())}")
+                LOGGER.trace("TS-MOD ${modTimeSeries.getName()} start: ${Instant.ofEpochMilli(modTimeSeries.getStart())} end: ${Instant.ofEpochMilli(modTimeSeries.getEnd())}")
+                LOGGER.trace("Max deviation: $maxDeviationTS in milliseconds")
+                LOGGER.trace("Raw: Sum of deltas: $indexwiseDeltaRawTS in minutes")
+                LOGGER.trace("Mod: Sum of deltas: $indexwiseDeltaModTS in minutes")
+                LOGGER.trace("Change rate per point: ${changesTS / sumOfPointTS}")
+                LOGGER.trace("Average deviation per point: ${averageDeviationTS / sumOfPointTS}")
+                LOGGER.trace("Bytes after serialization: $bytes")
+                LOGGER.trace("Bytes before serialization: $rawBytes")
+                LOGGER.trace("Safes: ${(1 - bytes / rawBytes) * 100} %")
+                LOGGER.trace("Bytes per point: ${bytes / sumOfPointTS}")
+                LOGGER.trace("Compressed Bytes per point: ${compressedBytes / sumOfPointTS}")
+                LOGGER.trace("=======================================================")
             }
-            println "======================================================="
-            println "= Overall almost equals: $almostEquals"
-            println "======================================================="
-            println "Max deviation: $maxDeviation in milliseconds"
-            println "Raw: Sum of deltas: $indexwiseDeltaRaw in minutes"
-            println "Mod: Sum of deltas: $indexwiseDeltaMod in minutes"
-            println "Change rate per point: ${changes / sumOfPoint}"
-            println "Average deviation per point: ${averageDeviation / sumOfPoint}"
+            LOGGER.trace("=======================================================")
+            LOGGER.trace("= Overall almost equals: $almostEquals")
+            LOGGER.trace("=======================================================")
+            LOGGER.trace("Max deviation: $maxDeviation in milliseconds")
+            LOGGER.trace("Raw: Sum of deltas: $indexwiseDeltaRaw in minutes")
+            LOGGER.trace("Mod: Sum of deltas: $indexwiseDeltaMod in minutes")
+            LOGGER.trace("Change rate per point: ${changes / sumOfPoint}")
+            LOGGER.trace("Average deviation per point: ${averageDeviation / sumOfPoint}")
 
 
             def changeRate = (changes / sumOfPoint) * 100
@@ -520,7 +524,7 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
 
         when:
         rawTimeSeriesList.each {
-            println "Checking file ${it.key}"
+            LOGGER.trace( "Checking file ${it.key}")
             def rawTimeSeries = it.value;
             rawTimeSeries.sort()
 
@@ -548,7 +552,7 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
             def serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(uniqueTS.points().iterator(), almostEquals)
             def end = System.currentTimeMillis()
 
-            println "Serialization took ${end - start} ms"
+            LOGGER.trace( "Serialization took ${end - start} ms")
 
             def builder = new MetricTimeSeries.Builder("heap", "metric")
 
@@ -556,14 +560,14 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
             ProtoBufMetricTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), uniqueTS.getStart(), uniqueTS.getEnd(), builder)
             end = System.currentTimeMillis()
 
-            println "Deserialization took ${end - start} ms"
+            LOGGER.trace( "Deserialization took ${end - start} ms")
             def modifiedTimeSeries = builder.build()
 
             def count = uniqueTS.size();
 
             for (int i = 0; i < count; i++) {
                 if (modifiedTimeSeries.getTime(i) - uniqueTS.getTime(i) > almostEquals) {
-                    println("Position ${i}: Time diff is ${modifiedTimeSeries.getTime(i) - uniqueTS.getTime(i)}. Orginal ts: ${uniqueTS.getTime(i)}. Reconstructed ts: ${modifiedTimeSeries.getTime(i)}")
+                    LOGGER.trace(("Position ${i}: Time diff is ${modifiedTimeSeries.getTime(i) - uniqueTS.getTime(i)}. Orginal ts: ${uniqueTS.getTime(i)}. Reconstructed ts: ${modifiedTimeSeries.getTime(i)}"))
                 }
             }
         }
@@ -583,7 +587,7 @@ class ProtoBufMetricGenericTimeSeriesSerializerTest extends Specification {
         def documents = new HashMap<String, MetricTimeSeries>()
 
         tsDir.listFiles().each { File file ->
-            println("Processing file $file")
+            LOGGER.trace(("Processing file $file"))
             def bytes = new GZIPInputStream(new FileInputStream(file)).getBytes()
 
             documents.put(file.name, new MetricTimeSeries.Builder(file.name, "metric").attribute("bytes", bytes.length).build())
