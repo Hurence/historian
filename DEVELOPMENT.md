@@ -83,5 +83,9 @@ We added the enforcer plugin to ensure that all slf4j implementation embedded by
 If not you will get an error message and you have to exclude the conflicting dependency.
 
   
+## Tests
 
+Unit test should be implemented inside src/test directory and suffixed with "Test".
+Integration tests should be put into src/integration-test and be suffixed with "IT" so 
+that it is not run as Unit tests !
 
