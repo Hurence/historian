@@ -8,24 +8,17 @@ This project is composed of several module :
 * logisland-timeseries : TODO
 * timeseries : TODO
 
-# gateway
+# Historian server
 
-The gateway is implemented using vertx. It serves an API that the grafana-historian-datasource needs to interact with grafana.
-SO those two modules are tightly coupled by the Rest api.
+The historian server is implemented using vertx. 
+It serves an API that the grafana-historian-datasource needs to interact with grafana.
+So those two modules are tightly coupled by the Rest api.
 
 # grafana-historian-datasource
 
 This is implemented using javascript. We recommend you to directly develop this plugin in its own
  [repo](https://github.com/Hurence/grafana-historian-datasource).
 You develop this plugin, implement unit tests as indicated in the project. Once you have push your changes in the datasource project.
-You can just update the submodule in this project by typing :
-
-```
-git submodule update --remote
-```
-
-It will automatically pull the last commit of the project in this repository.
-Then do not forget to commit the differences !
 
 ## install plugin in grafana
 
@@ -45,23 +38,54 @@ Clone this project. We included the grafana-historian-datasource project as a su
 The sub project is localized at ./data/plugins/grafana-historian-datasource of the grafana project.
 
 We recommend using visual studio code for developping grafana plugins. You can check grafana development documentation too.
-In particular to build and run grafana in you devlopment environment you can follow this [guide](https://github.com/grafana/grafana/blob/master/contribute/developer-guide.md) or this [one](https://medium.com/@ivanahuckova/how-to-contribute-to-grafana-as-junior-dev-c01fe3064502).
+In particular to build and run grafana in you development environment you can follow this [guide](https://github.com/grafana/grafana/blob/master/contribute/developer-guide.md) or this [one](https://medium.com/@ivanahuckova/how-to-contribute-to-grafana-as-junior-dev-c01fe3064502).
 
 
-Once you successfully ran those guides you can run
+# Build project
+This section is mainly for developers as it will guive some insight about compiling testing the framework.
+Hurence Historian is Open Source, distributed as Apache 2.0 licence and the source repository is hosted on github at [https://github.com/Hurence/historian](https://github.com/Hurence/historian)
+
+Run the following command in the root directory of historian source checkout.
+
+    git clone git@github.com:Hurence/historian.git
+    cd historian
+    mvn clean install -DskipTests -Pbuild-integration-tests
+    
+# Release process
+
+Ensure all tests are passing
+
+Create release branch :
+
+```bash
+git checkout -b release-x.x.x
 ```
-git submodule init
-git submodule update
+
+Update maven version :
+
+```bash
+mvn versions:set -DnewVersion=x.x.x
 ```
-to retrieve the plugin
 
+verify modification and commit them.
 
+Test the standalone install in ./assembly/target/historian-X.X.X-install.tgz.
+Here the process :
 
+Extract it somewhere (we will use /tmp here (be sure to have enough disk)).
 
+```bash
+mkdir -p /tmp/historian && tar -xf ./assembly/target/historian-*-install.tgz -C /tmp/historian
+```
+run the script install :
 
-# Bonne pratiques
+```bash
+bash ./install.sh
+```
+    
+# Good practices
 
-## Les logs
+## Logs
 
 * Never use println
 * Never use show() (Dataframe) or conditionnaly, for exemple :
