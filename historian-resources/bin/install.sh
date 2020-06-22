@@ -117,6 +117,7 @@ ask_for_solr_url() {
   echo "What is the path to the solr cluster ? We will use the solr REST api to create collection. Example [$DEFAULT_SOLR_CLUSTER_URL]"
   read -r SOLR_CLUSTER_URL
   SOLR_CLUSTER_URL=${SOLR_CLUSTER_URL:-$DEFAULT_SOLR_CLUSTER_URL}
+  echo "SOLR_CLUSTER_URL is $SOLR_CLUSTER_URL" # TODO remove
 }
 
 ask_for_chunk_collection_name() {
