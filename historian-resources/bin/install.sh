@@ -11,7 +11,9 @@ EOF
 
 check_brew_or_install() {
   #BREW INSTALL
-  if [ "$(brew 2>&1)" = "install.sh: line 21: brew: command not found" ]; then
+  brew 2>&1
+  if [[ $? != 0 ]]; then
+    echo "Brew is not already installed. Installing it"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
     brew update
   else
@@ -19,24 +21,27 @@ check_brew_or_install() {
   fi
 }
 
-check_wget_or_install() {
+check_wget_or_install_with_apt_get() {
   #WGET INSTALL
-  if [ "$(wget 2>&1)" = "install.sh: line 30: wget: command not found" ]; then
-    brew install wget
-    brew update
+  wget --version &>/dev/null
+  if [ $? != 0 ]; then
+    echo "wget is not already installed. Installing it"
+    apt update
+    apt install wget
   else
     echo "Wget is already installed"
   fi
 }
 
-check_maven_or_install() {
-  #MAVEN INSTALL
-  maven_check=$(mvn 2>&1)
-  if [ "$maven_check" = "install.sh: line 40: mvn: command not found" ]; then
-    brew install maven
+check_wget_or_install_with_brew() {
+  #WGET INSTALL
+  wget --version &>/dev/null
+  if [ $? != 0 ]; then
+    echo "wget is not already installed. Installing it"
+    brew install wget
     brew update
   else
-    echo "Maven is already installed"
+    echo "Wget is already installed"
   fi
 }
 
@@ -45,11 +50,11 @@ setup_all_variables() {
   ask_and_set_variable "HDH_HOME" "/opt/hdh" "$MSG"
   MSG="Do you want us to install an embedded solr (version 8.2.0 required)? (otherwise you need to have one that can be used from this machine)"
   ask_and_set_boolean_variable "USING_EMBEDDED_SOLR" "$MSG"
-  if [[ ! $USING_EMBEDDED_SOLR ]]; then
+  if [[ $USING_EMBEDDED_SOLR  = false ]]; then
     MSG="What is the path to the solr cluster ? We will use the solr REST api to create collection."
-    ask_and_set_variable "SOLR_CLUSTER_URL" "$DEFAULT_SOLR_CLUSTER_URL" "$MSG"
+    ask_and_set_variable "SOLR_HOST_PORT_SOLR" "$DEFAULT_HOST_PORT_SOLR" "$MSG"
   else
-    SOLR_CLUSTER_URL="$DEFAULT_SOLR_CLUSTER_URL"
+    export SOLR_HOST_PORT_SOLR="$DEFAULT_HOST_PORT_SOLR"
   fi
   MSG="Which name to use for the solr collection which will be storing time series ?"
   ask_and_set_variable "CHUNK_COLLECTION_NAME" "historian" "$MSG"
@@ -59,37 +64,43 @@ setup_all_variables() {
   ask_and_update_array "TAG_NAMES" "$MSG" "Tag name"
   MSG="Do you want us to install an embedded grafana (version 7.0.3 required)? (otherwise you need to have one that can be used from this machine if you plan to use grafana)"
   ask_and_set_boolean_variable "USING_EMBEDDED_GRAFANA" "$MSG"
-  if [[ $USING_EMBEDDED_GRAFANA ]]; then
-    GRAFANA_HOME="$HDH_HOME/grafana-7.0.3.darwin-amd64"
+  if [[ $USING_EMBEDDED_GRAFANA = true ]]; then
+    export GRAFANA_HOME="$HDH_HOME/grafana-7.0.3"
   fi
   MSG="Do you want us to install the historian datasource grafana plugin ? You need it to see data with grafana."
   MSG="$MSG We can install it only if grafana is on this machin as single node otherwise you will have to install it manually."
   MSG="$MSG If you choose to install an embedded grafana you can install it as well."
   ask_and_set_boolean_variable "INSTALLING_DATASOURCE_PLUGIN" "$MSG"
-  if [[ $INSTALLING_DATASOURCE_PLUGIN ]]; then
-    if [[ -z $GRAFANA_HOME ]]; then
-      GRAFANA_PLUGIN_DIR="$GRAFANA_HOME/data/plugins"
+  if [[ $INSTALLING_DATASOURCE_PLUGIN = true ]]; then
+    if [[ -v GRAFANA_HOME ]]; then
+      export GRAFANA_PLUGIN_DIR="$GRAFANA_HOME/data/plugins"
     else
       MSG="What is the path to your grafana installation plugin folder ? "
-      ask_and_set_variable "GRAFANA_PLUGIN_DIR" "path/to/grafana/data/plugins" "$MSG"
+      ask_and_set_variable "GRAFANA_PLUGIN_DIR" "path/to/grafana/data/plugins"
     fi
   fi
   MSG="Do you want us to install an embedded spark (this is not required)?"
   ask_and_set_boolean_variable "INSTALLING_SPARK" "$MSG"
+  #setup variable from others
+  export HISTORIAN_HOME="$HDH_HOME/$HISTORIAN_DIR_NAME"
+  export SOLR_CLUSTER_HISTORIAN_CHUNK_URL="http://$SOLR_HOST_PORT_SOLR/$CHUNK_COLLECTION_NAME"
 }
 
 print_conf() {
   echo "will start the install with those parameters :"
   echo "HDH_HOME : $HDH_HOME"
   echo "USING_EMBEDDED_SOLR : $USING_EMBEDDED_SOLR"
-  echo "SOLR_CLUSTER_URL : $SOLR_CLUSTER_URL"
+  localhost:8983/solr
+  echo "SOLR_HOST_PORT_SOLR : $SOLR_HOST_PORT_SOLR"
   echo "CHUNK_COLLECTION_NAME : $CHUNK_COLLECTION_NAME"
   echo "REPORT_COLLECTION_NAME : $REPORT_COLLECTION_NAME"
+  echo "TAG_NAMES to add for time series : ${TAG_NAMES[*]}"
   echo "USING_EMBEDDED_GRAFANA : $USING_EMBEDDED_GRAFANA"
   echo "INSTALLING_DATASOURCE_PLUGIN : $INSTALLING_DATASOURCE_PLUGIN"
   echo "GRAFANA_PLUGIN_DIR : $GRAFANA_PLUGIN_DIR"
   echo "GRAFANA_HOME : $GRAFANA_HOME"
-  echo "TAG_NAMES to add for time series : ${TAG_NAMES[*]}"
+  echo "INSTALLING_SPARK : $INSTALLING_SPARK"
+  echo -e "\n"
 }
 
 #ask user to enter value for the variable, if user just press enter the default value is used instead
@@ -143,26 +154,29 @@ ask_and_update_array() {
 #param1 Variable name to set
 #param2 Msg description
 ask_and_set_boolean_variable() {
-  local MSG="$2"
   local variable_name_to_modify="$1"
-  local -n variable_value="${variable_name_to_modify}"
-  echo "${MSG}"
-  select solr_install in Standalone Existing; do
-    if [ "$solr_install" = "Yes" ]; then
-      export "${variable_name_to_modify}=yes"
-      break
-    elif [ "$solr_install" = "No" ]; then
-      export "${variable_name_to_modify}="
-      break
-    else
-      echo "Please choose 1 or 2"
-    fi
+  local MSG="$2"
+  echo "$MSG"
+  select solr_install in Yes No; do
+    case $solr_install in
+      Yes)
+        export "${variable_name_to_modify}=true"
+        break
+        ;;
+      No)
+        export "${variable_name_to_modify}=false"
+        break
+        ;;
+      *)
+        echo "Please choose 1 or 2"
+        ;;
+    esac
   done
 }
 
 add_tag_names_to_chunk_collection() {
   for tag in "${TAG_NAMES[@]}"; do
-    "$HISTORIAN_HOME/bin/modify-collection-schema.sh" -c "$CHUNK_COLLECTION_NAME" -s "$SOLR_CLUSTER_URL" -f "$tag"
+    "$HISTORIAN_HOME/bin/modify-collection-schema.sh" -c "$CHUNK_COLLECTION_NAME" -s "$SOLR_HOST_PORT_SOLR" -f "$tag"
     echo -e "\n"
   done
 }
@@ -174,17 +188,17 @@ extract_historian_into_hdh_home() {
   echo "installed historian into $HDH_HOME"
 }
 
-#Install embeded solr if needed and setup SOLR_CLUSTER_URL, default or user input
+#Install embeded solr if needed and setup SOLR_HOST_PORT_SOLR, default or user input
 install_embedded_solr_and_start_it_if_needed() {
-  if [[ $USING_EMBEDDED_SOLR ]]; then
+  if [[ $USING_EMBEDDED_SOLR = true ]]; then
     # create 2 data folders for SolR data
     local -r SOLR_NODE_1="$HDH_HOME/data/solr/node1"
     local -r SOLR_NODE_2="$HDH_HOME/data/solr/node2"
     mkdir -p "$SOLR_NODE_1" "$SOLR_NODE_2"
     # touch a few config files for SolR
     local -r SOLR_XML_PATH="$HISTORIAN_HOME/conf/solr.xml"
-    echo "${SOLR_XML_PATH}" >"${SOLR_NODE_1}/solr.xml"
-    echo "${SOLR_XML_PATH}" >"${SOLR_NODE_2}/solr.xml"
+    cp "${SOLR_XML_PATH}" "${SOLR_NODE_1}/solr.xml"
+    cp "${SOLR_XML_PATH}" "${SOLR_NODE_2}/solr.xml"
     touch "${HDH_HOME}/data/solr/node1/zoo.cfg"
     # get SolR 8.2.0 and unpack it
     wget https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz
@@ -196,31 +210,50 @@ install_embedded_solr_and_start_it_if_needed() {
     "${SOLR_HOME}/bin/solr" start -cloud -s "$SOLR_NODE_1" -p 8983
     # démarre un second core Solr localement qui va utiliser le serveur zookeeper précédament créer.
     "${SOLR_HOME}/bin/solr" start -cloud -s "$SOLR_NODE_2" -p 7574 -z localhost:9983
-    echo "solr is now running at ${SOLR_CLUSTER_URL}"
+    echo "solr is now running at ${SOLR_HOST_PORT_SOLR}"
     echo -e "\n"
   fi
 }
 
-intall_grafana_if_asked() {
-  if [[ $USING_EMBEDDED_GRAFANA ]]; then
+intall_grafana_if_asked_for_mac() {
+  if [[ $USING_EMBEDDED_GRAFANA = true ]]; then
     wget https://dl.grafana.com/oss/release/grafana-7.0.3.darwin-amd64.tar.gz
-    tar -zxvf grafana-7.0.3.darwin-amd64.tar.gz
+    tar -zxf grafana-7.0.3.darwin-amd64.tar.gz
     rm grafana-7.0.3.darwin-amd64.tar.gz
-    brew services restart grafana
+  fi
+  echo -e "\n"
+}
+
+intall_grafana_if_asked_for_linux() {
+  if [[ $USING_EMBEDDED_GRAFANA = true ]]; then
+    wget https://dl.grafana.com/oss/release/grafana-7.0.3.linux-amd64.tar.gz
+    tar -zxf grafana-7.0.3.linux-amd64.tar.gz
+    rm grafana-7.0.3.linux-amd64.tar.gz
   fi
   echo -e "\n"
 }
 
 intall_grafana_datasource_plugin_if_asked() {
-  if [[ $INSTALLING_DATASOURCE_PLUGIN ]]; then
+  if [[ $INSTALLING_DATASOURCE_PLUGIN = true ]]; then
     wget https://github.com/Hurence/grafana-historian-datasource/archive/v1.0.0.tar.gz
-    tar -zxvf grafana-historian-datasource-1.0.0.tar.gz -C "$GRAFANA_PLUGIN_DIR"
-    rm grafana-historian-datasource-1.0.0.tar.gz
+    mkdir -p "$GRAFANA_PLUGIN_DIR"
+    tar -zxf v1.0.0.tar.gz -C "$GRAFANA_PLUGIN_DIR"
+    rm v1.0.0.tar.gz
+    echo "Installed grafana plugin into $GRAFANA_PLUGIN_DIR"
+    echo -e "\n"
+  fi
+}
+
+start_grafana_if_asked() {
+  if [[ $USING_EMBEDDED_GRAFANA = true ]]; then
+    cd "$GRAFANA_HOME"
+    ./bin/grafana-server web
+    cd -
   fi
 }
 
 intall_spark_if_asked() {
-  if [[ $INSTALLING_SPARK ]]; then
+  if [[ $INSTALLING_SPARK = true ]]; then
     # get Apache Spark 2.3.4 and unpack it
     wget https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz
     tar -xf spark-2.3.4-bin-without-hadoop.tgz
@@ -275,10 +308,10 @@ generate_historian_server_conf() {
 
 create_historian_collections() {
   # create collection in SolR
-  "$HISTORIAN_HOME/bin/create-historian-chunk-collection.sh" -c "$CHUNK_COLLECTION_NAME" -s "$SOLR_CLUSTER_URL"
+  "$HISTORIAN_HOME/bin/create-historian-chunk-collection.sh" -c "$CHUNK_COLLECTION_NAME" -s "$SOLR_HOST_PORT_SOLR"
   echo -e "\n"
   # create report collection in SolR
-  "$HISTORIAN_HOME/bin/create-historian-report-collection.sh" -c "$REPORT_COLLECTION_NAME" -s "$SOLR_CLUSTER_URL"
+  "$HISTORIAN_HOME/bin/create-historian-report-collection.sh" -c "$REPORT_COLLECTION_NAME" -s "$SOLR_HOST_PORT_SOLR"
   echo -e "\n"
 }
 
@@ -291,33 +324,68 @@ start_historian_server() {
 }
 
 main() {
-  #REQUIEREMENTS
-  check_brew_or_install
-  check_wget_or_install
-  check_maven_or_install
-  #Setup conf with user (need to declare arrays in advance)
-  declare -a TAG_NAMES=()
-  setup_all_variables
-  print_conf
-  #setup variable from others
-  HISTORIAN_HOME="$HDH_HOME/$HISTORIAN_DIR_NAME"
-  SOLR_CLUSTER_HISTORIAN_CHUNK_URL="$SOLR_CLUSTER_URL/$CHUNK_COLLECTION_NAME"
-  #    Start the installation
-  mkdir -p "$HDH_HOME"
-  extract_historian_into_hdh_home
-  cd "$HDH_HOME" || (echo "could not go to $HDH_HOME folder" && exit 1)
-  install_embedded_solr_and_start_it_if_needed
-  create_historian_collections
-  add_tag_names_to_chunk_collection
-  intall_grafana_if_asked
-  intall_grafana_datasource_plugin_if_asked
-  intall_spark_if_asked
-  generate_historian_server_conf
-  start_historian_server
+  if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+      echo "Os detected is linux : $OSTYPE"
+      check_wget_or_install_with_apt_get
+      #Setup conf with user (need to declare arrays in advance)
+      declare -a TAG_NAMES=()
+      setup_all_variables
+      print_conf
+      #    Start the installation
+      mkdir -p "$HDH_HOME"
+      extract_historian_into_hdh_home
+      cd "$HDH_HOME" || (echo "could not go to $HDH_HOME folder" && exit 1)
+      install_embedded_solr_and_start_it_if_needed
+      create_historian_collections
+      add_tag_names_to_chunk_collection
+      intall_grafana_if_asked_for_linux
+      intall_grafana_datasource_plugin_if_asked
+      start_grafana_if_asked
+      intall_spark_if_asked
+      generate_historian_server_conf
+      start_historian_server
+  elif [[ "$OSTYPE" == "darwin"* ]]; then #Mac OS
+      echo "Os detected is Mac os : $OSTYPE"
+      check_brew_or_install
+      check_wget_or_install_with_brew
+      #Setup conf with user (need to declare arrays in advance)
+      declare -a TAG_NAMES=()
+      setup_all_variables
+      print_conf
+      #    Start the installation
+      mkdir -p "$HDH_HOME"
+      extract_historian_into_hdh_home
+      cd "$HDH_HOME" || (echo "could not go to $HDH_HOME folder" && exit 1)
+      install_embedded_solr_and_start_it_if_needed
+      create_historian_collections
+      add_tag_names_to_chunk_collection
+      intall_grafana_if_asked_for_mac
+      intall_grafana_datasource_plugin_if_asked
+      start_grafana_if_asked
+      intall_spark_if_asked
+      generate_historian_server_conf
+      start_historian_server
+  elif [[ "$OSTYPE" == "cygwin" ]]; then
+      echo "this os is not yet supported : $OSTYPE"
+      exit 1
+  elif [[ "$OSTYPE" == "msys" ]]; then
+      echo "this os is not yet supported : $OSTYPE"
+      exit 1
+  elif [[ "$OSTYPE" == "win32" ]]; then
+      echo "this os is not yet supported : $OSTYPE"
+      exit 1
+  elif [[ "$OSTYPE" == "freebsd"* ]]; then
+      echo "this os is not yet supported : $OSTYPE"
+      exit 1
+  else
+      echo "this os is not yet supported : $OSTYPE"
+      exit 1
+  fi
   exit 0
 }
 
-declare -r DEFAULT_SOLR_CLUSTER_URL="http://localhost:8983/solr"
+
+declare -r DEFAULT_HOST_PORT_SOLR="localhost:8983/solr"
 declare -r HISTORIAN_DIR_NAME="historian-1.3.5"
 
 main "$@"
