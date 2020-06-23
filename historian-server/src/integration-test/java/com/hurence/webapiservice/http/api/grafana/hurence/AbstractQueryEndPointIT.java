@@ -161,6 +161,20 @@ public abstract class AbstractQueryEndPointIT {
                 "/http/grafana/hurence/query/aggregations/testQueryWithALLAggregation/expectedResponse.json");
     }
 
+    /**
+     * bug found the 23/06/2020. Not working when request is like
+     * <pre>"names" : [{ "name" : "metric" }]</pre>
+     * @param vertx
+     * @param testContext
+     */
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithObjectName(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/testNames/objectNameWithoutTags/request.json",
+                "/http/grafana/hurence/query/testNames/objectNameWithoutTags/expectedResponse.json");
+    }
+
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
         assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);

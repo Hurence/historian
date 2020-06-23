@@ -141,10 +141,11 @@ public class HurenceDatasourcePluginQueryRequestParser {
                         if (el instanceof String) return el;
                         if (el instanceof JsonObject) {
                             JsonObject jsonObject = (JsonObject) el;
-                            Map<String, String> tags = parseTags(jsonObject);
                             JsonObject toReturn = new JsonObject()
-                                    .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME))
-                                    .put(HistorianFields.TAGS, tags);
+                                    .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME));
+                            Map<String, String> tags = parseTags(jsonObject);
+                            if (!tags.isEmpty())
+                                toReturn.put(HistorianFields.TAGS, tags);
                             if (jsonObject.containsKey(QUERY_PARAM_REF_ID))
                                 toReturn.put(QUERY_PARAM_REF_ID, jsonObject.getString(QUERY_PARAM_REF_ID));
                             return toReturn;

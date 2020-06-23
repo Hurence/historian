@@ -21,9 +21,9 @@ import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourc
 import static com.hurence.webapiservice.modele.AGG.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class QueryRequestParserTest {
+public class HurenceQueryRequestParserTest {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(QueryRequestParserTest.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(HurenceQueryRequestParserTest.class);
 
     @Test
     public void testParsingRequest() {
@@ -279,11 +279,31 @@ public class QueryRequestParserTest {
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                 TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
-        LOGGER.info("request : {}", request);
+        LOGGER.debug("request : {}", request);
         assertEquals(names, request.getMetricNames());
         assertEquals(new HashMap<String, String>() {{
             put("usine", "usine_1");
             put("sensor", "sensor_3");
         }}, request.getTags());
+    }
+
+    /**
+     * bug found the 23/06/2020
+     */
+    @Test
+    public void testBugWithObjectContainingOnlyName() {
+        JsonArray names = new JsonArray(Arrays.asList("temp_b",
+                new JsonObject().put(HistorianFields.NAME, "temp_a"),
+                new JsonObject().put(HistorianFields.NAME, "temp_b")
+        ));
+        JsonObject requestBody = new JsonObject();
+        JsonPointer.from(NAMES_JSON_PATH)
+                .writeJson(requestBody, names, true);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
+                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
+                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+        LOGGER.debug("request : {}", request);
+        assertEquals(names, request.getMetricNames());
     }
 }
