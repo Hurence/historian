@@ -43,6 +43,13 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     }
 
 
+    @Override
+    public void root(RoutingContext context) {
+        context.response()
+                .setStatusCode(200)
+                .end("Historian grafana api is Working fine");
+    }
+
     /**
      *  used by the find metric options on the query tab in panels.
      *  In our case we will return each different '{@value HistorianFields#NAME}' value in historian.

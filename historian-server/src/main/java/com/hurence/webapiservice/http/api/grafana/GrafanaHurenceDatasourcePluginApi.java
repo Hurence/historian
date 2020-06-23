@@ -16,6 +16,7 @@ public interface GrafanaHurenceDatasourcePluginApi {
 
     default Router getGraphanaRouter(Vertx vertx) {
         Router router = Router.router(vertx);
+        router.get("/").handler(this::root);
         router.post(SEARCH_ENDPOINT).handler(this::search);
         router.post(SEARCH_VALUES_ENDPOINT).handler(this::searchValues);
         router.post(SEARCH_TAGS_ENDPOINT).handler(this::searchTags);
@@ -25,6 +26,8 @@ public interface GrafanaHurenceDatasourcePluginApi {
         router.post(ANNOTATIONS_ENDPOINT).handler(this::annotations);
         return router;
     }
+
+    void root(RoutingContext context);
 
     /**
      * should return metrics name based on input.
