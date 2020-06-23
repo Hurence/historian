@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
-decalre -r SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-source SCRIPT_DIR/solr-util.sh
+declare -r SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "$SCRIPT_DIR"
+source solr-util.sh
 
 ################################
 # GLOBAL VARIABLES
