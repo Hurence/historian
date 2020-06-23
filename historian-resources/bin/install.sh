@@ -247,7 +247,7 @@ intall_grafana_datasource_plugin_if_asked() {
 start_grafana_if_asked() {
   if [[ $USING_EMBEDDED_GRAFANA = true ]]; then
     cd "$GRAFANA_HOME"
-    ./bin/grafana-server web &
+    nohup ./bin/grafana-server web &
     cd -
   fi
 }
