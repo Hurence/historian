@@ -62,7 +62,7 @@ public class RequestParserUtil {
         JsonPointer jsonPointer = JsonPointer.from(pointer);
         Object fromObj = jsonPointer.queryJson(requestBody);
         if (fromObj == null)
-            return null;
+            return Collections.emptyMap();
         if (fromObj instanceof JsonObject) {
             try {
                 JsonObject jsonObject = (JsonObject) fromObj;

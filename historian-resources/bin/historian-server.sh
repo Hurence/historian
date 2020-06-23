@@ -89,7 +89,7 @@ start() {
 #       Using an array to stock command hinder double interpretation of args
 #       see https://unix.stackexchange.com/questions/444946/how-can-we-run-a-command-stored-in-a-variable for more info
         COMMAND=(java)
-        if [ $DEBUG_MODE ]
+        if [[ $DEBUG_MODE = true ]]
         then
           COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j-debug.properties")
           COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j-debug.properties")
