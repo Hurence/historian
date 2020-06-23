@@ -5,11 +5,10 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 echo "DIR is $DIR"
 ROOT_DIR="$DIR/.."
-BASE="$ROOT_DIR"
-echo "BASE is $BASE"
-PID=$BASE/app.pid
-LOG=$BASE/app.log
-ERROR=$BASE/app-error.log
+echo "ROOT_DIR is $ROOT_DIR"
+PID=$ROOT_DIR/app.pid
+LOG=$ROOT_DIR/app.log
+ERROR=$ROOT_DIR/app-error.log
 DEBUG_MODE=false
 
 USR=user
@@ -92,13 +91,13 @@ start() {
         COMMAND=(java)
         if [ $DEBUG_MODE ]
         then
-          COMMAND+=("-Dlog4j.configuration=file:./conf/log4j-debug.properties")
-          COMMAND+=("-Dlog4j.configurationFile=file:./conf/log4j-debug.properties")
+          COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j-debug.properties")
+          COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j-debug.properties")
         else
-          COMMAND+=("-Dlog4j.configuration=file:./conf/log4j.properties")
-          COMMAND+=("-Dlog4j.configurationFile=file:./conf/log4j.properties")
+          COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j.properties")
+          COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j.properties")
         fi
-        COMMAND+=(-jar lib/historian-server-*.jar -conf conf/historian-server-conf.json)
+        COMMAND+=(-jar "$ROOT_DIR/lib/historian-server-1.3.5-fat.jar" --conf "$ROOT_DIR/conf/historian-server-conf.json")
         echo "run below command"
         echo "nohup ${COMMAND[@]} >> ${LOG} 2>&1 &"
         if nohup "${COMMAND[@]}" >> "$LOG" 2>&1 &

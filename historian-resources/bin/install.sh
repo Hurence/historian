@@ -275,7 +275,7 @@ generate_historian_server_conf() {
       "port" : 8080,
       "historian.address": "historian",
       "debug": false,
-      "max_data_points_allowed_for_ExportCsv" : 10000,
+      "max_data_points_allowed_for_ExportCsv" : 10000
     },
     "historian": {
       "schema_version": "VERSION_0",
