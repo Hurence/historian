@@ -11,8 +11,6 @@ dans ce guide nous allons utiliser l'import de données à partir de fichiers cs
 
 
 
-
-
 === Requêter des données avec l'api REST
 
 [source,bash]

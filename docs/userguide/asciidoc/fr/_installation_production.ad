@@ -84,7 +84,7 @@ Il sera alors demander à l'utilisateur plusieurs informations.
 
 Voici un exemple :
 
-image::../../../resources/images/screenshot_install_mono_noeud.png[]
+image::screenshot_install_mono_noeud.png[]
 
 Dans la suite, on appellera le chemin indiqué pour l'installation de l'historian '$HDH_HOME'.
 
