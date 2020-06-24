@@ -25,6 +25,7 @@ public class HttpServerVerticle extends AbstractVerticle {
      */
     public static final String CONFIG_HTTP_SERVER_PORT = "port";
     public static final String CONFIG_HTTP_SERVER_HOSTNAME = "host";
+    public static final String CONFIG_UPLOAD_DIRECTORY = "upload_directory";
     public static final String GRAFANA = "grafana";
     public static final String VERSION = "version";
 //    public static final String API = "api";
@@ -83,11 +84,15 @@ public class HttpServerVerticle extends AbstractVerticle {
         historianService = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), conf.getHistorianServiceAdr());
         HttpServer server = vertx.createHttpServer();
         Router router = Router.router(vertx);
-        router.route().handler(BodyHandler.create());
+        router.route().handler(BodyHandler.create()
+                .setUploadsDirectory(conf.getUploadDirectory())
+                .setDeleteUploadedFilesOnEnd(true)
+        );
         //main
         Router mainApi = new MainHistorianApiImpl(historianService, conf.getMaxDataPointsAllowedForExportCsv()).getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
+        //TODO config uploads tmp then delete
         router.mountSubRouter(IMPORT_ENDPOINT, importApi);
         //grafana
         Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService).getGraphanaRouter(vertx);
