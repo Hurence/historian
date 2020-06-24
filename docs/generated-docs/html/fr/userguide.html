@@ -452,9 +452,57 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toctitle">Table des matières</div>
 <ul class="sectlevel1">
 <li><a href="#introduction">Introduction</a></li>
+<li><a href="#concepts">Concepts</a>
+<ul class="sectlevel2">
+<li><a href="#data-modèle">Data modèle</a></li>
+</ul>
+</li>
 <li><a href="#installation">Installation</a>
 <ul class="sectlevel2">
+<li><a href="#install-standalone">Installation standalone</a>
+<ul class="sectlevel3">
+<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester">Pre-requis pour une installation mono serveur en standalone (pour tester)</a></li>
+<li><a href="#installation-de-lhistorian">Installation de l&#8217;historian</a>
+<ul class="sectlevel4">
+<li><a href="#description-du-fichier-de-configuration-de-lhistorian">Description du fichier de configuration de l&#8217;historian</a></li>
+<li><a href="#description-des-composants-installer-par-le-script-dinstallation">Description des composants installer par le script d&#8217;installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#install-production-mono-noeud">Installation mono noeud de production</a>
+<ul class="sectlevel3">
 <li><a href="#pre-requis-pour-une-installation-mono-serveur-en-production">Pre-requis pour une installation mono serveur en production</a></li>
+<li><a href="#installation-de-apache-solr-2">Installation de Apache SolR</a></li>
+<li><a href="#install-apache-spark">Install Apache Spark</a></li>
+<li><a href="#installation-de-grafana">Installation de Grafana</a>
+<ul class="sectlevel4">
+<li><a href="#install-production-hurence-datasource-grafana-plugin">Installation Plugin Grafana pour utiliser le data historian Hurence</a></li>
+</ul>
+</li>
+<li><a href="#installation-de-lhistorian-2">Installation de l&#8217;historian</a>
+<ul class="sectlevel4">
+<li><a href="#description-du-fichier-de-configuration-de-lhistorian-2">Description du fichier de configuration de l&#8217;historian</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#configure-grafana-and-your-dashboard">Configure grafana and your dashboard</a></li>
+<li><a href="#tear-down-and-cleanup">Tear down and cleanup</a>
+<ul class="sectlevel2">
+<li><a href="#stop-your-solr-instances">Stop your SolR instances</a></li>
+</ul>
+</li>
+<li><a href="#data-management">Data management</a>
+<ul class="sectlevel2">
+<li><a href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest">Import de donnée à partir de fichiers csv avec l&#8217;api REST</a></li>
+<li><a href="#requêter-des-données-avec-lapi-rest">Requêter des données avec l&#8217;api REST</a></li>
+<li><a href="#retrieve-data-from-rest-api">Retrieve data from REST API</a></li>
+<li><a href="#use-spark-to-get-data">Use Spark to get data</a></li>
+<li><a href="#visualize-data-through-grafana">Visualize data through grafana</a></li>
+<li><a href="#realtime-data-ingestion-with-logisland">Realtime data ingestion with logisland</a></li>
 </ul>
 </li>
 </ul>
@@ -465,7 +513,113 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="introduction"><a class="anchor" href="#introduction"></a>Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ce guide aidera l&#8217;utilisateur du data historian dans la compréhension de la plateforme, de son installation, de son utilisation. Le data historian ayant été conçu dans l&#8217;optique d&#8217;un déploiement sur une infrastructure Big Data, qui sont par nature des environnements complexes à mettre en oeuvre, nous n&#8217;aborderons dans ce guide que les déploiements sur une seule machine et de manière progressive. Pour un déploiement sur une infrastructure Big Data multi-serveurs et sa sécurisation, il faudra se référer à d&#8217;autres documentations ou contacter Hurence à <a href="mailto:contact@hurence.com">contact@hurence.com</a>.</p>
+<p>Ce guide aidera l&#8217;utilisateur du data historian dans la compréhension de la plateforme, de son installation,
+de son utilisation. Le data historian ayant été conçu dans l&#8217;optique d&#8217;un déploiement sur une infrastructure Big Data,
+qui sont par nature des environnements complexes à mettre en oeuvre, nous n&#8217;aborderons dans ce guide que les
+déploiements sur une seule machine et de manière progressive. Pour un déploiement sur une infrastructure
+Big Data multi-serveurs et sa sécurisation, il faudra se référer à d&#8217;autres documentations ou contacter Hurence à
+<a href="mailto:contact@hurence.com">contact@hurence.com</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="concepts"><a class="anchor" href="#concepts"></a>Concepts</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Hurence Data Historian est une solution open source pour gérer des énormes quantités de time series.
+Il se base sur les moteurs de recherche (comme Apache Solr).
+Les principaux concepts sont les suivants :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Measure</strong> C&#8217;est un point dans le temps avec une valeur de type "double" identifié par un nom et des tags (clés valeurs).</p>
+</li>
+<li>
+<p><strong>Chunk</strong> Est un ensemble continue de Measures dans un intervalle de temps données groupé par date, name et éventuellement des tags.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Le but principal de cet outil est d&#8217;aider à la création, au stockage et au requêtage de ces chunks de time series.
+Nous utilison le "chunking" à la place du stockage brut des données afin d&#8217;économiser de l&#8217;epace dans le disque dur
+et d&#8217;améliorer les performances pour de grande volumétries de points. En effet le chunking nous permet
+de pré-calculer des agrégations pour faciliter le sampling par exemple.</p>
+</div>
+<div class="sect2">
+<h3 id="data-modèle"><a class="anchor" href="#data-modèle"></a>Data modèle</h3>
+<div class="paragraph">
+<p>Une Measure est un point dans le temps Identifié par les champs suivants :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="scala">case class Measure(name: String,
+                   value: Double,
+                   timestamp: Long,
+                   year: Int,
+                   month: Int,
+                   day: String,
+                   hour: Int,
+                   tags: Map[String,String])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Un Chunk est identifié par les champs suivants :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="scala">case class Chunk(name: String,
+     day:String,
+     start: Long,
+     end: Long,
+     chunk: String,
+     count: Long,
+     avg: Double,
+     stddev: Double,
+     min: Double,
+     max: Double,
+     first: Double,
+     last: Double,
+     sax: String,
+     tags: Map[String,String])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Comme vous pouvez le constater lors du passage entre la Measure et le Chunk de Measure, le "timestamp"
+a été remplacé par "start" et "stop" qui définissent l&#8217;intervalle de temps, la valeur elle passé d&#8217;un double dans le champs "value"
+à une string en base64 compresser avec un algorithm stocké dans le champs "chunk".</p>
+</div>
+<div class="paragraph">
+<p>Dans solr les chunks seront stockés sous la forme du schéma suivant :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;schema</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">default-config</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">version</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">1.6</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+    ...
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_avg</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_value</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_count</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_day</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_end</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_first</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_hour</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_last</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_max</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_min</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_month</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_outlier</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sax</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ngramtext</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_start</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_stddev</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sum</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_trend</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_year</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_origin</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">compactions_running</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+<span class="tag">&lt;/schema&gt;</span></code></pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -473,7 +627,10 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="installation"><a class="anchor" href="#installation"></a>Installation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d&#8217;installation n&#8217;est pas décrite ici par simplification car elle concerne des experts en urbanisation d&#8217;infrastructures Big Data.</p>
+<p>Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant
+conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes
+volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d&#8217;installation n&#8217;est pas
+décrite ici par simplification car elle concerne des experts en urbanisation d&#8217;infrastructures Big Data.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -487,8 +644,369 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 </tr>
 </table>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#install-standalone">Installation standalone</a>(à utiliser seulement pour tester)</p>
+</li>
+<li>
+<p><a href="#install-production-mono-noeud">Installation de production mono noeud</a>.
+Cette installation se base sur des serveurs solr, grafana et spark (spark et grafana étant optionnels) installés de manières indépendantes.
+Ce guide contient des sections pour installer ces outils.</p>
+</li>
+</ul>
+</div>
 <div class="sect2">
-<h3 id="pre-requis-pour-une-installation-mono-serveur-en-production"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-production"></a>Pre-requis pour une installation mono serveur en production</h3>
+<h3 id="install-standalone"><a class="anchor" href="#install-standalone"></a>Installation standalone</h3>
+<div class="sect3">
+<h4 id="pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"></a>Pre-requis pour une installation mono serveur en standalone (pour tester)</h4>
+<div class="paragraph">
+<p>La configuration minimale du serveur pour une installation de test du data historian est:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>un OS CentOS ou Redhat 7.x</p>
+</li>
+<li>
+<p>8 Gigabits de RAM</p>
+</li>
+<li>
+<p>6 vcores de CPU</p>
+</li>
+<li>
+<p>50 Giga octets de disque</p>
+</li>
+<li>
+<p>Java 8</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-lhistorian"><a class="anchor" href="#installation-de-lhistorian"></a>Installation de l&#8217;historian</h4>
+<div class="paragraph">
+<p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
+et les chunks. Téléchargez la dernière version de l&#8217;historian à l&#8217;adresse suivante
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-install.tgz">historian-1.3.5.tgz</a>.
+Décompressez l&#8217;archive et entrez dedans, ensuite commencez l&#8217;installation en tapant la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">sudo ./bin/install.sh</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Il sera alors demander à l&#8217;utilisateur plusieurs informations, comme nous allons procéder à une installation de test
+en mode standalone vous pouvez laisser les valeurs par défaut et juste taper sur la touche entrée pour chaque question.
+Pour les questions sur les installations standalone tapé "1". Sauf pour l&#8217;installation de spark qui ne nous sera pas utile.
+Le programme va télécharger et installer des versions embarqués de solr et grafana.</p>
+</div>
+<div class="paragraph">
+<p>Attention cependant au chemin ou vous installez l&#8217;historian (par défaut /opt/hdh). En effet l&#8217;espace disque doit être
+suffisant pour stocker les binaires, les scripts ainsi que les données de time series que vous allez injecter.</p>
+</div>
+<div class="paragraph">
+<p>Voici un aperçu de l&#8217;installation :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/resources/images/Screenshot_install_standalone.png" alt="Screenshot install standalone">
+</div>
+</div>
+<div class="paragraph">
+<p>Dans la suite, on appellera le chemin indiqué pour l&#8217;installation de l&#8217;historian '$HDH_HOME'.</p>
+</div>
+<div class="paragraph">
+<p>A l&#8217;issue de ce script, si vous avez suivi l&#8217;exemple, vous aurez :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Un serveur solr 8.2 installé dans $HDH_HOME/solr-8.2.0</p>
+</li>
+<li>
+<p>Le script à démarrer le serveur solr, vous pouvez vérifier cela à l&#8217;adresse suivante :
+<a href="http://localhost:8983/solr/#/~cloud">solr UI</a>. Vous pouvez regarder la documentation solr pour
+interagir avec solr (Notamment pour démarrer le cluster et l&#8217;éteindre).</p>
+</li>
+<li>
+<p>Un serveur grafana version-7.0.3 installé dans $HDH_HOME/grafana</p>
+</li>
+<li>
+<p>Le plugin <a href="https://github.com/Hurence/grafana-historian-datasource">datasource grafana de l&#8217;historian</a>
+installer sur ce serveur grafana.</p>
+</li>
+<li>
+<p>Le serveur grafana a du être lancé par le script, vous pouvez vérifier à l&#8217;adresse suivante :
+<a href="http://localhost:3000/">http://localhost:3000/</a>. Vous pouvez regarder la documentation solr pour
+interagir avec grafana (Notamment pour démarrer le serveur et l&#8217;éteindre).</p>
+</li>
+<li>
+<p>Le serveur historian installé dans $HDH_HOME/historian-1.3.5</p>
+</li>
+<li>
+<p>Un répertoire "$HDH_HOME/data" qui va contenir les time series de l&#8217;historian.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Voici la structure de $HDH_HOME a l&#8217;issue de l&#8217;installation par défaut :
+* $HDH_HOME/data : Dossier contenant les données solr
+* $HDH_HOME/solr-8.2.0 : Dossier contenant l&#8217;installation de solr 8.2.0
+* $HDH_HOME/solr-8.2.0/bin/solr : Script permettant de démarrer et arrêter solr
+* $HDH_HOME/historian-1.3.5/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.
+* $HDH_HOME/historian-1.3.5/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
+* $HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
+* $HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.
+* $HDH_HOME/application.log : Le fichier de log du data historian.
+* $HDH_HOME/grafana-7.0.3 : Dossier contenant l&#8217;installation de grafana
+* $HDH_HOME/grafana-7.0.3/bin/grafana-server : Script permettant de démarrer et arrêter grafana</p>
+</div>
+<div class="paragraph">
+<p>Si l&#8217;installation se passe correctement. Tous les services sont lancé à la fin de cette installation.</p>
+</div>
+<div class="paragraph">
+<p>Pour démarrer l&#8217;historian :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh start</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh stop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attention ces commandes n&#8217;affectent ni grafana ni solr qui sont des services indépendants.</p>
+</div>
+<div class="sect4">
+<h5 id="description-du-fichier-de-configuration-de-lhistorian"><a class="anchor" href="#description-du-fichier-de-configuration-de-lhistorian"></a>Description du fichier de configuration de l&#8217;historian</h5>
+<div class="paragraph">
+<p>Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoire :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">web.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">1</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">2</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">http_server</span><span class="delimiter">&quot;</span></span> : {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">localhost</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span> : <span class="integer">8080</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">address</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_point_before_using_pre_agg</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_chunks_before_using_solr_partition</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">api</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">grafana</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">search</span><span class="delimiter">&quot;</span></span> : {
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">default_size</span><span class="delimiter">&quot;</span></span>: <span class="integer">100</span>
+        }
+      }
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">solr</span><span class="delimiter">&quot;</span></span> : {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">use_zookeeper</span><span class="delimiter">&quot;</span></span>: <span class="value">true</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_urls</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">localhost:9983</span><span class="delimiter">&quot;</span></span>],
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_chroot</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">stream_url</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">http://localhost:8983/solr/historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">chunk_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">annotation_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">annotation</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">sleep_milli_between_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">3</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">urls</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">connection_timeout</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">socket_timeout</span><span class="delimiter">&quot;</span></span>: <span class="integer">60000</span>
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>General conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>web.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour répondre aux appelles http des clients.
+Un verticle est capable de gérer un grand nombre de requête (au moins 1000, voir la documentation de vertx pour plus d&#8217;information).</p>
+</li>
+<li>
+<p>historian.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour le service de l&#8217;historian qui s&#8217;occupe
+du sampling et des interactions avec le backend. C&#8217;est ce paramètre qui va être clé, il y a de grande chance que ce soit
+ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Http server conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>http_server/host : le nom du serveur http à déployer.</p>
+</li>
+<li>
+<p>http_server/port : le port sur lequelle déployé l&#8217;api rest.</p>
+</li>
+<li>
+<p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
+que vous savez ce que vous faites</p>
+</li>
+<li>
+<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
+accepte de retourner lorsqu&#8217;un client utiliser l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
+trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un
+outil comme spark.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Historian service conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>general conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
+que vous savez ce que vous faites. Doit être identique à la valeur de 'http_server/historian.address'.</p>
+</li>
+<li>
+<p>historian/limit_number_of_point_before_using_pre_agg : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/limit_number_of_chunks_before_using_solr_partition : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métrique à retourner par défaut pour l&#8217;endpoint search.</p>
+</li>
+<li>
+<p>historian/schema_version : La version du schéma a utiliser. (Attention ne pas modifier cette valeur manuellement !)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>solr conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/connection_timeout : Le timeout lors de la connection au serveur Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/socket_timeout : Le timeout pour tous les socket de lecture avec Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/stream_url : l&#8217;url de la collection solr a utiliser pour l&#8217;api stream de solr. Il est recommandé de
+créer une collection dédié (avec les ressources suffisantes).</p>
+</li>
+<li>
+<p>historian/solr/chunk_collection : Le nom de la collection ou sont stockés les timeseries.</p>
+</li>
+<li>
+<p>historian/solr/annotation_collection : Le nom de la collection ou sont stockés les annotations.</p>
+</li>
+<li>
+<p>historian/solr/sleep_milli_between_connection_attempt : Le nombre de millisecondes à attendre entre chaque tentatives
+de ping du serveur solr au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/number_of_connection_attempt : Le nombre de tentatives pour tester la connectivité au serveur solr
+au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/use_zookeeper : If you use solr cloud (using a zookeeper server) or not.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>option si utilisation de zookeeper</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/zookeeper_urls : une liste d&#8217;au moins un serveur zookeeper (ex: ["zookeeper1:2181"]).</p>
+</li>
+<li>
+<p>historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigné ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>option si zookeeper n&#8217;est pas utilisé</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/urls : Les urls http pour faire des requêtes à solr. Par exemple ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Le script d&#8217;install génère un fichier de configuration selon les informations renseignées.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="description-des-composants-installer-par-le-script-dinstallation"><a class="anchor" href="#description-des-composants-installer-par-le-script-dinstallation"></a>Description des composants installer par le script d&#8217;installation</h5>
+<div class="sect5">
+<h6 id="installation-de-apache-solr"><a class="anchor" href="#installation-de-apache-solr"></a>Installation de Apache SolR</h6>
+<div class="paragraph">
+<p>Apache SolR est la base de donnée utilisé par l&#8217;historian, elle peut être remplacée par un autre moteur de recherche.</p>
+</div>
+<div class="paragraph">
+<p>Le script d&#8217;installation a installer solr au chemin '$HDH_HOME/solr-8.2.0' que nous appelleront '$SOLR_HOME'.
+Il a également lancé deux cores solr localement dans le répertoire <code>$SOLR_HOME/data</code>.</p>
+</div>
+</div>
+<div class="sect5">
+<h6 id="pour-démarrer-solr"><a class="anchor" href="#pour-démarrer-solr"></a>Pour démarrer solr</h6>
+<div class="paragraph">
+<p>Si vous avez couper solr ou bien si vous avez rédémarrer votre ordinateur vous pouvez relancer le solr avec les commandes suivantes :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">cd $SOLR_HOME
+# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node1 -p 8983
+# démarre un second core Solr localement qui va utiliser le serveur zookeeper précédamment créer.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vérifiez que votre instance solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
+(<a href="http://localhost:8983/solr/#/~cloud)">local solr UI</a></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install-production-mono-noeud"><a class="anchor" href="#install-production-mono-noeud"></a>Installation mono noeud de production</h3>
+<div class="sect3">
+<h4 id="pre-requis-pour-une-installation-mono-serveur-en-production"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-production"></a>Pre-requis pour une installation mono serveur en production</h4>
 <div class="paragraph">
 <p>La configuration minimale du serveur pour une installation mono serveur (en production) du data historian est:</p>
 </div>
@@ -506,8 +1024,566 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 <li>
 <p>2 Tera octets de disque</p>
 </li>
+<li>
+<p>Java 8</p>
+</li>
+<li>
+<p>Spark 2.3.4</p>
+</li>
+<li>
+<p>Solr 8.2.0</p>
+</li>
+<li>
+<p>Grafana 7.0.3</p>
+</li>
 </ul>
 </div>
+<div class="paragraph">
+<p>Dans cette section nous avons prévu des petits guides pour vous aider a installer solr 8.2.0, spark 2.3.4 et grafana 7.0.3.
+Mais nous recommandons de vous référer à la documentation officiel pour des installations de production.
+Si vous avez déjà des serveurs existants vous pouvez directement passer à cette <a href="#install-production-hurence-datasource-grafana-plugin">section</a></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-apache-solr-2"><a class="anchor" href="#installation-de-apache-solr-2"></a>Installation de Apache SolR</h4>
+<div class="paragraph">
+<p>Apache SolR est la base de donnée utilisé par l&#8217;historian, elle peut être remplacée par un autre moteur de recherche.</p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez télécharger la version 8.2.0 de solr sur le lien suivant : <a href="https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz">solr-8.2.0.tgz</a>
+ou via le <a href="https://lucene.apache.org/solr">site officiel</a>. Nous vous invitons également a suivre la documentation officiel
+pour installer un cluster solr de production.</p>
+</div>
+<div class="paragraph">
+<p>Vérifiez que votre instance solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
+"http://&lt;solrhost&gt;:8983/solr/#/~cloud"</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="install-apache-spark"><a class="anchor" href="#install-apache-spark"></a>Install Apache Spark</h4>
+<div class="paragraph">
+<p>Pour installer spark vous pouvez téléchargez cette archive :
+<a href="https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz">spark-2.3.4-bin-without-hadoop.tgz</a></p>
+</div>
+<div class="paragraph">
+<p>Les commandes suivantes vous permettront d&#8217;avoir une installation locale. Sinon veuillez suuivre les indications officiels
+pour un cluster de production.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash"># get Apache Spark 2.3.4 and unpack it
+cd $HDH_HOME
+wget https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz
+tar -xvf spark-2.3.4-bin-without-hadoop.tgz
+rm spark-2.3.4-bin-without-hadoop.tgz
+
+# add two additional jars to spark to handle our framework
+wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
+mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/
+cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-grafana"><a class="anchor" href="#installation-de-grafana"></a>Installation de Grafana</h4>
+<div class="paragraph">
+<p>Installez Grafana pour votre plateforme comme décrit ici : <code><a href="https://grafana.com/docs/grafana/latest/installation/requirements/" class="bare">https://grafana.com/docs/grafana/latest/installation/requirements/</a></code>.
+Une fois l&#8217;installation de votre cluster grafana effectué nous allons passer à l&#8217;installation de notre plugin grafana datasource
+nécessaire pour consulter des dashboard basé sur notre historian.</p>
+</div>
+<div class="sect4">
+<h5 id="install-production-hurence-datasource-grafana-plugin"><a class="anchor" href="#install-production-hurence-datasource-grafana-plugin"></a>Installation Plugin Grafana pour utiliser le data historian Hurence</h5>
+<div class="paragraph">
+<p>Pour consulter les données de l&#8217;historian via des dashboard nous utilisons grafana. Dans ce but nous avons développer
+nos propres plugins grafana que nous ferons évoluer avec l&#8217;historian.</p>
+</div>
+<div class="paragraph">
+<p>Pour installer le plugin datasource suivez les <a href="https://github.com/Hurence/grafana-historian-datasource#installation">instruction sur le projet correspondant</a></p>
+</div>
+<div class="paragraph">
+<p>TODO pointer sur une release !</p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-lhistorian-2"><a class="anchor" href="#installation-de-lhistorian-2"></a>Installation de l&#8217;historian</h4>
+<div class="paragraph">
+<p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les timeseries
+et les chunks. Téléchargez la dernière version de l&#8217;historian à l&#8217;adresse suivante
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.4/historian-1.3.4-SNAPSHOT.tgz">historian-1.3.4-SNAPSHOT.tgz</a>
+Décompressez l&#8217;archive et entrez dedans, ensuite commencez l&#8217;installation en tapant la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">sudo ./bin/install.sh</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Il sera alors demander à l&#8217;utilisateur plusieurs informations.</p>
+</div>
+<div class="paragraph">
+<p>Voici un exemple :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/resources/images/screenshot_install_mono_noeud.png" alt="screenshot install mono noeud">
+</div>
+</div>
+<div class="paragraph">
+<p>Dans la suite, on appellera le chemin indiqué pour l&#8217;installation de l&#8217;historian '$HDH_HOME'.</p>
+</div>
+<div class="paragraph">
+<p>A l&#8217;issue de ce script, vous aurez :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>l&#8217;historian installer au chemin indiqué $HDH_HOME.</p>
+</li>
+<li>
+<p>Le plugin <a href="https://github.com/Hurence/grafana-historian-datasource">datasource grafana de l&#8217;historian</a>
+installé sur le serveur grafana indiqué lors de l&#8217;installation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Voici la structure de $HDH_HOME a l&#8217;issue de l&#8217;installation par défaut :
+* $HDH_HOME/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.
+* $HDH_HOME/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
+* $HDH_HOME/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
+* $HDH_HOME/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.</p>
+</div>
+<div class="paragraph">
+<p>Le script $HDH_HOME/bin/historian-server.sh sert à lancer/arrêter l&#8217;api rest de l&#8217;historian.</p>
+</div>
+<div class="paragraph">
+<p>Pour lancer l&#8217;historian taper la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh start</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh stop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attention ces commandes n&#8217;affectent ni grafana ni solr qui sont des services indépendants.</p>
+</div>
+<div class="sect4">
+<h5 id="description-du-fichier-de-configuration-de-lhistorian-2"><a class="anchor" href="#description-du-fichier-de-configuration-de-lhistorian-2"></a>Description du fichier de configuration de l&#8217;historian</h5>
+<div class="paragraph">
+<p>Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoire :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">web.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">1</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">2</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">http_server</span><span class="delimiter">&quot;</span></span> : {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">localhost</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span> : <span class="integer">8080</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">address</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_point_before_using_pre_agg</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_chunks_before_using_solr_partition</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">api</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">grafana</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">search</span><span class="delimiter">&quot;</span></span> : {
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">default_size</span><span class="delimiter">&quot;</span></span>: <span class="integer">100</span>
+        }
+      }
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">solr</span><span class="delimiter">&quot;</span></span> : {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">use_zookeeper</span><span class="delimiter">&quot;</span></span>: <span class="value">true</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_urls</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">localhost:9983</span><span class="delimiter">&quot;</span></span>],
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_chroot</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">stream_url</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">http://localhost:8983/solr/historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">chunk_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">annotation_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">annotation</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">sleep_milli_between_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">3</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">urls</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">connection_timeout</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">socket_timeout</span><span class="delimiter">&quot;</span></span>: <span class="integer">60000</span>
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>General conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>web.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour répondre aux appelles http des clients.
+Un verticle est capable de gérer un grand nombre de requête (au moins 1000, voir la documentation de vertx pour plus d&#8217;information).</p>
+</li>
+<li>
+<p>historian.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour le service de l&#8217;historian qui s&#8217;occupe
+du sampling et des interactions avec le backend. C&#8217;est ce paramètre qui va être clé, il y a de grande chance que ce soit
+ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Http server conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>http_server/host : le nom du serveur http à déployer.</p>
+</li>
+<li>
+<p>http_server/port : le port sur lequelle déployé l&#8217;api rest.</p>
+</li>
+<li>
+<p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
+que vous savez ce que vous faites</p>
+</li>
+<li>
+<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
+accepte de retourner lorsqu&#8217;un client utiliser l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
+trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un
+outil comme spark.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Historian service conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>general conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
+que vous savez ce que vous faites. Doit être identique à la valeur de 'http_server/historian.address'.</p>
+</li>
+<li>
+<p>historian/limit_number_of_point_before_using_pre_agg : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/limit_number_of_chunks_before_using_solr_partition : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métrique à retourner par défaut pour l&#8217;endpoint search.</p>
+</li>
+<li>
+<p>historian/schema_version : La version du schéma a utiliser. (Attention ne pas modifier cette valeur manuellement !)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>solr conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/connection_timeout : Le timeout lors de la connection au serveur Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/socket_timeout : Le timeout pour tous les socket de lecture avec Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/stream_url : l&#8217;url de la collection solr a utiliser pour l&#8217;api stream de solr. Il est recommandé de
+créer une collection dédié (avec les ressources suffisantes).</p>
+</li>
+<li>
+<p>historian/solr/chunk_collection : Le nom de la collection ou sont stockés les timeseries.</p>
+</li>
+<li>
+<p>historian/solr/annotation_collection : Le nom de la collection ou sont stockés les annotations.</p>
+</li>
+<li>
+<p>historian/solr/sleep_milli_between_connection_attempt : Le nombre de millisecondes à attendre entre chaque tentatives
+de ping du serveur solr au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/number_of_connection_attempt : Le nombre de tentatives pour tester la connectivité au serveur solr
+au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/use_zookeeper : If you use solr cloud (using a zookeeper server) or not.</p>
+<div class="ulist">
+<ul>
+<li>
+<p>option si utilisation de zookeeper</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/zookeeper_urls : une liste d&#8217;au moins un serveur zookeeper (ex: ["zookeeper1:2181"]).</p>
+</li>
+<li>
+<p>historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigné ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>option si zookeeper n&#8217;est pas utilisé</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/urls : Les urls http pour faire des requêtes à solr. Par exemple ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Generation un fichier de configuration pendant le script d&#8217;install selon les informations renseignées</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="configure-grafana-and-your-dashboard"><a class="anchor" href="#configure-grafana-and-your-dashboard"></a>Configure grafana and your dashboard</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>aller sur l&#8217;interface graphique de grafana (<a href="http://localhost:3000/">http://localhost:3000/</a> pour une isntallation standalone).</p>
+</div>
+<div class="paragraph">
+<p>Ensuite allez dans le menu des datasources :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/resources/images/grafana_ui_datasource.png" alt="grafana ui datasource">
+</div>
+</div>
+<div class="paragraph">
+<p>Cherchez la datasource "Hurence-Historian" et sélectionnez la.
+Il y a juste a renseigné l&#8217;URL <a href="http://localhost:8080/api/grafana/v0" class="bare">http://localhost:8080/api/grafana/v0</a> dans le cas de l&#8217;installation standalone.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/resources/images/datasource_historian_setup.png" alt="datasource historian setup">
+</div>
+</div>
+<div class="paragraph">
+<p>Testez la connectivité en cliquant sur "Save &amp; Test" button at the bottom of the page.
+Ensuite créez un nouveau dashboard.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/resources/images/grafana_ui_create_dashboard.png" alt="grafana ui create dashboard">
+</div>
+</div>
+<div class="paragraph">
+<p>Ajoutez les graphes que vous voulez, un petit exemple ci-dessous :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/resources/images/grafana_graph_config_exemple.png" alt="grafana graph config exemple">
+</div>
+</div>
+<div class="paragraph">
+<p>Une "query" consiste d&#8217;un nom de métrique, et de pairs de tag name/tag value ainsi que des options pour
+l&#8217;algorithme de sampling.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">note</dt>
+<dd>
+<p>Pour le moment les options de sampling de la première query fait fois pour toutes les autres.</p>
+</dd>
+<dt class="hdlist1">note</dt>
+<dd>
+<p>Pour l&#8217;instant vous n&#8217;avez pas de données d&#8217;injecté. Suivez le tutorial pour injecter des données.
+Aussi si vous n&#8217;avez pas ajouter de tag name a l&#8217;installation vous ne pourrez pas utiliser de tags. Il est toujours
+possible de rajouter des tag manuellement après installation en rajoutant un champ dans le schéma.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="tear-down-and-cleanup"><a class="anchor" href="#tear-down-and-cleanup"></a>Tear down and cleanup</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>This section shows how to stop the services and cleanup data if needed.</p>
+</div>
+<div class="sect2">
+<h3 id="stop-your-solr-instances"><a class="anchor" href="#stop-your-solr-instances"></a>Stop your SolR instances</h3>
+<div class="paragraph">
+<p>when you&#8217;re done you can stop your SolR cores. Attention cette commande va éteindre Solr (cela pourrait impacter d&#8217;autres
+service utilisant solr).</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd $SOLR_HOME
+bin/solr stop -all</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="data-management"><a class="anchor" href="#data-management"></a>Data management</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Vous pouvez consulter notre documentation sur l&#8217;api REST 'rest-api.pdf' pour connaitre les détails de chaque endpoint.
+Maintenant que nous avons installer l&#8217;historian. Vous pouvez jouer avec des données, il y a plusieurs manières
+d&#8217;interagir avec l&#8217;historian selon votre culture et vos besoins.</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;historian ne contient initialement aucune données. Il existe plusieurs moyens d&#8217;injecter des données (voir le guide sur l&#8217;api rest),
+dans ce guide nous allons utiliser l&#8217;import de données à partir de fichiers csv.</p>
+</div>
+<div class="sect2">
+<h3 id="import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"><a class="anchor" href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"></a>Import de donnée à partir de fichiers csv avec l&#8217;api REST</h3>
+
+</div>
+<div class="sect2">
+<h3 id="requêter-des-données-avec-lapi-rest"><a class="anchor" href="#requêter-des-données-avec-lapi-rest"></a>Requêter des données avec l&#8217;api REST</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  &quot;panelId&quot;: 1,
+  &quot;range&quot;: {
+    &quot;from&quot;: &quot;2019-03-01T00:00:00.000Z&quot;,
+    &quot;to&quot;: &quot;2020-03-01T23:59:59.000Z&quot;
+  },
+  &quot;interval&quot;: &quot;30s&quot;,
+  &quot;intervalMs&quot;: 30000,
+  &quot;targets&quot;: [
+    {
+      &quot;target&quot;: &quot;\&quot;ack\&quot;&quot;,
+      &quot;type&quot;: &quot;timeserie&quot;
+    }
+  ],
+  &quot;format&quot;: &quot;json&quot;,
+  &quot;maxDataPoints&quot;: 550
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Get all metrics names</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/search' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    &quot;target&quot;: &quot;*&quot;
+}'
+
+# [&quot;ack&quot;, ... ,&quot;messages&quot;,&quot;cpu&quot;]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Get some measures points within a time range</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+         &quot;range&quot;: {
+          &quot;from&quot;: &quot;2019-11-25T23:59:59.999Z&quot;,
+          &quot;to&quot;: &quot;2019-11-30T23:59:59.999Z&quot;
+      },
+      &quot;targets&quot;: [
+        { &quot;target&quot;: &quot;ack&quot; }
+      ]
+}'</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="retrieve-data-from-rest-api"><a class="anchor" href="#retrieve-data-from-rest-api"></a>Retrieve data from REST API</h3>
+<div class="paragraph">
+<p>TODO</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="use-spark-to-get-data"><a class="anchor" href="#use-spark-to-get-data"></a>Use Spark to get data</h3>
+<div class="paragraph">
+<p>Apache Spark is an Open Source framework designed to process hudge datasets in parallel on computing clusters.
+Hurence Data Historian is highly integrated with Spark so that you can handle dataset interactions in both ways (input and output) through a simple API.</p>
+</div>
+<div class="paragraph">
+<p>The following commands show you how to take a CSV dataset from HDFS or local filesystem, load it as a HDH</p>
+</div>
+<div class="listingblock">
+<div class="title">./_setup_historian/spark-2.3.4-bin-hadoop2.7/bin/spark-shell --jars assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT//lib/loader-1.3.4-SNAPSHOT.jar,assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="scala">import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.spark.ml.Chunkyfier
+import com.hurence.historian.spark.sql
+import com.hurence.historian.spark.sql.functions._
+import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import com.lucidworks.spark.util.SolrSupport
+import org.apache.commons.cli.{DefaultParser, Option, Options}
+import org.apache.spark.sql.SparkSession
+import org.slf4j.LoggerFactory
+
+ val filePath = &quot;/Users/tom/Documents/workspace/historian/loader/src/test/resources/it-data-4metrics.csv.gz&quot;
+ val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val measuresDS = reader.read(sql.Options(
+      filePath,
+      Map(
+        &quot;inferSchema&quot; -&gt; &quot;true&quot;,
+        &quot;delimiter&quot; -&gt; &quot;,&quot;,
+        &quot;header&quot; -&gt; &quot;true&quot;,
+        &quot;nameField&quot; -&gt; &quot;metric_name&quot;,
+        &quot;timestampField&quot; -&gt; &quot;timestamp&quot;,
+        &quot;timestampDateFormat&quot; -&gt; &quot;s&quot;,
+        &quot;valueField&quot; -&gt; &quot;value&quot;,
+        &quot;tagsFields&quot; -&gt; &quot;metric_id,warn,crit&quot;
+      )))
+
+
+
+val chunkyfier = new Chunkyfier().setGroupByCols(Array(  &quot;name&quot;, &quot;tags.metric_id&quot;))
+val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0]
+
+
+val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
+    writer.write(sql.Options(&quot;historian&quot;, Map(
+      &quot;zkhost&quot; -&gt; &quot;localhost:9983&quot;,
+      &quot;collection&quot; -&gt; &quot;historian&quot;,
+      &quot;tag_names&quot; -&gt; &quot;metric_id,warn,crit&quot;
+    )), chunksDS)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="visualize-data-through-grafana"><a class="anchor" href="#visualize-data-through-grafana"></a>Visualize data through grafana</h3>
+
+</div>
+<div class="sect2">
+<h3 id="realtime-data-ingestion-with-logisland"><a class="anchor" href="#realtime-data-ingestion-with-logisland"></a>Realtime data ingestion with logisland</h3>
+
 </div>
 </div>
 </div>
@@ -515,8 +1591,97 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 <div id="footer">
 <div id="footer-text">
 Version v1.0<br>
-Last updated 2020-04-13 12:40:16 +0200
+Last updated 2020-06-24 09:18:24 +0200
 </div>
 </div>
+<style>
+/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
+pre.CodeRay{background:#f7f7f8}
+.CodeRay .line-numbers{border-right:1px solid currentColor;opacity:.35;padding:0 .5em 0 0}
+.CodeRay span.line-numbers{display:inline-block;margin-right:.75em}
+.CodeRay .line-numbers strong{color:#000}
+table.CodeRay{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.CodeRay td{vertical-align:top;line-height:inherit}
+table.CodeRay td.line-numbers{text-align:right}
+table.CodeRay td.code{padding:0 0 0 .75em}
+.CodeRay .debug{color:#fff !important;background:#000080 !important}
+.CodeRay .annotation{color:#007}
+.CodeRay .attribute-name{color:#000080}
+.CodeRay .attribute-value{color:#700}
+.CodeRay .binary{color:#509}
+.CodeRay .comment{color:#998;font-style:italic}
+.CodeRay .char{color:#04d}
+.CodeRay .char .content{color:#04d}
+.CodeRay .char .delimiter{color:#039}
+.CodeRay .class{color:#458;font-weight:bold}
+.CodeRay .complex{color:#a08}
+.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
+.CodeRay .color{color:#099}
+.CodeRay .class-variable{color:#369}
+.CodeRay .decorator{color:#b0b}
+.CodeRay .definition{color:#099}
+.CodeRay .delimiter{color:#000}
+.CodeRay .doc{color:#970}
+.CodeRay .doctype{color:#34b}
+.CodeRay .doc-string{color:#d42}
+.CodeRay .escape{color:#666}
+.CodeRay .entity{color:#800}
+.CodeRay .error{color:#808}
+.CodeRay .exception{color:inherit}
+.CodeRay .filename{color:#099}
+.CodeRay .function{color:#900;font-weight:bold}
+.CodeRay .global-variable{color:#008080}
+.CodeRay .hex{color:#058}
+.CodeRay .integer,.CodeRay .float{color:#099}
+.CodeRay .include{color:#555}
+.CodeRay .inline{color:#000}
+.CodeRay .inline .inline{background:#ccc}
+.CodeRay .inline .inline .inline{background:#bbb}
+.CodeRay .inline .inline-delimiter{color:#d14}
+.CodeRay .inline-delimiter{color:#d14}
+.CodeRay .important{color:#555;font-weight:bold}
+.CodeRay .interpreted{color:#b2b}
+.CodeRay .instance-variable{color:#008080}
+.CodeRay .label{color:#970}
+.CodeRay .local-variable{color:#963}
+.CodeRay .octal{color:#40e}
+.CodeRay .predefined{color:#369}
+.CodeRay .preprocessor{color:#579}
+.CodeRay .pseudo-class{color:#555}
+.CodeRay .directive{font-weight:bold}
+.CodeRay .type{font-weight:bold}
+.CodeRay .predefined-type{color:inherit}
+.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
+.CodeRay .key{color:#808}
+.CodeRay .key .delimiter{color:#606}
+.CodeRay .key .char{color:#80f}
+.CodeRay .value{color:#088}
+.CodeRay .regexp .delimiter{color:#808}
+.CodeRay .regexp .content{color:#808}
+.CodeRay .regexp .modifier{color:#808}
+.CodeRay .regexp .char{color:#d14}
+.CodeRay .regexp .function{color:#404;font-weight:bold}
+.CodeRay .string{color:#d20}
+.CodeRay .string .string .string{background:#ffd0d0}
+.CodeRay .string .content{color:#d14}
+.CodeRay .string .char{color:#d14}
+.CodeRay .string .delimiter{color:#d14}
+.CodeRay .shell{color:#d14}
+.CodeRay .shell .delimiter{color:#d14}
+.CodeRay .symbol{color:#990073}
+.CodeRay .symbol .content{color:#a60}
+.CodeRay .symbol .delimiter{color:#630}
+.CodeRay .tag{color:#008080}
+.CodeRay .tag-special{color:#d70}
+.CodeRay .variable{color:#036}
+.CodeRay .insert{background:#afa}
+.CodeRay .delete{background:#faa}
+.CodeRay .change{color:#aaf;background:#007}
+.CodeRay .head{color:#f8f;background:#505}
+.CodeRay .insert .insert{color:#080}
+.CodeRay .delete .delete{color:#800}
+.CodeRay .change .change{color:#66f}
+.CodeRay .head .head{color:#f4f}
+</style>
 </body>
 </html>

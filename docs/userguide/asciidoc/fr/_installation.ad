@@ -20,6 +20,37 @@ include::./_installation_standalone.ad[]
 include::./_installation_production.ad[]
 
 
+== Configure grafana and your dashboard
+
+aller sur l'interface graphique de grafana (http://localhost:3000/[http://localhost:3000/] pour une isntallation standalone).
+
+Ensuite allez dans le menu des datasources :
+
+image::grafana_ui_datasource.png[go to datasource page]
+
+Cherchez la datasource "Hurence-Historian" et sélectionnez la.
+Il y a juste a renseigné l'URL http://localhost:8080/api/grafana/v0 dans le cas de l'installation standalone.
+
+image::datasource_historian_setup.png[datasource setup]
+
+Testez la connectivité en cliquant sur "Save & Test" button at the bottom of the page.
+Ensuite créez un nouveau dashboard.
+
+image::grafana_ui_create_dashboard.png[go to new dashboard page]
+
+Ajoutez les graphes que vous voulez, un petit exemple ci-dessous :
+
+image::grafana_graph_config_exemple.png[exemple of query config]
+
+Une "query" consiste d'un nom de métrique, et de pairs de tag name/tag value ainsi que des options pour
+l'algorithme de sampling.
+
+note:: Pour le moment les options de sampling de la première query fait fois pour toutes les autres.
+
+note:: Pour l'instant vous n'avez pas de données d'injecté. Suivez le tutorial pour injecter des données.
+Aussi si vous n'avez pas ajouter de tag name a l'installation vous ne pourrez pas utiliser de tags. Il est toujours
+possible de rajouter des tag manuellement après installation en rajoutant un champ dans le schéma.
+
 == Tear down and cleanup
 This section shows how to stop the services and cleanup data if needed.
 
@@ -31,16 +62,4 @@ service utilisant solr).
     cd $SOLR_HOME
     bin/solr stop -all
 
-Si vous ête en mode standalone pour solr, vous pouvez effacer vos données en supprimer les fichiers suivants
-
-[source,bash]
-----
-rm -r $HDH_HOME/data/solr/node1 $HDH_HOME/data/solr/node2
-----
-
-TODO see what is needed to rebootstrap.
-  * Peut être prévoir un script de désinstall.
-  * Un script pour reset les données solr.
-
-don't forget then to bootstrap your setup again as described previously.
 
