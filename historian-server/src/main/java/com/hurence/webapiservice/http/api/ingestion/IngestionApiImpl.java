@@ -1,20 +1,17 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil;
 import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.MultiMap;
-import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Set;
-
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseJsonImportRequest;
+import static com.hurence.webapiservice.http.api.ingestion.util.CsvConvertorUtil.fillingAllFilesReport;
+import static com.hurence.webapiservice.http.api.ingestion.util.CsvConvertorUtil.parseFiles;
 import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
@@ -81,7 +78,8 @@ public class IngestionApiImpl implements IngestionApi {
         MultiCsvFilesConvertor multiCsvFilesConvertor = new MultiCsvFilesConvertor(context);
 
         try {
-            constructCsvFileConvertors(multiCsvFilesConvertor);
+            parseFiles(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport);
+            fillingAllFilesReport(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport);
         } catch (Exception ex) {
             JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
@@ -91,7 +89,7 @@ public class IngestionApiImpl implements IngestionApi {
             context.response().end(String.valueOf(errorObject));
             return;
         }
-        JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
+        JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, multiCsvFilesConvertor.allFilesReport.correctPoints)
                 .put(CHUNK_ORIGIN, "ingestion-csv");
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
@@ -103,8 +101,7 @@ public class IngestionApiImpl implements IngestionApi {
                 .doOnSuccess(response -> {
                     context.response().setStatusCode(CREATED);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.allFilesReport, context.request().formAttributes()).encodePrettily());
                 }).subscribe();
-
     }
 }

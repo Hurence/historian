@@ -16,31 +16,25 @@ public class IngestionApiUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiUtil.class);
 
-    public static void constructCsvFileConvertors(MultiCsvFilesConvertor multiCsvFilesConvertor) {
-        multiCsvFilesConvertor.uploads.forEach(file -> multiCsvFilesConvertor.csvFileConvertors.add(new CsvFileConvertor(multiCsvFilesConvertor.multiMap, file)));
-        multiCsvFilesConvertor.parseFiles();
-        multiCsvFilesConvertor.fillingAllFilesConvertor();
-    }
-
-    public static JsonObject constructFinalResponseCsv(MultiCsvFilesConvertor.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles,
+    public static JsonObject constructFinalResponseCsv(AllFilesReport allFilesReport,
                                                        io.vertx.reactivex.core.MultiMap multiMap) {
 
-        JsonArray result = getGroupedByReportFromInjectedPoints(correctPointsAndFailedPointsOfAllFiles, multiMap);
+        JsonArray result = getGroupedByReportFromInjectedPoints(allFilesReport, multiMap);
         JsonObject finalResponse = new JsonObject();
         if (!result.isEmpty())
             finalResponse.put(TAGS, new JsonArray(multiMap.getAll(MAPPING_TAGS)))
                     .put(GROUPED_BY_IN_RESPONSE, IngestionApiUtil.getGroupedByList(multiMap))
                     .put(REPORT, result);
-        if (!correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.isEmpty())
-            finalResponse.put(ERRORS, correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles);
+        if (!allFilesReport.namesOfTooBigFiles.isEmpty())
+            finalResponse.put(ERRORS, allFilesReport.namesOfTooBigFiles);
         return finalResponse;
     }
-    public static JsonArray getGroupedByReportFromInjectedPoints(MultiCsvFilesConvertor.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles,
+    public static JsonArray getGroupedByReportFromInjectedPoints(AllFilesReport allFilesReport,
                                                                  io.vertx.reactivex.core.MultiMap multiMap) {
 
         List<Map<String, Object>> resultForCsvImport = new LinkedList<>();
         try {
-            JsonArray timeseriesPoints = correctPointsAndFailedPointsOfAllFiles.correctPoints;
+            JsonArray timeseriesPoints = allFilesReport.correctPoints;
             JsonArray groupedByFields = IngestionApiUtil.getGroupedByList(multiMap);
             List<HashMap<String, String>> groupedByFieldsForEveryChunk = new LinkedList<>();
             for (Object timeserieObject : timeseriesPoints) {
@@ -57,7 +51,7 @@ public class IngestionApiUtil {
                 groupedByFieldsForThisChunk.put("totalPointsForThisChunk", String.valueOf(totalNumPointsInChunk));
                 groupedByFieldsForEveryChunk.add(groupedByFieldsForThisChunk);
             }
-            resultForCsvImport.addAll(prepareOneReport(groupedByFieldsForEveryChunk, groupedByFields, correctPointsAndFailedPointsOfAllFiles.numberOfFailedPointsPerMetric));
+            resultForCsvImport.addAll(prepareOneReport(groupedByFieldsForEveryChunk, groupedByFields, allFilesReport.numberOfFailedPointsPerMetric));
         } catch (Exception e) {
             LOGGER.error("unexpected exception");
         }
@@ -147,16 +141,6 @@ public class IngestionApiUtil {
         }).collect(Collectors.toList());
         groupByList.remove(null);
         return new JsonArray(groupByList);
-    }
-
-    public static class LineWithDateInfo {
-        public Map mapFromOneCsvLine;
-        public String date;
-
-        LineWithDateInfo(Map map, String date) {
-            this.mapFromOneCsvLine = map;
-            this.date = date;
-        }
     }
 
 }

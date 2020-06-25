@@ -1,6 +1,8 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.webapiservice.http.api.ingestion.util.CsvFileConvertor;
+import com.hurence.webapiservice.http.api.ingestion.util.CsvFilesConvertorConf;
+import com.hurence.webapiservice.http.api.ingestion.util.FileReport;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
@@ -120,13 +122,12 @@ public class ImportRequestParser {
             this.errorMessages = new ArrayList<>();
         }
     }
-    public CsvFileConvertor.CorrectPointsAndFailedPoints parseCsvImportRequest(JsonArray metricsParam, MultiMap multiMap) throws IllegalArgumentException {
+    public static FileReport parseCsvImportRequest(JsonArray metricsParam, CsvFilesConvertorConf csvFilesConvertorConf, FileReport fileReport) throws IllegalArgumentException {
         if (null == metricsParam) {
             throw new NullPointerException("Null request body");
         }else if (metricsParam.isEmpty()) {
             throw new IllegalArgumentException("Empty request body");
         }
-        CsvFileConvertor.CorrectPointsAndFailedPoints correctPointsAndFailedPoints = new CsvFileConvertor.CorrectPointsAndFailedPoints();
         for (Object metricsObject : metricsParam) {
             JsonObject timeserie = (JsonObject) metricsObject;
             int numberOfFailedPointsForThisName = 0;
@@ -186,7 +187,7 @@ public class ImportRequestParser {
             }
             if(!newPoints.isEmpty()) {
                 newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
-                correctPointsAndFailedPoints.correctPoints.add(newTimeserie);
+                fileReport.correctPoints.add(newTimeserie);
             }
             int currentNumberOfFailedPoints;
             LinkedHashMap groupByMap = new LinkedHashMap();
@@ -204,16 +205,16 @@ public class ImportRequestParser {
             } else {
             groupByMap.put(NAME, timeserie.getString(NAME));
             }
-            if (correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.containsKey(groupByMap)) {
-                currentNumberOfFailedPoints = (int) correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.get(groupByMap);
-                correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.put(groupByMap, currentNumberOfFailedPoints+numberOfFailedPointsForThisName);
+            if (fileReport.numberOfFailedPointsPerMetric.containsKey(groupByMap)) {
+                currentNumberOfFailedPoints = (int) fileReport.numberOfFailedPointsPerMetric.get(groupByMap);
+                fileReport.numberOfFailedPointsPerMetric.put(groupByMap, currentNumberOfFailedPoints+numberOfFailedPointsForThisName);
             }else {
-                correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.put(groupByMap, numberOfFailedPointsForThisName);
+                fileReport.numberOfFailedPointsPerMetric.put(groupByMap, numberOfFailedPointsForThisName);
             }
 
         }
-        if (correctPointsAndFailedPoints.correctPoints.isEmpty())
+        if (fileReport.correctPoints.isEmpty())
             throw new IllegalArgumentException("There is no valid points");
-        return correctPointsAndFailedPoints;
+        return fileReport;
     }
 }
