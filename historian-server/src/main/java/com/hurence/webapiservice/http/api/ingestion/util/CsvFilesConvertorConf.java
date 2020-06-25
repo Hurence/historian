@@ -1,13 +1,11 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
 import io.vertx.reactivex.core.MultiMap;
-import net.sf.cglib.asm.$MethodTooLargeException;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.*;
 
 public class CsvFilesConvertorConf {
 

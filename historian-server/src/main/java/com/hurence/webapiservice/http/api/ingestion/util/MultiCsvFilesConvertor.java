@@ -1,18 +1,13 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
-import com.hurence.webapiservice.http.api.ingestion.ImportRequestParser;
-import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.*;
-
-import static com.hurence.historian.modele.HistorianFields.*;
+import java.util.List;
+import java.util.Set;
 
 public class MultiCsvFilesConvertor {
 
@@ -34,7 +29,5 @@ public class MultiCsvFilesConvertor {
             csvFileConvertors.add(csvFileConvertor);
         });
     }
-
-
 
 }
