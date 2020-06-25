@@ -10,6 +10,10 @@ public class HistorianCollections {
     public static String DEFAULT_COLLECTION_HISTORIAN = "historian";
     public static String DEFAULT_COLLECTION_ANNOTATION = "annotation";
     public static String DEFAULT_COLLECTION_REPORT = "historian-reports";
+
+    public static HistorianCollection[] getAllCollections() {
+        return HistorianCollection.values();
+    }
 }
 
 

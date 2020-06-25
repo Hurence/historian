@@ -1,17 +1,12 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil;
 import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.MultiMap;
-import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Set;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseJsonImportRequest;
@@ -50,7 +45,7 @@ public class IngestionApiImpl implements IngestionApi {
             context.response().end(errorObject.encodePrettily());
             return;
         }
-        JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, correctPointsAndErrorMessages.correctPoints)
+        JsonObject pointsToBeInjected = new JsonObject().put(POINTS, correctPointsAndErrorMessages.correctPoints)
                 .put(CHUNK_ORIGIN, "ingestion-json");
 
         service.rxAddTimeSeries(pointsToBeInjected)
@@ -91,7 +86,7 @@ public class IngestionApiImpl implements IngestionApi {
             context.response().end(String.valueOf(errorObject));
             return;
         }
-        JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
+        JsonObject pointsToBeInjected = new JsonObject().put(POINTS, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
                 .put(CHUNK_ORIGIN, "ingestion-csv");
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {

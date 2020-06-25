@@ -43,9 +43,9 @@ public class TimeSeriesExtracterUtil {
     public static Stream<Point> extractPointsAsStream(long from, long to, List<JsonObject> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
-                    byte[] binaryChunk = chunk.getBinary(RESPONSE_CHUNK_VALUE_FIELD);
-                    long chunkStart = chunk.getLong(RESPONSE_CHUNK_START_FIELD);
-                    long chunkEnd = chunk.getLong(RESPONSE_CHUNK_END_FIELD);
+                    byte[] binaryChunk = chunk.getBinary(CHUNK_VALUE_FIELD);
+                    long chunkStart = chunk.getLong(CHUNK_START_FIELD);
+                    long chunkEnd = chunk.getLong(CHUNK_END_FIELD);
                     try {
                         return BinaryCompactionUtil.unCompressPoints(binaryChunk, chunkStart, chunkEnd, from, to).stream();
                     } catch (IOException ex) {

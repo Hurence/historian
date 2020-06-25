@@ -61,21 +61,21 @@ public class JsonObjectToChunk {
         final SolrInputDocument doc = new SolrInputDocument();
         checkChunkNotEmpty(chunk);
         doc.addField(NAME, chunk.getName());
-        doc.addField(RESPONSE_CHUNK_START_FIELD, chunk.getStart());
-        doc.addField(RESPONSE_CHUNK_END_FIELD, chunk.getEnd());
-        doc.addField(RESPONSE_CHUNK_COUNT_FIELD, chunk.getValues().size());
+        doc.addField(CHUNK_START_FIELD, chunk.getStart());
+        doc.addField(CHUNK_END_FIELD, chunk.getEnd());
+        doc.addField(CHUNK_COUNT_FIELD, chunk.getValues().size());
         chunk.attributes().keySet().forEach(key -> {
             doc.addField(key, chunk.attribute(key));
         });
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(chunk);
-        doc.addField(RESPONSE_CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
+        doc.addField(CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
         computeAndSetMetrics(doc, chunk);
         DateInfo dateInfo = TimeSeriesUtil.calculDateFields(chunk.getStart());
         doc.addField(CHUNK_YEAR, dateInfo.year);
         doc.addField(CHUNK_DAY, dateInfo.day);
         doc.addField(CHUNK_MONTH, dateInfo.month);
         doc.addField(CHUNK_ORIGIN, this.chunkOrigin);
-        doc.setField(RESPONSE_CHUNK_ID_FIELD, calulateHash(doc));
+        doc.setField(CHUNK_ID_FIELD, calulateHash(doc));
         return doc;
     }
 
@@ -153,7 +153,7 @@ public class JsonObjectToChunk {
      *
      *                              {
      *                                  {@value HistorianFields#NAME} : "metric name to add datapoints",
-     *                                  {@value HistorianFields#POINTS_REQUEST_FIELD } : [
+     *                                  {@value HistorianFields#POINTS } : [
      *                                      [timestamp, value, quality]
      *                                      ...
      *                                      [timestamp, value, quality]
@@ -165,7 +165,7 @@ public class JsonObjectToChunk {
      */
     private MetricTimeSeries buildMetricTimeSeries(JsonObject json) {
         String metricName = json.getString(NAME);
-        JsonArray points = json.getJsonArray(POINTS_REQUEST_FIELD);
+        JsonArray points = json.getJsonArray(POINTS);
         JsonObject tags = json.getJsonObject(TAGS, new JsonObject());
 
         final long start = getStart(points);

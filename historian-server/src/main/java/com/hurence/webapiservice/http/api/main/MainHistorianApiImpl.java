@@ -129,10 +129,10 @@ public class MainHistorianApiImpl implements MainHistorianApi {
 
     private JsonObject buildGetTimeSeriesRequest(QueryRequestParam request) {
         JsonArray fieldsToFetch = new JsonArray()
-                .add(RESPONSE_CHUNK_VALUE_FIELD)
-                .add(RESPONSE_CHUNK_START_FIELD)
-                .add(RESPONSE_CHUNK_END_FIELD)
-                .add(RESPONSE_CHUNK_COUNT_FIELD)
+                .add(CHUNK_VALUE_FIELD)
+                .add(CHUNK_START_FIELD)
+                .add(CHUNK_END_FIELD)
+                .add(CHUNK_COUNT_FIELD)
                 .add(NAME);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()

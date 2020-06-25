@@ -52,21 +52,21 @@ public class ImportRequestParser {
             JsonObject timeserie = (JsonObject) metricsObject;
             if (!(timeserie.containsKey(NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) || (timeserie.getValue(NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS).size();
                 correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" points for metric with name "+timeserie.getValue(NAME)+" because this is not a valid name");
                 continue;
             } else if (!(timeserie.getValue(NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD))) {
+            } else if (!(timeserie.containsKey(POINTS))) {
                 throw new IllegalArgumentException("field 'points' is required");
-            } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
-                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
+            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
+                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
             newTimeserie.put(NAME, timeserie.getString(NAME));
             JsonArray newPoints = new JsonArray();
-            for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
+            for (Object point : timeserie.getJsonArray(POINTS)) {
                 JsonArray pointArray;
                 String commonErrorMessage = "Ignored 1 points for metric with name '" + timeserie.getString(NAME);
                 try {
@@ -102,7 +102,7 @@ public class ImportRequestParser {
                 newPoints.add(pointArray);
             }
             if(!newPoints.isEmpty()) {
-                newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
+                newTimeserie.put(POINTS, newPoints);
                 correctPointsAndErrorMessages.correctPoints.add(newTimeserie);
             }
         }
@@ -132,25 +132,25 @@ public class ImportRequestParser {
             int numberOfFailedPointsForThisName = 0;
             if (!(timeserie.containsKey(NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) || (timeserie.getValue(NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS).size();
                 numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints; // TODO see this
                 continue;
             } else if (!(timeserie.getValue(NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD))) {
+            } else if (!(timeserie.containsKey(POINTS))) {
                 throw new IllegalArgumentException("field 'points' is required");
-            } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
-                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
+            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
+                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
             Set<String> fieldsNamesWithoutPoints = timeserie.fieldNames();
             fieldsNamesWithoutPoints.forEach(i -> {
-                if (!i.equals(POINTS_REQUEST_FIELD))
+                if (!i.equals(POINTS))
                     newTimeserie.put(i, timeserie.getValue(i));
             });
             JsonArray newPoints = new JsonArray();
-            for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
+            for (Object point : timeserie.getJsonArray(POINTS)) {
                 JsonArray pointArray;
                 try {
                     pointArray = (JsonArray) point;
@@ -185,7 +185,7 @@ public class ImportRequestParser {
                 newPoints.add(pointArray);
             }
             if(!newPoints.isEmpty()) {
-                newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
+                newTimeserie.put(POINTS, newPoints);
                 correctPointsAndFailedPoints.correctPoints.add(newTimeserie);
             }
             int currentNumberOfFailedPoints;
