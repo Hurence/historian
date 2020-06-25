@@ -1,6 +1,6 @@
-package com.hurence.historian.modele;
+package com.hurence.historian.modele.solr;
 
-public class Field {
+public class SolrField {
     private final String name;
     private final String type;
     private final Boolean multivalued;
@@ -8,9 +8,9 @@ public class Field {
     private final Boolean required;
     private final Boolean stored;
 
-    private Field(String name, String type,
-                 boolean multivalued, boolean indexed,
-                 boolean required, boolean stored) {
+    private SolrField(String name, String type,
+                      boolean multivalued, boolean indexed,
+                      boolean required, boolean stored) {
         this.name = name;
         this.type = type;
         this.multivalued = multivalued;
@@ -93,8 +93,8 @@ public class Field {
             return this;
         }
 
-        public Field build() {
-            return new Field(name, type, multivalued, indexed, required, stored);
+        public SolrField build() {
+            return new SolrField(name, type, multivalued, indexed, required, stored);
         }
     }
 

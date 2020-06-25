@@ -1,4 +1,4 @@
-package com.hurence.historian.modele;
+package com.hurence.historian.modele.solr;
 
 public enum HistorianCollection {
     CHUNK,

@@ -1,17 +1,11 @@
 package com.hurence.historian.solr.util;
 
-import com.hurence.historian.modele.HistorianCollections;
+import com.hurence.historian.modele.solr.HistorianCollections;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.unit5.extensions.SolrExtension;
-import io.vertx.core.json.JsonArray;
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.request.CollectionAdminRequest;
-import org.apache.solr.client.solrj.request.schema.SchemaRequest;
-import org.apache.solr.client.solrj.response.schema.SchemaResponse;
-import org.apache.solr.common.util.NamedList;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +19,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class SolrITHelper {
 
