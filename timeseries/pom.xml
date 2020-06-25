@@ -140,7 +140,7 @@
                                 <outputTarget>
                                     <type>java</type>
                                     <addSources>none</addSources>
-                                    <outputDirectory>src/main/java</outputDirectory>
+                                    <outputDirectory>src/main/generated</outputDirectory>
                                 </outputTarget>
                             </outputTargets>
                         </configuration>
