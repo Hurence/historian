@@ -43,7 +43,6 @@
                             </archiverConfig>
                             <descriptors>
                                 <descriptor>src/assembly/assembly.xml</descriptor>
-                                <descriptor>src/assembly/install_script_assembly.xml</descriptor>
                             </descriptors>
                             <tarLongFileMode>posix</tarLongFileMode>
                         </configuration>
