@@ -2,13 +2,8 @@ package com.hurence.historian.modele;
 
 
 /**
- * Static class to put field names used by HistorianService.
- */
-/*
- Does not move those fields inside HistorianService for any reason !
- Indeed it is hard to refactor HistorianService as there is many other generated classes from HistorianService.
- THe source code generated from HistorianService copy paste static variables... So When you refactor them it is not
- taking in account by your code referencing auto generated source code.
+ * those fields are the fields used by historian internally. It always correspond to the last version of the historian.
+ * All tools should use
  */
 public class HistorianFields {
     private HistorianFields() {}

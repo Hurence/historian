@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.logisland.timeseries.converter.compaction;
+package com.hurence.timeseries.compaction;
 
-import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.converter.common.Compression;
-import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
-import com.hurence.logisland.util.string.BinaryEncodingUtils;
+import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufTimeSeriesSerializer;
+import com.hurence.timeseries.modele.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,12 +34,12 @@ public class BinaryCompactionUtil {
     public static int DEFAULT_DDC_THRESHOLD = 0;
 
     public static byte[] serializeTimeseries(final MetricTimeSeries timeSeries) {
-        byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(timeSeries.points().iterator(), DEFAULT_DDC_THRESHOLD);
+        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(timeSeries.points().iterator(), DEFAULT_DDC_THRESHOLD);
         return Compression.compress(serializedPoints);
     }
 
     public static byte[] serializeTimeseries(final MetricTimeSeries timeSeries, int ddcThreshold) {
-        byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(timeSeries.points().iterator(), ddcThreshold);
+        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(timeSeries.points().iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }
 
@@ -54,32 +53,6 @@ public class BinaryCompactionUtil {
         return BinaryEncodingUtils.encode(serializedPoints);
     }
 
-
-
-//    public MetricTimeSeries buildTimeSeries(String metricName, String metricType,
-//                                            long[] timestamps, double[] values, double[] quality) {
-//        //TODO check size
-//        MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(metricName, metricType);
-//        tsBuilder.start(timestamps[0]);
-//        tsBuilder.end(timestamps[timestamps.length - 1]);
-//
-//        // set attributes
-//        first.getAllFieldsSorted().forEach(field -> {
-//            if (!field.getName().startsWith("record_"))
-//                tsBuilder.attribute(field.getName(), field.getRawValue());
-//        });
-//
-//        records.forEach(record -> {
-//            if (record.getField(FieldDictionary.RECORD_VALUE) != null && record.getField(FieldDictionary.RECORD_VALUE).getRawValue() != null) {
-//                final long timestamp = record.getTime().getTime();
-//                final double value = record.getField(FieldDictionary.RECORD_VALUE).asDouble();
-//                tsBuilder.point(timestamp, value);
-//            }
-//        });
-//
-//        return tsBuilder.build();
-//    }
-
     /**
      *
      * @param chunkOfPoints the compressed points
@@ -90,7 +63,7 @@ public class BinaryCompactionUtil {
      */
     public static List<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
-            return ProtoBufMetricTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, chunkStart, chunkEnd);
+            return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, chunkStart, chunkEnd);
         }
     }
 
@@ -107,7 +80,7 @@ public class BinaryCompactionUtil {
     public static List<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd,
                                         long requestedFrom, long requestedEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
-            return ProtoBufMetricTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd);
+            return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd);
         }
     }
 }

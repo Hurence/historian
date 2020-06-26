@@ -1,7 +1,7 @@
 package com.hurence.historian.solr.injector;
 
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.Point;
 
 import java.util.List;
 import java.util.Map;

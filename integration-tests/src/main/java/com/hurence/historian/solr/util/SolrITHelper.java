@@ -1,8 +1,8 @@
 package com.hurence.historian.solr.util;
 
-import com.hurence.historian.modele.solr.HistorianCollections;
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.logisland.record.TimeSeriesRecord;
+import com.hurence.historian.modele.solr.HistorianCollections;
 import com.hurence.unit5.extensions.SolrExtension;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
@@ -65,8 +65,8 @@ public class SolrITHelper {
     }
 
     public static void addCodeInstallAndSensor(String solrUrl) throws IOException, InterruptedException, SolrServerException {
-        SolrITHelper.addFieldToChunkSchema(solrUrl, TimeSeriesRecord.CODE_INSTALL);
-        SolrITHelper.addFieldToChunkSchema(solrUrl, TimeSeriesRecord.SENSOR);
+        SolrITHelper.addFieldToChunkSchema(solrUrl, HistorianChunkCollectionFieldsVersionEVOA0.CODE_INSTALL);
+        SolrITHelper.addFieldToChunkSchema(solrUrl, HistorianChunkCollectionFieldsVersionEVOA0.SENSOR);
     }
 
     public static void addFieldToChunkSchema(DockerComposeContainer container, String fieldName) throws IOException, InterruptedException, SolrServerException {

@@ -77,7 +77,6 @@ public class JsonMetricTimeSeriesSerializer {
                 return baos.toByteArray();
             } catch (IOException e) {
                 LOGGER.error("Could not serialize data to json", e);
-
             }
         }
         return EMPTY_JSON;

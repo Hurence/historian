@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.timeseries;
 
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -18,7 +18,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 
 import static com.hurence.webapiservice.modele.AGG.*;
-import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
+import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.TIMESERIE_AGGS;
+import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.TIMESERIE_POINT;
 
 
 public class TimeSeriesExtracterImplTest {

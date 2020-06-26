@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.sampling.Sampler;
 import com.hurence.logisland.timeseries.sampling.SamplerFactory;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.PointsAggsCalculator;

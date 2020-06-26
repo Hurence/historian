@@ -38,14 +38,14 @@ import com.hurence.logisland.component.InitializationException;
     import com.hurence.logisland.annotation.documentation.Tags;
     import com.hurence.logisland.component.PropertyDescriptor;
     import com.hurence.logisland.record.FieldDictionary;
-    import com.hurence.logisland.record.Point;
     import com.hurence.logisland.record.Record;
     import com.hurence.logisland.record.StandardRecord;
     import com.hurence.logisland.timeseries.converter.common.Compression;
-    import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
+    import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufTimeSeriesSerializer;
     import com.hurence.logisland.timeseries.dts.Pair;
     import com.hurence.logisland.validator.StandardValidators;
-    import org.apache.commons.lang3.StringUtils;
+import com.hurence.timeseries.modele.Point;
+import org.apache.commons.lang3.StringUtils;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
 
@@ -146,7 +146,7 @@ public class CompactChunkProcessor extends AbstractProcessor {
     }
 
     private byte[] compressPoints(Stream<Point> points) {
-        byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(points.iterator(), threshold);
+        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), threshold);
         return Compression.compress(serializedPoints);
     }
 

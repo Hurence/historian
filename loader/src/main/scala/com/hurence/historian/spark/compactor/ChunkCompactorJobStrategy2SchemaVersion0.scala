@@ -4,11 +4,9 @@ import java.text.SimpleDateFormat
 import java.util
 import java.util.Date
 
-import com.hurence.historian.TimeseriesConverter
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0
-import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
-import com.hurence.historian.processor.HistorianContext
 import com.hurence.historian.solr.HurenceSolrSupport
+import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.solr.SparkSolrUtils

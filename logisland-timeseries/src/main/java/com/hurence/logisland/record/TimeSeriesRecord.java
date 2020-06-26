@@ -15,23 +15,20 @@
  */
 package com.hurence.logisland.record;
 
+import com.hurence.timeseries.modele.Point;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;
 import com.hurence.logisland.timeseries.query.TypeFunctions;
-import com.hurence.logisland.util.string.BinaryEncodingUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**

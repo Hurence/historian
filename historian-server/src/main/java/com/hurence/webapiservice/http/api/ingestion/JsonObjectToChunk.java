@@ -2,13 +2,12 @@ package com.hurence.webapiservice.http.api.ingestion;
 
 import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.record.TimeSeriesRecord;
 import com.hurence.logisland.timeseries.DateInfo;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.timeseries.TimeSeriesUtil;
 import com.hurence.logisland.timeseries.converter.common.DoubleList;
 import com.hurence.logisland.timeseries.converter.common.LongList;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;
@@ -86,10 +85,10 @@ public class JsonObjectToChunk {
      * @return
      */
     private String calulateHash(SolrInputDocument doc) {
-        String toHash = doc.getField(TimeSeriesRecord.CHUNK_VALUE).toString() +
-                doc.getField(TimeSeriesRecord.METRIC_NAME).toString() +
-                doc.getField(TimeSeriesRecord.CHUNK_START).toString() +
-                doc.getField(TimeSeriesRecord.CHUNK_ORIGIN).toString();
+        String toHash = doc.getField(CHUNK_VALUE_FIELD).toString() +
+                doc.getField(NAME).toString() +
+                doc.getField(CHUNK_START_FIELD).toString() +
+                doc.getField(CHUNK_ORIGIN).toString();
 
         String sha256hex = Hashing.sha256()
                 .hashString(toHash, StandardCharsets.UTF_8)

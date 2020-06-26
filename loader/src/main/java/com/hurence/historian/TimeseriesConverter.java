@@ -2,12 +2,12 @@ package com.hurence.historian;
 
 import com.hurence.historian.processor.HistorianContext;
 import com.hurence.historian.processor.HistorianProcessor;
+import com.hurence.logisland.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.record.*;
 import com.hurence.logisland.serializer.KryoSerializer;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import com.hurence.logisland.timeseries.query.QueryEvaluator;

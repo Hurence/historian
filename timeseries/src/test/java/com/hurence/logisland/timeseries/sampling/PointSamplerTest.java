@@ -15,7 +15,7 @@
  */
 package com.hurence.logisland.timeseries.sampling;
 
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.Point;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;

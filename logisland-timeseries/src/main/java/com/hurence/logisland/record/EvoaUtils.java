@@ -1,6 +1,7 @@
 package com.hurence.logisland.record;
 
 import com.google.common.hash.Hashing;
+import com.hurence.historian.modele.HistorianFields;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -10,9 +11,9 @@ import java.time.temporal.WeekFields;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-    public class EvoaUtils {
+public class EvoaUtils {
 
-    static Pattern  csvRegexp = Pattern.compile("(\\w+)\\.?(\\w+-?\\w+-?\\w+)?\\.?(\\w+)?");
+    static Pattern csvRegexp = Pattern.compile("(\\w+)\\.?(\\w+-?\\w+-?\\w+)?\\.?(\\w+)?");
 
 
     /**
@@ -21,10 +22,10 @@ import java.util.regex.Pattern;
      * @param record
      * @return
      */
-    public static synchronized Record setDateFields(final Record record){
-        if (record.hasField(TimeSeriesRecord.CHUNK_START)) {
+    public static synchronized Record setDateFields(final Record record) {
+        if (record.hasField(HistorianFields.CHUNK_START_FIELD)) {
             try {
-                Instant instant = Instant.ofEpochMilli(record.getField(TimeSeriesRecord.CHUNK_START).asLong());
+                Instant instant = Instant.ofEpochMilli(record.getField(HistorianFields.CHUNK_START_FIELD).asLong());
                 LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
                 int month = localDate.getMonthValue();
                 int day = localDate.getDayOfMonth();
@@ -50,10 +51,10 @@ import java.util.regex.Pattern;
      * @return
      */
     public static synchronized Record setBusinessFields(Record record) {
-        if (record.hasField(TimeSeriesRecord.METRIC_NAME)) {
+        if (record.hasField(HistorianFields.NAME)) {
 
             try {
-                Matcher m = csvRegexp.matcher(record.getField(TimeSeriesRecord.METRIC_NAME).asString());
+                Matcher m = csvRegexp.matcher(record.getField(HistorianFields.NAME).asString());
                 boolean b = m.matches();
                 if (b) {
                     record.setStringField("code_install", m.group(1));
@@ -75,7 +76,7 @@ import java.util.regex.Pattern;
      * @return
      */
     public static synchronized Record setChunkOrigin(Record record, String origin) {
-        record.setStringField(TimeSeriesRecord.CHUNK_ORIGIN, origin);
+        record.setStringField(HistorianFields.CHUNK_ORIGIN, origin);
         return record;
     }
 
@@ -87,23 +88,21 @@ import java.util.regex.Pattern;
      */
     public static synchronized Record setHashId(Record record) {
         try {
-            String toHash = record.getField(TimeSeriesRecord.CHUNK_VALUE).asString() +
-                    record.getField(TimeSeriesRecord.METRIC_NAME).asString() +
-                    record.getField(TimeSeriesRecord.CHUNK_START).asLong();
+            String toHash = record.getField(HistorianFields.CHUNK_VALUE_FIELD).asString() +
+                    record.getField(HistorianFields.NAME).asString() +
+                    record.getField(HistorianFields.CHUNK_START_FIELD).asLong();
 
             String sha256hex = Hashing.sha256()
                     .hashString(toHash, StandardCharsets.UTF_8)
                     .toString();
 
             record.setId(sha256hex);
-        }catch (Exception ex) {
+        } catch (Exception ex) {
             // do nothing
         }
 
         return record;
     }
-
-
 
 
 }

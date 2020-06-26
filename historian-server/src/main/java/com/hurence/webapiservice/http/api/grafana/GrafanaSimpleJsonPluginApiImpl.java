@@ -2,7 +2,6 @@ package com.hurence.webapiservice.http.api.grafana;
 
 
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.record.FieldDictionary;
 import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
@@ -11,8 +10,8 @@ import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
-import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
+import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
 import io.vertx.core.json.JsonArray;
@@ -52,7 +51,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
 
     /**
      *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value FieldDictionary#RECORD_NAME}' value in historian.
+     *  In our case we will return each different '{@value HistorianFields#NAME}' value in historian.
      * @param context
      *
      * Expected request exemple :
@@ -111,7 +110,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
 
     /**
      *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value FieldDictionary#RECORD_NAME}' value in historian.
+     *  In our case we will return each different '{@value HistorianFields#NAME}' value in historian.
      * @param context
      *
      * Expected request exemple :

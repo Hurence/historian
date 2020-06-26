@@ -9,7 +9,7 @@ public final class MetricPointWithQuality {
       com.google.protobuf.ExtensionRegistry registry) {
   }
   public interface PointOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:Point)
+      // @@protoc_insertion_point(interface_extends:serializer.Point)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -107,7 +107,7 @@ public final class MetricPointWithQuality {
     int getVIndex();
   }
   /**
-   * Protobuf type {@code Point}
+   * Protobuf type {@code serializer.Point}
    *
    * <pre>
    *Our point
@@ -115,7 +115,7 @@ public final class MetricPointWithQuality {
    */
   public static final class Point extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:Point)
+      // @@protoc_insertion_point(message_implements:serializer.Point)
       PointOrBuilder {
     // Use Point.newBuilder() to construct.
     private Point(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
@@ -206,12 +206,12 @@ public final class MetricPointWithQuality {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Point_descriptor;
+      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Point_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Point_fieldAccessorTable
+      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Point_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.class, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder.class);
     }
@@ -513,7 +513,7 @@ public final class MetricPointWithQuality {
       return builder;
     }
     /**
-     * Protobuf type {@code Point}
+     * Protobuf type {@code serializer.Point}
      *
      * <pre>
      *Our point
@@ -521,16 +521,16 @@ public final class MetricPointWithQuality {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:Point)
+        // @@protoc_insertion_point(builder_implements:serializer.Point)
         com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Point_descriptor;
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Point_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Point_fieldAccessorTable
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Point_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.class, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder.class);
       }
@@ -576,7 +576,7 @@ public final class MetricPointWithQuality {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Point_descriptor;
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Point_descriptor;
       }
 
       public com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point getDefaultInstanceForType() {
@@ -952,7 +952,7 @@ public final class MetricPointWithQuality {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:Point)
+      // @@protoc_insertion_point(builder_scope:serializer.Point)
     }
 
     static {
@@ -960,15 +960,15 @@ public final class MetricPointWithQuality {
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:Point)
+    // @@protoc_insertion_point(class_scope:serializer.Point)
   }
 
   public interface PointsOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:Points)
+      // @@protoc_insertion_point(interface_extends:serializer.Points)
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -977,7 +977,7 @@ public final class MetricPointWithQuality {
     java.util.List<com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point> 
         getPList();
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -985,7 +985,7 @@ public final class MetricPointWithQuality {
      */
     com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point getP(int index);
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -993,7 +993,7 @@ public final class MetricPointWithQuality {
      */
     int getPCount();
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -1002,7 +1002,7 @@ public final class MetricPointWithQuality {
     java.util.List<? extends com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> 
         getPOrBuilderList();
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -1029,7 +1029,7 @@ public final class MetricPointWithQuality {
     int getDdc();
   }
   /**
-   * Protobuf type {@code Points}
+   * Protobuf type {@code serializer.Points}
    *
    * <pre>
    *The data of a time series is a list of points
@@ -1037,7 +1037,7 @@ public final class MetricPointWithQuality {
    */
   public static final class Points extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:Points)
+      // @@protoc_insertion_point(message_implements:serializer.Points)
       PointsOrBuilder {
     // Use Points.newBuilder() to construct.
     private Points(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
@@ -1114,12 +1114,12 @@ public final class MetricPointWithQuality {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Points_descriptor;
+      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Points_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Points_fieldAccessorTable
+      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Points_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Points.class, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Points.Builder.class);
     }
@@ -1143,7 +1143,7 @@ public final class MetricPointWithQuality {
     public static final int P_FIELD_NUMBER = 1;
     private java.util.List<com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point> p_;
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -1153,7 +1153,7 @@ public final class MetricPointWithQuality {
       return p_;
     }
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -1164,7 +1164,7 @@ public final class MetricPointWithQuality {
       return p_;
     }
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -1174,7 +1174,7 @@ public final class MetricPointWithQuality {
       return p_.size();
     }
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -1184,7 +1184,7 @@ public final class MetricPointWithQuality {
       return p_.get(index);
     }
     /**
-     * <code>repeated .Point p = 1;</code>
+     * <code>repeated .serializer.Point p = 1;</code>
      *
      * <pre>
      *The list of points
@@ -1337,7 +1337,7 @@ public final class MetricPointWithQuality {
       return builder;
     }
     /**
-     * Protobuf type {@code Points}
+     * Protobuf type {@code serializer.Points}
      *
      * <pre>
      *The data of a time series is a list of points
@@ -1345,16 +1345,16 @@ public final class MetricPointWithQuality {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:Points)
+        // @@protoc_insertion_point(builder_implements:serializer.Points)
         com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.PointsOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Points_descriptor;
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Points_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Points_fieldAccessorTable
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Points_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Points.class, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Points.Builder.class);
       }
@@ -1397,7 +1397,7 @@ public final class MetricPointWithQuality {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Points_descriptor;
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Points_descriptor;
       }
 
       public com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Points getDefaultInstanceForType() {
@@ -1514,7 +1514,7 @@ public final class MetricPointWithQuality {
           com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> pBuilder_;
 
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1528,7 +1528,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1542,7 +1542,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1556,7 +1556,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1577,7 +1577,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1595,7 +1595,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1615,7 +1615,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1636,7 +1636,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1654,7 +1654,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1672,7 +1672,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1691,7 +1691,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1708,7 +1708,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1725,7 +1725,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1736,7 +1736,7 @@ public final class MetricPointWithQuality {
         return getPFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1750,7 +1750,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1765,7 +1765,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1776,7 +1776,7 @@ public final class MetricPointWithQuality {
             com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.getDefaultInstance());
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1788,7 +1788,7 @@ public final class MetricPointWithQuality {
             index, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.getDefaultInstance());
       }
       /**
-       * <code>repeated .Point p = 1;</code>
+       * <code>repeated .serializer.Point p = 1;</code>
        *
        * <pre>
        *The list of points
@@ -1861,7 +1861,7 @@ public final class MetricPointWithQuality {
         return this;
       }
 
-      // @@protoc_insertion_point(builder_scope:Points)
+      // @@protoc_insertion_point(builder_scope:serializer.Points)
     }
 
     static {
@@ -1869,11 +1869,11 @@ public final class MetricPointWithQuality {
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:Points)
+    // @@protoc_insertion_point(class_scope:serializer.Points)
   }
 
   public interface QualitiesOrBuilder extends
-      // @@protoc_insertion_point(interface_extends:Qualities)
+      // @@protoc_insertion_point(interface_extends:serializer.Qualities)
       com.google.protobuf.MessageOrBuilder {
 
     /**
@@ -1911,7 +1911,7 @@ public final class MetricPointWithQuality {
     double getAvgValue();
 
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -1920,7 +1920,7 @@ public final class MetricPointWithQuality {
     java.util.List<com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point> 
         getPList();
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -1928,7 +1928,7 @@ public final class MetricPointWithQuality {
      */
     com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point getP(int index);
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -1936,7 +1936,7 @@ public final class MetricPointWithQuality {
      */
     int getPCount();
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -1945,7 +1945,7 @@ public final class MetricPointWithQuality {
     java.util.List<? extends com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> 
         getPOrBuilderList();
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -1955,7 +1955,7 @@ public final class MetricPointWithQuality {
         int index);
   }
   /**
-   * Protobuf type {@code Qualities}
+   * Protobuf type {@code serializer.Qualities}
    *
    * <pre>
    * Only quality values different from firstValue are stored
@@ -1963,7 +1963,7 @@ public final class MetricPointWithQuality {
    */
   public static final class Qualities extends
       com.google.protobuf.GeneratedMessage implements
-      // @@protoc_insertion_point(message_implements:Qualities)
+      // @@protoc_insertion_point(message_implements:serializer.Qualities)
       QualitiesOrBuilder {
     // Use Qualities.newBuilder() to construct.
     private Qualities(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
@@ -2045,12 +2045,12 @@ public final class MetricPointWithQuality {
     }
     public static final com.google.protobuf.Descriptors.Descriptor
         getDescriptor() {
-      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Qualities_descriptor;
+      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Qualities_descriptor;
     }
 
     protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
         internalGetFieldAccessorTable() {
-      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Qualities_fieldAccessorTable
+      return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Qualities_fieldAccessorTable
           .ensureFieldAccessorsInitialized(
               com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Qualities.class, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Qualities.Builder.class);
     }
@@ -2120,7 +2120,7 @@ public final class MetricPointWithQuality {
     public static final int P_FIELD_NUMBER = 3;
     private java.util.List<com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point> p_;
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -2130,7 +2130,7 @@ public final class MetricPointWithQuality {
       return p_;
     }
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -2141,7 +2141,7 @@ public final class MetricPointWithQuality {
       return p_;
     }
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -2151,7 +2151,7 @@ public final class MetricPointWithQuality {
       return p_.size();
     }
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -2161,7 +2161,7 @@ public final class MetricPointWithQuality {
       return p_.get(index);
     }
     /**
-     * <code>repeated .Point p = 3;</code>
+     * <code>repeated .serializer.Point p = 3;</code>
      *
      * <pre>
      * The list of Quality points
@@ -2299,7 +2299,7 @@ public final class MetricPointWithQuality {
       return builder;
     }
     /**
-     * Protobuf type {@code Qualities}
+     * Protobuf type {@code serializer.Qualities}
      *
      * <pre>
      * Only quality values different from firstValue are stored
@@ -2307,16 +2307,16 @@ public final class MetricPointWithQuality {
      */
     public static final class Builder extends
         com.google.protobuf.GeneratedMessage.Builder<Builder> implements
-        // @@protoc_insertion_point(builder_implements:Qualities)
+        // @@protoc_insertion_point(builder_implements:serializer.Qualities)
         com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.QualitiesOrBuilder {
       public static final com.google.protobuf.Descriptors.Descriptor
           getDescriptor() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Qualities_descriptor;
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Qualities_descriptor;
       }
 
       protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
           internalGetFieldAccessorTable() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Qualities_fieldAccessorTable
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Qualities_fieldAccessorTable
             .ensureFieldAccessorsInitialized(
                 com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Qualities.class, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Qualities.Builder.class);
       }
@@ -2361,7 +2361,7 @@ public final class MetricPointWithQuality {
 
       public com.google.protobuf.Descriptors.Descriptor
           getDescriptorForType() {
-        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_Qualities_descriptor;
+        return com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Qualities_descriptor;
       }
 
       public com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Qualities getDefaultInstanceForType() {
@@ -2581,7 +2581,7 @@ public final class MetricPointWithQuality {
           com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> pBuilder_;
 
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2595,7 +2595,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2609,7 +2609,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2623,7 +2623,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2644,7 +2644,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2662,7 +2662,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2682,7 +2682,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2703,7 +2703,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2721,7 +2721,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2739,7 +2739,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2758,7 +2758,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2775,7 +2775,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2792,7 +2792,7 @@ public final class MetricPointWithQuality {
         return this;
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2803,7 +2803,7 @@ public final class MetricPointWithQuality {
         return getPFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2817,7 +2817,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2832,7 +2832,7 @@ public final class MetricPointWithQuality {
         }
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2843,7 +2843,7 @@ public final class MetricPointWithQuality {
             com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.getDefaultInstance());
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2855,7 +2855,7 @@ public final class MetricPointWithQuality {
             index, com.hurence.logisland.timeseries.converter.serializer.MetricPointWithQuality.Point.getDefaultInstance());
       }
       /**
-       * <code>repeated .Point p = 3;</code>
+       * <code>repeated .serializer.Point p = 3;</code>
        *
        * <pre>
        * The list of Quality points
@@ -2880,7 +2880,7 @@ public final class MetricPointWithQuality {
         return pBuilder_;
       }
 
-      // @@protoc_insertion_point(builder_scope:Qualities)
+      // @@protoc_insertion_point(builder_scope:serializer.Qualities)
     }
 
     static {
@@ -2888,24 +2888,24 @@ public final class MetricPointWithQuality {
       defaultInstance.initFields();
     }
 
-    // @@protoc_insertion_point(class_scope:Qualities)
+    // @@protoc_insertion_point(class_scope:serializer.Qualities)
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_Point_descriptor;
+    internal_static_serializer_Point_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_Point_fieldAccessorTable;
+      internal_static_serializer_Point_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_Points_descriptor;
+    internal_static_serializer_Points_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_Points_fieldAccessorTable;
+      internal_static_serializer_Points_fieldAccessorTable;
   private static final com.google.protobuf.Descriptors.Descriptor
-    internal_static_Qualities_descriptor;
+    internal_static_serializer_Qualities_descriptor;
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
-      internal_static_Qualities_fieldAccessorTable;
+      internal_static_serializer_Qualities_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2915,14 +2915,15 @@ public final class MetricPointWithQuality {
       descriptor;
   static {
     java.lang.String[] descriptorData = {
-      "\n\037metric_point_with_quality.proto\"`\n\005Poi" +
-      "nt\022\r\n\005tlong\030\001 \001(\004\022\014\n\004tint\030\002 \001(\r\022\017\n\007tlong" +
-      "BP\030\003 \001(\004\022\016\n\006tintBP\030\004 \001(\r\022\t\n\001v\030\005 \001(\001\022\016\n\006v" +
-      "Index\030\006 \001(\r\"(\n\006Points\022\021\n\001p\030\001 \003(\0132\006.Point" +
-      "\022\013\n\003ddc\030\002 \001(\r\"D\n\tQualities\022\022\n\nfirstValue" +
-      "\030\001 \001(\001\022\020\n\010avgValue\030\002 \001(\001\022\021\n\001p\030\003 \003(\0132\006.Po" +
-      "intB9\n5com.hurence.logisland.timeseries." +
-      "converter.serializerH\001"
+      "\n\037metric_point_with_quality.proto\022\nseria" +
+      "lizer\"`\n\005Point\022\r\n\005tlong\030\001 \001(\004\022\014\n\004tint\030\002 " +
+      "\001(\r\022\017\n\007tlongBP\030\003 \001(\004\022\016\n\006tintBP\030\004 \001(\r\022\t\n\001" +
+      "v\030\005 \001(\001\022\016\n\006vIndex\030\006 \001(\r\"3\n\006Points\022\034\n\001p\030\001" +
+      " \003(\0132\021.serializer.Point\022\013\n\003ddc\030\002 \001(\r\"O\n\t" +
+      "Qualities\022\022\n\nfirstValue\030\001 \001(\001\022\020\n\010avgValu" +
+      "e\030\002 \001(\001\022\034\n\001p\030\003 \003(\0132\021.serializer.PointB9\n" +
+      "5com.hurence.logisland.timeseries.conver" +
+      "ter.serializerH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2936,23 +2937,23 @@ public final class MetricPointWithQuality {
       .internalBuildGeneratedFileFrom(descriptorData,
         new com.google.protobuf.Descriptors.FileDescriptor[] {
         }, assigner);
-    internal_static_Point_descriptor =
+    internal_static_serializer_Point_descriptor =
       getDescriptor().getMessageTypes().get(0);
-    internal_static_Point_fieldAccessorTable = new
+    internal_static_serializer_Point_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_Point_descriptor,
+        internal_static_serializer_Point_descriptor,
         new java.lang.String[] { "Tlong", "Tint", "TlongBP", "TintBP", "V", "VIndex", });
-    internal_static_Points_descriptor =
+    internal_static_serializer_Points_descriptor =
       getDescriptor().getMessageTypes().get(1);
-    internal_static_Points_fieldAccessorTable = new
+    internal_static_serializer_Points_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_Points_descriptor,
+        internal_static_serializer_Points_descriptor,
         new java.lang.String[] { "P", "Ddc", });
-    internal_static_Qualities_descriptor =
+    internal_static_serializer_Qualities_descriptor =
       getDescriptor().getMessageTypes().get(2);
-    internal_static_Qualities_fieldAccessorTable = new
+    internal_static_serializer_Qualities_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
-        internal_static_Qualities_descriptor,
+        internal_static_serializer_Qualities_descriptor,
         new java.lang.String[] { "FirstValue", "AvgValue", "P", });
   }
 

@@ -3,16 +3,15 @@ package com.hurence.historian.spark.sql
 import java.nio.charset.StandardCharsets
 
 import com.google.common.hash.Hashing
+import com.hurence.logisland.BinaryCompactionConverterOfRecord
 import com.hurence.logisland.timeseries.MetricTimeSeries
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
-import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter, SaxAnalyzer}
+import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
 import com.hurence.logisland.util.DateUtil
-import com.hurence.logisland.util.string.BinaryEncodingUtils
+import com.hurence.timeseries.compaction.BinaryEncodingUtils
 import org.apache.spark.sql.functions.udf
-import spire.std.int
 
-import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.control.NonFatal
 
 

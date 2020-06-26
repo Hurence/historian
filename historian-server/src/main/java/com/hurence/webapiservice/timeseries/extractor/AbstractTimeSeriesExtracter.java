@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

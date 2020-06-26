@@ -161,6 +161,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>logisland-timeseries</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.lucidworks.spark</groupId>
             <artifactId>spark-solr</artifactId>
             <version>${spark.solr}</version>

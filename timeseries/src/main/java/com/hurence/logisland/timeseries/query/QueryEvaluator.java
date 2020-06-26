@@ -18,7 +18,6 @@ package com.hurence.logisland.timeseries.query;
 
 import com.hurence.logisland.timeseries.functions.*;
 import com.hurence.logisland.timeseries.metric.ChronixType;
-import com.hurence.logisland.timeseries.metric.ChronixTypes;
 import com.hurence.logisland.timeseries.metric.MetricType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

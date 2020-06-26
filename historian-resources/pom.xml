@@ -10,12 +10,4 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>historian-resources</artifactId>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.hurence.historian</groupId>
-            <artifactId>timeseries</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-    </dependencies>
 </project>

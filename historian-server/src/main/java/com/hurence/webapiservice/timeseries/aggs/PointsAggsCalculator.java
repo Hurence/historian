@@ -1,10 +1,9 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.webapiservice.modele.AGG;
 
-
-import java.util.*;
+import java.util.List;
 import java.util.stream.DoubleStream;
 
 public class PointsAggsCalculator extends AbstractAggsCalculator<Point> {

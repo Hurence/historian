@@ -1,8 +1,7 @@
 package com.hurence.historian.solr.injector;
 
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersionEVOA0;
-import com.hurence.historian.spark.compactor.job.ChunkModeleVersionEVOA0;
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.Point;
 
 import java.util.ArrayList;
 import java.util.List;

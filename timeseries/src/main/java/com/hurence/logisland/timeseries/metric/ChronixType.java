@@ -16,10 +16,7 @@
 package com.hurence.logisland.timeseries.metric;
 
 
-
 import com.hurence.logisland.timeseries.functions.ChronixFunction;
-
-import java.util.List;
 
 /**
  * The interface defines a Chronix type.
@@ -32,16 +29,6 @@ public interface ChronixType {
      * @return the type name. Must be unique within an index.
      */
     String getType();
-
-    /**
-     * Converts the given list of records to specific type of time series
-     *
-     * @param records    a list of records that belong to the query
-     * @param queryStart the start of the query, use it to filter the records
-     * @param queryEnd   the end of the query, use it fo filter the records
-     * @return a time series of type <t>
-     */
-  //  ChronixTimeSeries convert(List<SolrDocument> records, long queryStart, long queryEnd, boolean rawDataIsRequested);
 
     /**
      * @param function the query name of the function

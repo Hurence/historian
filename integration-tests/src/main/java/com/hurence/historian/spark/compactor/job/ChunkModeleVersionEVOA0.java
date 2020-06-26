@@ -1,9 +1,9 @@
 package com.hurence.historian.spark.compactor.job;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
-import com.hurence.logisland.record.Point;
 import com.hurence.logisland.timeseries.converter.common.Compression;
-import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
+import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufTimeSeriesSerializer;
+import com.hurence.timeseries.modele.Point;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -67,7 +67,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
     }
 
     protected static byte[] compressPoints(List<Point> pointsChunk) {
-        byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
+        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }
 
