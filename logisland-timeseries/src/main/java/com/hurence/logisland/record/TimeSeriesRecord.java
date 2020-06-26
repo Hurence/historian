@@ -15,14 +15,14 @@
  */
 package com.hurence.logisland.record;
 
+import com.hurence.timeseries.functions.*;
 import com.hurence.timeseries.modele.Point;
-import com.hurence.logisland.timeseries.MetricTimeSeries;
+import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
-import com.hurence.logisland.timeseries.functions.*;
-import com.hurence.logisland.timeseries.metric.MetricType;
-import com.hurence.logisland.timeseries.query.QueryEvaluator;
-import com.hurence.logisland.timeseries.query.TypeFunctions;
+import com.hurence.timeseries.metric.MetricType;
+import com.hurence.timeseries.query.QueryEvaluator;
+import com.hurence.timeseries.query.TypeFunctions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

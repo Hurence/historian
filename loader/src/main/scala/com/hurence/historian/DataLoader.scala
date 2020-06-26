@@ -3,7 +3,7 @@ package com.hurence.historian
 import com.hurence.historian.processor.HistorianContext
 import com.hurence.historian.spark.compactor.ChunkCompactor
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
-import com.hurence.logisland.timeseries.MetricTimeSeries
+import com.hurence.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.spark.sql.functions.{asc, concat, from_unixtime, hour, lit}

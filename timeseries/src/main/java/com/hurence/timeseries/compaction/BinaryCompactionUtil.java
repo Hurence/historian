@@ -15,9 +15,8 @@
  */
 package com.hurence.timeseries.compaction;
 
-import com.hurence.logisland.timeseries.MetricTimeSeries;
-import com.hurence.logisland.timeseries.converter.common.Compression;
-import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufTimeSeriesSerializer;
+import com.hurence.timeseries.MetricTimeSeries;
+import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
 import com.hurence.timeseries.modele.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

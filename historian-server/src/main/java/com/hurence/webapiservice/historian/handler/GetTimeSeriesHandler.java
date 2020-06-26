@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;

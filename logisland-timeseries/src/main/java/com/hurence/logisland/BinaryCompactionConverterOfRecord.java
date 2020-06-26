@@ -17,9 +17,9 @@ package com.hurence.logisland;
 
 import com.hurence.logisland.processor.ProcessException;
 import com.hurence.logisland.record.*;
-import com.hurence.logisland.timeseries.MetricTimeSeries;
+import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.logisland.timeseries.converter.compaction.Chunker;
+import com.hurence.timeseries.compaction.Chunker;
 import com.hurence.timeseries.modele.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

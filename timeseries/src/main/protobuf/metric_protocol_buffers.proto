@@ -17,7 +17,7 @@ syntax = "proto2";
 
 package serializer;
 
-option java_package = "com.hurence.logisland.timeseries.converter.serializer";
+option java_package = "com.hurence.timeseries.converter.serializer";
 
 option optimize_for = SPEED;
 

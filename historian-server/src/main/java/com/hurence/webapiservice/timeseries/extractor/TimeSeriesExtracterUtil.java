@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.logisland.timeseries.sampling.Sampler;
-import com.hurence.logisland.timeseries.sampling.SamplerFactory;
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.sampling.Sampler;
+import com.hurence.timeseries.sampling.SamplerFactory;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.modele.Point;
 import com.hurence.webapiservice.historian.util.ChunkUtil;

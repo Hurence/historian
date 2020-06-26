@@ -3,7 +3,7 @@ package com.hurence.historian;
 import com.hurence.historian.processor.HistorianContext;
 import com.hurence.logisland.component.InitializationException;
 import com.hurence.logisland.record.TimeSeriesRecord;
-import com.hurence.logisland.timeseries.MetricTimeSeries;
+import com.hurence.timeseries.MetricTimeSeries;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.catalyst.expressions.GenericRowWithSchema;
 import org.apache.spark.sql.types.DataTypes;

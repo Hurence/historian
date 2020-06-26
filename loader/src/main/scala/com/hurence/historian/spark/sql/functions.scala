@@ -4,10 +4,11 @@ import java.nio.charset.StandardCharsets
 
 import com.google.common.hash.Hashing
 import com.hurence.logisland.BinaryCompactionConverterOfRecord
-import com.hurence.logisland.timeseries.MetricTimeSeries
-import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
+import com.hurence.logisland.timeseries.sax.SaxConverter
 import com.hurence.logisland.util.DateUtil
+import com.hurence.timeseries.MetricTimeSeries
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
+import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
 import org.apache.spark.sql.functions.udf
 
 import scala.collection.JavaConverters._

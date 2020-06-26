@@ -8,8 +8,8 @@ import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0
 import com.hurence.historian.solr.HurenceSolrSupport
 import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
 import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
-import com.hurence.logisland.timeseries.MetricTimeSeries
 import com.hurence.solr.SparkSolrUtils
+import com.hurence.timeseries.MetricTimeSeries
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.solr.client.solrj.response.UpdateResponse
 import org.apache.solr.common.SolrInputDocument
