@@ -224,8 +224,9 @@ add_tag_names_to_chunk_collection() {
   done
 }
 
-extract_historian_into_hdh_home() {
-  #HISTORIAN
+download_and_extract_historian_into_hdh_home() {
+  #Historian download & extract
+  wget https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-install.tgz
   mkdir -p "$HDH_HOME" && tar -xf historian-*-bin.tgz -C "$HDH_HOME"
   rm historian-*-bin.tgz
   echo "installed historian into $HDH_HOME"
@@ -376,7 +377,7 @@ main() {
       print_conf
       #    Start the installation
       mkdir -p "$HDH_HOME"
-      extract_historian_into_hdh_home
+      download_and_extract_historian_into_hdh_home
       cd "$HDH_HOME" || (echo "could not go to $HDH_HOME folder" && exit 1)
       install_embedded_solr_and_start_it_if_needed
       create_historian_collections
@@ -397,7 +398,7 @@ main() {
       print_conf
       #    Start the installation
       mkdir -p "$HDH_HOME"
-      extract_historian_into_hdh_home
+      download_and_extract_historian_into_hdh_home
       cd "$HDH_HOME" || (echo "could not go to $HDH_HOME folder" && exit 1)
       install_embedded_solr_and_start_it_if_needed
       create_historian_collections
