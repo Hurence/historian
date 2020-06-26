@@ -157,7 +157,7 @@ public final class MetricTimeSeries implements Serializable {
     /**
      * A stream over the points
      *
-     * @return the points as points
+     * @return the points as stream (creating new points)
      */
     public Stream<Point> points() {
         if (timestamps.isEmpty()) {

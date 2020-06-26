@@ -18,7 +18,7 @@ package com.hurence.logisland.timeseries.converter.serializer.protobuf;
 
 import com.hurence.logisland.timeseries.converter.common.DoubleList;
 import com.hurence.logisland.timeseries.converter.common.LongList;
-import com.hurence.logisland.timeseries.converter.serializer.gen.MetricProtocolBuffers;
+import com.hurence.logisland.timeseries.converter.serializer.MetricProtocolBuffers;
 import com.hurence.logisland.timeseries.MetricTimeSeries;
 import com.hurence.logisland.record.Point;
 import org.slf4j.Logger;
@@ -216,25 +216,6 @@ public final class ProtoBufMetricTimeSeriesSerializer {
         }
     }
 
-    /**
-     * Gets the time stamp from the point.
-     *
-     * @param p          the protocol buffers point
-     * @param lastOffset the last stored offset
-     * @return the time stamp of the point or the last offset if the point do not have any information about the time stamp
-     */
-    private static long getTimestamp(final MetricProtocolBuffers.Point p, final long lastOffset) {
-        //Normal delta
-        if (p.hasTint() || p.hasTlong()) {
-            return p.getTint() + p.getTlong();
-        }
-        //Base point delta
-        if (p.hasTintBP() || p.hasTlongBP()) {
-            return p.getTintBP() + p.getTlongBP();
-        }
-        return lastOffset;
-    }
-
 
     /**
      * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
@@ -269,7 +250,7 @@ public final class ProtoBufMetricTimeSeriesSerializer {
         long delta = 0;
         long lastStoredDelta = 0;
 
-        int timesSinceLastDelta = 0;
+        int numberOfPointSinceLastDelta = 0;
 
         Map<Double, Integer> valueIndex = new HashMap<>();
 
@@ -315,28 +296,28 @@ public final class ProtoBufMetricTimeSeriesSerializer {
             //The deltas of the timestamps are almost equals (delta < ddcThreshold)
             if (isAlmostEquals) {
                 //calculate the drift to the actual timestamp
-                drift = calculateDrift(currentTimestamp, lastStoredDate, timesSinceLastDelta, lastStoredDelta);
+                drift = calculateDrift(currentTimestamp, lastStoredDate, numberOfPointSinceLastDelta, lastStoredDelta);
             }
 
-            if (isAlmostEquals && noDrift(drift, ddcThreshold, timesSinceLastDelta) && drift >= 0) {
+            if (isAlmostEquals && noDrift(drift, ddcThreshold, numberOfPointSinceLastDelta) && drift >= 0) {
                 points.addP(point.build());
-                timesSinceLastDelta += 1;
+                numberOfPointSinceLastDelta += 1;
             } else {
-                long timeStamp = delta;
+                long timeStampOffset = delta;
                 //If the previous offset was not stored, correct the following delta using the calculated drift
-                if (timesSinceLastDelta > 0 && delta > previousDrift) {
-                    timeStamp = delta - previousDrift;
-                    setBPTimeStamp(point, timeStamp);
+                if (numberOfPointSinceLastDelta > 0 && delta > previousDrift) {
+                    timeStampOffset = delta - previousDrift;
+                    setBPTimeStamp(point, timeStampOffset);
                 } else {
-                    setTimeStamp(point, timeStamp);
+                    setTimeStamp(point, timeStampOffset);
                 }
 
                 //Store offset
                 points.addP(point.build());
                 //reset the offset counter
-                timesSinceLastDelta = 0;
+                numberOfPointSinceLastDelta = 0;
                 lastStoredDate = p.getTimestamp();
-                lastStoredDelta = timeStamp;
+                lastStoredDelta = timeStampOffset;
 
             }
             //set current as former previous date
@@ -352,7 +333,29 @@ public final class ProtoBufMetricTimeSeriesSerializer {
     }
 
     /**
-     * Handles the last point of a time series.  We always store the first an the last point as supporting points actualPoints[Last] == serializedPoints[Last]
+     * Gets the time stamp from the point.
+     *
+     * @param p          the protocol buffers point
+     * @param lastOffset the last stored offset
+     * @return the time stamp of the point or the last offset if the point do not have any information about the time stamp
+     */
+    private static long getTimestamp(final MetricProtocolBuffers.Point p, final long lastOffset) {
+        //Normal delta
+        if (p.hasTint() || p.hasTlong()) {
+            return p.getTint() + p.getTlong();//Todo in my opinion either getTint either getTint,
+            //todo here it works because one is 0 if not assigned but this is not logical
+        }
+        //Base point delta
+        if (p.hasTintBP() || p.hasTlongBP()) {
+            return p.getTintBP() + p.getTlongBP();//todo same
+        }
+        return lastOffset;
+    }
+
+    /**
+     * Handles the last point of a time series.
+     * We always store the first and the last point as supporting points actualPoints[Last] == serializedPoints[Last]
+     * This means that we serialized point so that timestamps of first and last point are not degraded.
      *
      * @param ddcThreshold     the ddc threshold
      * @param startDate        the start date
@@ -360,7 +363,10 @@ public final class ProtoBufMetricTimeSeriesSerializer {
      * @param points           the protocol buffer point
      * @param currentTimestamp the current time stamp
      */
-    private static void handleLastPoint(int ddcThreshold, long startDate, MetricProtocolBuffers.Point.Builder point, MetricProtocolBuffers.Points.Builder points, long currentTimestamp) {
+    private static void handleLastPoint(int ddcThreshold, long startDate,
+                                        MetricProtocolBuffers.Point.Builder point,
+                                        MetricProtocolBuffers.Points.Builder points,
+                                        long currentTimestamp) {
         long calcPoint = calculateTimeStamp(startDate, points.getPList(), ddcThreshold);
         //Calc offset
         long deltaToLastTimestamp = currentTimestamp - calcPoint;
@@ -378,10 +384,10 @@ public final class ProtoBufMetricTimeSeriesSerializer {
     /**
      * Sets the given value or if the value exists in the index, the index position as value of the point.
      *
-     * @param currentPointIndex the current index position
      * @param index             the map holding the values and the indices
-     * @param point             the current point
+     * @param currentPointIndex the current index position
      * @param value             the current value
+     * @param point             the current point builder
      */
     private static void setValueOrRefIndexOnPoint(Map<Double, Integer> index, int currentPointIndex, double value, MetricProtocolBuffers.Point.Builder point) {
         //build value index
@@ -432,7 +438,10 @@ public final class ProtoBufMetricTimeSeriesSerializer {
      * @param points              the serialized points
      * @param point               the serialized point
      */
-    private static void rearrangePoints(final long startDate, final long currentTimestamp, final long deltaToEndTimestamp, final int ddcThreshold, final MetricProtocolBuffers.Points.Builder points, final MetricProtocolBuffers.Point.Builder point) {
+    private static void rearrangePoints(final long startDate, final long currentTimestamp,
+                                        final long deltaToEndTimestamp, final int ddcThreshold,
+                                        final MetricProtocolBuffers.Points.Builder points,
+                                        final MetricProtocolBuffers.Point.Builder point) {
         //break the offset down on all points
         long avgPerDelta = (long) Math.ceil((double) deltaToEndTimestamp * -1 + ddcThreshold / (double) (points.getPCount() - 1));
 
@@ -542,11 +551,11 @@ public final class ProtoBufMetricTimeSeriesSerializer {
     /**
      * @param drift                    the calculated drift (difference between calculated and actual time stamp)
      * @param ddcThreshold             the ddc threshold
-     * @param timeSinceLastStoredDelta times since a delta was stored
+     * @param numberOfPointSinceLastDelta times since a delta was stored
      * @return true if the drift is below ddcThreshold/2, otherwise false
      */
-    private static boolean noDrift(long drift, long ddcThreshold, long timeSinceLastStoredDelta) {
-        return timeSinceLastStoredDelta == 0 || drift == 0 || drift < (ddcThreshold / 2);
+    private static boolean noDrift(long drift, long ddcThreshold, long numberOfPointSinceLastDelta) {
+        return numberOfPointSinceLastDelta == 0 || drift == 0 || drift < (ddcThreshold / 2);
     }
 
 
@@ -555,12 +564,12 @@ public final class ProtoBufMetricTimeSeriesSerializer {
      *
      * @param timestamp           the actual time stamp
      * @param lastStoredDate      the last stored date
-     * @param timesSinceLastDelta the times no delta was stored
+     * @param numberOfPointSinceLastDelta the times no delta was stored
      * @param lastStoredDelta     the last stored delta
      * @return
      */
-    private static long calculateDrift(long timestamp, long lastStoredDate, int timesSinceLastDelta, long lastStoredDelta) {
-        long calculatedMaxOffset = lastStoredDelta * (timesSinceLastDelta + 1);
+    private static long calculateDrift(long timestamp, long lastStoredDate, int numberOfPointSinceLastDelta, long lastStoredDelta) {
+        long calculatedMaxOffset = lastStoredDelta * (numberOfPointSinceLastDelta + 1);
         return lastStoredDate + calculatedMaxOffset - timestamp;
     }
 
@@ -572,13 +581,13 @@ public final class ProtoBufMetricTimeSeriesSerializer {
      *
      * @param previousOffset the previous offset
      * @param offset         the current offset
-     * @param almostEquals   the threshold for equality
+     * @param ddcThreshold   the threshold for equality
      * @return true if set offsets are equals using the threshold
      */
-    private static boolean almostEquals(long previousOffset, long offset, long almostEquals) {
+    private static boolean almostEquals(long previousOffset, long offset, long ddcThreshold) {
         //check the deltas
-        double diff = Math.abs(offset - previousOffset);
-        return (diff <= almostEquals);
+        long diff = Math.abs(offset - previousOffset);
+        return (diff <= ddcThreshold);
     }
 
 }

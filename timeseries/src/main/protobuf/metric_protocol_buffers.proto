@@ -13,9 +13,11 @@
  *    See the License for the specific language governing permissions and
  *    limitations under the License.
  */
-option java_package = "com.hurence.logisland.timeseries.converter.serializer.gen";
+syntax = "proto2";
 
-option java_outer_classname = "MetricProtocolBuffers";
+package serializer;
+
+option java_package = "com.hurence.logisland.timeseries.converter.serializer";
 
 option optimize_for = SPEED;
 
