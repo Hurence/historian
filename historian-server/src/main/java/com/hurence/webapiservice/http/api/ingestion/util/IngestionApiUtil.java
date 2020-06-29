@@ -17,15 +17,15 @@ public class IngestionApiUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiUtil.class);
 
     /**
-     * @param allFilesReport        AllFilesReport
-     * @param multiMap              MultiMap
+     * @param allFilesReport          AllFilesReport
+     * @param csvFilesConvertorConf   CsvFilesConvertorConf
      *
      * construct the final response to return, which should be grouped by.
      *
      * @return JsonObject : the response to return
      */
     public static JsonObject constructFinalResponseCsv(AllFilesReport allFilesReport,
-                                                       MultiMap multiMap) {
+                                                       CsvFilesConvertorConf csvFilesConvertorConf) {
         //TODO
         return null;
     }

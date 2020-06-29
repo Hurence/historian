@@ -10,20 +10,15 @@ public class CsvFileConvertor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvFileConvertor.class);
 
-    public CsvFilesConvertorConf csvFilesConvertorConf;
     public FileUpload file;
     public JsonArray fileInArray;
     public FileReport fileReport;
 
-    CsvFileConvertor (MultiMap multiMap, FileUpload file) {
-        this.csvFilesConvertorConf = new CsvFilesConvertorConf(multiMap);
+    CsvFileConvertor (FileUpload file) {
         this.file = file;
         this.fileReport = new FileReport();
     }
 
-    public CsvFilesConvertorConf getCsvFilesConvertorConf() {
-        return csvFilesConvertorConf;
-    }
 
     public FileUpload getFile() {
         return file;
