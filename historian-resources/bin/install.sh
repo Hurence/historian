@@ -226,7 +226,7 @@ add_tag_names_to_chunk_collection() {
 
 download_and_extract_historian_into_hdh_home() {
   #Historian download & extract
-  wget https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-install.tgz
+  wget https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-bin.tgz
   mkdir -p "$HDH_HOME" && tar -xf historian-*-bin.tgz -C "$HDH_HOME"
   rm historian-*-bin.tgz
   echo "installed historian into $HDH_HOME"
