@@ -85,8 +85,10 @@ setup_all_variables() {
   ask_and_set_variable "REPORT_COLLECTION_NAME" "historian-report" "$MSG"
   MSG="Do you want to add tags names for your time series (you can always add them after installation )? [No]"
   ask_and_update_array "TAG_NAMES" "$MSG" "Tag name"
+  if [ $CREATE = true ]; then
   MSG="Do you confirm the creation of these tags? [Yes]"
   confirmation_creation_array "RESET_TAG" "$MSG"
+  fi
   while [[ $RESET_TAG = false ]]; do
     MSG="Do you want to add tags names for your time series (you can always add them after installation )? [No]"
     ask_and_update_array "TAG_NAMES" "$MSG" "Tag name"
@@ -171,9 +173,10 @@ ask_and_update_array() {
         fi
       done
       echo Tags :[${_array[*]}]
+      CREATE=true
       ;;
 
-    ''|'No') ;;
+    ''|'No') CREATE=false;;
   esac
 }
 
