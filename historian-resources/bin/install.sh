@@ -190,7 +190,7 @@ echo "$MSG"
     case $select_reset_tag in
      ''|'Yes') export "${variable_name_to_modify}=true"
                ;;
-     'No') unset _array[*]
+     'No') unset TAG_NAMES[@]
            export "${variable_name_to_modify}=false"
            ;;
     esac
