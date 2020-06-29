@@ -4,7 +4,6 @@ import java.nio.charset.StandardCharsets
 
 import com.google.common.hash.Hashing
 import com.hurence.logisland.BinaryCompactionConverterOfRecord
-import com.hurence.logisland.timeseries.sax.SaxConverter
 import com.hurence.logisland.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
