@@ -11,7 +11,7 @@ EOF
 
 check_brew_or_install() {
   #BREW INSTALL
-  brew 2>&1
+  brew -v 2>&1 &>/dev/null
   if [[ $? != 0 ]]; then
     echo "Brew is not already installed. Installing it"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)"
@@ -45,10 +45,33 @@ check_wget_or_install_with_brew() {
   fi
 }
 
+selectWithDefault() {
+
+  local item i=0 numItems=$#
+
+  # Print numbered menu items, based on the arguments passed.
+  for item; do         # Short for: for item in "$@"; do
+    printf '%s\n' "$((++i))) $item"
+  done >&2 # Print to stderr, as `select` does.
+
+  # Prompt the user for the index of the desired item.
+  while :; do
+    printf %s "${PS3-#? }" >&2 # Print the prompt string to stderr, as `select` does.
+    read -r index
+    # Make sure that the input is either empty or that a valid index was entered.
+    [[ -z $index ]] && break  # empty input
+    (( index >= 1 && index <= numItems )) 2>/dev/null || { echo "Please choose 1 or 2" >&2; continue; }
+    break
+  done
+
+  # Output the selected item, if any.
+  [[ -n $index ]] && printf %s "${@: index:1}"
+}
+
 setup_all_variables() {
   local MSG="Where do you want to install Hurence Data Historian ?"
   ask_and_set_variable "HDH_HOME" "/opt/hdh" "$MSG"
-  MSG="Do you want us to install an embedded solr (version 8.2.0 required)? (otherwise you need to have one that can be used from this machine)"
+  MSG="Do you want us to install an embedded solr (version 8.2.0 required)? (otherwise you need to have one that can be used from this machine) [Yes] "
   ask_and_set_boolean_variable "USING_EMBEDDED_SOLR" "$MSG"
   if [[ $USING_EMBEDDED_SOLR  = false ]]; then
     MSG="What is the path to the solr cluster ? We will use the solr REST api to create collection."
@@ -60,14 +83,22 @@ setup_all_variables() {
   ask_and_set_variable "CHUNK_COLLECTION_NAME" "historian" "$MSG"
   MSG="Which name to use for the solr report collection ?"
   ask_and_set_variable "REPORT_COLLECTION_NAME" "historian-report" "$MSG"
-  MSG="Do you want to add tags names for your time series (you can always add them after installation ?)"
+  MSG="Do you want to add tags names for your time series (you can always add them after installation )? [No]"
   ask_and_update_array "TAG_NAMES" "$MSG" "Tag name"
-  MSG="Do you want us to install an embedded grafana (version 7.0.3 required)? (otherwise you need to have one that can be used from this machine if you plan to use grafana)"
+  MSG="Do you confirm the creation of these tags? [Yes]"
+  confirmation_creation_array "RESET_TAG" "$MSG"
+  while [[ $RESET_TAG = false ]]; do
+    MSG="Do you want to add tags names for your time series (you can always add them after installation )? [No]"
+    ask_and_update_array "TAG_NAMES" "$MSG" "Tag name"
+    MSG="Do you confirm the creation of these tags? [Yes]"
+    confirmation_creation_array "RESET_TAG" "$MSG"
+  done
+  MSG="Do you want us to install an embedded grafana (version 7.0.3 required)? (otherwise you need to have one that can be used from this machine if you plan to use grafana) [Yes]"
   ask_and_set_boolean_variable "USING_EMBEDDED_GRAFANA" "$MSG"
   if [[ $USING_EMBEDDED_GRAFANA = true ]]; then
     export GRAFANA_HOME="$HDH_HOME/grafana-7.0.3"
   fi
-  MSG="Do you want us to install the historian datasource grafana plugin ? You need it to see data with grafana."
+  MSG="Do you want us to install the historian datasource grafana plugin ? You need it to see data with grafana. [Yes]"
   MSG="$MSG We can install it only if grafana is on this machin as single node otherwise you will have to install it manually."
   MSG="$MSG If you choose to install an embedded grafana you can install it as well."
   ask_and_set_boolean_variable "INSTALLING_DATASOURCE_PLUGIN" "$MSG"
@@ -79,7 +110,7 @@ setup_all_variables() {
       ask_and_set_variable "GRAFANA_PLUGIN_DIR" "path/to/grafana/data/plugins"
     fi
   fi
-  MSG="Do you want us to install an embedded spark (this is not required)?"
+  MSG="Do you want us to install an embedded spark (this is not required)? [Yes]"
   ask_and_set_boolean_variable "INSTALLING_SPARK" "$MSG"
   #setup variable from others
   export HISTORIAN_HOME="$HDH_HOME/$HISTORIAN_DIR_NAME"
@@ -90,7 +121,6 @@ print_conf() {
   echo "will start the install with those parameters :"
   echo "HDH_HOME : $HDH_HOME"
   echo "USING_EMBEDDED_SOLR : $USING_EMBEDDED_SOLR"
-  localhost:8983/solr
   echo "SOLR_HOST_PORT_SOLR : $SOLR_HOST_PORT_SOLR"
   echo "CHUNK_COLLECTION_NAME : $CHUNK_COLLECTION_NAME"
   echo "REPORT_COLLECTION_NAME : $REPORT_COLLECTION_NAME"
@@ -127,26 +157,43 @@ ask_and_update_array() {
   local -n _array="${variable_name_to_modify}"
   local MSG="$2"
   local MSG2="$3"
-
+  unset tag_name
   echo "$MSG"
-  select tags in Add_tags Skip; do
-    if [ "$tags" = "Add_tags" ]; then
-      echo -e "\n"
-      while [ -z "$tag_name" ] || ([ "$tag_name" != 'STOP' ] && [ "$tag_name" != 'stop' ]); do
+  optionsAudits=('Yes' 'No')
+  select_tag=$(selectWithDefault "${optionsAudits[@]}")
+  case $select_tag in
+    'Yes') while [ -z "$tag_name" ] || ([ "$tag_name" != 'STOP' ] && [ "$tag_name" != 'stop' ]);
+      do
         read -p "${MSG2} (STOP when you want stop): " tag_name
         if [ "$tag_name" != 'STOP' ] && [ "$tag_name" != '' ] && [ "$tag_name" != 'stop' ]; then
           echo "tapped tag $tag_name"
           _array+=("$tag_name")
         fi
       done
-      break
-    elif [ "$tags" = "Skip" ]; then
-      break
-    else
-      echo "Please choose 1 or 2"
-    fi
-  done
-  echo "array is ${_array[*]}"
+      echo Tags :[${_array[*]}]
+      ;;
+
+    ''|'No') ;;
+  esac
+}
+
+#ask user to confirm the creation of array of ask_and_update_array
+#if user just press enter the default value is used instead
+#param1 Variable name to set
+#param2 Msg description
+confirmation_creation_array() {
+local variable_name_to_modify="$1"
+local MSG="$2"
+echo "$MSG"
+  optionsAudits=('Yes' 'No')
+  select_reset_tag=$(selectWithDefault "${optionsAudits[@]}")
+    case $select_reset_tag in
+     ''|'Yes') export "${variable_name_to_modify}=true"
+               ;;
+     'No') unset _array[*]
+           export "${variable_name_to_modify}=false"
+           ;;
+    esac
 }
 
 #ask user to enter value for the variable, if user just press enter the default value is used instead
@@ -157,21 +204,17 @@ ask_and_set_boolean_variable() {
   local variable_name_to_modify="$1"
   local MSG="$2"
   echo "$MSG"
-  select solr_install in Yes No; do
-    case $solr_install in
-      Yes)
-        export "${variable_name_to_modify}=true"
-        break
-        ;;
-      No)
-        export "${variable_name_to_modify}=false"
-        break
-        ;;
-      *)
-        echo "Please choose 1 or 2"
-        ;;
-    esac
-  done
+  optionsAudits=('Yes' 'No')
+  select_solr=$(selectWithDefault "${optionsAudits[@]}")
+  case $select_solr in
+  ''|'Yes')
+         export "${variable_name_to_modify}=true"
+         ;;
+
+  'No')
+         export "${variable_name_to_modify}=false"
+         ;; # $opt is '' if the user just pressed ENTER
+  esac
 }
 
 add_tag_names_to_chunk_collection() {
@@ -181,8 +224,9 @@ add_tag_names_to_chunk_collection() {
   done
 }
 
-extract_historian_into_hdh_home() {
-  #HISTORIAN
+download_and_extract_historian_into_hdh_home() {
+  #Historian download & extract
+  wget https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-install.tgz
   mkdir -p "$HDH_HOME" && tar -xf historian-*-bin.tgz -C "$HDH_HOME"
   rm historian-*-bin.tgz
   echo "installed historian into $HDH_HOME"
@@ -333,7 +377,7 @@ main() {
       print_conf
       #    Start the installation
       mkdir -p "$HDH_HOME"
-      extract_historian_into_hdh_home
+      download_and_extract_historian_into_hdh_home
       cd "$HDH_HOME" || (echo "could not go to $HDH_HOME folder" && exit 1)
       install_embedded_solr_and_start_it_if_needed
       create_historian_collections
@@ -354,7 +398,7 @@ main() {
       print_conf
       #    Start the installation
       mkdir -p "$HDH_HOME"
-      extract_historian_into_hdh_home
+      download_and_extract_historian_into_hdh_home
       cd "$HDH_HOME" || (echo "could not go to $HDH_HOME folder" && exit 1)
       install_embedded_solr_and_start_it_if_needed
       create_historian_collections
