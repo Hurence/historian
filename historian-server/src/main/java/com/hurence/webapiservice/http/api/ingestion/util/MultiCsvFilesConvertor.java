@@ -20,12 +20,12 @@ public class MultiCsvFilesConvertor {
     public MultiCsvFilesConvertor(RoutingContext context) {
         this.uploads = context.fileUploads();
         this.allFilesReport = new AllFilesReport();
-        fillingCsvFileConverotrs(context.request().formAttributes());
+        fillingCsvFileConverotrs();
     }
 
-    private void fillingCsvFileConverotrs(MultiMap multiMap) {
+    private void fillingCsvFileConverotrs() {
         uploads.forEach(file -> {
-            CsvFileConvertor csvFileConvertor = new CsvFileConvertor(multiMap, file);
+            CsvFileConvertor csvFileConvertor = new CsvFileConvertor(file);
             csvFileConvertors.add(csvFileConvertor);
         });
     }

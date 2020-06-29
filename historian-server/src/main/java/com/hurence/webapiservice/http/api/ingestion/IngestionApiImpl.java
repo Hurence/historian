@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.webapiservice.http.api.ingestion.util.CsvFilesConvertorConf;
 import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -75,10 +76,11 @@ public class IngestionApiImpl implements IngestionApi {
     public void importCsv(RoutingContext context) {
         LOGGER.trace("received request at importCsv: {}", context.request());
 
+        CsvFilesConvertorConf csvFilesConvertorConf = new CsvFilesConvertorConf(context.request().formAttributes());
         MultiCsvFilesConvertor multiCsvFilesConvertor = new MultiCsvFilesConvertor(context);
 
         try {
-            parseFiles(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport);
+            parseFiles(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport, csvFilesConvertorConf);
             fillingAllFilesReport(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport);
         } catch (Exception ex) {
             JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
@@ -101,7 +103,7 @@ public class IngestionApiImpl implements IngestionApi {
                 .doOnSuccess(response -> {
                     context.response().setStatusCode(CREATED);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.allFilesReport, context.request().formAttributes()).encodePrettily());
+                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.allFilesReport, csvFilesConvertorConf).encodePrettily());
                 }).subscribe();
     }
 }
