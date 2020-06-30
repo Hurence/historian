@@ -1,19 +1,15 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
-import com.hurence.webapiservice.http.api.ingestion.util.CsvFileConvertor;
 import com.hurence.webapiservice.http.api.ingestion.util.CsvFilesConvertorConf;
 import com.hurence.webapiservice.http.api.ingestion.util.FileReport;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.MultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
@@ -134,7 +130,130 @@ public class ImportRequestParser {
      * @return void
      */
     public static FileReport parseCsvImportRequest(JsonArray fileInArray, CsvFilesConvertorConf csvFilesConvertorConf, FileReport fileReport) {
-        // TODO
+        if (null == fileInArray) {
+            throw new NullPointerException("Null request body");
+        }else if (fileInArray.isEmpty()) {
+            throw new IllegalArgumentException("Empty request body");
+        }
+        parseEachObjectInTheArray(fileInArray, fileReport, csvFilesConvertorConf);
+        if (fileReport.correctPoints.isEmpty())
+            throw new IllegalArgumentException("There is no valid points");
+        return fileReport;
+    }
+
+    /**
+     * @param fileInArray              JsonArray
+     * @param fileReport               FileReport
+     * @param csvFilesConvertorConf    CsvFilesConvertorConf
+     *
+     * parse every object in fileInArray
+     *
+     * @return void
+     */
+    private static void parseEachObjectInTheArray(JsonArray fileInArray, FileReport fileReport, CsvFilesConvertorConf csvFilesConvertorConf) {
+        for (Object timeserieObject : fileInArray) {
+            JsonObject timeserie = (JsonObject) timeserieObject;
+            int numberOfFailedPointsForThisName = 0;
+            if (!(timeserie.containsKey(NAME)))
+                throw new IllegalArgumentException("Missing a name for at least one metric");
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
+                numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints;
+                continue;
+            } else if (!(timeserie.getValue(NAME) instanceof String)) {
+                throw new IllegalArgumentException("A name is not a string for at least one metric");
+            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD))) {
+                throw new IllegalArgumentException("field 'points' is required");
+            } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
+                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
+            }
+            JsonObject newTimeserie = getTimeserieWithoutPoints(timeserie);
+            parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport, newTimeserie);
+            calculateNumberOfFailedPoints(fileReport, csvFilesConvertorConf, timeserie, numberOfFailedPointsForThisName);
+
+        }
+    }
+
+    /**
+     * @param fileReport                         FileReport
+     * @param csvFilesConvertorConf              CsvFilesConvertorConf
+     * @param timeserie                          JsonObject
+     * @param numberOfFailedPointsForThisName    int
+     *
+     * calculate the number of failed points per metric
+     *
+     * @return void
+     */
+    private static void calculateNumberOfFailedPoints(FileReport fileReport, CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie, int numberOfFailedPointsForThisName) {
+        int currentNumberOfFailedPoints;
+        LinkedHashMap groupByMap = getGroupedByFields(csvFilesConvertorConf, timeserie);
+        if (fileReport.numberOfFailedPointsPerMetric.containsKey(groupByMap)) {
+            currentNumberOfFailedPoints = (int) fileReport.numberOfFailedPointsPerMetric.get(groupByMap);
+            fileReport.numberOfFailedPointsPerMetric.put(groupByMap, currentNumberOfFailedPoints+numberOfFailedPointsForThisName);
+        }else {
+            fileReport.numberOfFailedPointsPerMetric.put(groupByMap, numberOfFailedPointsForThisName);
+        }
+    }
+
+    private static JsonObject getTimeserieWithoutPoints (JsonObject timeserie) {
+        //TODO
         return null;
+    }
+
+    private static LinkedHashMap getGroupedByFields (CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie) {
+        //TODO
+        return null;
+    }
+
+    /**
+     * @param timeserie                         JsonObject
+     * @param numberOfFailedPointsForThisName   int
+     * @param fileReport                        FileReport
+     * @param newTimeserie                      JsonObject
+     *
+     * parse every point in the object
+     *
+     * @return void
+     */
+    private static void parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport, JsonObject newTimeserie) {
+        JsonArray newPoints = new JsonArray();
+        for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
+            JsonArray pointArray;
+            try {
+                pointArray = (JsonArray) point;
+                pointArray.size();
+            } catch (Exception ex) {
+                numberOfFailedPointsForThisName++;
+                continue;
+            }
+            if (pointArray.size() == 0){
+                numberOfFailedPointsForThisName++;
+                continue;
+            } else if (pointArray.size() != 2)
+                throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
+            try {
+                if (pointArray.getLong(0) == null) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+            } catch (Exception e) {
+                numberOfFailedPointsForThisName++;
+                continue;
+            }
+            try {
+                if ((pointArray.getDouble(1) == null)) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+            } catch (Exception e) {
+                numberOfFailedPointsForThisName++;
+                continue;
+            }
+            newPoints.add(pointArray);
+        }
+        if(!newPoints.isEmpty()) {
+            newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
+            fileReport.correctPoints.add(newTimeserie);
+        }
     }
 }
