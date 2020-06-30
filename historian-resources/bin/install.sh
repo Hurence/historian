@@ -253,9 +253,9 @@ install_embedded_solr_and_start_it_if_needed() {
     rm solr-8.2.0.tgz
     # start a SolR cluster locally with an embedded zookeeper
     local -r SOLR_HOME="$HDH_HOME/solr-8.2.0"
-    # démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+    # démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
     "${SOLR_HOME}/bin/solr" start -cloud -s "$SOLR_NODE_1" -p 8983
-    # démarre un second core Solr localement qui va utiliser le serveur zookeeper précédament créer.
+    # démarre un second core Solr localement qui va utiliser le serveur zookeeper précédament créer.
     "${SOLR_HOME}/bin/solr" start -cloud -s "$SOLR_NODE_2" -p 7574 -z localhost:9983
     echo "solr is now running at ${SOLR_HOST_PORT_SOLR}"
     echo -e "\n"
@@ -313,7 +313,7 @@ intall_spark_if_asked() {
 }
 
 generate_historian_server_conf() {
-  #Generation du fichier de configuration selon les informations renseignées ( stream_url & chunk_collection )
+  #Generation du fichier de configuration selon les informations renseignées ( stream_url & chunk_collection )
   echo '{
     "web.verticles.instance.number": 1,
     "historian.verticles.instance.number": 2,
