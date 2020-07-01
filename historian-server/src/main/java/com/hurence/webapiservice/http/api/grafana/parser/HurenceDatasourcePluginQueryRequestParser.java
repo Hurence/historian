@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.DoubleStream;
 
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
 import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
@@ -31,6 +32,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
     private final String bucketSizeJsonPath;
     private final String requestIdJsonPath;
     private final String aggregationPath;
+    private final String qualityPath;
 
     public HurenceDatasourcePluginQueryRequestParser(String fromJsonPath,
                                                      String toJsonPath,
@@ -41,7 +43,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                                      String samplingAlgoJsonPath,
                                                      String bucketSizeJsonPath,
                                                      String requestIdJsonPath,
-                                                     String aggregationPath) {
+                                                     String aggregationPath,
+                                                     String qualityPath) {
         this.fromJsonPath = fromJsonPath;
         this.toJsonPath = toJsonPath;
         this.namesJsonPath = namesJsonPath;
@@ -52,6 +55,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.bucketSizeJsonPath = bucketSizeJsonPath;
         this.requestIdJsonPath = requestIdJsonPath;
         this.aggregationPath= aggregationPath;
+        this.qualityPath = qualityPath;
     }
 
     public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
@@ -106,7 +110,15 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (agreg != null) {
             builder.withAggreg(agreg);
         }
+        Double quality = parseQuality(requestBody);
+        if (quality != null) {
+            builder.withQuality(quality);
+        }
         return builder.build();
+    }
+
+    private Double parseQuality(JsonObject requestBody) {
+        return parse(requestBody, qualityPath, Double.class);
     }
 
     private List<AGG> parseAggreg(JsonObject requestBody) {

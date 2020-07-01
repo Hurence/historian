@@ -203,6 +203,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
     public final static String AGGREGATION_JSON_PATH = "/aggregations";
+    public final static String QUALITY_JSON_PATH = "/quality";
 
     /**
      *  used to query metrics datapoints in grafana panels.
@@ -270,7 +271,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH)
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH)
                     .parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
@@ -363,11 +364,12 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 .put(TO, request.getTo())
                 .put(FIELDS, fieldsToFetch)
                 .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTags())
+                .put(TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
-                .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()));
+                .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()))
+                .put(QUALITY, request.getQuality());
     }
 
     public final static String LIMIT_JSON_PATH = "/limit";
