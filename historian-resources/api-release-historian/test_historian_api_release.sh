@@ -3,23 +3,16 @@
 
 print_usage(){
     cat << EOF
-    create-historian-collection.sh [options]
 
     by Hurence, 09/01/2019
-
-    The script creates a collection for historian solr
-
 EOF
 }
 
-parse_args() {
+curl_request() {
 
-bash install.sh
-
-   curl -X POST \
-  http://localhost:8080/historian-server/ingestion/csv \
-  -F 'my_csv_file=@/Users/wichroff/hdh_workspace/historian-1.3.4-SNAPSHOT/TEST.csv' \
-  -F 'my_csv_file2=@/Users/wichroff/hdh_workspace/historian-1.3.4-SNAPSHOT/TEST.csv' \
+   curl \-X POST \http://localhost:8080/historian-server/ingestion/csv \
+  -F 'my_csv_file=@/Users/wichroff/Documents/Git/Hurence/historian/historian-resources/api-release-historian/metrics_test.csv' \
+  -F 'my_csv_file2=@/Users/wichroff/Documents/Git/Hurence/historian/historian-resources/api-release-historian/metrics_test.csv' \
   -F mapping.name=metric_name_2 \
   -F mapping.value=value_2 \
   -F mapping.timestamp=timestamp \
@@ -31,7 +24,7 @@ bash install.sh
   -F group_by=tags.sensor \
   -F format_date=yyyy-D-m HH:mm:ss.SSS \
   -F timezone_date=UTC \
->result_command_line.txt
+>result_command_line_server.txt
 
 echo '{
   "tags" : [ "sensor", "code_install" ],
@@ -55,16 +48,20 @@ echo '{
     "number_of_point_failed" : 0,
     "number_of_chunk_created" : 2
   } ]
-}'> result_command_line1.txt
+}'> result_command_line_default.txt
 
-diff -s -b result_command_line.txt result_command_line1.txt
-rm result_command_line.txt
-rm result_command_line1.txt
+
 }
 
+diff_between_files() {
+diff -s -b result_command_line_server.txt result_command_line_default.txt
+rm result_command_line_server.txt
+rm result_command_line_default.txt
+}
 
 main() {
-    parse_args "$@"
+    curl_request
+    diff_between_files
 }
 
 main "$@"
