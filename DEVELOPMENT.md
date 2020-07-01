@@ -28,7 +28,7 @@ grafana.ini file, by default the path is ./data/plugins/
 SO you could do something like
  
  ``` shell script
-cp -r ./grafana-historian-dataosurce ${GRAFANA_HOME}/data/plugins/
+cp -r ./grafana-historian-datasource ${GRAFANA_HOME}/data/plugins/
 ```
 
 ## How to test the grafana plugin ?
@@ -40,6 +40,10 @@ The sub project is localized at ./data/plugins/grafana-historian-datasource of t
 We recommend using visual studio code for developping grafana plugins. You can check grafana development documentation too.
 In particular to build and run grafana in you development environment you can follow this [guide](https://github.com/grafana/grafana/blob/master/contribute/developer-guide.md) or this [one](https://medium.com/@ivanahuckova/how-to-contribute-to-grafana-as-junior-dev-c01fe3064502).
 
+# Modify documentation
+
+Go to ./docs folder and modify .ad files. Then run mvn clean install in ./docs folder then commit newly generated pdf.
+If it is a new file you may add it in README.MD. You should modify documentation on the corresponding branch release. 
 
 # Build project
 This section is mainly for developers as it will guive some insight about compiling testing the framework.
