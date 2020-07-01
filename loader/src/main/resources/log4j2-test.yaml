@@ -1,0 +1,42 @@
+Configuration:
+ status: info
+ name: YAMLConfigTest
+ properties:
+  property:
+   name: filename
+   value: target/test-yaml.log
+ thresholdFilter:
+  level: debug
+ appenders:
+  Console:
+   name: STDOUT
+   target: SYSTEM_OUT
+   PatternLayout:
+    Pattern: "%m%n"
+  File:
+   name: File
+   fileName: ${filename}
+   PatternLayout:
+    Pattern: "%d %p %C{1.} [%t] %m%n"
+   Filters:
+    ThresholdFilter:
+     level: debug
+
+ Loggers:
+  logger:
+    -
+     name: com.hurence
+     level: debug
+     additivity: false
+     AppenderRef:
+       ref: STDOUT
+    -
+     name: com.hurence
+     level: debug
+     additivity: false
+     AppenderRef:
+       ref: File
+  Root:
+    level: info
+    AppenderRef:
+      ref: STDOUT
