@@ -57,6 +57,8 @@ Installez Grafana pour votre plateforme comme décrit ici : `https://grafana.com
 Une fois l'installation de votre cluster grafana effectué nous allons passer à l'installation de notre plugin grafana datasource
 nécessaire pour consulter des dashboard basé sur notre historian.
 
+Il est nécessaire d'avoir la version 7.0.3 au minimum.
+
 [[install-production-hurence-datasource-grafana-plugin]]
 ===== Installation Plugin Grafana pour utiliser le data historian Hurence
 
@@ -65,19 +67,18 @@ nos propres plugins grafana que nous ferons évoluer avec l'historian.
 
 Pour installer le plugin datasource suivez les https://github.com/Hurence/grafana-historian-datasource#installation[instruction sur le projet correspondant]
 
-TODO pointer sur une release !
 
 
 ==== Installation de l'historian
 
-Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les timeseries
-et les chunks. Téléchargez la dernière version de l'historian à l'adresse suivante
-https://github.com/Hurence/historian/releases/download/v1.3.4/historian-1.3.4-SNAPSHOT.tgz[historian-1.3.4-SNAPSHOT.tgz]
-Décompressez l'archive et entrez dedans, ensuite commencez l'installation en tapant la commande suivante :
+Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
+et les chunks. Téléchargez le script dinstallation de l'historian pour votre version
+https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
+Lancez l'installation en lançant ce script :
 
 [source,bash]
 ----
-sudo ./bin/install.sh
+bash ./install.sh
 ----
 
 Il sera alors demander à l'utilisateur plusieurs informations.

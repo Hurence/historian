@@ -13,13 +13,13 @@ La configuration minimale du serveur pour une installation de test du data histo
 ==== Installation de l'historian
 
 Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
-et les chunks. Téléchargez la dernière version de l'historian à l'adresse suivante
-https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-install.tgz[historian-1.3.5.tgz].
-Décompressez l'archive et entrez dedans, ensuite commencez l'installation en tapant la commande suivante :
+et les chunks. Téléchargez le script dinstallation de l'historian pour votre version
+https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
+Lancez l'installation en lançant ce script :
 
 [source,bash]
 ----
-sudo ./bin/install.sh
+bash ./install.sh
 ----
 
 Il sera alors demander à l'utilisateur plusieurs informations, comme nous allons procéder à une installation de test
