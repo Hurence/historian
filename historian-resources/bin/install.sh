@@ -85,8 +85,10 @@ setup_all_variables() {
   ask_and_set_variable "REPORT_COLLECTION_NAME" "historian-report" "$MSG"
   MSG="Do you want to add tags names for your time series (you can always add them after installation )? [No]"
   ask_and_update_array "TAG_NAMES" "$MSG" "Tag name"
+  if [ $CREATE = true ]; then
   MSG="Do you confirm the creation of these tags? [Yes]"
   confirmation_creation_array "RESET_TAG" "$MSG"
+  fi
   while [[ $RESET_TAG = false ]]; do
     MSG="Do you want to add tags names for your time series (you can always add them after installation )? [No]"
     ask_and_update_array "TAG_NAMES" "$MSG" "Tag name"
@@ -171,9 +173,10 @@ ask_and_update_array() {
         fi
       done
       echo Tags :[${_array[*]}]
+      CREATE=true
       ;;
 
-    ''|'No') ;;
+    ''|'No') CREATE=false;;
   esac
 }
 
@@ -190,7 +193,7 @@ echo "$MSG"
     case $select_reset_tag in
      ''|'Yes') export "${variable_name_to_modify}=true"
                ;;
-     'No') unset _array[*]
+     'No') unset TAG_NAMES[@]
            export "${variable_name_to_modify}=false"
            ;;
     esac
@@ -250,9 +253,9 @@ install_embedded_solr_and_start_it_if_needed() {
     rm solr-8.2.0.tgz
     # start a SolR cluster locally with an embedded zookeeper
     local -r SOLR_HOME="$HDH_HOME/solr-8.2.0"
-    # démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+    # démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
     "${SOLR_HOME}/bin/solr" start -cloud -s "$SOLR_NODE_1" -p 8983
-    # démarre un second core Solr localement qui va utiliser le serveur zookeeper précédament créer.
+    # démarre un second core Solr localement qui va utiliser le serveur zookeeper précédament créer.
     "${SOLR_HOME}/bin/solr" start -cloud -s "$SOLR_NODE_2" -p 7574 -z localhost:9983
     echo "solr is now running at ${SOLR_HOST_PORT_SOLR}"
     echo -e "\n"
@@ -310,7 +313,7 @@ intall_spark_if_asked() {
 }
 
 generate_historian_server_conf() {
-  #Generation du fichier de configuration selon les informations renseignées ( stream_url & chunk_collection )
+  #Generation du fichier de configuration selon les informations renseignées ( stream_url & chunk_collection )
   echo '{
     "web.verticles.instance.number": 1,
     "historian.verticles.instance.number": 2,
