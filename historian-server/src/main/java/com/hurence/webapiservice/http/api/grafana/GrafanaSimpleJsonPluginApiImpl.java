@@ -249,8 +249,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                 .put(HistorianFields.TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
-                .put(QUALITY, request.getQuality());
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
 

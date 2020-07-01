@@ -29,7 +29,6 @@ public class QueryRequestParam {
     private int maxDataPoints;
     private List<AdHocFilter> adHocFilters;
     private String requestId;
-    private Double quality;
 
     private QueryRequestParam() { }
 
@@ -90,14 +89,6 @@ public class QueryRequestParam {
         this.requestId = requestId;
     }
 
-    private void setQuality(Double quality) {
-        this.quality = quality;
-    }
-
-    public Double getQuality() {
-        return quality;
-    }
-
     public List<AGG> getAggs() {
         return Collections.emptyList();
     }
@@ -156,7 +147,6 @@ public class QueryRequestParam {
         private int maxDataPoints;
         private List<AdHocFilter> adHocFilters;
         private String requestId;
-        private Double quality;
 
         public Builder() { }
 
@@ -195,10 +185,6 @@ public class QueryRequestParam {
             return this;
         }
 
-        public Builder withQuality(Double quality) {
-            this.quality = quality;
-            return this;
-        }
 
         public QueryRequestParam build() {
             QueryRequestParam getTimeSerieRequestParam = new QueryRequestParam();
@@ -209,10 +195,7 @@ public class QueryRequestParam {
             getTimeSerieRequestParam.setMaxDataPoints(maxDataPoints);
             getTimeSerieRequestParam.setAdHocFilters(adHocFilters);
             getTimeSerieRequestParam.setRequestId(requestId);
-            getTimeSerieRequestParam.setQuality(quality);
             return getTimeSerieRequestParam;
         }
-
     }
-
 }

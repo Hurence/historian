@@ -35,14 +35,9 @@ public class QueryRequestParser {
         builder.withAdHocFilters(adHocFilters == null ? QueryRequestParam.DEFAULT_FILTERS : adHocFilters);
         String requestId = parseRequestId(requestBody);
         builder.withId(requestId);
-        Double quality = parseQuality(requestBody);
-        builder.withQuality(quality);
         return builder.build();
     }
 
-    private Double parseQuality(JsonObject requestBody) {
-        return requestBody.getDouble("quality");
-    }
 
     private List<Target> parseTargets(JsonObject requestBody) {
         return requestBody.getJsonArray("targets").stream()
