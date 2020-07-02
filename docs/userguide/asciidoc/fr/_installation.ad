@@ -8,58 +8,14 @@ décrite ici par simplification car elle concerne des experts en urbanisation d'
 [NOTE]
 Hurence propose de l'accompagnement pour installer le data historian pour des volumétries importantes.
 
-* <<install-standalone,Installation standalone>>(à utiliser seulement pour tester)
+Dans ce guide nous proposing une installation simple et rapide qui est idéale pour tester, développer et stocker de petits volumes de données peu sensibles. Nous ne recommendons pas cette installation en production car pour la production il faut se préparer pour une infrastructure qui deviendra à terme multi noeuds, et aura la nécessaire redondance des données et des mécanismes de fail over. La seconde installation est plus souhaitable si vous planifiez de faire passer à l'échelle ce que vous voulez installer.
+
+* <<install-standalone,Installation standalone>>
 * <<install-production-mono-noeud,Installation de production mono noeud>>.
-Cette installation se base sur des serveurs solr, grafana et spark (spark et grafana étant optionnels) installés de manières indépendantes.
-Ce guide contient des sections pour installer ces outils.
+
 
 [[install-standalone]]
 include::./_installation_standalone.ad[]
 
 [[install-production-mono-noeud]]
 include::./_installation_production.ad[]
-
-
-== Configure grafana and your dashboard
-
-aller sur l'interface graphique de grafana (http://localhost:3000/[http://localhost:3000/] pour une isntallation standalone).
-
-Ensuite allez dans le menu des datasources :
-
-image::grafana_ui_datasource.png[go to datasource page]
-
-Cherchez la datasource "Hurence-Historian" et sélectionnez la.
-Il y a juste a renseigné l'URL http://localhost:8080/api/grafana/v0 dans le cas de l'installation standalone.
-
-image::datasource_historian_setup.png[datasource setup]
-
-Testez la connectivité en cliquant sur "Save & Test" button at the bottom of the page.
-Ensuite créez un nouveau dashboard.
-
-image::grafana_ui_create_dashboard.png[go to new dashboard page]
-
-Ajoutez les graphes que vous voulez, un petit exemple ci-dessous :
-
-image::grafana_graph_config_exemple.png[exemple of query config]
-
-Une "query" consiste d'un nom de métrique, et de pairs de tag name/tag value ainsi que des options pour
-l'algorithme de sampling.
-
-note:: Pour le moment les options de sampling de la première query fait fois pour toutes les autres.
-
-note:: Pour l'instant vous n'avez pas de données d'injecté. Suivez le tutorial pour injecter des données.
-Aussi si vous n'avez pas ajouter de tag name a l'installation vous ne pourrez pas utiliser de tags. Il est toujours
-possible de rajouter des tag manuellement après installation en rajoutant un champ dans le schéma.
-
-== Tear down and cleanup
-This section shows how to stop the services and cleanup data if needed.
-
-=== Stop your SolR instances
-
-when you're done you can stop your SolR cores. Attention cette commande va éteindre Solr (cela pourrait impacter d'autres
-service utilisant solr).
-
-    cd $SOLR_HOME
-    bin/solr stop -all
-
-

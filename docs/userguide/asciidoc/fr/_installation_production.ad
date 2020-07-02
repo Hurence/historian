@@ -14,16 +14,16 @@ La configuration minimale du serveur pour une installation mono serveur (en prod
 - Grafana 7.0.3
 
 Dans cette section nous avons prévu des petits guides pour vous aider a installer solr 8.2.0, spark 2.3.4 et grafana 7.0.3.
-Mais nous recommandons de vous référer à la documentation officiel pour des installations de production.
+Mais nous recommandons de vous référer à la documentation officielle de ces outils pour des installations de production.
 Si vous avez déjà des serveurs existants vous pouvez directement passer à cette <<install-production-hurence-datasource-grafana-plugin,section>>
 
 
 ==== Installation de Apache SolR
 
-Apache SolR est la base de donnée utilisé par l'historian, elle peut être remplacée par un autre moteur de recherche.
+Apache SolR est la base de donnée utilisée par l'historian, elle peut être remplacée par un autre moteur de recherche.
 
 Vous pouvez télécharger la version 8.2.0 de solr sur le lien suivant : https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz[solr-8.2.0.tgz]
-ou via le https://lucene.apache.org/solr[site officiel]. Nous vous invitons également a suivre la documentation officiel
+ou via le https://lucene.apache.org/solr[site officiel]. Nous vous invitons également à suivre la documentation officielle
 pour installer un cluster solr de production.
 
 Vérifiez que votre instance solr fonctionne correctement en allant sur l'interface graphique à l'adresse suivante :
@@ -54,16 +54,16 @@ cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/sp
 ==== Installation de Grafana
 
 Installez Grafana pour votre plateforme comme décrit ici : `https://grafana.com/docs/grafana/latest/installation/requirements/`.
-Une fois l'installation de votre cluster grafana effectué nous allons passer à l'installation de notre plugin grafana datasource
-nécessaire pour consulter des dashboard basé sur notre historian.
+Une fois l'installation de votre cluster grafana effectuée nous allons passer à l'installation de notre plugin grafana datasource
+nécessaire pour consulter des dashboard basés sur notre historian.
 
-Il est nécessaire d'avoir la version 7.0.3 au minimum.
+Il est nécessaire d'avoir au minimum la version 7.0.3 de Grafana.
 
 [[install-production-hurence-datasource-grafana-plugin]]
 ===== Installation Plugin Grafana pour utiliser le data historian Hurence
 
-Pour consulter les données de l'historian via des dashboard nous utilisons grafana. Dans ce but nous avons développer
-nos propres plugins grafana que nous ferons évoluer avec l'historian.
+Pour consulter les données de l'historian via des dashboard nous utilisons Grafana. Dans ce but nous avons développé
+nos propres plugins Grafana que nous ferons évoluer avec l'historian.
 
 Pour installer le plugin datasource suivez les https://github.com/Hurence/grafana-historian-datasource#installation[instruction sur le projet correspondant]
 
@@ -91,12 +91,12 @@ Dans la suite, on appellera le chemin indiqué pour l'installation de l'historia
 
 A l'issue de ce script, vous aurez :
 
-* l'historian installer au chemin indiqué $HDH_HOME.
+* l'historian installé au chemin indiqué $HDH_HOME.
 * Le plugin https://github.com/Hurence/grafana-historian-datasource[datasource grafana de l'historian]
-installé sur le serveur grafana indiqué lors de l'installation
+installé sur le serveur Grafana indiqué lors de l'installation
 
 
-Voici la structure de $HDH_HOME a l'issue de l'installation par défaut :
+Voici la structure de $HDH_HOME à l'issue de l'installation par défaut :
 * $HDH_HOME/bin/historian-server.sh : Permet de lancer et arrêter l'api REST de l'historian.
 * $HDH_HOME/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
 * $HDH_HOME/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
@@ -118,7 +118,7 @@ Pour arrêter l'historian taper la commande suivante :
 ./bin/historian-server.sh stop
 ----
 
-Attention ces commandes n'affectent ni grafana ni solr qui sont des services indépendants.
+Attention ces commandes n'affectent ni Grafana ni Solr qui sont des services indépendants.
 
 ===== Description du fichier de configuration de l'historian
 
