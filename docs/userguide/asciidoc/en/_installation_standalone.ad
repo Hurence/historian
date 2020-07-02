@@ -1,0 +1,127 @@
+=== Standalone installation
+
+This installation is the one you should use if you are new to the data historian and want to test it. It is not meant for production and large volumes (only a single node) but can evolve if needed towards a true production installation.
+
+Note:: Hurence provides assistance to evolve your single node installation towards a proper clusterized production infrastructure.
+
+==== Pre-requisites for a standalone single node installation 
+
+As said earlier this install représents the quickest and easiest way for installing HDH. It is ideal for testing or if you do not have large volumes of data.
+
+The minimal configuration for the server, for this installation is the following:
+
+- OS CentOS or Redhat 7.x
+- 16 Gigabits of RAM
+- 8 vcores of CPU
+- 250 Gigabytes of disk
+- Java 8
+
+
+==== Installing the Data Historian
+
+Hurence Data Historian is a set of scripts and binary files that let you manupulate time series and chunks of time series. 
+
+Download the installation script for your version of data historian at :
+https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
+
+Run the installation by running this script :
+
+[source,bash]
+----
+bash ./install.sh
+----
+
+Some information will be needed. Since we are going to install a single node data historian, you can use the defaults values and just press ENTER for each question. 
+
+To access the standalone installation you must type "1". You can skip the Spark installation that is not mandatory. It is useful for more advanced users.
+
+The script is going to download and install packaged and embeded versions of Solr and Grafana.
+
+Make sure you have enough space in the directory where the historian is installed (défault is /opt/hdh) to store the scripts, binaries and the time series data (these data are stored in the same directory by default).
+
+
+Here is an overview of the installation :
+
+image::Screenshot_install_standalone.png[]
+
+In the following, the variable '$HDH_HOME' will be used to refer to the installation path of the data historian.
+
+After running the script and if you followed the example, you'll get :
+
+* A Solr 8.2 server installed in $HDH_HOME/solr-8.2.0
+* The script to start the Solr server. The script has started Solr and you can check that this server is running at :
+http://localhost:8983/solr/#/~cloud[solr UI]. You can check the Solr documentation for managing Solr (starting, stopping the Solr server).
+* A Grafana server 7.0.3 installed in $HDH_HOME/grafana
+* The data source plugin for Grafana https://github.com/Hurence/grafana-historian-datasource[datasource Grafana de l'historian]
+is installed to on this server. This plugin is the necessary tooling for visualizing the historian time series in Grafana.
+* The Grafana server was started by the script. You can check it is up and running at this address:
+http://localhost:3000/[http://localhost:3000/]. 
+You can check the Grafana documentation to interact with Grafana (starting and stopping the server for example).
+* The historian server is installed in $HDH_HOME/historian-1.3.5
+* A folder "$HDH_HOME/data" has been created to receive the time series data for the historian.
+
+Here is the default structure for $HDH_HOME after the default installation :
+
+* $HDH_HOME/data :folder contening the Solr data (timeseries)
+* $HDH_HOME/solr-8.2.0 : folder containing the scripts and binaries for Solr 8.2.0
+* $HDH_HOME/solr-8.2.0/bin/solr : script to start and stop Solr
+* $HDH_HOME/historian-1.3.5/bin/historian-server.sh : script to start and stop the REST API for the data historian.
+* $HDH_HOME/historian-1.3.5/conf/log4j.properties : file to control the level of logs in production mode. (default).
+* $HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : file to control the level of logs in debug mode.
+* $HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : file that stores the configuration for the API REST server of the data historian.
+* $HDH_HOME/application.log : the log file for the data historian.
+* $HDH_HOME/grafana-7.0.3 : folder containing the scripts and binaries for Grafana 7.0.3.
+* $HDH_HOME/grafana-7.0.3/bin/grafana-server : script for staring and stopping the Grafana server.
+
+When the installation runs successfully, all services are started and the data historian is ready to use.
+
+The following commandes are provided for the case you would need to stop and restart the data historian server. 
+
+To start the Hurence Data Historian :
+
+[source,bash]
+----
+$HDH_HOME/historian-1.3.5/bin/historian-server.sh start
+----
+
+To stop the Hurence Data Historian :
+
+[source,bash]
+----
+$HDH_HOME/historian-1.3.5/bin/historian-server.sh stop
+----
+
+Note:: these commands affect neither Grafana nor Solr which are independant services (and need to be started / Stopped separately).
+
+===== Configuration file for the data historian
+
+include::./_description_conf_file.ad[]
+
+Generation of a configuration file, according to entered information, at installation.
+
+
+===== Description of the installed historian components 
+
+====== Apache SolR
+
+Apache SolR is the database / search engine used by the historian for storing and indexing time series. It can be replaced by another search engine. 
+
+The installation script has installed Solr in the '$HDH_HOME/solr-8.2.0' folder that we will name '$SOLR_HOME' in the following. 
+
+It also started to Solr cores locally in the folder `$SOLR_HOME/data`.
+
+====== To start solr
+
+If you stopped Solr or if after restarting your computer, Solr is not running, you can restart Solr with the following commands : 
+
+[source,bash]
+----
+cd $SOLR_HOME
+# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node1 -p 8983
+# démarre un second core Solr localement qui va utiliser le serveur zookeeper précédamment créer.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983
+----
+
+You can check that your Solr instance is up and running by checking on its web UI at this address:
+(http://localhost:8983/solr/#/~cloud)[local solr UI]

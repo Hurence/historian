@@ -1,0 +1,74 @@
+The following file is the default configuration. It contains all possible information, some of them are not mandatory :
+
+[source,json]
+----
+{
+  "web.verticles.instance.number": 1,
+  "historian.verticles.instance.number": 2,
+  "http_server" : {
+    "host": "localhost",
+    "port" : 8080,
+    "historian.address": "historian",
+    "debug": false,
+    "max_data_points_allowed_for_ExportCsv" : 10000,
+  },
+  "historian": {
+    "schema_version": "VERSION_0",
+    "address" : "historian",
+    "limit_number_of_point_before_using_pre_agg" : 50000,
+    "limit_number_of_chunks_before_using_solr_partition" : 50000,
+    "api": {
+      "grafana": {
+        "search" : {
+          "default_size": 100
+        }
+      }
+    },
+    "solr" : {
+      "use_zookeeper": true,
+      "zookeeper_urls": ["localhost:9983"],
+      "zookeeper_chroot" : null,
+      "stream_url" : "http://localhost:8983/solr/historian",
+      "chunk_collection": "historian",
+      "annotation_collection": "annotation",
+      "sleep_milli_between_connection_attempt" : 10000,
+      "number_of_connection_attempt" : 3,
+      "urls" : null,
+      "connection_timeout" : 10000,
+      "socket_timeout": 60000
+    }
+  }
+}
+----
+
+* General conf :
+
+** web.verticles.instance.number : The number of instances of verticles to be deployed to respond to all http requests from clients. A verticle can handle a large number of requests (at least 1000, check the vertx docummentation for more information).
+** historian.verticles.instance.number : The number of instances of verticles to deploy for the historian service that manages the sampling and the interactions with the backend. This parameter is KEY. In case of performances problem it is likely that augmenting this parameter may help fix the problem.
+* Http server conf :
+
+** http_server/host : the name of the http server to  be deployed.
+** http_server/port : the port on which the REST API is to be bound.
+** http_server/historian.address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. It is important to master vertx when changing this parameter.
+** http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum points the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.
+* Historian service conf :
+** general conf
+*** historian/address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. This value must be the same as the 'http_server/historian.address'.
+*** historian/limit_number_of_point_before_using_pre_agg : this option provides some performance tuning. Take care to not set a too large number. 
+*** historian/limit_number_of_chunks_before_using_solr_partition : this option provides some performance tuning. Take care to not set a too large number. 
+*** historian/api/grafana/search/default_size : this option sets the maximum number of metrics to be returned, by default, for the endpoint Search.
+*** historian/schema_version : The schema version to use. You should avoid changing this value by hand. It will changed by the system during a rolling update typically.
+** solr conf
+*** historian/solr/connection_timeout : the connection timeout in milliseconds to the Solr server.
+*** historian/solr/socket_timeout : the connection timeout in milliseconds for all reading sockets on Solr. 
+*** historian/solr/stream_url : the URL of the Solr collection to use for the stream API of Solr. We recommend to create a dedicated collection (with sufficient resources);
+*** historian/solr/chunk_collection : the name of the collection where time series are to be stored.
+*** historian/solr/annotation_collection : the name of the collection where annotations are to be stored.
+*** historian/solr/sleep_milli_between_connection_attempt : the number of milliseconds to wait between two ping attempts to the Solr server when starting the historian.
+*** historian/solr/number_of_connection_attempt : the number of attempts in testing connectivity to the Solr server when starting the historian.
+*** historian/solr/use_zookeeper : in case you are using Solr cloud (with or without a zookeeper server or cluster)
+**** option if using zookeeper
+***** historian/solr/zookeeper_urls : a list of at list one zookeeper server (ex: ["zookeeper1:2181"]).
+***** historian/solr/zookeeper_chroot : the path to the root zookeeper that contains the Solr data. Do not enter or use null if there is no chroot (see the zookeeper documentation).
+**** option if zookeeper is not used
+***** historian/solr/urls : the http URLs to query Solr. For example ["http://server1:8983/solr", "http://server2:8983/solr"].

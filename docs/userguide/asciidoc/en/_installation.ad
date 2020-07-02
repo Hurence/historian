@@ -1,0 +1,19 @@
+== Installation
+
+This section describes a simple single node installation of the Hurence Data Historian. The historian is designed for Big Data and therefore it is possible to deploy it on small to very large multi node infrastructures (on multiple racks) with potentially huge storage capacities and in any cases outstanding computing performances.
+
+This type of installation is not described here ; this is the specific domain of experts in designing Big Data infrastructures. 
+
+[NOTE]
+Hurence proposes services to install the data historian on Big Data infrastructures for large volumes of data.
+
+In this guide we propose a simple and quick installation on a single node which is ideal for starting. It can be used for testing, developing and storing small volumes data. We would not recommend it for production since in production we will need to prepare the infrastructure to scale and become multi-nodes and have the necessary data redundancy and fail over mechanisms. The second installation is more suitable if you plan to go this route.
+
+* <<install-standalone,Installation standalone>>
+* <<install-production-mono-noeud,Installation de production mono noeud>>.
+
+[[install-standalone]]
+include::./_installation_standalone.ad[]
+
+[[install-production-mono-noeud]]
+include::./_installation_production.ad[]
