@@ -21,6 +21,7 @@ public class QueryRequestParam {
     public static final long DEFAULT_TO = Long.MAX_VALUE;
     public static final int DEFAULT_MAX_DATAPOINTS = 1000;
     public static final  List<AdHocFilter> DEFAULT_FILTERS = Collections.emptyList();
+    public static final Double DEFAULT_QUALITY = 0.0;
 
     private List<Target> targets;
     private long from;
@@ -29,6 +30,7 @@ public class QueryRequestParam {
     private int maxDataPoints;
     private List<AdHocFilter> adHocFilters;
     private String requestId;
+    private Double quality;
 
     private QueryRequestParam() { }
 
@@ -93,6 +95,14 @@ public class QueryRequestParam {
         return Collections.emptyList();
     }
 
+    public Double getQuality() {
+        return quality;
+    }
+
+    public void setQuality(Double quality) {
+        this.quality = quality;
+    }
+
     public SamplingConf getSamplingConf() {
         if (containFilter(GrafanaSimpleJsonPluginApiImpl.ALGO_TAG_KEY) || containFilter(GrafanaSimpleJsonPluginApiImpl.BUCKET_SIZE_TAG_KEY)) {
             Optional<SamplingAlgorithm> algo = getAlgoFromFilter();
@@ -147,6 +157,7 @@ public class QueryRequestParam {
         private int maxDataPoints;
         private List<AdHocFilter> adHocFilters;
         private String requestId;
+        private Double quality;
 
         public Builder() { }
 
@@ -185,6 +196,9 @@ public class QueryRequestParam {
             return this;
         }
 
+        public void withQuality(Double quality) {
+            this.quality = quality;
+        }
 
         public QueryRequestParam build() {
             QueryRequestParam getTimeSerieRequestParam = new QueryRequestParam();
@@ -195,6 +209,7 @@ public class QueryRequestParam {
             getTimeSerieRequestParam.setMaxDataPoints(maxDataPoints);
             getTimeSerieRequestParam.setAdHocFilters(adHocFilters);
             getTimeSerieRequestParam.setRequestId(requestId);
+            getTimeSerieRequestParam.setQuality(quality);
             return getTimeSerieRequestParam;
         }
     }
