@@ -100,11 +100,8 @@ public class ImportRequestParser {
                     continue;
                 }
                 try {
-                    if (pointArray.getDouble(2) == null) {
+                    if (pointArray.getDouble(2) == null  || (pointArray.getDouble(2) > 1.0) || (pointArray.getDouble(2) < 0.0)) {
                         correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its quality is null");
-                        continue;
-                    } else if (pointArray.getDouble(2) > 1.0 && pointArray.getDouble(2) < 0.0){
-                        correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its quality is not between 0.0 and 1.0");
                         continue;
                     }
                 } catch (Exception e) {
@@ -174,8 +171,8 @@ public class ImportRequestParser {
                 if (pointArray.size() == 0){
                     numberOfFailedPointsForThisName++;
                     continue;
-                } else if (pointArray.size() != 2)
-                    throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
+                } else if (pointArray.size() != 3)
+                    throw new IllegalArgumentException("Points should be of the form [timestamp, value, quality]");
                 try {
                     if (pointArray.getLong(0) == null) {
                         numberOfFailedPointsForThisName++;
@@ -187,6 +184,15 @@ public class ImportRequestParser {
                 }
                 try {
                     if ((pointArray.getDouble(1) == null)) {
+                        numberOfFailedPointsForThisName++;
+                        continue;
+                    }
+                } catch (Exception e) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+                try {
+                    if ((pointArray.getDouble(2) == null) || (pointArray.getDouble(2) > 1.0) || (pointArray.getDouble(2) < 0.0)) {
                         numberOfFailedPointsForThisName++;
                         continue;
                     }
