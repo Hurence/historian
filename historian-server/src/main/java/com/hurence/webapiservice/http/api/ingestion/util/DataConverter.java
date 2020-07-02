@@ -42,7 +42,7 @@ public class DataConverter {
         List<String> groupByList = getGroupByList();
 
         List<Map<String, Object>> finalGroupedPoints = LinesWithDateInfo.stream()
-            //group by metric,tag,date -> [value, date] ( in case where group by just metric : metric,date -> [value, date])
+            //group by metric,tag,date -> [value, date, quality] ( in case where group by just metric : metric,date -> [value, date, quality])
             .collect(Collectors.groupingBy(map -> {
                 List<Object> groupByListForThisMap = new ArrayList<>();
                 groupByList.forEach(i -> groupByListForThisMap.add(map.mapFromOneCsvLine.get(i)));
@@ -54,7 +54,8 @@ public class DataConverter {
                     JsonObject tagsList = new JsonObject();
                     multiMap.getAll(MAPPING_TAGS).forEach(t -> tagsList.put(t, map.mapFromOneCsvLine.get(t)));
                     return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_TIMESTAMP)), multiMap),
-                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_VALUE)))),
+                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_VALUE))),
+                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_QUALITY)))),
                             tagsList);
                 },
             Collectors.toList())))
