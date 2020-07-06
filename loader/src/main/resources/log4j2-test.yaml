@@ -12,7 +12,7 @@ Configuration:
    name: STDOUT
    target: SYSTEM_OUT
    PatternLayout:
-    Pattern: "%m%n"
+    Pattern: "%p %C{3.} [%t] %m%n"
   File:
    name: File
    fileName: ${filename}
@@ -31,12 +31,12 @@ Configuration:
      AppenderRef:
        ref: STDOUT
     -
-     name: com.hurence
-     level: debug
+     name: org.apache.spark.*
+     level: error
      additivity: false
      AppenderRef:
        ref: File
   Root:
-    level: info
+    level: error
     AppenderRef:
       ref: STDOUT

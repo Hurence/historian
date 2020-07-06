@@ -235,7 +235,6 @@ object App {
       .option("header", "true")
       .save(options.out)
 
-
     println("Preloading done")
   }
 
@@ -309,57 +308,54 @@ object App {
 
     import spark.implicits._
 
+    val tsDF = spark.sparkContext.wholeTextFiles(options.in).mapPartitions(listFiles => {
+      val pattern = "(.+):((.+)\\/year=(.+)\\/month=(.+)\\/week=(.+)\\/code_install=(.+)\\/name=(.+)\\/(.+))".r
+      listFiles.map(file => {
+        try {
+          val filePath = file._1
+          val pathTokens = pattern.findAllIn(filePath).matchData.toList.head
 
-    val pattern = "(.+):((.+)\\/year=(.+)\\/month=(.+)\\/week=(.+)\\/code_install=(.+)\\/name=(.+)\\/(.+))".r
-    val tsDF = spark.sparkContext.wholeTextFiles(options.in).map(r => {
+          logger.info(s"processing $filePath")
 
+          val year = pathTokens.group(4).toInt
+          val month = pathTokens.group(5).toInt
+          val week = pathTokens.group(6).toInt
+          val codeInstall = pathTokens.group(7)
+          val name = pathTokens.group(8)
 
-      try {
-        val filePath = r._1
-        val pathTokens = pattern.findAllIn(filePath).matchData.toList.head
+          val measures = file._2
+            .split("\n")
+            .tail
+            .map(line => {
+              try {
+                val lineTokens = line.split(",")
+                val value = lineTokens(0).toDouble
+                val quality = lineTokens(1).toDouble
+                val sensor = lineTokens(2)
+                val timestamp = lineTokens(3)
+                val timeMs = lineTokens(4).toLong
+                val day = lineTokens(5).toInt
 
-        logger.info(s"processing $filePath")
+                Some(EvoaMeasure(name, codeInstall, sensor, value, quality, timestamp, timeMs, year, month, week, day, filePath))
+              } catch {
+                case _: Throwable => None
+              }
 
-        val year = pathTokens.group(4).toInt
-        val month = pathTokens.group(5).toInt
-        val week = pathTokens.group(6).toInt
-        val codeInstall = pathTokens.group(7)
-        val name = pathTokens.group(8)
+            })
+            .filter(_.isDefined)
+            .map(_.get)
+            .sortBy(_.timeMs)
 
-        val measures = r._2
-          .split("\n")
-          .tail
-          .map(line => {
-            try {
-              val lineTokens = line.split(",")
-              val value = lineTokens(0).toDouble
-              val quality = lineTokens(1).toDouble
-              val sensor = lineTokens(2)
-              val timestamp = lineTokens(3)
-              val timeMs = lineTokens(4).toLong
-              val day = lineTokens(5).toInt
-
-              Some(EvoaMeasure(name, codeInstall, sensor, value, quality, timestamp, timeMs, year, month, week, day, filePath))
-            } catch {
-              case _: Throwable => None
-            }
-
-          })
-          .filter(_.isDefined)
-          .map(_.get)
-          .sortBy(_.timeMs)
-
-        Some((name, measures))
-      } catch {
-        case _: Throwable => None
-      }
-
-
-    })
+          Some((name, measures))
+        } catch {
+          case _: Throwable => None
+        }
+      })
+    }, preservesPartitioning = true)
       .filter(_.isDefined)
       .map(_.get)
       .flatMap(m => {
-
+//TODO use MapPartition beacaus processor init is heavy
         val name = m._1
         val measures = m._2
 
