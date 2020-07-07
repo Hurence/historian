@@ -1,0 +1,5 @@
+=== integration-tests
+
+This module contains utilities for doing integration tests. It typically contains junit5 extensions
+for Spark and for Solr. The extension for Solr uses the libraries [testcontainers] (https://www.testcontainers.org/),
+to form a Solr cluster with docker compose. This module also contains in its resources the necessary configurations to create the different collections used by our historian.

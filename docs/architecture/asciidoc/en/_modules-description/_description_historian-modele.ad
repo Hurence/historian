@@ -1,0 +1,4 @@
+
+=== historian-modele
+
+It is a module which is used to share classes. It is used by the gateway (the historian server) but also by other modules. For example the loader module. This avoids having to embed the dependency on the gateway (which contains many things).
