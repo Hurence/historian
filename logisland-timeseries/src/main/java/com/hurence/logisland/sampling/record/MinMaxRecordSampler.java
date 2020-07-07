@@ -13,20 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.sampling.record;
+package com.hurence.logisland.sampling.record;
 
 import com.hurence.logisland.record.Record;
-import com.hurence.timeseries.sampling.SamplingUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-public class FirstItemRecordSampler extends AbstractRecordSampler {
+//TODO
+public class MinMaxRecordSampler extends AbstractRecordSampler {
 
 
     private int numBuckets;
 
-    public FirstItemRecordSampler(String valueFieldName, String timeFieldName, int numBuckets) {
+    public MinMaxRecordSampler(String valueFieldName, String timeFieldName, int numBuckets) {
         super(valueFieldName,timeFieldName);
         this.numBuckets = numBuckets;
     }
@@ -41,11 +40,7 @@ public class FirstItemRecordSampler extends AbstractRecordSampler {
      */
     @Override
     public List<Record> sample(List<Record> inputRecords) {
-        // simple downsample to numBucket data points
-        final int bucketSize = SamplingUtils.fitBucketSize(inputRecords, numBuckets);
-
-        return SamplingUtils.grouped(inputRecords, bucketSize)
-                .map(record -> getTimeValueRecord(record.get(0)))
-                .collect(Collectors.toList());
+        //TODO
+        return null;
     }
 }

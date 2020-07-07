@@ -13,33 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.sampling.record;
+package com.hurence.logisland.sampling.record;
 
 import com.hurence.logisland.record.Record;
+import com.hurence.timeseries.sampling.Sampler;
 
-import java.util.List;
-
-//TODO
-public class ModeMedianRecordSampler extends AbstractRecordSampler {
-
-
-    private int numBuckets;
-
-    public ModeMedianRecordSampler(String valueFieldName, String timeFieldName, int numBuckets) {
-        super(valueFieldName,timeFieldName);
-        this.numBuckets = numBuckets;
-    }
-
-
-    /**
-     * divide the points sequence into equally sized buckets
-     * and select the first point of each bucket
-     *
-     * @param inputRecords the iput list
-     * @return
-     */
-    @Override
-    public List<Record> sample(List<Record> inputRecords) {
-       return null;
-    }
-}
+public interface RecordSampler extends Sampler<Record> { }

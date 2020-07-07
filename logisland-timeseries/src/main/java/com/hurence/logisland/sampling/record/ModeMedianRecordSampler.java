@@ -13,31 +13,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.sampling.record;
+package com.hurence.logisland.sampling.record;
 
 import com.hurence.logisland.record.Record;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+//TODO
+public class ModeMedianRecordSampler extends AbstractRecordSampler {
 
 
-public class IsoRecordSampler extends AbstractRecordSampler {
+    private int numBuckets;
 
-    public IsoRecordSampler(String valueFieldName, String timeFieldName) {
-        super(valueFieldName, timeFieldName);
+    public ModeMedianRecordSampler(String valueFieldName, String timeFieldName, int numBuckets) {
+        super(valueFieldName,timeFieldName);
+        this.numBuckets = numBuckets;
     }
 
+
     /**
-     * do no sample at all => for test or benchmark purpose
+     * divide the points sequence into equally sized buckets
+     * and select the first point of each bucket
      *
-     * @param inputRecords
-     * @return the same list as input
+     * @param inputRecords the iput list
+     * @return
      */
     @Override
     public List<Record> sample(List<Record> inputRecords) {
-        return inputRecords
-                .stream()
-                .map(this::getTimeValueRecord)
-                .collect(Collectors.toList());
+       return null;
     }
 }

@@ -1,6 +1,7 @@
-package com.hurence.timeseries.sampling;
+package com.hurence.logisland.sampling;
 
-import com.hurence.timeseries.sampling.record.*;
+import com.hurence.logisland.sampling.record.*;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 
 public class SamplerFactory {
     /**

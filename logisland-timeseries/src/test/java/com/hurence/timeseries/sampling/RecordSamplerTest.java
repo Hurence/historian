@@ -18,7 +18,8 @@ package com.hurence.timeseries.sampling;
 import com.hurence.logisland.record.FieldType;
 import com.hurence.logisland.record.Record;
 import com.hurence.logisland.record.StandardRecord;
-import com.hurence.timeseries.sampling.record.RecordSampler;
+import com.hurence.logisland.sampling.SamplerFactory;
+import com.hurence.logisland.sampling.record.RecordSampler;
 import com.hurence.logisland.util.runner.MockRecord;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -53,7 +54,7 @@ public class RecordSamplerTest {
 
     @Test
     public void testAvgSampler() {
-        RecordSampler sampler = com.hurence.timeseries.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.AVERAGE, VALUE, TIMESTAMP, 3);
+        RecordSampler sampler = com.hurence.logisland.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.AVERAGE, VALUE, TIMESTAMP, 3);
         List<Record> sampled = sampler.sample(getRecords());
         Assertions.assertEquals(1, sampled.size());
         MockRecord record1 = new MockRecord(sampled.get(0));
@@ -63,7 +64,7 @@ public class RecordSamplerTest {
 
     @Test
     public void testAvgSamplerNoFullBucket() {
-        RecordSampler sampler = com.hurence.timeseries.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.AVERAGE, VALUE, TIMESTAMP, 2);
+        RecordSampler sampler = com.hurence.logisland.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.AVERAGE, VALUE, TIMESTAMP, 2);
         List<Record> sampled = sampler.sample(getRecords());
         Assertions.assertEquals(2, sampled.size());
         MockRecord record1 = new MockRecord(sampled.get(0));
@@ -76,7 +77,7 @@ public class RecordSamplerTest {
 
     @Test
     public void testFirstItemSampler() {
-        RecordSampler sampler = com.hurence.timeseries.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST, VALUE, TIMESTAMP, 3);
+        RecordSampler sampler = com.hurence.logisland.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST, VALUE, TIMESTAMP, 3);
         List<Record> sampled = sampler.sample(getRecords());
         Assertions.assertEquals(1, sampled.size());
         MockRecord record1 = new MockRecord(sampled.get(0));
@@ -86,7 +87,7 @@ public class RecordSamplerTest {
 
     @Test
     public void testFirstItemSamplerNoFullBucket() {
-        RecordSampler sampler = com.hurence.timeseries.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST, VALUE, TIMESTAMP, 2);
+        RecordSampler sampler = com.hurence.logisland.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.FIRST, VALUE, TIMESTAMP, 2);
         List<Record> sampled = sampler.sample(getRecords());
         Assertions.assertEquals(2, sampled.size());
         MockRecord record1 = new MockRecord(sampled.get(0));
@@ -169,7 +170,7 @@ public class RecordSamplerTest {
 
     @Test
     public void testNoneSampler() {
-        RecordSampler sampler = com.hurence.timeseries.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.NONE, VALUE, TIMESTAMP, 3);
+        RecordSampler sampler = com.hurence.logisland.sampling.SamplerFactory.getRecordSampler(SamplingAlgorithm.NONE, VALUE, TIMESTAMP, 3);
         List<Record> sampled = sampler.sample(getRecords());
         Assertions.assertEquals(3, sampled.size());
         MockRecord record1 = new MockRecord(sampled.get(0));

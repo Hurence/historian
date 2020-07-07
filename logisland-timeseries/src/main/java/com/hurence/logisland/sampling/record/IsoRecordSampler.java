@@ -13,34 +13,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.sampling.record;
+package com.hurence.logisland.sampling.record;
 
 import com.hurence.logisland.record.Record;
 
 import java.util.List;
-
-//TODO
-public class MinMaxRecordSampler extends AbstractRecordSampler {
+import java.util.stream.Collectors;
 
 
-    private int numBuckets;
+public class IsoRecordSampler extends AbstractRecordSampler {
 
-    public MinMaxRecordSampler(String valueFieldName, String timeFieldName, int numBuckets) {
-        super(valueFieldName,timeFieldName);
-        this.numBuckets = numBuckets;
+    public IsoRecordSampler(String valueFieldName, String timeFieldName) {
+        super(valueFieldName, timeFieldName);
     }
 
-
     /**
-     * divide the points sequence into equally sized buckets
-     * and select the first point of each bucket
+     * do no sample at all => for test or benchmark purpose
      *
-     * @param inputRecords the iput list
-     * @return
+     * @param inputRecords
+     * @return the same list as input
      */
     @Override
     public List<Record> sample(List<Record> inputRecords) {
-        //TODO
-        return null;
+        return inputRecords
+                .stream()
+                .map(this::getTimeValueRecord)
+                .collect(Collectors.toList());
     }
 }
