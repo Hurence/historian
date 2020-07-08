@@ -21,7 +21,7 @@ public class QueryRequestParam {
     public static final long DEFAULT_TO = Long.MAX_VALUE;
     public static final int DEFAULT_MAX_DATAPOINTS = 1000;
     public static final  List<AdHocFilter> DEFAULT_FILTERS = Collections.emptyList();
-    public static final Double DEFAULT_QUALITY = 0.0;
+    public static final Float DEFAULT_QUALITY = 0.0f;
 
     private List<Target> targets;
     private long from;
@@ -30,7 +30,7 @@ public class QueryRequestParam {
     private int maxDataPoints;
     private List<AdHocFilter> adHocFilters;
     private String requestId;
-    private Double quality;
+    private Float quality;
 
     private QueryRequestParam() { }
 
@@ -95,11 +95,11 @@ public class QueryRequestParam {
         return Collections.emptyList();
     }
 
-    public Double getQuality() {
+    public Float getQuality() {
         return quality;
     }
 
-    public void setQuality(Double quality) {
+    public void setQuality(Float quality) {
         this.quality = quality;
     }
 
@@ -157,7 +157,7 @@ public class QueryRequestParam {
         private int maxDataPoints;
         private List<AdHocFilter> adHocFilters;
         private String requestId;
-        private Double quality;
+        private Float quality;
 
         public Builder() { }
 
@@ -196,7 +196,7 @@ public class QueryRequestParam {
             return this;
         }
 
-        public void withQuality(Double quality) {
+        public void withQuality(Float quality) {
             this.quality = quality;
         }
 
