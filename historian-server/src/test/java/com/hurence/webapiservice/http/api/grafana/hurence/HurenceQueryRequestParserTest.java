@@ -25,6 +25,12 @@ public class HurenceQueryRequestParserTest {
 
     private static Logger LOGGER = LoggerFactory.getLogger(HurenceQueryRequestParserTest.class);
 
+    private HurenceDatasourcePluginQueryRequestParser getHurenceDatasourcePluginQueryRequestParser() {
+        return new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
+                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
+                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+    }
+
     @Test
     public void testParsingRequest() {
         JsonObject requestBody = new JsonObject();
@@ -49,9 +55,7 @@ public class HurenceQueryRequestParserTest {
         JsonPointer.from(MAX_DATA_POINTS_JSON_PATH)
                 .writeJson(requestBody, 500, true);
 
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
 
         LOGGER.info("request : {}", request);
@@ -98,9 +102,7 @@ public class HurenceQueryRequestParserTest {
                 .range(0, 10)
                 .parallel()
                 .forEach(i -> {
-                    final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                            TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                            TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+                    final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
                     final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         });
     }
@@ -110,9 +112,7 @@ public class HurenceQueryRequestParserTest {
         JsonObject requestBody = new JsonObject();
         JsonPointer.from(NAMES_JSON_PATH)
                 .writeJson(requestBody, Arrays.asList("metric_1"), true);
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(HurenceDatasourcePluginQueryRequestParam.DEFAULT_FROM, request.getFrom());
@@ -128,9 +128,7 @@ public class HurenceQueryRequestParserTest {
     @Test
     public void testparsingErrorEmptyRequest() {
         JsonObject requestBody = new JsonObject("{}");
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
 
@@ -158,9 +156,7 @@ public class HurenceQueryRequestParserTest {
                 .writeJson(requestBody, 500, true);
         JsonPointer.from(AGGREGATION_JSON_PATH)
                 .writeJson(requestBody,Arrays.asList(MAX, MIN, AVG, COUNT, SUM), true);
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(1573700213285L, request.getFrom());
@@ -184,9 +180,7 @@ public class HurenceQueryRequestParserTest {
                 .writeJson(requestBody, 500, true);
         JsonPointer.from(AGGREGATION_JSON_PATH)
                 .writeJson(requestBody,Arrays.asList("MA", MIN), true);
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             queryRequestParser.parseRequest(requestBody);
         });
@@ -217,9 +211,7 @@ public class HurenceQueryRequestParserTest {
                 .writeJson(requestBody, 500, true);
         JsonPointer.from(AGGREGATION_JSON_PATH)
                 .writeJson(requestBody, true, true);
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.info("request : {}", request);
         assertEquals(1573700213285L, request.getFrom());
@@ -243,9 +235,7 @@ public class HurenceQueryRequestParserTest {
                 .writeJson(requestBody, 500, true);
         JsonPointer.from(AGGREGATION_JSON_PATH)
                 .writeJson(requestBody,false, true);
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         Assertions.assertThrows(IllegalArgumentException.class, () -> {
             queryRequestParser.parseRequest(requestBody);
         });
@@ -275,9 +265,7 @@ public class HurenceQueryRequestParserTest {
                     put("usine", "usine_1");
                     put("sensor", "sensor_3");
                 }}, true);
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.debug("request : {}", request);
         assertEquals(names, request.getMetricNames());
@@ -299,9 +287,7 @@ public class HurenceQueryRequestParserTest {
         JsonObject requestBody = new JsonObject();
         JsonPointer.from(NAMES_JSON_PATH)
                 .writeJson(requestBody, names, true);
-        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
-                TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_JSON_PATH);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.debug("request : {}", request);
         assertEquals(names, request.getMetricNames());
