@@ -3,23 +3,18 @@ package com.hurence.historian.spark.sql
 import java.nio.charset.StandardCharsets
 
 import com.google.common.hash.Hashing
-import com.hurence.logisland.timeseries.MetricTimeSeries
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
-import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter, SaxAnalyzer}
 import com.hurence.logisland.util.DateUtil
-import com.hurence.logisland.util.string.BinaryEncodingUtils
+import com.hurence.timeseries.MetricTimeSeries
+import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils}
+import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
 import org.apache.spark.sql.functions.udf
-import spire.std.int
 
-import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.control.NonFatal
 
 
 object functions {
-
-  private val converter = new BinaryCompactionConverterOfRecord.Builder().build
-
 
   val sha256 = udf { toHash: String =>
     Hashing.sha256.hashString(toHash, StandardCharsets.UTF_8).toString
@@ -57,7 +52,7 @@ object functions {
 
     (timestamps zip values).map { case (t, v) => builder.point(t, v) }
 
-    val bytes = converter.serializeTimeseries(builder.build())
+    val bytes = BinaryCompactionUtil.serializeTimeseries(builder.build());
     BinaryEncodingUtils.encode(bytes)
 
   }
@@ -71,9 +66,7 @@ object functions {
 
     val bytes = BinaryEncodingUtils.decode(chunk)
 
-    converter.deSerializeTimeseries(bytes, start, end).asScala.map(p => (p.getTimestamp, p.getValue))
-
-
+    BinaryCompactionUtil.unCompressPoints(bytes, start, end).asScala.map(p => (p.getTimestamp, p.getValue))
   }
 
   /**

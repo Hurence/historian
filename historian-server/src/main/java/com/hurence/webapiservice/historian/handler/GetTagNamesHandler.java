@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.Field;
-import com.hurence.historian.modele.Schema;
+import com.hurence.historian.modele.solr.SolrField;
+import com.hurence.historian.modele.solr.Schema;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -42,7 +42,7 @@ public class GetTagNamesHandler {
                 List<String> tags = response.getSchemaRepresentation().getFields().stream()
                         .map(fieldMap -> (String) fieldMap.get(NAME)).collect(Collectors.toList());
                 Collection<String> schemaFields = Schema.getChunkSchema(solrHistorianConf.schemaVersion).getFields()
-                        .stream().map(Field::getName)
+                        .stream().map(SolrField::getName)
                         .collect(Collectors.toList());
                 tags.removeAll(schemaFields);
                 tags.removeAll(fieldsThatAreNotTags);

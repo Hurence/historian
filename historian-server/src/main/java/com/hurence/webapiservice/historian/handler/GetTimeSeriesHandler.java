@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -75,13 +75,13 @@ public class GetTimeSeriesHandler {
         StringBuilder queryBuilder = new StringBuilder();
         if (request.getTo() != null) {
             LOGGER.trace("requesting timeseries to {}", request.getTo());
-            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
+            queryBuilder.append(CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
         }
         if (request.getFrom()  != null) {
             LOGGER.trace("requesting timeseries from {}", request.getFrom());
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(RESPONSE_CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
+            queryBuilder.append(CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
@@ -91,15 +91,15 @@ public class GetTimeSeriesHandler {
         //FILTER
         buildFilters(request, query);
         //    FIELDS_TO_FETCH
-        query.setFields(RESPONSE_CHUNK_START_FIELD,
-                RESPONSE_CHUNK_END_FIELD,
-                RESPONSE_CHUNK_COUNT_FIELD,
+        query.setFields(CHUNK_START_FIELD,
+                CHUNK_END_FIELD,
+                CHUNK_COUNT_FIELD,
                 NAME);
         addAllTagsAsFields(request.getMetricRequestsWithFinalTags(), query);
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
-        query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setSort(CHUNK_START_FIELD, SolrQuery.ORDER.asc);
+        query.addSort(CHUNK_END_FIELD, SolrQuery.ORDER.asc);
         query.setRows(request.getMaxTotalChunkToRetrieve());
 
         return query;
@@ -170,19 +170,19 @@ public class GetTimeSeriesHandler {
         aggregationList.forEach(agg -> {
             switch (agg) {
                 case AVG:
-                    query.addField(RESPONSE_CHUNK_AVG_FIELD);
+                    query.addField(CHUNK_AVG_FIELD);
                     break;
                 case SUM:
-                    query.addField(RESPONSE_CHUNK_SUM_FIELD);
+                    query.addField(CHUNK_SUM_FIELD);
                     break;
                 case MIN:
-                    query.addField(RESPONSE_CHUNK_MIN_FIELD);
+                    query.addField(CHUNK_MIN_FIELD);
                     break;
                 case MAX:
-                    query.addField(RESPONSE_CHUNK_MAX_FIELD);
+                    query.addField(CHUNK_MAX_FIELD);
                     break;
                 case COUNT:
-                    query.addField(RESPONSE_CHUNK_COUNT_FIELD);
+                    query.addField(CHUNK_COUNT_FIELD);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported aggregation: " + agg);
@@ -204,12 +204,12 @@ public class GetTimeSeriesHandler {
         neededFields.add(NAME);
         List<String> overFields = new ArrayList<>(neededFields);
         String overString = joinListAsString(overFields);
-        neededFields.add(RESPONSE_CHUNK_COUNT_FIELD);
+        neededFields.add(CHUNK_COUNT_FIELD);
         String flString = joinListAsString(neededFields);
         exprBuilder.append(",fl=\"").append(flString).append("\"")
                 .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\")")
                 .append(",over=\"").append(overString).append("\"")
-                .append(", sum(").append(RESPONSE_CHUNK_COUNT_FIELD).append("), count(*))");
+                .append(", sum(").append(CHUNK_COUNT_FIELD).append("), count(*))");
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
         paramsLoc.set("expr", exprBuilder.toString());
@@ -293,7 +293,7 @@ public class GetTimeSeriesHandler {
         if (metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint ||
                 metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint()) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
-            query.addField(RESPONSE_CHUNK_VALUE_FIELD);
+            query.addField(CHUNK_VALUE_FIELD);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (metricsInfo.getTotalNumberOfChunks() < solrHistorianConf.limitNumberOfChunks) {
             LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
@@ -334,19 +334,19 @@ public class GetTimeSeriesHandler {
         samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
-                    query.addField(RESPONSE_CHUNK_VALUE_FIELD);
+                    query.addField(CHUNK_VALUE_FIELD);
                     break;
                 case FIRST:
-                    query.addField(RESPONSE_CHUNK_FIRST_VALUE_FIELD);
+                    query.addField(CHUNK_FIRST_VALUE_FIELD);
                     break;
                 case AVERAGE:
-                    query.addField(RESPONSE_CHUNK_SUM_FIELD);
+                    query.addField(CHUNK_SUM_FIELD);
                     break;
                 case MIN:
-                    query.addField(RESPONSE_CHUNK_MIN_FIELD);
+                    query.addField(CHUNK_MIN_FIELD);
                     break;
                 case MAX:
-                    query.addField(RESPONSE_CHUNK_MAX_FIELD);
+                    query.addField(CHUNK_MAX_FIELD);
                     break;
                 case MODE_MEDIAN:
                 case LTTB:

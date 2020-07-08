@@ -2,10 +2,10 @@ package com.hurence.webapiservice.historian;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.logisland.record.Point;
+import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
-import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -32,7 +32,6 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.*;
@@ -59,22 +58,22 @@ public class HistorianVerticleIT {
                 ),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 1L, 5),
-                                new Point(0, 2L, 8),
-                                new Point(0, 3L, 1.2),
-                                new Point(0, 4L, 6.5)
+                                new PointImpl( 1L, 5),
+                                new PointImpl( 2L, 8),
+                                new PointImpl( 3L, 1.2),
+                                new PointImpl( 4L, 6.5)
                         ),
                         Arrays.asList(
-                                new Point(0, 5L, -2),
-                                new Point(0, 6L, 8.8),
-                                new Point(0, 7L, 13.3),
-                                new Point(0, 8L, 2)
+                                new PointImpl( 5L, -2),
+                                new PointImpl( 6L, 8.8),
+                                new PointImpl( 7L, 13.3),
+                                new PointImpl( 8L, 2)
                         ),
                         Arrays.asList(
-                                new Point(0, 9L, -5),
-                                new Point(0, 10L, 80),
-                                new Point(0, 11L, 1.2),
-                                new Point(0, 12L, 5.5)
+                                new PointImpl( 9L, -5),
+                                new PointImpl( 10L, 80),
+                                new PointImpl( 11L, 1.2),
+                                new PointImpl( 12L, 5.5)
                         )
                 ));
         Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempB = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
@@ -84,10 +83,10 @@ public class HistorianVerticleIT {
                 ),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 9L, -5),
-                                new Point(0, 10L, 80),
-                                new Point(0, 11L, 1.2),
-                                new Point(0, 12L, 5.5)
+                                new PointImpl( 9L, -5),
+                                new PointImpl( 10L, 80),
+                                new PointImpl( 11L, 1.2),
+                                new PointImpl( 12L, 5.5)
                         )
                 ));
         injectorTempA.addChunk(injectorTempB);
@@ -141,31 +140,31 @@ public class HistorianVerticleIT {
                         assertEquals(4, docs.size());
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertTrue(doc1.containsKey(NAME));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_START_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_AVG_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_COUNT_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SAX_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_MIN_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_MAX_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_TREND_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_SUM_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
-                        assertTrue(doc1.containsKey(RESPONSE_CHUNK_FIRST_VALUE_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_START_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_END_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_AVG_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_ID_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_COUNT_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_SAX_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_VALUE_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_MIN_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_MAX_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_TREND_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_SUM_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_VERSION_FIELD));
+                        assertTrue(doc1.containsKey(CHUNK_FIRST_VALUE_FIELD));
                         assertEquals(18, doc1.size());
                         assertEquals("id0", doc1.getString("id"));
-                        assertEquals(1L, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
-                        assertEquals(4L, doc1.getLong(RESPONSE_CHUNK_END_FIELD));
+                        assertEquals(1L, doc1.getLong(CHUNK_START_FIELD));
+                        assertEquals(4L, doc1.getLong(CHUNK_END_FIELD));
                         JsonObject doc2 = docs.getJsonObject(1);
                         assertEquals("id1", doc2.getString("id"));
-                        assertEquals(5L, doc2.getLong(RESPONSE_CHUNK_START_FIELD));
-                        assertEquals(8L, doc2.getLong(RESPONSE_CHUNK_END_FIELD));
+                        assertEquals(5L, doc2.getLong(CHUNK_START_FIELD));
+                        assertEquals(8L, doc2.getLong(CHUNK_END_FIELD));
                         JsonObject doc3 = docs.getJsonObject(2);
                         assertEquals("id2", doc3.getString("id"));
-                        assertEquals(9L, doc3.getLong(RESPONSE_CHUNK_START_FIELD));
-                        assertEquals(12L, doc3.getLong(RESPONSE_CHUNK_END_FIELD));
+                        assertEquals(9L, doc3.getLong(CHUNK_START_FIELD));
+                        assertEquals(12L, doc3.getLong(CHUNK_END_FIELD));
                         testContext.completeNow();
                     });
                 })
@@ -220,7 +219,7 @@ public class HistorianVerticleIT {
     void getTimeSeriesChunkTestWithSelectedFields(VertxTestContext testContext) {
         JsonObject params = new JsonObject()
                 .put(FIELDS, new JsonArray()
-                    .add(RESPONSE_CHUNK_VALUE_FIELD).add(RESPONSE_CHUNK_START_FIELD).add(RESPONSE_CHUNK_MAX_FIELD).add("id")
+                    .add(CHUNK_VALUE_FIELD).add(CHUNK_START_FIELD).add(CHUNK_MAX_FIELD).add("id")
                 );
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
@@ -230,10 +229,10 @@ public class HistorianVerticleIT {
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertEquals(4, doc1.size());
                         assertEquals("id0", doc1.getString("id"));
-                        assertEquals(1L, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
-                        assertEquals(8.0, doc1.getDouble(RESPONSE_CHUNK_MAX_FIELD));
+                        assertEquals(1L, doc1.getLong(CHUNK_START_FIELD));
+                        assertEquals(8.0, doc1.getDouble(CHUNK_MAX_FIELD));
                         assertEquals("H4sIAAAAAAAAAOPi1GQAAxEHLm4FRihHwYGLU9MYDD7bc3ELwMSlHAQYANb3vjkyAAAA",
-                                doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
+                                doc1.getString(CHUNK_VALUE_FIELD));
                         testContext.completeNow();
                     });
                 })

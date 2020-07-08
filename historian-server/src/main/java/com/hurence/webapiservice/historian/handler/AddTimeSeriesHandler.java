@@ -31,7 +31,7 @@ public class AddTimeSeriesHandler {
         return p -> {
             try {
                 final String chunkOrigin = timeseriesObject.getString(CHUNK_ORIGIN, "ingestion-json");
-                JsonArray timeseriesPoints = timeseriesObject.getJsonArray(POINTS_REQUEST_FIELD);
+                JsonArray timeseriesPoints = timeseriesObject.getJsonArray(POINTS);
                 JsonObject response = new JsonObject();
                 Collection<SolrInputDocument> documents = new ArrayList<>();
                 int numChunk = 0;
@@ -42,7 +42,7 @@ public class AddTimeSeriesHandler {
                     LOGGER.info("building SolrDocument from a chunk");
                     document = chunkTimeSerie(timeserie, chunkOrigin);
                     documents.add(document);
-                    int totalNumPointsInChunk = (int) document.getFieldValue(RESPONSE_CHUNK_COUNT_FIELD);
+                    int totalNumPointsInChunk = (int) document.getFieldValue(CHUNK_COUNT_FIELD);
                     numChunk++;
                     numPoints = numPoints + totalNumPointsInChunk;
                 }
@@ -52,7 +52,7 @@ public class AddTimeSeriesHandler {
                     solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
                     LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
                 }
-                response.put(RESPONSE_TOTAL_ADDED_POINTS, numPoints).put(RESPONSE_TOTAL_ADDED_CHUNKS, numChunk);
+                response.put(TOTAL_ADDED_POINTS, numPoints).put(TOTAL_ADDED_CHUNKS, numChunk);
                 p.complete(response);
             } catch (SolrServerException | IOException e) {
                 p.fail(e);

@@ -1,11 +1,12 @@
 package com.hurence.historian.spark.compactor
 
-import com.hurence.logisland.record.{Point, TimeSeriesRecord}
-import scala.collection.JavaConverters._
+import com.hurence.timeseries.modele.PointImpl
 
 case class CompactionChunkInfo(value: String, start: Long, end: Long, size: Long) {
 
-  def getPoints(): List[Point] = {
-    TimeSeriesRecord.getPointStream(value, start, end).asScala.toList
+  def getPoints(): List[PointImpl] = {
+    //TODO
+//    TimeSeriesRecord.getPointStream(value, start, end).asScala.toList
+    null
   }
 }

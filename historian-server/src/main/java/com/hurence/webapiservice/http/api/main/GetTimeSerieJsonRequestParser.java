@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.main;
 
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.AdHocFilter;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.Json;

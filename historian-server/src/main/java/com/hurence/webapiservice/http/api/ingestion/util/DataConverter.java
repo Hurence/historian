@@ -3,7 +3,6 @@ package com.hurence.webapiservice.http.api.ingestion.util;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
-import org.joda.time.IllegalFieldValueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -72,7 +71,7 @@ public class DataConverter {
                 });
                 List pointsList = new LinkedList();
                 entry.getValue().forEach(i -> pointsList.add(i.get(0)));
-                fieldsAndThereValues.put(POINTS_REQUEST_FIELD, pointsList);
+                fieldsAndThereValues.put(POINTS, pointsList);
                 return fieldsAndThereValues;
             }).collect(Collectors.toList());
         return new JsonArray(finalGroupedPoints);

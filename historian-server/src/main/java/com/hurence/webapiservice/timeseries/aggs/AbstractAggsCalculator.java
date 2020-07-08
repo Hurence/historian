@@ -90,7 +90,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
     }
 
     private void calculateSum(List<T> elementsToAgg) {
-        double sum = getDoubleStreamFromElementsToAgg(elementsToAgg, RESPONSE_CHUNK_SUM_FIELD)
+        double sum = getDoubleStreamFromElementsToAgg(elementsToAgg, CHUNK_SUM_FIELD)
                 .sum();
         if(aggValues.containsKey(SUM)) {
             double currentSum = aggValues.get(SUM).doubleValue();
@@ -101,7 +101,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
     private void calculateMin(List<T> elementsToAgg) {
-        OptionalDouble minMap = getDoubleStreamFromElementsToAgg(elementsToAgg, RESPONSE_CHUNK_MIN_FIELD)
+        OptionalDouble minMap = getDoubleStreamFromElementsToAgg(elementsToAgg, CHUNK_MIN_FIELD)
                 .min();
         if (minMap.isPresent()) {
             double min = minMap.getAsDouble();
@@ -113,7 +113,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
     private void calculateMax(List<T> elementsToAgg) {
-        OptionalDouble maxMap = getDoubleStreamFromElementsToAgg(elementsToAgg, RESPONSE_CHUNK_MAX_FIELD)
+        OptionalDouble maxMap = getDoubleStreamFromElementsToAgg(elementsToAgg, CHUNK_MAX_FIELD)
                 .max();
         if (maxMap.isPresent()) {
             double max = maxMap.getAsDouble();

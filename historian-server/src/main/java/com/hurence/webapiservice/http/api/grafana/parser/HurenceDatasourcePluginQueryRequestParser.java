@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;

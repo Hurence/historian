@@ -1,8 +1,7 @@
 package com.hurence.historian.solr.injector;
 
-import com.hurence.logisland.record.Point;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-
+import com.hurence.timeseries.modele.PointImpl;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,10 +10,10 @@ import java.util.stream.IntStream;
 public class Version0SolrInjectorOneMetricMultipleChunksSpecificPoints extends AbstractVersion0SolrInjector {
 
     private final String metricName;
-    private final List<List<Point>> pointsByChunk;
+    private final List<List<PointImpl>> pointsByChunk;
 
     public Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(String metricName,
-                                                                     List<List<Point>> pointsByChunk) {
+                                                                     List<List<PointImpl>> pointsByChunk) {
         this.metricName = metricName;
         this.pointsByChunk = pointsByChunk;
     }

@@ -24,7 +24,7 @@ public class ChunkAggsCalculator extends AbstractAggsCalculator<JsonObject> {
     @Override
     protected double getDoubleCount(List<JsonObject> chunks) {
         return chunks.stream()
-                .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_COUNT_FIELD))
+                .mapToDouble(chunk -> chunk.getDouble(CHUNK_COUNT_FIELD))
                 .sum();
     }
 

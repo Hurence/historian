@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.compactor.job
 
-import com.hurence.historian.modele.HistorianCollections
+import com.hurence.historian.modele.solr.HistorianCollections
 
 case class CompactorJobReport(jobId: String,
                               jobType: String,
