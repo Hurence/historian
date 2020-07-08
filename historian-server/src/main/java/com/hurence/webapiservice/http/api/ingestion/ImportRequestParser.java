@@ -79,8 +79,8 @@ public class ImportRequestParser {
                 if (pointArray.size() == 0){
                     correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because this point was an empty array");
                     continue;
-                } else if (pointArray.size() != 3)
-                    throw new IllegalArgumentException("Points should be of the form [timestamp, value, quality]");
+                } else if (pointArray.size() != 2 && pointArray.size() != 3)
+                    throw new IllegalArgumentException("Points should be of the form [timestamp, value] or [timestamp, value, quality]");
                 try {
                     if (pointArray.getLong(0) == null) {
                         correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its timestamp is null");
@@ -99,14 +99,19 @@ public class ImportRequestParser {
                     correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its value was not a double");
                     continue;
                 }
-                try {
-                    if (pointArray.getDouble(2) == null  || (pointArray.getDouble(2) > 1.0) || (pointArray.getDouble(2) < 0.0)) {
-                        correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its quality is null");
+                if (pointArray.size() == 3) {
+                    try {
+                        if (pointArray.getFloat(2) == null) {
+                            correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its quality is null");
+                            continue;
+                        } else if ((pointArray.getFloat(2) > 1) || (pointArray.getFloat(2) < 0)) {
+                            correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its quality is not between 0 and 1");
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its quality is not a float");
                         continue;
                     }
-                } catch (Exception e) {
-                    correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its quality is not a double");
-                    continue;
                 }
                 newPoints.add(pointArray);
             }
