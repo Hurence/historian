@@ -2,10 +2,10 @@ package com.hurence.webapiservice.historian;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.logisland.record.Point;
+import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
-import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -58,22 +58,22 @@ public class HistorianVerticleIT {
                 ),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 1L, 5),
-                                new Point(0, 2L, 8),
-                                new Point(0, 3L, 1.2),
-                                new Point(0, 4L, 6.5)
+                                new PointImpl( 1L, 5),
+                                new PointImpl( 2L, 8),
+                                new PointImpl( 3L, 1.2),
+                                new PointImpl( 4L, 6.5)
                         ),
                         Arrays.asList(
-                                new Point(0, 5L, -2),
-                                new Point(0, 6L, 8.8),
-                                new Point(0, 7L, 13.3),
-                                new Point(0, 8L, 2)
+                                new PointImpl( 5L, -2),
+                                new PointImpl( 6L, 8.8),
+                                new PointImpl( 7L, 13.3),
+                                new PointImpl( 8L, 2)
                         ),
                         Arrays.asList(
-                                new Point(0, 9L, -5),
-                                new Point(0, 10L, 80),
-                                new Point(0, 11L, 1.2),
-                                new Point(0, 12L, 5.5)
+                                new PointImpl( 9L, -5),
+                                new PointImpl( 10L, 80),
+                                new PointImpl( 11L, 1.2),
+                                new PointImpl( 12L, 5.5)
                         )
                 ));
         Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempB = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
@@ -83,10 +83,10 @@ public class HistorianVerticleIT {
                 ),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 9L, -5),
-                                new Point(0, 10L, 80),
-                                new Point(0, 11L, 1.2),
-                                new Point(0, 12L, 5.5)
+                                new PointImpl( 9L, -5),
+                                new PointImpl( 10L, 80),
+                                new PointImpl( 11L, 1.2),
+                                new PointImpl( 12L, 5.5)
                         )
                 ));
         injectorTempA.addChunk(injectorTempB);

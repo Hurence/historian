@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.dts
 
-import com.hurence.timeseries.modele.Point
+import com.hurence.timeseries.modele.PointImpl
 import spock.lang.Specification
 
 /**
@@ -25,43 +25,42 @@ class PointTest extends Specification {
 
     def "test point"() {
         when:
-        def pair = new Point(0 as int, 1 as long, 2 as double)
+        def pair = new PointImpl(1 as long, 2 as double)
 
         then:
-        pair.index == 0
         pair.timestamp == 1l
         pair.value == 2d
     }
 
     def "test equals"() {
         when:
-        def pair = new Point(0i, 1l, 2d)
+        def pair = new PointImpl(1l, 2d)
 
         then:
         pair.equals(pair)
         pair.equals(other) == result
 
         where:
-        other << [null, new Object(), new Point(1i, 1l, 2d), new Point(0i, 2l, 2d), new Point(0i, 1l, 3d), new Point(0i, 1l, 2d)]
-        result << [false, false, false, false, false, true]
+        other << [null, new Object(), new PointImpl(1l, 2d), new PointImpl(2l, 2d), new PointImpl(1l, 3d)]
+        result << [false, false, true, false, false]
     }
 
     def "test hashCode"() {
         when:
-        def pair = new Point(0i, 1l, 2d)
+        def pair = new PointImpl(1l, 2d)
 
         then:
         (pair.hashCode() == other.hashCode()) == result
 
 
         where:
-        other << [new Object(), new Point(1i, 1l, 2d), new Point(0i, 2l, 2d), new Point(0i, 1l, 3d), new Point(0i, 1l, 2d)]
-        result << [false, false, false, false, true]
+        other << [new Object(), new PointImpl( 1l, 2d), new PointImpl( 2l, 2d), new PointImpl(1l, 3d)]
+        result << [false, true, false, false]
     }
 
     def "test to string"() {
         expect:
-        new Point(0i, 1l, 2d).toString()
+        new PointImpl(1l, 2d).toString()
     }
 
 }

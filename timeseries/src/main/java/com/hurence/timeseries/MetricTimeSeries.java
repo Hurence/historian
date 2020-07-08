@@ -19,7 +19,7 @@ package com.hurence.timeseries;
 
 import com.hurence.timeseries.modele.DoubleList;
 import com.hurence.timeseries.modele.LongList;
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -142,7 +143,7 @@ public final class MetricTimeSeries implements Serializable {
             LongList sortedTimes = new LongList(timestamps.size());
             DoubleList sortedValues = new DoubleList(values.size());
 
-            points().sorted(Comparator.comparingLong(Point::getTimestamp)).forEachOrdered(p -> {
+            points().sorted(Comparator.comparingLong(PointImpl::getTimestamp)).forEachOrdered(p -> {
                 sortedTimes.add(p.getTimestamp());
                 sortedValues.add(p.getValue());
             });
@@ -159,17 +160,14 @@ public final class MetricTimeSeries implements Serializable {
      *
      * @return the points as stream (creating new points)
      */
-    public Stream<Point> points() {
+    public Stream<PointImpl> points() {
         if (timestamps.isEmpty()) {
             return Stream.empty();
         }
-        return Stream.iterate(of(0), pair -> of(pair.getIndex() + 1)).limit(timestamps.size());
+        return IntStream
+            .range(0, Math.min(timestamps.size(), values.size()))
+            .mapToObj(i -> new PointImpl(timestamps.get(i), values.get(i)));
     }
-
-    private Point of(int index) {
-        return new Point(index, timestamps.get(index), values.get(index));
-    }
-
 
     /**
      * Sets the timestamps and values as data

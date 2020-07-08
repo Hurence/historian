@@ -3,7 +3,7 @@ package com.hurence.historian.spark.compactor.job;
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
 import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -15,7 +15,7 @@ import java.util.Map;
 public class ChunkModeleVersion0 implements ChunkModele {
     private static int ddcThreshold = 0;
 
-    public List<Point> points;
+    public List<PointImpl> points;
     public byte[] compressedPoints;
     public long start;
     public long end;
@@ -33,7 +33,7 @@ public class ChunkModeleVersion0 implements ChunkModele {
     public String chunk_origin;
     public Map<String, String> tagsAsKeyValue = new HashMap<>();
 
-    public static ChunkModeleVersion0 fromPoints(String metricName, List<Point> points) {
+    public static ChunkModeleVersion0 fromPoints(String metricName, List<PointImpl> points) {
         return fromPoints(metricName, 2000, 12, 13, "logisland", points);
     }
 
@@ -53,16 +53,16 @@ public class ChunkModeleVersion0 implements ChunkModele {
                                                  int month,
                                                  int day,
                                                  String chunk_origin,
-                                                 List<Point> points) {
+                                                 List<PointImpl> points) {
         ChunkModeleVersion0 chunk = new ChunkModeleVersion0();
         chunk.points = points;
         chunk.compressedPoints = compressPoints(chunk.points);
-        chunk.start = chunk.points.stream().mapToLong(Point::getTimestamp).min().getAsLong();
-        chunk.end = chunk.points.stream().mapToLong(Point::getTimestamp).max().getAsLong();;
-        chunk.sum = chunk.points.stream().mapToDouble(Point::getValue).sum();
+        chunk.start = chunk.points.stream().mapToLong(PointImpl::getTimestamp).min().getAsLong();
+        chunk.end = chunk.points.stream().mapToLong(PointImpl::getTimestamp).max().getAsLong();;
+        chunk.sum = chunk.points.stream().mapToDouble(PointImpl::getValue).sum();
         chunk.avg = chunk.sum / chunk.points.size();
-        chunk.min = chunk.points.stream().mapToDouble(Point::getValue).min().getAsDouble();
-        chunk.max = chunk.points.stream().mapToDouble(Point::getValue).max().getAsDouble();
+        chunk.min = chunk.points.stream().mapToDouble(PointImpl::getValue).min().getAsDouble();
+        chunk.max = chunk.points.stream().mapToDouble(PointImpl::getValue).max().getAsDouble();
         chunk.name = metricName;
         chunk.sax = "edeebcccdf";
         chunk.firstValue = points.get(0).getValue();
@@ -73,7 +73,7 @@ public class ChunkModeleVersion0 implements ChunkModele {
         return chunk;
     }
 
-    protected static byte[] compressPoints(List<Point> pointsChunk) {
+    protected static byte[] compressPoints(List<PointImpl> pointsChunk) {
         byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }

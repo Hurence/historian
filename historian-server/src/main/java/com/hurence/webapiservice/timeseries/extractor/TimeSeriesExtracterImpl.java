@@ -2,7 +2,7 @@ package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.PointsAggsCalculator;
@@ -20,7 +20,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterImpl.class);
 
-    final Sampler<Point> sampler;
+    final Sampler<PointImpl> sampler;
     final PointsAggsCalculator aggsCalculator;
 
     public TimeSeriesExtracterImpl(long from, long to,
@@ -34,8 +34,8 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     @Override
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
-        List<Point> points = decompressPoints(from, to, chunks);
-        List<Point> sampledPoints = sampler.sample(points);
+        List<PointImpl> points = decompressPoints(from, to, chunks);
+        List<PointImpl> sampledPoints = sampler.sample(points);
         this.sampledPoints.addAll(sampledPoints);
         aggsCalculator.updateAggs(points);
     }
@@ -45,10 +45,10 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<Point> decompressPoints(long from, long to, List<JsonObject> chunks) {
-        Stream<Point> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
-        Stream<Point> sortedPoints = extractedPoints
-                .sorted(Comparator.comparing(Point::getTimestamp));
+    private List<PointImpl> decompressPoints(long from, long to, List<JsonObject> chunks) {
+        Stream<PointImpl> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
+        Stream<PointImpl> sortedPoints = extractedPoints
+                .sorted(Comparator.comparing(PointImpl::getTimestamp));
         return sortedPoints.collect(Collectors.toList());
     }
 }

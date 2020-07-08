@@ -18,7 +18,7 @@ package com.hurence.timeseries.converter.serializer.protobuf
 import com.hurence.timeseries.compaction.Compression
 import com.hurence.timeseries.MetricTimeSeries
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer
-import com.hurence.timeseries.modele.Point
+import com.hurence.timeseries.modele.PointImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import spock.lang.Shared
@@ -42,7 +42,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         given:
         def points = []
         100.times {
-            points.add(new Point(it, it, it * 100))
+            points.add(new PointImpl(it, it * 100))
         }
         def compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(points.iterator())
 
@@ -67,7 +67,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def points = []
 
         100.times {
-            points.add(new Point(it, start.plusSeconds(it).toEpochMilli(), it * 100))
+            points.add(new PointImpl(start.plusSeconds(it).toEpochMilli(), it * 100))
         }
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator())
         def builder = new MetricTimeSeries.Builder("name", "metric")
@@ -77,7 +77,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def ts = builder.build()
 
         then:
-        List<Point> list = ts.points().collect(Collectors.toList())
+        List<PointImpl> list = ts.points().collect(Collectors.toList())
         list.size() == size
         if (size == 21) {
             list.get(0).timestamp == 1456394850774
@@ -97,7 +97,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         given:
         def points = []
         100.times {
-            points.add(new Point(it, it + 15, it * 100))
+            points.add(new PointImpl(it + 15, it * 100))
         }
         //Points that are null are ignored
         points.add(null)
@@ -132,11 +132,11 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
     def "test date-delta-compaction with almost_equals = 0"() {
         given:
         def points = []
-        points.add(new Point(0, 1, 10))
-        points.add(new Point(1, 5, 20))
-        points.add(new Point(2, 8, 30))
-        points.add(new Point(3, 16, 40))
-        points.add(new Point(4, 21, 50))
+        points.add(new PointImpl(1, 10))
+        points.add(new PointImpl(5, 20))
+        points.add(new PointImpl(8, 30))
+        points.add(new PointImpl(16, 40))
+        points.add(new PointImpl(21, 50))
 
         def builder = new MetricTimeSeries.Builder("name", "metric")
 
@@ -144,7 +144,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator())
         ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1l, 1036l, 1l, 1036l, builder)
         def ts = builder.build()
-        def listPoints = ts.points().collect(Collectors.toList()) as List<Point>
+        def listPoints = ts.points().collect(Collectors.toList()) as List<PointImpl>
 
         then:
         listPoints.get(0).timestamp == 1
@@ -158,11 +158,11 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
     def "test date-delta-compaction used in the paper"() {
         given:
         def points = []
-        points.add(new Point(0, 1, 10))
-        points.add(new Point(1, 5, 20))
-        points.add(new Point(2, 8, 30))
-        points.add(new Point(3, 16, 40))
-        points.add(new Point(4, 21, 50))
+        points.add(new PointImpl(1, 10))
+        points.add(new PointImpl(5, 20))
+        points.add(new PointImpl(8, 30))
+        points.add(new PointImpl(16, 40))
+        points.add(new PointImpl(21, 50))
 
         def builder = new MetricTimeSeries.Builder("name", "metric")
 
@@ -170,7 +170,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), 4)
         ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1l, 1036l, builder)
         def ts = builder.build()
-        def listPoints = ts.points().collect(Collectors.toList()) as List<Point>
+        def listPoints = ts.points().collect(Collectors.toList()) as List<PointImpl>
 
         then:
         listPoints.get(0).timestamp == 1//offset: 4
@@ -185,21 +185,21 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
     def "test date-delta-compaction"() {
         given:
         def points = []
-        points.add(new Point(0, 10, -10))
-        points.add(new Point(1, 20, -20))
-        points.add(new Point(2, 30, -30))
-        points.add(new Point(3, 39, -39))
-        points.add(new Point(4, 48, -48))
-        points.add(new Point(5, 57, -57))
-        points.add(new Point(6, 66, -66))
-        points.add(new Point(7, 75, -75))
-        points.add(new Point(8, 84, -84))
-        points.add(new Point(9, 93, -93))
-        points.add(new Point(10, 102, -102))
-        points.add(new Point(11, 111, -109))
-        points.add(new Point(12, 120, -118))
-        points.add(new Point(13, 129, -127))
-        points.add(new Point(14, 138, -136))
+        points.add(new PointImpl(10, -10))
+        points.add(new PointImpl(20, -20))
+        points.add(new PointImpl(30, -30))
+        points.add(new PointImpl(39, -39))
+        points.add(new PointImpl(48, -48))
+        points.add(new PointImpl(57, -57))
+        points.add(new PointImpl(66, -66))
+        points.add(new PointImpl(75, -75))
+        points.add(new PointImpl(84, -84))
+        points.add(new PointImpl(93, -93))
+        points.add(new PointImpl( 102, -102))
+        points.add(new PointImpl( 111, -109))
+        points.add(new PointImpl( 120, -118))
+        points.add(new PointImpl( 129, -127))
+        points.add(new PointImpl( 138, -136))
 
         def builder = new MetricTimeSeries.Builder("name", "metric")
 
@@ -207,7 +207,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), 10)
         ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 10l, 1036l, builder)
         def ts = builder.build()
-        def listPoints = ts.points().collect(Collectors.toList()) as List<Point>
+        def listPoints = ts.points().collect(Collectors.toList()) as List<PointImpl>
 
         then:                            //diff to origin
         listPoints.get(0).timestamp == 10//0
@@ -232,21 +232,21 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
     def "test date-delta-compaction with different values"() {
         given:
         def points = []
-        points.add(new Point(0, 1462892410, 10))
-        points.add(new Point(1, 1462892420, 20))
-        points.add(new Point(2, 1462892430, 30))
-        points.add(new Point(3, 1462892439, 39))
-        points.add(new Point(4, 1462892448, 48))
-        points.add(new Point(5, 1462892457, 57))
-        points.add(new Point(6, 1462892466, 66))
-        points.add(new Point(7, 1462892475, 10))
-        points.add(new Point(8, 1462892484, 84))
-        points.add(new Point(9, 1462892493, 93))
-        points.add(new Point(10, 1462892502, -102))
-        points.add(new Point(11, 1462892511, 109))
-        points.add(new Point(12, 1462892520, 118))
-        points.add(new Point(13, 1462892529, 127))
-        points.add(new Point(14, 1462892538, 136))
+        points.add(new PointImpl(1462892410, 10))
+        points.add(new PointImpl(1462892420, 20))
+        points.add(new PointImpl(1462892430, 30))
+        points.add(new PointImpl(1462892439, 39))
+        points.add(new PointImpl(1462892448, 48))
+        points.add(new PointImpl(1462892457, 57))
+        points.add(new PointImpl(1462892466, 66))
+        points.add(new PointImpl(1462892475, 10))
+        points.add(new PointImpl(1462892484, 84))
+        points.add(new PointImpl(1462892493, 93))
+        points.add(new PointImpl( 1462892502, -102))
+        points.add(new PointImpl( 1462892511, 109))
+        points.add(new PointImpl( 1462892520, 118))
+        points.add(new PointImpl( 1462892529, 127))
+        points.add(new PointImpl( 1462892538, 136))
 
         def builder = new MetricTimeSeries.Builder("metric1", "metric")
 
@@ -254,7 +254,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), 10)
         ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1462892410L, 1462892538L, builder)
         def ts = builder.build()
-        def listPoints = ts.points().collect(Collectors.toList()) as List<Point>
+        def listPoints = ts.points().collect(Collectors.toList()) as List<PointImpl>
 
         then:                            //diff to origin
         listPoints.get(0).timestamp == 1462892410//0
@@ -307,14 +307,14 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
     def "test rearrange points"() {
         given:
         def points = []
-        points.add(new Point(0, 100, 10))
-        points.add(new Point(1, 202, 20))
-        points.add(new Point(2, 305, 30))
-        points.add(new Point(3, 401, 39))
-        points.add(new Point(4, 509, 48))
-        points.add(new Point(5, 510, 48))
-        points.add(new Point(6, 511, 48))
-        points.add(new Point(7, 509, 10))
+        points.add(new PointImpl(100, 10))
+        points.add(new PointImpl(202, 20))
+        points.add(new PointImpl(305, 30))
+        points.add(new PointImpl(401, 39))
+        points.add(new PointImpl(509, 48))
+        points.add(new PointImpl(510, 48))
+        points.add(new PointImpl(511, 48))
+        points.add(new PointImpl(509, 10))
 
         def builder = new MetricTimeSeries.Builder("rearrange", "metric")
 
@@ -323,7 +323,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 100L, 510L, builder)
 
         def ts = builder.build()
-        def listPoints = ts.points().collect(Collectors.toList()) as List<Point>
+        def listPoints = ts.points().collect(Collectors.toList()) as List<PointImpl>
 
         then:
         listPoints.get(7).timestamp == 509
@@ -531,7 +531,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
             def unique = new MetricTimeSeries.Builder("Unique", "metric")
 
-            List<Point> list = rawTimeSeries.points().collect(Collectors.toList());
+            List<PointImpl> list = rawTimeSeries.points().collect(Collectors.toList());
 
             def prevDate = list.get(0).timestamp;
 

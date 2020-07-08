@@ -21,6 +21,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.stream.DoubleStream;
+import java.util.stream.LongStream;
 
 import static com.hurence.timeseries.modele.ListUtil.*;
 
@@ -195,6 +197,9 @@ public class DoubleList implements Serializable {
         return Arrays.copyOf(doubles, size);
     }
 
+    public DoubleStream toStream() {
+        return Arrays.stream(doubles);
+    }
 
     private void growIfNeeded(int newCapacity) {
         if (newCapacity != -1) {

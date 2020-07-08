@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.sampling;
 
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.PointImpl;
 
 public class SamplerFactory {
 
@@ -28,18 +28,18 @@ public class SamplerFactory {
      * @param bucketSize an int parameter
      * @return the sampler
      */
-    public static Sampler<Point> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
+    public static Sampler<PointImpl> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSampler<Point>(bucketSize);
+                return new FirstItemSampler<PointImpl>(bucketSize);
             case AVERAGE:
-                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketSize);
+                return new AverageSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
             case NONE:
-                return new IsoSampler<Point>();
+                return new IsoSampler<PointImpl>();
             case MIN:
-                return new MinSampler<Point>(getPointTimeSerieHandler(), bucketSize);
+                return new MinSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
             case MAX:
-                return new MaxSampler<Point>(getPointTimeSerieHandler(), bucketSize);
+                return new MaxSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
             case MIN_MAX:
             case LTTB:
             case MODE_MEDIAN:
@@ -49,10 +49,10 @@ public class SamplerFactory {
         }
     }
     //TODO
-    public static Sampler<Point> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
+    public static Sampler<PointImpl> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSamplerWithSpecificBucketing<Point>(bucketingStrategy);
+                return new FirstItemSamplerWithSpecificBucketing<PointImpl>(bucketingStrategy);
             case AVERAGE:
 //                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
             case NONE:
@@ -70,20 +70,20 @@ public class SamplerFactory {
         }
     }
 
-    public static TimeSerieHandler<Point> getPointTimeSerieHandler() {
-        return new TimeSerieHandler<Point>() {
+    public static TimeSerieHandler<PointImpl> getPointTimeSerieHandler() {
+        return new TimeSerieHandler<PointImpl>() {
                 @Override
-                public Point createTimeserie(long timestamp, double value) {
-                    return new Point(0, timestamp, value);
+                public PointImpl createTimeserie(long timestamp, double value) {
+                    return new PointImpl(timestamp, value);
                 }
 
                 @Override
-                public long getTimeserieTimestamp(Point point) {
+                public long getTimeserieTimestamp(PointImpl point) {
                     return point.getTimestamp();
                 }
 
                 @Override
-                public Double getTimeserieValue(Point point) {
+                public Double getTimeserieValue(PointImpl point) {
                     return point.getValue();
                 }
             };

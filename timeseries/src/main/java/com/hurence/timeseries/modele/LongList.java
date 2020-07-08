@@ -21,6 +21,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static com.hurence.timeseries.modele.ListUtil.*;
 
@@ -191,6 +193,10 @@ public class LongList implements Serializable {
      */
     public long[] toArray() {
         return Arrays.copyOf(longs, size);
+    }
+
+    public LongStream toStream() {
+        return Arrays.stream(longs);
     }
 
     /**

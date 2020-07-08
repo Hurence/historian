@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.ChunkAggsCalculator;
@@ -31,7 +31,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     @Override
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
-        List<Point> sampledPoint = extractPoints(chunks);
+        List<PointImpl> sampledPoint = extractPoints(chunks);
         this.sampledPoints.addAll(sampledPoint);
         aggsCalculator.updateAggs(chunks);
     }
@@ -41,11 +41,11 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<Point> extractPoints(List<JsonObject> chunks) {
+    private List<PointImpl> extractPoints(List<JsonObject> chunks) {
         List<List<JsonObject>> groupedChunks = groupChunks(chunks, this.samplingConf.getBucketSize());
         return groupedChunks.stream()
                 .map(this::sampleChunksIntoOneAggPoint)
-                .sorted(Comparator.comparing(Point::getTimestamp))
+                .sorted(Comparator.comparing(PointImpl::getTimestamp))
                 .collect(Collectors.toList());
     }
 
@@ -67,7 +67,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return groupedChunks;
     }
 
-    private Point sampleChunksIntoOneAggPoint(List<JsonObject> chunks) {
+    private PointImpl sampleChunksIntoOneAggPoint(List<JsonObject> chunks) {
         if (chunks.isEmpty())
             throw new IllegalArgumentException("chunks can not be empty !");
         LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0).encodePrettily());
@@ -113,6 +113,6 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             default:
                 throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
         }
-        return new Point(0, timestamp, aggValue);
+        return new PointImpl(timestamp, aggValue);
     }
 }
