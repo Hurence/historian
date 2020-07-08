@@ -65,8 +65,10 @@
         <org.log4j.version>1.2.16</org.log4j.version>
         <logisland.version>1.2.0</logisland.version>
 
-        <scala.version>2.12.9</scala.version>
-        <scala.binary.version>2.12</scala.binary.version>
+<!--        <scala.version>2.12.9</scala.version>-->
+<!--        <scala.binary.version>2.12</scala.binary.version>-->
+        <scala.version>2.11.12</scala.version>
+        <scala.binary.version>2.11</scala.binary.version>
 
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>

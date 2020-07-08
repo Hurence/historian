@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.sql
 
-import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.modele.ChunkRecordV0
 import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql.functions.{anomalie_test, chunk, guess, sax, sax_best_guess, sax_best_guess_paa_fixed}

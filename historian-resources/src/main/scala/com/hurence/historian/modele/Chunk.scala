@@ -1,6 +1,4 @@
-package com.hurence.historian.model
-
-import com.hurence.historian.spark.sql.reader.ModelVersion
+package com.hurence.historian.modele
 
 
 trait HistorianRecord {
@@ -15,7 +13,7 @@ trait HistorianRecord {
   */
 sealed trait Chunk extends HistorianRecord {
 
-  def apiVersion: String = ModelVersion.V0.toString
+  def apiVersion: String = SchemaVersion.VERSION_0.toString
 
   def name: String
 

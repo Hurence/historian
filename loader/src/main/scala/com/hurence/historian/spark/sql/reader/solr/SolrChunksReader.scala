@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.sql.reader.solr
 
-import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.modele.ChunkRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
 import org.apache.spark.sql.functions.{base64, col, lit, map}
