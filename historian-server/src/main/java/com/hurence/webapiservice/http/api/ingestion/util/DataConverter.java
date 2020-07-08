@@ -53,9 +53,13 @@ public class DataConverter {
                 Collectors.mapping(map -> {
                     JsonObject tagsList = new JsonObject();
                     multiMap.getAll(MAPPING_TAGS).forEach(t -> tagsList.put(t, map.mapFromOneCsvLine.get(t)));
+                    if (map.mapFromOneCsvLine.containsKey(multiMap.get(MAPPING_QUALITY)))
+                        return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_TIMESTAMP)), multiMap),
+                                toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_VALUE))),
+                                toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_QUALITY)))),
+                                tagsList);
                     return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_TIMESTAMP)), multiMap),
-                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_VALUE))),
-                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_QUALITY)))),
+                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_VALUE)))),
                             tagsList);
                 },
             Collectors.toList())))

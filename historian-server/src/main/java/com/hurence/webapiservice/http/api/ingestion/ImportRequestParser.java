@@ -176,8 +176,8 @@ public class ImportRequestParser {
                 if (pointArray.size() == 0){
                     numberOfFailedPointsForThisName++;
                     continue;
-                } else if (pointArray.size() != 3)
-                    throw new IllegalArgumentException("Points should be of the form [timestamp, value, quality]");
+                } else if (pointArray.size() != 3 && pointArray.size() != 2)
+                    throw new IllegalArgumentException("Points should be of the form [timestamp, value] or [timestamp, value, quality]");
                 try {
                     if (pointArray.getLong(0) == null) {
                         numberOfFailedPointsForThisName++;
@@ -196,14 +196,16 @@ public class ImportRequestParser {
                     numberOfFailedPointsForThisName++;
                     continue;
                 }
-                try {
-                    if ((pointArray.getDouble(2) == null) || (pointArray.getDouble(2) > 1.0) || (pointArray.getDouble(2) < 0.0)) {
+                if (pointArray.size() == 3) {
+                    try {
+                        if ((pointArray.getFloat(2) == null) || (pointArray.getFloat(2) > 1.0) || (pointArray.getFloat(2) < 0.0)) {
+                            numberOfFailedPointsForThisName++;
+                            continue;
+                        }
+                    } catch (Exception e) {
                         numberOfFailedPointsForThisName++;
                         continue;
                     }
-                } catch (Exception e) {
-                    numberOfFailedPointsForThisName++;
-                    continue;
                 }
                 newPoints.add(pointArray);
             }
