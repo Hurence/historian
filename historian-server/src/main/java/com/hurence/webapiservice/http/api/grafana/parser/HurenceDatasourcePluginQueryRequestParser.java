@@ -110,15 +110,15 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (agreg != null) {
             builder.withAggreg(agreg);
         }
-        Double quality = parseQuality(requestBody);
+        Float quality = parseQuality(requestBody);
         if (quality != null) {
             builder.withQuality(quality);
         }
         return builder.build();
     }
 
-    private Double parseQuality(JsonObject requestBody) {
-        return parse(requestBody, qualityPath, Double.class);
+    private Float parseQuality(JsonObject requestBody) {
+        return parse(requestBody, qualityPath, Float.class);
     }
 
     private List<AGG> parseAggreg(JsonObject requestBody) {

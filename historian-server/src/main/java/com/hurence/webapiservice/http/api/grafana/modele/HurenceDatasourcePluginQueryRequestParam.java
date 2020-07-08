@@ -21,7 +21,7 @@ public class HurenceDatasourcePluginQueryRequestParam {
     public static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
     public static final List DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
     public static final List<AGG> DEFAULT_ALL_AGGREGATION_LIST = Arrays.asList(values());
-    public static final Double DEFAULT_QUALITY = 0.0;
+    public static final Float DEFAULT_QUALITY = 0.0f;
 
     private final JsonArray metricNames;
     private final long from;
@@ -33,11 +33,11 @@ public class HurenceDatasourcePluginQueryRequestParam {
     private final Map<String, String> tags;
     private final String requestId;
     private final List<AGG> aggregList;
-    private final Double quality;
+    private final Float quality;
 
     private HurenceDatasourcePluginQueryRequestParam(JsonArray metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
-                                                     Map<String, String> tags, String requestId, List<AGG> aggregList, Double quality) {
+                                                     Map<String, String> tags, String requestId, List<AGG> aggregList, Float quality) {
         Objects.requireNonNull(metricNames);
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
@@ -83,7 +83,7 @@ public class HurenceDatasourcePluginQueryRequestParam {
         return tags;
     }
 
-    public Double getQuality() {
+    public Float getQuality() {
         return quality;
     }
 
@@ -103,7 +103,7 @@ public class HurenceDatasourcePluginQueryRequestParam {
         private Map<String, String> tags = DEFAULT_TAGS;
         private String requestId = DEFAULT_REQUEST_ID;
         private List<AGG> aggreg = DEFAULT_AGGREGATION;
-        private Double quality = DEFAULT_QUALITY;
+        private Float quality = DEFAULT_QUALITY;
 
         public Builder withMetricNames(JsonArray metricNames) {
             this.metricNames = metricNames;
@@ -154,7 +154,7 @@ public class HurenceDatasourcePluginQueryRequestParam {
             this.aggreg = aggreg;
         }
 
-        public void withQuality(Double quality) {
+        public void withQuality(Float quality) {
             this.quality = quality;
         }
 
