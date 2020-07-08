@@ -16,7 +16,6 @@
 package com.hurence.timeseries.converter.serializer.protobuf
 
 import com.hurence.timeseries.compaction.Compression
-import com.hurence.timeseries.MetricTimeSeries
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer
 import com.hurence.timeseries.modele.PointImpl
 import org.slf4j.Logger
@@ -25,9 +24,9 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.lang.reflect.Constructor
 import java.text.DecimalFormat
 import java.time.Instant
-import java.util.stream.Collectors
 import java.util.zip.GZIPInputStream
 
 /**
@@ -323,7 +322,6 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
             LOGGER.trace("Checking file ${it.key}")
             def points = it.value
             points.sort()
-            LOGGER.error("points size is ${points.size()} and points are ${points}")
             def startTs = points.get(0).getTimestamp()
             def endTs = points.get(points.size() - 1).getTimestamp()
 
