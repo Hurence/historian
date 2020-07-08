@@ -8,9 +8,6 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.List;
-
 public class JsonSchemaCompatibilityUtil {
 
     private static Logger LOGGER = LoggerFactory.getLogger(JsonSchemaCompatibilityUtil.class);
@@ -24,13 +21,13 @@ public class JsonSchemaCompatibilityUtil {
         convertMultiValuedFieldToMonoValued(chunk,
                 HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_YEAR, HistorianFields.CHUNK_YEAR);
         convertMultiValuedFieldToMonoValued(chunk,
-                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_AVG, HistorianFields.RESPONSE_CHUNK_AVG_FIELD);
+                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_AVG, HistorianFields.CHUNK_AVG_FIELD);
         convertMultiValuedFieldToMonoValued(chunk,
-                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_FIRST, HistorianFields.RESPONSE_CHUNK_FIRST_VALUE_FIELD);
+                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_FIRST, HistorianFields.CHUNK_FIRST_VALUE_FIELD);
         convertMultiValuedFieldToMonoValued(chunk,
-                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SUM, HistorianFields.RESPONSE_CHUNK_SUM_FIELD);
+                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SUM, HistorianFields.CHUNK_SUM_FIELD);
         convertMultiValuedFieldToMonoValued(chunk,
-                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_TREND, HistorianFields.RESPONSE_CHUNK_TREND_FIELD);
+                HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_TREND, HistorianFields.CHUNK_TREND_FIELD);
         LOGGER.debug("chunk version {} (converted) is {}", SchemaVersion.VERSION_0, chunk);
     }
 

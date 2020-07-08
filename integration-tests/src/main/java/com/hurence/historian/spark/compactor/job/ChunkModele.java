@@ -1,16 +1,7 @@
 package com.hurence.historian.spark.compactor.job;
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
-import com.hurence.logisland.record.Point;
-import com.hurence.logisland.timeseries.converter.common.Compression;
-import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
-
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public interface ChunkModele {
 

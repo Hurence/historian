@@ -4,7 +4,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
@@ -67,21 +67,21 @@ public class QueryEndPointFocusOnFilterIT {
                 ),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 1477895624866L, 1.0),
-                                new Point(0, 1477916224866L, 1.0),
-                                new Point(0, 1477917224866L, 1.0)
+                                new PointImpl( 1477895624866L, 1.0),
+                                new PointImpl( 1477916224866L, 1.0),
+                                new PointImpl( 1477917224866L, 1.0)
                         ),
                         Arrays.asList(
-                                new Point(0, 1477917224868L, 2.0),
-                                new Point(0, 1477917224886L, 2.0)
+                                new PointImpl( 1477917224868L, 2.0),
+                                new PointImpl( 1477917224886L, 2.0)
                         ),
                         Arrays.asList(
-                                new Point(0, 1477917224980L, 3.0),
-                                new Point(0, 1477917224981L, 3.0)
+                                new PointImpl( 1477917224980L, 3.0),
+                                new PointImpl( 1477917224981L, 3.0)
                         ),
                         Arrays.asList(//maxDataPoints we are not testing value only sampling
-                                new Point(0, 1477917224988L, 4.0),
-                                new Point(0, 1477917324988L, 4.0)
+                                new PointImpl( 1477917224988L, 4.0),
+                                new PointImpl( 1477917324988L, 4.0)
                         )
                 ));
         injector.injectChunks(client);

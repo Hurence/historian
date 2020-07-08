@@ -1,12 +1,10 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
-import com.hurence.logisland.timeseries.functions.aggregation.Max;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
-import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam.DEFAULT_ALL_AGGREGATION_LIST;
-import static com.hurence.webapiservice.modele.AGG.*;
+import static com.hurence.webapiservice.modele.AGG.values;
 
 public class RequestParserUtil {
 

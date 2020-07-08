@@ -200,7 +200,7 @@ public interface HistorianService {
      *                          {    "correctPoints" : [
      *                                  {
      *                                      {@value HistorianFields#NAME} : "metric name to add datapoints",
-     *                                      {@value HistorianFields#POINTS_REQUEST_FIELD } : [
+     *                                      {@value HistorianFields#POINTS } : [
      *                                          [timestamp, value, quality]
      *                                          ...
      *                                          [timestamp, value, quality]
@@ -208,7 +208,7 @@ public interface HistorianService {
      *                                  }
      *                                  {
      *                                      {@value HistorianFields#NAME} : "metric name to add datapoints",
-     *                                      {@value HistorianFields#POINTS_REQUEST_FIELD } : [
+     *                                      {@value HistorianFields#POINTS } : [
      *                                          [timestamp, value, quality]
      *                                          ...
      *                                          [timestamp, value, quality]

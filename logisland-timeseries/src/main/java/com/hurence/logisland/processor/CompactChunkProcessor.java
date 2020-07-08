@@ -38,14 +38,14 @@ import com.hurence.logisland.component.InitializationException;
     import com.hurence.logisland.annotation.documentation.Tags;
     import com.hurence.logisland.component.PropertyDescriptor;
     import com.hurence.logisland.record.FieldDictionary;
-    import com.hurence.logisland.record.Point;
     import com.hurence.logisland.record.Record;
     import com.hurence.logisland.record.StandardRecord;
-    import com.hurence.logisland.timeseries.converter.common.Compression;
-    import com.hurence.logisland.timeseries.converter.serializer.protobuf.ProtoBufMetricTimeSeriesSerializer;
-    import com.hurence.logisland.timeseries.dts.Pair;
+    import com.hurence.timeseries.compaction.Compression;
+    import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
+    import com.hurence.timeseries.modele.Pair;
     import com.hurence.logisland.validator.StandardValidators;
-    import org.apache.commons.lang3.StringUtils;
+import com.hurence.timeseries.modele.PointImpl;
+import org.apache.commons.lang3.StringUtils;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;
 
@@ -140,22 +140,22 @@ public class CompactChunkProcessor extends AbstractProcessor {
 
     private Record chunkRecords(List<Record> records) {
         final StandardRecord chunkedRecord = new StandardRecord();
-        List<Point> points = extractPoints(records.stream()).collect(Collectors.toList());
+        List<PointImpl> points = extractPoints(records.stream()).collect(Collectors.toList());
 //        chunkedRecord.setCompressedPoints(compressPoints(points.stream()));
         return null;
     }
 
-    private byte[] compressPoints(Stream<Point> points) {
-        byte[] serializedPoints = ProtoBufMetricTimeSeriesSerializer.to(points.iterator(), threshold);
+    private byte[] compressPoints(Stream<PointImpl> points) {
+        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), threshold);
         return Compression.compress(serializedPoints);
     }
 
-    private Stream<Point> extractPoints(Stream<Record> records) {
+    private Stream<PointImpl> extractPoints(Stream<Record> records) {
         return records
                 .filter(record -> record.getField(FieldDictionary.RECORD_VALUE) != null && record.getField(FieldDictionary.RECORD_VALUE).getRawValue() != null)
                 .map(record -> new Pair<>(record.getTime().getTime(), record.getField(FieldDictionary.RECORD_VALUE).asDouble()))
                 .filter(longDoublePair -> longDoublePair.getSecond() != null && Double.isFinite(longDoublePair.getSecond()))
-                .map(pair -> new Point(0 ,pair.getFirst(), pair.getSecond()));
+                .map(pair -> new PointImpl(pair.getFirst(), pair.getSecond()));
     }
     /*
      * Build a map of mapping rules of the form:

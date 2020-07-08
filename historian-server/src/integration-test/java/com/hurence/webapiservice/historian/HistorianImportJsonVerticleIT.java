@@ -63,20 +63,20 @@ public class HistorianImportJsonVerticleIT {
     void importJsonTimeseries(VertxTestContext testContext) {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
-        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature000").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))));
-        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
+        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature000").put(POINTS, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))));
+        JsonObject paramsObject = new JsonObject().put(POINTS, params).put(CHUNK_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject expectedResponse = new JsonObject().put(RESPONSE_TOTAL_ADDED_POINTS, 2).put(RESPONSE_TOTAL_ADDED_CHUNKS, 1);
+                        JsonObject expectedResponse = new JsonObject().put(TOTAL_ADDED_POINTS, 2).put(TOTAL_ADDED_CHUNKS, 1);
                         assertEquals(rsp, expectedResponse);
                     });
                 })
                 .doAfterSuccess(t -> {
                     JsonObject params1 = new JsonObject("{\""+FROM+"\":1477895614866," +
                             "\""+TO+"\": 1477916925845," +
-                            "\""+FIELDS+"\":[\""+RESPONSE_CHUNK_VALUE_FIELD+"\",\""+RESPONSE_CHUNK_START_FIELD+"\",\""+RESPONSE_CHUNK_END_FIELD+"\",\""+RESPONSE_CHUNK_COUNT_FIELD+"\",\""+NAME+"\"]," +
+                            "\""+FIELDS+"\":[\""+ CHUNK_VALUE_FIELD +"\",\""+ CHUNK_START_FIELD +"\",\""+ CHUNK_END_FIELD +"\",\""+ CHUNK_COUNT_FIELD +"\",\""+NAME+"\"]," +
                             "\""+NAMES+"\":[\"openSpaceSensors.Temperature000\"]," +
                             "\""+TAGS+"\":{}," +
                             "\""+SAMPLING_ALGO+"\":\"AVERAGE\"," +
@@ -111,23 +111,23 @@ public class HistorianImportJsonVerticleIT {
         long time2 = 1477916224866L;
         long time3 = 1477895724888L;
         long time4 = 1477916924845L;
-        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature111").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
-                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature222").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))))
-                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature333").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time3).add(4.1)).add(new JsonArray().add(time4).add(6.5))))
-                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature444").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time3).add(0.0)).add(new JsonArray().add(time4).add(9.1))));
-        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
+        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature111").put(POINTS, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
+                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature222").put(POINTS, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))))
+                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature333").put(POINTS, new JsonArray().add(new JsonArray().add(time3).add(4.1)).add(new JsonArray().add(time4).add(6.5))))
+                .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature444").put(POINTS, new JsonArray().add(new JsonArray().add(time3).add(0.0)).add(new JsonArray().add(time4).add(9.1))));
+        JsonObject paramsObject = new JsonObject().put(POINTS, params).put(CHUNK_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject expectedResponse = new JsonObject().put(RESPONSE_TOTAL_ADDED_POINTS, 8).put(RESPONSE_TOTAL_ADDED_CHUNKS, 4);
+                        JsonObject expectedResponse = new JsonObject().put(TOTAL_ADDED_POINTS, 8).put(TOTAL_ADDED_CHUNKS, 4);
                         assertEquals(rsp, expectedResponse);
                     });
                 })
                 .doAfterSuccess(t -> {
                     JsonObject params1 = new JsonObject("{\""+FROM+"\":1477895614866," +
                             "\""+TO+"\": 1477916925845," +
-                            "\""+FIELDS+"\":[\""+RESPONSE_CHUNK_VALUE_FIELD+"\",\""+RESPONSE_CHUNK_START_FIELD+"\",\""+RESPONSE_CHUNK_END_FIELD+"\",\""+RESPONSE_CHUNK_COUNT_FIELD+"\",\""+NAME+"\"]," +
+                            "\""+FIELDS+"\":[\""+ CHUNK_VALUE_FIELD +"\",\""+ CHUNK_START_FIELD +"\",\""+ CHUNK_END_FIELD +"\",\""+ CHUNK_COUNT_FIELD +"\",\""+NAME+"\"]," +
                             "\""+NAMES+"\":[\"openSpaceSensors.Temperature111\",\"openSpaceSensors.Temperature222\"," +
                             "\"openSpaceSensors.Temperature333\"," +
                             "\"openSpaceSensors.Temperature444\"]," +
@@ -174,14 +174,14 @@ public class HistorianImportJsonVerticleIT {
     void checkAddedTimeseriesChunks(VertxTestContext testContext) {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
-        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature555").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
-        .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature666").put(POINTS_REQUEST_FIELD, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))));
-        JsonObject paramsObject = new JsonObject().put(POINTS_REQUEST_FIELD, params).put(CHUNK_ORIGIN, "ingestion-json");
+        JsonArray params = new JsonArray().add(new JsonObject().put(NAME, "openSpaceSensors.Temperature555").put(POINTS, new JsonArray().add(new JsonArray().add(time1).add(2.0)).add(new JsonArray().add(time2).add(4.0))))
+        .add(new JsonObject().put(NAME, "openSpaceSensors.Temperature666").put(POINTS, new JsonArray().add(new JsonArray().add(time1).add(3.1)).add(new JsonArray().add(time2).add(8.8))));
+        JsonObject paramsObject = new JsonObject().put(POINTS, params).put(CHUNK_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject expectedResponse = new JsonObject().put(RESPONSE_TOTAL_ADDED_POINTS, 4).put(RESPONSE_TOTAL_ADDED_CHUNKS, 2);
+                        JsonObject expectedResponse = new JsonObject().put(TOTAL_ADDED_POINTS, 4).put(TOTAL_ADDED_CHUNKS, 2);
                         assertEquals(rsp, expectedResponse);
                     });
                 })
@@ -213,26 +213,26 @@ public class HistorianImportJsonVerticleIT {
     private void checkTimeseriesChunks (JsonObject doc1, JsonObject doc2) {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_START_FIELD));
-        assertEquals(time1, doc1.getLong(RESPONSE_CHUNK_START_FIELD));
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_END_FIELD));
-        assertEquals(time2, doc1.getLong(RESPONSE_CHUNK_END_FIELD));
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_ID_FIELD));
-assertEquals("7e52004b840e5fabbcd033384149d843390d4c7a118e47719798695e7ecd4216",doc1.getString(RESPONSE_CHUNK_ID_FIELD));
+        assertTrue(doc1.containsKey(CHUNK_START_FIELD));
+        assertEquals(time1, doc1.getLong(CHUNK_START_FIELD));
+        assertTrue(doc1.containsKey(CHUNK_END_FIELD));
+        assertEquals(time2, doc1.getLong(CHUNK_END_FIELD));
+        assertTrue(doc1.containsKey(CHUNK_ID_FIELD));
+assertEquals("7e52004b840e5fabbcd033384149d843390d4c7a118e47719798695e7ecd4216",doc1.getString(CHUNK_ID_FIELD));
 
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_COUNT_FIELD));
-        assertEquals(2,doc1.getLong(RESPONSE_CHUNK_COUNT_FIELD));
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VALUE_FIELD));
-        assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(RESPONSE_CHUNK_VALUE_FIELD));
+        assertTrue(doc1.containsKey(CHUNK_COUNT_FIELD));
+        assertEquals(2,doc1.getLong(CHUNK_COUNT_FIELD));
+        assertTrue(doc1.containsKey(CHUNK_VALUE_FIELD));
+        assertEquals("H4sIAAAAAAAAAOPi1GSAAAcuPoEDK1/C+AIOAgwAJ4b8wB0AAAA=", doc1.getString(CHUNK_VALUE_FIELD));
 //        assertTrue(doc1.containsKey(RESPONSE_CHUNK_WINDOW_MS_FIELD));
 //        assertEquals(20600000, doc1.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
-        assertTrue(doc1.containsKey(RESPONSE_CHUNK_VERSION_FIELD));
+        assertTrue(doc1.containsKey(CHUNK_VERSION_FIELD));
 
         assertEquals("openSpaceSensors.Temperature666",doc2.getString(NAME));
-        assertEquals(time1, doc2.getLong(RESPONSE_CHUNK_START_FIELD));
-        assertEquals(time2, doc2.getLong(RESPONSE_CHUNK_END_FIELD));
-        assertEquals(2,doc2.getLong(RESPONSE_CHUNK_COUNT_FIELD));
-        assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQ4HLj4BA6sfMmpOWsmCCg6CDAAAFASLIkdAAAA", doc2.getString(RESPONSE_CHUNK_VALUE_FIELD));
+        assertEquals(time1, doc2.getLong(CHUNK_START_FIELD));
+        assertEquals(time2, doc2.getLong(CHUNK_END_FIELD));
+        assertEquals(2,doc2.getLong(CHUNK_COUNT_FIELD));
+        assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQ4HLj4BA6sfMmpOWsmCCg6CDAAAFASLIkdAAAA", doc2.getString(CHUNK_VALUE_FIELD));
 //        assertEquals(20600000,doc2.getLong(RESPONSE_CHUNK_WINDOW_MS_FIELD));
     }
 

@@ -2,27 +2,19 @@ package com.hurence.webapiservice.http.api.grafana.hurence;
 
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector;
-import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.util.MultipartRequestResponseConf;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
-import com.hurence.webapiservice.http.HttpServerVerticle;
-import com.hurence.webapiservice.http.api.grafana.GrafanaApiVersion;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.reactivex.Completable;
-import io.reactivex.Observable;
-import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -46,8 +38,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT;
-import static com.hurence.webapiservice.http.HttpServerVerticle.IMPORT_CSV_ENDPOINT;
-import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 
 
@@ -79,37 +69,37 @@ public class ComplexQueryEndPointVersion0IT {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralVersion0SolrInjector injector = new GeneralVersion0SolrInjector();
         ChunkModeleVersion0 chunkTempbUsine1Sensor3 = ChunkModeleVersion0.fromPoints("temp_b", Arrays.asList(
-                new Point(0, 1, 1)
+                new PointImpl( 1, 1)
         ));
         chunkTempbUsine1Sensor3.addTag("sensor", "sensor_3");
         chunkTempbUsine1Sensor3.addTag("usine", "usine_1");
         injector.addChunk(chunkTempbUsine1Sensor3);
 
         ChunkModeleVersion0 chunkTempaUsine1Sensor1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 2, 2),
-                new Point(0, 3, 3),
-                new Point(0, 4, 4)
+                new PointImpl( 2, 2),
+                new PointImpl( 3, 3),
+                new PointImpl( 4, 4)
         ));
         chunkTempaUsine1Sensor1.addTag("sensor", "sensor_1");
         chunkTempaUsine1Sensor1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1Sensor1);
 
         ChunkModeleVersion0 chunkTempaUsine1Sensor2 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 5, 3)
+                new PointImpl( 5, 3)
         ));
         chunkTempaUsine1Sensor2.addTag("sensor", "sensor_2");
         chunkTempaUsine1Sensor2.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1Sensor2);
 
         ChunkModeleVersion0 chunkTempaUsine2Sensor3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 6, 4)
+                new PointImpl( 6, 4)
         ));
         chunkTempaUsine2Sensor3.addTag("sensor", "sensor_3");
         chunkTempaUsine2Sensor3.addTag("usine", "usine_2");
         injector.addChunk(chunkTempaUsine2Sensor3);
 
         ChunkModeleVersion0 chunkTempaUsine1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new Point(0, 7, 5)
+                new PointImpl( 7, 5)
         ));
         chunkTempaUsine1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1);

@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -22,7 +22,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     final long to;
     final SamplingConf samplingConf;
     protected final List<JsonObject> chunks = new ArrayList<>();
-    final List<Point> sampledPoints = new ArrayList<>();
+    final List<PointImpl> sampledPoints = new ArrayList<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
@@ -39,7 +39,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     @Override
     public void addChunk(JsonObject chunk) {
         totalChunkCounter++;
-        pointCounter+=chunk.getLong(HistorianFields.RESPONSE_CHUNK_COUNT_FIELD);
+        pointCounter+=chunk.getLong(HistorianFields.CHUNK_COUNT_FIELD);
         chunks.add(chunk);
         if (isBufferFull()) {
             samplePointsInBufferAndCalculAggregThenReset();
@@ -87,7 +87,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 * may be the best solution I think. The requesting code here should suppose chunks are not intersecting.
                 * We sort just so that user can not realize there is a problem in chunks.
                 */
-                .sorted(Comparator.comparing(Point::getTimestamp))
+                .sorted(Comparator.comparing(PointImpl::getTimestamp))
                 .map(p -> new JsonArray().add(p.getValue()).add(p.getTimestamp()))
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()

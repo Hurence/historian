@@ -104,13 +104,13 @@ public class GetTimeSeriesChunkHandler {
         StringBuilder queryBuilder = new StringBuilder();
         if (params.getLong(TO) != null) {
             LOGGER.trace("requesting timeseries to {}", params.getLong(TO));
-            queryBuilder.append(RESPONSE_CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO)).append("]");
+            queryBuilder.append(CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO)).append("]");
         }
         if (params.getLong(FROM) != null) {
             LOGGER.trace("requesting timeseries from {}", params.getLong(FROM));
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(RESPONSE_CHUNK_END_FIELD).append(":[").append(params.getLong(FROM)).append(" TO *]");
+            queryBuilder.append(CHUNK_END_FIELD).append(":[").append(params.getLong(FROM)).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
@@ -120,13 +120,13 @@ public class GetTimeSeriesChunkHandler {
         buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
                 .ifPresent(query::addFilterQuery);
 //            FIELDS_TO_FETCH
-        query.setFields(RESPONSE_CHUNK_START_FIELD,
-                RESPONSE_CHUNK_END_FIELD,
-                RESPONSE_CHUNK_COUNT_FIELD,
+        query.setFields(CHUNK_START_FIELD,
+                CHUNK_END_FIELD,
+                CHUNK_COUNT_FIELD,
                 NAME);
         //    SORT
-        query.setSort(RESPONSE_CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(RESPONSE_CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setSort(CHUNK_START_FIELD, SolrQuery.ORDER.asc);
+        query.addSort(CHUNK_END_FIELD, SolrQuery.ORDER.asc);
         query.setRows(params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000));
         return query;
     }

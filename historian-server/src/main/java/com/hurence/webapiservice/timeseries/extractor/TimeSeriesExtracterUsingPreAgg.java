@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.logisland.record.Point;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.ChunkAggsCalculator;
@@ -31,7 +31,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     @Override
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
-        List<Point> sampledPoint = extractPoints(chunks);
+        List<PointImpl> sampledPoint = extractPoints(chunks);
         this.sampledPoints.addAll(sampledPoint);
         aggsCalculator.updateAggs(chunks);
     }
@@ -41,11 +41,11 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<Point> extractPoints(List<JsonObject> chunks) {
+    private List<PointImpl> extractPoints(List<JsonObject> chunks) {
         List<List<JsonObject>> groupedChunks = groupChunks(chunks, this.samplingConf.getBucketSize());
         return groupedChunks.stream()
                 .map(this::sampleChunksIntoOneAggPoint)
-                .sorted(Comparator.comparing(Point::getTimestamp))
+                .sorted(Comparator.comparing(PointImpl::getTimestamp))
                 .collect(Collectors.toList());
     }
 
@@ -55,7 +55,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         List<JsonObject> bucketOfChunks = new ArrayList<>();
         for (JsonObject chunk: chunks) {
             bucketOfChunks.add(chunk);
-            currentPointNumber += chunk.getInteger(RESPONSE_CHUNK_COUNT_FIELD);
+            currentPointNumber += chunk.getInteger(CHUNK_COUNT_FIELD);
             if (currentPointNumber >= bucketSize) {
                 groupedChunks.add(bucketOfChunks);
                 bucketOfChunks = new ArrayList<>();
@@ -67,22 +67,22 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return groupedChunks;
     }
 
-    private Point sampleChunksIntoOneAggPoint(List<JsonObject> chunks) {
+    private PointImpl sampleChunksIntoOneAggPoint(List<JsonObject> chunks) {
         if (chunks.isEmpty())
             throw new IllegalArgumentException("chunks can not be empty !");
         LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0).encodePrettily());
         long timestamp = chunks.stream()
-                .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_START_FIELD))
+                .mapToLong(chunk -> chunk.getLong(CHUNK_START_FIELD))
                 .findFirst()
                 .getAsLong();
         double aggValue;
         switch (samplingConf.getAlgo()) {
             case AVERAGE:
                 double sum = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_SUM_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_SUM_FIELD))
                         .sum();
                 long numberOfPoint = chunks.stream()
-                        .mapToLong(chunk -> chunk.getLong(RESPONSE_CHUNK_COUNT_FIELD))
+                        .mapToLong(chunk -> chunk.getLong(CHUNK_COUNT_FIELD))
                         .sum();
                 aggValue = BigDecimal.valueOf(sum)
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
@@ -90,19 +90,19 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 break;
             case FIRST:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_FIRST_VALUE_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_FIRST_VALUE_FIELD))
                         .findFirst()
                         .getAsDouble();
                 break;
             case MIN:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MIN_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_MIN_FIELD))
                         .min()
                         .getAsDouble();
                 break;
             case MAX:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(RESPONSE_CHUNK_MAX_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_MAX_FIELD))
                         .max()
                         .getAsDouble();
                 break;
@@ -113,6 +113,6 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             default:
                 throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
         }
-        return new Point(0, timestamp, aggValue);
+        return new PointImpl(timestamp, aggValue);
     }
 }
