@@ -1,0 +1,11 @@
+=== grafana-historian-datasource
+
+The datasource is implemented using javascript, the corresponding github project is available
+[here] (https://github.com/Hurence/grafana-historian-datasource), we recommend developing this plugin directly in your own project. Once you have pushed your modifications in the datasource project, you can update the submodule in this project with the following command:
+
+[source,bash]
+----
+git submodule update --remote
+----
+
+This will automatically update the project with the last commit of the submodule project.
