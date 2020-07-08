@@ -1,6 +1,8 @@
 package com.hurence.timeseries.modele;
 
-public interface Point {
+import java.io.Serializable;
+
+public interface Point extends Comparable<Point>, Serializable {
 
     static Point fromValueAndQuality(long timestamp, double value, float quality) {
         return new PointWithQualityImpl(timestamp, value, quality);
@@ -14,4 +16,9 @@ public interface Point {
     double getValue();
     float getQuality();
     boolean hasQuality();
+
+    @Override
+    default int compareTo(Point o) {
+        return Long.compare(this.getTimestamp(), o.getTimestamp());
+    }
 }

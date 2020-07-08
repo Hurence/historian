@@ -42,26 +42,16 @@ message Points {
     repeated Point p = 1;
     //the used ddc threshold
     optional uint32 ddc = 2;
-}
-
-// Only quality values different from firstValue are stored
-message Qualities {
-    // The list of Quality points
-    repeated Quality q = 1;
+    //The list of qualities, only saving for each change
+    repeated Quality q = 3;
 }
 
 message Quality {
-    //The delta as long
-    optional uint64 tlong = 1;
-    //Perhaps we can store the delta as int
-    optional uint32 tint = 2;
-    //timestamp base deltas
-    optional uint64 tlongBP = 3;
-    optional uint32 tintBP = 4;
-
-    //Value
-    optional float v = 5;
-    //Or the index of the value
+    //the index of the first point with this quality, not given for first point
+    //we will store it each time the quality changes
+    optional uint32 tIndex = 1;
+    //the Value of the quality
+    optional float v = 2;
+    //Or the index of the value if it is already stocked
     optional uint32 vIndex = 6;
-
 }
