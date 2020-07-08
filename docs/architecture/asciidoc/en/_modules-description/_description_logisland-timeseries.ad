@@ -1,0 +1,3 @@
+=== logisland-timeseries
+
+This module contains logisland processors using the timeseries library. These processors handle timeseries. Some are used to compact data in the compactor. Ultimately, it would be good to delete this module and only use the tools present in the timeseries module. Indeed it does not seem necessary to embed logisland business logics in the historian.
