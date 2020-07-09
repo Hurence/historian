@@ -24,7 +24,6 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
-import java.lang.reflect.Constructor
 import java.text.DecimalFormat
 import java.time.Instant
 import java.util.zip.GZIPInputStream
@@ -308,7 +307,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
     def "test ddc threshold -1"() {
         when:
-        ProtoBufTimeSeriesSerializer.to(null, -1)
+        ProtoBufTimeSeriesSerializer.to(Collections.emptyList(), -1)
         then:
         thrown(IllegalArgumentException)
     }
@@ -397,7 +396,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
                 def indexwiseDeltaModTS = 0
                 def averageDeviationTS = 0
                 def compressedBytes = 0
-                def url = ProtoBufTimeSeriesSerializerJavaTest.getResource("/data-mini")
+                def url = ProtoBufTimeSeriesSerializerTest.getResource("/data-mini")
                 def tsDir = new File(url.toURI())
                 def compressedFile = new File(tsDir, filename)
                 def rawBytes = new GZIPInputStream(new FileInputStream(compressedFile)).getBytes().length
@@ -556,7 +555,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
 
     static def readTimeSeriesData() {
-        def url = ProtoBufTimeSeriesSerializerJavaTest.getResource("/data-mini")
+        def url = ProtoBufTimeSeriesSerializerTest.getResource("/data-mini")
         def tsDir = new File(url.toURI())
 
         def documents = new HashMap<String, List<PointImpl>>()

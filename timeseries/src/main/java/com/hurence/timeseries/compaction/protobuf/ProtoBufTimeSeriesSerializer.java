@@ -20,6 +20,7 @@ import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.modele.DoubleList;
 import com.hurence.timeseries.modele.LongList;
 import com.hurence.timeseries.converter.serializer.MetricProtocolBuffers;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,11 +137,36 @@ public final class ProtoBufTimeSeriesSerializer {
         }
     }
 
+    /**
+     * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
+     *
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
+     * @param ddcThreshold     - the aberration threshold for the deltas
+     * @return the serialized points as byte[]
+     */
+    public static byte[] to(List<Point> metricDataPoints, final int ddcThreshold) {
+        Iterator<PointImpl> removePointsWithQuality = metricDataPoints.
+                stream()
+                .filter(p -> !p.hasQuality())
+                .map(PointImpl.class::cast)
+                .iterator();
+        return to(removePointsWithQuality, ddcThreshold);
+    }
 
     /**
      * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
      *
-     * @param metricDataPoints - the list with points
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
+     * @return the serialized points as byte[]
+     */
+    public static byte[] to(List<Point> metricDataPoints) {
+        return to(metricDataPoints, 0);
+    }
+
+    /**
+     * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
+     *
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
     public static byte[] to(Iterator<PointImpl> metricDataPoints) {
@@ -151,7 +177,7 @@ public final class ProtoBufTimeSeriesSerializer {
     /**
      * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
      *
-     * @param metricDataPoints - the list with points
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @param ddcThreshold     - the aberration threshold for the deltas
      * @return the serialized points as byte[]
      */
