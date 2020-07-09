@@ -25,14 +25,11 @@ message Point {
     optional uint64 tlong = 1;
     //Perhaps we can store the delta as int
     optional uint32 tint = 2;
-    //timestamp base deltas
-    optional uint64 tlongBP = 3;
-    optional uint32 tintBP = 4;
 
     //Value
-    optional double v = 5;
+    optional double v = 3;
     //Or the index of the value
-    optional uint32 vIndex = 6;
+    optional uint32 vIndex = 4;
 
 }
 
@@ -49,9 +46,9 @@ message Points {
 message Quality {
     //the index of the first point with this quality, not given for first point
     //we will store it each time the quality changes
-    optional uint32 tIndex = 1;
+    optional uint32 pointIndex = 1;
     //the Value of the quality
     optional float v = 2;
     //Or the index of the value if it is already stocked
-    optional uint32 vIndex = 6;
+    optional uint32 vIndex = 3;
 }
