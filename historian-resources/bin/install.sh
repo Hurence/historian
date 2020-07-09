@@ -307,10 +307,6 @@ intall_spark_if_asked() {
     wget https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz
     tar -xf spark-2.3.4-bin-without-hadoop.tgz
     rm spark-2.3.4-bin-without-hadoop.tgz
-    # add two additional jars to spark to handle our framework
-    wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
-    mv spark-solr-3.6.6-shaded.jar "$HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/"
-    cp "$HISTORIAN_HOME/lib/loader-*.jar" "$HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/"
   fi
 }
 
