@@ -55,13 +55,9 @@ message Quality {
     optional uint64 tlong = 1;
     //Perhaps we can store the delta as int
     optional uint32 tint = 2;
-    //timestamp base deltas
-    optional uint64 tlongBP = 3;
-    optional uint32 tintBP = 4;
 
     //Value
-    optional float v = 5;
+    optional float v = 3;
     //Or the index of the value
-    optional uint32 vIndex = 6;
-
+    optional uint32 vIndex = 4;
 }

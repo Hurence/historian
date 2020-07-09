@@ -1877,81 +1877,47 @@ public final class MetricPointWithQuality {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional double firstValue = 1;</code>
-     *
-     * <pre>
-     * First Quality Value
-     * </pre>
-     */
-    boolean hasFirstValue();
-    /**
-     * <code>optional double firstValue = 1;</code>
-     *
-     * <pre>
-     * First Quality Value
-     * </pre>
-     */
-    double getFirstValue();
-
-    /**
-     * <code>optional double avgValue = 2;</code>
-     *
-     * <pre>
-     * Avg Quality value
-     * </pre>
-     */
-    boolean hasAvgValue();
-    /**
-     * <code>optional double avgValue = 2;</code>
-     *
-     * <pre>
-     * Avg Quality value
-     * </pre>
-     */
-    double getAvgValue();
-
-    /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point> 
-        getPList();
+    java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality> 
+        getQList();
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point getP(int index);
+    com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality getQ(int index);
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    int getPCount();
+    int getQCount();
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    java.util.List<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> 
-        getPOrBuilderList();
+    java.util.List<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder> 
+        getQOrBuilderList();
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder getPOrBuilder(
+    com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder getQOrBuilder(
         int index);
   }
   /**
@@ -2010,22 +1976,12 @@ public final class MetricPointWithQuality {
               }
               break;
             }
-            case 9: {
-              bitField0_ |= 0x00000001;
-              firstValue_ = input.readDouble();
-              break;
-            }
-            case 17: {
-              bitField0_ |= 0x00000002;
-              avgValue_ = input.readDouble();
-              break;
-            }
-            case 26: {
-              if (!((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-                p_ = new java.util.ArrayList<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point>();
-                mutable_bitField0_ |= 0x00000004;
+            case 10: {
+              if (!((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+                q_ = new java.util.ArrayList<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality>();
+                mutable_bitField0_ |= 0x00000001;
               }
-              p_.add(input.readMessage(com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.PARSER, extensionRegistry));
+              q_.add(input.readMessage(com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.PARSER, extensionRegistry));
               break;
             }
           }
@@ -2036,8 +1992,8 @@ public final class MetricPointWithQuality {
         throw new com.google.protobuf.InvalidProtocolBufferException(
             e.getMessage()).setUnfinishedMessage(this);
       } finally {
-        if (((mutable_bitField0_ & 0x00000004) == 0x00000004)) {
-          p_ = java.util.Collections.unmodifiableList(p_);
+        if (((mutable_bitField0_ & 0x00000001) == 0x00000001)) {
+          q_ = java.util.Collections.unmodifiableList(q_);
         }
         this.unknownFields = unknownFields.build();
         makeExtensionsImmutable();
@@ -2070,112 +2026,63 @@ public final class MetricPointWithQuality {
       return PARSER;
     }
 
-    private int bitField0_;
-    public static final int FIRSTVALUE_FIELD_NUMBER = 1;
-    private double firstValue_;
+    public static final int Q_FIELD_NUMBER = 1;
+    private java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality> q_;
     /**
-     * <code>optional double firstValue = 1;</code>
-     *
-     * <pre>
-     * First Quality Value
-     * </pre>
-     */
-    public boolean hasFirstValue() {
-      return ((bitField0_ & 0x00000001) == 0x00000001);
-    }
-    /**
-     * <code>optional double firstValue = 1;</code>
-     *
-     * <pre>
-     * First Quality Value
-     * </pre>
-     */
-    public double getFirstValue() {
-      return firstValue_;
-    }
-
-    public static final int AVGVALUE_FIELD_NUMBER = 2;
-    private double avgValue_;
-    /**
-     * <code>optional double avgValue = 2;</code>
-     *
-     * <pre>
-     * Avg Quality value
-     * </pre>
-     */
-    public boolean hasAvgValue() {
-      return ((bitField0_ & 0x00000002) == 0x00000002);
-    }
-    /**
-     * <code>optional double avgValue = 2;</code>
-     *
-     * <pre>
-     * Avg Quality value
-     * </pre>
-     */
-    public double getAvgValue() {
-      return avgValue_;
-    }
-
-    public static final int P_FIELD_NUMBER = 3;
-    private java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point> p_;
-    /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    public java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point> getPList() {
-      return p_;
+    public java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality> getQList() {
+      return q_;
     }
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    public java.util.List<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> 
-        getPOrBuilderList() {
-      return p_;
+    public java.util.List<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder> 
+        getQOrBuilderList() {
+      return q_;
     }
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    public int getPCount() {
-      return p_.size();
+    public int getQCount() {
+      return q_.size();
     }
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point getP(int index) {
-      return p_.get(index);
+    public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality getQ(int index) {
+      return q_.get(index);
     }
     /**
-     * <code>repeated .serializer.Point p = 3;</code>
+     * <code>repeated .serializer.Quality q = 1;</code>
      *
      * <pre>
      * The list of Quality points
      * </pre>
      */
-    public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder getPOrBuilder(
+    public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder getQOrBuilder(
         int index) {
-      return p_.get(index);
+      return q_.get(index);
     }
 
     private void initFields() {
-      firstValue_ = 0D;
-      avgValue_ = 0D;
-      p_ = java.util.Collections.emptyList();
+      q_ = java.util.Collections.emptyList();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -2190,14 +2097,8 @@ public final class MetricPointWithQuality {
     public void writeTo(com.google.protobuf.CodedOutputStream output)
                         throws java.io.IOException {
       getSerializedSize();
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeDouble(1, firstValue_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        output.writeDouble(2, avgValue_);
-      }
-      for (int i = 0; i < p_.size(); i++) {
-        output.writeMessage(3, p_.get(i));
+      for (int i = 0; i < q_.size(); i++) {
+        output.writeMessage(1, q_.get(i));
       }
       getUnknownFields().writeTo(output);
     }
@@ -2208,17 +2109,9 @@ public final class MetricPointWithQuality {
       if (size != -1) return size;
 
       size = 0;
-      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+      for (int i = 0; i < q_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(1, firstValue_);
-      }
-      if (((bitField0_ & 0x00000002) == 0x00000002)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeDoubleSize(2, avgValue_);
-      }
-      for (int i = 0; i < p_.size(); i++) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(3, p_.get(i));
+          .computeMessageSize(1, q_.get(i));
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -2333,7 +2226,7 @@ public final class MetricPointWithQuality {
       }
       private void maybeForceBuilderInitialization() {
         if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
-          getPFieldBuilder();
+          getQFieldBuilder();
         }
       }
       private static Builder create() {
@@ -2342,15 +2235,11 @@ public final class MetricPointWithQuality {
 
       public Builder clear() {
         super.clear();
-        firstValue_ = 0D;
-        bitField0_ = (bitField0_ & ~0x00000001);
-        avgValue_ = 0D;
-        bitField0_ = (bitField0_ & ~0x00000002);
-        if (pBuilder_ == null) {
-          p_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+        if (qBuilder_ == null) {
+          q_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
         } else {
-          pBuilder_.clear();
+          qBuilder_.clear();
         }
         return this;
       }
@@ -2379,25 +2268,15 @@ public final class MetricPointWithQuality {
       public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Qualities buildPartial() {
         com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Qualities result = new com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Qualities(this);
         int from_bitField0_ = bitField0_;
-        int to_bitField0_ = 0;
-        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
-          to_bitField0_ |= 0x00000001;
-        }
-        result.firstValue_ = firstValue_;
-        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
-          to_bitField0_ |= 0x00000002;
-        }
-        result.avgValue_ = avgValue_;
-        if (pBuilder_ == null) {
-          if (((bitField0_ & 0x00000004) == 0x00000004)) {
-            p_ = java.util.Collections.unmodifiableList(p_);
-            bitField0_ = (bitField0_ & ~0x00000004);
+        if (qBuilder_ == null) {
+          if (((bitField0_ & 0x00000001) == 0x00000001)) {
+            q_ = java.util.Collections.unmodifiableList(q_);
+            bitField0_ = (bitField0_ & ~0x00000001);
           }
-          result.p_ = p_;
+          result.q_ = q_;
         } else {
-          result.p_ = pBuilder_.build();
+          result.q_ = qBuilder_.build();
         }
-        result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
       }
@@ -2413,35 +2292,29 @@ public final class MetricPointWithQuality {
 
       public Builder mergeFrom(com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Qualities other) {
         if (other == com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Qualities.getDefaultInstance()) return this;
-        if (other.hasFirstValue()) {
-          setFirstValue(other.getFirstValue());
-        }
-        if (other.hasAvgValue()) {
-          setAvgValue(other.getAvgValue());
-        }
-        if (pBuilder_ == null) {
-          if (!other.p_.isEmpty()) {
-            if (p_.isEmpty()) {
-              p_ = other.p_;
-              bitField0_ = (bitField0_ & ~0x00000004);
+        if (qBuilder_ == null) {
+          if (!other.q_.isEmpty()) {
+            if (q_.isEmpty()) {
+              q_ = other.q_;
+              bitField0_ = (bitField0_ & ~0x00000001);
             } else {
-              ensurePIsMutable();
-              p_.addAll(other.p_);
+              ensureQIsMutable();
+              q_.addAll(other.q_);
             }
             onChanged();
           }
         } else {
-          if (!other.p_.isEmpty()) {
-            if (pBuilder_.isEmpty()) {
-              pBuilder_.dispose();
-              pBuilder_ = null;
-              p_ = other.p_;
-              bitField0_ = (bitField0_ & ~0x00000004);
-              pBuilder_ = 
+          if (!other.q_.isEmpty()) {
+            if (qBuilder_.isEmpty()) {
+              qBuilder_.dispose();
+              qBuilder_ = null;
+              q_ = other.q_;
+              bitField0_ = (bitField0_ & ~0x00000001);
+              qBuilder_ = 
                 com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders ?
-                   getPFieldBuilder() : null;
+                   getQFieldBuilder() : null;
             } else {
-              pBuilder_.addAllMessages(other.p_);
+              qBuilder_.addAllMessages(other.q_);
             }
           }
         }
@@ -2472,412 +2345,316 @@ public final class MetricPointWithQuality {
       }
       private int bitField0_;
 
-      private double firstValue_ ;
-      /**
-       * <code>optional double firstValue = 1;</code>
-       *
-       * <pre>
-       * First Quality Value
-       * </pre>
-       */
-      public boolean hasFirstValue() {
-        return ((bitField0_ & 0x00000001) == 0x00000001);
-      }
-      /**
-       * <code>optional double firstValue = 1;</code>
-       *
-       * <pre>
-       * First Quality Value
-       * </pre>
-       */
-      public double getFirstValue() {
-        return firstValue_;
-      }
-      /**
-       * <code>optional double firstValue = 1;</code>
-       *
-       * <pre>
-       * First Quality Value
-       * </pre>
-       */
-      public Builder setFirstValue(double value) {
-        bitField0_ |= 0x00000001;
-        firstValue_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional double firstValue = 1;</code>
-       *
-       * <pre>
-       * First Quality Value
-       * </pre>
-       */
-      public Builder clearFirstValue() {
-        bitField0_ = (bitField0_ & ~0x00000001);
-        firstValue_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private double avgValue_ ;
-      /**
-       * <code>optional double avgValue = 2;</code>
-       *
-       * <pre>
-       * Avg Quality value
-       * </pre>
-       */
-      public boolean hasAvgValue() {
-        return ((bitField0_ & 0x00000002) == 0x00000002);
-      }
-      /**
-       * <code>optional double avgValue = 2;</code>
-       *
-       * <pre>
-       * Avg Quality value
-       * </pre>
-       */
-      public double getAvgValue() {
-        return avgValue_;
-      }
-      /**
-       * <code>optional double avgValue = 2;</code>
-       *
-       * <pre>
-       * Avg Quality value
-       * </pre>
-       */
-      public Builder setAvgValue(double value) {
-        bitField0_ |= 0x00000002;
-        avgValue_ = value;
-        onChanged();
-        return this;
-      }
-      /**
-       * <code>optional double avgValue = 2;</code>
-       *
-       * <pre>
-       * Avg Quality value
-       * </pre>
-       */
-      public Builder clearAvgValue() {
-        bitField0_ = (bitField0_ & ~0x00000002);
-        avgValue_ = 0D;
-        onChanged();
-        return this;
-      }
-
-      private java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point> p_ =
+      private java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality> q_ =
         java.util.Collections.emptyList();
-      private void ensurePIsMutable() {
-        if (!((bitField0_ & 0x00000004) == 0x00000004)) {
-          p_ = new java.util.ArrayList<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point>(p_);
-          bitField0_ |= 0x00000004;
+      private void ensureQIsMutable() {
+        if (!((bitField0_ & 0x00000001) == 0x00000001)) {
+          q_ = new java.util.ArrayList<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality>(q_);
+          bitField0_ |= 0x00000001;
          }
       }
 
       private com.google.protobuf.RepeatedFieldBuilder<
-          com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> pBuilder_;
+          com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder> qBuilder_;
 
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point> getPList() {
-        if (pBuilder_ == null) {
-          return java.util.Collections.unmodifiableList(p_);
+      public java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality> getQList() {
+        if (qBuilder_ == null) {
+          return java.util.Collections.unmodifiableList(q_);
         } else {
-          return pBuilder_.getMessageList();
+          return qBuilder_.getMessageList();
         }
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public int getPCount() {
-        if (pBuilder_ == null) {
-          return p_.size();
+      public int getQCount() {
+        if (qBuilder_ == null) {
+          return q_.size();
         } else {
-          return pBuilder_.getCount();
+          return qBuilder_.getCount();
         }
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point getP(int index) {
-        if (pBuilder_ == null) {
-          return p_.get(index);
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality getQ(int index) {
+        if (qBuilder_ == null) {
+          return q_.get(index);
         } else {
-          return pBuilder_.getMessage(index);
+          return qBuilder_.getMessage(index);
         }
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder setP(
-          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point value) {
-        if (pBuilder_ == null) {
+      public Builder setQ(
+          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality value) {
+        if (qBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensurePIsMutable();
-          p_.set(index, value);
+          ensureQIsMutable();
+          q_.set(index, value);
           onChanged();
         } else {
-          pBuilder_.setMessage(index, value);
+          qBuilder_.setMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder setP(
-          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder builderForValue) {
-        if (pBuilder_ == null) {
-          ensurePIsMutable();
-          p_.set(index, builderForValue.build());
+      public Builder setQ(
+          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder builderForValue) {
+        if (qBuilder_ == null) {
+          ensureQIsMutable();
+          q_.set(index, builderForValue.build());
           onChanged();
         } else {
-          pBuilder_.setMessage(index, builderForValue.build());
+          qBuilder_.setMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder addP(com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point value) {
-        if (pBuilder_ == null) {
+      public Builder addQ(com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality value) {
+        if (qBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensurePIsMutable();
-          p_.add(value);
+          ensureQIsMutable();
+          q_.add(value);
           onChanged();
         } else {
-          pBuilder_.addMessage(value);
+          qBuilder_.addMessage(value);
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder addP(
-          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point value) {
-        if (pBuilder_ == null) {
+      public Builder addQ(
+          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality value) {
+        if (qBuilder_ == null) {
           if (value == null) {
             throw new NullPointerException();
           }
-          ensurePIsMutable();
-          p_.add(index, value);
+          ensureQIsMutable();
+          q_.add(index, value);
           onChanged();
         } else {
-          pBuilder_.addMessage(index, value);
+          qBuilder_.addMessage(index, value);
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder addP(
-          com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder builderForValue) {
-        if (pBuilder_ == null) {
-          ensurePIsMutable();
-          p_.add(builderForValue.build());
+      public Builder addQ(
+          com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder builderForValue) {
+        if (qBuilder_ == null) {
+          ensureQIsMutable();
+          q_.add(builderForValue.build());
           onChanged();
         } else {
-          pBuilder_.addMessage(builderForValue.build());
+          qBuilder_.addMessage(builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder addP(
-          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder builderForValue) {
-        if (pBuilder_ == null) {
-          ensurePIsMutable();
-          p_.add(index, builderForValue.build());
+      public Builder addQ(
+          int index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder builderForValue) {
+        if (qBuilder_ == null) {
+          ensureQIsMutable();
+          q_.add(index, builderForValue.build());
           onChanged();
         } else {
-          pBuilder_.addMessage(index, builderForValue.build());
+          qBuilder_.addMessage(index, builderForValue.build());
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder addAllP(
-          java.lang.Iterable<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point> values) {
-        if (pBuilder_ == null) {
-          ensurePIsMutable();
+      public Builder addAllQ(
+          java.lang.Iterable<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality> values) {
+        if (qBuilder_ == null) {
+          ensureQIsMutable();
           com.google.protobuf.AbstractMessageLite.Builder.addAll(
-              values, p_);
+              values, q_);
           onChanged();
         } else {
-          pBuilder_.addAllMessages(values);
+          qBuilder_.addAllMessages(values);
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder clearP() {
-        if (pBuilder_ == null) {
-          p_ = java.util.Collections.emptyList();
-          bitField0_ = (bitField0_ & ~0x00000004);
+      public Builder clearQ() {
+        if (qBuilder_ == null) {
+          q_ = java.util.Collections.emptyList();
+          bitField0_ = (bitField0_ & ~0x00000001);
           onChanged();
         } else {
-          pBuilder_.clear();
+          qBuilder_.clear();
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public Builder removeP(int index) {
-        if (pBuilder_ == null) {
-          ensurePIsMutable();
-          p_.remove(index);
+      public Builder removeQ(int index) {
+        if (qBuilder_ == null) {
+          ensureQIsMutable();
+          q_.remove(index);
           onChanged();
         } else {
-          pBuilder_.remove(index);
+          qBuilder_.remove(index);
         }
         return this;
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder getPBuilder(
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder getQBuilder(
           int index) {
-        return getPFieldBuilder().getBuilder(index);
+        return getQFieldBuilder().getBuilder(index);
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder getPOrBuilder(
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder getQOrBuilder(
           int index) {
-        if (pBuilder_ == null) {
-          return p_.get(index);  } else {
-          return pBuilder_.getMessageOrBuilder(index);
+        if (qBuilder_ == null) {
+          return q_.get(index);  } else {
+          return qBuilder_.getMessageOrBuilder(index);
         }
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public java.util.List<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> 
-           getPOrBuilderList() {
-        if (pBuilder_ != null) {
-          return pBuilder_.getMessageOrBuilderList();
+      public java.util.List<? extends com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder> 
+           getQOrBuilderList() {
+        if (qBuilder_ != null) {
+          return qBuilder_.getMessageOrBuilderList();
         } else {
-          return java.util.Collections.unmodifiableList(p_);
+          return java.util.Collections.unmodifiableList(q_);
         }
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder addPBuilder() {
-        return getPFieldBuilder().addBuilder(
-            com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.getDefaultInstance());
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder addQBuilder() {
+        return getQFieldBuilder().addBuilder(
+            com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.getDefaultInstance());
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder addPBuilder(
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder addQBuilder(
           int index) {
-        return getPFieldBuilder().addBuilder(
-            index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.getDefaultInstance());
+        return getQFieldBuilder().addBuilder(
+            index, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.getDefaultInstance());
       }
       /**
-       * <code>repeated .serializer.Point p = 3;</code>
+       * <code>repeated .serializer.Quality q = 1;</code>
        *
        * <pre>
        * The list of Quality points
        * </pre>
        */
-      public java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder> 
-           getPBuilderList() {
-        return getPFieldBuilder().getBuilderList();
+      public java.util.List<com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder> 
+           getQBuilderList() {
+        return getQFieldBuilder().getBuilderList();
       }
       private com.google.protobuf.RepeatedFieldBuilder<
-          com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder> 
-          getPFieldBuilder() {
-        if (pBuilder_ == null) {
-          pBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
-              com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Point.Builder, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.PointOrBuilder>(
-                  p_,
-                  ((bitField0_ & 0x00000004) == 0x00000004),
+          com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder> 
+          getQFieldBuilder() {
+        if (qBuilder_ == null) {
+          qBuilder_ = new com.google.protobuf.RepeatedFieldBuilder<
+              com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder>(
+                  q_,
+                  ((bitField0_ & 0x00000001) == 0x00000001),
                   getParentForChildren(),
                   isClean());
-          p_ = null;
+          q_ = null;
         }
-        return pBuilder_;
+        return qBuilder_;
       }
 
       // @@protoc_insertion_point(builder_scope:serializer.Qualities)
@@ -2889,6 +2666,765 @@ public final class MetricPointWithQuality {
     }
 
     // @@protoc_insertion_point(class_scope:serializer.Qualities)
+  }
+
+  public interface QualityOrBuilder extends
+      // @@protoc_insertion_point(interface_extends:serializer.Quality)
+      com.google.protobuf.MessageOrBuilder {
+
+    /**
+     * <code>optional uint64 tlong = 1;</code>
+     *
+     * <pre>
+     *The delta as long
+     * </pre>
+     */
+    boolean hasTlong();
+    /**
+     * <code>optional uint64 tlong = 1;</code>
+     *
+     * <pre>
+     *The delta as long
+     * </pre>
+     */
+    long getTlong();
+
+    /**
+     * <code>optional uint32 tint = 2;</code>
+     *
+     * <pre>
+     *Perhaps we can store the delta as int
+     * </pre>
+     */
+    boolean hasTint();
+    /**
+     * <code>optional uint32 tint = 2;</code>
+     *
+     * <pre>
+     *Perhaps we can store the delta as int
+     * </pre>
+     */
+    int getTint();
+
+    /**
+     * <code>optional float v = 3;</code>
+     *
+     * <pre>
+     *Value
+     * </pre>
+     */
+    boolean hasV();
+    /**
+     * <code>optional float v = 3;</code>
+     *
+     * <pre>
+     *Value
+     * </pre>
+     */
+    float getV();
+
+    /**
+     * <code>optional uint32 vIndex = 4;</code>
+     *
+     * <pre>
+     *Or the index of the value
+     * </pre>
+     */
+    boolean hasVIndex();
+    /**
+     * <code>optional uint32 vIndex = 4;</code>
+     *
+     * <pre>
+     *Or the index of the value
+     * </pre>
+     */
+    int getVIndex();
+  }
+  /**
+   * Protobuf type {@code serializer.Quality}
+   */
+  public static final class Quality extends
+      com.google.protobuf.GeneratedMessage implements
+      // @@protoc_insertion_point(message_implements:serializer.Quality)
+      QualityOrBuilder {
+    // Use Quality.newBuilder() to construct.
+    private Quality(com.google.protobuf.GeneratedMessage.Builder<?> builder) {
+      super(builder);
+      this.unknownFields = builder.getUnknownFields();
+    }
+    private Quality(boolean noInit) { this.unknownFields = com.google.protobuf.UnknownFieldSet.getDefaultInstance(); }
+
+    private static final Quality defaultInstance;
+    public static Quality getDefaultInstance() {
+      return defaultInstance;
+    }
+
+    public Quality getDefaultInstanceForType() {
+      return defaultInstance;
+    }
+
+    private final com.google.protobuf.UnknownFieldSet unknownFields;
+    @java.lang.Override
+    public final com.google.protobuf.UnknownFieldSet
+        getUnknownFields() {
+      return this.unknownFields;
+    }
+    private Quality(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      initFields();
+      int mutable_bitField0_ = 0;
+      com.google.protobuf.UnknownFieldSet.Builder unknownFields =
+          com.google.protobuf.UnknownFieldSet.newBuilder();
+      try {
+        boolean done = false;
+        while (!done) {
+          int tag = input.readTag();
+          switch (tag) {
+            case 0:
+              done = true;
+              break;
+            default: {
+              if (!parseUnknownField(input, unknownFields,
+                                     extensionRegistry, tag)) {
+                done = true;
+              }
+              break;
+            }
+            case 8: {
+              bitField0_ |= 0x00000001;
+              tlong_ = input.readUInt64();
+              break;
+            }
+            case 16: {
+              bitField0_ |= 0x00000002;
+              tint_ = input.readUInt32();
+              break;
+            }
+            case 29: {
+              bitField0_ |= 0x00000004;
+              v_ = input.readFloat();
+              break;
+            }
+            case 32: {
+              bitField0_ |= 0x00000008;
+              vIndex_ = input.readUInt32();
+              break;
+            }
+          }
+        }
+      } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+        throw e.setUnfinishedMessage(this);
+      } catch (java.io.IOException e) {
+        throw new com.google.protobuf.InvalidProtocolBufferException(
+            e.getMessage()).setUnfinishedMessage(this);
+      } finally {
+        this.unknownFields = unknownFields.build();
+        makeExtensionsImmutable();
+      }
+    }
+    public static final com.google.protobuf.Descriptors.Descriptor
+        getDescriptor() {
+      return com.hurence.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Quality_descriptor;
+    }
+
+    protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+        internalGetFieldAccessorTable() {
+      return com.hurence.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Quality_fieldAccessorTable
+          .ensureFieldAccessorsInitialized(
+              com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.class, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder.class);
+    }
+
+    public static com.google.protobuf.Parser<Quality> PARSER =
+        new com.google.protobuf.AbstractParser<Quality>() {
+      public Quality parsePartialFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return new Quality(input, extensionRegistry);
+      }
+    };
+
+    @java.lang.Override
+    public com.google.protobuf.Parser<Quality> getParserForType() {
+      return PARSER;
+    }
+
+    private int bitField0_;
+    public static final int TLONG_FIELD_NUMBER = 1;
+    private long tlong_;
+    /**
+     * <code>optional uint64 tlong = 1;</code>
+     *
+     * <pre>
+     *The delta as long
+     * </pre>
+     */
+    public boolean hasTlong() {
+      return ((bitField0_ & 0x00000001) == 0x00000001);
+    }
+    /**
+     * <code>optional uint64 tlong = 1;</code>
+     *
+     * <pre>
+     *The delta as long
+     * </pre>
+     */
+    public long getTlong() {
+      return tlong_;
+    }
+
+    public static final int TINT_FIELD_NUMBER = 2;
+    private int tint_;
+    /**
+     * <code>optional uint32 tint = 2;</code>
+     *
+     * <pre>
+     *Perhaps we can store the delta as int
+     * </pre>
+     */
+    public boolean hasTint() {
+      return ((bitField0_ & 0x00000002) == 0x00000002);
+    }
+    /**
+     * <code>optional uint32 tint = 2;</code>
+     *
+     * <pre>
+     *Perhaps we can store the delta as int
+     * </pre>
+     */
+    public int getTint() {
+      return tint_;
+    }
+
+    public static final int V_FIELD_NUMBER = 3;
+    private float v_;
+    /**
+     * <code>optional float v = 3;</code>
+     *
+     * <pre>
+     *Value
+     * </pre>
+     */
+    public boolean hasV() {
+      return ((bitField0_ & 0x00000004) == 0x00000004);
+    }
+    /**
+     * <code>optional float v = 3;</code>
+     *
+     * <pre>
+     *Value
+     * </pre>
+     */
+    public float getV() {
+      return v_;
+    }
+
+    public static final int VINDEX_FIELD_NUMBER = 4;
+    private int vIndex_;
+    /**
+     * <code>optional uint32 vIndex = 4;</code>
+     *
+     * <pre>
+     *Or the index of the value
+     * </pre>
+     */
+    public boolean hasVIndex() {
+      return ((bitField0_ & 0x00000008) == 0x00000008);
+    }
+    /**
+     * <code>optional uint32 vIndex = 4;</code>
+     *
+     * <pre>
+     *Or the index of the value
+     * </pre>
+     */
+    public int getVIndex() {
+      return vIndex_;
+    }
+
+    private void initFields() {
+      tlong_ = 0L;
+      tint_ = 0;
+      v_ = 0F;
+      vIndex_ = 0;
+    }
+    private byte memoizedIsInitialized = -1;
+    public final boolean isInitialized() {
+      byte isInitialized = memoizedIsInitialized;
+      if (isInitialized == 1) return true;
+      if (isInitialized == 0) return false;
+
+      memoizedIsInitialized = 1;
+      return true;
+    }
+
+    public void writeTo(com.google.protobuf.CodedOutputStream output)
+                        throws java.io.IOException {
+      getSerializedSize();
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        output.writeUInt64(1, tlong_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        output.writeUInt32(2, tint_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        output.writeFloat(3, v_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        output.writeUInt32(4, vIndex_);
+      }
+      getUnknownFields().writeTo(output);
+    }
+
+    private int memoizedSerializedSize = -1;
+    public int getSerializedSize() {
+      int size = memoizedSerializedSize;
+      if (size != -1) return size;
+
+      size = 0;
+      if (((bitField0_ & 0x00000001) == 0x00000001)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(1, tlong_);
+      }
+      if (((bitField0_ & 0x00000002) == 0x00000002)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(2, tint_);
+      }
+      if (((bitField0_ & 0x00000004) == 0x00000004)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeFloatSize(3, v_);
+      }
+      if (((bitField0_ & 0x00000008) == 0x00000008)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(4, vIndex_);
+      }
+      size += getUnknownFields().getSerializedSize();
+      memoizedSerializedSize = size;
+      return size;
+    }
+
+    private static final long serialVersionUID = 0L;
+    @java.lang.Override
+    protected java.lang.Object writeReplace()
+        throws java.io.ObjectStreamException {
+      return super.writeReplace();
+    }
+
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(
+        com.google.protobuf.ByteString data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(
+        com.google.protobuf.ByteString data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(byte[] data)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(
+        byte[] data,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws com.google.protobuf.InvalidProtocolBufferException {
+      return PARSER.parseFrom(data, extensionRegistry);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseDelimitedFrom(java.io.InputStream input)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseDelimitedFrom(
+        java.io.InputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseDelimitedFrom(input, extensionRegistry);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(
+        com.google.protobuf.CodedInputStream input)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input);
+    }
+    public static com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parseFrom(
+        com.google.protobuf.CodedInputStream input,
+        com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+        throws java.io.IOException {
+      return PARSER.parseFrom(input, extensionRegistry);
+    }
+
+    public static Builder newBuilder() { return Builder.create(); }
+    public Builder newBuilderForType() { return newBuilder(); }
+    public static Builder newBuilder(com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality prototype) {
+      return newBuilder().mergeFrom(prototype);
+    }
+    public Builder toBuilder() { return newBuilder(this); }
+
+    @java.lang.Override
+    protected Builder newBuilderForType(
+        com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+      Builder builder = new Builder(parent);
+      return builder;
+    }
+    /**
+     * Protobuf type {@code serializer.Quality}
+     */
+    public static final class Builder extends
+        com.google.protobuf.GeneratedMessage.Builder<Builder> implements
+        // @@protoc_insertion_point(builder_implements:serializer.Quality)
+        com.hurence.timeseries.converter.serializer.MetricPointWithQuality.QualityOrBuilder {
+      public static final com.google.protobuf.Descriptors.Descriptor
+          getDescriptor() {
+        return com.hurence.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Quality_descriptor;
+      }
+
+      protected com.google.protobuf.GeneratedMessage.FieldAccessorTable
+          internalGetFieldAccessorTable() {
+        return com.hurence.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Quality_fieldAccessorTable
+            .ensureFieldAccessorsInitialized(
+                com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.class, com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.Builder.class);
+      }
+
+      // Construct using com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.newBuilder()
+      private Builder() {
+        maybeForceBuilderInitialization();
+      }
+
+      private Builder(
+          com.google.protobuf.GeneratedMessage.BuilderParent parent) {
+        super(parent);
+        maybeForceBuilderInitialization();
+      }
+      private void maybeForceBuilderInitialization() {
+        if (com.google.protobuf.GeneratedMessage.alwaysUseFieldBuilders) {
+        }
+      }
+      private static Builder create() {
+        return new Builder();
+      }
+
+      public Builder clear() {
+        super.clear();
+        tlong_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000001);
+        tint_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000002);
+        v_ = 0F;
+        bitField0_ = (bitField0_ & ~0x00000004);
+        vIndex_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000008);
+        return this;
+      }
+
+      public Builder clone() {
+        return create().mergeFrom(buildPartial());
+      }
+
+      public com.google.protobuf.Descriptors.Descriptor
+          getDescriptorForType() {
+        return com.hurence.timeseries.converter.serializer.MetricPointWithQuality.internal_static_serializer_Quality_descriptor;
+      }
+
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality getDefaultInstanceForType() {
+        return com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.getDefaultInstance();
+      }
+
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality build() {
+        com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality result = buildPartial();
+        if (!result.isInitialized()) {
+          throw newUninitializedMessageException(result);
+        }
+        return result;
+      }
+
+      public com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality buildPartial() {
+        com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality result = new com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality(this);
+        int from_bitField0_ = bitField0_;
+        int to_bitField0_ = 0;
+        if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+          to_bitField0_ |= 0x00000001;
+        }
+        result.tlong_ = tlong_;
+        if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+          to_bitField0_ |= 0x00000002;
+        }
+        result.tint_ = tint_;
+        if (((from_bitField0_ & 0x00000004) == 0x00000004)) {
+          to_bitField0_ |= 0x00000004;
+        }
+        result.v_ = v_;
+        if (((from_bitField0_ & 0x00000008) == 0x00000008)) {
+          to_bitField0_ |= 0x00000008;
+        }
+        result.vIndex_ = vIndex_;
+        result.bitField0_ = to_bitField0_;
+        onBuilt();
+        return result;
+      }
+
+      public Builder mergeFrom(com.google.protobuf.Message other) {
+        if (other instanceof com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality) {
+          return mergeFrom((com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality)other);
+        } else {
+          super.mergeFrom(other);
+          return this;
+        }
+      }
+
+      public Builder mergeFrom(com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality other) {
+        if (other == com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality.getDefaultInstance()) return this;
+        if (other.hasTlong()) {
+          setTlong(other.getTlong());
+        }
+        if (other.hasTint()) {
+          setTint(other.getTint());
+        }
+        if (other.hasV()) {
+          setV(other.getV());
+        }
+        if (other.hasVIndex()) {
+          setVIndex(other.getVIndex());
+        }
+        this.mergeUnknownFields(other.getUnknownFields());
+        return this;
+      }
+
+      public final boolean isInitialized() {
+        return true;
+      }
+
+      public Builder mergeFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality parsedMessage = null;
+        try {
+          parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          parsedMessage = (com.hurence.timeseries.converter.serializer.MetricPointWithQuality.Quality) e.getUnfinishedMessage();
+          throw e;
+        } finally {
+          if (parsedMessage != null) {
+            mergeFrom(parsedMessage);
+          }
+        }
+        return this;
+      }
+      private int bitField0_;
+
+      private long tlong_ ;
+      /**
+       * <code>optional uint64 tlong = 1;</code>
+       *
+       * <pre>
+       *The delta as long
+       * </pre>
+       */
+      public boolean hasTlong() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional uint64 tlong = 1;</code>
+       *
+       * <pre>
+       *The delta as long
+       * </pre>
+       */
+      public long getTlong() {
+        return tlong_;
+      }
+      /**
+       * <code>optional uint64 tlong = 1;</code>
+       *
+       * <pre>
+       *The delta as long
+       * </pre>
+       */
+      public Builder setTlong(long value) {
+        bitField0_ |= 0x00000001;
+        tlong_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 tlong = 1;</code>
+       *
+       * <pre>
+       *The delta as long
+       * </pre>
+       */
+      public Builder clearTlong() {
+        bitField0_ = (bitField0_ & ~0x00000001);
+        tlong_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private int tint_ ;
+      /**
+       * <code>optional uint32 tint = 2;</code>
+       *
+       * <pre>
+       *Perhaps we can store the delta as int
+       * </pre>
+       */
+      public boolean hasTint() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional uint32 tint = 2;</code>
+       *
+       * <pre>
+       *Perhaps we can store the delta as int
+       * </pre>
+       */
+      public int getTint() {
+        return tint_;
+      }
+      /**
+       * <code>optional uint32 tint = 2;</code>
+       *
+       * <pre>
+       *Perhaps we can store the delta as int
+       * </pre>
+       */
+      public Builder setTint(int value) {
+        bitField0_ |= 0x00000002;
+        tint_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 tint = 2;</code>
+       *
+       * <pre>
+       *Perhaps we can store the delta as int
+       * </pre>
+       */
+      public Builder clearTint() {
+        bitField0_ = (bitField0_ & ~0x00000002);
+        tint_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private float v_ ;
+      /**
+       * <code>optional float v = 3;</code>
+       *
+       * <pre>
+       *Value
+       * </pre>
+       */
+      public boolean hasV() {
+        return ((bitField0_ & 0x00000004) == 0x00000004);
+      }
+      /**
+       * <code>optional float v = 3;</code>
+       *
+       * <pre>
+       *Value
+       * </pre>
+       */
+      public float getV() {
+        return v_;
+      }
+      /**
+       * <code>optional float v = 3;</code>
+       *
+       * <pre>
+       *Value
+       * </pre>
+       */
+      public Builder setV(float value) {
+        bitField0_ |= 0x00000004;
+        v_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional float v = 3;</code>
+       *
+       * <pre>
+       *Value
+       * </pre>
+       */
+      public Builder clearV() {
+        bitField0_ = (bitField0_ & ~0x00000004);
+        v_ = 0F;
+        onChanged();
+        return this;
+      }
+
+      private int vIndex_ ;
+      /**
+       * <code>optional uint32 vIndex = 4;</code>
+       *
+       * <pre>
+       *Or the index of the value
+       * </pre>
+       */
+      public boolean hasVIndex() {
+        return ((bitField0_ & 0x00000008) == 0x00000008);
+      }
+      /**
+       * <code>optional uint32 vIndex = 4;</code>
+       *
+       * <pre>
+       *Or the index of the value
+       * </pre>
+       */
+      public int getVIndex() {
+        return vIndex_;
+      }
+      /**
+       * <code>optional uint32 vIndex = 4;</code>
+       *
+       * <pre>
+       *Or the index of the value
+       * </pre>
+       */
+      public Builder setVIndex(int value) {
+        bitField0_ |= 0x00000008;
+        vIndex_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 vIndex = 4;</code>
+       *
+       * <pre>
+       *Or the index of the value
+       * </pre>
+       */
+      public Builder clearVIndex() {
+        bitField0_ = (bitField0_ & ~0x00000008);
+        vIndex_ = 0;
+        onChanged();
+        return this;
+      }
+
+      // @@protoc_insertion_point(builder_scope:serializer.Quality)
+    }
+
+    static {
+      defaultInstance = new Quality(true);
+      defaultInstance.initFields();
+    }
+
+    // @@protoc_insertion_point(class_scope:serializer.Quality)
   }
 
   private static final com.google.protobuf.Descriptors.Descriptor
@@ -2906,6 +3442,11 @@ public final class MetricPointWithQuality {
   private static
     com.google.protobuf.GeneratedMessage.FieldAccessorTable
       internal_static_serializer_Qualities_fieldAccessorTable;
+  private static final com.google.protobuf.Descriptors.Descriptor
+    internal_static_serializer_Quality_descriptor;
+  private static
+    com.google.protobuf.GeneratedMessage.FieldAccessorTable
+      internal_static_serializer_Quality_fieldAccessorTable;
 
   public static com.google.protobuf.Descriptors.FileDescriptor
       getDescriptor() {
@@ -2919,11 +3460,11 @@ public final class MetricPointWithQuality {
       "lizer\"`\n\005Point\022\r\n\005tlong\030\001 \001(\004\022\014\n\004tint\030\002 " +
       "\001(\r\022\017\n\007tlongBP\030\003 \001(\004\022\016\n\006tintBP\030\004 \001(\r\022\t\n\001" +
       "v\030\005 \001(\001\022\016\n\006vIndex\030\006 \001(\r\"3\n\006Points\022\034\n\001p\030\001" +
-      " \003(\0132\021.serializer.Point\022\013\n\003ddc\030\002 \001(\r\"O\n\t" +
-      "Qualities\022\022\n\nfirstValue\030\001 \001(\001\022\020\n\010avgValu" +
-      "e\030\002 \001(\001\022\034\n\001p\030\003 \003(\0132\021.serializer.PointB/\n" +
-      "+com.hurence.timeseries.converter.serial" +
-      "izerH\001"
+      " \003(\0132\021.serializer.Point\022\013\n\003ddc\030\002 \001(\r\"+\n\t" +
+      "Qualities\022\036\n\001q\030\001 \003(\0132\023.serializer.Qualit" +
+      "y\"A\n\007Quality\022\r\n\005tlong\030\001 \001(\004\022\014\n\004tint\030\002 \001(" +
+      "\r\022\t\n\001v\030\003 \001(\002\022\016\n\006vIndex\030\004 \001(\rB/\n+com.hure" +
+      "nce.timeseries.converter.serializerH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2954,7 +3495,13 @@ public final class MetricPointWithQuality {
     internal_static_serializer_Qualities_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_serializer_Qualities_descriptor,
-        new java.lang.String[] { "FirstValue", "AvgValue", "P", });
+        new java.lang.String[] { "Q", });
+    internal_static_serializer_Quality_descriptor =
+      getDescriptor().getMessageTypes().get(3);
+    internal_static_serializer_Quality_fieldAccessorTable = new
+      com.google.protobuf.GeneratedMessage.FieldAccessorTable(
+        internal_static_serializer_Quality_descriptor,
+        new java.lang.String[] { "Tlong", "Tint", "V", "VIndex", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)
