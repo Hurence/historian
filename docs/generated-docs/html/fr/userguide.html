@@ -724,7 +724,7 @@ suffisant pour stocker les binaires, les scripts ainsi que les données de time 
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/media/lhubert/f795ccce-150c-4615-b5df-68b1bc9573b9/hurence/github/historian/docs/resources/images/Screenshot_install_standalone.png" alt="Screenshot install standalone">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/Screenshot_install_standalone.png" alt="Screenshot install standalone">
 </div>
 </div>
 <div class="paragraph">
@@ -817,6 +817,7 @@ interagir avec Grafana (notamment pour démarrer le serveur et l&#8217;éteindre
     <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/hurence-historian</span><span class="delimiter">&quot;</span></span>
   },
   <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
@@ -881,6 +882,9 @@ ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.<
 <p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
 accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
 trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
+</li>
+<li>
+<p>http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l&#8217;import de données achever).</p>
 </li>
 </ul>
 </div>
@@ -1139,7 +1143,7 @@ Lancez l&#8217;installation en lançant ce script :</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/media/lhubert/f795ccce-150c-4615-b5df-68b1bc9573b9/hurence/github/historian/docs/resources/images/screenshot_install_mono_noeud.png" alt="screenshot install mono noeud">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_mono_noeud.png" alt="screenshot install mono noeud">
 </div>
 </div>
 <div class="paragraph">
@@ -1204,6 +1208,7 @@ installé sur le serveur Grafana indiqué lors de l&#8217;installation</p>
     <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/hurence-historian</span><span class="delimiter">&quot;</span></span>
   },
   <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
     <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
@@ -1268,6 +1273,9 @@ ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.<
 <p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
 accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
 trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
+</li>
+<li>
+<p>http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l&#8217;import de données achever).</p>
 </li>
 </ul>
 </div>
@@ -1537,7 +1545,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/media/lhubert/f795ccce-150c-4615-b5df-68b1bc9573b9/hurence/github/historian/docs/resources/images/grafana_ui_datasource.png" alt="go to datasource page">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_ui_datasource.png" alt="go to datasource page">
 </div>
 </div>
 <div class="paragraph">
@@ -1546,7 +1554,7 @@ Il y a juste a renseigner l&#8217;URL <a href="http://localhost:8080/api/grafana
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/media/lhubert/f795ccce-150c-4615-b5df-68b1bc9573b9/hurence/github/historian/docs/resources/images/datasource_historian_setup.png" alt="datasource setup">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/datasource_historian_setup.png" alt="datasource setup">
 </div>
 </div>
 <div class="paragraph">
@@ -1555,7 +1563,7 @@ Ensuite créez un nouveau dashboard.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/media/lhubert/f795ccce-150c-4615-b5df-68b1bc9573b9/hurence/github/historian/docs/resources/images/grafana_ui_create_dashboard.png" alt="go to new dashboard page">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_ui_create_dashboard.png" alt="go to new dashboard page">
 </div>
 </div>
 <div class="paragraph">
@@ -1563,7 +1571,7 @@ Ensuite créez un nouveau dashboard.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/media/lhubert/f795ccce-150c-4615-b5df-68b1bc9573b9/hurence/github/historian/docs/resources/images/grafana_graph_config_exemple.png" alt="exemple of query config">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_graph_config_exemple.png" alt="exemple of query config">
 </div>
 </div>
 <div class="paragraph">
@@ -1612,7 +1620,7 @@ bin/solr stop -all</pre>
 <div id="footer">
 <div id="footer-text">
 Version v1.0<br>
-Last updated 2020-07-02 14:47:41 +0200
+Last updated 2020-07-10 10:19:25 +0200
 </div>
 </div>
 <style>

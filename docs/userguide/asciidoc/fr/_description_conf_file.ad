@@ -11,6 +11,7 @@ Voici le fichier de configuration par défaut, il contient toutes les informatio
     "historian.address": "historian",
     "debug": false,
     "max_data_points_allowed_for_ExportCsv" : 10000,
+    "upload_directory": "/tmp/hurence-historian"
   },
   "historian": {
     "schema_version": "VERSION_0",
@@ -56,6 +57,7 @@ ce paramètre qu'il faille augmenter en cas de problème de performances.
 ** http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l'historian
 accepte de retourner lorsqu'un client utilise l'api rest d'export dans le format csv. Attention de ne pas choisir un maximum
 trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d'un gros export il vous faudra utiliser un outil comme spark pour réaliser l'export.
+** http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l'import de données achever).
 
 * Historian service conf :
 
