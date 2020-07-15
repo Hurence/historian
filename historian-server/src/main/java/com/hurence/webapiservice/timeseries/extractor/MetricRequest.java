@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.webapiservice.http.api.grafana.util.QualityConfig;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
@@ -9,10 +10,19 @@ import java.util.Objects;
 public class MetricRequest {
     private final String name;
     private final Map<String, String> tags;
+    private final QualityConfig quality;
+
+    public MetricRequest(String name, Map<String, String> tags, QualityConfig quality) {
+        this.name = name;
+        this.tags = tags;
+        this.quality = quality;
+    }
+
 
     public MetricRequest(String name, Map<String, String> tags) {
         this.name = name;
         this.tags = tags;
+        this.quality = null;
 
     }
 
@@ -23,6 +33,8 @@ public class MetricRequest {
     public Map<String, String> getTags() {
         return tags;
     }
+
+    public QualityConfig getQuality() { return quality; }
 
     @Override
     public String toString() {
@@ -43,7 +55,7 @@ public class MetricRequest {
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, tags);
+        return Objects.hash(name, tags, quality);
     }
 
     /**
@@ -55,6 +67,9 @@ public class MetricRequest {
     public boolean isChunkMatching(JsonObject chunk) {
         final String chunkName = chunk.getString(HistorianFields.NAME);
         if (!getName().equals(chunkName)) {
+            return false;
+        }
+        if (getQuality() != null && !getQuality().matchChunk(chunk)) {
             return false;
         }
         boolean isChunkMatching = true;

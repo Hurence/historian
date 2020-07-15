@@ -2,6 +2,8 @@ package com.hurence.webapiservice.historian.handler;
 
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.impl.*;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
+import com.hurence.webapiservice.http.api.grafana.util.QualityConfig;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.*;
@@ -23,6 +25,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.QUALITY_AGG;
+import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.QUALITY_VALUE;
+import static com.hurence.webapiservice.http.api.grafana.util.QualityConfig.getChunkQualityField;
 
 public class GetTimeSeriesHandler {
 
@@ -51,7 +56,7 @@ public class GetTimeSeriesHandler {
         return p -> {
             MetricsSizeInfo metricsInfo;
             try {
-                metricsInfo = getNumberOfPointsByMetricInRequest(request.getMetricRequestsWithFinalTags(), query);
+                metricsInfo = getNumberOfPointsByMetricInRequest(request.getMetricRequestsWithFinalTagsAndFinalQualities(), query);
                 LOGGER.debug("metrics info to query : {}", metricsInfo);
                 if (metricsInfo.isEmpty()) {
                     final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
@@ -95,7 +100,7 @@ public class GetTimeSeriesHandler {
                 CHUNK_END_FIELD,
                 CHUNK_COUNT_FIELD,
                 NAME);
-        addAllTagsAsFields(request.getMetricRequestsWithFinalTags(), query);
+        addAllTagsAsFields(request.getMetricRequestsWithFinalTagsAndFinalQualities(), query);
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
         query.setSort(CHUNK_START_FIELD, SolrQuery.ORDER.asc);
@@ -112,10 +117,8 @@ public class GetTimeSeriesHandler {
     }
 
     private void buildFilters(Request request, SolrQuery query) {
-        Map<String, String> rootTags = request.getRootTags();
-        //TODO Simplify : Here rootTags is not needed as merge is already done in getMetricRequestsWithFinalTags
-        List<MetricRequest> metricOptions = request.getMetricRequestsWithFinalTags();
-        List<String> metricFilters = buildFilterForEachMetric(rootTags, metricOptions);
+        List<MetricRequest> metricOptions = request.getMetricRequestsWithFinalTagsAndFinalQualities();
+        List<String> metricFilters = buildFilterForEachMetric(metricOptions);
         String finalFilter = buildFinalFilterQuery(metricFilters);
         query.addFilterQuery(finalFilter);
     }
@@ -136,10 +139,9 @@ public class GetTimeSeriesHandler {
     /**
      * filter query for each metric
      *     each string should looks like "(name:A && usine:usine_1 && sensor:sensor_1)"
-     *     we filter on metric name and on every tags we get. we use tags of metricOptions and of rootTags.
-     *     If there is conflict then tags of metricOptions have priority.
-     * @param rootTags
-     * @param metricOptions
+     *     we filter on metric name and on every tags we get. we use tags of metricRequests and of rootTags.
+     *     If there is conflict then tags of metricRequests have priority.
+     * @param metricRequests
      * @return filter query for each metric
      *         each string should looks like :
      *         <pre>
@@ -148,23 +150,30 @@ public class GetTimeSeriesHandler {
      *
      *
      */
-    private List<String> buildFilterForEachMetric(Map<String, String> rootTags, List<MetricRequest> metricOptions) {
+    private List<String> buildFilterForEachMetric(List<MetricRequest> metricRequests) {
         List<String> finalStringList = new ArrayList<>();
-        metricOptions.forEach(metricRequest -> {
-            Map<String,String> finalTagsForMetric = new HashMap<>();
-            rootTags.forEach(finalTagsForMetric::put);
-            metricRequest.getTags().forEach(finalTagsForMetric::put);
+        metricRequests.forEach(metricRequest -> {
+            StringBuilder queryForEachMetricBuilder = new StringBuilder();
             List<String> tagsFilter = new ArrayList<>();
-            finalTagsForMetric.forEach((key, value) -> {
+            metricRequest.getTags().forEach((key, value) -> {
                 tagsFilter.add(key+":\""+value+"\"");
             });
             if(!tagsFilter.isEmpty())
-                finalStringList.add(tagsFilter.stream().collect(Collectors.joining(" AND ", "name:\""+metricRequest.getName()+"\" AND ", "")));
+                queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", "name:\""+metricRequest.getName()+"\" AND ", "")));
             else
-                finalStringList.add("name:\""+metricRequest.getName()+"\"");
+                queryForEachMetricBuilder.append("name:\"").append(metricRequest.getName()).append("\"");
+            if (metricRequest.getQuality() != null) {
+                QualityAgg qualityAgg = metricRequest.getQuality().getQualityAgg();
+                Float qualityValue = metricRequest.getQuality().getQuality();
+                String qualityField = getChunkQualityField(qualityAgg);
+                queryForEachMetricBuilder.append(" AND ").append(qualityField).append(":[").append(qualityValue).append(" TO *]"); // TODO isn't TO 1 better ?
+            }
+            finalStringList.add(queryForEachMetricBuilder.toString());
         });
         return finalStringList;
     }
+
+
 
     private void addFieldsThatWillBeNeededByAggregations(List<AGG> aggregationList, SolrQuery query) {
         aggregationList.forEach(agg -> {
@@ -376,7 +385,7 @@ public class GetTimeSeriesHandler {
         long from = request.getFrom();
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
-        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTags());
+        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -387,7 +396,7 @@ public class GetTimeSeriesHandler {
         long from = request.getFrom();
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
-        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTags());
+        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -490,27 +499,41 @@ public class GetTimeSeriesHandler {
         }
 
         /**
-         * return the metric name desired with the associated tags.
+         * return the metric name desired with the associated tags and the associated quality (if quality exist).
          * The tags must be the result of the merge of specific tags and rootTags
+         * The quality must be the result of the merge of specific quality and rootQuality
          * @return
          */
-        public List<MetricRequest> getMetricRequestsWithFinalTags() {
+        public List<MetricRequest> getMetricRequestsWithFinalTagsAndFinalQualities() {
             return params.getJsonArray(NAMES).stream().map(i -> {
                 try {
                     JsonObject metricObject = new JsonObject(i.toString());
                     String name = metricObject.getString(NAME);
+                    Float qualityValue = metricObject.getFloat(QUALITY_VALUE, getRootQuality().getQuality());
+                    String qualityAgg = metricObject.getString(QUALITY_AGG, getRootQuality().getQualityAgg().toString());
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     metricObject.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+                    if (!qualityAgg.equals(QualityAgg.NONE.toString()) && !qualityValue.isNaN()) {
+                        QualityConfig qualityConfig = new QualityConfig(qualityValue, qualityAgg);
+                        return new MetricRequest(name, tagsMap, qualityConfig);
+                    }
                     return new MetricRequest(name, tagsMap);
                 }catch (Exception ex) {
                     String name = i.toString();
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
+                    QualityConfig qualityConfig = getRootQuality();
+                    if (!qualityConfig.getQuality().isNaN() && !qualityConfig.getQualityAgg().equals(QualityAgg.NONE))
+                        return new MetricRequest(name, tagsMap, qualityConfig);
                     return new MetricRequest(name, tagsMap);
                 }
             })
             .collect(Collectors.toList());
+        }
+
+        public QualityConfig getRootQuality() {
+            return new QualityConfig(params.getFloat(QUALITY_VALUE), params.getString(QUALITY_AGG)) ;
         }
 
         public int getMaxPoint() {
