@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
@@ -22,7 +23,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     final long to;
     final SamplingConf samplingConf;
     protected final List<JsonObject> chunks = new ArrayList<>();
-    final List<PointImpl> sampledPoints = new ArrayList<>();
+    final List<Point> sampledPoints = new ArrayList<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
@@ -87,7 +88,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 * may be the best solution I think. The requesting code here should suppose chunks are not intersecting.
                 * We sort just so that user can not realize there is a problem in chunks.
                 */
-                .sorted(Comparator.comparing(PointImpl::getTimestamp))
+                .sorted(Comparator.comparing(Point::getTimestamp))
                 .map(p -> new JsonArray().add(p.getValue()).add(p.getTimestamp()))
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()
