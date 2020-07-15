@@ -21,6 +21,8 @@ public class HurenceDatasourcePluginQueryRequestParam {
     public static final Map<String, String> DEFAULT_TAGS = Collections.emptyMap();
     public static final List DEFAULT_AGGREGATION = Collections.EMPTY_LIST;
     public static final List<AGG> DEFAULT_ALL_AGGREGATION_LIST = Arrays.asList(values());
+    public static final Float DEFAULT_QUALITY_VALUE_NAN = Float.NaN;
+    public static final String DEFAULT_QUALITY_NONE = "NONE";
 
     private final JsonArray metricNames;
     private final long from;
@@ -32,10 +34,12 @@ public class HurenceDatasourcePluginQueryRequestParam {
     private final Map<String, String> tags;
     private final String requestId;
     private final List<AGG> aggregList;
+    private final Float qualityValue;
+    private final String qualityAgg;
 
     private HurenceDatasourcePluginQueryRequestParam(JsonArray metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
-                                                     Map<String, String> tags, String requestId, List<AGG> aggregList) {
+                                                     Map<String, String> tags, String requestId, List<AGG> aggregList, Float qualityValue, String qualityAgg) {
         Objects.requireNonNull(metricNames);
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
@@ -48,6 +52,8 @@ public class HurenceDatasourcePluginQueryRequestParam {
         this.tags = tags;
         this.requestId = requestId;
         this.aggregList = aggregList;
+        this.qualityValue = qualityValue;
+        this.qualityAgg = qualityAgg;
     }
 
 
@@ -80,6 +86,13 @@ public class HurenceDatasourcePluginQueryRequestParam {
         return tags;
     }
 
+    public Float getQualityValue() {
+        return qualityValue;
+    }
+
+    public String getQualityAgg() {
+        return qualityAgg;
+    }
 
     public String getRequestId() {
         return requestId;
@@ -96,6 +109,8 @@ public class HurenceDatasourcePluginQueryRequestParam {
         private Map<String, String> tags = DEFAULT_TAGS;
         private String requestId = DEFAULT_REQUEST_ID;
         private List<AGG> aggreg = DEFAULT_AGGREGATION;
+        private Float qualityValue = DEFAULT_QUALITY_VALUE_NAN;
+        private String qualityAgg = DEFAULT_QUALITY_NONE;
 
         public Builder withMetricNames(JsonArray metricNames) {
             this.metricNames = metricNames;
@@ -142,9 +157,17 @@ public class HurenceDatasourcePluginQueryRequestParam {
             return this;
         }
 
+        public void withQualityValue(Float qualityValue) {
+            this.qualityValue = qualityValue;
+        }
+
+        public void withQualityAgg(String qualityAgg) {
+            this.qualityAgg = qualityAgg;
+        }
+
         public HurenceDatasourcePluginQueryRequestParam build() {
             return new HurenceDatasourcePluginQueryRequestParam(metricNames, from, to, format, maxDataPoints,
-                    samplingAlgo, bucketSize, tags, requestId, aggreg);
+                    samplingAlgo, bucketSize, tags, requestId, aggreg, qualityValue, qualityAgg);
         }
 
         public void withAggreg(List<AGG> aggreg) {

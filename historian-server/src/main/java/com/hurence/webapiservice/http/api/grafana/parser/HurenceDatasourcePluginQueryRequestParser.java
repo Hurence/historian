@@ -31,6 +31,9 @@ public class HurenceDatasourcePluginQueryRequestParser {
     private final String bucketSizeJsonPath;
     private final String requestIdJsonPath;
     private final String aggregationPath;
+    private final String qualityValuePath;
+    private final String qualityAggPath;
+
 
     public HurenceDatasourcePluginQueryRequestParser(String fromJsonPath,
                                                      String toJsonPath,
@@ -41,7 +44,9 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                                      String samplingAlgoJsonPath,
                                                      String bucketSizeJsonPath,
                                                      String requestIdJsonPath,
-                                                     String aggregationPath) {
+                                                     String aggregationPath,
+                                                     String qualityValuePath,
+                                                     String qualityAggPath) {
         this.fromJsonPath = fromJsonPath;
         this.toJsonPath = toJsonPath;
         this.namesJsonPath = namesJsonPath;
@@ -52,6 +57,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.bucketSizeJsonPath = bucketSizeJsonPath;
         this.requestIdJsonPath = requestIdJsonPath;
         this.aggregationPath= aggregationPath;
+        this.qualityValuePath = qualityValuePath;
+        this.qualityAggPath = qualityAggPath;
     }
 
     public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
@@ -105,6 +112,14 @@ public class HurenceDatasourcePluginQueryRequestParser {
         List<AGG> agreg = parseAggreg(requestBody);
         if (agreg != null) {
             builder.withAggreg(agreg);
+        }
+        Float qualityValue = parseQualityValue(requestBody);
+        if (qualityValue != null) {
+            builder.withQualityValue(qualityValue);
+        }
+        String qualityAgg = parseQualityAgg(requestBody);
+        if (qualityAgg != null) {
+            builder.withQualityAgg(qualityAgg);
         }
         return builder.build();
     }
@@ -179,6 +194,14 @@ public class HurenceDatasourcePluginQueryRequestParser {
 
     private Integer parseMaxDataPoints(JsonObject requestBody) {
         return parse(requestBody, maxDatapointsJsonPath, Integer.class);
+    }
+
+    private Float parseQualityValue(JsonObject requestBody) {
+        return parseFloat(requestBody, qualityValuePath);
+    }
+
+    private String parseQualityAgg(JsonObject requestBody) {
+        return parse(requestBody, qualityAggPath, String.class);
     }
 
 }

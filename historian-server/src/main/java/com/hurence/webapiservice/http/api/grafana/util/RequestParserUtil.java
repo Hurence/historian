@@ -107,6 +107,31 @@ public class RequestParserUtil {
         return parse(requestBody, pointer, String.class);
     }
 
+    public static Float parseFloat(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof Double) { // TODO check this !
+            try {
+                return convertToFloat(fromObj);
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid Float !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not of class Float !",
+                        pointer, fromObj));
+    }
+
+    public static Float convertToFloat(Object value) {
+        Double doubleValue = (Double) value;
+        return doubleValue == null ? null : doubleValue.floatValue();
+    }
+
     public static <T> T parse(JsonObject requestBody, String pointer, Class<T> clazz) {
         LOGGER.debug("trying to parse pointer {}", pointer);
         JsonPointer jsonPointer = JsonPointer.from(pointer);
