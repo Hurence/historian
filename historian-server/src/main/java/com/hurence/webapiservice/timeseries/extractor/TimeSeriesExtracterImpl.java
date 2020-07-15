@@ -37,6 +37,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
         List<Point> points = decompressPoints(from, to, chunks);
         List<Point> sampledPoints = sampler.sample(points);
+        // TODO here i will filter with quality if quality exist in query.
         this.sampledPoints.addAll(sampledPoints);
         aggsCalculator.updateAggs(points);
     }
