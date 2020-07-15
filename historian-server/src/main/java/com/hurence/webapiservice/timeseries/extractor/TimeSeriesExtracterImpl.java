@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.timeseries.modele.PointImpl;
@@ -20,7 +21,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterImpl.class);
 
-    final Sampler<PointImpl> sampler;
+    final Sampler<Point> sampler;
     final PointsAggsCalculator aggsCalculator;
 
     public TimeSeriesExtracterImpl(long from, long to,
@@ -34,8 +35,8 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     @Override
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
-        List<PointImpl> points = decompressPoints(from, to, chunks);
-        List<PointImpl> sampledPoints = sampler.sample(points);
+        List<Point> points = decompressPoints(from, to, chunks);
+        List<Point> sampledPoints = sampler.sample(points);
         this.sampledPoints.addAll(sampledPoints);
         aggsCalculator.updateAggs(points);
     }
@@ -45,10 +46,10 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<PointImpl> decompressPoints(long from, long to, List<JsonObject> chunks) {
-        Stream<PointImpl> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
-        Stream<PointImpl> sortedPoints = extractedPoints
-                .sorted(Comparator.comparing(PointImpl::getTimestamp));
+    private List<Point> decompressPoints(long from, long to, List<JsonObject> chunks) {
+        Stream<Point> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
+        Stream<Point> sortedPoints = extractedPoints
+                .sorted(Comparator.comparing(Point::getTimestamp));
         return sortedPoints.collect(Collectors.toList());
     }
 }

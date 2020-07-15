@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
@@ -36,11 +37,11 @@ public class TimeSeriesExtracterUtil {
      * @param chunks
      * @return return all points uncompressing chunks
      */
-    public static List<PointImpl> extractPoints(long from, long to, List<JsonObject> chunks) {
+    public static List<Point> extractPoints(long from, long to, List<JsonObject> chunks) {
         return extractPointsAsStream(from, to, chunks).collect(Collectors.toList());
     }
 
-    public static Stream<PointImpl> extractPointsAsStream(long from, long to, List<JsonObject> chunks) {
+    public static Stream<Point> extractPointsAsStream(long from, long to, List<JsonObject> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
                     byte[] binaryChunk = chunk.getBinary(CHUNK_VALUE_FIELD);
@@ -69,8 +70,8 @@ public class TimeSeriesExtracterUtil {
      * DOCS contains at minimum chunk_value, chunk_start
      * </pre>
      */
-    public static List<PointImpl> extractPointsThenSample(long from, long to, SamplingConf samplingConf, List<JsonObject> chunks) {
-        Sampler<PointImpl> sampler = SamplerFactory.getPointSampler(samplingConf.getAlgo(), samplingConf.getBucketSize());
+    public static List<Point> extractPointsThenSample(long from, long to, SamplingConf samplingConf, List<JsonObject> chunks) {
+        Sampler<Point> sampler = SamplerFactory.getPointSampler(samplingConf.getAlgo(), samplingConf.getBucketSize());
         return sampler.sample(extractPoints(from, to, chunks));
     }
 
@@ -89,20 +90,20 @@ public class TimeSeriesExtracterUtil {
      * DOCS contains at minimum chunk_value, chunk_start
      * </pre>
      */
-    public static List<PointImpl> extractPointsThenSortThenSample(long from, long to, SamplingConf samplingConf, List<JsonObject> chunks) {
-        Stream<PointImpl> extractedPoints = extractPointsAsStream(from, to, chunks);
-        Stream<PointImpl> sortedPoints = extractedPoints
-                .sorted(Comparator.comparing(PointImpl::getTimestamp));
+    public static List<Point> extractPointsThenSortThenSample(long from, long to, SamplingConf samplingConf, List<JsonObject> chunks) {
+        Stream<Point> extractedPoints = extractPointsAsStream(from, to, chunks);
+        Stream<Point> sortedPoints = extractedPoints
+                .sorted(Comparator.comparing(Point::getTimestamp));
         return samplePoints(samplingConf, chunks, sortedPoints);
     }
 
-    public static List<PointImpl> samplePoints(SamplingConf samplingConf, List<JsonObject> chunks, Stream<PointImpl> sortedPoints) {
+    public static List<Point> samplePoints(SamplingConf samplingConf, List<JsonObject> chunks, Stream<Point> sortedPoints) {
         int totalNumberOfPoint = ChunkUtil.countTotalNumberOfPointInChunks(chunks);
-        Sampler<PointImpl> sampler = getPointSampler(samplingConf, totalNumberOfPoint);
+        Sampler<Point> sampler = getPointSampler(samplingConf, totalNumberOfPoint);
         return sampler.sample(sortedPoints.collect(Collectors.toList()));
     }
 
-    public static Sampler<PointImpl> getPointSampler(SamplingConf samplingConf, long totalNumberOfPoint) {
+    public static Sampler<Point> getPointSampler(SamplingConf samplingConf, long totalNumberOfPoint) {
         SamplingConf calculatedConf = calculSamplingConf(samplingConf, totalNumberOfPoint);
         return SamplerFactory.getPointSampler(calculatedConf.getAlgo(), calculatedConf.getBucketSize());
     }

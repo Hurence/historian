@@ -5,6 +5,7 @@ import com.hurence.historian.solr.injector.AbstractVersion0SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPoints;
 import com.hurence.historian.solr.util.SolrITHelper;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.historian.HistorianVerticle;
@@ -70,7 +71,7 @@ public class QueryEndPointFocusOnSamplingWithPreAggVersion0IT extends AbstractQu
     }
 
     public static SolrInjector buildInjector() {
-        List<List<PointImpl>> pointsByChunk10Chunks = Arrays.asList(
+        List<List<Point>> pointsByChunk10Chunks = Arrays.asList(
                 Arrays.asList(
                         new PointImpl( 1L, 1.0),
                         new PointImpl( 2L, 1.0)

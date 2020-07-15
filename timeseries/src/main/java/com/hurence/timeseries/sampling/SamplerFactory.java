@@ -15,6 +15,7 @@
  */
 package com.hurence.timeseries.sampling;
 
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 
 public class SamplerFactory {
@@ -28,18 +29,18 @@ public class SamplerFactory {
      * @param bucketSize an int parameter
      * @return the sampler
      */
-    public static Sampler<PointImpl> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
+    public static Sampler<Point> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSampler<PointImpl>(bucketSize);
+                return new FirstItemSampler<Point>(bucketSize);
             case AVERAGE:
-                return new AverageSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
+                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketSize);
             case NONE:
-                return new IsoSampler<PointImpl>();
+                return new IsoSampler<Point>();
             case MIN:
-                return new MinSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
+                return new MinSampler<Point>(getPointTimeSerieHandler(), bucketSize);
             case MAX:
-                return new MaxSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
+                return new MaxSampler<Point>(getPointTimeSerieHandler(), bucketSize);
             case MIN_MAX:
             case LTTB:
             case MODE_MEDIAN:
@@ -70,20 +71,20 @@ public class SamplerFactory {
         }
     }
 
-    public static TimeSerieHandler<PointImpl> getPointTimeSerieHandler() {
-        return new TimeSerieHandler<PointImpl>() {
+    public static TimeSerieHandler<Point> getPointTimeSerieHandler() {
+        return new TimeSerieHandler<Point>() {
                 @Override
                 public PointImpl createTimeserie(long timestamp, double value) {
                     return new PointImpl(timestamp, value);
                 }
 
                 @Override
-                public long getTimeserieTimestamp(PointImpl point) {
+                public long getTimeserieTimestamp(Point point) {
                     return point.getTimestamp();
                 }
 
                 @Override
-                public Double getTimeserieValue(PointImpl point) {
+                public Double getTimeserieValue(Point point) {
                     return point.getValue();
                 }
             };

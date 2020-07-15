@@ -20,6 +20,7 @@ import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.modele.DoubleList;
 import com.hurence.timeseries.modele.LongList;
 import com.hurence.timeseries.converter.serializer.MetricProtocolBuffers;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -223,7 +224,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param metricDataPoints - the list with points
      * @return the serialized points as byte[]
      */
-    public static byte[] to(Iterator<PointImpl> metricDataPoints) {
+    public static byte[] to(Iterator<Point> metricDataPoints) {
         return to(metricDataPoints, 0);
     }
 
@@ -235,7 +236,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param ddcThreshold     - the aberration threshold for the deltas
      * @return the serialized points as byte[]
      */
-    public static byte[] to(final Iterator<PointImpl> metricDataPoints, final int ddcThreshold) {
+    public static byte[] to(final Iterator<Point> metricDataPoints, final int ddcThreshold) {
 
         if (ddcThreshold < 0) {
             throw new IllegalArgumentException("DDC Threshold must not be lower than 0. Current value is: " + ddcThreshold);
@@ -261,7 +262,7 @@ public final class ProtoBufTimeSeriesSerializer {
         int index = 0;
         while (metricDataPoints.hasNext()) {
 
-            PointImpl p = metricDataPoints.next();
+            Point p = metricDataPoints.next();
             if (p == null) {
                 LOGGER.debug("Skipping 'null' point.");
                 continue;
