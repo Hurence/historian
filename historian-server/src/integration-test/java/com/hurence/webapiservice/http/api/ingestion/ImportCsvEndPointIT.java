@@ -496,7 +496,7 @@ public class ImportCsvEndPointIT {
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
                         multipartForm,
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_too_big.json",
-                        CREATED, StatusMessages.CREATED,
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
                         BodyCodec.jsonObject(), vertx)
         );
         AssertResponseGivenRequestHelper
