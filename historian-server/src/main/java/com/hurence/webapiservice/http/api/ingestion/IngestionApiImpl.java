@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.ingestion;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil;
 import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
+import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
@@ -86,11 +87,21 @@ public class IngestionApiImpl implements IngestionApi {
             JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage("BAD REQUEST");
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
             context.response().end(String.valueOf(errorObject));
             return;
         }
+
+        JsonObject finalResponse = constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap);
+        if (multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints.isEmpty()) {
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+            return;
+        }
+
         JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
                 .put(CHUNK_ORIGIN, "ingestion-csv");
         service.rxAddTimeSeries(pointsToBeInjected)
@@ -103,7 +114,7 @@ public class IngestionApiImpl implements IngestionApi {
                 .doOnSuccess(response -> {
                     context.response().setStatusCode(CREATED);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+                    context.response().end(finalResponse.encodePrettily());
                 }).subscribe();
 
     }

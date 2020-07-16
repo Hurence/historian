@@ -686,5 +686,72 @@ public class ImportCsvEndPointIT {
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testBug10072020EmptyResponseWhenNoFileIsSent(Vertx vertx, VertxTestContext testContext) {
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "Timestamp")
+                .attribute(MAPPING_NAME, "Metric")
+                .attribute(MAPPING_VALUE, "Happiness Score")
+                .attribute("timestamp_unit", "MILLISECONDS_EPOCH")
+                .attribute(FORMAT_DATE, "yyyy-m-DTHH:mm+ss.SSS")
+                .attribute(TIMEZONE_DATE, "UTC");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/bug/testBug10072020EmptyResponseWhenNoFileIsSent/expectedResponse.json",
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    //date format 2015-01-31T23:59:59+99:999
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testParsingFile_10072020(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/bug/csv/2015.txt").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "Timestamp")
+                .attribute(MAPPING_NAME, "Metric")
+                .attribute(MAPPING_VALUE, "Happiness Score")
+                .attribute(FORMAT_DATE, "yyyy-MM-dd'T'HH:mm:ssXXX")
+                .attribute(TIMEZONE_DATE, "UTC")
+                .textFileUpload("csv-exemple.csv", "csv-exemple.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/bug/testParsingFile_10072020/expectedResponse.json",
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    //date format 2015-01-31T23:59:59+99:999
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testParsingFile_10072020_novalid_points_should_give_a_reason(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/bug/csv/2015.txt").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "Timestamp")
+                .attribute(MAPPING_NAME, "Metric")
+                .attribute(MAPPING_VALUE, "Happiness Score")
+                .attribute(FORMAT_DATE, "yyyy-MM-dd'T'HH:mm+ss.SSS")
+                .attribute(TIMEZONE_DATE, "UTC")
+                .textFileUpload("csv-exemple.csv", "csv-exemple.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/bug/testParsingFile_10072020_novalid_points_should_give_a_reason/expectedResponse.json",
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
 }
 
