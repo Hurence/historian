@@ -18,7 +18,7 @@ public class IngestionApiUtil {
 
     public static void constructCsvFileConvertors(MultiCsvFilesConvertor multiCsvFilesConvertor) {
         if (multiCsvFilesConvertor.uploads.isEmpty()) {
-            throw new IllegalArgumentException("request is not containing any files");
+            throw new IllegalArgumentException("Request is not containing any files");
         }
         multiCsvFilesConvertor.uploads.forEach(file -> multiCsvFilesConvertor.csvFileConvertors.add(new CsvFileConvertor(multiCsvFilesConvertor.multiMap, file)));
         multiCsvFilesConvertor.parseFiles();
