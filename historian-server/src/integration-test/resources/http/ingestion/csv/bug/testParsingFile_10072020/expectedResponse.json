@@ -1,8 +1,0 @@
-{
-  "errors": [
-    {
-      "file": "csv-exemple.csv",
-      "cause": "There is no valid points"
-    }
-  ]
-}
