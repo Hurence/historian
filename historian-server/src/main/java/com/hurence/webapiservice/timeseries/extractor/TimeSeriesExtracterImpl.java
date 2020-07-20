@@ -38,8 +38,13 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         List<Point> points = decompressPoints(from, to, chunks);
         List<Point> sampledPoints = sampler.sample(points);
         // TODO here i will filter with quality if quality exist in query.
+        List<Point> filteredPoints = filterPointsByQuality();
         this.sampledPoints.addAll(sampledPoints);
         aggsCalculator.updateAggs(points);
+    }
+
+    private List<Point> filterPointsByQuality() {
+        return null; // TODO
     }
 
     @Override

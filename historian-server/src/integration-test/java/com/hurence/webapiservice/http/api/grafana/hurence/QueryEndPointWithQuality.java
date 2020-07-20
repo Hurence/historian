@@ -4,6 +4,7 @@ package com.hurence.webapiservice.http.api.grafana.hurence;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
+import com.hurence.historian.solr.injector.Version1SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.modele.PointWithQualityImpl;
 import com.hurence.unit5.extensions.SolrExtension;
@@ -57,7 +58,7 @@ public class QueryEndPointWithQuality {
 
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        SolrInjector injector = new Version0SolrInjectorMultipleMetricSpecificPoints(
+        SolrInjector injector = new Version1SolrInjectorMultipleMetricSpecificPoints(
                 Arrays.asList("temp_a", "temp_b", "temp_c"),
                 Arrays.asList(
                         Arrays.asList(
@@ -90,7 +91,7 @@ public class QueryEndPointWithQuality {
     }
 
     public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
         JsonObject httpConf = new JsonObject()
                 .put(HttpServerVerticle.GRAFANA,
                         new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));

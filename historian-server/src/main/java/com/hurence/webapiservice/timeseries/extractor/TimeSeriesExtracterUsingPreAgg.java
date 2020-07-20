@@ -115,6 +115,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             default:
                 throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
         }
+        // TODO add here quality
         return new PointImpl(timestamp, aggValue);
     }
 }

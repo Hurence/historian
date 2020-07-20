@@ -12,6 +12,8 @@ public interface Schema {
                 return new ChunkSchemaVersionEVOA0();
             case VERSION_0:
                 return new ChunkSchemaVersion0();
+            case VERSION_1:
+                return new ChunkSchemaVersion1();
             default:
                 throw new IllegalArgumentException(String.format("version '%s' is not yet supported !", version.toString()));
         }

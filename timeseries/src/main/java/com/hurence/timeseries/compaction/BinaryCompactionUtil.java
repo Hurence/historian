@@ -17,6 +17,7 @@ package com.hurence.timeseries.compaction;
 
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,7 +61,7 @@ public class BinaryCompactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<PointImpl> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd) throws IOException {
+    public static List<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
             return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, chunkStart, chunkEnd);
         }
@@ -76,8 +77,8 @@ public class BinaryCompactionUtil {
      * @return
      * @throws IOException
      */
-    public static List<PointImpl> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd,
-                                                   long requestedFrom, long requestedEnd) throws IOException {
+    public static List<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd,
+                                               long requestedFrom, long requestedEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
             return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd);
         }

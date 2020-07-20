@@ -1,9 +1,12 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
 import com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler;
+import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Objects;
 
 
 public class QualityConfig {
@@ -34,19 +37,33 @@ public class QualityConfig {
         this.qualityAgg = qualityAgg;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        QualityConfig that = (QualityConfig) o;
+        return Objects.equals(quality, that.quality) &&
+                Objects.equals(qualityAgg, that.qualityAgg);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(quality, qualityAgg);
+    }
+
     public boolean matchChunk(JsonObject chunk) {
         Float qualityChunk;
-        String chunkQualityField = getChunkQualityField(qualityAgg);
+        String chunkQualityField = getChunkQualityField();
         try {
             qualityChunk = chunk.getFloat(chunkQualityField);
         } catch (Exception e) {
             LOGGER.debug("chunk don't have field "+chunkQualityField);
             return false;
         }
-        return this.quality.equals(qualityChunk);
+        return (this.quality <= qualityChunk);
     }
 
-    public static String getChunkQualityField(QualityAgg qualityAgg) {
+    public String getChunkQualityField() {
         String qualityAggName;
         switch (qualityAgg) {
             case AVG:
