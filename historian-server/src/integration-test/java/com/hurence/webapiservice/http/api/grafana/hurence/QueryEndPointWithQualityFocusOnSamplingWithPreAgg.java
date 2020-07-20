@@ -2,9 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.hurence;
 
 
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.solr.injector.AbstractVersion0SolrInjector;
-import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPoints;
+import com.hurence.historian.solr.injector.*;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
@@ -67,7 +65,7 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAgg {
     }
 
     public static void initSolrAndVerticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
         JsonObject httpConf = new JsonObject()
                 .put(HttpServerVerticle.GRAFANA,
                         new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
@@ -131,15 +129,15 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAgg {
                         new PointWithQualityImpl( 20L, 10.0, 0.9f)
                 )
         );
-        AbstractVersion0SolrInjector injector10chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion1SolrInjector injector10chunk = new Version1SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_10_chunk", pointsByChunk10Chunks);
-        AbstractVersion0SolrInjector injector9chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion1SolrInjector injector9chunk = new Version1SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_9_chunk", pointsByChunk10Chunks.stream().limit(9).collect(Collectors.toList()));
-        AbstractVersion0SolrInjector injector7chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion1SolrInjector injector7chunk = new Version1SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_7_chunk", pointsByChunk10Chunks.stream().limit(7).collect(Collectors.toList()));
-        AbstractVersion0SolrInjector injector5chunk = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion1SolrInjector injector5chunk = new Version1SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_5_chunk", pointsByChunk10Chunks.stream().limit(5).collect(Collectors.toList()));
-        AbstractVersion0SolrInjector injector1chunkOf20Point = new Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(
+        AbstractVersion1SolrInjector injector1chunkOf20Point = new Version1SolrInjectorOneMetricMultipleChunksSpecificPoints(
                 "metric_1_chunk_of_20_points",
                 Arrays.asList(
                         pointsByChunk10Chunks.stream().flatMap(List::stream).collect(Collectors.toList())

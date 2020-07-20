@@ -27,7 +27,6 @@ import java.util.stream.Collectors;
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.QUALITY_AGG;
 import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.QUALITY_VALUE;
-import static com.hurence.webapiservice.http.api.grafana.util.QualityConfig.getChunkQualityField;
 
 public class GetTimeSeriesHandler {
 
@@ -100,6 +99,7 @@ public class GetTimeSeriesHandler {
                 CHUNK_END_FIELD,
                 CHUNK_COUNT_FIELD,
                 NAME);
+        addQualityFields(query, request);
         addAllTagsAsFields(request.getMetricRequestsWithFinalTagsAndFinalQualities(), query);
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
@@ -108,6 +108,12 @@ public class GetTimeSeriesHandler {
         query.setRows(request.getMaxTotalChunkToRetrieve());
 
         return query;
+    }
+
+    private void addQualityFields(SolrQuery query, Request request) {
+        Set<String> qualityAggSet = new HashSet<>();
+        request.getMetricRequestsWithFinalTagsAndFinalQualities().forEach(metricRequest -> qualityAggSet.add(metricRequest.getQuality().getChunkQualityField()));
+        qualityAggSet.forEach(query::addField);;
     }
 
     private void addAllTagsAsFields(List<MetricRequest> metricRequests, SolrQuery query) {
@@ -163,9 +169,8 @@ public class GetTimeSeriesHandler {
             else
                 queryForEachMetricBuilder.append("name:\"").append(metricRequest.getName()).append("\"");
             if (metricRequest.getQuality() != null) {
-                QualityAgg qualityAgg = metricRequest.getQuality().getQualityAgg();
                 Float qualityValue = metricRequest.getQuality().getQuality();
-                String qualityField = getChunkQualityField(qualityAgg);
+                String qualityField = metricRequest.getQuality().getChunkQualityField();
                 queryForEachMetricBuilder.append(" AND ").append(qualityField).append(":[").append(qualityValue).append(" TO *]"); // TODO isn't TO 1 better ?
             }
             finalStringList.add(queryForEachMetricBuilder.toString());

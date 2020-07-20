@@ -144,7 +144,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param from              including points from
      * @param to                including points to
      */
-    public static List<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
         LOGGER.debug("from - timeSeriesStart={} timeSeriesEnd={} to={} from={}", timeSeriesStart, timeSeriesEnd, to, from);
         if (from == -1 || to == -1) {
             throw new IllegalArgumentException("FROM or TO have to be >= 0");
@@ -172,7 +172,7 @@ public final class ProtoBufTimeSeriesSerializer {
             MetricProtocolBuffers.Points protocolBufferPoints = MetricProtocolBuffers.Points.parseFrom(decompressedBytes);
 
             List<MetricProtocolBuffers.Point> pList = protocolBufferPoints.getPList();
-            List<PointImpl> pointsToReturn = new ArrayList<>();
+            List<Point> pointsToReturn = new ArrayList<>();
 
             int size = pList.size();
 
@@ -204,6 +204,7 @@ public final class ProtoBufTimeSeriesSerializer {
                         LOGGER.debug("remaining {} points are skipped after t={}", size - i, calculatedPointDate);
                         return pointsToReturn;
                     }
+                    // TODO  add here quality
                     pointsToReturn.add(new PointImpl(calculatedPointDate, value));
                 } else {
                     LOGGER.debug("not adding point at t={}", calculatedPointDate);

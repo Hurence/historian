@@ -50,7 +50,8 @@ public class MetricRequest {
         if (o == null || getClass() != o.getClass()) return false;
         MetricRequest that = (MetricRequest) o;
         return Objects.equals(name, that.name) &&
-                Objects.equals(tags, that.tags);
+                Objects.equals(tags, that.tags) &&
+                Objects.equals(quality, that.quality);
     }
 
     @Override

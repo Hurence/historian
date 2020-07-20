@@ -58,6 +58,9 @@ public class HistorianFields {
     public static String CHUNK_SUM_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SUM;
     public static String CHUNK_SAX_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_SAX;
     public static String CHUNK_TREND_FIELD = HistorianChunkCollectionFieldsVersion0.CHUNK_TREND;
+    public static String CHUNK_QUALITY_AVG_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_AVG;
+    public static String CHUNK_QUALITY_MIN_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MIN;
+    public static String CHUNK_QUALITY_MAX_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MAX;
 
     //schema historian
     public static String CHUNK_YEAR = HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR;
