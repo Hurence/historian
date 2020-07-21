@@ -21,7 +21,7 @@ public class QualityConfig {
         this.qualityAgg = QualityAgg.valueOf(qualityAgg);
     }
 
-    public Float getQuality() {
+    public Float getQualityValue() {
         return quality;
     }
 

@@ -27,8 +27,9 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
     public TimeSeriesExtracterImpl(long from, long to,
                                    SamplingConf samplingConf,
                                    long totalNumberOfPoint,
-                                   List<AGG> aggregList) {
-        super(from, to, samplingConf, totalNumberOfPoint);
+                                   List<AGG> aggregList,
+                                   boolean returnQuality) {
+        super(from, to, samplingConf, totalNumberOfPoint, returnQuality);
         sampler = SamplerFactory.getPointSampler(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
         aggsCalculator = new PointsAggsCalculator(aggregList);
     }

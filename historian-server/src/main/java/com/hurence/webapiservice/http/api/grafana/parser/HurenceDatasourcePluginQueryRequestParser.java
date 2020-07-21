@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.grafana.parser;
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -33,6 +34,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
     private final String aggregationPath;
     private final String qualityValuePath;
     private final String qualityAggPath;
+    private final String qualityReturnPath;
 
 
     public HurenceDatasourcePluginQueryRequestParser(String fromJsonPath,
@@ -46,7 +48,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                                      String requestIdJsonPath,
                                                      String aggregationPath,
                                                      String qualityValuePath,
-                                                     String qualityAggPath) {
+                                                     String qualityAggPath,
+                                                     String qualityReturnPath) {
         this.fromJsonPath = fromJsonPath;
         this.toJsonPath = toJsonPath;
         this.namesJsonPath = namesJsonPath;
@@ -59,6 +62,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.aggregationPath= aggregationPath;
         this.qualityValuePath = qualityValuePath;
         this.qualityAggPath = qualityAggPath;
+        this.qualityReturnPath = qualityReturnPath;
     }
 
     public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
@@ -117,12 +121,17 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (qualityValue != null) {
             builder.withQualityValue(qualityValue);
         }
-        String qualityAgg = parseQualityAgg(requestBody);
+        QualityAgg qualityAgg = parseQualityAgg(requestBody);
         if (qualityAgg != null) {
             builder.withQualityAgg(qualityAgg);
         }
+        Boolean qualityReturn = parseQualityReturn(requestBody);
+        if (qualityReturn != null) {
+            builder.withQualityReturn(qualityReturn);
+        }
         return builder.build();
     }
+
 
     private List<AGG> parseAggreg(JsonObject requestBody) {
         return parseListAGG(requestBody, aggregationPath);
@@ -144,6 +153,10 @@ public class HurenceDatasourcePluginQueryRequestParser {
         String algoStr  = parseString(requestBody, samplingAlgoJsonPath);
         if (algoStr == null) return null;
         return SamplingAlgorithm.valueOf(algoStr.toUpperCase());
+    }
+
+    private Boolean parseQualityReturn(JsonObject requestBody) {
+        return parseBoolean(requestBody, qualityReturnPath);
     }
 
     private JsonArray parseMetricNames(JsonObject requestBody) {
@@ -200,8 +213,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
         return parseFloat(requestBody, qualityValuePath);
     }
 
-    private String parseQualityAgg(JsonObject requestBody) {
-        return parse(requestBody, qualityAggPath, String.class);
+    private QualityAgg parseQualityAgg(JsonObject requestBody) {
+        return parseQualityAggregation(requestBody, qualityAggPath);
     }
 
 }

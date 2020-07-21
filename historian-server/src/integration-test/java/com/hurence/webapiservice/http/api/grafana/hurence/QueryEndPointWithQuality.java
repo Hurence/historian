@@ -3,7 +3,6 @@ package com.hurence.webapiservice.http.api.grafana.hurence;
 
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.historian.solr.injector.Version1SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.modele.PointWithQualityImpl;

@@ -10,5 +10,6 @@
   "quality" :  {
     "quality_value" : 0.75,
     "quality_agg" : "AVG"
-  }
+  },
+  "return_with_quality" : true
 }

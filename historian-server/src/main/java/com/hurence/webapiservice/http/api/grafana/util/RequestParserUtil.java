@@ -107,6 +107,19 @@ public class RequestParserUtil {
         return parse(requestBody, pointer, String.class);
     }
 
+    public static QualityAgg parseQualityAggregation(JsonObject requestBody, String qualityAggPath) {
+        LOGGER.debug("trying to parse pointer {}", qualityAggPath);
+        JsonPointer jsonPointer = JsonPointer.from(qualityAggPath);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        try {
+            return QualityAgg.valueOf(fromObj.toString());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(fromObj.toString()+ " is not a recognized aggregation ");
+        }
+    }
+
     public static Float parseFloat(JsonObject requestBody, String pointer) {
         LOGGER.debug("trying to parse pointer {}", pointer);
         JsonPointer jsonPointer = JsonPointer.from(pointer);
@@ -124,6 +137,26 @@ public class RequestParserUtil {
         }
         throw new IllegalArgumentException(
                 String.format("'%s' json pointer value '%s' is not of class Float !",
+                        pointer, fromObj));
+    }
+
+    public static Boolean parseBoolean(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof Boolean) {
+            try {
+                return (Boolean) fromObj;
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid Boolean !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not of class Boolean !",
                         pointer, fromObj));
     }
 

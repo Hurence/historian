@@ -204,11 +204,14 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
     public final static String AGGREGATION_JSON_PATH = "/aggregations";
     public final static String QUALITY_JSON_PATH = "/quality";
+    public final static String QUALITY_RETURN_JSON_PATH = "/return_with_quality";
     public final static String QUALITY_VALUE_JSON_PATH = QUALITY_JSON_PATH+"/quality_value";
     public final static String QUALITY_AGG_JSON_PATH = QUALITY_JSON_PATH+"/quality_agg";
 
     public final static String QUALITY_VALUE = "quality_value";
-    public final static String QUALITY_AGG  = "qualitu_agg";
+    public final static String QUALITY_AGG  = "quality_agg";
+    public final static String QUALITY_RETURN  = "quality_return";
+
 
     /**
      *  used to query metrics datapoints in grafana panels.
@@ -276,7 +279,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH)
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH)
                     .parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
@@ -375,7 +378,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
                 .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()))
                 .put(QUALITY_VALUE, request.getQualityValue())
-                .put(QUALITY_AGG, request.getQualityAgg());
+                .put(QUALITY_AGG, request.getQualityAgg().toString())
+                .put(QUALITY_RETURN, request.getQualityReturn());
     }
 
     public final static String LIMIT_JSON_PATH = "/limit";

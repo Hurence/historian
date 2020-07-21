@@ -2,6 +2,7 @@ package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.PointWithQualityImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.ChunkAggsCalculator;
@@ -25,8 +26,8 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     final ChunkAggsCalculator aggsCalculator;
 
-    public TimeSeriesExtracterUsingPreAgg(long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
-        super(from, to, samplingConf, totalNumberOfPoint);
+    public TimeSeriesExtracterUsingPreAgg(long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList, boolean returnQuality) {
+        super(from, to, samplingConf, totalNumberOfPoint, returnQuality);
         aggsCalculator = new ChunkAggsCalculator(aggregList);
     }
 
@@ -78,6 +79,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 .findFirst()
                 .getAsLong();
         double aggValue;
+        float quality = 0;
         switch (samplingConf.getAlgo()) {
             case AVERAGE:
                 double sum = chunks.stream()
@@ -89,10 +91,20 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 aggValue = BigDecimal.valueOf(sum)
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
                         .doubleValue();
+                float qualitySum = (float) chunks.stream()
+                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_SUM_FIELD))
+                        .sum();
+                quality = BigDecimal.valueOf(qualitySum)
+                        .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
+                        .floatValue();
                 break;
             case FIRST:
                 aggValue = chunks.stream()
                         .mapToDouble(chunk -> chunk.getDouble(CHUNK_FIRST_VALUE_FIELD))
+                        .findFirst()
+                        .getAsDouble();
+                quality = (float) chunks.stream()
+                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_FIRST_FIELD))
                         .findFirst()
                         .getAsDouble();
                 break;
@@ -101,10 +113,18 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                         .mapToDouble(chunk -> chunk.getDouble(CHUNK_MIN_FIELD))
                         .min()
                         .getAsDouble();
+                quality = (float) chunks.stream()
+                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MIN_FIELD))
+                        .min()
+                        .getAsDouble();
                 break;
             case MAX:
                 aggValue = chunks.stream()
                         .mapToDouble(chunk -> chunk.getDouble(CHUNK_MAX_FIELD))
+                        .max()
+                        .getAsDouble();
+                quality = (float) chunks.stream()
+                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MAX_FIELD))
                         .max()
                         .getAsDouble();
                 break;
@@ -115,7 +135,9 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             default:
                 throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
         }
-        // TODO add here quality
-        return new PointImpl(timestamp, aggValue);
+        if (returnQuality)
+            return new PointWithQualityImpl(timestamp, aggValue, quality);
+        else
+            return new PointImpl(timestamp, aggValue);
     }
 }

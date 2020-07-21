@@ -16,6 +16,7 @@
 package com.hurence.logisland.record;
 
 import com.hurence.timeseries.functions.*;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
@@ -102,7 +103,7 @@ public class TimeSeriesRecord extends StandardRecord {
         setField(CHUNK_END, FieldType.LONG, chunkEnd);
 
         try {
-            Stream<PointImpl> pointStream = getPointStream(chunkValue, chunkStart, chunkEnd).stream();
+            Stream<Point> pointStream = getPointStream(chunkValue, chunkStart, chunkEnd).stream();
 
             MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(name, type)
                     .start(chunkStart)
@@ -118,7 +119,7 @@ public class TimeSeriesRecord extends StandardRecord {
         }
     }
 
-    public static List<PointImpl> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
+    public static List<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
         byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
         return BinaryCompactionUtil.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
     }
@@ -180,11 +181,11 @@ public class TimeSeriesRecord extends StandardRecord {
      *
      * @return uncompressed points lazyly if not yet done
      */
-    public List<PointImpl> getPoints() {
+    public List<Point> getPoints() {
         if (hasField(RECORD_CHUNK_UNCOMPRESSED_POINTS))
-            return (List<PointImpl>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue();
+            return (List<Point>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue();
         else {
-            List<PointImpl> points = null;
+            List<Point> points = null;
             try {
                 points = getPointStream(getChunkValue(), getStartChunk(), getEndChunk());
             } catch (IOException e) {
