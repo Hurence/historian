@@ -87,6 +87,12 @@ public class ChunkSchemaVersion1 implements Schema{
                     .withType("pfloat").build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MAX)
+                    .withType("pfloat").build(),
+            new SolrField.Builder()
+                    .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_SUM)
+                    .withType("pfloat").build(),
+            new SolrField.Builder()
+                    .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_FIRST)
                     .withType("pfloat").build()
     );
 

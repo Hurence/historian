@@ -5,6 +5,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 public class PointImpl implements Point {
+
+    static float DEFAULT_QUALITY = 1;
     private long timestamp;
     private double value;
 
@@ -35,7 +37,8 @@ public class PointImpl implements Point {
 
     @Override
     public float getQuality() {
-        throw new IllegalArgumentException("Not implemented method for PointImpl.");
+        /*throw new IllegalArgumentException("Not implemented method for PointImpl.");*/
+        return DEFAULT_QUALITY; // TODO configure this
     }
 
     @Override

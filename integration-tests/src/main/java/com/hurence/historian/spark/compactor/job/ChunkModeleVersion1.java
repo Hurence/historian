@@ -35,6 +35,7 @@ public class ChunkModeleVersion1 implements ChunkModele {
     public float chunk_quality_sum;
     public float chunk_quality_min;
     public float chunk_quality_max;
+    public float chunk_quality_first;
     public Map<String, String> tagsAsKeyValue = new HashMap<>();
 
     public static ChunkModeleVersion1 fromPoints(String metricName, List<Point> points) {
@@ -78,6 +79,7 @@ public class ChunkModeleVersion1 implements ChunkModele {
         chunk.chunk_quality_avg = chunk.chunk_quality_sum / chunk.points.size();
         chunk.chunk_quality_min = (float) chunk.points.stream().mapToDouble(Point::getQuality).min().getAsDouble();
         chunk.chunk_quality_max = (float) chunk.points.stream().mapToDouble(Point::getQuality).max().getAsDouble();
+        chunk.chunk_quality_first = points.get(0).getQuality();
         return chunk;
     }
 
@@ -110,6 +112,8 @@ public class ChunkModeleVersion1 implements ChunkModele {
         json.put(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_AVG, this.chunk_quality_avg);
         json.put(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MIN, this.chunk_quality_min);
         json.put(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MAX, this.chunk_quality_max);
+        json.put(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_SUM, this.chunk_quality_sum);
+        json.put(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_FIRST, this.chunk_quality_first);
         return json;
     }
 
@@ -136,6 +140,8 @@ public class ChunkModeleVersion1 implements ChunkModele {
         doc.addField(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_AVG, this.chunk_quality_avg);
         doc.addField(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MIN, this.chunk_quality_min);
         doc.addField(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MAX, this.chunk_quality_max);
+        doc.addField(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_SUM, this.chunk_quality_sum);
+        doc.addField(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_FIRST, this.chunk_quality_first);
         return doc;
     }
 }

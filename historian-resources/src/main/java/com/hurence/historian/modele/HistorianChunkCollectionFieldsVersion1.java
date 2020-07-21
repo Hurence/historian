@@ -29,5 +29,7 @@ public class HistorianChunkCollectionFieldsVersion1 {
     public static String CHUNK_QUALITY_AVG = "chunk_quality_avg";
     public static String CHUNK_QUALITY_MIN = "chunk_quality_min";
     public static String CHUNK_QUALITY_MAX = "chunk_quality_max";
+    public static String CHUNK_QUALITY_SUM = "chunk_quality_sum";
+    public static String CHUNK_QUALITY_FIRST = "chunk_quality_first";
     // TODO see what other quality aggregs to add
 }

@@ -27,13 +27,16 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
+    boolean returnQuality;
 
     public AbstractTimeSeriesExtracter(long from, long to,
                                        SamplingConf samplingConf,
-                                       long totalNumberOfPoint) {
+                                       long totalNumberOfPoint,
+                                       boolean returnQuality) {
         this.from = from;
         this.to = to;
         this.samplingConf = TimeSeriesExtracterUtil.calculSamplingConf(samplingConf, totalNumberOfPoint);
+        this.returnQuality = returnQuality;
         LOGGER.debug("Initialized {}  with samplingConf : {}", this.getClass(), this.samplingConf);
     }
 
@@ -89,7 +92,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 * We sort just so that user can not realize there is a problem in chunks.
                 */
                 .sorted(Comparator.comparing(Point::getTimestamp))
-                .map(p -> new JsonArray().add(p.getValue()).add(p.getTimestamp()))
+                .map(this::returnPoint)
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()
                 .put(TIMESERIE_POINT, new JsonArray(points));
@@ -97,6 +100,13 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
         return toReturn;
+    }
+
+    private JsonArray returnPoint(Point point) {
+        if (point.hasQuality())
+            return new JsonArray().add(point.getValue()).add(point.getTimestamp()).add(point.getQuality());
+        else
+            return new JsonArray().add(point.getValue()).add(point.getTimestamp());
     }
 
     @Override

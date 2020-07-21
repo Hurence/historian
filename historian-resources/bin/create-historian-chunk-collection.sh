@@ -248,6 +248,8 @@ create_schema() {
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_avg" "pfloat"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_min" "pfloat"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_max" "pfloat"
+            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_sum" "pfloat"
+            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_first" "pfloat"
             ;;
         *)
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"

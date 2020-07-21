@@ -25,8 +25,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.QUALITY_AGG;
-import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.QUALITY_VALUE;
+import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
 
 public class GetTimeSeriesHandler {
 
@@ -113,7 +112,7 @@ public class GetTimeSeriesHandler {
     private void addQualityFields(SolrQuery query, Request request) {
         Set<String> qualityAggSet = new HashSet<>();
         request.getMetricRequestsWithFinalTagsAndFinalQualities().forEach(metricRequest -> qualityAggSet.add(metricRequest.getQuality().getChunkQualityField()));
-        qualityAggSet.forEach(query::addField);;
+        qualityAggSet.forEach(query::addField);
     }
 
     private void addAllTagsAsFields(List<MetricRequest> metricRequests, SolrQuery query) {
@@ -169,7 +168,7 @@ public class GetTimeSeriesHandler {
             else
                 queryForEachMetricBuilder.append("name:\"").append(metricRequest.getName()).append("\"");
             if (metricRequest.getQuality() != null) {
-                Float qualityValue = metricRequest.getQuality().getQuality();
+                Float qualityValue = metricRequest.getQuality().getQualityValue();
                 String qualityField = metricRequest.getQuality().getChunkQualityField();
                 queryForEachMetricBuilder.append(" AND ").append(qualityField).append(":[").append(qualityValue).append(" TO *]"); // TODO isn't TO 1 better ?
             }
@@ -352,15 +351,19 @@ public class GetTimeSeriesHandler {
                     break;
                 case FIRST:
                     query.addField(CHUNK_FIRST_VALUE_FIELD);
+                    query.addField(CHUNK_QUALITY_FIRST_FIELD);
                     break;
                 case AVERAGE:
                     query.addField(CHUNK_SUM_FIELD);
+                    query.addField(CHUNK_QUALITY_AVG_FIELD);
                     break;
                 case MIN:
                     query.addField(CHUNK_MIN_FIELD);
+                    query.addField(CHUNK_QUALITY_MIN_FIELD);
                     break;
                 case MAX:
                     query.addField(CHUNK_MAX_FIELD);
+                    query.addField(CHUNK_QUALITY_MAX_FIELD);
                     break;
                 case MODE_MEDIAN:
                 case LTTB:
@@ -390,7 +393,7 @@ public class GetTimeSeriesHandler {
         long from = request.getFrom();
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
-        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities());
+        MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities(), request.getQualityReturn());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -401,7 +404,7 @@ public class GetTimeSeriesHandler {
         long from = request.getFrom();
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
-        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities());
+        MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities(), request.getQualityReturn());
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -493,6 +496,10 @@ public class GetTimeSeriesHandler {
             return params.getLong(FROM);
         }
 
+        public boolean getQualityReturn() {
+            return params.getBoolean(QUALITY_RETURN);
+        }
+
         public Integer getMaxTotalChunkToRetrieve() {
             return params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
         }
@@ -514,7 +521,7 @@ public class GetTimeSeriesHandler {
                 try {
                     JsonObject metricObject = new JsonObject(i.toString());
                     String name = metricObject.getString(NAME);
-                    Float qualityValue = metricObject.getFloat(QUALITY_VALUE, getRootQuality().getQuality());
+                    Float qualityValue = metricObject.getFloat(QUALITY_VALUE, getRootQuality().getQualityValue());
                     String qualityAgg = metricObject.getString(QUALITY_AGG, getRootQuality().getQualityAgg().toString());
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
@@ -529,7 +536,7 @@ public class GetTimeSeriesHandler {
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     QualityConfig qualityConfig = getRootQuality();
-                    if (!qualityConfig.getQuality().isNaN() && !qualityConfig.getQualityAgg().equals(QualityAgg.NONE))
+                    if (!qualityConfig.getQualityValue().isNaN() && !qualityConfig.getQualityAgg().equals(QualityAgg.NONE))
                         return new MetricRequest(name, tagsMap, qualityConfig);
                     return new MetricRequest(name, tagsMap);
                 }
