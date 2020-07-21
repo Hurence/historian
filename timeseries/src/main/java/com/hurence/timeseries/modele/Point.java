@@ -17,6 +17,11 @@ public interface Point extends Comparable<Point>, Serializable {
     float getQuality();
     boolean hasQuality();
 
+
+    default Point withoutQuality() {
+        return new PointImpl(getTimestamp(), getValue());
+    }
+
     @Override
     default int compareTo(Point o) {
         return Long.compare(this.getTimestamp(), o.getTimestamp());

@@ -88,7 +88,6 @@ public final class ProtoBufTimeSeriesSerializer {
         }
 
         try {
-            //TODO add possibility to choose ddcThreshold
             MetricProtocolBuffers.Points protocolBufferPoints = MetricProtocolBuffers.Points.parseFrom(decompressedBytes);
 
             List<MetricProtocolBuffers.Point> pList = protocolBufferPoints.getPList();

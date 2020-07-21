@@ -79,6 +79,32 @@ public final class MetricPointWithQualityEmbedded {
      * </pre>
      */
     int getVIndex();
+
+    /**
+     * <code>optional uint64 tlongBP = 5;</code>
+     *
+     * <pre>
+     *timestamp base deltas
+     * </pre>
+     */
+    boolean hasTlongBP();
+    /**
+     * <code>optional uint64 tlongBP = 5;</code>
+     *
+     * <pre>
+     *timestamp base deltas
+     * </pre>
+     */
+    long getTlongBP();
+
+    /**
+     * <code>optional uint32 tintBP = 6;</code>
+     */
+    boolean hasTintBP();
+    /**
+     * <code>optional uint32 tintBP = 6;</code>
+     */
+    int getTintBP();
   }
   /**
    * Protobuf type {@code serializer.Point}
@@ -154,6 +180,16 @@ public final class MetricPointWithQualityEmbedded {
             case 32: {
               bitField0_ |= 0x00000008;
               vIndex_ = input.readUInt32();
+              break;
+            }
+            case 40: {
+              bitField0_ |= 0x00000010;
+              tlongBP_ = input.readUInt64();
+              break;
+            }
+            case 48: {
+              bitField0_ |= 0x00000020;
+              tintBP_ = input.readUInt32();
               break;
             }
           }
@@ -288,11 +324,51 @@ public final class MetricPointWithQualityEmbedded {
       return vIndex_;
     }
 
+    public static final int TLONGBP_FIELD_NUMBER = 5;
+    private long tlongBP_;
+    /**
+     * <code>optional uint64 tlongBP = 5;</code>
+     *
+     * <pre>
+     *timestamp base deltas
+     * </pre>
+     */
+    public boolean hasTlongBP() {
+      return ((bitField0_ & 0x00000010) == 0x00000010);
+    }
+    /**
+     * <code>optional uint64 tlongBP = 5;</code>
+     *
+     * <pre>
+     *timestamp base deltas
+     * </pre>
+     */
+    public long getTlongBP() {
+      return tlongBP_;
+    }
+
+    public static final int TINTBP_FIELD_NUMBER = 6;
+    private int tintBP_;
+    /**
+     * <code>optional uint32 tintBP = 6;</code>
+     */
+    public boolean hasTintBP() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional uint32 tintBP = 6;</code>
+     */
+    public int getTintBP() {
+      return tintBP_;
+    }
+
     private void initFields() {
       tlong_ = 0L;
       tint_ = 0;
       v_ = 0D;
       vIndex_ = 0;
+      tlongBP_ = 0L;
+      tintBP_ = 0;
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -319,6 +395,12 @@ public final class MetricPointWithQualityEmbedded {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         output.writeUInt32(4, vIndex_);
       }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        output.writeUInt64(5, tlongBP_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeUInt32(6, tintBP_);
+      }
       getUnknownFields().writeTo(output);
     }
 
@@ -343,6 +425,14 @@ public final class MetricPointWithQualityEmbedded {
       if (((bitField0_ & 0x00000008) == 0x00000008)) {
         size += com.google.protobuf.CodedOutputStream
           .computeUInt32Size(4, vIndex_);
+      }
+      if (((bitField0_ & 0x00000010) == 0x00000010)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt64Size(5, tlongBP_);
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeUInt32Size(6, tintBP_);
       }
       size += getUnknownFields().getSerializedSize();
       memoizedSerializedSize = size;
@@ -473,6 +563,10 @@ public final class MetricPointWithQualityEmbedded {
         bitField0_ = (bitField0_ & ~0x00000004);
         vIndex_ = 0;
         bitField0_ = (bitField0_ & ~0x00000008);
+        tlongBP_ = 0L;
+        bitField0_ = (bitField0_ & ~0x00000010);
+        tintBP_ = 0;
+        bitField0_ = (bitField0_ & ~0x00000020);
         return this;
       }
 
@@ -517,6 +611,14 @@ public final class MetricPointWithQualityEmbedded {
           to_bitField0_ |= 0x00000008;
         }
         result.vIndex_ = vIndex_;
+        if (((from_bitField0_ & 0x00000010) == 0x00000010)) {
+          to_bitField0_ |= 0x00000010;
+        }
+        result.tlongBP_ = tlongBP_;
+        if (((from_bitField0_ & 0x00000020) == 0x00000020)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.tintBP_ = tintBP_;
         result.bitField0_ = to_bitField0_;
         onBuilt();
         return result;
@@ -544,6 +646,12 @@ public final class MetricPointWithQualityEmbedded {
         }
         if (other.hasVIndex()) {
           setVIndex(other.getVIndex());
+        }
+        if (other.hasTlongBP()) {
+          setTlongBP(other.getTlongBP());
+        }
+        if (other.hasTintBP()) {
+          setTintBP(other.getTintBP());
         }
         this.mergeUnknownFields(other.getUnknownFields());
         return this;
@@ -760,6 +868,86 @@ public final class MetricPointWithQualityEmbedded {
       public Builder clearVIndex() {
         bitField0_ = (bitField0_ & ~0x00000008);
         vIndex_ = 0;
+        onChanged();
+        return this;
+      }
+
+      private long tlongBP_ ;
+      /**
+       * <code>optional uint64 tlongBP = 5;</code>
+       *
+       * <pre>
+       *timestamp base deltas
+       * </pre>
+       */
+      public boolean hasTlongBP() {
+        return ((bitField0_ & 0x00000010) == 0x00000010);
+      }
+      /**
+       * <code>optional uint64 tlongBP = 5;</code>
+       *
+       * <pre>
+       *timestamp base deltas
+       * </pre>
+       */
+      public long getTlongBP() {
+        return tlongBP_;
+      }
+      /**
+       * <code>optional uint64 tlongBP = 5;</code>
+       *
+       * <pre>
+       *timestamp base deltas
+       * </pre>
+       */
+      public Builder setTlongBP(long value) {
+        bitField0_ |= 0x00000010;
+        tlongBP_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint64 tlongBP = 5;</code>
+       *
+       * <pre>
+       *timestamp base deltas
+       * </pre>
+       */
+      public Builder clearTlongBP() {
+        bitField0_ = (bitField0_ & ~0x00000010);
+        tlongBP_ = 0L;
+        onChanged();
+        return this;
+      }
+
+      private int tintBP_ ;
+      /**
+       * <code>optional uint32 tintBP = 6;</code>
+       */
+      public boolean hasTintBP() {
+        return ((bitField0_ & 0x00000020) == 0x00000020);
+      }
+      /**
+       * <code>optional uint32 tintBP = 6;</code>
+       */
+      public int getTintBP() {
+        return tintBP_;
+      }
+      /**
+       * <code>optional uint32 tintBP = 6;</code>
+       */
+      public Builder setTintBP(int value) {
+        bitField0_ |= 0x00000020;
+        tintBP_ = value;
+        onChanged();
+        return this;
+      }
+      /**
+       * <code>optional uint32 tintBP = 6;</code>
+       */
+      public Builder clearTintBP() {
+        bitField0_ = (bitField0_ & ~0x00000020);
+        tintBP_ = 0;
         onChanged();
         return this;
       }
@@ -2161,23 +2349,23 @@ public final class MetricPointWithQualityEmbedded {
       com.google.protobuf.MessageOrBuilder {
 
     /**
-     * <code>optional uint32 tIndex = 1;</code>
+     * <code>optional uint32 pointIndex = 1;</code>
      *
      * <pre>
      *the index of the first point with this quality, not given for first point
      *we will store it each time the quality changes
      * </pre>
      */
-    boolean hasTIndex();
+    boolean hasPointIndex();
     /**
-     * <code>optional uint32 tIndex = 1;</code>
+     * <code>optional uint32 pointIndex = 1;</code>
      *
      * <pre>
      *the index of the first point with this quality, not given for first point
      *we will store it each time the quality changes
      * </pre>
      */
-    int getTIndex();
+    int getPointIndex();
 
     /**
      * <code>optional float v = 2;</code>
@@ -2267,7 +2455,7 @@ public final class MetricPointWithQualityEmbedded {
             }
             case 8: {
               bitField0_ |= 0x00000001;
-              tIndex_ = input.readUInt32();
+              pointIndex_ = input.readUInt32();
               break;
             }
             case 21: {
@@ -2320,29 +2508,29 @@ public final class MetricPointWithQualityEmbedded {
     }
 
     private int bitField0_;
-    public static final int TINDEX_FIELD_NUMBER = 1;
-    private int tIndex_;
+    public static final int POINTINDEX_FIELD_NUMBER = 1;
+    private int pointIndex_;
     /**
-     * <code>optional uint32 tIndex = 1;</code>
+     * <code>optional uint32 pointIndex = 1;</code>
      *
      * <pre>
      *the index of the first point with this quality, not given for first point
      *we will store it each time the quality changes
      * </pre>
      */
-    public boolean hasTIndex() {
+    public boolean hasPointIndex() {
       return ((bitField0_ & 0x00000001) == 0x00000001);
     }
     /**
-     * <code>optional uint32 tIndex = 1;</code>
+     * <code>optional uint32 pointIndex = 1;</code>
      *
      * <pre>
      *the index of the first point with this quality, not given for first point
      *we will store it each time the quality changes
      * </pre>
      */
-    public int getTIndex() {
-      return tIndex_;
+    public int getPointIndex() {
+      return pointIndex_;
     }
 
     public static final int V_FIELD_NUMBER = 2;
@@ -2392,7 +2580,7 @@ public final class MetricPointWithQualityEmbedded {
     }
 
     private void initFields() {
-      tIndex_ = 0;
+      pointIndex_ = 0;
       v_ = 0F;
       vIndex_ = 0;
     }
@@ -2410,7 +2598,7 @@ public final class MetricPointWithQualityEmbedded {
                         throws java.io.IOException {
       getSerializedSize();
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
-        output.writeUInt32(1, tIndex_);
+        output.writeUInt32(1, pointIndex_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         output.writeFloat(2, v_);
@@ -2429,7 +2617,7 @@ public final class MetricPointWithQualityEmbedded {
       size = 0;
       if (((bitField0_ & 0x00000001) == 0x00000001)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeUInt32Size(1, tIndex_);
+          .computeUInt32Size(1, pointIndex_);
       }
       if (((bitField0_ & 0x00000002) == 0x00000002)) {
         size += com.google.protobuf.CodedOutputStream
@@ -2556,7 +2744,7 @@ public final class MetricPointWithQualityEmbedded {
 
       public Builder clear() {
         super.clear();
-        tIndex_ = 0;
+        pointIndex_ = 0;
         bitField0_ = (bitField0_ & ~0x00000001);
         v_ = 0F;
         bitField0_ = (bitField0_ & ~0x00000002);
@@ -2593,7 +2781,7 @@ public final class MetricPointWithQualityEmbedded {
         if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
           to_bitField0_ |= 0x00000001;
         }
-        result.tIndex_ = tIndex_;
+        result.pointIndex_ = pointIndex_;
         if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
           to_bitField0_ |= 0x00000002;
         }
@@ -2618,8 +2806,8 @@ public final class MetricPointWithQualityEmbedded {
 
       public Builder mergeFrom(com.hurence.timeseries.converter.serializer.MetricPointWithQualityEmbedded.Quality other) {
         if (other == com.hurence.timeseries.converter.serializer.MetricPointWithQualityEmbedded.Quality.getDefaultInstance()) return this;
-        if (other.hasTIndex()) {
-          setTIndex(other.getTIndex());
+        if (other.hasPointIndex()) {
+          setPointIndex(other.getPointIndex());
         }
         if (other.hasV()) {
           setV(other.getV());
@@ -2654,54 +2842,54 @@ public final class MetricPointWithQualityEmbedded {
       }
       private int bitField0_;
 
-      private int tIndex_ ;
+      private int pointIndex_ ;
       /**
-       * <code>optional uint32 tIndex = 1;</code>
+       * <code>optional uint32 pointIndex = 1;</code>
        *
        * <pre>
        *the index of the first point with this quality, not given for first point
        *we will store it each time the quality changes
        * </pre>
        */
-      public boolean hasTIndex() {
+      public boolean hasPointIndex() {
         return ((bitField0_ & 0x00000001) == 0x00000001);
       }
       /**
-       * <code>optional uint32 tIndex = 1;</code>
+       * <code>optional uint32 pointIndex = 1;</code>
        *
        * <pre>
        *the index of the first point with this quality, not given for first point
        *we will store it each time the quality changes
        * </pre>
        */
-      public int getTIndex() {
-        return tIndex_;
+      public int getPointIndex() {
+        return pointIndex_;
       }
       /**
-       * <code>optional uint32 tIndex = 1;</code>
+       * <code>optional uint32 pointIndex = 1;</code>
        *
        * <pre>
        *the index of the first point with this quality, not given for first point
        *we will store it each time the quality changes
        * </pre>
        */
-      public Builder setTIndex(int value) {
+      public Builder setPointIndex(int value) {
         bitField0_ |= 0x00000001;
-        tIndex_ = value;
+        pointIndex_ = value;
         onChanged();
         return this;
       }
       /**
-       * <code>optional uint32 tIndex = 1;</code>
+       * <code>optional uint32 pointIndex = 1;</code>
        *
        * <pre>
        *the index of the first point with this quality, not given for first point
        *we will store it each time the quality changes
        * </pre>
        */
-      public Builder clearTIndex() {
+      public Builder clearPointIndex() {
         bitField0_ = (bitField0_ & ~0x00000001);
-        tIndex_ = 0;
+        pointIndex_ = 0;
         onChanged();
         return this;
       }
@@ -2838,13 +3026,14 @@ public final class MetricPointWithQualityEmbedded {
   static {
     java.lang.String[] descriptorData = {
       "\n(metric_point_with_quality_embedded.pro" +
-      "to\022\nserializer\"?\n\005Point\022\r\n\005tlong\030\001 \001(\004\022\014" +
-      "\n\004tint\030\002 \001(\r\022\t\n\001v\030\003 \001(\001\022\016\n\006vIndex\030\004 \001(\r\"" +
-      "S\n\006Points\022\034\n\001p\030\001 \003(\0132\021.serializer.Point\022" +
-      "\013\n\003ddc\030\002 \001(\r\022\036\n\001q\030\003 \003(\0132\023.serializer.Qua" +
-      "lity\"4\n\007Quality\022\016\n\006tIndex\030\001 \001(\r\022\t\n\001v\030\002 \001" +
-      "(\002\022\016\n\006vIndex\030\003 \001(\rB/\n+com.hurence.timese" +
-      "ries.converter.serializerH\001"
+      "to\022\nserializer\"`\n\005Point\022\r\n\005tlong\030\001 \001(\004\022\014" +
+      "\n\004tint\030\002 \001(\r\022\t\n\001v\030\003 \001(\001\022\016\n\006vIndex\030\004 \001(\r\022" +
+      "\017\n\007tlongBP\030\005 \001(\004\022\016\n\006tintBP\030\006 \001(\r\"S\n\006Poin" +
+      "ts\022\034\n\001p\030\001 \003(\0132\021.serializer.Point\022\013\n\003ddc\030" +
+      "\002 \001(\r\022\036\n\001q\030\003 \003(\0132\023.serializer.Quality\"8\n" +
+      "\007Quality\022\022\n\npointIndex\030\001 \001(\r\022\t\n\001v\030\002 \001(\002\022" +
+      "\016\n\006vIndex\030\003 \001(\rB/\n+com.hurence.timeserie" +
+      "s.converter.serializerH\001"
     };
     com.google.protobuf.Descriptors.FileDescriptor.InternalDescriptorAssigner assigner =
         new com.google.protobuf.Descriptors.FileDescriptor.    InternalDescriptorAssigner() {
@@ -2863,7 +3052,7 @@ public final class MetricPointWithQualityEmbedded {
     internal_static_serializer_Point_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_serializer_Point_descriptor,
-        new java.lang.String[] { "Tlong", "Tint", "V", "VIndex", });
+        new java.lang.String[] { "Tlong", "Tint", "V", "VIndex", "TlongBP", "TintBP", });
     internal_static_serializer_Points_descriptor =
       getDescriptor().getMessageTypes().get(1);
     internal_static_serializer_Points_fieldAccessorTable = new
@@ -2875,7 +3064,7 @@ public final class MetricPointWithQualityEmbedded {
     internal_static_serializer_Quality_fieldAccessorTable = new
       com.google.protobuf.GeneratedMessage.FieldAccessorTable(
         internal_static_serializer_Quality_descriptor,
-        new java.lang.String[] { "TIndex", "V", "VIndex", });
+        new java.lang.String[] { "PointIndex", "V", "VIndex", });
   }
 
   // @@protoc_insertion_point(outer_class_scope)

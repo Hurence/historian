@@ -31,6 +31,9 @@ message Point {
     //Or the index of the value
     optional uint32 vIndex = 4;
 
+    //timestamp base deltas
+    optional uint64 tlongBP = 5;
+    optional uint32 tintBP = 6;
 }
 
 //The data of a time series is a list of points
