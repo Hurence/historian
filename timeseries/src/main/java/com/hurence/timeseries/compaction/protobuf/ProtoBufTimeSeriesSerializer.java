@@ -20,6 +20,7 @@ import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.modele.DoubleList;
 import com.hurence.timeseries.modele.LongList;
 import com.hurence.timeseries.converter.serializer.MetricProtocolBuffers;
+import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,95 +46,15 @@ public final class ProtoBufTimeSeriesSerializer {
     }
 
     /**
-     * Add the points to the given builder
-     *
-     * @param decompressedBytes the decompressed input stream
-     * @param timeSeriesStart   start of the time series
-     * @param timeSeriesEnd     end of the time series
-     * @param builder           the builder
-     */
-    public static void from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, MetricTimeSeries.Builder builder) {
-        from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd, builder);
-    }
-
-    /**
-     * Adds the points (compressed byte array) to the given builder
+     * return the uncompressed points (compressed byte array)
      *
      * @param decompressedBytes the compressed bytes holding the data points
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
-     * @param from              including points from
-     * @param to                including points to
-     * @param builder           the time series builder
      */
-    public static void from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to, MetricTimeSeries.Builder builder) {
-        if (from == -1 || to == -1) {
-            throw new IllegalArgumentException("FROM or TO have to be >= 0");
-        }
-
-        //if to is left of the time series, we have no points to return
-        if (to < timeSeriesStart) {
-            return;
-        }
-        //if from is greater  to, we have nothing to return
-        if (from > to) {
-            return;
-        }
-
-        //if from is right of the time series we have nothing to return
-        if (from > timeSeriesEnd) {
-            return;
-        }
-
-        try {
-            MetricProtocolBuffers.Points protocolBufferPoints = MetricProtocolBuffers.Points.parseFrom(decompressedBytes);
-
-            List<MetricProtocolBuffers.Point> pList = protocolBufferPoints.getPList();
-
-            int size = pList.size();
-            MetricProtocolBuffers.Point[] points = pList.toArray(new MetricProtocolBuffers.Point[0]);
-
-            long[] timestamps = new long[pList.size()];
-            double[] values = new double[pList.size()];
-
-            long lastDelta = protocolBufferPoints.getDdc();
-            long calculatedPointDate = timeSeriesStart;
-            int lastPointIndex = 0;
-
-            double value;
-
-            for (int i = 0; i < size; i++) {
-                MetricProtocolBuffers.Point p = points[i];
-
-                //Decode the time
-                if (i > 0) {
-                    lastDelta = getTimestamp(p, lastDelta);
-                    calculatedPointDate += lastDelta;
-                }
-
-                //only add the point if it is within the date
-                if (calculatedPointDate >= from && calculatedPointDate <= to) {
-                    timestamps[lastPointIndex] = calculatedPointDate;
-
-                    //Check if the point refers to an index
-                    if (p.hasVIndex()) {
-                        value = pList.get(p.getVIndex()).getV();
-                    } else {
-                        value = p.getV();
-                    }
-                    values[lastPointIndex] = value;
-                    lastPointIndex++;
-                }
-            }
-            //TODO return points
-            builder.points(new LongList(timestamps, lastPointIndex), new DoubleList(values, lastPointIndex));
-
-        } catch (IOException e) {
-            LOGGER.info("Could not decode protocol buffers points");
-        }
-
+    public static List<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
+        return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
     }
-
     /**
      * return the uncompressed points (compressed byte array)
      *
@@ -167,7 +88,6 @@ public final class ProtoBufTimeSeriesSerializer {
         }
 
         try {
-            //TODO add possibility to choose ddcThreshold
             MetricProtocolBuffers.Points protocolBufferPoints = MetricProtocolBuffers.Points.parseFrom(decompressedBytes);
 
             List<MetricProtocolBuffers.Point> pList = protocolBufferPoints.getPList();
@@ -216,11 +136,36 @@ public final class ProtoBufTimeSeriesSerializer {
         }
     }
 
+    /**
+     * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
+     *
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
+     * @param ddcThreshold     - the aberration threshold for the deltas
+     * @return the serialized points as byte[]
+     */
+    public static byte[] to(List<Point> metricDataPoints, final int ddcThreshold) {
+        Iterator<PointImpl> removePointsWithQuality = metricDataPoints.
+                stream()
+                .filter(p -> !p.hasQuality())
+                .map(PointImpl.class::cast)
+                .iterator();
+        return to(removePointsWithQuality, ddcThreshold);
+    }
 
     /**
      * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
      *
-     * @param metricDataPoints - the list with points
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
+     * @return the serialized points as byte[]
+     */
+    public static byte[] to(List<Point> metricDataPoints) {
+        return to(metricDataPoints, 0);
+    }
+
+    /**
+     * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
+     *
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
     public static byte[] to(Iterator<PointImpl> metricDataPoints) {
@@ -231,7 +176,7 @@ public final class ProtoBufTimeSeriesSerializer {
     /**
      * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
      *
-     * @param metricDataPoints - the list with points
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @param ddcThreshold     - the aberration threshold for the deltas
      * @return the serialized points as byte[]
      */
