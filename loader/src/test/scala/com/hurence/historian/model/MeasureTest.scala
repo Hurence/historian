@@ -1,9 +1,12 @@
 package com.hurence.historian.model
 
 import java.util.Date
+
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.util.Calendar
+
+import com.hurence.historian.modele.MeasureRecordV0
 
 class MeasureTest {
 

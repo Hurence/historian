@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.sql.writer.solr
 
-import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.modele.ChunkRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.writer.Writer
 import org.apache.spark.sql.{Column, Dataset, SparkSession}

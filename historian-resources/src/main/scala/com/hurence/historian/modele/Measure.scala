@@ -1,5 +1,4 @@
-package com.hurence.historian.model
-
+package com.hurence.historian.modele
 
 /**
   * A measure is a chronodated value of something

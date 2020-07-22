@@ -25,15 +25,15 @@ message Point {
     optional uint64 tlong = 1;
     //Perhaps we can store the delta as int
     optional uint32 tint = 2;
-    //timestamp base deltas
-    optional uint64 tlongBP = 3;
-    optional uint32 tintBP = 4;
 
     //Value
-    optional double v = 5;
+    optional double v = 3;
     //Or the index of the value
-    optional uint32 vIndex = 6;
+    optional uint32 vIndex = 4;
 
+    //timestamp base deltas
+    optional uint64 tlongBP = 5;
+    optional uint32 tintBP = 6;
 }
 
 //The data of a time series is a list of points
@@ -42,22 +42,16 @@ message Points {
     repeated Point p = 1;
     //the used ddc threshold
     optional uint32 ddc = 2;
-}
-
-// Only quality values different from firstValue are stored
-message Qualities {
-    // The list of Quality points
-    repeated Quality q = 1;
+    //The list of qualities, only saving for each change
+    repeated Quality q = 3;
 }
 
 message Quality {
-    //The delta as long
-    optional uint64 tlong = 1;
-    //Perhaps we can store the delta as int
-    optional uint32 tint = 2;
-
-    //Value
-    optional float v = 3;
-    //Or the index of the value
-    optional uint32 vIndex = 4;
+    //the index of the first point with this quality, not given for first point
+    //we will store it each time the quality changes
+    optional uint32 pointIndex = 1;
+    //the Value of the quality
+    optional float v = 2;
+    //Or the index of the value if it is already stocked
+    optional uint32 vIndex = 3;
 }

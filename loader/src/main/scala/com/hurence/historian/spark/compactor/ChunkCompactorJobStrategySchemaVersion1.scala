@@ -7,7 +7,6 @@
 //import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0
 //import com.hurence.historian.solr.HurenceSolrSupport
 //import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
-//import com.hurence.logisland.record.{EvoaUtils, TimeSeriesRecord}
 //import com.hurence.solr.SparkSolrUtils
 //import com.hurence.timeseries.MetricTimeSeries
 //import com.lucidworks.spark.util.SolrSupport
@@ -20,9 +19,9 @@
 //
 //import scala.collection.mutable.{WrappedArray => ArrayDF}
 //
-//class ChunkCompactorJobStrategy2SchemaVersion0(options: ChunkCompactorConfStrategy2) extends ChunkCompactor {
+//class ChunkCompactorJobStrategySchemaVersion1(options: ChunkCompactorConfStrategy2) extends ChunkCompactor {
 //
-//  private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJobStrategy2SchemaVersion0])
+//  private val logger = LoggerFactory.getLogger(classOf[ChunkCompactorJobStrategySchemaVersion1])
 //  private val totalNumberOfPointColumnName = "number_points_day"
 //  private val startsColumnName = "starts"
 //  private val valuesColumnName = "values"
@@ -217,8 +216,6 @@
 //        f.collect_list(col(HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT)).as(sizesColumnName),
 //        f.first(col(HistorianChunkCollectionFieldsVersion0.NAME)).as(nameColumnName)
 //      )
-//
-//    import groupedChunkDf.sparkSession.implicits._
 //
 //    groupedChunkDf
 //      .rdd

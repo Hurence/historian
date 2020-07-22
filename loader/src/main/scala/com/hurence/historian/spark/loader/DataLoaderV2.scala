@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.loader
 
-import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.modele.ChunkRecordV0
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.functions._
