@@ -34,6 +34,7 @@ public final class ProtoBufTimeSeriesWithQualitySerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(   ProtoBufTimeSeriesWithQualitySerializer.class);
 
+    private static final float DEFAULT_QUALITY_EQUALS = 0.1f;
     /**
      * Private constructor
      */
@@ -106,8 +107,18 @@ public final class ProtoBufTimeSeriesWithQualitySerializer {
      * @return the serialized points as byte[]
      */
     public static byte[] to(final Iterator<Point> metricDataPoints, long ddcThreshold) {
+        return to(metricDataPoints, DEFAULT_QUALITY_EQUALS, ddcThreshold);
+    }
+
+    /**
+     * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
+     *
+     * @param metricDataPoints - the list with points (expected te be already sorted !)
+     * @return the serialized points as byte[]
+     */
+    public static byte[] to(final Iterator<Point> metricDataPoints, float diffAcceptedForQuality, long ddcThreshold) {
         PointsCompressorWithQuality compressor = new PointsCompressorWithQuality();
-        return compressor.to(metricDataPoints, ddcThreshold);
+        return compressor.to(metricDataPoints, diffAcceptedForQuality, ddcThreshold);
     }
 
 }

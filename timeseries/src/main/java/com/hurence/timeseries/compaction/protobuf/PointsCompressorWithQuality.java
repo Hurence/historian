@@ -5,6 +5,7 @@ import com.hurence.timeseries.modele.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -13,6 +14,8 @@ import java.util.*;
 public class PointsCompressorWithQuality {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PointsCompressorWithQuality.class);
+    private static final BigDecimal MIN_QUALITY = BigDecimal.valueOf(0f);
+    private static final BigDecimal MAX_QUALITY = BigDecimal.valueOf(1f);
 
     private long previousDate = -1;
     private long previousDelta = 0;
@@ -24,7 +27,7 @@ public class PointsCompressorWithQuality {
     private Map<Float, Integer> qualityIndex = new HashMap<>();
     private MetricPointWithQualityEmbedded.Point.Builder point = MetricPointWithQualityEmbedded.Point.newBuilder();
     private MetricPointWithQualityEmbedded.Points.Builder points = MetricPointWithQualityEmbedded.Points.newBuilder();
-    private Optional<Float> previousQuality = Optional.empty();
+    private Optional<Float> previousStoredQuality = Optional.empty();
     private boolean shoudBeReset = false;
 
     private void resetProps() {
@@ -38,7 +41,7 @@ public class PointsCompressorWithQuality {
         qualityIndex.clear();
         point.clear();
         points.clear();
-        previousQuality = Optional.empty();
+        previousStoredQuality = Optional.empty();
     }
 
     /**
@@ -47,17 +50,7 @@ public class PointsCompressorWithQuality {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public byte[] to(final Iterator<Point> metricDataPoints) {
-        return to(metricDataPoints, 0);
-    }
-
-    /**
-     * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
-     *
-     * @param metricDataPoints - the list with points (expected te be already sorted !)
-     * @return the serialized points as byte[]
-     */
-    public byte[] to(final Iterator<Point> metricDataPoints, long ddcThreshold) {
+    public byte[] to(final Iterator<Point> metricDataPoints, float diffAcceptedForQuality, long ddcThreshold) {
         if (shoudBeReset) {
             resetProps();
         }
@@ -76,16 +69,16 @@ public class PointsCompressorWithQuality {
             //Add value or index, if the value already exists
             setValueOrRefIndexOnPoint(valueIndex, index, p.getValue(), point);
             //setQualityIfNeeded
-            float currentQuality = getQualityOfPoint(p);
-            addQualityToPointsIfNeeded(qualityIndex, points, previousQuality, index, currentQuality);
-            previousQuality = Optional.of(currentQuality);
+            float qualityOfPoint = getQualityOfPoint(p);
+            addQualityToPointsIfNeeded(index, qualityOfPoint, diffAcceptedForQuality);
 
-            long delta = calculDelta(previousDate, currentTimestamp);
 
-            boolean isAlmostEquals = almostEquals(previousDelta, delta, ddcThreshold);
+            long delta = calculDelta(currentTimestamp);
+
+            boolean isAlmostEquals = almostEquals(delta, ddcThreshold);
             long drift = 0;
             if (isAlmostEquals) {
-                drift = calculateDrift(currentTimestamp, lastStoredDate, numberOfPointSinceLastDelta, lastStoredDelta);;
+                drift = calculateDrift(currentTimestamp);;
                 if (noDrift(drift, ddcThreshold, numberOfPointSinceLastDelta) && drift >= 0) {
                     numberOfPointSinceLastDelta += 1;
                 } else {
@@ -132,12 +125,9 @@ public class PointsCompressorWithQuality {
      * Calculates the drift between the given timestamp and the reconstructed time stamp
      *
      * @param timestamp           the actual time stamp
-     * @param lastStoredDate      the last stored date
-     * @param numberOfPointSinceLastDelta the times no delta was stored
-     * @param lastStoredDelta     the last stored delta
      * @return
      */
-    private static long calculateDrift(long timestamp, long lastStoredDate, int numberOfPointSinceLastDelta, long lastStoredDelta) {
+    private long calculateDrift(long timestamp) {
         long calculatedMaxOffset = lastStoredDelta * (numberOfPointSinceLastDelta + 1);
         return lastStoredDate + calculatedMaxOffset - timestamp;
     }
@@ -162,23 +152,50 @@ public class PointsCompressorWithQuality {
      * abs(offset - previousOffset) <= aberration
      * </p>
      *
-     * @param previousOffset the previous offset
      * @param offset         the current offset
      * @param ddcThreshold   the threshold for equality
      * @return true if set offsets are equals using the threshold
      */
-    private static boolean almostEquals(long previousOffset, long offset, long ddcThreshold) {
+    private boolean almostEquals(long offset, long ddcThreshold) {
         //check the deltas
-        long diff = Math.abs(offset - previousOffset);
+        long diff = Math.abs(offset - previousDelta);
         return (diff <= ddcThreshold);
     }
 
-    private static void addQualityToPointsIfNeeded(Map<Float, Integer> qualityIndex, MetricPointWithQualityEmbedded.Points.Builder points, Optional<Float> previousQuality, int index, float currentQuality) {
+    private void addQualityToPointsIfNeeded(int index, float currentQuality, float diffAcceptedForQuality) {
 //       ajout pour le premier point ou si la qualité a changer
-        if (!previousQuality.isPresent() || currentQuality != previousQuality.get()) {
-            MetricPointWithQualityEmbedded.Quality q = buildQuality(qualityIndex, index, currentQuality);
-            points.addQ(q);
+        if (!previousStoredQuality.isPresent()) {
+            addQualityToPoint(index, currentQuality);
+            return;
         }
+        BigDecimal previousStoredQualityBigDec = BigDecimal.valueOf(previousStoredQuality.get());
+        BigDecimal currentQualityBigDec = BigDecimal.valueOf(currentQuality);
+        BigDecimal thresholdBigDec = BigDecimal.valueOf(diffAcceptedForQuality);
+        //store quality if it has changed significantly or if it is min or max and changed.
+        if (!isFloatsAlmostEquals(previousStoredQualityBigDec, currentQualityBigDec, thresholdBigDec) ||
+                (qualityIsMinOrMax(currentQualityBigDec) &&
+                        previousStoredQualityBigDec.compareTo(currentQualityBigDec) != 0)) {
+            addQualityToPoint(index, currentQuality);
+        } else {
+            LOGGER.trace("skipping quality of point index {} with quality {}, stored quality is {}",
+                    index, currentQuality, previousStoredQuality.get());
+        }
+    }
+
+    private void addQualityToPoint(int index, float currentQuality) {
+        LOGGER.trace("Saved quality of point index {} with quality {}", index, currentQuality);
+        MetricPointWithQualityEmbedded.Quality q = buildQuality(qualityIndex, index, currentQuality);
+        points.addQ(q);
+        previousStoredQuality = Optional.of(currentQuality);
+    }
+
+    private boolean qualityIsMinOrMax(BigDecimal quality) {
+        return quality.compareTo(MIN_QUALITY) == 0 || quality.compareTo(MAX_QUALITY) == 0;
+    }
+
+    public static boolean isFloatsAlmostEquals(BigDecimal float1, BigDecimal float2, BigDecimal threshold) {
+        int diff = float1.subtract(float2).abs().compareTo(threshold);
+        return diff <= 0;
     }
 
     private static float getQualityOfPoint(Point p) {
@@ -204,7 +221,7 @@ public class PointsCompressorWithQuality {
         return q.build();
     }
 
-    private static long calculDelta(long previousDate, long currentTimestamp) {
+    private long calculDelta(long currentTimestamp) {
         long delta = 0;
         if (previousDate != -1) {
             delta = currentTimestamp - previousDate;

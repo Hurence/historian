@@ -47,7 +47,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded2Test {
     private void testThereIsNoInformationLost(List<Point> points) throws IOException {
         long start = points.get(0).getTimestamp();
         long end = points.get(points.size() - 1).getTimestamp();
-        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(points);
+        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(points.iterator(), 0, 0);
         List<Point> uncompressedPoints = ProtoBufTimeSeriesWithQualitySerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
