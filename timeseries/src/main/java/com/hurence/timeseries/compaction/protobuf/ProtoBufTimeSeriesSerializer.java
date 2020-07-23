@@ -16,9 +16,6 @@
 package com.hurence.timeseries.compaction.protobuf;
 
 
-import com.hurence.timeseries.MetricTimeSeries;
-import com.hurence.timeseries.modele.DoubleList;
-import com.hurence.timeseries.modele.LongList;
 import com.hurence.timeseries.converter.serializer.MetricProtocolBuffers;
 import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
@@ -52,7 +49,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static List<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
+    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
         return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
     }
     /**
@@ -145,10 +142,9 @@ public final class ProtoBufTimeSeriesSerializer {
      * @return the serialized points as byte[]
      */
     public static byte[] to(List<Point> metricDataPoints, final int ddcThreshold) {
-        Iterator<PointImpl> removePointsWithQuality = metricDataPoints.
+        Iterator<Point> removePointsWithQuality = metricDataPoints.
                 stream()
                 .filter(p -> !p.hasQuality())
-                .map(PointImpl.class::cast)
                 .iterator();
         return to(removePointsWithQuality, ddcThreshold);
     }
