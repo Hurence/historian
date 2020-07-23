@@ -2,7 +2,7 @@ package com.hurence.historian.spark.sql
 
 import java.util.UUID
 
-import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.modele.ChunkRecordV0
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}

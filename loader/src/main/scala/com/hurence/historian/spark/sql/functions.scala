@@ -3,7 +3,7 @@ package com.hurence.historian.spark.sql
 import java.nio.charset.StandardCharsets
 
 import com.google.common.hash.Hashing
-import com.hurence.logisland.util.DateUtil
+import com.hurence.historian.date.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
 import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils}
 import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}

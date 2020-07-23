@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.model.MeasureRecordV0
+import com.hurence.historian.modele.MeasureRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
 import org.apache.spark.sql.functions._

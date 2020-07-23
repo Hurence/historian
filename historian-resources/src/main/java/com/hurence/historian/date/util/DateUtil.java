@@ -1,4 +1,4 @@
-package com.hurence.logisland.util;
+package com.hurence.historian.date.util;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;

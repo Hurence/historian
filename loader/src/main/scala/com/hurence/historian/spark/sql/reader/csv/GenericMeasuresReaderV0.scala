@@ -1,8 +1,8 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.model.{ChunkRecordV0, MeasureRecordV0}
+import com.hurence.historian.modele.MeasureRecordV0
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.functions.{toDateUTC, toTimestampUTC}
+import com.hurence.historian.spark.sql.functions.toTimestampUTC
 import com.hurence.historian.spark.sql.reader.Reader
 import org.apache.spark.sql.functions.{lit, _}
 import org.apache.spark.sql.{Dataset, SparkSession}
