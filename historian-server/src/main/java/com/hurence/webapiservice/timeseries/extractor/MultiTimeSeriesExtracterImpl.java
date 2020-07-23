@@ -60,7 +60,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     }
 
     protected TimeSeriesExtracter createTimeSeriesExtractor(MetricRequest metricRequest) {
-        return new TimeSeriesExtracterImpl(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList, returnQuality);
+        return new TimeSeriesExtracterImpl(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList, returnQuality, metricRequest.getQuality().getQualityValue());
     }
 
     public void setTotalNumberOfPointForMetric(MetricRequest metric, long totalNumberOfPoints) {

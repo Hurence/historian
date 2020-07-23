@@ -35,13 +35,6 @@ public class TimeSeriesExtracterImplTest {
     private long MIDDLE_CHUNK_2 = 1477895624870L;
     private long END_CHUNK_2 = 1477895624871L;
 
-    private TimeSeriesExtracter getTimeSeriesExtracter() {
-        return new TimeSeriesExtracterImpl(
-                Long.MIN_VALUE , Long.MAX_VALUE,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
-                3, Arrays.asList(AGG.values()), false);
-    }
-
     JsonObject getChunk1() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new PointImpl( START_CHUNK_1, 1),
@@ -72,7 +65,10 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSampler() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
+                3, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -95,7 +91,10 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSamplerPartOfOneChunk() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , MIDDLE_CHUNK_1,
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
+                3, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -117,7 +116,10 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testAvgSampler() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , END_CHUNK_1,
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
+                3, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -141,7 +143,10 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testAvgSampler2() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
+                6, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.flush();
@@ -165,7 +170,10 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSamplerWithIntersectingChunks() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 9),
+                9, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getConflictingChunk());
@@ -196,7 +204,10 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testNoSamplerWithIntersectingChunks2() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 2),
+                9, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getConflictingChunk());
@@ -221,7 +232,10 @@ public class TimeSeriesExtracterImplTest {
 
     @Test
     public void testAggsWithSeveralFlush() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
+                9, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.flush();
         extractor.addChunk(getChunk2());

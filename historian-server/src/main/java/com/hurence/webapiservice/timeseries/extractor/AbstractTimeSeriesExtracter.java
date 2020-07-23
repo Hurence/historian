@@ -2,7 +2,6 @@ package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.HistorianFields;
 import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -25,7 +24,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     protected final List<JsonObject> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
     private long totalChunkCounter = 0L;
-    long toatlPointCounter = 0L;
+    long totalPointCounter = 0L;
     long pointCounter = 0L;
     boolean returnQuality;
 
@@ -71,7 +70,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         }
         samplePointsFromChunksAndCalculAggreg(from, to, chunks);
         chunks.clear();
-        toatlPointCounter+=pointCounter;
+        totalPointCounter +=pointCounter;
         pointCounter = 0;
     }
 
@@ -103,7 +102,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     }
 
     private JsonArray returnPoint(Point point) {
-        if (point.hasQuality())
+        if (returnQuality)
             return new JsonArray().add(point.getValue()).add(point.getTimestamp()).add(point.getQuality());
         else
             return new JsonArray().add(point.getValue()).add(point.getTimestamp());
@@ -116,6 +115,6 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
 
     @Override
     public long pointCount() {
-        return toatlPointCounter;
+        return totalPointCounter;
     }
 }

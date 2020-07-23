@@ -33,9 +33,9 @@ import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class QueryEndPointWithQuality {
+public class QueryEndPointWithQualityIT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointWithQuality.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointWithQualityIT.class);
 
     private static AssertResponseGivenRequestHelper assertHelper;
 

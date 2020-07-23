@@ -126,7 +126,7 @@ public class RequestParserUtil {
         Object fromObj = jsonPointer.queryJson(requestBody);
         if (fromObj == null)
             return null;
-        if (fromObj instanceof Double) { // TODO check this !
+        if (fromObj instanceof Number) { // TODO check this !
             try {
                 return convertToFloat(fromObj);
             } catch (ClassCastException e) {
@@ -162,7 +162,7 @@ public class RequestParserUtil {
 
     public static Float convertToFloat(Object value) {
         Double doubleValue = (Double) value;
-        return doubleValue == null ? null : doubleValue.floatValue();
+        return doubleValue.floatValue();
     }
 
     public static <T> T parse(JsonObject requestBody, String pointer, Class<T> clazz) {

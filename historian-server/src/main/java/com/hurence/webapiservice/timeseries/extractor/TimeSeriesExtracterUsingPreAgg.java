@@ -70,7 +70,6 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
     }
 
     private Point sampleChunksIntoOneAggPoint(List<JsonObject> chunks) {
-        // TODO add here creation of Point with quality if quality exist
         if (chunks.isEmpty())
             throw new IllegalArgumentException("chunks can not be empty !");
         LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0).encodePrettily());

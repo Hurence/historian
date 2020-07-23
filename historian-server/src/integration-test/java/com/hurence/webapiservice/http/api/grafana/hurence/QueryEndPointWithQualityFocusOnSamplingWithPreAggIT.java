@@ -5,7 +5,6 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.*;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.timeseries.modele.PointWithQualityImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
@@ -37,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class QueryEndPointWithQualityFocusOnSamplingWithPreAgg {
-    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointWithQualityFocusOnSamplingWithPreAgg.class);
+public class QueryEndPointWithQualityFocusOnSamplingWithPreAggIT {
+    private static Logger LOGGER = LoggerFactory.getLogger(QueryEndPointWithQualityFocusOnSamplingWithPreAggIT.class);
 
     private static AssertResponseGivenRequestHelper assertHelper;
 

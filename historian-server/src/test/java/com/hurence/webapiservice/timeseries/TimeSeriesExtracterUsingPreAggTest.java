@@ -28,14 +28,6 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     private long START_CHUNK_2 = 1477917224866L;
     private long START_CHUNK_1 = 1477895624866L;
-
-    private TimeSeriesExtracter getTimeSeriesExtracter() {
-        return new TimeSeriesExtracterUsingPreAgg(
-                Long.MIN_VALUE , Long.MAX_VALUE,
-                new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
-                9, Arrays.asList(AGG.values()), false);
-    }
-
     JsonObject getChunk1() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new PointImpl(START_CHUNK_1, 1),
@@ -90,7 +82,10 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testNoSampler() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
+                9, Arrays.asList(AGG.values()), false);
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -115,7 +110,10 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAvgSampler() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
+                15, Arrays.asList(AGG.values()), false);
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -141,7 +139,10 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAvgSampler2() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
+                12, Arrays.asList(AGG.values()), false);
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -167,8 +168,10 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testMinSampler() {
-                TimeSeriesExtracter extractor = getTimeSeriesExtracter();
-                extractor.addChunk(getChunk1());
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.values()), false);
+        extractor.addChunk(getChunk1());
                 extractor.addChunk(getChunk2());
                 extractor.addChunk(getChunk3());
                 extractor.flush();
@@ -193,7 +196,10 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testMinSampler2() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+                Long.MIN_VALUE, Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3),
+                12, Arrays.asList(AGG.values()), false);
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -219,7 +225,10 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testAggsWithSeveralFlush() {
-        TimeSeriesExtracter extractor = getTimeSeriesExtracter();
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
+                21, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.flush();
         extractor.addChunk(getChunk2());
