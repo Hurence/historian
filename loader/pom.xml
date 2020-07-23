@@ -13,29 +13,9 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <spark.solr>3.6.6</spark.solr>
-        <solr.version>8.2.0</solr.version>
-        <jackson.version>2.9.10</jackson.version>
         <MaxPermSize>128m</MaxPermSize>
     </properties>
 
-
-    <repositories>
-        <repository>
-            <id>repo.hortonworks.com</id>
-            <name>hdp</name>
-            <url>https://repo.hortonworks.com/content/repositories/releases/</url>
-        </repository>
-    </repositories>
-    <!--
-     <pluginRepositories>
-       <pluginRepository>
-         <id>scala-tools.org</id>
-         <name>Scala-Tools Maven2 Repository</name>
-         <url>http://scala-tools.org/repo-releases</url>
-       </pluginRepository>
-     </pluginRepositories>
-    -->
     <dependencyManagement>
         <dependencies>
             <dependency>
