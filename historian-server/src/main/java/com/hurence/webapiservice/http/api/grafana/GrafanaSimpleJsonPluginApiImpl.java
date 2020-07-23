@@ -36,9 +36,11 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
     public final static String BUCKET_SIZE_TAG_KEY = "Bucket size";
     public final static List<String> FILTER_KEYS = Arrays.asList(ALGO_TAG_KEY, BUCKET_SIZE_TAG_KEY);
     public final static String TARGET = "target";
+    private int maxDataPointsAllowed;
 
-    public GrafanaSimpleJsonPluginApiImpl(HistorianService service) {
-        this.service = service;
+    public GrafanaSimpleJsonPluginApiImpl(HistorianService historianService, int maxDataPointsAllowed) {
+        this.service = historianService;
+        this.maxDataPointsAllowed = maxDataPointsAllowed;
     }
 
 
@@ -180,6 +182,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
             request = new QueryRequestParser().parseRequest(requestBody);
+            if (request.getSamplingConf().getMaxPoint() > this.maxDataPointsAllowed) {
+                throw new IllegalArgumentException(String.format("maximum allowed for %s is %s", "maxDataPoints", this.maxDataPointsAllowed));
+            }
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);

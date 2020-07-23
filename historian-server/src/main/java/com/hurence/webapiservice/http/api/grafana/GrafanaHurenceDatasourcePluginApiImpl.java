@@ -38,9 +38,11 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     private static final Logger LOGGER = LoggerFactory.getLogger(GrafanaHurenceDatasourcePluginApiImpl.class);
 
     protected HistorianService service;
+    private int maxDataPointsAllowed;
 
-    public GrafanaHurenceDatasourcePluginApiImpl(HistorianService service) {
+    public GrafanaHurenceDatasourcePluginApiImpl(HistorianService historianService, int maxDataPointsAllowed) {
         this.service = service;
+        this.maxDataPointsAllowed = maxDataPointsAllowed;
     }
 
 
@@ -273,6 +275,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
                     TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH)
                     .parseRequest(requestBody);
+            if (request.getSamplingConf().getMaxPoint() > this.maxDataPointsAllowed) {
+                throw new IllegalArgumentException(String.format("maximum allowed for %s is %s", MAX_DATA_POINTS_JSON_PATH, this.maxDataPointsAllowed));
+            }
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
