@@ -208,10 +208,6 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     public final static String QUALITY_VALUE_JSON_PATH = QUALITY_JSON_PATH+"/quality_value";
     public final static String QUALITY_AGG_JSON_PATH = QUALITY_JSON_PATH+"/quality_agg";
 
-    public final static String QUALITY_VALUE = "quality_value";
-    public final static String QUALITY_AGG  = "quality_agg";
-    public final static String QUALITY_RETURN  = "quality_return";
-
 
     /**
      *  used to query metrics datapoints in grafana panels.

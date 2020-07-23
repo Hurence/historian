@@ -18,14 +18,6 @@ public class MetricRequest {
         this.quality = quality;
     }
 
-
-    public MetricRequest(String name, Map<String, String> tags) {
-        this.name = name;
-        this.tags = tags;
-        this.quality = null;
-
-    }
-
     public String getName() {
         return name;
     }

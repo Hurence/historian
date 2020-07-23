@@ -25,7 +25,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
 
 public class GetTimeSeriesHandler {
 
@@ -110,9 +109,9 @@ public class GetTimeSeriesHandler {
     }
 
     private void addQualityFields(SolrQuery query, Request request) {
-        Set<String> qualityAggSet = new HashSet<>();
-        request.getMetricRequestsWithFinalTagsAndFinalQualities().forEach(metricRequest -> qualityAggSet.add(metricRequest.getQuality().getChunkQualityField()));
-        qualityAggSet.forEach(query::addField);
+        request.getMetricRequestsWithFinalTagsAndFinalQualities().forEach(
+                metricRequest -> query.addField(metricRequest.getQuality().getChunkQualityField())
+        );
     }
 
     private void addAllTagsAsFields(List<MetricRequest> metricRequests, SolrQuery query) {
@@ -159,10 +158,7 @@ public class GetTimeSeriesHandler {
         List<String> finalStringList = new ArrayList<>();
         metricRequests.forEach(metricRequest -> {
             StringBuilder queryForEachMetricBuilder = new StringBuilder();
-            List<String> tagsFilter = new ArrayList<>();
-            metricRequest.getTags().forEach((key, value) -> {
-                tagsFilter.add(key+":\""+value+"\"");
-            });
+            List<String> tagsFilter = getTagsAsPair(metricRequest);
             if(!tagsFilter.isEmpty())
                 queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", "name:\""+metricRequest.getName()+"\" AND ", "")));
             else
@@ -177,6 +173,13 @@ public class GetTimeSeriesHandler {
         return finalStringList;
     }
 
+    private List<String> getTagsAsPair(MetricRequest metricRequest) {
+        List<String> tagsFilter = new ArrayList<>();
+        metricRequest.getTags().forEach((key, value) -> {
+            tagsFilter.add(key+":\""+value+"\"");
+        });
+        return tagsFilter;
+    }
 
 
     private void addFieldsThatWillBeNeededByAggregations(List<AGG> aggregationList, SolrQuery query) {
@@ -526,19 +529,14 @@ public class GetTimeSeriesHandler {
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     metricObject.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
-                    if (!qualityAgg.equals(QualityAgg.NONE.toString()) && !qualityValue.isNaN()) {
-                        QualityConfig qualityConfig = new QualityConfig(qualityValue, qualityAgg);
-                        return new MetricRequest(name, tagsMap, qualityConfig);
-                    }
-                    return new MetricRequest(name, tagsMap);
+                    QualityConfig qualityConfig = new QualityConfig(qualityValue, qualityAgg);
+                    return new MetricRequest(name, tagsMap, qualityConfig);
                 }catch (Exception ex) {
                     String name = i.toString();
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     QualityConfig qualityConfig = getRootQuality();
-                    if (!qualityConfig.getQualityValue().isNaN() && !qualityConfig.getQualityAgg().equals(QualityAgg.NONE))
-                        return new MetricRequest(name, tagsMap, qualityConfig);
-                    return new MetricRequest(name, tagsMap);
+                    return new MetricRequest(name, tagsMap, qualityConfig);
                 }
             })
             .collect(Collectors.toList());

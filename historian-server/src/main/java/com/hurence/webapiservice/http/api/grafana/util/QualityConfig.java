@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
+import static com.hurence.historian.modele.HistorianFields.*;
+
 
 public class QualityConfig {
 
@@ -57,7 +59,7 @@ public class QualityConfig {
         try {
             qualityChunk = chunk.getFloat(chunkQualityField);
         } catch (Exception e) {
-            LOGGER.debug("chunk don't have field "+chunkQualityField);
+            LOGGER.trace("chunk don't have field "+chunkQualityField);
             return false;
         }
         return (this.quality <= qualityChunk);
@@ -67,13 +69,13 @@ public class QualityConfig {
         String qualityAggName;
         switch (qualityAgg) {
             case AVG:
-                qualityAggName = "chunk_quality_avg"; //TODO
+                qualityAggName = CHUNK_QUALITY_AVG_FIELD; //TODO
                 break;
             case MIN:
-                qualityAggName = "chunk_quality_min"; //TODO
+                qualityAggName = CHUNK_QUALITY_MIN_FIELD; //TODO
                 break;
             case MAX:
-                qualityAggName = "chunk_quality_max"; //TODO
+                qualityAggName = CHUNK_QUALITY_MAX_FIELD; //TODO
                 break;
             default:
                 throw new IllegalStateException("Unsupported quality aggregation: " + qualityAgg);

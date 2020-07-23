@@ -26,6 +26,9 @@ public class HistorianFields {
     public static String TYPE = "type";
     public static String METRIC = "metric";
     public static String AGGREGATION = "aggregation";
+    public static String QUALITY_VALUE = "quality_value";
+    public static String QUALITY_AGG  = "quality_agg";
+    public static String QUALITY_RETURN  = "quality_return";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";

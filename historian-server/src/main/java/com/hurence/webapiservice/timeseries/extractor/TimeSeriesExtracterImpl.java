@@ -11,6 +11,7 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -23,29 +24,39 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     final Sampler<Point> sampler;
     final PointsAggsCalculator aggsCalculator;
+    final Float qualityLimit;
 
     public TimeSeriesExtracterImpl(long from, long to,
                                    SamplingConf samplingConf,
                                    long totalNumberOfPoint,
                                    List<AGG> aggregList,
-                                   boolean returnQuality) {
+                                   boolean returnQuality,
+                                   Float qualityLimit) {
         super(from, to, samplingConf, totalNumberOfPoint, returnQuality);
         sampler = SamplerFactory.getPointSampler(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
         aggsCalculator = new PointsAggsCalculator(aggregList);
+        if(!qualityLimit.isNaN())
+            this.qualityLimit = qualityLimit;
+        else
+            this.qualityLimit = 0f;
     }
 
     @Override
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
         List<Point> points = decompressPoints(from, to, chunks);
         List<Point> sampledPoints = sampler.sample(points);
-        // TODO here i will filter with quality if quality exist in query.
-        List<Point> filteredPoints = filterPointsByQuality();
-        this.sampledPoints.addAll(sampledPoints);
+        List<Point> filteredPoints = filterPointsByQuality(sampledPoints);
+        this.sampledPoints.addAll(filteredPoints);
         aggsCalculator.updateAggs(points);
     }
 
-    private List<Point> filterPointsByQuality() {
-        return null; // TODO
+    private List<Point> filterPointsByQuality(List<Point> sampledPoints) {
+        List<Point> pointsToReturn = new ArrayList<>();
+        sampledPoints.forEach(point -> {
+            if (point.getQuality() >= qualityLimit)
+                pointsToReturn.add(point);
+        });
+        return pointsToReturn;
     }
 
     @Override
