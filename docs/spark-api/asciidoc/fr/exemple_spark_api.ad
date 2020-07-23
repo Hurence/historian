@@ -29,6 +29,23 @@ Décompressez l'archive et entrez dedans, ensuite commencez l'installation en ta
 ----
 sudo ./bin/install.sh
 ----
+== Démarrer Apache Solr
+Apache SolR est la base de donnée utilisée par l’historian, elle peut être remplacée par un autre
+moteur de recherche.
+Rendez-vous dans le dossier solr-8.2.0 et appliquez ces commandes :
+
+```
+# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node1 -p 8983
+# démarre un second core Solr localement qui va utiliser le serveur zookeeper
+précédamment créer.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983
+```
+
+Vérifiez que votre instance solr fonctionne correctement en allant sur l’interface graphique à
+l’adresse suivante : "http://<solrhost>:8983/solr/#/~cloud"
+
+== Création du projet
 Pour tester notre api vous aurez besoin d'installez un IDE, dans notre cas nous allons utilizer
 IntelliJ IDEA:
 Créez un nouveau projet:
