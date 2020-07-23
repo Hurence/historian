@@ -15,6 +15,7 @@ import com.hurence.webapiservice.http.api.grafana.parser.SearchValuesRequestPars
 import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
+import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -283,25 +284,10 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
 
         final JsonObject getTimeSeriesChunkParams = buildGetTimeSeriesRequest(request);
         LOGGER.debug("getTimeSeriesChunkParams : {}", getTimeSeriesChunkParams.toString());
-        service
-                .rxGetTimeSeries(getTimeSeriesChunkParams)
-                .map(sampledTimeSeriesRsp -> {
-                    JsonArray timeseries = sampledTimeSeriesRsp.getJsonArray(TIMESERIES);
-                    if (LOGGER.isDebugEnabled()) {
-                        timeseries.forEach(metric -> {
-                            JsonObject el = (JsonObject) metric;
-                            String metricName = el.getString(TIMESERIE_NAME);
-                            int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
-                            LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
-                                    request.getRequestId(),size, metricName);
-                        });
-                        LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
-                                request.getRequestId(),
-                                sampledTimeSeriesRsp.getLong(TOTAL_POINTS, 0L),
-                                System.currentTimeMillis() - startRequest);
-                    }
-                    return timeseries;
-                }).map(sampledTimeSeries -> {
+        Single<JsonObject> rsp = service.rxGetTimeSeries(getTimeSeriesChunkParams);
+        rsp = logThingsIfDebugMode(startRequest, request, rsp);
+        rsp.map(timeseries -> {
+                    JsonArray sampledTimeSeries = timeseries.getJsonArray(TIMESERIES);
                     List<RefIdInfo> refIdList = getRefIdInfos(request);
                     List<JsonObject> timeseriesAsList = sampledTimeSeries.stream().map(timeserieWithoutRefId -> {
                         JsonObject timeserieWithRefIdIfExist = (JsonObject) timeserieWithoutRefId;
@@ -322,6 +308,29 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                     context.response().end(timeseries.encode());
                     LOGGER.debug("body :: {}", timeseries);
                 }).subscribe();
+    }
+
+    private Single<JsonObject> logThingsIfDebugMode(long startRequest, HurenceDatasourcePluginQueryRequestParam request, Single<JsonObject> rsp) {
+        if (LOGGER.isDebugEnabled()) {
+            rsp = rsp.map(sampledTimeSeriesRsp -> {
+                if (LOGGER.isDebugEnabled()) {
+                    JsonArray timeseries = sampledTimeSeriesRsp.getJsonArray(TIMESERIES);
+                    timeseries.forEach(metric -> {
+                        JsonObject el = (JsonObject) metric;
+                        String metricName = el.getString(TIMESERIE_NAME);
+                        int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
+                        LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
+                                request.getRequestId(),size, metricName);
+                    });
+                    LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
+                            request.getRequestId(),
+                            sampledTimeSeriesRsp.getLong(TOTAL_POINTS, 0L),
+                            System.currentTimeMillis() - startRequest);
+                }
+                return sampledTimeSeriesRsp;
+            });
+        }
+        return rsp;
     }
 
     private void addRefIdIfExist(List<RefIdInfo> refIdList, JsonObject timeserieWithoutRefId) {

@@ -75,16 +75,21 @@ public interface HistorianService {
      * @param myResult return chunks of timeseries as an array of
      *                      <pre>
      *                      {
-     *                          {@value HistorianFields#TOTAL_POINTS} : "the total number of point returned",
+     *                          {@value HistorianFields#TOTAL_POINTS} : "the total number of point returned (after sampling)",
      *                          {@value HistorianFields#TIMESERIES} : [
      *                              {
      *                                  {@value HistorianFields#NAME} : "the metric name",
+     *                                  {@value HistorianFields#TOTAL_POINTS} : "the total number of point returned for this metric (after sampling)",
      *                                  {@value HistorianFields#TAGS} : {
      *                                      "tag name 1" : "tag value",
      *                                      ...
      *                                  },
      *                                  {@value HistorianFields#DATAPOINTS} : [
      *                                      [value(double), timestamp(long)],
+     *                                      ...
+     *                                  ],
+     *                                  {@value HistorianFields#AGGREGATION} : [
+     *                                      aggName : aggvalue,
      *                                      ...
      *                                  ]
      *                              }

@@ -11,7 +11,8 @@
       "MAX":622.0,
       "MIN":-3.0,
       "AVG":328.0
-    }
+    },
+    "total_points":3
   },
   {
     "name":"temp_b",
@@ -24,6 +25,7 @@
       "MAX":861.0,
       "MIN":767.0,
       "AVG":814.0
-    }
+    },
+    "total_points":2
   }
 ]
