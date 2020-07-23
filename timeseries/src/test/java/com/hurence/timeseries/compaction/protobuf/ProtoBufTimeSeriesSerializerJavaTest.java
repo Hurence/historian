@@ -16,7 +16,7 @@
 package com.hurence.timeseries.compaction.protobuf;
 
 import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.Point;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,7 +64,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
         long start = points.get(0).getTimestamp();
         long end = points.get(points.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(points, ddc);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        List<Point> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
@@ -83,7 +83,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
         long start = expectedPoints.get(0).getTimestamp();
         long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 0);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        List<Point> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
@@ -125,7 +125,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(50, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 1);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        List<Point> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
@@ -149,7 +149,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(50, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 1);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        List<Point> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
@@ -172,7 +172,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(50, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 2);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        List<Point> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
@@ -209,7 +209,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(500, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 2);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        List<Point> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 500
         );

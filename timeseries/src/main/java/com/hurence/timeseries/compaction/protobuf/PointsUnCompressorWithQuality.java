@@ -61,7 +61,10 @@ public class PointsUnCompressorWithQuality {
             List<MetricPointWithQualityEmbedded.Point> pList = protocolBufferPoints.getPList();
             List<MetricPointWithQualityEmbedded.Quality> qList = protocolBufferPoints.getQList();
             ListIterator<MetricPointWithQualityEmbedded.Quality> qListIterator = qList.listIterator();
-            if (!qListIterator.hasNext()) throw new IllegalArgumentException("qList should not be empty. Bad or icompatible compressedBytes !");
+            if (!qListIterator.hasNext()) {
+                //Then this means this is an old version without quality
+                throw new IllegalArgumentException("qList should not be empty. Bad or icompatible compressedBytes !");
+            }
             List<Point> pointsToReturn = new ArrayList<>();
             int size = pList.size();
             currentQuality = getQuality(qList, qListIterator.next());
