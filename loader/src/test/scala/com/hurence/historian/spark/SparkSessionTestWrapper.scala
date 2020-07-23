@@ -1,6 +1,6 @@
 package com.hurence.historian.spark
 
-import com.hurence.historian.model.{ChunkRecordV0, MeasureRecordV0}
+import com.hurence.historian.modele.{ChunkRecordV0, MeasureRecordV0}
 import org.apache.spark.sql.SparkSession
 
 

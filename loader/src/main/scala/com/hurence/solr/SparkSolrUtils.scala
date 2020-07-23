@@ -1,6 +1,6 @@
 package com.hurence.solr
 
-import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.modele.ChunkRecordV0
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 object SparkSolrUtils {
