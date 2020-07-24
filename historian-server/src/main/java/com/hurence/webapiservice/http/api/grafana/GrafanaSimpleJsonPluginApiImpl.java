@@ -220,6 +220,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                         JsonObject timeserieJson = (JsonObject) timeserie;
                         timeserieJson.put(TARGET, timeserieJson.getValue(NAME));
                         timeserieJson.remove(NAME);
+                        timeserieJson.remove(TOTAL_POINTS);
                     });
                     return timeseries;
                 })
