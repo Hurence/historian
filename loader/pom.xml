@@ -17,8 +17,8 @@
         <!--   <spark.version>2.4.5</spark.version>-->
         <spark.solr>3.6.6</spark.solr>
         <scala.version>2.11.12</scala.version>
-        <solr.version>8.2.0</solr.version>
         <scala.binary.version>2.11</scala.binary.version>
+        <solr.version>8.2.0</solr.version>
         <jackson.version>2.9.10</jackson.version>
         <MaxPermSize>128m</MaxPermSize>
     </properties>
