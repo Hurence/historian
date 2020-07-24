@@ -91,7 +91,8 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 .map(p -> new JsonArray().add(p.getValue()).add(p.getTimestamp()))
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()
-                .put(TIMESERIE_POINT, new JsonArray(points));
+                .put(TIMESERIE_POINT, new JsonArray(points))
+                .put(TOTAL_POINTS, points.size());
         getAggsAsJson()
                 .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
         LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());

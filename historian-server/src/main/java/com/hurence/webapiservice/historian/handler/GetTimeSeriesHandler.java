@@ -291,7 +291,9 @@ public class GetTimeSeriesHandler {
         //TODO make three different group for each metrics, not use a single strategy globally for all metrics.
         final MultiTimeSeriesExtracter timeSeriesExtracter;
         if (metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint ||
-                metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint()) {
+                metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint() ||
+                metricsInfo.getTotalNumberOfChunks() < getSamplingConf(request).getMaxPoint()
+        ) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
             query.addField(CHUNK_VALUE_FIELD);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);

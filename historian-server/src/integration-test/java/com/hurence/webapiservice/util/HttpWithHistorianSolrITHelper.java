@@ -88,7 +88,7 @@ public abstract class HttpWithHistorianSolrITHelper {
 
     public static Single<String> deployCustomHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, int maxLimitFromConfig) {
         return deployCustomHttpAndCustomHistorianVerticle(container, vertx, new JsonObject(),
-                new JsonObject().put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, maxLimitFromConfig)
+                new JsonObject().put(HttpServerVerticle.CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED, maxLimitFromConfig)
         );
     }
 

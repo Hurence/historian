@@ -8,6 +8,7 @@ public interface TimeSeriesExtracter {
     String TIMESERIE_NAME = HistorianFields.NAME;
     String TIMESERIE_POINT = HistorianFields.DATAPOINTS;
     String TIMESERIE_AGGS = HistorianFields.AGGREGATION;
+    String TOTAL_POINTS = HistorianFields.TOTAL_POINTS;
 
     void addChunk(JsonObject chunk);
 

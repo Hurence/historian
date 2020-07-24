@@ -54,7 +54,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.aggregationPath= aggregationPath;
     }
 
-    public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
+    public HurenceDatasourcePluginQueryRequestParam parseRequest(
+            JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse requestBody : {}", requestBody);
         HurenceDatasourcePluginQueryRequestParam.Builder builder = new HurenceDatasourcePluginQueryRequestParam.Builder();
         Long from = parseFrom(requestBody);
