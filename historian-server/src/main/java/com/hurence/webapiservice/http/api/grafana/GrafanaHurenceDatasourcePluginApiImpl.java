@@ -41,7 +41,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     private int maxDataPointsAllowed;
 
     public GrafanaHurenceDatasourcePluginApiImpl(HistorianService historianService, int maxDataPointsAllowed) {
-        this.service = service;
+        this.service = historianService;
         this.maxDataPointsAllowed = maxDataPointsAllowed;
     }
 
