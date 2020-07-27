@@ -36,8 +36,7 @@ public class AverageSampler<SAMPLED> extends AbstractSampler<SAMPLED> {
      */
     @Override
     public List<SAMPLED> sample(List<SAMPLED> inputRecords) {
-        final int realBucketSize = SamplingUtils.fitBucketSize(inputRecords, bucketSize);
-        return SamplingUtils.grouped(inputRecords, realBucketSize)
+        return SamplingUtils.grouped(inputRecords, bucketSize)
                 .map(bucket -> {
                     SummaryStatistics stats = new SummaryStatistics();
                     bucket.forEach(element -> {

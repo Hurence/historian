@@ -22,19 +22,8 @@ import java.util.stream.Stream;
 
 public class SamplingUtils {
 
-    /**
-     *
-     * @param rawData elements to bucket
-     * @param bucketSize wanted size of buckets
-     * @return 1 if bucketSize is lesser than 0 or lesser than the size of rawData
-     *         else bucketSize
-     */
-    public static int fitBucketSize(List rawData, int bucketSize) {
-        return fitBucketSize(rawData.size(), bucketSize);
-    }
-
-    private static int fitBucketSize(int numberOfPoint, int bucketSize) {
-        if (bucketSize <= 0 || bucketSize > numberOfPoint) return 1;
+    private static int fitBucketSize(int bucketSize) {
+        if (bucketSize <= 0) return 1;
         else return bucketSize;
     }
 

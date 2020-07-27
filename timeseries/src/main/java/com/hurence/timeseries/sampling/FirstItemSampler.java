@@ -20,15 +20,14 @@ import java.util.stream.Stream;
 
 public class FirstItemSampler<SAMPLED> extends AbstractFirstItemSampler<SAMPLED> implements Sampler<SAMPLED> {
 
-    private int numBuckets;
+    private int bucketSize;
 
-    public FirstItemSampler(int numBuckets) {
-        this.numBuckets = numBuckets;
+    public FirstItemSampler(int bucketSize) {
+        this.bucketSize = bucketSize;
     }
 
     @Override
     protected Stream<List<SAMPLED>> group(List<SAMPLED> toBeSampled) {
-        final int bucketSize = SamplingUtils.fitBucketSize(toBeSampled, numBuckets);
         return SamplingUtils.grouped(toBeSampled, bucketSize);
     }
 }
