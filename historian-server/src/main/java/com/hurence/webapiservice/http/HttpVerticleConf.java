@@ -13,10 +13,12 @@ public class HttpVerticleConf {
     private final String hostname;
     private final String uploadDirectory;
 
+    public static final int CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED_DEFAULT = 50000;
+
     public HttpVerticleConf(JsonObject json) {
         this.isDebugModeEnabled = json.getBoolean(CONFIG_DEBUG_MODE, false);
         this.historianAdress = json.getString(CONFIG_HISTORIAN_ADDRESS, "historian");
-        this.maxDataPointsAllowed = json.getInteger(CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED, 50000);
+        this.maxDataPointsAllowed = json.getInteger(CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED, CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED_DEFAULT);
         this.port = json.getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
         this.hostname = json.getString(CONFIG_HTTP_SERVER_HOSTNAME, "localhost");
         this.uploadDirectory = json.getString(CONFIG_UPLOAD_DIRECTORY, "/tmp/hurence-historian");
