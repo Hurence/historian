@@ -22,6 +22,7 @@
       }
     },
     "solr" : {
+      "is_standalone" : true,
       "use_zookeeper": true,
       "zookeeper_urls": ["localhost:9983"],
       "zookeeper_chroot" : null,

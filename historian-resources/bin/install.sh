@@ -335,6 +335,7 @@ generate_historian_server_conf() {
         }
       },
       "solr" : {
+        "is_standalone" : '${USING_EMBEDDED_SOLR}',
         "use_zookeeper": true,
         "zookeeper_urls": ["localhost:9983"],
         "zookeeper_chroot" : null,
