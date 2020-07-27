@@ -107,6 +107,14 @@ public class TimeSeriesExtracterUtil {
         return SamplerFactory.getPointSampler(calculatedConf.getAlgo(), calculatedConf.getBucketSize());
     }
 
+    /**
+     * return the sampling in input if it is compatible with totalNumberOfPoint to sample.
+     * If totalNumberOfPoint > maxpoint then we have to sample.
+     * Calcul bucket size if needed (dependending on samplingConf.getMaxPoint() and totalNumberOfPoint
+     * @param samplingConf
+     * @param totalNumberOfPoint
+     * @return
+     */
     public static SamplingConf calculSamplingConf(SamplingConf samplingConf, long totalNumberOfPoint) {
         SamplingAlgorithm algorithm = calculSamplingAlgorithm(samplingConf, totalNumberOfPoint);
         int bucketSize = samplingConf.getBucketSize();
