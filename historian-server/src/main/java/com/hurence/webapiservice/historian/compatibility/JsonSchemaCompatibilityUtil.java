@@ -12,7 +12,12 @@ public class JsonSchemaCompatibilityUtil {
 
     private static Logger LOGGER = LoggerFactory.getLogger(JsonSchemaCompatibilityUtil.class);
 
-    public static void convertJsonSchemaEVOA0ToVERSION_0(JsonObject chunk) {
+    /**
+     * This methode do modify input.
+     * @param chunk
+     * @return
+     */
+    public static JsonObject convertJsonSchemaEVOA0ToVERSION_0(JsonObject chunk) {
         LOGGER.debug("chunk version {} is {}", SchemaVersion.EVOA0, chunk);
         convertMultiValuedFieldToMonoValued(chunk,
                 HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_DAY, HistorianFields.CHUNK_DAY);
@@ -29,6 +34,7 @@ public class JsonSchemaCompatibilityUtil {
         convertMultiValuedFieldToMonoValued(chunk,
                 HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_TREND, HistorianFields.CHUNK_TREND_FIELD);
         LOGGER.debug("chunk version {} (converted) is {}", SchemaVersion.VERSION_0, chunk);
+        return chunk;
     }
 
     private static void convertMultiValuedFieldToMonoValued(JsonObject chunk,

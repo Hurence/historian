@@ -1,0 +1,7 @@
+{
+  "from": "2020-07-10T09:00:00.000Z",
+  "to": "2020-07-17T09:00:00.000Z",
+  "names": ["U879.FQ244D_PV.F_CV"],
+  "max_data_points": 5,
+  "aggregations": ["COUNT"]
+}

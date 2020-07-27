@@ -124,6 +124,6 @@ public class HistorianSolrITHelper {
     }
 
     public static void createAnnotationCollection(SolrClient client, DockerComposeContainer container, SchemaVersion version) throws IOException, SolrServerException, InterruptedException {
-        SolrITHelper.createAnnotationCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+        SolrITHelper.createAnnotationCollection(client, SolrExtension.getSolr1Url(container), version);
     }
 }
