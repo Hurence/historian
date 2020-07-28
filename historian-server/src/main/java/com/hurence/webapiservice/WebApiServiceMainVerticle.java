@@ -43,7 +43,10 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
     Single<String> dbVerticleDeployment = deployHistorianVerticle();
     dbVerticleDeployment
             .flatMap(id -> deployHttpVerticle())
-            .doOnError(promise::fail)
+            .doOnError(t -> {
+              LOGGER.error("Could not deploy historian !", t);
+              promise.fail(t);
+            })
             .doOnSuccess(id -> promise.complete())
             .subscribe(id -> {
               LOGGER.info("{} finished to deploy verticles", WebApiServiceMainVerticle.class.getSimpleName());
