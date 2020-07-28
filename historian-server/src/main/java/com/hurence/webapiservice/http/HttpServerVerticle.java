@@ -41,7 +41,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     private HistorianService historianService;
 
     //main
-    private static final String MAIN_API_ENDPOINT = "/api/historian/v0";
+    public static final String MAIN_API_ENDPOINT = "/api/historian/v0";
     public static final String CSV_EXPORT_ENDPOINT = MAIN_API_ENDPOINT + MainHistorianApi.EXPORT_ENDPOINT;
     private static final String IMPORT_ENDPOINT = MAIN_API_ENDPOINT + "/import";
     public static final String IMPORT_CSV_ENDPOINT = IMPORT_ENDPOINT + IngestionApi.CSV_ENDPOINT;

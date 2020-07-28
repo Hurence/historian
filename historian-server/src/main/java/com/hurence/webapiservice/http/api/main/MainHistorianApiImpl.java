@@ -40,7 +40,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
     public void root(RoutingContext context) {
         context.response()
                 .setStatusCode(200)
-                .end("Historian grafana api is Working fine");
+                .end("Historian api is Working fine");
     }
 
     @Override

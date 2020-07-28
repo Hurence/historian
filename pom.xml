@@ -93,6 +93,7 @@
         <module>integration-tests</module>
         <module>historian-resources</module>
         <module>assembly</module>
+        <module>historian-launcher</module>
     </modules>
 
     <dependencies>

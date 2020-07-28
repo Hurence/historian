@@ -56,13 +56,21 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
 
   private Single<String> deployHistorianVerticle() {
     int instances = this.conf.getNumberOfInstanceHistorian();
-    DeploymentOptions opts = new DeploymentOptions().setInstances(instances).setConfig(config().getJsonObject(CONFIG_HISTORIAN_ROOT));
+    DeploymentOptions opts = new DeploymentOptions().setInstances(instances).setConfig(extractHistorianConf(config()));
     return vertx.rxDeployVerticle(HistorianVerticle::new, opts);
+  }
+
+  public static JsonObject extractHistorianConf(JsonObject rootConf) {
+    return rootConf.getJsonObject(CONFIG_HISTORIAN_ROOT);
+  }
+
+  public static JsonObject extractHttpConf(JsonObject rootConf) {
+    return rootConf.getJsonObject(CONFIG_HTTP_SERVER_ROOT);
   }
 
   private Single<String> deployHttpVerticle() {
     int instances = this.conf.getNumberOfInstanceHttpVerticle();
-    DeploymentOptions opts = new DeploymentOptions().setInstances(instances).setConfig(config().getJsonObject(CONFIG_HTTP_SERVER_ROOT));
+    DeploymentOptions opts = new DeploymentOptions().setInstances(instances).setConfig(extractHttpConf(config()));
     return vertx.rxDeployVerticle(HttpServerVerticle::new, opts);
   }
 

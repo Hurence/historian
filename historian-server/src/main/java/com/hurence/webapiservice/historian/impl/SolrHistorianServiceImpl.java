@@ -150,7 +150,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
     private Handler<Promise<Integer>> createPingHandler(long sleepDurationMilli, int numberOfRetry) {
         return p -> {
             try {
-                p.complete(pingSolrServer(6000, 3));
+                p.complete(pingSolrServer(sleepDurationMilli, numberOfRetry));
             } catch (IOException e) {
                 LOGGER.error("IOException while pinging solr", e);
                 p.fail(e);
