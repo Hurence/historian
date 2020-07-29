@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.historian.handler;
 
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -16,8 +17,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-
 public class GetFieldValuesHandler {
     private static Logger LOGGER = LoggerFactory.getLogger(GetFieldValuesHandler.class);
     SolrHistorianConf solrHistorianConf;
@@ -29,9 +28,9 @@ public class GetFieldValuesHandler {
 
     public Handler<Promise<JsonObject>> getHandler(JsonObject params) {
 
-        String field = params.getString(FIELD);
-        String query = params.getString(QUERY);
-        int limit = params.getInteger(LIMIT, solrHistorianConf.maxNumberOfTargetReturned);
+        String field = params.getString(HistorianServiceFields.FIELD);
+        String query = params.getString(HistorianServiceFields.QUERY);
+        int limit = params.getInteger(HistorianServiceFields.LIMIT, solrHistorianConf.maxNumberOfTargetReturned);
         String queryString = field +":*";
         if (query!=null && !query.isEmpty()) {
             queryString = field + ":*" + query + "*";
@@ -51,8 +50,8 @@ public class GetFieldValuesHandler {
                 List<FacetField.Count> facetFieldsCount = facetField.getValues();
                 if (facetFieldsCount.size() == 0) {
                     p.complete(new JsonObject()
-                            .put(TOTAL, 0)
-                            .put(RESPONSE_VALUES, new JsonArray())
+                            .put(HistorianServiceFields.TOTAL, 0)
+                            .put(HistorianServiceFields.RESPONSE_VALUES, new JsonArray())
                     );
                     return;
                 }
@@ -63,8 +62,8 @@ public class GetFieldValuesHandler {
                         .collect(Collectors.toList())
                 );
                 p.complete(new JsonObject()
-                        .put(TOTAL, facetField.getValueCount())
-                        .put(RESPONSE_VALUES, metrics)
+                        .put(HistorianServiceFields.TOTAL, facetField.getValueCount())
+                        .put(HistorianServiceFields.RESPONSE_VALUES, metrics)
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);

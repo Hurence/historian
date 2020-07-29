@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.modele.AGG;
@@ -21,6 +21,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HurenceDatasourcePluginQueryRequestParser.class);
 
+    public final static String NAME = "name";
     private final String fromJsonPath;
     private final String toJsonPath;
     private final String namesJsonPath;
@@ -143,10 +144,10 @@ public class HurenceDatasourcePluginQueryRequestParser {
                         if (el instanceof JsonObject) {
                             JsonObject jsonObject = (JsonObject) el;
                             JsonObject toReturn = new JsonObject()
-                                    .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME));
+                                    .put(HistorianServiceFields.NAME, jsonObject.getString(NAME));
                             Map<String, String> tags = parseTags(jsonObject);
                             if (!tags.isEmpty())
-                                toReturn.put(HistorianFields.TAGS, tags);
+                                toReturn.put(HistorianServiceFields.TAGS, tags);
                             if (jsonObject.containsKey(QUERY_PARAM_REF_ID))
                                 toReturn.put(QUERY_PARAM_REF_ID, jsonObject.getString(QUERY_PARAM_REF_ID));
                             return toReturn;

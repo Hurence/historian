@@ -35,7 +35,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.ANNOTATIONS;
+import static com.hurence.historian.modele.HistorianServiceFields.ANNOTATIONS;
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.COLLECTION_ANNOTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

@@ -127,7 +127,6 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.ID, id);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START, this.start);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SIZE, this.points.size());
-        doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_COUNT, this.points.size());
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_END, this.end);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SAX, this.sax);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_VALUE, Base64.getEncoder().encodeToString(this.compressedPoints));

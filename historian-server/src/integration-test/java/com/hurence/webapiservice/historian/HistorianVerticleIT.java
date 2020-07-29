@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
 import com.hurence.timeseries.modele.PointImpl;
@@ -34,7 +35,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -134,37 +134,37 @@ public class HistorianVerticleIT {
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        long totalHit = rsp.getLong(HistorianFields.TOTAL);
+                        long totalHit = rsp.getLong(HistorianServiceFields.TOTAL);
                         assertEquals(4, totalHit);
-                        JsonArray docs = rsp.getJsonArray(CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(HistorianServiceFields.CHUNKS);
                         assertEquals(4, docs.size());
                         JsonObject doc1 = docs.getJsonObject(0);
-                        assertTrue(doc1.containsKey(NAME));
-                        assertTrue(doc1.containsKey(CHUNK_START_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_END_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_AVG_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_ID_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_COUNT_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_SAX_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_VALUE_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_MIN_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_MAX_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_TREND_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_SUM_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_VERSION_FIELD));
-                        assertTrue(doc1.containsKey(CHUNK_FIRST_VALUE_FIELD));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.NAME));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_START));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_END));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_AVG));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.ID));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_COUNT));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_SAX));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_MIN));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_MAX));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_TREND));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_SUM));
+//                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_VERSION));
+                        assertTrue(doc1.containsKey(HistorianChunkCollectionFieldsVersion0.CHUNK_FIRST));
                         assertEquals(18, doc1.size());
                         assertEquals("id0", doc1.getString("id"));
-                        assertEquals(1L, doc1.getLong(CHUNK_START_FIELD));
-                        assertEquals(4L, doc1.getLong(CHUNK_END_FIELD));
+                        assertEquals(1L, doc1.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_START));
+                        assertEquals(4L, doc1.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_END));
                         JsonObject doc2 = docs.getJsonObject(1);
                         assertEquals("id1", doc2.getString("id"));
-                        assertEquals(5L, doc2.getLong(CHUNK_START_FIELD));
-                        assertEquals(8L, doc2.getLong(CHUNK_END_FIELD));
+                        assertEquals(5L, doc2.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_START));
+                        assertEquals(8L, doc2.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_END));
                         JsonObject doc3 = docs.getJsonObject(2);
                         assertEquals("id2", doc3.getString("id"));
-                        assertEquals(9L, doc3.getLong(CHUNK_START_FIELD));
-                        assertEquals(12L, doc3.getLong(CHUNK_END_FIELD));
+                        assertEquals(9L, doc3.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_START));
+                        assertEquals(12L, doc3.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_END));
                         testContext.completeNow();
                     });
                 })
@@ -176,12 +176,12 @@ public class HistorianVerticleIT {
     void getTimeSeriesChunkTestWithStart(VertxTestContext testContext) {
 
         JsonObject params = new JsonObject()
-                .put(FROM, 9L);
+                .put(HistorianServiceFields.FROM, 9L);
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonArray docs = rsp.getJsonArray(CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(HistorianServiceFields.CHUNKS);
                         JsonObject doc2 = docs.getJsonObject(0);
                         assertEquals("id2", doc2.getString("id"));
                         JsonObject doc3 = docs.getJsonObject(1);
@@ -197,12 +197,12 @@ public class HistorianVerticleIT {
     void getTimeSeriesChunkTestWithEnd(VertxTestContext testContext) {
 
         JsonObject params = new JsonObject()
-                .put(TO, 1571129390801L);
+                .put(HistorianServiceFields.TO, 1571129390801L);
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonArray docs = rsp.getJsonArray(CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(HistorianServiceFields.CHUNKS);
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertEquals("id0", doc1.getString("id"));
                         JsonObject doc2 = docs.getJsonObject(1);
@@ -218,21 +218,23 @@ public class HistorianVerticleIT {
     @Disabled("This feature is legacy, now this is the service that decides what to return based on timeseries request.")
     void getTimeSeriesChunkTestWithSelectedFields(VertxTestContext testContext) {
         JsonObject params = new JsonObject()
-                .put(FIELDS, new JsonArray()
-                    .add(CHUNK_VALUE_FIELD).add(CHUNK_START_FIELD).add(CHUNK_MAX_FIELD).add("id")
+                .put(HistorianServiceFields.FIELDS, new JsonArray()
+                    .add(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE)
+                        .add(HistorianChunkCollectionFieldsVersion0.CHUNK_START)
+                        .add(HistorianChunkCollectionFieldsVersion0.CHUNK_MAX).add("id")
                 );
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonArray docs = rsp.getJsonArray(CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(HistorianServiceFields.CHUNKS);
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertEquals(4, doc1.size());
                         assertEquals("id0", doc1.getString("id"));
-                        assertEquals(1L, doc1.getLong(CHUNK_START_FIELD));
-                        assertEquals(8.0, doc1.getDouble(CHUNK_MAX_FIELD));
+                        assertEquals(1L, doc1.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_START));
+                        assertEquals(8.0, doc1.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_MAX));
                         assertEquals("H4sIAAAAAAAAAOPi1GQAAxEHLm4FRihHwYGLU9MYDD7bc3ELwMSlHAQYANb3vjkyAAAA",
-                                doc1.getString(CHUNK_VALUE_FIELD));
+                                doc1.getString(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE));
                         testContext.completeNow();
                     });
                 })
@@ -243,14 +245,14 @@ public class HistorianVerticleIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     void getTimeSeriesChunkTestWithName(VertxTestContext testContext) {
         JsonObject params = new JsonObject()
-                .put(NAMES, Arrays.asList("temp_a"));
+                .put(HistorianServiceFields.NAMES, Arrays.asList("temp_a"));
         historian.rxGetTimeSeriesChunk(params)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        long totalHit = rsp.getLong(HistorianFields.TOTAL);
+                        long totalHit = rsp.getLong(HistorianServiceFields.TOTAL);
                         assertEquals(3, totalHit);
-                        JsonArray docs = rsp.getJsonArray(CHUNKS);
+                        JsonArray docs = rsp.getJsonArray(HistorianServiceFields.CHUNKS);
                         assertEquals(3, docs.size());
                         testContext.completeNow();
                     });

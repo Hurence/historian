@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
+import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
 
@@ -8,7 +9,6 @@ import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.DoubleStream;
 
-import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.modele.AGG.*;
 
 public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
@@ -90,7 +90,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
     }
 
     private void calculateSum(List<T> elementsToAgg) {
-        double sum = getDoubleStreamFromElementsToAgg(elementsToAgg, CHUNK_SUM_FIELD)
+        double sum = getDoubleStreamFromElementsToAgg(elementsToAgg, FieldNamesInsideHistorianService.CHUNK_SUM)
                 .sum();
         if(aggValues.containsKey(SUM)) {
             double currentSum = aggValues.get(SUM).doubleValue();
@@ -101,7 +101,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
     private void calculateMin(List<T> elementsToAgg) {
-        OptionalDouble minMap = getDoubleStreamFromElementsToAgg(elementsToAgg, CHUNK_MIN_FIELD)
+        OptionalDouble minMap = getDoubleStreamFromElementsToAgg(elementsToAgg, FieldNamesInsideHistorianService.CHUNK_MIN)
                 .min();
         if (minMap.isPresent()) {
             double min = minMap.getAsDouble();
@@ -113,7 +113,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
     private void calculateMax(List<T> elementsToAgg) {
-        OptionalDouble maxMap = getDoubleStreamFromElementsToAgg(elementsToAgg, CHUNK_MAX_FIELD)
+        OptionalDouble maxMap = getDoubleStreamFromElementsToAgg(elementsToAgg, FieldNamesInsideHistorianService.CHUNK_MAX)
                 .max();
         if (maxMap.isPresent()) {
             double max = maxMap.getAsDouble();

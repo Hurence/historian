@@ -1,5 +1,8 @@
 package com.hurence.webapiservice.historian.handler;
 
+import com.hurence.historian.modele.HistorianConf;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.modele.AGG;
@@ -22,16 +25,17 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-
 public class GetTimeSeriesHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GetTimeSeriesHandler.class);
+    HistorianConf historianConf;
     SolrHistorianConf solrHistorianConf;
 
-    public GetTimeSeriesHandler(SolrHistorianConf solrHistorianConf) {
+    public GetTimeSeriesHandler(HistorianConf historianConf, SolrHistorianConf solrHistorianConf) {
+        this.historianConf = historianConf;
         this.solrHistorianConf = solrHistorianConf;
     }
+
 
     /**
      * nombre point < LIMIT_TO_DEFINE ==> Extract points from chunk
@@ -75,13 +79,13 @@ public class GetTimeSeriesHandler {
         StringBuilder queryBuilder = new StringBuilder();
         if (request.getTo() != null) {
             LOGGER.trace("requesting timeseries to {}", request.getTo());
-            queryBuilder.append(CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
+            queryBuilder.append(getHistorianFields().CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
         }
         if (request.getFrom()  != null) {
             LOGGER.trace("requesting timeseries from {}", request.getFrom());
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
+            queryBuilder.append(getHistorianFields().CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
@@ -91,18 +95,22 @@ public class GetTimeSeriesHandler {
         //FILTER
         buildFilters(request, query);
         //    FIELDS_TO_FETCH
-        query.setFields(CHUNK_START_FIELD,
-                CHUNK_END_FIELD,
-                CHUNK_COUNT_FIELD,
-                NAME);
+        query.setFields(getHistorianFields().CHUNK_START_FIELD,
+                getHistorianFields().CHUNK_END_FIELD,
+                getHistorianFields().CHUNK_COUNT_FIELD,
+                getHistorianFields().CHUNK_NAME);
         addAllTagsAsFields(request.getMetricRequestsWithFinalTags(), query);
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
-        query.setSort(CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setSort(getHistorianFields().CHUNK_START_FIELD, SolrQuery.ORDER.asc);
+        query.addSort(getHistorianFields().CHUNK_END_FIELD, SolrQuery.ORDER.asc);
         query.setRows(request.getMaxTotalChunkToRetrieve());
 
         return query;
+    }
+
+    private SolrFieldMapping getHistorianFields() {
+        return this.historianConf.getFieldsInSolr();
     }
 
     private void addAllTagsAsFields(List<MetricRequest> metricRequests, SolrQuery query) {
@@ -159,9 +167,9 @@ public class GetTimeSeriesHandler {
                 tagsFilter.add(key+":\""+value+"\"");
             });
             if(!tagsFilter.isEmpty())
-                finalStringList.add(tagsFilter.stream().collect(Collectors.joining(" AND ", "name:\""+metricRequest.getName()+"\" AND ", "")));
+                finalStringList.add(tagsFilter.stream().collect(Collectors.joining(" AND ", getHistorianFields().CHUNK_NAME +":\""+metricRequest.getName()+"\" AND ", "")));
             else
-                finalStringList.add("name:\""+metricRequest.getName()+"\"");
+                finalStringList.add(getHistorianFields().CHUNK_NAME + ":\""+metricRequest.getName()+"\"");
         });
         return finalStringList;
     }
@@ -170,19 +178,19 @@ public class GetTimeSeriesHandler {
         aggregationList.forEach(agg -> {
             switch (agg) {
                 case AVG:
-                    query.addField(CHUNK_AVG_FIELD);
+                    query.addField(getHistorianFields().CHUNK_AVG_FIELD);
                     break;
                 case SUM:
-                    query.addField(CHUNK_SUM_FIELD);
+                    query.addField(getHistorianFields().CHUNK_SUM_FIELD);
                     break;
                 case MIN:
-                    query.addField(CHUNK_MIN_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MIN_FIELD);
                     break;
                 case MAX:
-                    query.addField(CHUNK_MAX_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MAX_FIELD);
                     break;
                 case COUNT:
-                    query.addField(CHUNK_COUNT_FIELD);
+                    query.addField(getHistorianFields().CHUNK_COUNT_FIELD);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported aggregation: " + agg);
@@ -201,15 +209,15 @@ public class GetTimeSeriesHandler {
         }
 
         List<String> neededFields = findNeededTagsName(requests);
-        neededFields.add(NAME);
+        neededFields.add(getHistorianFields().CHUNK_NAME);
         List<String> overFields = new ArrayList<>(neededFields);
         String overString = joinListAsString(overFields);
-        neededFields.add(CHUNK_COUNT_FIELD);
+        neededFields.add(getHistorianFields().CHUNK_COUNT_FIELD);
         String flString = joinListAsString(neededFields);
         exprBuilder.append(",fl=\"").append(flString).append("\"")
-                .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\")")
+                .append(",qt=\"/export\", sort=\"").append(getHistorianFields().CHUNK_NAME).append(" asc\")")
                 .append(",over=\"").append(overString).append("\"")
-                .append(", sum(").append(CHUNK_COUNT_FIELD).append("), count(*))");
+                .append(", sum(").append(getHistorianFields().CHUNK_COUNT_FIELD).append("), count(*))");
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
         paramsLoc.set("expr", exprBuilder.toString());
@@ -224,8 +232,12 @@ public class GetTimeSeriesHandler {
             LOGGER.trace("tuple : {}", tuple.jsonStr());
             for (MetricRequest request: requests) {
                 if (isTupleMatchingMetricRequest(request, tuple)) {
-                    metricsInfo.increaseNumberOfChunksForMetricRequest(request, tuple.getLong("count(*)"));
-                    metricsInfo.increaseNumberOfPointsForMetricRequest(request, tuple.getLong("sum(chunk_count)"));
+                    metricsInfo.increaseNumberOfChunksForMetricRequest(request,
+                            tuple.getLong("count(*)")
+                    );
+                    metricsInfo.increaseNumberOfPointsForMetricRequest(request,
+                            tuple.getLong("sum(" + getHistorianFields().CHUNK_COUNT_FIELD + ")")
+                    );
                 }
             }
             tuple = solrStream.read();
@@ -274,7 +286,7 @@ public class GetTimeSeriesHandler {
      * @return
      */
     private boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
-        if (!request.getName().equals(tuple.fields.get(NAME))){
+        if (!request.getName().equals(tuple.fields.get(getHistorianFields().CHUNK_NAME))){
             return false;
         } else {
             for (Map.Entry<String, String> entry : request.getTags().entrySet()) {
@@ -295,7 +307,7 @@ public class GetTimeSeriesHandler {
                 metricsInfo.getTotalNumberOfChunks() < getSamplingConf(request).getMaxPoint()
         ) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
-            query.addField(CHUNK_VALUE_FIELD);
+            query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (metricsInfo.getTotalNumberOfChunks() < solrHistorianConf.limitNumberOfChunks) {
             LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
@@ -336,19 +348,19 @@ public class GetTimeSeriesHandler {
         samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
-                    query.addField(CHUNK_VALUE_FIELD);
+                    query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
                     break;
                 case FIRST:
-                    query.addField(CHUNK_FIRST_VALUE_FIELD);
+                    query.addField(getHistorianFields().CHUNK_FIRST_VALUE_FIELD);
                     break;
                 case AVERAGE:
-                    query.addField(CHUNK_SUM_FIELD);
+                    query.addField(getHistorianFields().CHUNK_SUM_FIELD);
                     break;
                 case MIN:
-                    query.addField(CHUNK_MIN_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MIN_FIELD);
                     break;
                 case MAX:
-                    query.addField(CHUNK_MAX_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MAX_FIELD);
                     break;
                 case MODE_MEDIAN:
                 case LTTB:
@@ -361,9 +373,9 @@ public class GetTimeSeriesHandler {
 
     private Set<SamplingAlgorithm> determineSamplingAlgoThatWillBeUsed(SamplingConf askedSamplingConf, MetricsSizeInfo metricsSizeInfo) {
         if (askedSamplingConf.getAlgo() != SamplingAlgorithm.NONE) {
-            Set<SamplingAlgorithm> singletonSet = new HashSet<SamplingAlgorithm>();
-            singletonSet.add(askedSamplingConf.getAlgo());
-            return singletonSet;
+            Set<SamplingAlgorithm> algos = new HashSet<SamplingAlgorithm>();
+            algos.add(askedSamplingConf.getAlgo());
+            return algos;
         }
         return metricsSizeInfo.getMetricRequests().stream()
                 .map(metricrequest -> {
@@ -428,8 +440,8 @@ public class GetTimeSeriesHandler {
 
     private JsonObject buildTimeSeriesResponse(MultiTimeSeriesExtracter timeSeriesExtracter) {
         return new JsonObject()
-                .put(TOTAL_POINTS, timeSeriesExtracter.pointCount())
-                .put(TIMESERIES, timeSeriesExtracter.getTimeSeries());
+                .put(HistorianServiceFields.TOTAL_POINTS, timeSeriesExtracter.pointCount())
+                .put(HistorianServiceFields.TIMESERIES, timeSeriesExtracter.getTimeSeries());
     }
 
     private JsonStream queryStream(SolrQuery query) {
@@ -466,7 +478,7 @@ public class GetTimeSeriesHandler {
         }
 
         public List<AGG> getAggs() {
-            return params.getJsonArray(AGGREGATION, new JsonArray())
+            return params.getJsonArray(HistorianServiceFields.AGGREGATION, new JsonArray())
                     .stream()
                     .map(String::valueOf)
                     .map(AGG::valueOf)
@@ -474,20 +486,20 @@ public class GetTimeSeriesHandler {
         }
 
         public Long getTo() {
-            return params.getLong(TO);
+            return params.getLong(HistorianServiceFields.TO);
         }
 
         public Long getFrom() {
-            return params.getLong(FROM);
+            return params.getLong(HistorianServiceFields.FROM);
         }
 
         public Integer getMaxTotalChunkToRetrieve() {
-            return params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
+            return params.getInteger(HistorianServiceFields.MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
         }
 
         public Map<String, String> getRootTags() {
             Map<String,String> tagsMap = new HashMap<>();
-            params.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+            params.getJsonObject(HistorianServiceFields.TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
             return tagsMap;
         }
 
@@ -497,13 +509,13 @@ public class GetTimeSeriesHandler {
          * @return
          */
         public List<MetricRequest> getMetricRequestsWithFinalTags() {
-            return params.getJsonArray(NAMES).stream().map(i -> {
+            return params.getJsonArray(HistorianServiceFields.NAMES).stream().map(i -> {
                 try {
                     JsonObject metricObject = new JsonObject(i.toString());
-                    String name = metricObject.getString(NAME);
+                    String name = metricObject.getString(HistorianServiceFields.NAME);
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
-                    metricObject.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+                    metricObject.getJsonObject(HistorianServiceFields.TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
                     return new MetricRequest(name, tagsMap);
                 }catch (Exception ex) {
                     String name = i.toString();
@@ -516,15 +528,15 @@ public class GetTimeSeriesHandler {
         }
 
         public int getMaxPoint() {
-            return params.getInteger(MAX_POINT_BY_METRIC);
+            return params.getInteger(HistorianServiceFields.MAX_POINT_BY_METRIC);
         }
 
         public int getBucketSize() {
-            return params.getInteger(BUCKET_SIZE);
+            return params.getInteger(HistorianServiceFields.BUCKET_SIZE);
         }
 
         public SamplingAlgorithm getSamplingAlgo() {
-            return SamplingAlgorithm.valueOf(params.getString(SAMPLING_ALGO));
+            return SamplingAlgorithm.valueOf(params.getString(HistorianServiceFields.SAMPLING_ALGO));
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.historian;
 
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
@@ -27,7 +28,6 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianFields.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -100,14 +100,14 @@ public class HistorianSearchVerticleIT {
     @ Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void getMetricsNameTest (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
-                .put(METRIC, "per");
+                .put(HistorianServiceFields.METRIC, "per");
         historian.rxGetMetricsName (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (5, rsp.getLong(TOTAL));
-                        JsonArray docs = rsp.getJsonArray (METRICS);
+                        assertEquals (5, rsp.getLong(HistorianServiceFields.TOTAL));
+                        JsonArray docs = rsp.getJsonArray (HistorianServiceFields.METRICS);
                         LOGGER.info("docs {}",docs);
                         assertEquals (5, docs.size ());
                         testContext.completeNow ();
@@ -125,8 +125,8 @@ public class HistorianSearchVerticleIT {
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (7, rsp.getLong(TOTAL));
-                        JsonArray docs = rsp.getJsonArray (METRICS);
+                        assertEquals (7, rsp.getLong(HistorianServiceFields.TOTAL));
+                        JsonArray docs = rsp.getJsonArray (HistorianServiceFields.METRICS);
                         LOGGER.info("docs {}",docs);
                         assertEquals (7, docs.size ());
                         testContext.completeNow ();
