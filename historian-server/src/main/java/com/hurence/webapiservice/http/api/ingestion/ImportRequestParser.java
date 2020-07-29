@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.http.api.ingestion.util.CsvFileConvertor;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -12,8 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static com.hurence.historian.modele.HistorianFields.*;
 
 public class ImportRequestParser {
 
@@ -50,25 +49,25 @@ public class ImportRequestParser {
         CorrectPointsAndErrorMessages correctPointsAndErrorMessages = new CorrectPointsAndErrorMessages();
         for (Object metricsObject : jsonImportRequest) {
             JsonObject timeserie = (JsonObject) metricsObject;
-            if (!(timeserie.containsKey(NAME)))
+            if (!(timeserie.containsKey(HistorianServiceFields.NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(POINTS).size();
-                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" points for metric with name "+timeserie.getValue(NAME)+" because this is not a valid name");
+            if (((timeserie.getValue(HistorianServiceFields.NAME) == null) && (timeserie.getValue(HistorianServiceFields.POINTS) != null)) || (timeserie.getValue(HistorianServiceFields.NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(HistorianServiceFields.POINTS).size();
+                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" points for metric with name "+timeserie.getValue(HistorianServiceFields.NAME)+" because this is not a valid name");
                 continue;
-            } else if (!(timeserie.getValue(NAME) instanceof String)) {
+            } else if (!(timeserie.getValue(HistorianServiceFields.NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(POINTS))) {
+            } else if (!(timeserie.containsKey(HistorianServiceFields.POINTS))) {
                 throw new IllegalArgumentException("field 'points' is required");
-            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
-                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS) + " is not an array");
+            } else if  ((!(timeserie.getValue(HistorianServiceFields.POINTS) instanceof JsonArray)) || (timeserie.getValue(HistorianServiceFields.POINTS)==null)) {
+                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(HistorianServiceFields.POINTS) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
-            newTimeserie.put(NAME, timeserie.getString(NAME));
+            newTimeserie.put(HistorianServiceFields.NAME, timeserie.getString(HistorianServiceFields.NAME));
             JsonArray newPoints = new JsonArray();
-            for (Object point : timeserie.getJsonArray(POINTS)) {
+            for (Object point : timeserie.getJsonArray(HistorianServiceFields.POINTS)) {
                 JsonArray pointArray;
-                String commonErrorMessage = "Ignored 1 points for metric with name '" + timeserie.getString(NAME);
+                String commonErrorMessage = "Ignored 1 points for metric with name '" + timeserie.getString(HistorianServiceFields.NAME);
                 try {
                     pointArray = (JsonArray) point;
                     pointArray.size();
@@ -102,7 +101,7 @@ public class ImportRequestParser {
                 newPoints.add(pointArray);
             }
             if(!newPoints.isEmpty()) {
-                newTimeserie.put(POINTS, newPoints);
+                newTimeserie.put(HistorianServiceFields.POINTS, newPoints);
                 correctPointsAndErrorMessages.correctPoints.add(newTimeserie);
             }
         }
@@ -130,27 +129,27 @@ public class ImportRequestParser {
         for (Object metricsObject : metricsParam) {
             JsonObject timeserie = (JsonObject) metricsObject;
             int numberOfFailedPointsForThisName = 0;
-            if (!(timeserie.containsKey(NAME)))
+            if (!(timeserie.containsKey(HistorianServiceFields.NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(POINTS).size();
+            if (((timeserie.getValue(HistorianServiceFields.NAME) == null) && (timeserie.getValue(HistorianServiceFields.POINTS) != null)) || (timeserie.getValue(HistorianServiceFields.NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(HistorianServiceFields.POINTS).size();
                 numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints; // TODO see this
                 continue;
-            } else if (!(timeserie.getValue(NAME) instanceof String)) {
+            } else if (!(timeserie.getValue(HistorianServiceFields.NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(POINTS))) {
+            } else if (!(timeserie.containsKey(HistorianServiceFields.POINTS))) {
                 throw new IllegalArgumentException("field 'points' is required");
-            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
-                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS) + " is not an array");
+            } else if  ((!(timeserie.getValue(HistorianServiceFields.POINTS) instanceof JsonArray)) || (timeserie.getValue(HistorianServiceFields.POINTS)==null)) {
+                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(HistorianServiceFields.POINTS) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
             Set<String> fieldsNamesWithoutPoints = timeserie.fieldNames();
             fieldsNamesWithoutPoints.forEach(i -> {
-                if (!i.equals(POINTS))
+                if (!i.equals(HistorianServiceFields.POINTS))
                     newTimeserie.put(i, timeserie.getValue(i));
             });
             JsonArray newPoints = new JsonArray();
-            for (Object point : timeserie.getJsonArray(POINTS)) {
+            for (Object point : timeserie.getJsonArray(HistorianServiceFields.POINTS)) {
                 JsonArray pointArray;
                 try {
                     pointArray = (JsonArray) point;
@@ -185,24 +184,24 @@ public class ImportRequestParser {
                 newPoints.add(pointArray);
             }
             if(!newPoints.isEmpty()) {
-                newTimeserie.put(POINTS, newPoints);
+                newTimeserie.put(HistorianServiceFields.POINTS, newPoints);
                 correctPointsAndFailedPoints.correctPoints.add(newTimeserie);
             }
             int currentNumberOfFailedPoints;
             LinkedHashMap groupByMap = new LinkedHashMap();
             if (multiMap != null) {
-                List<String> groupByList = multiMap.getAll(GROUP_BY).stream().map(s -> {
-                    if (s.startsWith(TAGS+".")) {
-                        groupByMap.put(s.substring(5), timeserie.getJsonObject(TAGS).getString(s.substring(5)));
-                        return timeserie.getJsonObject(TAGS).getString(s.substring(5));
-                    }else if (s.equals(NAME)) {
+                List<String> groupByList = multiMap.getAll(HistorianServiceFields.GROUP_BY).stream().map(s -> {
+                    if (s.startsWith(HistorianServiceFields.TAGS+".")) {
+                        groupByMap.put(s.substring(5), timeserie.getJsonObject(HistorianServiceFields.TAGS).getString(s.substring(5)));
+                        return timeserie.getJsonObject(HistorianServiceFields.TAGS).getString(s.substring(5));
+                    }else if (s.equals(HistorianServiceFields.NAME)) {
                         groupByMap.put(s, timeserie.getString(s));
                         return timeserie.getString(s);
                     } else return null ;
                 }).collect(Collectors.toList());
                 groupByList.remove(null);
             } else {
-            groupByMap.put(NAME, timeserie.getString(NAME));
+            groupByMap.put(HistorianServiceFields.NAME, timeserie.getString(HistorianServiceFields.NAME));
             }
             if (correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.containsKey(groupByMap)) {
                 currentNumberOfFailedPoints = (int) correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.get(groupByMap);

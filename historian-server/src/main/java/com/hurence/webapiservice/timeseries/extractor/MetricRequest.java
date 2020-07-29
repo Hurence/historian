@@ -1,6 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.FieldNamesInsideHistorianService;
+import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
 import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
@@ -53,7 +55,7 @@ public class MetricRequest {
      * @return true if chunk is corresponding to metric query.
      */
     public boolean isChunkMatching(JsonObject chunk) {
-        final String chunkName = chunk.getString(HistorianFields.NAME);
+        final String chunkName = chunk.getString(FieldNamesInsideHistorianService.NAME);
         if (!getName().equals(chunkName)) {
             return false;
         }

@@ -1,13 +1,12 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
+import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
 
 import java.util.*;
 
 import java.util.stream.DoubleStream;
-
-import static com.hurence.historian.modele.HistorianFields.*;
 
 public class ChunkAggsCalculator extends AbstractAggsCalculator<JsonObject> {
 
@@ -24,7 +23,7 @@ public class ChunkAggsCalculator extends AbstractAggsCalculator<JsonObject> {
     @Override
     protected double getDoubleCount(List<JsonObject> chunks) {
         return chunks.stream()
-                .mapToDouble(chunk -> chunk.getDouble(CHUNK_COUNT_FIELD))
+                .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_COUNT))
                 .sum();
     }
 

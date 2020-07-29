@@ -15,7 +15,7 @@ public class JsonStreamSolrStreamSchemaVersion0 extends JsonStreamSolrStream {
     @Override
     protected JsonObject toJson(Tuple tuple) {
         final JsonObject json = super.toJson(tuple);
-        JsonSchemaCompatibilityUtil.convertJsonSchemaEVOA0ToVERSION_0(json);
+        ChunkSchemaCompatibilityUtil.convertEVOA0ToInternalChunk(json);
         return json;
     }
 }

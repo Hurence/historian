@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 import io.vertx.core.Handler;
@@ -18,8 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.historian.modele.HistorianFields.TIME;
+import static com.hurence.historian.modele.HistorianServiceFields.TIME;
 
 public class GetAnnotationsHandler {
 
@@ -43,8 +42,8 @@ public class GetAnnotationsHandler {
                 );
                 LOGGER.debug("annotations found : "+ annotation);
                 p.complete(new JsonObject()
-                        .put(ANNOTATIONS, annotation)
-                        .put(HistorianFields.TOTAL_HIT, annotation.size())
+                        .put(HistorianServiceFields.ANNOTATIONS, annotation)
+                        .put(HistorianServiceFields.TOTAL_HIT, annotation.size())
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
@@ -57,8 +56,8 @@ public class GetAnnotationsHandler {
 
     private SolrQuery buildAnnotationQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        Long from = params.getLong(FROM);
-        Long to = params.getLong(TO);
+        Long from = params.getLong(HistorianServiceFields.FROM);
+        Long to = params.getLong(HistorianServiceFields.TO);
         if (to == null && from != null) {
             LOGGER.trace("requesting annotation with from time {}", from);
             queryBuilder.append(TIME).append(":[").append(from).append(" TO ").append("*]");
@@ -74,17 +73,17 @@ public class GetAnnotationsHandler {
         }
         //FILTER
         List<String> tags = null;
-        if (params.getJsonArray(TAGS) != null)
-            tags = params.getJsonArray(TAGS).getList();
+        if (params.getJsonArray(HistorianServiceFields.TAGS) != null)
+            tags = params.getJsonArray(HistorianServiceFields.TAGS).getList();
         StringBuilder stringQuery = new StringBuilder();
         String operator = "";
         SolrQuery query = new SolrQuery();
-        switch (AnnotationRequestType.valueOf(params.getString(TYPE, AnnotationRequestType.ALL.toString()))) {
+        switch (AnnotationRequestType.valueOf(params.getString(HistorianServiceFields.TYPE, AnnotationRequestType.ALL.toString()))) {
             case ALL:
                 break;
             case TAGS:
                 queryBuilder.append(" && ");
-                if (!params.getBoolean(MATCH_ANY, true)) {
+                if (!params.getBoolean(HistorianServiceFields.MATCH_ANY, true)) {
                     operator = " AND ";
                 } else {
                     operator = " OR ";
@@ -93,19 +92,19 @@ public class GetAnnotationsHandler {
                     stringQuery.append(tag).append(operator);
                 }
                 stringQuery.append(tags.get(tags.size()-1));
-                queryBuilder.append(HistorianFields.TAGS).append(":").append("(").append(stringQuery.toString()).append(")");
+                queryBuilder.append(HistorianServiceFields.TAGS).append(":").append("(").append(stringQuery.toString()).append(")");
                 break;
         }
         if (queryBuilder.length() != 0 ) {
             LOGGER.info("query is : {}", queryBuilder.toString());
             query.setQuery(queryBuilder.toString());
         }
-        query.setRows(params.getInteger(LIMIT, 1000));
+        query.setRows(params.getInteger(HistorianServiceFields.LIMIT, 1000));
         //    FIELDS_TO_FETCH
         query.setFields(TIME,
-                TIME_END_REQUEST_FIELD,
-                TEXT,
-                TAGS);
+                HistorianServiceFields.TIME_END_REQUEST_FIELD,
+                HistorianServiceFields.TEXT,
+                HistorianServiceFields.TAGS);
         query.addSort("score", SolrQuery.ORDER.desc);
         query.addSort(TIME, SolrQuery.ORDER.desc);
         return query;

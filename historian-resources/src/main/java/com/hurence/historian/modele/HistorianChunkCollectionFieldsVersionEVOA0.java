@@ -15,7 +15,6 @@ public class HistorianChunkCollectionFieldsVersionEVOA0 {
 
     public static String NAME = "name";
     public static String ID = "id";
-    public static String COMPACTIONS_RUNNING = "compactions_running";
     public static String CHUNK_VALUE = "chunk_value";
     public static String CHUNK_START = "chunk_start";
     public static String CHUNK_MAX = "chunk_max";
@@ -39,14 +38,11 @@ public class HistorianChunkCollectionFieldsVersionEVOA0 {
     public static String CHUNK_ORIGIN = "chunk_origin";
     public static String CHUNK_OUTLIER = "chunk_outlier";
     public static String CHUNK_FIRST = "chunk_first";
-    public static String CHUNK_LAST = "chunk_last";
     public static String CHUNK_SUM = "chunk_sum";
     public static String CHUNK_YEAR = "year";
     public static String CHUNK_MONTH = "month";
     public static String CHUNK_DAY = "day";
-    public static String CHUNK_HOUR = "hour";
     public static String CHUNK_WEEK = "week";
-    public static String CHUNK_STDDEV = "chunk_stddev";
     public static String TAGS = "tagname";
 }
 

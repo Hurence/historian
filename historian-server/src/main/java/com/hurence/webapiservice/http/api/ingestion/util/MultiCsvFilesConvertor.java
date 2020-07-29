@@ -1,20 +1,17 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.http.api.ingestion.ImportRequestParser;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import org.joda.time.IllegalFieldValueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
-
-import static com.hurence.historian.modele.HistorianFields.*;
 
 public class MultiCsvFilesConvertor {
 
@@ -55,12 +52,12 @@ public class MultiCsvFilesConvertor {
                 convertor.ConvertCsvFileToJson();
             } catch (NoSuchElementException e) {
                 String errorMessage = "The csv mappings don't match the mappings in the attributes. this file will be skipped";
-                JsonObject errorObject = new JsonObject().put(FILE, convertor.file.fileName()).put(CAUSE, errorMessage);
+                JsonObject errorObject = new JsonObject().put(HistorianServiceFields.FILE, convertor.file.fileName()).put(HistorianServiceFields.CAUSE, errorMessage);
                 correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.add(errorObject);
                 continue;
             } catch (IOException e) {
-                String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+MAX_LINES_FOR_CSV_FILE;
-                JsonObject errorObject = new JsonObject().put(FILE, convertor.file.fileName()).put(CAUSE, errorMessage);
+                String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+ HistorianServiceFields.MAX_LINES_FOR_CSV_FILE;
+                JsonObject errorObject = new JsonObject().put(HistorianServiceFields.FILE, convertor.file.fileName()).put(HistorianServiceFields.CAUSE, errorMessage);
                 correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.add(errorObject);
                 continue;
             }

@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.ingestion.util;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import com.hurence.historian.modele.HistorianServiceFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.FileUpload;
@@ -15,7 +16,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.DEFAULT_TIMESTAMP_COLUMN_MAPPING;
 
 public class CsvFileConvertor {
@@ -56,7 +56,7 @@ public class CsvFileConvertor {
 
         DataConverter converter = new DataConverter(multiMap);
         JsonArray result = converter.toGroupedByMetricDataPoints(linesWithDateInfo);
-        if (result.size() > MAX_LINES_FOR_CSV_FILE) {
+        if (result.size() > HistorianServiceFields.MAX_LINES_FOR_CSV_FILE) {
             throw new IOException(String.valueOf(result.size()));
         }
         fileInArray = result;
@@ -81,21 +81,21 @@ public class CsvFileConvertor {
     private static void verifyMultiMap(List<Map> listFromRows, MultiMap multiMap) {
         listFromRows.forEach(i ->  {
             Set<String> keySet = i.keySet();
-            if ((multiMap.get(MAPPING_NAME) != null) && (!keySet.contains(multiMap.get(MAPPING_NAME))))
+            if ((multiMap.get(HistorianServiceFields.MAPPING_NAME) != null) && (!keySet.contains(multiMap.get(HistorianServiceFields.MAPPING_NAME))))
                 throw new NoSuchElementException("error in the attributes");
-            if ((multiMap.get(MAPPING_TIMESTAMP) != null) && (!keySet.contains(multiMap.get(MAPPING_TIMESTAMP))))
+            if ((multiMap.get(HistorianServiceFields.MAPPING_TIMESTAMP) != null) && (!keySet.contains(multiMap.get(HistorianServiceFields.MAPPING_TIMESTAMP))))
                 throw new NoSuchElementException("error in the attributes");
-            if ((multiMap.get(MAPPING_VALUE) != null) && (!keySet.contains(multiMap.get(MAPPING_VALUE))))
+            if ((multiMap.get(HistorianServiceFields.MAPPING_VALUE) != null) && (!keySet.contains(multiMap.get(HistorianServiceFields.MAPPING_VALUE))))
                 throw new NoSuchElementException("error in the attributes");
-            if ((multiMap.get(MAPPING_QUALITY) != null) && (!keySet.contains(multiMap.get(MAPPING_QUALITY))))
+            if ((multiMap.get(HistorianServiceFields.MAPPING_QUALITY) != null) && (!keySet.contains(multiMap.get(HistorianServiceFields.MAPPING_QUALITY))))
                 throw new NoSuchElementException("error in the attributes");
         });
     }
 
     private static String generateDateFromTime (Map map, MultiMap multiMap) {
-        if (multiMap.get(MAPPING_TIMESTAMP) == null)
-            multiMap.add(MAPPING_TIMESTAMP, DEFAULT_TIMESTAMP_COLUMN_MAPPING);
-        Object date1 = map.get(multiMap.get(MAPPING_TIMESTAMP));
+        if (multiMap.get(HistorianServiceFields.MAPPING_TIMESTAMP) == null)
+            multiMap.add(HistorianServiceFields.MAPPING_TIMESTAMP, DEFAULT_TIMESTAMP_COLUMN_MAPPING);
+        Object date1 = map.get(multiMap.get(HistorianServiceFields.MAPPING_TIMESTAMP));
         long date = (long) DataConverter.toNumber(date1, multiMap);
         Date d = new Date(date);
         DateFormat f = new SimpleDateFormat("yyyy-MM-dd");
