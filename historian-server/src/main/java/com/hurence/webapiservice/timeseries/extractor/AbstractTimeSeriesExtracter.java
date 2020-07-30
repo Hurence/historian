@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.hurence.timeseries.modele.Point.DEFAULT_QUALITY;
+
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractTimeSeriesExtracter.class);
@@ -102,8 +104,10 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     }
 
     private JsonArray returnPoint(Point point) {
-        if (returnQuality)
+        if (returnQuality && point.hasQuality())
             return new JsonArray().add(point.getValue()).add(point.getTimestamp()).add(point.getQuality());
+        else if (returnQuality && !point.hasQuality())
+            return new JsonArray().add(point.getValue()).add(point.getTimestamp()).add(DEFAULT_QUALITY);
         else
             return new JsonArray().add(point.getValue()).add(point.getTimestamp());
     }

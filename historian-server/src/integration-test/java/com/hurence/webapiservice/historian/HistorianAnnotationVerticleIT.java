@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -43,8 +44,11 @@ public class HistorianAnnotationVerticleIT {
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
+        JsonObject historianConf = new JsonObject()
+                .put(CONFIG_SCHEMA_VERSION,
+                        SchemaVersion.VERSION_0.toString());
         HistorianSolrITHelper
-                .deployHistorianVerticle(container, vertx)
+                .deployHistorianVerticle(container, vertx, historianConf)
                 .subscribe(id -> {
                             historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();

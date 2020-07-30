@@ -15,6 +15,7 @@ public class JsonStreamSolrStream implements JsonStream {
             case EVOA0:
                 return new JsonStreamSolrStreamSchemaVersion0(stream);
             case VERSION_0:
+            case VERSION_1:
                 return new JsonStreamSolrStream(stream);
             default:
                 throw new IllegalArgumentException(String.format(

@@ -33,7 +33,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
                                    boolean returnQuality,
                                    Float qualityLimit) {
         super(from, to, samplingConf, totalNumberOfPoint, returnQuality);
-        sampler = SamplerFactory.getPointSampler(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
+        sampler = SamplerFactory.getPointSamplerWithQuality(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
         aggsCalculator = new PointsAggsCalculator(aggregList);
         if(!qualityLimit.isNaN())
             this.qualityLimit = qualityLimit;
@@ -53,7 +53,8 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
     private List<Point> filterPointsByQuality(List<Point> sampledPoints) {
         List<Point> pointsToReturn = new ArrayList<>();
         sampledPoints.forEach(point -> {
-            if (point.getQuality() >= qualityLimit)
+            if ((point.hasQuality() && point.getQuality() >= qualityLimit)
+                        || (!point.hasQuality())) // TODO configure this to get default quality and compare with qualitylimit
                 pointsToReturn.add(point);
         });
         return pointsToReturn;

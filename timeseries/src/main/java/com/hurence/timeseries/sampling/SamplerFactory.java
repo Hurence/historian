@@ -17,6 +17,7 @@ package com.hurence.timeseries.sampling;
 
 import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.PointWithQualityImpl;
 
 public class SamplerFactory {
 
@@ -49,11 +50,40 @@ public class SamplerFactory {
 
         }
     }
-    //TODO
-    public static Sampler<PointImpl> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
+
+    /**
+     * Instanciates a sampler with quality
+     *
+     * @param algorithm the sampling algorithm
+     * @param bucketSize an int parameter
+     * @return the sampler
+     */
+    public static Sampler<Point> getPointSamplerWithQuality(SamplingAlgorithm algorithm, int bucketSize) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSamplerWithSpecificBucketing<PointImpl>(bucketingStrategy);
+                return new FirstItemSampler<Point>(bucketSize);
+            case AVERAGE:
+                return new AverageSamplerWithQuality<>(getPointTimeSerieHandlerWithQuality(), bucketSize);
+            case NONE:
+                return new IsoSampler<Point>();
+            case MIN:
+                return new MinSamplerWithQuality<>(getPointTimeSerieHandlerWithQuality(), bucketSize);
+            case MAX:
+                return new MaxSamplerWithQuality<>(getPointTimeSerieHandlerWithQuality(), bucketSize);
+            case MIN_MAX:
+            case LTTB:
+            case MODE_MEDIAN:
+            default:
+                throw new UnsupportedOperationException("algorithm " + algorithm.name() + " is not yet supported !");
+
+        }
+    }
+
+    //TODO
+    public static Sampler<Point> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
+        switch (algorithm) {
+            case FIRST:
+                return new FirstItemSamplerWithSpecificBucketing<Point>(bucketingStrategy);
             case AVERAGE:
 //                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
             case NONE:
@@ -73,12 +103,13 @@ public class SamplerFactory {
 
     public static TimeSerieHandler<Point> getPointTimeSerieHandler() {
         return new TimeSerieHandler<Point>() {
-                @Override
-                public PointImpl createTimeserie(long timestamp, double value) {
-                    return new PointImpl(timestamp, value);
-                }
 
-                @Override
+            @Override
+            public Point createTimeserie(long timestamp, double value) {
+                return new PointImpl(timestamp, value);
+            }
+
+            @Override
                 public long getTimeserieTimestamp(Point point) {
                     return point.getTimestamp();
                 }
@@ -87,6 +118,34 @@ public class SamplerFactory {
                 public Double getTimeserieValue(Point point) {
                     return point.getValue();
                 }
-            };
+        };
+    }
+
+    public static TimeSerieHandlerWithQuality<Point> getPointTimeSerieHandlerWithQuality() {
+        return new TimeSerieHandlerWithQuality<Point>() {
+
+            @Override
+            public Point createTimeserie(long timestamp, double value, float quality) {
+                return new PointWithQualityImpl(timestamp, value, quality);
+            }
+
+            @Override
+            public long getTimeserieTimestamp(Point point) {
+                return point.getTimestamp();
+            }
+
+            @Override
+            public Double getTimeserieValue(Point point) {
+                return point.getValue();
+            }
+
+            @Override
+            public Float getTimeserieQuality(Point point) {
+                if (point.hasQuality())
+                    return point.getQuality();
+                else
+                    return Point.DEFAULT_QUALITY;
+            }
+        };
     }
 }

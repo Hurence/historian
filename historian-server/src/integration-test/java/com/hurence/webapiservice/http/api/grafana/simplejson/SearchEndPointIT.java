@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.simplejson;
 
 
 import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
@@ -9,6 +10,7 @@ import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
 import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -32,6 +34,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -41,8 +44,8 @@ public class SearchEndPointIT {
     private static String COLLECTION = HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, DockerComposeContainer container) throws IOException, SolrServerException, InterruptedException {
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
+    public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         final SolrInputDocument doc = new SolrInputDocument();
         doc.addField("id", UUID.randomUUID().toString());
@@ -78,6 +81,13 @@ public class SearchEndPointIT {
         client.add(COLLECTION, doc7);
         client.commit(COLLECTION);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
+        JsonObject historianConf = new JsonObject()
+                .put(CONFIG_SCHEMA_VERSION,
+                        SchemaVersion.VERSION_0.toString());
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
+                    context.completeNow();
+                },
+                t -> context.failNow(t));
     }
 
 

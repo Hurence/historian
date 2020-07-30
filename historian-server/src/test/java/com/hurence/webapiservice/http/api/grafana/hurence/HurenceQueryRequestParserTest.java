@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
 import static com.hurence.webapiservice.modele.AGG.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 public class HurenceQueryRequestParserTest {
 
@@ -29,7 +30,8 @@ public class HurenceQueryRequestParserTest {
     private HurenceDatasourcePluginQueryRequestParser getHurenceDatasourcePluginQueryRequestParser() {
         return new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                 TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH);
+                TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH
+                , QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH);
     }
 
     @Test
@@ -294,5 +296,57 @@ public class HurenceQueryRequestParserTest {
         final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
         LOGGER.debug("request : {}", request);
         assertEquals(names, request.getMetricNames());
+    }
+
+    @Test
+    public void testParsingRequestWithQuality() {
+
+        JsonObject requestBody = new JsonObject();
+        JsonPointer.from(FROM_JSON_PATH)
+                .writeJson(requestBody, "2019-11-14T02:56:53.285Z", true);
+        JsonPointer.from(TO_JSON_PATH)
+                .writeJson(requestBody, "2019-11-14T08:56:53.285Z", true);
+        JsonPointer.from(NAMES_JSON_PATH)
+                .writeJson(requestBody, Arrays.asList("metric_1"), true);
+        JsonPointer.from(MAX_DATA_POINTS_JSON_PATH)
+                .writeJson(requestBody, 500, true);
+        JsonPointer.from(QUALITY_AGG_JSON_PATH)
+                .writeJson(requestBody, "AVG", true);
+        JsonPointer.from(QUALITY_VALUE_JSON_PATH)
+                .writeJson(requestBody, 0.75, true);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+        LOGGER.info("request : {}", request);
+        assertEquals(1573700213285L, request.getFrom());
+        assertEquals(1573721813285L, request.getTo());
+        assertEquals(new JsonArray(Arrays.asList("metric_1")), request.getMetricNames());
+        assertEquals(500, request.getSamplingConf().getMaxPoint());
+        assertEquals("AVG", request.getQualityAgg().toString());
+        assertEquals(0.75f, request.getQualityValue());
+        assertFalse(request.getQualityReturn());
+    }
+
+    @Test
+    public void testParsingRequestWithoutQuality() {
+
+        JsonObject requestBody = new JsonObject();
+        JsonPointer.from(FROM_JSON_PATH)
+                .writeJson(requestBody, "2019-11-14T02:56:53.285Z", true);
+        JsonPointer.from(TO_JSON_PATH)
+                .writeJson(requestBody, "2019-11-14T08:56:53.285Z", true);
+        JsonPointer.from(NAMES_JSON_PATH)
+                .writeJson(requestBody, Arrays.asList("metric_1"), true);
+        JsonPointer.from(MAX_DATA_POINTS_JSON_PATH)
+                .writeJson(requestBody, 500, true);
+        final HurenceDatasourcePluginQueryRequestParser queryRequestParser = getHurenceDatasourcePluginQueryRequestParser();
+        final HurenceDatasourcePluginQueryRequestParam request = queryRequestParser.parseRequest(requestBody);
+        LOGGER.info("request : {}", request);
+        assertEquals(1573700213285L, request.getFrom());
+        assertEquals(1573721813285L, request.getTo());
+        assertEquals(new JsonArray(Arrays.asList("metric_1")), request.getMetricNames());
+        assertEquals(500, request.getSamplingConf().getMaxPoint());
+        assertEquals("NONE", request.getQualityAgg().toString());
+        assertEquals(Float.NaN, request.getQualityValue());
+        assertFalse(request.getQualityReturn());
     }
 }

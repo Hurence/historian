@@ -41,11 +41,8 @@ public class QueryEndPointFocusOnSamplingWithPreAggEVOA0IT extends AbstractQuery
         buildInjector().injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         JsonObject historianConf = buildHistorianConf();
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.GRAFANA,
-                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
         HttpWithHistorianSolrITHelper
-                .deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
+                .deployHttpAndCustomHistorianVerticle(container, vertx, historianConf)
                 .subscribe(id -> {
                             context.completeNow();
                         },

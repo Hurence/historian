@@ -2,8 +2,10 @@ package com.hurence.historian.spark.compactor.job;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion1;
 import com.hurence.timeseries.compaction.Compression;
+import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesCurrentSerializer;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
 import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.PointWithDefaultQualityImpl;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -75,17 +77,24 @@ public class ChunkModeleVersion1 implements ChunkModele {
         chunk.month = month;
         chunk.day = String.valueOf(day);
         chunk.chunk_origin = chunk_origin;
-        chunk.chunk_quality_sum = (float) chunk.points.stream().mapToDouble(Point::getQuality).sum();
+        chunk.chunk_quality_sum = (float) chunk.points.stream().mapToDouble(ChunkModeleVersion1::getQuality).sum();
         chunk.chunk_quality_avg = chunk.chunk_quality_sum / chunk.points.size();
-        chunk.chunk_quality_min = (float) chunk.points.stream().mapToDouble(Point::getQuality).min().getAsDouble();
-        chunk.chunk_quality_max = (float) chunk.points.stream().mapToDouble(Point::getQuality).max().getAsDouble();
-        chunk.chunk_quality_first = points.get(0).getQuality();
+        chunk.chunk_quality_min = (float) chunk.points.stream().mapToDouble(ChunkModeleVersion1::getQuality).min().getAsDouble();
+        chunk.chunk_quality_max = (float) chunk.points.stream().mapToDouble(ChunkModeleVersion1::getQuality).max().getAsDouble();
+        chunk.chunk_quality_first = getQuality(points.get(0));
         return chunk;
     }
 
     protected static byte[] compressPoints(List<Point> pointsChunk) {
-        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
+        byte[] serializedPoints = ProtoBufTimeSeriesCurrentSerializer.to(pointsChunk.iterator(),0 , ddcThreshold);
         return Compression.compress(serializedPoints);
+    }
+
+    private static float getQuality(Point point) {
+        if (point.hasQuality())
+            return point.getQuality();
+        else
+            return 1f;
     }
 
 
