@@ -73,7 +73,7 @@ public class HurenceQueryRequestParserTest {
         assertEquals(500, request.getSamplingConf().getMaxPoint());
         assertEquals(100, request.getSamplingConf().getBucketSize());
         assertEquals(SamplingAlgorithm.MIN, request.getSamplingConf().getAlgo());
-        assertEquals(QualityAgg.NONE.toString(), request.getQualityAgg());
+        assertEquals(QualityAgg.NONE, request.getQualityAgg());
         assertEquals(Float.NaN, request.getQualityValue());
     }
 
