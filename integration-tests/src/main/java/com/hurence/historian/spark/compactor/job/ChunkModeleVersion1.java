@@ -5,7 +5,6 @@ import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesCurrentSerializer;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
 import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointWithDefaultQualityImpl;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
