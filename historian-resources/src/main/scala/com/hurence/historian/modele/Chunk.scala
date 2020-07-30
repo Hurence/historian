@@ -11,7 +11,7 @@ trait HistorianRecord {
   *
   * @see Measure
   */
-sealed trait Chunk extends HistorianRecord {
+trait Chunk extends HistorianRecord {
 
   def apiVersion: String = SchemaVersion.VERSION_0.toString
 

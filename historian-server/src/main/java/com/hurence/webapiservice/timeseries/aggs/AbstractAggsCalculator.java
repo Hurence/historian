@@ -1,13 +1,11 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonObject;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.stream.DoubleStream;
 
 import static com.hurence.webapiservice.modele.AGG.*;
 
@@ -90,8 +88,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
     }
 
     private void calculateSum(List<T> elementsToAgg) {
-        double sum = getDoubleStreamFromElementsToAgg(elementsToAgg, FieldNamesInsideHistorianService.CHUNK_SUM)
-                .sum();
+        double sum = calculSum(elementsToAgg);
         if(aggValues.containsKey(SUM)) {
             double currentSum = aggValues.get(SUM).doubleValue();
             Number updatedSum =  BigDecimal.valueOf(currentSum+sum);
@@ -101,8 +98,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
     private void calculateMin(List<T> elementsToAgg) {
-        OptionalDouble minMap = getDoubleStreamFromElementsToAgg(elementsToAgg, FieldNamesInsideHistorianService.CHUNK_MIN)
-                .min();
+        OptionalDouble minMap = calculMin(elementsToAgg);
         if (minMap.isPresent()) {
             double min = minMap.getAsDouble();
             if(aggValues.containsKey(MIN)) {
@@ -113,8 +109,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
     private void calculateMax(List<T> elementsToAgg) {
-        OptionalDouble maxMap = getDoubleStreamFromElementsToAgg(elementsToAgg, FieldNamesInsideHistorianService.CHUNK_MAX)
-                .max();
+        OptionalDouble maxMap = calculMax(elementsToAgg);
         if (maxMap.isPresent()) {
             double max = maxMap.getAsDouble();
             if(aggValues.containsKey(MAX)) {
@@ -125,7 +120,7 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
     private void calculateCount(List<T> elementsToAgg) {
-        double count = getDoubleCount(elementsToAgg);
+        long count = getCount(elementsToAgg);
         if(aggValues.containsKey(COUNT)) {
             double currentCount = aggValues.get(COUNT).doubleValue();
             Number newCount =  BigDecimal.valueOf(currentCount + count);
@@ -135,6 +130,8 @@ public abstract class AbstractAggsCalculator<T> implements AggsCalculator<T> {
         }
     }
 
-    protected abstract DoubleStream getDoubleStreamFromElementsToAgg(List<T> elementsToAgg, String field);
-    protected abstract double getDoubleCount(List<T> elementsToAgg);
+    protected abstract double calculSum(List<T> elementsToAgg);
+    protected abstract OptionalDouble calculMin(List<T> elementsToAgg);
+    protected abstract OptionalDouble calculMax(List<T> elementsToAgg);
+    protected abstract long getCount(List<T> elementsToAgg);
 }

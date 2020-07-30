@@ -1,10 +1,15 @@
 package com.hurence.webapiservice.historian.handler;
 
 import com.hurence.historian.modele.HistorianConf;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.stream.ChunkStream;
+import com.hurence.historian.mymodele.Chunk;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.historian.impl.*;
+import com.hurence.webapiservice.historian.models.MetricSizeInfo;
+import com.hurence.webapiservice.historian.models.MetricsSizeInfo;
+import com.hurence.webapiservice.historian.models.MetricsSizeInfoImpl;
+import com.hurence.webapiservice.historian.SolrHistorianConf;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.*;
@@ -144,7 +149,6 @@ public class GetTimeSeriesHandler {
      *     each string should looks like "(name:A && usine:usine_1 && sensor:sensor_1)"
      *     we filter on metric name and on every tags we get. we use tags of metricOptions and of rootTags.
      *     If there is conflict then tags of metricOptions have priority.
-     * @param rootTags
      * @param metricOptions
      * @return filter query for each metric
      *         each string should looks like :
@@ -226,7 +230,7 @@ public class GetTimeSeriesHandler {
         Tuple tuple = solrStream.read();
         MetricsSizeInfoImpl metricsInfo = new MetricsSizeInfoImpl();
         while (!tuple.EOF) {
-            LOGGER.trace("tuple : {}", tuple.jsonStr());
+            LOGGER.trace("tuple : {}", tuple.jsonStr());//TODO truncate chunk if necessary how ?
             for (MetricRequest request: requests) {
                 if (isTupleMatchingMetricRequest(request, tuple)) {
                     metricsInfo.increaseNumberOfChunksForMetricRequest(request,
@@ -323,7 +327,7 @@ public class GetTimeSeriesHandler {
 
 
     public void requestSolrAndBuildTimeSeries(SolrQuery query, Promise<JsonObject> p, MultiTimeSeriesExtracter timeSeriesExtracter) {
-        try (JsonStream stream = queryStream(query)) {
+        try (ChunkStream stream = queryStream(query)) {
             JsonObject timeseries = extractTimeSeriesThenBuildResponse(stream, timeSeriesExtracter);
             p.complete(timeseries);
         } catch (Exception e) {
@@ -422,16 +426,16 @@ public class GetTimeSeriesHandler {
         return new SamplingConf(algo, bucketSize, maxPoint);
     }
 
-    private JsonObject extractTimeSeriesThenBuildResponse(JsonStream stream, MultiTimeSeriesExtracter timeSeriesExtracter) throws IOException {
+    private JsonObject extractTimeSeriesThenBuildResponse(ChunkStream stream, MultiTimeSeriesExtracter timeSeriesExtracter) throws IOException {
         stream.open();
-        JsonObject chunk = stream.read();
-        while (!chunk.containsKey("EOF") || !chunk.getBoolean("EOF")) {
+        Chunk chunk = stream.read();
+        while (stream.hasNext()) {
             timeSeriesExtracter.addChunk(chunk);
             chunk = stream.read();
         }
         timeSeriesExtracter.flush();
-        LOGGER.debug("read {} chunks in stream", stream.getNumberOfDocRead());
-        LOGGER.debug("extractTimeSeries response metric : {}", chunk.encodePrettily());
+        LOGGER.debug("read {} chunks in stream", stream.getCurrentNumberRead());
+        LOGGER.debug("extractTimeSeries response metric : {}", chunk.toString());
         return buildTimeSeriesResponse(timeSeriesExtracter);
     }
 
@@ -441,7 +445,7 @@ public class GetTimeSeriesHandler {
                 .put(HistorianServiceFields.TIMESERIES, timeSeriesExtracter.getTimeSeries());
     }
 
-    private JsonStream queryStream(SolrQuery query) {
+    private ChunkStream queryStream(SolrQuery query) {
         StringBuilder exprBuilder = new StringBuilder("search(").append(solrHistorianConf.chunkCollection).append(",")
                 .append("q=\"").append(query.getQuery()).append("\",");
         if (query.getFilterQueries() != null) {
@@ -463,7 +467,7 @@ public class GetTimeSeriesHandler {
         TupleStream solrStream = new SolrStream(solrHistorianConf.streamEndPoint, paramsLoc);
         StreamContext context = new StreamContext();
         solrStream.setStreamContext(context);
-        return JsonStreamSolrStream.forVersion(solrHistorianConf.schemaVersion, solrStream);
+        return ChunkStream.fromVersionAndSolrStream(solrHistorianConf.schemaVersion, solrStream);
     }
 
     private static class Request {

@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.timeseries;
 
+import com.hurence.historian.mymodele.Chunk;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.timeseries.modele.PointImpl;
@@ -32,32 +33,32 @@ public class TimeSeriesExtracterImplTest {
     private long MIDDLE_CHUNK_2 = 1477895624870L;
     private long END_CHUNK_2 = 1477895624871L;
 
-    JsonObject getChunk1() {
+    Chunk getChunk1() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new PointImpl( START_CHUNK_1, 1),
                 new PointImpl( MIDDLE_CHUNK_1, 2),
                 new PointImpl( END_CHUNK_1, 3)
         ));
-        return chunk.toJson("id1");
+        return chunk.toChunk("id1");
     }
 
 
-    JsonObject getChunk2() {
+    Chunk getChunk2() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new PointImpl( START_CHUNK_2, 4),
                 new PointImpl( MIDDLE_CHUNK_2, 5),
                 new PointImpl( END_CHUNK_2, 6)
         ));
-        return chunk.toJson("id1");
+        return chunk.toChunk("id1");
     }
 
-    JsonObject getConflictingChunk() {
+    Chunk getConflictingChunk() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
                 new PointImpl( MIDDLE_CHUNK_1, 4),
                 new PointImpl( START_CHUNK_2, 5),
                 new PointImpl( MIDDLE_CHUNK_2, 6)
         ));
-        return chunk.toJson("id1");
+        return chunk.toChunk("id1");
     }
 
     @Test

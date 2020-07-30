@@ -1,6 +1,9 @@
 package com.hurence.historian.spark.compactor.job;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
+import com.hurence.historian.modele.solr.ChunkSchemaVersion0;
+import com.hurence.historian.mymodele.Chunk;
+import com.hurence.historian.mymodele.ChunkFromJsonObjectVersion0;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
@@ -123,6 +126,11 @@ public class ChunkModeleVersion0 implements ChunkModele {
         json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN, this.chunk_origin);
         return json;
     }
+
+    public Chunk toChunk(String id) {
+        return new ChunkFromJsonObjectVersion0(toJson(id));
+    }
+
 
     public SolrInputDocument buildSolrDocument(String id) {
         final SolrInputDocument doc = new SolrInputDocument();

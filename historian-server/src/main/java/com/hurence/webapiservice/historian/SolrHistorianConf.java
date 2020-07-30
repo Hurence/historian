@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.historian.impl;
+package com.hurence.webapiservice.historian;
 
 import com.hurence.historian.modele.SchemaVersion;
 import org.apache.solr.client.solrj.SolrClient;

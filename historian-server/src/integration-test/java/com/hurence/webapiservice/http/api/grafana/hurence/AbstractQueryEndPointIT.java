@@ -175,6 +175,7 @@ public abstract class AbstractQueryEndPointIT {
                 "/http/grafana/hurence/query/testNames/objectNameWithoutTags/expectedResponse.json");
     }
 
+
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
         assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);

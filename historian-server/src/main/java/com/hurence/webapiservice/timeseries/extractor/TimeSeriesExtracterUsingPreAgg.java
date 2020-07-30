@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.historian.modele.FieldNamesInsideHistorianService;
+import com.hurence.historian.mymodele.Chunk;
 import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -29,7 +30,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
     }
 
     @Override
-    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
+    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks) {
         List<PointImpl> sampledPoint = extractPoints(chunks);
         this.sampledPoints.addAll(sampledPoint);
         aggsCalculator.updateAggs(chunks);
@@ -40,21 +41,21 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<PointImpl> extractPoints(List<JsonObject> chunks) {
-        List<List<JsonObject>> groupedChunks = groupChunks(chunks, this.samplingConf.getBucketSize());
+    private List<PointImpl> extractPoints(List<Chunk> chunks) {
+        List<List<Chunk>> groupedChunks = groupChunks(chunks, this.samplingConf.getBucketSize());
         return groupedChunks.stream()
                 .map(this::sampleChunksIntoOneAggPoint)
                 .sorted(Comparator.comparing(PointImpl::getTimestamp))
                 .collect(Collectors.toList());
     }
 
-    private List<List<JsonObject>> groupChunks(List<JsonObject> chunks, int bucketSize) {
-        List<List<JsonObject>> groupedChunks = new ArrayList<>();
+    private List<List<Chunk>> groupChunks(List<Chunk> chunks, int bucketSize) {
+        List<List<Chunk>> groupedChunks = new ArrayList<>();
         int currentPointNumber = 0;
-        List<JsonObject> bucketOfChunks = new ArrayList<>();
-        for (JsonObject chunk: chunks) {
+        List<Chunk> bucketOfChunks = new ArrayList<>();
+        for (Chunk chunk: chunks) {
             bucketOfChunks.add(chunk);
-            currentPointNumber += chunk.getInteger(FieldNamesInsideHistorianService.CHUNK_COUNT);
+            currentPointNumber += chunk.getCount();
             if (currentPointNumber >= bucketSize) {
                 groupedChunks.add(bucketOfChunks);
                 bucketOfChunks = new ArrayList<>();
@@ -66,22 +67,22 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return groupedChunks;
     }
 
-    private PointImpl sampleChunksIntoOneAggPoint(List<JsonObject> chunks) {
+    private PointImpl sampleChunksIntoOneAggPoint(List<Chunk> chunks) {
         if (chunks.isEmpty())
             throw new IllegalArgumentException("chunks can not be empty !");
-        LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0).encodePrettily());
+        LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0));
         long timestamp = chunks.stream()
-                .mapToLong(chunk -> chunk.getLong(FieldNamesInsideHistorianService.CHUNK_START))
+                .mapToLong(Chunk::getStart)
                 .findFirst()
                 .getAsLong();
         double aggValue;
         switch (samplingConf.getAlgo()) {
             case AVERAGE:
                 double sum = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_SUM))
+                        .mapToDouble(Chunk::getSum)
                         .sum();
                 long numberOfPoint = chunks.stream()
-                        .mapToLong(chunk -> chunk.getLong(FieldNamesInsideHistorianService.CHUNK_COUNT))
+                        .mapToLong(Chunk::getCount)
                         .sum();
                 aggValue = BigDecimal.valueOf(sum)
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
@@ -89,19 +90,19 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 break;
             case FIRST:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_FIRST))
+                        .mapToDouble(Chunk::getFirst)
                         .findFirst()
                         .getAsDouble();
                 break;
             case MIN:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_MIN))
+                        .mapToDouble(Chunk::getMin)
                         .min()
                         .getAsDouble();
                 break;
             case MAX:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_MAX))
+                        .mapToDouble(Chunk::getMax)
                         .max()
                         .getAsDouble();
                 break;

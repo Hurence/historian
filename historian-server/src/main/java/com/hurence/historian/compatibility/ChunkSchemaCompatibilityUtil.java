@@ -1,9 +1,8 @@
-package com.hurence.webapiservice.historian.compatibility;
+package com.hurence.historian.compatibility;
 
 import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;

@@ -11,6 +11,15 @@
 
     <artifactId>historian-resources</artifactId>
 
+    <dependencies>
+        <!--        VERTX-->
+        <dependency>
+            <groupId>io.vertx</groupId>
+            <artifactId>vertx-core</artifactId>
+            <version>${vertx.version}</version>
+        </dependency>
+    </dependencies>
+
     <build>
         <plugins>
             <plugin>

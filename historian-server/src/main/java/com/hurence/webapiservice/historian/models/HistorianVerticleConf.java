@@ -1,7 +1,7 @@
-package com.hurence.webapiservice.historian;
+package com.hurence.webapiservice.historian.models;
 
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
+import com.hurence.webapiservice.historian.SolrHistorianConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;

@@ -1,6 +1,7 @@
-package com.hurence.webapiservice.historian.impl;
+package com.hurence.historian.modele.stream.impl;
 
-import com.hurence.webapiservice.historian.compatibility.JsonStreamSolrStreamSchemaVersion0;
+import com.hurence.historian.modele.stream.JsonStream;
+import com.hurence.historian.compatibility.JsonSolrStreamSchemaVersion0;
 import com.hurence.historian.modele.SchemaVersion;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.io.Tuple;
@@ -8,14 +9,14 @@ import org.apache.solr.client.solrj.io.stream.TupleStream;
 
 import java.io.IOException;
 
-public class JsonStreamSolrStream implements JsonStream {
+public class JsonSolrStream implements JsonStream {
 
-    public static JsonStreamSolrStream forVersion(SchemaVersion version, TupleStream stream) {
+    public static JsonSolrStream forVersion(SchemaVersion version, TupleStream stream) {
         switch (version) {
             case EVOA0:
-                return new JsonStreamSolrStreamSchemaVersion0(stream);
+                return new JsonSolrStreamSchemaVersion0(new SolrStream(stream));
             case VERSION_0:
-                return new JsonStreamSolrStream(stream);
+                return new JsonSolrStream(new SolrStream(stream));
             default:
                 throw new IllegalArgumentException(String.format(
                         "schema version %s for chunks is not yet supported or no longer supported",
@@ -23,10 +24,9 @@ public class JsonStreamSolrStream implements JsonStream {
         }
     }
 
-    private TupleStream stream;
-    private long counter = 0L;
+    private SolrStream stream;
 
-    public JsonStreamSolrStream(TupleStream stream) {
+    public JsonSolrStream(SolrStream stream) {
         this.stream = stream;
     }
 
@@ -38,13 +38,17 @@ public class JsonStreamSolrStream implements JsonStream {
     @Override
     public JsonObject read() throws IOException {
         Tuple tuple = stream.read();
-        counter++;
         return toJson(tuple);
     }
 
     @Override
-    public long getNumberOfDocRead() {
-        return counter;
+    public long getCurrentNumberRead() {
+        return stream.getCurrentNumberRead();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return stream.hasNext();
     }
 
     protected JsonObject toJson(Tuple tuple) {

@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.historian.util;
+package com.hurence.webapiservice.historian.models;
 
 import io.vertx.core.json.JsonObject;
 

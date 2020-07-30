@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.historian.impl;
+package com.hurence.webapiservice.historian.models;
 
 import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
 

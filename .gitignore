@@ -49,5 +49,11 @@ integration-tests/src/main/resources/shared-resources/create-historian-chunk-col
 integration-tests/src/main/resources/shared-resources/create-historian-collection.sh
 integration-tests/src/main/resources/shared-resources/create-historian-report-collection.sh
 integration-tests/src/main/resources/shared-resources/modify-collection-schema.sh
+integration-tests/src/main/resources/shared-resources/delete_collection.sh
+integration-tests/src/main/resources/shared-resources/install.sh
+integration-tests/src/main/resources/shared-resources/remove_collection_and_config.sh
+integration-tests/src/main/resources/shared-resources/solr-util.sh
+integration-tests/src/main/resources/shared-resources/test_historian_api_release.sh
+integration-tests/src/main/resources/shared-resources/uninstall.sh
 loader/dependency-tree-before
 loader/dependency-tree-now
