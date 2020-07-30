@@ -59,7 +59,7 @@ public class SerializerCompatibilityTest {
                     }
                 })
                 .collect(Collectors.toList());
-        byte[] compressedOlgAlgo = ProtoBufTimeSeriesSerializer.to(expectedPoints);
+        byte[] compressedOlgAlgo = ProtoBufTimeSeriesCurrentSerializer.to(expectedPoints);
         long start = expectedPoints.get(0).getTimestamp();
         long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
         List<Point> uncompressedPoints = ProtoBufTimeSeriesCurrentSerializer.from(
