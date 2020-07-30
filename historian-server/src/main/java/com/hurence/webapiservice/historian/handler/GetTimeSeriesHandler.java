@@ -120,10 +120,8 @@ public class GetTimeSeriesHandler {
     }
 
     private void buildFilters(Request request, SolrQuery query) {
-        Map<String, String> rootTags = request.getRootTags();
-        //TODO Simplify : Here rootTags is not needed as merge is already done in getMetricRequestsWithFinalTags
         List<MetricRequest> metricOptions = request.getMetricRequestsWithFinalTags();
-        List<String> metricFilters = buildFilterForEachMetric(rootTags, metricOptions);
+        List<String> metricFilters = buildFilterForEachMetric(metricOptions);
         String finalFilter = buildFinalFilterQuery(metricFilters);
         query.addFilterQuery(finalFilter);
     }
@@ -156,11 +154,10 @@ public class GetTimeSeriesHandler {
      *
      *
      */
-    private List<String> buildFilterForEachMetric(Map<String, String> rootTags, List<MetricRequest> metricOptions) {
+    private List<String> buildFilterForEachMetric(List<MetricRequest> metricOptions) {
         List<String> finalStringList = new ArrayList<>();
         metricOptions.forEach(metricRequest -> {
             Map<String,String> finalTagsForMetric = new HashMap<>();
-            rootTags.forEach(finalTagsForMetric::put);
             metricRequest.getTags().forEach(finalTagsForMetric::put);
             List<String> tagsFilter = new ArrayList<>();
             finalTagsForMetric.forEach((key, value) -> {
