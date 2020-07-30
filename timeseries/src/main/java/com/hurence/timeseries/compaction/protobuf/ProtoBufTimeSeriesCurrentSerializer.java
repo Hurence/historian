@@ -16,6 +16,7 @@
 package com.hurence.timeseries.compaction.protobuf;
 
 
+import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.modele.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,8 +49,8 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
-        return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
+    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, byte[] chunkOfPoints) throws IOException, IllegalArgumentException {
+        return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd, chunkOfPoints);
     }
     /**
      * return the uncompressed points (compressed byte array)
@@ -62,13 +63,15 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param from              including points from
      * @param to                including points to
      */
-    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd
+            , long from, long to, byte[] chunkOfPoints) throws IOException, IllegalArgumentException {
         try {
             return ProtoBufTimeSeriesWithQualitySerializer.from(decompressedBytes, timeSeriesStart, timeSeriesEnd, from, to);
         } catch (IllegalArgumentException ex) {
-            LOGGER.trace("could not uncompress using algo qith quality will try with old algorithm");
-            decompressedBytes.reset();
-            return ProtoBufTimeSeriesSerializer.from(decompressedBytes, timeSeriesStart, timeSeriesEnd, from, to);
+            LOGGER.trace("could not uncompress using algo with quality will try with old algorithm");
+            /*decompressedBytes.reset();*/
+            InputStream newDecompressedBytes = Compression.decompressToStream(chunkOfPoints);
+            return ProtoBufTimeSeriesSerializer.from(newDecompressedBytes, timeSeriesStart, timeSeriesEnd, from, to);
         }
     }
 

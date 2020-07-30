@@ -77,8 +77,18 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 .mapToLong(chunk -> chunk.getLong(CHUNK_START_FIELD))
                 .findFirst()
                 .getAsLong();
+        double aggValue = getAggValue(chunks);
+        Float quality = getQualityValue(chunks);
+        if (returnQuality && !quality.isNaN())
+            return new PointWithQualityImpl(timestamp, aggValue, quality);
+        else if (returnQuality)
+            return new PointWithQualityImpl(timestamp, aggValue, Point.DEFAULT_QUALITY);
+        else
+            return new PointImpl(timestamp, aggValue);
+    }
+
+    private double getAggValue(List<JsonObject> chunks) {
         double aggValue;
-        float quality = 0;
         switch (samplingConf.getAlgo()) {
             case AVERAGE:
                 double sum = chunks.stream()
@@ -90,20 +100,10 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 aggValue = BigDecimal.valueOf(sum)
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
                         .doubleValue();
-                float qualitySum = (float) chunks.stream()
-                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_SUM_FIELD))
-                        .sum();
-                quality = BigDecimal.valueOf(qualitySum)
-                        .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
-                        .floatValue();
                 break;
             case FIRST:
                 aggValue = chunks.stream()
                         .mapToDouble(chunk -> chunk.getDouble(CHUNK_FIRST_VALUE_FIELD))
-                        .findFirst()
-                        .getAsDouble();
-                quality = (float) chunks.stream()
-                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_FIRST_FIELD))
                         .findFirst()
                         .getAsDouble();
                 break;
@@ -112,18 +112,10 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                         .mapToDouble(chunk -> chunk.getDouble(CHUNK_MIN_FIELD))
                         .min()
                         .getAsDouble();
-                quality = (float) chunks.stream()
-                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MIN_FIELD))
-                        .min()
-                        .getAsDouble();
                 break;
             case MAX:
                 aggValue = chunks.stream()
                         .mapToDouble(chunk -> chunk.getDouble(CHUNK_MAX_FIELD))
-                        .max()
-                        .getAsDouble();
-                quality = (float) chunks.stream()
-                        .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MAX_FIELD))
                         .max()
                         .getAsDouble();
                 break;
@@ -134,9 +126,64 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             default:
                 throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
         }
-        if (returnQuality)
-            return new PointWithQualityImpl(timestamp, aggValue, quality);
-        else
-            return new PointImpl(timestamp, aggValue);
+        return aggValue;
     }
+    private Float getQualityValue(List<JsonObject> chunks) {
+        Float quality;
+        switch (samplingConf.getAlgo()) {
+            case AVERAGE:
+                try {
+                    long numberOfPoint = chunks.stream()
+                            .mapToLong(chunk -> chunk.getLong(CHUNK_COUNT_FIELD))
+                            .sum();
+                    float qualitySum = (float) chunks.stream()
+                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_SUM_FIELD))
+                            .sum();
+                    quality = BigDecimal.valueOf(qualitySum)
+                            .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
+                            .floatValue();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            case FIRST:
+                try {
+                    quality = (float) chunks.stream()
+                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_FIRST_FIELD))
+                            .findFirst()
+                            .getAsDouble();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            case MIN:
+                try {
+                    quality = (float) chunks.stream()
+                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MIN_FIELD))
+                            .min()
+                            .getAsDouble();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            case MAX:
+                try {
+                    quality = (float) chunks.stream()
+                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MAX_FIELD))
+                            .max()
+                            .getAsDouble();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            case MODE_MEDIAN:
+            case LTTB:
+            case MIN_MAX:
+            case NONE:
+            default:
+                throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
+        }
+        return quality;
+    }
+
 }

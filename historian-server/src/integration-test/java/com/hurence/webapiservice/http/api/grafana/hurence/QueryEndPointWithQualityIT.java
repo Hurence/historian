@@ -5,6 +5,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.Version1SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.historian.solr.util.SolrITHelper;
+import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.timeseries.modele.PointWithQualityImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
@@ -58,14 +59,14 @@ public class QueryEndPointWithQualityIT {
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new Version1SolrInjectorMultipleMetricSpecificPoints(
-                Arrays.asList("temp_a", "temp_b", "temp_c"),
+                Arrays.asList("temp_a", "temp_b", "temp_c", "mixed1", "mixed2", "non_mixed"),
                 Arrays.asList(
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 622, 0.9f),
                                 new PointWithQualityImpl( 1477916224866L, -3, 0.8f),
                                 new PointWithQualityImpl( 1477917224866L, 365, 0.7f),
                                 new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
-                                new PointWithQualityImpl( 1477948224866L, 14, 0.7f),
+                                new PointWithQualityImpl( 1477948224866L, 14, 0.8f),
                                 new PointWithQualityImpl( 1477957224866L, 86, 0.7f)
                         ),
                         Arrays.asList(
@@ -83,6 +84,30 @@ public class QueryEndPointWithQualityIT {
                                 new PointWithQualityImpl( 1477931224866L, 125, 0.8f),
                                 new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
                                 new PointWithQualityImpl( 1477985224866L, 7, 0.8f)
+                        ),
+                        Arrays.asList(
+                                new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
+                                new PointImpl( 1477917224866L, 767),
+                                new PointWithQualityImpl( 1477927624866L, 57, 0.7f),
+                                new PointWithQualityImpl( 1477931224866L, 125, 0.6f),
+                                new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
+                                new PointImpl( 1477985224866L, 7)
+                        ),
+                        Arrays.asList(
+                                new PointImpl( 1477895624866L, 622),
+                                new PointWithQualityImpl( 1477916224866L, -3, 0.4f),
+                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),
+                                new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
+                                new PointImpl( 1477948224866L, 14),
+                                new PointWithQualityImpl( 1477957224866L, 86, 0.2f)
+                        ),
+                        Arrays.asList(
+                                new PointWithQualityImpl( 1477895624866L, 622, 0.8f),
+                                new PointWithQualityImpl( 1477916224866L, -3, 0.4f),
+                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),
+                                new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
+                                new PointWithQualityImpl( 1477948224866L, 14, 0.8f),
+                                new PointWithQualityImpl( 1477957224866L, 86, 0.2f)
                         )
                 ));
         injector.injectChunks(client);
@@ -112,8 +137,8 @@ public class QueryEndPointWithQualityIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryWithQualityMinAndReturningAllPoints(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/testWithQuality/test4/request.json",
-                "/http/grafana/hurence/query/testWithQuality/test4/expectedResponse.json");
+                "/http/grafana/hurence/query/testWithQuality/test2/request.json",
+                "/http/grafana/hurence/query/testWithQuality/test2/expectedResponse.json");
     }
 
     @Test
@@ -130,6 +155,38 @@ public class QueryEndPointWithQualityIT {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/testWithQuality/test4/request.json",
                 "/http/grafana/hurence/query/testWithQuality/test4/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithQualityAvgAndReturningAllMixedPoints(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/testWithQuality/test5/request.json",
+                "/http/grafana/hurence/query/testWithQuality/test5/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithQualityMinAndReturningAllMixedPoints(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/testWithQuality/test6/request.json",
+                "/http/grafana/hurence/query/testWithQuality/test6/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithQualityMaxAndReturningAllMixedPoints(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/testWithQuality/test7/request.json",
+                "/http/grafana/hurence/query/testWithQuality/test7/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithoutQualityAndReturningMixedPoints(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/testWithQuality/test8/request.json",
+                "/http/grafana/hurence/query/testWithQuality/test8/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,

@@ -33,6 +33,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
+
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class QueryEndPointFocusOnFilterIT {
 
@@ -88,10 +90,10 @@ public class QueryEndPointFocusOnFilterIT {
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.SIMPLE_JSON_GRAFANA_QUERY_API_ENDPOINT);
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.GRAFANA,
-                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.SIMPLE_JSON_PLUGIN.toString()));
-        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, httpConf).subscribe(id -> {
+        JsonObject historianConf = new JsonObject()
+                .put(CONFIG_SCHEMA_VERSION,
+                        SchemaVersion.VERSION_0.toString());
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));

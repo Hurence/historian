@@ -95,7 +95,7 @@ public class HistorianVerticleConf {
         historianConf.sleepDurationBetweenTry = slrConfig.getLong(CONFIG_SOLR_SLEEP_BETWEEEN_TRY, 10000L);
         historianConf.numberOfRetryToConnect = slrConfig.getInteger(CONFIG_SOLR_NUMBER_CONNECTION_ATTEMPT, 3);
         historianConf.maxNumberOfTargetReturned = maxNumberOfTargetReturned;
-        String schemaVersion = conf.getString(CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
+        String schemaVersion = conf.getString(CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_1.toString());
         historianConf.schemaVersion = SchemaVersion.valueOf(schemaVersion);
         historianConf.client = createSolrClient();
         return historianConf;

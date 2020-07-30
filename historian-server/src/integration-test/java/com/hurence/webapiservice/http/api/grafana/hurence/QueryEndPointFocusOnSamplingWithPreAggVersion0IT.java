@@ -50,12 +50,9 @@ public class QueryEndPointFocusOnSamplingWithPreAggVersion0IT extends AbstractQu
     public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         SolrITHelper.addFieldToChunkSchema(container, "sensor");
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.GRAFANA,
-                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
         JsonObject historianConf = buildHistorianConf();
         HttpWithHistorianSolrITHelper
-                .deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
+                .deployHttpAndCustomHistorianVerticle(container, vertx, historianConf)
                 .subscribe(id -> {
                             context.completeNow();
                         },
@@ -67,7 +64,8 @@ public class QueryEndPointFocusOnSamplingWithPreAggVersion0IT extends AbstractQu
                     //10 so if more than 5 chunk (of size 2) returned we should sample
                     //with pre aggs
                     .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_POINT, 10L)
-                    .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L);
+                    .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L)
+                .put(HistorianVerticle.CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
     }
 
     public static SolrInjector buildInjector() {

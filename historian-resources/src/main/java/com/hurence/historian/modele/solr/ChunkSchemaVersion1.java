@@ -11,7 +11,7 @@ public class ChunkSchemaVersion1 extends ChunkSchemaVersion0 implements Schema{
 
     private Collection<SolrField> fields = new ArrayList<>(super.getFields());
 
-    public ChunkSchemaVersion1(){ // TODO
+    public ChunkSchemaVersion1(){ // TODO check this correct or not !
         fields.addAll(Arrays.asList(
                 new SolrField.Builder()
                         .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_AVG)

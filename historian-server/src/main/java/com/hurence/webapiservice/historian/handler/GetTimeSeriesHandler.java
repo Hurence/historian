@@ -110,8 +110,10 @@ public class GetTimeSeriesHandler {
 
     private void addQualityFields(SolrQuery query, Request request) {
         request.getMetricRequestsWithFinalTagsAndFinalQualities().forEach(
-                metricRequest -> query.addField(metricRequest.getQuality().getChunkQualityField())
-        );
+                metricRequest -> {
+                    if (!metricRequest.getQuality().getQualityAgg().equals(QualityAgg.NONE))
+                        query.addField(metricRequest.getQuality().getChunkQualityField());
+                });
     }
 
     private void addAllTagsAsFields(List<MetricRequest> metricRequests, SolrQuery query) {
@@ -163,7 +165,7 @@ public class GetTimeSeriesHandler {
                 queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", "name:\""+metricRequest.getName()+"\" AND ", "")));
             else
                 queryForEachMetricBuilder.append("name:\"").append(metricRequest.getName()).append("\"");
-            if (metricRequest.getQuality() != null) {
+            if (metricRequest.getQuality().getQualityAgg() != QualityAgg.NONE) {
                 Float qualityValue = metricRequest.getQuality().getQualityValue();
                 String qualityField = metricRequest.getQuality().getChunkQualityField();
                 queryForEachMetricBuilder.append(" AND ").append(qualityField).append(":[").append(qualityValue).append(" TO *]"); // TODO isn't TO 1 better ?
@@ -341,9 +343,36 @@ public class GetTimeSeriesHandler {
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         Set<SamplingAlgorithm> samplingAlgos = determineSamplingAlgoThatWillBeUsed(requestedSamplingConf, metricsInfo);
         addNecessaryFieldToQuery(query, samplingAlgos);
+        addNecessaryQualityFieldToQuery(request, query, samplingAlgos);
     }
 
 
+    private void addNecessaryQualityFieldToQuery(Request request, SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
+        if(!request.params.getString(QUALITY_AGG, QualityAgg.NONE.toString()).equals(QualityAgg.NONE.toString()))
+            samplingAlgos.forEach(algo -> {
+                switch (algo) {
+                    case NONE:
+                        break;
+                    case FIRST:
+                        query.addField(CHUNK_QUALITY_FIRST_FIELD);
+                        break;
+                    case AVERAGE:
+                        query.addField(CHUNK_QUALITY_AVG_FIELD);
+                        break;
+                    case MIN:
+                        query.addField(CHUNK_QUALITY_MIN_FIELD);
+                        break;
+                    case MAX:
+                        query.addField(CHUNK_QUALITY_MAX_FIELD);
+                        break;
+                    case MODE_MEDIAN:
+                    case LTTB:
+                    case MIN_MAX:
+                    default:
+                        throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
+                }
+            });
+    }
 
 
     private void addNecessaryFieldToQuery(SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
@@ -354,19 +383,15 @@ public class GetTimeSeriesHandler {
                     break;
                 case FIRST:
                     query.addField(CHUNK_FIRST_VALUE_FIELD);
-                    query.addField(CHUNK_QUALITY_FIRST_FIELD);
                     break;
                 case AVERAGE:
                     query.addField(CHUNK_SUM_FIELD);
-                    query.addField(CHUNK_QUALITY_AVG_FIELD);
                     break;
                 case MIN:
                     query.addField(CHUNK_MIN_FIELD);
-                    query.addField(CHUNK_QUALITY_MIN_FIELD);
                     break;
                 case MAX:
                     query.addField(CHUNK_MAX_FIELD);
-                    query.addField(CHUNK_QUALITY_MAX_FIELD);
                     break;
                 case MODE_MEDIAN:
                 case LTTB:
@@ -500,7 +525,7 @@ public class GetTimeSeriesHandler {
         }
 
         public boolean getQualityReturn() {
-            return params.getBoolean(QUALITY_RETURN);
+            return params.getBoolean(QUALITY_RETURN, false);
         }
 
         public Integer getMaxTotalChunkToRetrieve() {
@@ -543,7 +568,7 @@ public class GetTimeSeriesHandler {
         }
 
         public QualityConfig getRootQuality() {
-            return new QualityConfig(params.getFloat(QUALITY_VALUE), params.getString(QUALITY_AGG)) ;
+            return new QualityConfig(params.getFloat(QUALITY_VALUE, Float.NaN), params.getString(QUALITY_AGG, QualityAgg.NONE.toString())) ;
         }
 
         public int getMaxPoint() {

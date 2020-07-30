@@ -56,6 +56,8 @@ public class QualityConfig {
     public boolean matchChunk(JsonObject chunk) {
         Float qualityChunk;
         String chunkQualityField = getChunkQualityField();
+        if(chunkQualityField == null)
+            return true;
         try {
             qualityChunk = chunk.getFloat(chunkQualityField);
         } catch (Exception e) {
@@ -76,6 +78,9 @@ public class QualityConfig {
                 break;
             case MAX:
                 qualityAggName = CHUNK_QUALITY_MAX_FIELD; //TODO
+                break;
+            case NONE:
+                qualityAggName = null;
                 break;
             default:
                 throw new IllegalStateException("Unsupported quality aggregation: " + qualityAgg);

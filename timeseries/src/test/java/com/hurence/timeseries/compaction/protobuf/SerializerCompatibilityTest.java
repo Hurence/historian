@@ -64,7 +64,7 @@ public class SerializerCompatibilityTest {
         long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
         List<Point> uncompressedPoints = ProtoBufTimeSeriesCurrentSerializer.from(
                 new ByteArrayInputStream(compressedOlgAlgo),
-                start, end
+                start, end, compressedOlgAlgo
         );
         assertEquals(expectedPoints, uncompressedPoints);
     }
