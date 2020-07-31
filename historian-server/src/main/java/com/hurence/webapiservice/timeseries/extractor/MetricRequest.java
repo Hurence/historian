@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.mymodele.Chunk;
+import com.hurence.timeseries.modele.chunk.Chunk;
 
 import java.util.Map;
 import java.util.Objects;

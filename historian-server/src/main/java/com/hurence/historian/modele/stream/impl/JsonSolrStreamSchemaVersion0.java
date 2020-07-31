@@ -1,7 +1,5 @@
-package com.hurence.historian.compatibility;
+package com.hurence.historian.modele.stream.impl;
 
-import com.hurence.historian.modele.stream.impl.JsonSolrStream;
-import com.hurence.historian.modele.stream.impl.SolrStream;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.client.solrj.io.Tuple;
 

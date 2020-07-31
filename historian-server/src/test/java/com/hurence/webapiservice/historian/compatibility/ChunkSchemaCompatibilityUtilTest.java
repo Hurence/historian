@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.compatibility;
 
-import com.hurence.historian.compatibility.ChunkSchemaCompatibilityUtil;
+import com.hurence.historian.modele.stream.impl.ChunkSchemaCompatibilityUtil;
 import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
 import com.hurence.webapiservice.http.api.grafana.QueryRequestParserTest;

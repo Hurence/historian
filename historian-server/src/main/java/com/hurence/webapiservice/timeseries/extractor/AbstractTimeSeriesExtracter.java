@@ -1,9 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
-import com.hurence.historian.mymodele.Chunk;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

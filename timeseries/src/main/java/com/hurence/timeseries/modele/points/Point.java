@@ -1,4 +1,4 @@
-package com.hurence.timeseries.modele;
+package com.hurence.timeseries.modele.points;
 
 import java.io.Serializable;
 

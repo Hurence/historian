@@ -1,7 +1,7 @@
 package com.hurence.historian.modele.stream.impl;
 
 import com.hurence.historian.modele.stream.ChunkStream;
-import com.hurence.historian.mymodele.Chunk;
+import com.hurence.timeseries.modele.chunk.Chunk;
 import io.vertx.core.json.JsonObject;
 
 import java.io.IOException;

@@ -4,7 +4,7 @@ import com.hurence.historian.modele.HistorianConf;
 import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
-import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
+import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunkVersion0;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -70,8 +70,8 @@ public class AddTimeSeriesHandler {
     }
 
     private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
-        JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk(chunkOrigin, getHistorianFields());
-        SolrInputDocument doc = jsonObjectToChunk.chunkIntoSolrDocument(timeserie);
+        JsonObjectToChunkVersion0 jsonObjectToChunkVersion0 = new JsonObjectToChunkVersion0(chunkOrigin, getHistorianFields());
+        SolrInputDocument doc = jsonObjectToChunkVersion0.chunkIntoSolrDocument(timeserie);
         return doc;
     }
 }

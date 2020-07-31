@@ -1,4 +1,4 @@
-package com.hurence.historian.compatibility;
+package com.hurence.historian.modele.stream.impl;
 
 import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;

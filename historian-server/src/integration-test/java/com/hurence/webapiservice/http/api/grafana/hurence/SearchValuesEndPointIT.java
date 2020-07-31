@@ -4,7 +4,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;

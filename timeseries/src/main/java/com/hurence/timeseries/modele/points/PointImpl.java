@@ -1,4 +1,4 @@
-package com.hurence.timeseries.modele;
+package com.hurence.timeseries.modele.points;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;

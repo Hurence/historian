@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
-import com.hurence.historian.mymodele.Chunk;
+import com.hurence.timeseries.modele.chunk.Chunk;
 import com.hurence.webapiservice.modele.AGG;
 
 import java.util.List;

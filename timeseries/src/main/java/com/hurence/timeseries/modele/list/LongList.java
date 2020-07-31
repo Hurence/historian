@@ -13,38 +13,42 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.modele;
+package com.hurence.timeseries.modele.list;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
+import java.io.Serializable;
 import java.util.Arrays;
+import java.util.stream.LongStream;
 
-import static com.hurence.timeseries.modele.ListUtil.*;
+import static com.hurence.timeseries.modele.list.ListUtil.*;
 
 
 /**
- * Implementation of a list with primitive ints.
+ * The long list implementation contains primitive longs and acts like an array list.
+ * Parts are copied from array list.
  *
  * @author f.lautenschlager
  */
-public class IntList {
+public class LongList implements Serializable {
+
+    private static final long serialVersionUID = -8791366160708918410L;
 
     /**
      * Shared empty array instance used for empty instances.
      */
-    private static final int[] EMPTY_ELEMENT_DATA = {};
+    private static final long[] EMPTY_ELEMENT_DATA = {};
 
     /**
      * Shared empty array instance used for default sized empty instances. We
      * distinguish this from EMPTY_ELEMENT_DATA to know how much to inflate when
      * first element is added.
      */
-    private static final int[] DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA = {};
+    private static final long[] DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA = {};
 
-
-    private int[] ints;
+    private long[] longs;
     private int size;
 
     /**
@@ -54,23 +58,41 @@ public class IntList {
      * @throws IllegalArgumentException if the specified initial capacity
      *                                  is negative
      */
-    public IntList(int initialCapacity) {
+    public LongList(int initialCapacity) {
         if (initialCapacity > 0) {
-            this.ints = new int[initialCapacity];
+            this.longs = new long[initialCapacity];
         } else if (initialCapacity == 0) {
-            this.ints = EMPTY_ELEMENT_DATA;
+            this.longs = EMPTY_ELEMENT_DATA;
         } else {
-            throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);
+            throw new IllegalArgumentException("Illegal Capacity: " +
+                    initialCapacity);
         }
     }
 
     /**
      * Constructs an empty list with an initial capacity of ten.
      */
-    public IntList() {
-        this.ints = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
+    public LongList() {
+        this.longs = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
     }
 
+    /**
+     * Constructs a long list from the given longs by simple assigning them.
+     *
+     * @param longs the values of the double list.
+     * @param size  the index of the last value in the array.
+     */
+    @SuppressWarnings("all")
+    public LongList(long[] longs, int size) {
+        if (longs == null) {
+            throw new IllegalArgumentException("Illegal initial array 'null'");
+        }
+        if (size < 0) {
+            throw new IllegalArgumentException("Size if negative.");
+        }
+        this.longs = longs;
+        this.size = size;
+    }
 
     /**
      * Returns the number of elements in this list.
@@ -99,7 +121,7 @@ public class IntList {
      * @param o element whose presence in this list is to be tested
      * @return <tt>true</tt> if this list contains the specified element
      */
-    public boolean contains(long o) {
+    public boolean contains(Long o) {
         return indexOf(o) >= 0;
     }
 
@@ -111,12 +133,11 @@ public class IntList {
      * or -1 if there is no such index.
      *
      * @param o the long value
-     * @return the index of the given long element
+     * @return the index of the element or -1
      */
     public int indexOf(long o) {
-
         for (int i = 0; i < size; i++) {
-            if (o == ints[i]) {
+            if (o == longs[i]) {
                 return i;
             }
         }
@@ -131,12 +152,11 @@ public class IntList {
      * or -1 if there is no such index.
      *
      * @param o the long value
-     * @return the last index of the given long element
+     * @return the last index of the element or -1
      */
     public int lastIndexOf(long o) {
-
         for (int i = size - 1; i >= 0; i--) {
-            if (o == ints[i]) {
+            if (o == longs[i]) {
                 return i;
             }
         }
@@ -149,9 +169,9 @@ public class IntList {
      *
      * @return a clone of this <tt>LongList</tt> instance
      */
-    public IntList copy() {
-        IntList v = new IntList(size);
-        v.ints = Arrays.copyOf(ints, size);
+    public LongList copy() {
+        LongList v = new LongList(size);
+        v.longs = Arrays.copyOf(longs, size);
         v.size = size;
         return v;
     }
@@ -170,15 +190,12 @@ public class IntList {
      * @return an array containing all of the elements in this list in
      * proper sequence
      */
-    public int[] toArray() {
-        return Arrays.copyOf(ints, size);
+    public long[] toArray() {
+        return Arrays.copyOf(longs, size);
     }
 
-
-    private void growIfNeeded(int newCapacity) {
-        if (newCapacity != -1) {
-            ints = Arrays.copyOf(ints, newCapacity);
-        }
+    public LongStream toStream() {
+        return Arrays.stream(longs);
     }
 
     /**
@@ -188,9 +205,9 @@ public class IntList {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException
      */
-    public int get(int index) {
+    public long get(int index) {
         rangeCheck(index, size);
-        return ints[index];
+        return longs[index];
     }
 
     /**
@@ -202,11 +219,11 @@ public class IntList {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException
      */
-    public int set(int index, int element) {
+    public long set(int index, long element) {
         rangeCheck(index, size);
 
-        int oldValue = ints[index];
-        ints[index] = element;
+        long oldValue = longs[index];
+        longs[index] = element;
         return oldValue;
     }
 
@@ -216,12 +233,18 @@ public class IntList {
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by Collection#add)
      */
-    public boolean add(int e) {
-        int newCapacity = calculateNewCapacity(ints.length, size + 1);
+    public boolean add(long e) {
+        int newCapacity = calculateNewCapacity(longs.length, size + 1);
         growIfNeeded(newCapacity);
 
-        ints[size++] = e;
+        longs[size++] = e;
         return true;
+    }
+
+    private void growIfNeeded(int newCapacity) {
+        if (newCapacity != -1) {
+            longs = Arrays.copyOf(longs, newCapacity);
+        }
     }
 
     /**
@@ -233,14 +256,14 @@ public class IntList {
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException
      */
-    public void add(int index, int element) {
+    public void add(int index, long element) {
         rangeCheckForAdd(index, size);
 
-        int newCapacity = calculateNewCapacity(ints.length, size + 1);
+        int newCapacity = calculateNewCapacity(longs.length, size + 1);
         growIfNeeded(newCapacity);
 
-        System.arraycopy(ints, index, ints, index + 1, size - index);
-        ints[index] = element;
+        System.arraycopy(longs, index, longs, index + 1, size - index);
+        longs[index] = element;
         size++;
     }
 
@@ -253,16 +276,17 @@ public class IntList {
      * @return the element that was removed from the list
      * @throws IndexOutOfBoundsException
      */
-    public long removeAt(int index) {
+    public long remove(int index) {
         rangeCheck(index, size);
 
-        long oldValue = ints[index];
+        long oldValue = longs[index];
 
         int numMoved = size - index - 1;
         if (numMoved > 0) {
-            System.arraycopy(ints, index + 1, ints, index, numMoved);
+            System.arraycopy(longs, index + 1, longs, index, numMoved);
         }
         --size;
+        //we do not override the value
 
         return oldValue;
     }
@@ -280,10 +304,10 @@ public class IntList {
      * @param o element to be removed from this list, if present
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(int o) {
+    public boolean remove(long o) {
 
         for (int index = 0; index < size; index++) {
-            if (o == ints[index]) {
+            if (o == longs[index]) {
                 fastRemove(index);
                 return true;
             }
@@ -295,9 +319,10 @@ public class IntList {
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
         if (numMoved > 0) {
-            System.arraycopy(ints, index + 1, ints, index, numMoved);
+            System.arraycopy(longs, index + 1, longs, index, numMoved);
         }
         --size;
+        //we do not override the value.
     }
 
     /**
@@ -305,7 +330,7 @@ public class IntList {
      * be empty after this call returns.
      */
     public void clear() {
-        ints = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
+        longs = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
         size = 0;
     }
 
@@ -322,14 +347,31 @@ public class IntList {
      * @return <tt>true</tt> if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null
      */
-    public boolean addAll(IntList c) {
-        int[] a = c.toArray();
+    public boolean addAll(LongList c) {
+        long[] a = c.toArray();
         int numNew = a.length;
-
-        int newCapacity = calculateNewCapacity(ints.length, size + numNew);
+        int newCapacity = calculateNewCapacity(longs.length, size + numNew);
         growIfNeeded(newCapacity);
 
-        System.arraycopy(a, 0, ints, size, numNew);
+        System.arraycopy(a, 0, longs, size, numNew);
+        size += numNew;
+        return numNew != 0;
+    }
+
+    /**
+     * Appends the long[] at the end of this long list.
+     *
+     * @param otherLongs the other long[] that is appended
+     * @return <tt>true</tt> if this list changed as a result of the call
+     * @throws NullPointerException if the specified array is null
+     */
+    public boolean addAll(long[] otherLongs) {
+        int numNew = otherLongs.length;
+
+        int newCapacity = calculateNewCapacity(longs.length, size + numNew);
+        growIfNeeded(newCapacity);
+
+        System.arraycopy(otherLongs, 0, longs, size, numNew);
         size += numNew;
         return numNew != 0;
     }
@@ -349,24 +391,25 @@ public class IntList {
      * @throws IndexOutOfBoundsException
      * @throws NullPointerException      if the specified collection is null
      */
-    public boolean addAll(int index, IntList c) {
+    public boolean addAll(int index, LongList c) {
         rangeCheckForAdd(index, size);
 
-        int[] a = c.toArray();
+        long[] a = c.toArray();
         int numNew = a.length;
 
-        int newCapacity = calculateNewCapacity(ints.length, size + numNew);
+        int newCapacity = calculateNewCapacity(longs.length, size + numNew);
         growIfNeeded(newCapacity);
 
         int numMoved = size - index;
         if (numMoved > 0) {
-            System.arraycopy(ints, index, ints, index + numNew, numMoved);
+            System.arraycopy(longs, index, longs, index + numNew, numMoved);
         }
 
-        System.arraycopy(a, 0, ints, index, numNew);
+        System.arraycopy(a, 0, longs, index, numNew);
         size += numNew;
         return numNew != 0;
     }
+
 
     /**
      * Removes from this list all of the elements whose index is between
@@ -375,6 +418,8 @@ public class IntList {
      * This call shortens the list by {@code (toIndex - fromIndex)} elements.
      * (If {@code toIndex==fromIndex}, this operation has no effect.)
      *
+     * @param fromIndex from index
+     * @param toIndex   to index
      * @throws IndexOutOfBoundsException if {@code fromIndex} or
      *                                   {@code toIndex} is out of range
      *                                   ({@code fromIndex < 0 ||
@@ -384,25 +429,17 @@ public class IntList {
      */
     public void removeRange(int fromIndex, int toIndex) {
         int numMoved = size - toIndex;
-        System.arraycopy(ints, toIndex, ints, fromIndex, numMoved);
-
+        System.arraycopy(longs, toIndex, longs, fromIndex, numMoved);
         size = size - (toIndex - fromIndex);
     }
 
-
-    /**
-     * Trims the capacity of this <tt>ArrayList</tt> instance to be the
-     * list's current size.  An application can use this operation to minimize
-     * the storage of an <tt>ArrayList</tt> instance.
-     */
-    private int[] trimToSize(int size, int[] elements) {
-        int[] copy = Arrays.copyOf(elements, elements.length);
-        if (size < elements.length) {
-            copy = (size == 0) ? EMPTY_ELEMENT_DATA : Arrays.copyOf(elements, size);
-        }
-        return copy;
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("longs", trimToSize(this.size, longs))
+                .append("size", size)
+                .toString();
     }
-
 
     @Override
     public boolean equals(Object obj) {
@@ -412,14 +449,13 @@ public class IntList {
         if (obj == this) {
             return true;
         }
-
         if (obj.getClass() != getClass()) {
             return false;
         }
-        IntList rhs = (IntList) obj;
+        LongList rhs = (LongList) obj;
 
-        int[] thisTrimmed = trimToSize(this.size, this.ints);
-        int[] otherTrimmed = trimToSize(rhs.size, rhs.ints);
+        long[] thisTrimmed = trimToSize(this.size, this.longs);
+        long[] otherTrimmed = trimToSize(rhs.size, rhs.longs);
 
         return new EqualsBuilder()
                 .append(thisTrimmed, otherTrimmed)
@@ -427,19 +463,24 @@ public class IntList {
                 .isEquals();
     }
 
-    @Override
-    public int hashCode() {
-        return new HashCodeBuilder()
-                .append(ints)
-                .append(size)
-                .toHashCode();
+    /**
+     * Trims the capacity of this <tt>ArrayList</tt> instance to be the
+     * list's current size.  An application can use this operation to minimize
+     * the storage of an <tt>ArrayList</tt> instance.
+     */
+    private long[] trimToSize(int size, long[] elements) {
+        long[] copy = Arrays.copyOf(elements, elements.length);
+        if (size < elements.length) {
+            copy = (size == 0) ? EMPTY_ELEMENT_DATA : Arrays.copyOf(elements, size);
+        }
+        return copy;
     }
 
     @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("ints", trimToSize(this.size, ints))
-                .append("size", size)
-                .toString();
+    public int hashCode() {
+        return new HashCodeBuilder()
+                .append(longs)
+                .append(size)
+                .toHashCode();
     }
 }

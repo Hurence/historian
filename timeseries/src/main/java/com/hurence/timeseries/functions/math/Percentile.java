@@ -16,7 +16,7 @@
 package com.hurence.timeseries.functions.math;
 
 
-import com.hurence.timeseries.modele.DoubleList;
+import com.hurence.timeseries.modele.list.DoubleList;
 
 import java.util.Arrays;
 

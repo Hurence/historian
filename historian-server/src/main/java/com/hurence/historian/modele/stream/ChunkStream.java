@@ -1,7 +1,7 @@
 package com.hurence.historian.modele.stream;
 
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.mymodele.Chunk;
+import com.hurence.timeseries.modele.chunk.Chunk;
 import com.hurence.historian.modele.stream.impl.ChunkSolrStreamVersion0;
 import com.hurence.historian.modele.stream.impl.ChunkSolrStreamVersionEVOA0;
 import com.hurence.historian.modele.stream.impl.JsonSolrStream;

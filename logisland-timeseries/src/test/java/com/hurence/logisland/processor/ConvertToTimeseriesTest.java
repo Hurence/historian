@@ -21,7 +21,7 @@ import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.util.runner.MockRecord;
 import com.hurence.logisland.util.runner.TestRunner;
 import com.hurence.logisland.util.runner.TestRunners;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

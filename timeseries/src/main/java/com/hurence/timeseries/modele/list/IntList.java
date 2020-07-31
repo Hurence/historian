@@ -13,42 +13,38 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.modele;
+package com.hurence.timeseries.modele.list;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
-import java.io.Serializable;
 import java.util.Arrays;
-import java.util.stream.DoubleStream;
-import java.util.stream.LongStream;
 
-import static com.hurence.timeseries.modele.ListUtil.*;
+import static com.hurence.timeseries.modele.list.ListUtil.*;
+
 
 /**
- * Implementation of a list with primitive doubles.
+ * Implementation of a list with primitive ints.
  *
  * @author f.lautenschlager
  */
-public class DoubleList implements Serializable {
-
-    private static final long serialVersionUID = -1275724597860546074L;
+public class IntList {
 
     /**
      * Shared empty array instance used for empty instances.
      */
-    private static final double[] EMPTY_ELEMENT_DATA = {};
+    private static final int[] EMPTY_ELEMENT_DATA = {};
 
     /**
      * Shared empty array instance used for default sized empty instances. We
      * distinguish this from EMPTY_ELEMENT_DATA to know how much to inflate when
      * first element is added.
      */
-    private static final double[] DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA = {};
+    private static final int[] DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA = {};
 
 
-    private double[] doubles;
+    private int[] ints;
     private int size;
 
     /**
@@ -58,11 +54,11 @@ public class DoubleList implements Serializable {
      * @throws IllegalArgumentException if the specified initial capacity
      *                                  is negative
      */
-    public DoubleList(int initialCapacity) {
+    public IntList(int initialCapacity) {
         if (initialCapacity > 0) {
-            this.doubles = new double[initialCapacity];
+            this.ints = new int[initialCapacity];
         } else if (initialCapacity == 0) {
-            this.doubles = EMPTY_ELEMENT_DATA;
+            this.ints = EMPTY_ELEMENT_DATA;
         } else {
             throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);
         }
@@ -71,27 +67,8 @@ public class DoubleList implements Serializable {
     /**
      * Constructs an empty list with an initial capacity of ten.
      */
-    public DoubleList() {
-        this.doubles = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
-    }
-
-    /**
-     * Constructs a double list from the given values by simple assigning them.
-     *
-     * @param longs the values of the double list.
-     * @param size  the index of the last value in the array.
-     */
-    @SuppressWarnings("all")
-    public DoubleList(double[] longs, int size) {
-        if (longs == null) {
-            throw new IllegalArgumentException("Illegal initial array 'null'");
-        }
-        if (size < 0) {
-            throw new IllegalArgumentException("Size if negative.");
-        }
-
-        this.doubles = longs;
-        this.size = size;
+    public IntList() {
+        this.ints = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
     }
 
 
@@ -122,7 +99,7 @@ public class DoubleList implements Serializable {
      * @param o element whose presence in this list is to be tested
      * @return <tt>true</tt> if this list contains the specified element
      */
-    public boolean contains(double o) {
+    public boolean contains(long o) {
         return indexOf(o) >= 0;
     }
 
@@ -133,13 +110,13 @@ public class DoubleList implements Serializable {
      * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
      * or -1 if there is no such index.
      *
-     * @param o the double value
-     * @return the index of the given double element
+     * @param o the long value
+     * @return the index of the given long element
      */
-    public int indexOf(double o) {
+    public int indexOf(long o) {
 
         for (int i = 0; i < size; i++) {
-            if (o == doubles[i]) {
+            if (o == ints[i]) {
                 return i;
             }
         }
@@ -153,13 +130,13 @@ public class DoubleList implements Serializable {
      * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
      * or -1 if there is no such index.
      *
-     * @param o the double value
-     * @return the last index of the given double element
+     * @param o the long value
+     * @return the last index of the given long element
      */
-    public int lastIndexOf(double o) {
+    public int lastIndexOf(long o) {
 
         for (int i = size - 1; i >= 0; i--) {
-            if (o == doubles[i]) {
+            if (o == ints[i]) {
                 return i;
             }
         }
@@ -172,9 +149,9 @@ public class DoubleList implements Serializable {
      *
      * @return a clone of this <tt>LongList</tt> instance
      */
-    public DoubleList copy() {
-        DoubleList v = new DoubleList(size);
-        v.doubles = Arrays.copyOf(doubles, size);
+    public IntList copy() {
+        IntList v = new IntList(size);
+        v.ints = Arrays.copyOf(ints, size);
         v.size = size;
         return v;
     }
@@ -193,17 +170,14 @@ public class DoubleList implements Serializable {
      * @return an array containing all of the elements in this list in
      * proper sequence
      */
-    public double[] toArray() {
-        return Arrays.copyOf(doubles, size);
+    public int[] toArray() {
+        return Arrays.copyOf(ints, size);
     }
 
-    public DoubleStream toStream() {
-        return Arrays.stream(doubles);
-    }
 
     private void growIfNeeded(int newCapacity) {
         if (newCapacity != -1) {
-            doubles = Arrays.copyOf(doubles, newCapacity);
+            ints = Arrays.copyOf(ints, newCapacity);
         }
     }
 
@@ -214,9 +188,9 @@ public class DoubleList implements Serializable {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException
      */
-    public double get(int index) {
+    public int get(int index) {
         rangeCheck(index, size);
-        return doubles[index];
+        return ints[index];
     }
 
     /**
@@ -228,11 +202,11 @@ public class DoubleList implements Serializable {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException
      */
-    public double set(int index, double element) {
+    public int set(int index, int element) {
         rangeCheck(index, size);
 
-        double oldValue = doubles[index];
-        doubles[index] = element;
+        int oldValue = ints[index];
+        ints[index] = element;
         return oldValue;
     }
 
@@ -242,11 +216,11 @@ public class DoubleList implements Serializable {
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by Collection#add)
      */
-    public boolean add(double e) {
-        int newCapacity = calculateNewCapacity(doubles.length, size + 1);
+    public boolean add(int e) {
+        int newCapacity = calculateNewCapacity(ints.length, size + 1);
         growIfNeeded(newCapacity);
 
-        doubles[size++] = e;
+        ints[size++] = e;
         return true;
     }
 
@@ -259,14 +233,14 @@ public class DoubleList implements Serializable {
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException
      */
-    public void add(int index, double element) {
+    public void add(int index, int element) {
         rangeCheckForAdd(index, size);
 
-        int newCapacity = calculateNewCapacity(doubles.length, size + 1);
+        int newCapacity = calculateNewCapacity(ints.length, size + 1);
         growIfNeeded(newCapacity);
 
-        System.arraycopy(doubles, index, doubles, index + 1, size - index);
-        doubles[index] = element;
+        System.arraycopy(ints, index, ints, index + 1, size - index);
+        ints[index] = element;
         size++;
     }
 
@@ -279,14 +253,14 @@ public class DoubleList implements Serializable {
      * @return the element that was removed from the list
      * @throws IndexOutOfBoundsException
      */
-    public double remove(int index) {
+    public long removeAt(int index) {
         rangeCheck(index, size);
 
-        double oldValue = doubles[index];
+        long oldValue = ints[index];
 
         int numMoved = size - index - 1;
         if (numMoved > 0) {
-            System.arraycopy(doubles, index + 1, doubles, index, numMoved);
+            System.arraycopy(ints, index + 1, ints, index, numMoved);
         }
         --size;
 
@@ -306,10 +280,10 @@ public class DoubleList implements Serializable {
      * @param o element to be removed from this list, if present
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(double o) {
+    public boolean remove(int o) {
 
         for (int index = 0; index < size; index++) {
-            if (o == doubles[index]) {
+            if (o == ints[index]) {
                 fastRemove(index);
                 return true;
             }
@@ -321,7 +295,7 @@ public class DoubleList implements Serializable {
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
         if (numMoved > 0) {
-            System.arraycopy(doubles, index + 1, doubles, index, numMoved);
+            System.arraycopy(ints, index + 1, ints, index, numMoved);
         }
         --size;
     }
@@ -331,7 +305,7 @@ public class DoubleList implements Serializable {
      * be empty after this call returns.
      */
     public void clear() {
-        doubles = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
+        ints = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
         size = 0;
     }
 
@@ -348,32 +322,14 @@ public class DoubleList implements Serializable {
      * @return <tt>true</tt> if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null
      */
-    public boolean addAll(DoubleList c) {
-        double[] a = c.toArray();
+    public boolean addAll(IntList c) {
+        int[] a = c.toArray();
         int numNew = a.length;
 
-        int newCapacity = calculateNewCapacity(doubles.length, size + numNew);
+        int newCapacity = calculateNewCapacity(ints.length, size + numNew);
         growIfNeeded(newCapacity);
 
-        System.arraycopy(a, 0, doubles, size, numNew);
-        size += numNew;
-        return numNew != 0;
-    }
-
-    /**
-     * Appends the long[] at the end of this long list.
-     *
-     * @param otherDoubles the other double[] that is appended
-     * @return <tt>true</tt> if this list changed as a result of the call
-     * @throws NullPointerException if the specified array is null
-     */
-    public boolean addAll(double[] otherDoubles) {
-        int numNew = otherDoubles.length;
-
-        int newCapacity = calculateNewCapacity(doubles.length, size + numNew);
-        growIfNeeded(newCapacity);
-
-        System.arraycopy(otherDoubles, 0, doubles, size, numNew);
+        System.arraycopy(a, 0, ints, size, numNew);
         size += numNew;
         return numNew != 0;
     }
@@ -393,21 +349,21 @@ public class DoubleList implements Serializable {
      * @throws IndexOutOfBoundsException
      * @throws NullPointerException      if the specified collection is null
      */
-    public boolean addAll(int index, DoubleList c) {
+    public boolean addAll(int index, IntList c) {
         rangeCheckForAdd(index, size);
 
-        double[] a = c.toArray();
+        int[] a = c.toArray();
         int numNew = a.length;
 
-        int newCapacity = calculateNewCapacity(doubles.length, size + numNew);
+        int newCapacity = calculateNewCapacity(ints.length, size + numNew);
         growIfNeeded(newCapacity);
 
         int numMoved = size - index;
         if (numMoved > 0) {
-            System.arraycopy(doubles, index, doubles, index + numNew, numMoved);
+            System.arraycopy(ints, index, ints, index + numNew, numMoved);
         }
 
-        System.arraycopy(a, 0, doubles, index, numNew);
+        System.arraycopy(a, 0, ints, index, numNew);
         size += numNew;
         return numNew != 0;
     }
@@ -419,8 +375,6 @@ public class DoubleList implements Serializable {
      * This call shortens the list by {@code (toIndex - fromIndex)} elements.
      * (If {@code toIndex==fromIndex}, this operation has no effect.)
      *
-     * @param fromIndex from index
-     * @param toIndex   to index
      * @throws IndexOutOfBoundsException if {@code fromIndex} or
      *                                   {@code toIndex} is out of range
      *                                   ({@code fromIndex < 0 ||
@@ -430,7 +384,7 @@ public class DoubleList implements Serializable {
      */
     public void removeRange(int fromIndex, int toIndex) {
         int numMoved = size - toIndex;
-        System.arraycopy(doubles, toIndex, doubles, fromIndex, numMoved);
+        System.arraycopy(ints, toIndex, ints, fromIndex, numMoved);
 
         size = size - (toIndex - fromIndex);
     }
@@ -438,15 +392,11 @@ public class DoubleList implements Serializable {
 
     /**
      * Trims the capacity of this <tt>ArrayList</tt> instance to be the
-     * list's current size. An application can use this operation to minimize
+     * list's current size.  An application can use this operation to minimize
      * the storage of an <tt>ArrayList</tt> instance.
-     *
-     * @param size     current size
-     * @param elements the current elements
-     * @return the trimmed elements
      */
-    private double[] trimToSize(int size, double[] elements) {
-        double[] copy = Arrays.copyOf(elements, elements.length);
+    private int[] trimToSize(int size, int[] elements) {
+        int[] copy = Arrays.copyOf(elements, elements.length);
         if (size < elements.length) {
             copy = (size == 0) ? EMPTY_ELEMENT_DATA : Arrays.copyOf(elements, size);
         }
@@ -466,10 +416,10 @@ public class DoubleList implements Serializable {
         if (obj.getClass() != getClass()) {
             return false;
         }
-        DoubleList rhs = (DoubleList) obj;
+        IntList rhs = (IntList) obj;
 
-        double[] thisTrimmed = trimToSize(this.size, this.doubles);
-        double[] otherTrimmed = trimToSize(rhs.size, rhs.doubles);
+        int[] thisTrimmed = trimToSize(this.size, this.ints);
+        int[] otherTrimmed = trimToSize(rhs.size, rhs.ints);
 
         return new EqualsBuilder()
                 .append(thisTrimmed, otherTrimmed)
@@ -480,7 +430,7 @@ public class DoubleList implements Serializable {
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(doubles)
+                .append(ints)
                 .append(size)
                 .toHashCode();
     }
@@ -488,7 +438,7 @@ public class DoubleList implements Serializable {
     @Override
     public String toString() {
         return new ToStringBuilder(this)
-                .append("doubles", trimToSize(this.size, doubles))
+                .append("ints", trimToSize(this.size, ints))
                 .append("size", size)
                 .toString();
     }

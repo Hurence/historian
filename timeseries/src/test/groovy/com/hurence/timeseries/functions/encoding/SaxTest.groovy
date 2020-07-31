@@ -16,9 +16,8 @@
 package com.hurence.timeseries.functions.encoding
 
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.functions.encoding.Sax
-import com.hurence.timeseries.modele.DoubleList
-import com.hurence.timeseries.modele.LongList
+import com.hurence.timeseries.modele.list.DoubleList
+import com.hurence.timeseries.modele.list.LongList
 import com.hurence.timeseries.functions.FunctionValueMap
 import spock.lang.Specification
 

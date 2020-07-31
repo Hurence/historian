@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.mymodele.Chunk;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.webapiservice.modele.AGG;

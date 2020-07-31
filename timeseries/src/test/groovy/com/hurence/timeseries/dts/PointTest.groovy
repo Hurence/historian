@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.dts
 
-import com.hurence.timeseries.modele.PointImpl
+import com.hurence.timeseries.modele.points.PointImpl
 import spock.lang.Specification
 
 /**

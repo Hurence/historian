@@ -17,7 +17,7 @@ package com.hurence.timeseries.converter.serializer.protobuf
 
 import com.hurence.timeseries.compaction.Compression
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer
-import com.hurence.timeseries.modele.PointImpl
+import com.hurence.timeseries.modele.points.PointImpl
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import spock.lang.Shared

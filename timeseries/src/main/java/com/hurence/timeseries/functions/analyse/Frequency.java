@@ -17,7 +17,7 @@ package com.hurence.timeseries.functions.analyse;
 
 
 import com.hurence.timeseries.MetricTimeSeries;
-import com.hurence.timeseries.modele.LongList;
+import com.hurence.timeseries.modele.list.LongList;
 import com.hurence.timeseries.functions.ChronixAnalysis;
 import com.hurence.timeseries.functions.FunctionValueMap;
 import org.apache.commons.lang3.builder.EqualsBuilder;

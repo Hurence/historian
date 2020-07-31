@@ -3,7 +3,7 @@ package com.hurence.webapiservice.http.api.main;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;

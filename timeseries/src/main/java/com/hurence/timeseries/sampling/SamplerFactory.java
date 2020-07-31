@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.sampling;
 
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 
 public class SamplerFactory {
 

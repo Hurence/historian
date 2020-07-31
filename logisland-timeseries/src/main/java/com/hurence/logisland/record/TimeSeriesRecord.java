@@ -16,7 +16,7 @@
 package com.hurence.logisland.record;
 
 import com.hurence.timeseries.functions.*;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;

@@ -4,7 +4,7 @@ import com.hurence.historian.modele.HistorianConf;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.stream.ChunkStream;
-import com.hurence.historian.mymodele.Chunk;
+import com.hurence.timeseries.modele.chunk.Chunk;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.models.MetricSizeInfo;
 import com.hurence.webapiservice.historian.models.MetricsSizeInfo;

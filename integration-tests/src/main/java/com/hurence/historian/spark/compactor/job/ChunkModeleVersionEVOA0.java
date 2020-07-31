@@ -1,11 +1,10 @@
 package com.hurence.historian.spark.compactor.job;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 

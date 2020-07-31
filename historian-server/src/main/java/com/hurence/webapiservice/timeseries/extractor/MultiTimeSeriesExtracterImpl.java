@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.mymodele.Chunk;
-import com.hurence.historian.mymodele.ChunkFromJsonObjectVersion0;
+import com.hurence.timeseries.modele.chunk.Chunk;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
@@ -49,8 +48,10 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     }
 
     private void rebuildChunkIfNeeded(Chunk chunk) {
-        //TODO
-//        if (from > )
+        if (from > chunk.getStart() || to < chunk.getEnd()) {
+            //TODO
+
+        }
     }
 
     @Override

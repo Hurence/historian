@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.modele;
+package com.hurence.timeseries.modele.list;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -21,35 +21,33 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 import java.util.Arrays;
-import java.util.stream.LongStream;
-import java.util.stream.Stream;
+import java.util.stream.DoubleStream;
 
-import static com.hurence.timeseries.modele.ListUtil.*;
-
+import static com.hurence.timeseries.modele.list.ListUtil.*;
 
 /**
- * The long list implementation contains primitive longs and acts like an array list.
- * Parts are copied from array list.
+ * Implementation of a list with primitive doubles.
  *
  * @author f.lautenschlager
  */
-public class LongList implements Serializable {
+public class DoubleList implements Serializable {
 
-    private static final long serialVersionUID = -8791366160708918410L;
+    private static final long serialVersionUID = -1275724597860546074L;
 
     /**
      * Shared empty array instance used for empty instances.
      */
-    private static final long[] EMPTY_ELEMENT_DATA = {};
+    private static final double[] EMPTY_ELEMENT_DATA = {};
 
     /**
      * Shared empty array instance used for default sized empty instances. We
      * distinguish this from EMPTY_ELEMENT_DATA to know how much to inflate when
      * first element is added.
      */
-    private static final long[] DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA = {};
+    private static final double[] DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA = {};
 
-    private long[] longs;
+
+    private double[] doubles;
     private int size;
 
     /**
@@ -59,41 +57,42 @@ public class LongList implements Serializable {
      * @throws IllegalArgumentException if the specified initial capacity
      *                                  is negative
      */
-    public LongList(int initialCapacity) {
+    public DoubleList(int initialCapacity) {
         if (initialCapacity > 0) {
-            this.longs = new long[initialCapacity];
+            this.doubles = new double[initialCapacity];
         } else if (initialCapacity == 0) {
-            this.longs = EMPTY_ELEMENT_DATA;
+            this.doubles = EMPTY_ELEMENT_DATA;
         } else {
-            throw new IllegalArgumentException("Illegal Capacity: " +
-                    initialCapacity);
+            throw new IllegalArgumentException("Illegal Capacity: " + initialCapacity);
         }
     }
 
     /**
      * Constructs an empty list with an initial capacity of ten.
      */
-    public LongList() {
-        this.longs = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
+    public DoubleList() {
+        this.doubles = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
     }
 
     /**
-     * Constructs a long list from the given longs by simple assigning them.
+     * Constructs a double list from the given values by simple assigning them.
      *
      * @param longs the values of the double list.
      * @param size  the index of the last value in the array.
      */
     @SuppressWarnings("all")
-    public LongList(long[] longs, int size) {
+    public DoubleList(double[] longs, int size) {
         if (longs == null) {
             throw new IllegalArgumentException("Illegal initial array 'null'");
         }
         if (size < 0) {
             throw new IllegalArgumentException("Size if negative.");
         }
-        this.longs = longs;
+
+        this.doubles = longs;
         this.size = size;
     }
+
 
     /**
      * Returns the number of elements in this list.
@@ -122,7 +121,7 @@ public class LongList implements Serializable {
      * @param o element whose presence in this list is to be tested
      * @return <tt>true</tt> if this list contains the specified element
      */
-    public boolean contains(Long o) {
+    public boolean contains(double o) {
         return indexOf(o) >= 0;
     }
 
@@ -133,12 +132,13 @@ public class LongList implements Serializable {
      * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
      * or -1 if there is no such index.
      *
-     * @param o the long value
-     * @return the index of the element or -1
+     * @param o the double value
+     * @return the index of the given double element
      */
-    public int indexOf(long o) {
+    public int indexOf(double o) {
+
         for (int i = 0; i < size; i++) {
-            if (o == longs[i]) {
+            if (o == doubles[i]) {
                 return i;
             }
         }
@@ -152,12 +152,13 @@ public class LongList implements Serializable {
      * <tt>(o==null&nbsp;?&nbsp;get(i)==null&nbsp;:&nbsp;o.equals(get(i)))</tt>,
      * or -1 if there is no such index.
      *
-     * @param o the long value
-     * @return the last index of the element or -1
+     * @param o the double value
+     * @return the last index of the given double element
      */
-    public int lastIndexOf(long o) {
+    public int lastIndexOf(double o) {
+
         for (int i = size - 1; i >= 0; i--) {
-            if (o == longs[i]) {
+            if (o == doubles[i]) {
                 return i;
             }
         }
@@ -170,9 +171,9 @@ public class LongList implements Serializable {
      *
      * @return a clone of this <tt>LongList</tt> instance
      */
-    public LongList copy() {
-        LongList v = new LongList(size);
-        v.longs = Arrays.copyOf(longs, size);
+    public DoubleList copy() {
+        DoubleList v = new DoubleList(size);
+        v.doubles = Arrays.copyOf(doubles, size);
         v.size = size;
         return v;
     }
@@ -191,12 +192,18 @@ public class LongList implements Serializable {
      * @return an array containing all of the elements in this list in
      * proper sequence
      */
-    public long[] toArray() {
-        return Arrays.copyOf(longs, size);
+    public double[] toArray() {
+        return Arrays.copyOf(doubles, size);
     }
 
-    public LongStream toStream() {
-        return Arrays.stream(longs);
+    public DoubleStream toStream() {
+        return Arrays.stream(doubles);
+    }
+
+    private void growIfNeeded(int newCapacity) {
+        if (newCapacity != -1) {
+            doubles = Arrays.copyOf(doubles, newCapacity);
+        }
     }
 
     /**
@@ -206,9 +213,9 @@ public class LongList implements Serializable {
      * @return the element at the specified position in this list
      * @throws IndexOutOfBoundsException
      */
-    public long get(int index) {
+    public double get(int index) {
         rangeCheck(index, size);
-        return longs[index];
+        return doubles[index];
     }
 
     /**
@@ -220,11 +227,11 @@ public class LongList implements Serializable {
      * @return the element previously at the specified position
      * @throws IndexOutOfBoundsException
      */
-    public long set(int index, long element) {
+    public double set(int index, double element) {
         rangeCheck(index, size);
 
-        long oldValue = longs[index];
-        longs[index] = element;
+        double oldValue = doubles[index];
+        doubles[index] = element;
         return oldValue;
     }
 
@@ -234,18 +241,12 @@ public class LongList implements Serializable {
      * @param e element to be appended to this list
      * @return <tt>true</tt> (as specified by Collection#add)
      */
-    public boolean add(long e) {
-        int newCapacity = calculateNewCapacity(longs.length, size + 1);
+    public boolean add(double e) {
+        int newCapacity = calculateNewCapacity(doubles.length, size + 1);
         growIfNeeded(newCapacity);
 
-        longs[size++] = e;
+        doubles[size++] = e;
         return true;
-    }
-
-    private void growIfNeeded(int newCapacity) {
-        if (newCapacity != -1) {
-            longs = Arrays.copyOf(longs, newCapacity);
-        }
     }
 
     /**
@@ -257,14 +258,14 @@ public class LongList implements Serializable {
      * @param element element to be inserted
      * @throws IndexOutOfBoundsException
      */
-    public void add(int index, long element) {
+    public void add(int index, double element) {
         rangeCheckForAdd(index, size);
 
-        int newCapacity = calculateNewCapacity(longs.length, size + 1);
+        int newCapacity = calculateNewCapacity(doubles.length, size + 1);
         growIfNeeded(newCapacity);
 
-        System.arraycopy(longs, index, longs, index + 1, size - index);
-        longs[index] = element;
+        System.arraycopy(doubles, index, doubles, index + 1, size - index);
+        doubles[index] = element;
         size++;
     }
 
@@ -277,17 +278,16 @@ public class LongList implements Serializable {
      * @return the element that was removed from the list
      * @throws IndexOutOfBoundsException
      */
-    public long remove(int index) {
+    public double remove(int index) {
         rangeCheck(index, size);
 
-        long oldValue = longs[index];
+        double oldValue = doubles[index];
 
         int numMoved = size - index - 1;
         if (numMoved > 0) {
-            System.arraycopy(longs, index + 1, longs, index, numMoved);
+            System.arraycopy(doubles, index + 1, doubles, index, numMoved);
         }
         --size;
-        //we do not override the value
 
         return oldValue;
     }
@@ -305,10 +305,10 @@ public class LongList implements Serializable {
      * @param o element to be removed from this list, if present
      * @return <tt>true</tt> if this list contained the specified element
      */
-    public boolean remove(long o) {
+    public boolean remove(double o) {
 
         for (int index = 0; index < size; index++) {
-            if (o == longs[index]) {
+            if (o == doubles[index]) {
                 fastRemove(index);
                 return true;
             }
@@ -320,10 +320,9 @@ public class LongList implements Serializable {
     private void fastRemove(int index) {
         int numMoved = size - index - 1;
         if (numMoved > 0) {
-            System.arraycopy(longs, index + 1, longs, index, numMoved);
+            System.arraycopy(doubles, index + 1, doubles, index, numMoved);
         }
         --size;
-        //we do not override the value.
     }
 
     /**
@@ -331,7 +330,7 @@ public class LongList implements Serializable {
      * be empty after this call returns.
      */
     public void clear() {
-        longs = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
+        doubles = DEFAULT_CAPACITY_EMPTY_ELEMENT_DATA;
         size = 0;
     }
 
@@ -348,13 +347,14 @@ public class LongList implements Serializable {
      * @return <tt>true</tt> if this list changed as a result of the call
      * @throws NullPointerException if the specified collection is null
      */
-    public boolean addAll(LongList c) {
-        long[] a = c.toArray();
+    public boolean addAll(DoubleList c) {
+        double[] a = c.toArray();
         int numNew = a.length;
-        int newCapacity = calculateNewCapacity(longs.length, size + numNew);
+
+        int newCapacity = calculateNewCapacity(doubles.length, size + numNew);
         growIfNeeded(newCapacity);
 
-        System.arraycopy(a, 0, longs, size, numNew);
+        System.arraycopy(a, 0, doubles, size, numNew);
         size += numNew;
         return numNew != 0;
     }
@@ -362,17 +362,17 @@ public class LongList implements Serializable {
     /**
      * Appends the long[] at the end of this long list.
      *
-     * @param otherLongs the other long[] that is appended
+     * @param otherDoubles the other double[] that is appended
      * @return <tt>true</tt> if this list changed as a result of the call
      * @throws NullPointerException if the specified array is null
      */
-    public boolean addAll(long[] otherLongs) {
-        int numNew = otherLongs.length;
+    public boolean addAll(double[] otherDoubles) {
+        int numNew = otherDoubles.length;
 
-        int newCapacity = calculateNewCapacity(longs.length, size + numNew);
+        int newCapacity = calculateNewCapacity(doubles.length, size + numNew);
         growIfNeeded(newCapacity);
 
-        System.arraycopy(otherLongs, 0, longs, size, numNew);
+        System.arraycopy(otherDoubles, 0, doubles, size, numNew);
         size += numNew;
         return numNew != 0;
     }
@@ -392,25 +392,24 @@ public class LongList implements Serializable {
      * @throws IndexOutOfBoundsException
      * @throws NullPointerException      if the specified collection is null
      */
-    public boolean addAll(int index, LongList c) {
+    public boolean addAll(int index, DoubleList c) {
         rangeCheckForAdd(index, size);
 
-        long[] a = c.toArray();
+        double[] a = c.toArray();
         int numNew = a.length;
 
-        int newCapacity = calculateNewCapacity(longs.length, size + numNew);
+        int newCapacity = calculateNewCapacity(doubles.length, size + numNew);
         growIfNeeded(newCapacity);
 
         int numMoved = size - index;
         if (numMoved > 0) {
-            System.arraycopy(longs, index, longs, index + numNew, numMoved);
+            System.arraycopy(doubles, index, doubles, index + numNew, numMoved);
         }
 
-        System.arraycopy(a, 0, longs, index, numNew);
+        System.arraycopy(a, 0, doubles, index, numNew);
         size += numNew;
         return numNew != 0;
     }
-
 
     /**
      * Removes from this list all of the elements whose index is between
@@ -430,17 +429,29 @@ public class LongList implements Serializable {
      */
     public void removeRange(int fromIndex, int toIndex) {
         int numMoved = size - toIndex;
-        System.arraycopy(longs, toIndex, longs, fromIndex, numMoved);
+        System.arraycopy(doubles, toIndex, doubles, fromIndex, numMoved);
+
         size = size - (toIndex - fromIndex);
     }
 
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("longs", trimToSize(this.size, longs))
-                .append("size", size)
-                .toString();
+
+    /**
+     * Trims the capacity of this <tt>ArrayList</tt> instance to be the
+     * list's current size. An application can use this operation to minimize
+     * the storage of an <tt>ArrayList</tt> instance.
+     *
+     * @param size     current size
+     * @param elements the current elements
+     * @return the trimmed elements
+     */
+    private double[] trimToSize(int size, double[] elements) {
+        double[] copy = Arrays.copyOf(elements, elements.length);
+        if (size < elements.length) {
+            copy = (size == 0) ? EMPTY_ELEMENT_DATA : Arrays.copyOf(elements, size);
+        }
+        return copy;
     }
+
 
     @Override
     public boolean equals(Object obj) {
@@ -450,13 +461,14 @@ public class LongList implements Serializable {
         if (obj == this) {
             return true;
         }
+
         if (obj.getClass() != getClass()) {
             return false;
         }
-        LongList rhs = (LongList) obj;
+        DoubleList rhs = (DoubleList) obj;
 
-        long[] thisTrimmed = trimToSize(this.size, this.longs);
-        long[] otherTrimmed = trimToSize(rhs.size, rhs.longs);
+        double[] thisTrimmed = trimToSize(this.size, this.doubles);
+        double[] otherTrimmed = trimToSize(rhs.size, rhs.doubles);
 
         return new EqualsBuilder()
                 .append(thisTrimmed, otherTrimmed)
@@ -464,24 +476,19 @@ public class LongList implements Serializable {
                 .isEquals();
     }
 
-    /**
-     * Trims the capacity of this <tt>ArrayList</tt> instance to be the
-     * list's current size.  An application can use this operation to minimize
-     * the storage of an <tt>ArrayList</tt> instance.
-     */
-    private long[] trimToSize(int size, long[] elements) {
-        long[] copy = Arrays.copyOf(elements, elements.length);
-        if (size < elements.length) {
-            copy = (size == 0) ? EMPTY_ELEMENT_DATA : Arrays.copyOf(elements, size);
-        }
-        return copy;
-    }
-
     @Override
     public int hashCode() {
         return new HashCodeBuilder()
-                .append(longs)
+                .append(doubles)
                 .append(size)
                 .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return new ToStringBuilder(this)
+                .append("doubles", trimToSize(this.size, doubles))
+                .append("size", size)
+                .toString();
     }
 }

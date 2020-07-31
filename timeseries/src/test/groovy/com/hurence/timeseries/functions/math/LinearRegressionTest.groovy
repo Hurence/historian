@@ -15,9 +15,9 @@
  */
 package com.hurence.timeseries.functions.math
 
-import com.hurence.timeseries.functions.math.LinearRegression
-import com.hurence.timeseries.modele.DoubleList
-import com.hurence.timeseries.modele.LongList
+
+import com.hurence.timeseries.modele.list.DoubleList
+import com.hurence.timeseries.modele.list.LongList
 import spock.lang.Specification
 
 /**
