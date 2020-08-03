@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_SEARCH_TAGS_API_ENDPOINT;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 
@@ -48,14 +49,14 @@ public class SearchTagsEndPointIT {
 
     @BeforeAll
     public static void initSolrAnderticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        Completable solrAndVerticlesDeployed = initSolrAndVerticles(container, vertx, context);
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+        Completable solrAndVerticlesDeployed = initVerticles(container, vertx, context);
         solrAndVerticlesDeployed
                 .subscribe(context::completeNow,
                         context::failNow);
     }
 
-    public static Completable initSolrAndVerticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+    public static Completable initVerticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
         JsonObject historianConf = new JsonObject()
                 .put(CONFIG_SCHEMA_VERSION,
                         SchemaVersion.VERSION_0.toString());
