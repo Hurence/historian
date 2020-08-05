@@ -98,6 +98,7 @@
         <module>integration-tests</module>
         <module>historian-resources</module>
         <module>assembly</module>
+        <module>historian-tools</module>
     </modules>
 
     <dependencies>

@@ -1,6 +1,6 @@
 package com.hurence.timeseries.converter;
 
-import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl;
+import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.timeseries.DateInfo;
 import com.hurence.timeseries.MetricTimeSeries;
@@ -9,10 +9,13 @@ import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.functions.*;
 import com.hurence.timeseries.metric.MetricType;
 import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.modele.chunk.ChunkVersion0;
+import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl;
 import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.query.QueryEvaluator;
 import com.hurence.timeseries.query.TypeFunctions;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +40,7 @@ public class PointsToChunkVersion0 implements PointsToChunk {
         return SchemaVersion.VERSION_0;
     }
 
-    public Chunk buildChunk(String name, List<Point> points, Map<String, String> tags) {
+    public ChunkVersion0 buildChunk(String name, List<? extends Point> points, Map<String, String> tags) {
         if (points == null || points.isEmpty())
             throw new IllegalArgumentException("points should not be null or empty");
         MetricTimeSeries chunk = buildMetricTimeSeries(name, points);
@@ -56,11 +59,11 @@ public class PointsToChunkVersion0 implements PointsToChunk {
 
 
     @Override
-    public Chunk buildChunk(String name, List<Point> points) {
+    public Chunk buildChunk(String name, List<? extends Point> points) {
         return null;
     }
 
-    private Chunk convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
+    private ChunkVersion0 convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
         ChunkVersion0Impl.Builder builder = new ChunkVersion0Impl.Builder();
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(timeSerie);
         builder
@@ -88,7 +91,7 @@ public class PointsToChunkVersion0 implements PointsToChunk {
     private void computeAndSetAggs(ChunkVersion0Impl.Builder builder, MetricTimeSeries timeSeries) {
         Integer sax_alphabet_size = Math.max(Math.min(timeSeries.size(), 7), 2);
         Integer sax_string_length = Math.min(timeSeries.size(), 100);
-        String metricString = String.format("first;last;min;max;sum;avg;count;std;trend;outlier;sax:%s,0.01,%s", sax_alphabet_size, sax_string_length);
+        String metricString = String.format("first;last;min;max;sum;avg;count;dev;trend;outlier;sax:%s,0.01,%s", sax_alphabet_size, sax_string_length);
         String[] metrics = new String[]{"metric{" + metricString + "}"};
         configMetricsCalcul(metrics);
 
@@ -123,7 +126,7 @@ public class PointsToChunkVersion0 implements PointsToChunk {
                 case "count" :
                     builder.setCount((long)value);
                     break;
-                case "std" :
+                case "dev" :
                     builder.setStd(value);
                     break;
             }
@@ -152,7 +155,7 @@ public class PointsToChunkVersion0 implements PointsToChunk {
     }
 
 
-    private MetricTimeSeries buildMetricTimeSeries(String name, List<Point> points) {
+    private MetricTimeSeries buildMetricTimeSeries(String name, List<? extends Point> points) {
         final long start = getStart(points);
         final long end  = getEnd(points);
         MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(name);
@@ -164,11 +167,11 @@ public class PointsToChunkVersion0 implements PointsToChunk {
         return tsBuilder.build();
     }
 
-    private long getEnd(List<Point> points) {
+    private long getEnd(List<? extends Point> points) {
         return points.get(0).getTimestamp();
     }
 
-    private long getStart(List<Point> points) {
+    private long getStart(List<? extends Point> points) {
         return points.get(points.size() - 1).getTimestamp();
     }
 }

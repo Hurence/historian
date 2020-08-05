@@ -1,7 +1,9 @@
 package com.hurence.timeseries.modele.chunk;
 
+import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.SchemaVersion;
 
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 public interface ChunkVersion0 extends Chunk {
@@ -10,11 +12,22 @@ public interface ChunkVersion0 extends Chunk {
         return SchemaVersion.VERSION_0;
     }
 
-    String sax();
-    double last();
-    double stddev();
-    List<String> compactions_running();
-    boolean trend();
-    boolean outlier();
-    String origin();
+    String getSax();
+    double getLast();
+    double getStddev();
+    List<String> getCompactionsRunning();
+    boolean getTrend();
+    boolean getOutlier();
+    String getOrigin();
+
+    static String buildId(ChunkVersion0 chunk) {
+        String toHash = chunk.getValueAsString() +
+                chunk.getName() +
+                chunk.getStart() +
+                chunk.getOrigin();
+
+        return Hashing.sha256()
+                .hashString(toHash, StandardCharsets.UTF_8)
+                .toString();
+    }
 }

@@ -75,12 +75,11 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSe
     private MetricTimeSeries buildTimeSeries(final List<Record> records) {
         final Record first = records.get(0);
         final Record last = records.get(records.size() - 1);
-        final String metricType = first.getType();
         final String metricName = first.getField(FieldDictionary.RECORD_NAME).asString();
         final long start = first.getTime().getTime();
         final long end = (last.getTime().getTime() == start) ? start + 1 : start;
 
-        MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(metricName, metricType);
+        MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(metricName);
         tsBuilder.start(start);
         tsBuilder.end(end);
 

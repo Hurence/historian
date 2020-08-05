@@ -17,11 +17,11 @@ public interface PointsToChunk {
     SchemaVersion getVersion();
 
     Chunk buildChunk(String name,
-                            List<Point> points,
+                            List<? extends Point> points,
                             Map<String, String> tags);
 
     default Chunk buildChunk(String name,
-                            List<Point> points) {
+                            List<? extends Point> points) {
         return buildChunk(name, points, Collections.emptyMap());
     }
 

@@ -70,7 +70,8 @@ public class AddTimeSeriesHandler {
     }
 
     private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
-        JsonObjectToChunkVersion0 jsonObjectToChunkVersion0 = new JsonObjectToChunkVersion0(chunkOrigin, getHistorianFields());
+        //Only version 0 is currently supporting creation from rest api
+        JsonObjectToChunkVersion0 jsonObjectToChunkVersion0 = new JsonObjectToChunkVersion0(chunkOrigin);
         SolrInputDocument doc = jsonObjectToChunkVersion0.chunkIntoSolrDocument(timeserie);
         return doc;
     }

@@ -4,12 +4,16 @@ import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-public class ChunkFromJsonObjectVersionEVOA0 implements ChunkVersionEVOA0 {
+public class ChunkFromJsonObjectVersionEVOA0 extends AbstractChunkFromJsonObject implements ChunkVersionEVOA0 {
 
-    JsonObject chunk;
 
     public ChunkFromJsonObjectVersionEVOA0(JsonObject chunk) {
-        this.chunk = chunk;
+        super(chunk);
+    }
+
+    @Override
+    public String getId() {
+        return chunk.getString(HistorianChunkCollectionFieldsVersionEVOA0.ID);
     }
 
     @Override
@@ -90,16 +94,6 @@ public class ChunkFromJsonObjectVersionEVOA0 implements ChunkVersionEVOA0 {
     }
 
     @Override
-    public boolean containsTag(String tagName) {
-        return chunk.containsKey(tagName);
-    }
-
-    @Override
-    public String getTag(String tagName) {
-        return chunk.getString(tagName);
-    }
-
-    @Override
     public String sax() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SAX);
     }
@@ -129,5 +123,7 @@ public class ChunkFromJsonObjectVersionEVOA0 implements ChunkVersionEVOA0 {
                 return value;
             }
         }
+        return null;
     }
+
 }

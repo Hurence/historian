@@ -6,12 +6,11 @@ import io.vertx.core.json.JsonObject;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class ChunkFromJsonObjectVersion0 implements ChunkVersion0 {
+public class ChunkFromJsonObjectVersion0 extends AbstractChunkFromJsonObject implements ChunkVersion0 {
 
-    JsonObject chunk;
 
     public ChunkFromJsonObjectVersion0(JsonObject chunk) {
-        this.chunk = chunk;
+        super(chunk);
     }
 
     @Override
@@ -49,7 +48,7 @@ public class ChunkFromJsonObjectVersion0 implements ChunkVersion0 {
     }
 
     @Override
-    public double last() {
+    public double getLast() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_LAST);
     }
 
@@ -89,49 +88,39 @@ public class ChunkFromJsonObjectVersion0 implements ChunkVersion0 {
     }
 
     @Override
-    public boolean containsTag(String tagName) {
-        return chunk.containsKey(tagName);
-    }
-
-    @Override
-    public String getTag(String tagName) {
-        return chunk.getString(tagName);
-    }
-
-    @Override
-    public double stddev() {
+    public double getStddev() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_STDDEV);
     }
 
     @Override
-    public String id() {
+    public String getId() {
         return chunk.getString(HistorianChunkCollectionFieldsVersion0.ID);
     }
 
     @Override
-    public List<String> compactions_running() {
+    public List<String> getCompactionsRunning() {
         return chunk.getJsonArray(HistorianChunkCollectionFieldsVersion0.COMPACTIONS_RUNNING).stream()
                 .map(String.class::cast)
                 .collect(Collectors.toList());
     }
 
     @Override
-    public boolean trend() {
+    public boolean getTrend() {
         return chunk.getBoolean(HistorianChunkCollectionFieldsVersion0.CHUNK_TREND);
     }
 
     @Override
-    public boolean outlier() {
+    public boolean getOutlier() {
         return chunk.getBoolean(HistorianChunkCollectionFieldsVersion0.CHUNK_OUTLIER);
     }
 
     @Override
-    public String origin() {
+    public String getOrigin() {
         return chunk.getString(HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN);
     }
 
     @Override
-    public String sax() {
+    public String getSax() {
         return chunk.getString(HistorianChunkCollectionFieldsVersion0.CHUNK_SAX);
     }
 

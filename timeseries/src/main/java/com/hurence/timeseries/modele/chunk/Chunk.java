@@ -1,21 +1,12 @@
 package com.hurence.timeseries.modele.chunk;
 
-import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.SchemaVersion;
 
-import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 public interface Chunk {
 
-    default String getId() {
-        String toHash = getValueAsString() +
-                getName() +
-                getStart();
-
-        return Hashing.sha256()
-                .hashString(toHash, StandardCharsets.UTF_8)
-                .toString();
-    }
+    String getId();
     SchemaVersion getVersion();
     String getName();
     String getValueAsString();
@@ -34,6 +25,7 @@ public interface Chunk {
 
     boolean containsTag(String tagName);
     String getTag(String tagName);
+    Map<String, String> getTags();
 
     /**
      *
@@ -43,5 +35,4 @@ public interface Chunk {
      * (recompute aggregations as well)
      */
     Chunk truncate(long from, long to);
-
 }

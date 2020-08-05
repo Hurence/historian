@@ -80,7 +80,7 @@ public class TimeSeriesRecord extends StandardRecord {
 
 
     public TimeSeriesRecord(MetricTimeSeries timeSeries) {
-        super(timeSeries.getType());
+        super("timeseries");
         this.timeSeries = timeSeries;
 
         setStringField(METRIC_NAME, timeSeries.getName());
@@ -104,7 +104,7 @@ public class TimeSeriesRecord extends StandardRecord {
         try {
             Stream<PointImpl> pointStream = getPointStream(chunkValue, chunkStart, chunkEnd).stream();
 
-            MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(name, type)
+            MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(name)
                     .start(chunkStart)
                     .end(chunkEnd);
             //     .attributes(attributes);

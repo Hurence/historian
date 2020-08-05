@@ -16,29 +16,30 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChunkVersion0Impl.class);
 
-    SchemaVersion version;
-    String name;
-    byte[] valueBinaries;
-    long start;
-    long end;
-    long count;
-    double first;
-    double min;
-    double max;
-    double sum;
-    double avg;
-    double last;
-    double std;
-    int year;
-    int month;
-    String day;
-    String chunkOrigin;
-    String sax;
-    boolean trend;
-    boolean outlier;
-    List<String> compactionRunnings;
+    private SchemaVersion version;
+    private String name;
+    private byte[] valueBinaries;
+    private long start;
+    private long end;
+    private long count;
+    private double first;
+    private double min;
+    private double max;
+    private double sum;
+    private double avg;
+    private double last;
+    private double std;
+    private int year;
+    private int month;
+    private String day;
+    private String chunkOrigin;
+    private String sax;
+    private boolean trend;
+    private boolean outlier;
+    private List<String> compactionRunnings;
+    private String id;
 
-    Map<String, String> tags;
+    private Map<String, String> tags;
 
     private ChunkVersion0Impl(SchemaVersion version, String name,
                               byte[] valueBinaries, long start, long end,
@@ -52,7 +53,8 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
                               String sax,
                               boolean trend,
                               boolean outlier,
-                              List<String> compactionRunnings) {
+                              List<String> compactionRunnings,
+                              String id) {
         this.version = version;
         this.name = name;
         this.valueBinaries = valueBinaries;
@@ -75,6 +77,16 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
         this.trend = trend;
         this.outlier = outlier;
         this.compactionRunnings = compactionRunnings;
+        if (id == null) {
+            this.id = ChunkVersion0.buildId(this);
+        } else {
+            this.id = id;
+        }
+    }
+
+    @Override
+    public String getId() {
+        return id;
     }
 
     @Override
@@ -83,38 +95,33 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
     }
 
     @Override
-    public String sax() {
+    public String getSax() {
         return sax;
     }
 
     @Override
-    public double last() {
+    public double getLast() {
         return last;
     }
 
     @Override
-    public double stddev() {
+    public double getStddev() {
         return std;
     }
 
     @Override
-    public List<String> compactions_running() {
+    public List<String> getCompactionsRunning() {
         return compactionRunnings;
     }
 
     @Override
-    public boolean trend() {
+    public boolean getTrend() {
         return trend;
     }
 
     @Override
-    public boolean outlier() {
+    public boolean getOutlier() {
         return outlier;
-    }
-
-    @Override
-    public String origin() {
-        return chunkOrigin;
     }
 
     @Override
@@ -208,6 +215,11 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
     }
 
     @Override
+    public Map<String, String> getTags() {
+        return tags;
+    }
+
+    @Override
     public Chunk truncate(long from, long to) {
         try {
             return ChunkTruncater.truncate(this, from, to);
@@ -232,14 +244,15 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
         private int year;
         private int month;
         private String day;
-        String chunkOrigin;
+        private String chunkOrigin;
         private Map<String, String> tags;
-        double last;
-        double std;
-        String sax;
-        boolean trend;
-        boolean outlier;
-        List<String> compactionRunnings = new ArrayList<>();
+        private double last;
+        private double std;
+        private String sax;
+        private boolean trend;
+        private boolean outlier;
+        private List<String> compactionRunnings = new ArrayList<>();
+        private String id;
 
 
         public Builder setVersion(SchemaVersion version) {
@@ -323,7 +336,7 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
                     count, first, min, max, sum, avg,
                     year, month, day, tags, chunkOrigin,
                     last, std, sax, trend, outlier,
-                    compactionRunnings);
+                    compactionRunnings, id);
         }
 
         public Builder setChunkOrigin(String chunkOrigin) {
@@ -353,6 +366,11 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
 
         public Builder setOutlier(boolean outlier) {
             this.outlier = outlier;
+            return this;
+        }
+
+        public Builder setId(String id) {
+            this.id = id;
             return this;
         }
 
