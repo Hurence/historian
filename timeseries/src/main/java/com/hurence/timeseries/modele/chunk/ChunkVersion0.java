@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface ChunkVersion0 extends Chunk {
 
+    @Override
     default SchemaVersion getVersion() {
         return SchemaVersion.VERSION_0;
     }
@@ -19,6 +20,9 @@ public interface ChunkVersion0 extends Chunk {
     boolean getTrend();
     boolean getOutlier();
     String getOrigin();
+
+    @Override
+    ChunkVersion0 truncate(long from, long to);
 
     static String buildId(ChunkVersion0 chunk) {
         String toHash = chunk.getValueAsString() +

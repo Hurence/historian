@@ -54,7 +54,7 @@ abstract class AbstractChunkFromJsonObject implements Chunk {
     }
 
     @Override
-    public Chunk truncate(long from, long to) {
+    public ChunkVersion0 truncate(long from, long to) {
         throw new UnsupportedOperationException("This chunk implementation is for reading only");
     }
 }

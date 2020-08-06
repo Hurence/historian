@@ -220,7 +220,7 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
     }
 
     @Override
-    public Chunk truncate(long from, long to) {
+    public ChunkVersion0 truncate(long from, long to) {
         try {
             return ChunkTruncater.truncate(this, from, to);
         } catch (IOException e) {
