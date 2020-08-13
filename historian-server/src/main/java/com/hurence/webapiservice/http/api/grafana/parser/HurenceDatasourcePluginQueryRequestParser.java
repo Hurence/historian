@@ -181,7 +181,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                     .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME));
                             Map<String, String> tags = parseTags(jsonObject);
                             Float qualityValue = parseQualityValue(jsonObject);
-                            if (!qualityValue.isNaN())
+                            if (qualityValue != null)
                                 toReturn.put(QUALITY_VALUE, qualityValue);
                             if (!tags.isEmpty())
                                 toReturn.put(HistorianFields.TAGS, tags);
