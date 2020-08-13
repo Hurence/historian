@@ -3,6 +3,7 @@ package com.hurence.webapiservice.timeseries;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -85,7 +86,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
-                9, Arrays.asList(AGG.values()), false);
+                9, Arrays.asList(AGG.values()), false,
+                QualityAgg.NONE);
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -113,7 +115,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
-                15, Arrays.asList(AGG.values()), false);
+                15, Arrays.asList(AGG.values()), false,
+                QualityAgg.AVG);
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -142,7 +145,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
-                12, Arrays.asList(AGG.values()), false);
+                12, Arrays.asList(AGG.values()), false,
+                QualityAgg.AVG);
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -170,7 +174,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
     public void testMinSampler() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
-                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.values()), false);
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.values()),
+                false, QualityAgg.MIN);
         extractor.addChunk(getChunk1());
                 extractor.addChunk(getChunk2());
                 extractor.addChunk(getChunk3());
@@ -199,7 +204,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE, Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.MIN, 2, 3),
-                12, Arrays.asList(AGG.values()), false);
+                12, Arrays.asList(AGG.values()),
+                false, QualityAgg.MIN);
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());

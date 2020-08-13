@@ -9,7 +9,7 @@
   },
   "quality" :  {
     "quality_value" : 0.75,
-    "quality_agg" : "AVG"
+    "quality_agg" : "FIRST"
   },
   "return_with_quality" : true
 }

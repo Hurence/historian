@@ -3,10 +3,5 @@
   "to": "2020-10-31T12:33:44.866Z",
   "names": ["temp_a", "temp_b", "temp_c"],
   "format": "json",
-  "max_data_points": 400,
-  "quality" :  {
-    "quality_value" : 0.75,
-    "quality_agg" : "MIN"
-  },
-  "return_with_quality" : true
+  "max_data_points": 400
 }

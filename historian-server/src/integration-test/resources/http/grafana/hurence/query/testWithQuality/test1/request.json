@@ -5,8 +5,7 @@
   "format": "json",
   "max_data_points": 400,
   "quality" :  {
-    "quality_value" : 0.75,
-    "quality_agg" : "AVG"
+    "quality_value" : 0.75
   },
   "return_with_quality" : true
 }

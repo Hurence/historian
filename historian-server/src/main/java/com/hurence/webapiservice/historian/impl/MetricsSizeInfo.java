@@ -14,6 +14,14 @@ public interface MetricsSizeInfo {
 
     public long getTotalNumberOfChunks();
 
+    public long getTotalNumberOfChunksWithCorrectQuality();
+
+    public long getTotalNumberOfPointsWithCorrectQuality();
+
+    long getTotalNumberOfChunksToReturn();
+
+    long getTotalNumberOfPointsToReturn();
+
     boolean isEmpty();
 }
 

@@ -64,7 +64,7 @@ public class QueryEndPointWithQualityIT {
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 622, 0.9f),
                                 new PointWithQualityImpl( 1477916224866L, -3, 0.8f),
-                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),
+                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),      // avg = 0.75
                                 new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
                                 new PointWithQualityImpl( 1477948224866L, 14, 0.8f),
                                 new PointWithQualityImpl( 1477957224866L, 86, 0.7f)
@@ -73,14 +73,14 @@ public class QueryEndPointWithQualityIT {
                                 new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
                                 new PointWithQualityImpl( 1477917224866L, 767, 0.9f),
                                 new PointWithQualityImpl( 1477927624866L, 57, 0.7f),
-                                new PointWithQualityImpl( 1477931224866L, 125, 0.6f),
+                                new PointWithQualityImpl( 1477931224866L, 125, 0.6f),    // avg = 0.783
                                 new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
                                 new PointWithQualityImpl( 1477985224866L, 7, 0.9f)
                         ),
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
                                 new PointWithQualityImpl( 1477917224866L, 767, 0.8f),
-                                new PointWithQualityImpl( 1477927624866L, 57, 0.8f),
+                                new PointWithQualityImpl( 1477927624866L, 57, 0.8f),     // avg = 0.8
                                 new PointWithQualityImpl( 1477931224866L, 125, 0.8f),
                                 new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
                                 new PointWithQualityImpl( 1477985224866L, 7, 0.8f)
@@ -88,7 +88,7 @@ public class QueryEndPointWithQualityIT {
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
                                 new PointImpl( 1477917224866L, 767),
-                                new PointWithQualityImpl( 1477927624866L, 57, 0.7f),
+                                new PointWithQualityImpl( 1477927624866L, 57, 0.7f),     //avg = 0.81
                                 new PointWithQualityImpl( 1477931224866L, 125, 0.6f),
                                 new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
                                 new PointImpl( 1477985224866L, 7)
@@ -97,14 +97,14 @@ public class QueryEndPointWithQualityIT {
                                 new PointImpl( 1477895624866L, 622),
                                 new PointWithQualityImpl( 1477916224866L, -3, 0.4f),
                                 new PointWithQualityImpl( 1477917224866L, 365, 0.7f),
-                                new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
+                                new PointWithQualityImpl( 1477924624866L, 568, 0.6f),     // avg = 0.65
                                 new PointImpl( 1477948224866L, 14),
                                 new PointWithQualityImpl( 1477957224866L, 86, 0.2f)
                         ),
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 622, 0.8f),
                                 new PointWithQualityImpl( 1477916224866L, -3, 0.4f),
-                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),
+                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),    // avg = 0.58
                                 new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
                                 new PointWithQualityImpl( 1477948224866L, 14, 0.8f),
                                 new PointWithQualityImpl( 1477957224866L, 86, 0.2f)
@@ -127,7 +127,7 @@ public class QueryEndPointWithQualityIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithQualityAvgAndReturningAllPoints(Vertx vertx, VertxTestContext testContext) {
+    public void testQueryWithQuality(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/testWithQuality/test1/request.json",
                 "/http/grafana/hurence/query/testWithQuality/test1/expectedResponse.json");
@@ -135,7 +135,7 @@ public class QueryEndPointWithQualityIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithQualityMinAndReturningAllPoints(Vertx vertx, VertxTestContext testContext) {
+    public void testQueryWithoutQuality(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/testWithQuality/test2/request.json",
                 "/http/grafana/hurence/query/testWithQuality/test2/expectedResponse.json");
@@ -143,15 +143,16 @@ public class QueryEndPointWithQualityIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithQualityMaxAndReturningAllPoints(Vertx vertx, VertxTestContext testContext) {
+    public void testQueryWithQualityForEachMetric(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/testWithQuality/test3/request.json",
                 "/http/grafana/hurence/query/testWithQuality/test3/expectedResponse.json");
     }
 
+
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithoutQualityAndReturningPoints(Vertx vertx, VertxTestContext testContext) {
+    public void testQueryWithQualityWithMixedPoints(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/testWithQuality/test4/request.json",
                 "/http/grafana/hurence/query/testWithQuality/test4/expectedResponse.json");
@@ -159,34 +160,10 @@ public class QueryEndPointWithQualityIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithQualityAvgAndReturningAllMixedPoints(Vertx vertx, VertxTestContext testContext) {
+    public void testQueryWithoutQualityWithMixedPoints(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/testWithQuality/test5/request.json",
                 "/http/grafana/hurence/query/testWithQuality/test5/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithQualityMinAndReturningAllMixedPoints(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/testWithQuality/test6/request.json",
-                "/http/grafana/hurence/query/testWithQuality/test6/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithQualityMaxAndReturningAllMixedPoints(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/testWithQuality/test7/request.json",
-                "/http/grafana/hurence/query/testWithQuality/test7/expectedResponse.json");
-    }
-
-    @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testQueryWithoutQualityAndReturningMixedPoints(Vertx vertx, VertxTestContext testContext) {
-        assertRequestGiveResponseFromFile(vertx, testContext,
-                "/http/grafana/hurence/query/testWithQuality/test8/request.json",
-                "/http/grafana/hurence/query/testWithQuality/test8/expectedResponse.json");
     }
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,

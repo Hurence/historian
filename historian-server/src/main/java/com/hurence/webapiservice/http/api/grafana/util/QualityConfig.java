@@ -35,6 +35,14 @@ public class QualityConfig {
         return qualityAgg;
     }
 
+    public static String getDefaultQualityAgg() {
+        return CHUNK_QUALITY_AVG_FIELD;
+    }
+
+    public static String getQualityCheckField() {
+        return CHUNK_QUALITY_AVG_FIELD;
+    }
+
     public void setQualityAgg(QualityAgg qualityAgg) {
         this.qualityAgg = qualityAgg;
     }
@@ -78,6 +86,9 @@ public class QualityConfig {
                 break;
             case MAX:
                 qualityAggName = CHUNK_QUALITY_MAX_FIELD; //TODO
+                break;
+            case FIRST:
+                qualityAggName = CHUNK_QUALITY_FIRST_FIELD; //TODO
                 break;
             case NONE:
                 qualityAggName = null;
