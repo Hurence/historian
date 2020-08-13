@@ -40,11 +40,12 @@ public class HurenceDatasourcePluginQueryRequestParam {
     private final Float qualityValue;
     private final QualityAgg qualityAgg;
     private final boolean qualityReturn;
+    private final boolean useQuality;
 
     private HurenceDatasourcePluginQueryRequestParam(JsonArray metricNames, long from, long to, String format,
                                                      int maxDataPoints, SamplingAlgorithm samplingAlgo, int bucketSize,
                                                      Map<String, String> tags, String requestId, List<AGG> aggregList,
-                                                     Float qualityValue, QualityAgg qualityAgg, boolean qualityReturn) {
+                                                     Float qualityValue, QualityAgg qualityAgg, boolean qualityReturn, boolean useQuality) {
         Objects.requireNonNull(metricNames);
         if (metricNames.isEmpty()) throw new IllegalArgumentException("metricNames should not be empty !");
         this.metricNames = metricNames;
@@ -60,6 +61,7 @@ public class HurenceDatasourcePluginQueryRequestParam {
         this.qualityValue = qualityValue;
         this.qualityAgg = qualityAgg;
         this.qualityReturn = qualityReturn;
+        this.useQuality = useQuality;
     }
 
 
@@ -108,6 +110,10 @@ public class HurenceDatasourcePluginQueryRequestParam {
         return requestId;
     }
 
+    public boolean getUseQuality() {
+        return useQuality;
+    }
+
     public static class Builder {
         private JsonArray metricNames;
         private long from = DEFAULT_FROM;
@@ -122,6 +128,7 @@ public class HurenceDatasourcePluginQueryRequestParam {
         private Float qualityValue = DEFAULT_QUALITY_VALUE_NAN;
         private QualityAgg qualityAgg = DEFAULT_QUALITY_NONE;
         private boolean qualityReturn = DEFAULT_QUALITY_RETURN;
+        private boolean useQuality;
 
         public Builder withMetricNames(JsonArray metricNames) {
             this.metricNames = metricNames;
@@ -188,9 +195,14 @@ public class HurenceDatasourcePluginQueryRequestParam {
             return this;
         }
 
+        public Builder withUseQuality(Boolean useQuality) {
+            this.useQuality = useQuality;
+            return this;
+        }
+
         public HurenceDatasourcePluginQueryRequestParam build() {
             return new HurenceDatasourcePluginQueryRequestParam(metricNames, from, to, format, maxDataPoints,
-                    samplingAlgo, bucketSize, tags, requestId, aggreg, qualityValue, qualityAgg, qualityReturn);
+                    samplingAlgo, bucketSize, tags, requestId, aggreg, qualityValue, qualityAgg, qualityReturn, useQuality);
         }
 
     }

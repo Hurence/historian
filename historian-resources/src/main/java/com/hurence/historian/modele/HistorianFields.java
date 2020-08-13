@@ -29,6 +29,8 @@ public class HistorianFields {
     public static String QUALITY_VALUE = "quality_value";
     public static String QUALITY_AGG  = "quality_agg";
     public static String QUALITY_RETURN  = "quality_return";
+    public static String USE_QUALITY  = "use_quality";
+    public static String QUALITY_CHECK  = "is_quality_ok";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";
@@ -66,7 +68,6 @@ public class HistorianFields {
     public static String CHUNK_QUALITY_MAX_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MAX;
     public static String CHUNK_QUALITY_SUM_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_SUM;
     public static String CHUNK_QUALITY_FIRST_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_FIRST;
-
     //schema historian
     public static String CHUNK_YEAR = HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR;
     public static String CHUNK_MONTH = HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH;

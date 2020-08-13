@@ -375,7 +375,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()))
                 .put(QUALITY_VALUE, request.getQualityValue())
                 .put(QUALITY_AGG, request.getQualityAgg().toString())
-                .put(QUALITY_RETURN, request.getQualityReturn());
+                .put(QUALITY_RETURN, request.getQualityReturn())
+                .put(USE_QUALITY, request.getUseQuality());
     }
 
     public final static String LIMIT_JSON_PATH = "/limit";

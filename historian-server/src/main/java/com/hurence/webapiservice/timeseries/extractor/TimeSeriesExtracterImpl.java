@@ -4,6 +4,8 @@ import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
+import com.hurence.webapiservice.http.api.grafana.util.QualityConfig;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.PointsAggsCalculator;
@@ -54,7 +56,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         List<Point> pointsToReturn = new ArrayList<>();
         sampledPoints.forEach(point -> {
             if ((point.hasQuality() && point.getQuality() >= qualityLimit)
-                        || (!point.hasQuality())) // TODO configure this to get default quality and compare with qualitylimit
+                        || (!point.hasQuality()))
                 pointsToReturn.add(point);
         });
         return pointsToReturn;

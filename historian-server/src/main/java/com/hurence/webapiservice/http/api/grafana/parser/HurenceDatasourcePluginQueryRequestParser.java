@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.hurence.historian.modele.HistorianFields.QUALITY_VALUE;
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
 import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 
@@ -118,9 +119,16 @@ public class HurenceDatasourcePluginQueryRequestParser {
             builder.withAggreg(agreg);
         }
         Float qualityValue = parseQualityValue(requestBody);
+
+        boolean useQuality;
         if (qualityValue != null) {
             builder.withQualityValue(qualityValue);
+            useQuality = true;
+        } else {
+            useQuality = false;
         }
+        builder.withUseQuality(useQuality);
+
         QualityAgg qualityAgg = parseQualityAgg(requestBody);
         if (qualityAgg != null) {
             builder.withQualityAgg(qualityAgg);
@@ -172,6 +180,9 @@ public class HurenceDatasourcePluginQueryRequestParser {
                             JsonObject toReturn = new JsonObject()
                                     .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME));
                             Map<String, String> tags = parseTags(jsonObject);
+                            Float qualityValue = parseQualityValue(jsonObject);
+                            if (!qualityValue.isNaN())
+                                toReturn.put(QUALITY_VALUE, qualityValue);
                             if (!tags.isEmpty())
                                 toReturn.put(HistorianFields.TAGS, tags);
                             if (jsonObject.containsKey(QUERY_PARAM_REF_ID))

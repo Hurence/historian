@@ -3,6 +3,7 @@ package com.hurence.webapiservice.timeseries.extractor;
 import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.timeseries.modele.PointWithQualityImpl;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.ChunkAggsCalculator;
@@ -26,9 +27,13 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     final ChunkAggsCalculator aggsCalculator;
 
-    public TimeSeriesExtracterUsingPreAgg(long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList, boolean returnQuality) {
+    final QualityAgg qualityAgg;
+
+    public TimeSeriesExtracterUsingPreAgg(long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList,
+                                          boolean returnQuality, QualityAgg qualityAgg) {
         super(from, to, samplingConf, totalNumberOfPoint, returnQuality);
         aggsCalculator = new ChunkAggsCalculator(aggregList);
+        this.qualityAgg = qualityAgg;
     }
 
     @Override
@@ -130,8 +135,9 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
     }
     private Float getQualityValue(List<JsonObject> chunks) {
         Float quality;
-        switch (samplingConf.getAlgo()) {
-            case AVERAGE:
+        switch (qualityAgg) {
+            case AVG:
+            case NONE:  // is it good to chose AVG if qualityAgg is NONE ?
                 try {
                     long numberOfPoint = chunks.stream()
                             .mapToLong(chunk -> chunk.getLong(CHUNK_COUNT_FIELD))
@@ -176,12 +182,11 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                     quality = Float.NaN;
                 }
                 break;
-            case MODE_MEDIAN:
-            case LTTB:
-            case MIN_MAX:
-            case NONE:
+            /*case NONE:
+                quality = Float.NaN;
+                break;*/
             default:
-                throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
+                throw new IllegalStateException("Unsupported algo: " + qualityAgg);
         }
         return quality;
     }
