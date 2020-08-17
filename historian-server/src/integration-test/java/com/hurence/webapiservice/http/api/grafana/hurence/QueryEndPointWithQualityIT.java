@@ -68,7 +68,7 @@ public class QueryEndPointWithQualityIT {
                                 new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
                                 new PointWithQualityImpl( 1477948224866L, 14, 0.8f),
                                 new PointWithQualityImpl( 1477957224866L, 86, 0.7f)
-                        ),
+                        ),//temp_b
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
                                 new PointWithQualityImpl( 1477917224866L, 767, 0.9f),
@@ -76,7 +76,7 @@ public class QueryEndPointWithQualityIT {
                                 new PointWithQualityImpl( 1477931224866L, 125, 0.6f),    // avg = 0.783
                                 new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
                                 new PointWithQualityImpl( 1477985224866L, 7, 0.9f)
-                        ),
+                        ),//temp_c
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
                                 new PointWithQualityImpl( 1477917224866L, 767, 0.8f),
@@ -84,7 +84,7 @@ public class QueryEndPointWithQualityIT {
                                 new PointWithQualityImpl( 1477931224866L, 125, 0.8f),
                                 new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
                                 new PointWithQualityImpl( 1477985224866L, 7, 0.8f)
-                        ),
+                        ),//mixed1
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
                                 new PointImpl( 1477917224866L, 767),
@@ -92,7 +92,7 @@ public class QueryEndPointWithQualityIT {
                                 new PointWithQualityImpl( 1477931224866L, 125, 0.6f),
                                 new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
                                 new PointImpl( 1477985224866L, 7)
-                        ),
+                        ),//mixed2
                         Arrays.asList(
                                 new PointImpl( 1477895624866L, 622),
                                 new PointWithQualityImpl( 1477916224866L, -3, 0.4f),
@@ -100,7 +100,7 @@ public class QueryEndPointWithQualityIT {
                                 new PointWithQualityImpl( 1477924624866L, 568, 0.6f),     // avg = 0.65
                                 new PointImpl( 1477948224866L, 14),
                                 new PointWithQualityImpl( 1477957224866L, 86, 0.2f)
-                        ),
+                        ),//non_mixed
                         Arrays.asList(
                                 new PointWithQualityImpl( 1477895624866L, 622, 0.8f),
                                 new PointWithQualityImpl( 1477916224866L, -3, 0.4f),

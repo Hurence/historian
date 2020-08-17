@@ -6,17 +6,21 @@ import java.util.Set;
 
 public interface MetricsSizeInfo {
 
-    public Set<MetricRequest> getMetricRequests();
+    Set<MetricRequest> getMetricRequests();
 
-    public MetricSizeInfo getMetricInfo(MetricRequest metric);
+    MetricSizeInfo getMetricInfo(MetricRequest metric);
 
-    public long getTotalNumberOfPoints();
+    long getTotalNumberOfPoints();
 
-    public long getTotalNumberOfChunks();
+    //TODO cette méthode n'est utilisé que dans l'implémentation de MetricsSizeInfo. Elle ne devrait donc pas être
+    // public et donc pas présente dans l'interface.
+    // Mais il est vrai que ce nom est plus parlant que la méthode getTotalNumberOfChunksToReturn
+    // Tu peux donc a la place supprimer getTotalNumberOfChunksToReturn
+    long getTotalNumberOfChunks();
 
-    public long getTotalNumberOfChunksWithCorrectQuality();
+    long getTotalNumberOfChunksWithCorrectQuality();
 
-    public long getTotalNumberOfPointsWithCorrectQuality();
+    long getTotalNumberOfPointsWithCorrectQuality();
 
     long getTotalNumberOfChunksToReturn();
 

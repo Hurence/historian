@@ -214,7 +214,13 @@ public class GetTimeSeriesHandler {
 
     private MetricsSizeInfo getNumberOfPointsByMetricInRequest(List<MetricRequest> requests, SolrQuery query, boolean useQuality) throws IOException {
         NumberOfPointsByMetricHelper numberOfPointsByMetricHelper = getNumberOfPointsByMetricHelperImpl(useQuality, requests);
+        //TODO getStreamExpression should return the final expression directly.
+        // for this to work you can provide information in constructor of impl,
+        // NumberOfPointsWithQualityOkByMetricHelperImpl
+        // NumberOfAllPointsByMetricHelperImpl
+        // Indeed here getStreamExpression is not really usefull, you want your object to directly provide the desired streaming expresion
         String streamExpression = numberOfPointsByMetricHelper.getStreamExpression();
+        //TODO so this should be moved inside NumberOfPointsByMetricHelper implementations
         StringBuilder exprBuilder = new StringBuilder(streamExpression).append(solrHistorianConf.chunkCollection)
                 .append(",q=").append(query.getQuery());
         if (query.getFilterQueries() != null) {
@@ -223,10 +229,10 @@ public class GetTimeSeriesHandler {
                         .append(",fq=").append(filterQuery);
             }
         }
-
         List<String> neededFields = findNeededTagsName(requests);
         neededFields.add(NAME);
         numberOfPointsByMetricHelper.getExpression(exprBuilder, neededFields);
+        //TODO until this line...
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
         paramsLoc.set("expr", exprBuilder.toString());
@@ -429,6 +435,8 @@ public class GetTimeSeriesHandler {
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities(), request.getQualityReturn());
+        //TODO here you should set totalNumberOfPointForMetric with  totalNumberOfPointsWithCorrectQuality and not totalNumberOfPointsToReturn !
+        // so you should create a new method instead of fillingExtractorWithMetricsSizeInfo.
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
