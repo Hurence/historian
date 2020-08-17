@@ -1,11 +1,17 @@
 package com.hurence.timeseries.modele.chunk;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
+import com.hurence.timeseries.converter.ChunkTruncater;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 public class ChunkFromJsonObjectVersionEVOA0 extends AbstractChunkFromJsonObject implements ChunkVersionEVOA0 {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChunkFromJsonObjectVersionEVOA0.class);
 
     public ChunkFromJsonObjectVersionEVOA0(JsonObject chunk) {
         super(chunk);
@@ -94,12 +100,12 @@ public class ChunkFromJsonObjectVersionEVOA0 extends AbstractChunkFromJsonObject
     }
 
     @Override
-    public String sax() {
+    public String getSax() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SAX);
     }
 
     @Override
-    public boolean trend() {
+    public boolean getTrend() {
         Object obj = getObjectOrFirstObjectIfItIsAnArray(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_TREND);
         return (boolean) obj;
     }
@@ -126,4 +132,13 @@ public class ChunkFromJsonObjectVersionEVOA0 extends AbstractChunkFromJsonObject
         return null;
     }
 
+    @Override
+    public ChunkVersionEVOA0 truncate(long from, long to) {
+        try {
+            return ChunkTruncater.truncate(this, from, to);
+        } catch (IOException e) {
+            LOGGER.error("Error encoding binaries", e);
+            throw new IllegalArgumentException(e);
+        }
+    }
 }

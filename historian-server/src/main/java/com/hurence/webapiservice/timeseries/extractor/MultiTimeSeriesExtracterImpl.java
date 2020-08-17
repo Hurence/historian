@@ -37,21 +37,21 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     @Override
     public void addChunk(Chunk chunk) {
-        rebuildChunkIfNeeded(chunk);
+        final Chunk finalChunk = rebuildChunkIfNeeded(chunk);
         metricRequests.forEach(metricRequest -> {
-            if (metricRequest.isChunkMatching(chunk)) {
+            if (metricRequest.isChunkMatching(finalChunk)) {
                 extractorByMetricRequest
                         .computeIfAbsent(metricRequest, this::createTimeSeriesExtractor)
-                        .addChunk(chunk);
+                        .addChunk(finalChunk);
             }
         });
     }
 
-    private void rebuildChunkIfNeeded(Chunk chunk) {
+    private Chunk rebuildChunkIfNeeded(Chunk chunk) {
         if (from > chunk.getStart() || to < chunk.getEnd()) {
-            //TODO
-
+            return chunk.truncate(from, to);
         }
+        return chunk;
     }
 
     @Override

@@ -8,8 +8,8 @@ import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.functions.*;
 import com.hurence.timeseries.metric.MetricType;
 import com.hurence.timeseries.modele.chunk.Chunk;
-import com.hurence.timeseries.modele.chunk.ChunkVersion0;
-import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl;
+import com.hurence.timeseries.modele.chunk.ChunkVersionEVOA0;
+import com.hurence.timeseries.modele.chunk.ChunkVersionEVOA0Impl;
 import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.query.QueryEvaluator;
 import com.hurence.timeseries.query.TypeFunctions;
@@ -20,26 +20,23 @@ import java.util.Map;
 /**
  * This class is not thread safe !
  */
-public class PointsToChunkVersion0 implements PointsToChunk {
+public class PointsToChunkVersionEVOA0 implements PointsToChunk {
 
     private List<ChronixTransformation> transformations;
     private List<ChronixAggregation> aggregations;
     private List<ChronixAnalysis> analyses;
     private List<ChronixEncoding> encodings;
     private FunctionValueMap functionValueMap;
-    private String chunkOrigin;
-    private static final String METRIC_STRING = "first;last;min;max;sum;avg;count;dev;trend;outlier;sax:%s,0.01,%s";
+    private static final String METRIC_STRING = "first;min;max;sum;avg;count;trend;sax:%s,0.01,%s";
 
-    public PointsToChunkVersion0(String chunkOrigin) {
-        this.chunkOrigin = chunkOrigin;
-    }
+    public PointsToChunkVersionEVOA0() { }
 
     @Override
     public SchemaVersion getVersion() {
-        return SchemaVersion.VERSION_0;
+        return SchemaVersion.EVOA0;
     }
 
-    public ChunkVersion0 buildChunk(String name, List<? extends Point> points, Map<String, String> tags) {
+    public ChunkVersionEVOA0 buildChunk(String name, List<? extends Point> points, Map<String, String> tags) {
         if (points == null || points.isEmpty())
             throw new IllegalArgumentException("points should not be null or empty");
         MetricTimeSeries chunk = buildMetricTimeSeries(name, points);
@@ -62,11 +59,10 @@ public class PointsToChunkVersion0 implements PointsToChunk {
         return null;
     }
 
-    private ChunkVersion0 convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
-        ChunkVersion0Impl.Builder builder = new ChunkVersion0Impl.Builder();
+    private ChunkVersionEVOA0 convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
+        ChunkVersionEVOA0Impl.Builder builder = new ChunkVersionEVOA0Impl.Builder();
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(timeSerie);
         builder
-                .setChunkOrigin(this.chunkOrigin)
                 .setTags(tags)
                 .setEnd(timeSerie.getEnd())
                 .setName(timeSerie.getName())
@@ -87,7 +83,7 @@ public class PointsToChunkVersion0 implements PointsToChunk {
      *
      * @return
      */
-    private void computeAndSetAggs(ChunkVersion0Impl.Builder builder, MetricTimeSeries timeSeries) {
+    private void computeAndSetAggs(ChunkVersionEVOA0Impl.Builder builder, MetricTimeSeries timeSeries) {
         Integer sax_alphabet_size = Math.max(Math.min(timeSeries.size(), 7), 2);
         Integer sax_string_length = Math.min(timeSeries.size(), 100);
         String metricString = String.format(METRIC_STRING, sax_alphabet_size, sax_string_length);
@@ -107,9 +103,6 @@ public class PointsToChunkVersion0 implements PointsToChunk {
                 case "first" :
                     builder.setFirst(value);
                     break;
-                case "last" :
-                    builder.setLast(value);
-                    break;
                 case "min" :
                     builder.setMin(value);
                     break;
@@ -125,9 +118,6 @@ public class PointsToChunkVersion0 implements PointsToChunk {
                 case "count" :
                     builder.setCount((long)value);
                     break;
-                case "dev" :
-                    builder.setStd(value);
-                    break;
             }
         }
         for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
@@ -136,9 +126,6 @@ public class PointsToChunkVersion0 implements PointsToChunk {
             switch (name) {
                 case "trend" :
                     builder.setTrend(value);
-                    break;
-                case "outlier" :
-                    builder.setOutlier(value);
                     break;
             }
         }

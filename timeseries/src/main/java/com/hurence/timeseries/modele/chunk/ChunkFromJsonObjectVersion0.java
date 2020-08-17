@@ -1,13 +1,18 @@
 package com.hurence.timeseries.modele.chunk;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
+import com.hurence.timeseries.converter.ChunkTruncater;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class ChunkFromJsonObjectVersion0 extends AbstractChunkFromJsonObject implements ChunkVersion0 {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChunkFromJsonObjectVersion0.class);
 
     public ChunkFromJsonObjectVersion0(JsonObject chunk) {
         super(chunk);
@@ -129,5 +134,15 @@ public class ChunkFromJsonObjectVersion0 extends AbstractChunkFromJsonObject imp
         return "ChunkFromJsonObjectVersion0{" +
                 "chunk=" + chunk.encodePrettily() +
                 '}';
+    }
+
+    @Override
+    public ChunkVersion0 truncate(long from, long to) {
+        try {
+            return ChunkTruncater.truncate(this, from, to);
+        } catch (IOException e) {
+            LOGGER.error("Error encoding binaries", e);
+            throw new IllegalArgumentException(e);
+        }
     }
 }

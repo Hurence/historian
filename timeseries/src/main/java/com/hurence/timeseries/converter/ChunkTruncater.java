@@ -2,6 +2,7 @@ package com.hurence.timeseries.converter;
 
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.modele.chunk.ChunkVersion0;
+import com.hurence.timeseries.modele.chunk.ChunkVersionEVOA0;
 import com.hurence.timeseries.modele.points.PointImpl;
 
 import java.io.IOException;
@@ -10,7 +11,11 @@ import java.util.stream.Collectors;
 
 public class ChunkTruncater {
 
+    public final static String TRUNCATER_ORIGIN = "ChunkTruncater";
     /**
+     * The chunk in input must have getValueAsBinary implemented (not returning null)
+     * The chunk in input must have getName implemented (not returning null)
+     * The chunk in input must have getTags implemented (not returning null)
      *
      * @param from the desired chunk_start of new chunk
      * @param to the desired chunk_end of new chunk
@@ -25,7 +30,26 @@ public class ChunkTruncater {
                     return p.getTimestamp() > from && p.getTimestamp() < to;
                 })
                 .collect(Collectors.toList());
-        PointsToChunkVersion0 converter = new PointsToChunkVersion0("ChunkTruncater");
+        PointsToChunkVersion0 converter = new PointsToChunkVersion0(TRUNCATER_ORIGIN);
+        return converter.buildChunk(chunk.getName(), newPoints, chunk.getTags());
+    }
+
+    /**
+     *
+     * @param from the desired chunk_start of new chunk
+     * @param to the desired chunk_end of new chunk
+     * @return a new Chunk without point outside of boundaries
+     * (recompute aggregations as well)
+     */
+    public static ChunkVersionEVOA0 truncate(ChunkVersionEVOA0 chunk, long from, long to) throws IOException {
+        byte[] binaries = chunk.getValueAsBinary();
+        List<PointImpl> points = BinaryCompactionUtil.unCompressPoints(binaries, chunk.getStart(), chunk.getEnd(), from, to);
+        List<PointImpl> newPoints = points.stream()
+                .filter(p -> {
+                    return p.getTimestamp() > from && p.getTimestamp() < to;
+                })
+                .collect(Collectors.toList());
+        PointsToChunkVersionEVOA0 converter = new PointsToChunkVersionEVOA0(TRUNCATER_ORIGIN);
         return converter.buildChunk(chunk.getName(), newPoints, chunk.getTags());
     }
 }
