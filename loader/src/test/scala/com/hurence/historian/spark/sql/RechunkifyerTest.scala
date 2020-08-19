@@ -3,24 +3,21 @@ package com.hurence.historian.spark.sql
 import java.util.Date
 
 import com.hurence.historian.modele.ChunkRecordV0
+import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql.transformer.{Rechunkifyer, RechunkifyerOptions}
-import org.apache.spark.sql.SparkSession
 import org.junit.Test
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.slf4j.LoggerFactory
 
 
-class RechunkifyerTest {
-private val logger = LoggerFactory.getLogger(classOf[LoaderTests])
+class RechunkifyerTest extends SparkSessionTestWrapper {
+
+  private val logger = LoggerFactory.getLogger(classOf[LoaderTests])
+  import spark.implicits._
+
   @Test
-  def TestRechunkifyer() {
-    val spark = SparkSession
-      .builder
-      .master("local[*]")
-      .appName("ReChunkyfierExample")
-      .getOrCreate()
-    import spark.implicits._
+  def TestRechunkifyer {
 
     val now = new Date().getTime
     val oneSec = 1000L
@@ -57,8 +54,22 @@ private val logger = LoggerFactory.getLogger(classOf[LoaderTests])
       .setSaxAlphabetSize(4)
       .setSaxStringLength(4)
 
-    val bucketedData = chunkyfier.transform(dataFrame).as[ChunkRecordV0]
 
+    val bucketedData = chunkyfier.transform(dataFrame).as[ChunkRecordV0]
+    val bucketedDataCollect = bucketedData.collect()
+
+
+    logger.debug(bucketedDataCollect(3).toString)
+    assertEquals("metric_a", bucketedDataCollect(3).name)
+    assertEquals("2", bucketedDataCollect(3).tags("metric_id"))
+    assertEquals(4, bucketedDataCollect(3).count)
+    assertEquals(2.1, bucketedDataCollect(3).min)
+    assertEquals(2.4, bucketedDataCollect(3).max)
+    assertEquals(2.1, bucketedDataCollect(3).first)
+    assertEquals(2.4, bucketedDataCollect(3).last)
+    assertEquals(0.12909944487358033, bucketedDataCollect(3).stddev)
+    assertEquals(2.25, bucketedDataCollect(3).avg)
+    assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQYHLh4FQ6cV9GcNRMEGB24ODXTwIAJKCNw4F2upjEYMDsIMAAACfULTjYAAAA=", bucketedDataCollect(3).chunk)
 
     val options = new RechunkifyerOptions
     val rechunkify = new Rechunkifyer
@@ -70,18 +81,19 @@ private val logger = LoggerFactory.getLogger(classOf[LoaderTests])
     val newBucketedDataChunkRecord = newBucketedData.as[ChunkRecordV0].collect()
 //    println(newBucketedDataChunkRecord(0))
 
-    logger.debug(newBucketedDataChunkRecord(0).toString)
-    assertEquals("metric_a", newBucketedDataChunkRecord(0).name)
-    assertEquals("1", newBucketedDataChunkRecord(0).tags("metric_id"))
-    assertEquals(2, newBucketedDataChunkRecord(0).count)
-    assertEquals(1.7, newBucketedDataChunkRecord(0).min)
-    assertEquals(1.8, newBucketedDataChunkRecord(0).max)
-    assertEquals(1.7, newBucketedDataChunkRecord(0).first)
-    assertEquals(1.8, newBucketedDataChunkRecord(0).last)
-    assertEquals(0.07071067811865482, newBucketedDataChunkRecord(0).stddev)
-    assertEquals(1.75, newBucketedDataChunkRecord(0).avg)
-    assertEquals("H4sIAAAAAAAAAOPi1DQGg9/2XLwCB86raJ49AwJ/7AUYAMo5bj4cAAAA", newBucketedDataChunkRecord(0).chunk)
 
+    logger.debug(newBucketedDataChunkRecord(3).toString)
+    assertEquals("metric_a", newBucketedDataChunkRecord(3).name)
+    assertEquals("2", newBucketedDataChunkRecord(3).tags("metric_id"))
+    assertEquals(4, newBucketedDataChunkRecord(3).count)
+    assertEquals(2.1, newBucketedDataChunkRecord(3).min)
+    assertEquals(2.4, newBucketedDataChunkRecord(3).max)
+    assertEquals(2.1, newBucketedDataChunkRecord(3).first)
+    assertEquals(2.4, newBucketedDataChunkRecord(3).last)
+    assertEquals(0.12909944487358033, newBucketedDataChunkRecord(3).stddev)
+    assertEquals(2.25, newBucketedDataChunkRecord(3).avg)
+    assertEquals("H4sIAAAAAAAAAOPi1Dx7BgQYHLh4FQ6cV9GcNRMEGB24ODXTwIAJKCNw4F2upjEYMDsIMAAACfULTjYAAAA=", newBucketedDataChunkRecord(3).chunk)
 
+  spark.close()
   }
 }
