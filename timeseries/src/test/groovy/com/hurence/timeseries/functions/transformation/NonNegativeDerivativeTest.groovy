@@ -29,7 +29,7 @@ import java.time.Instant
 class NonNegativeDerivativeTest extends Specification {
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Derivative time series","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Derivative time series")
         def derivative = new NonNegativeDerivative()
 
         timeSeriesBuilder.point(dateOf("2016-05-23T10:51:00.000Z"), 5)

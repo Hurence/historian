@@ -30,7 +30,7 @@ import java.time.Instant
 class DerivativeTest extends Specification {
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Derivative time series","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Derivative time series")
         def derivative = new Derivative()
         def analysisResult = new FunctionValueMap(1, 1, 1)
 

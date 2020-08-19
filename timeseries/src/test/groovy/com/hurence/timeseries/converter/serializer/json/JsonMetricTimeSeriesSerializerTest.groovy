@@ -34,7 +34,7 @@ class JsonMetricTimeSeriesSerializerTest extends Specification {
         given:
         def times = longList([0, 1, 2])
         def values = doubleList([4711d, 8564d, 1237d])
-        def ts = new MetricTimeSeries.Builder("test", "metric").points(times, values).build()
+        def ts = new MetricTimeSeries.Builder("test").points(times, values).build()
 
         def serializer = new JsonMetricTimeSeriesSerializer()
         def start = 0l
@@ -44,7 +44,7 @@ class JsonMetricTimeSeriesSerializerTest extends Specification {
         def json = serializer.toJson(ts)
 
         then:
-        def builder = new MetricTimeSeries.Builder("test", "metric")
+        def builder = new MetricTimeSeries.Builder("test")
         serializer.fromJson(json, start, end, builder)
         def recoverdTs = builder.build();
 
@@ -66,12 +66,12 @@ class JsonMetricTimeSeriesSerializerTest extends Specification {
         given:
         def times = longList([0, 1, 2, 3, 4, 5])
         def values = doubleList([4711, 8564, 8564, 1237, 1237, 1237])
-        def ts = new MetricTimeSeries.Builder("test", "metric").points(times, values).build()
+        def ts = new MetricTimeSeries.Builder("test").points(times, values).build()
 
         def serializer = new JsonMetricTimeSeriesSerializer()
 
         when:
-        def builder = new MetricTimeSeries.Builder("test", "metric")
+        def builder = new MetricTimeSeries.Builder("test")
 
         def json = serializer.toJson(ts)
         serializer.fromJson(json, start, end, builder)
@@ -87,7 +87,7 @@ class JsonMetricTimeSeriesSerializerTest extends Specification {
     def "test serialize to json with empty timestamps, values"() {
         given:
         def serializer = new JsonMetricTimeSeriesSerializer()
-        def ts = new MetricTimeSeries.Builder("test", "metric").points(times, values).build()
+        def ts = new MetricTimeSeries.Builder("test").points(times, values).build()
 
         when:
         def json = serializer.toJson(ts)
@@ -117,7 +117,7 @@ class JsonMetricTimeSeriesSerializerTest extends Specification {
     def "test deserialize from empty json "() {
         given:
         def serializer = new JsonMetricTimeSeriesSerializer()
-        def builder = new MetricTimeSeries.Builder("test", "metric")
+        def builder = new MetricTimeSeries.Builder("test")
 
         when:
         serializer.fromJson("[[],[]]".getBytes(Charset.forName("UTF-8")), 1, 2000, builder)

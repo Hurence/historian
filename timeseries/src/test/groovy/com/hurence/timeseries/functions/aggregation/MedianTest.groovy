@@ -28,7 +28,7 @@ import spock.lang.Specification
 class MedianTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Median", "metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Median")
 
         LongList timestamps = new LongList()
         15.times {
@@ -69,7 +69,7 @@ class MedianTest extends Specification {
         def analysisResult = new FunctionValueMap(1, 1, 1)
 
         when:
-        new Median().execute(new MetricTimeSeries.Builder("Empty", "metric").build(), analysisResult)
+        new Median().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

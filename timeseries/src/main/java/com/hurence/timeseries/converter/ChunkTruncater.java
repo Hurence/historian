@@ -49,7 +49,7 @@ public class ChunkTruncater {
                     return p.getTimestamp() > from && p.getTimestamp() < to;
                 })
                 .collect(Collectors.toList());
-        PointsToChunkVersionEVOA0 converter = new PointsToChunkVersionEVOA0(TRUNCATER_ORIGIN);
+        PointsToChunkVersionEVOA0 converter = new PointsToChunkVersionEVOA0();
         return converter.buildChunk(chunk.getName(), newPoints, chunk.getTags());
     }
 }

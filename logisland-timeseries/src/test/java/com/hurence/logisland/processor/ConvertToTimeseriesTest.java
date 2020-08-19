@@ -118,7 +118,7 @@ public class ConvertToTimeseriesTest {
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_START, 1000000);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_END, 1001999);
         out.assertFieldEquals(TimeSeriesRecord.METRIC_NAME, "cpu.load");
-        out.assertFieldEquals(FieldDictionary.RECORD_TYPE, SAMPLED_RECORD);
+        out.assertFieldEquals(FieldDictionary.RECORD_TYPE, "timeseries");
         out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8063);
