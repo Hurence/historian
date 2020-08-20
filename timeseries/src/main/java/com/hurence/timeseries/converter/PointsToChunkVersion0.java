@@ -39,6 +39,13 @@ public class PointsToChunkVersion0 implements PointsToChunk {
         return SchemaVersion.VERSION_0;
     }
 
+    /**
+     *
+     * @param name
+     * @param points expected to be f the same year, month, day
+     * @param tags
+     * @return
+     */
     public ChunkVersion0 buildChunk(String name, List<? extends Point> points, Map<String, String> tags) {
         if (points == null || points.isEmpty())
             throw new IllegalArgumentException("points should not be null or empty");
@@ -54,12 +61,6 @@ public class PointsToChunkVersion0 implements PointsToChunk {
         analyses = functions.getTypeFunctions(new MetricType()).getAnalyses();
         encodings = functions.getTypeFunctions(new MetricType()).getEncodings();
         functionValueMap = new FunctionValueMap(aggregations.size(), analyses.size(), transformations.size(), encodings.size());
-    }
-
-
-    @Override
-    public Chunk buildChunk(String name, List<? extends Point> points) {
-        return null;
     }
 
     private ChunkVersion0 convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {

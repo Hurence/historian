@@ -1,14 +1,14 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.modele.MeasureRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.functions.toTimestampUTC
 import com.hurence.historian.spark.sql.reader.Reader
+import com.hurence.timeseries.modele.measure.MeasureVersionV0
 import org.apache.spark.sql.functions.{lit, _}
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 import org.slf4j.LoggerFactory
 
-class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
+class GenericMeasuresReaderV0 extends Reader[MeasureVersionV0] {
 
   private val logger = LoggerFactory.getLogger(classOf[GenericMeasuresReaderV0])
 
@@ -23,7 +23,7 @@ class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
     "tagsFields" -> "tag_a,tag_b"
   )
 
-  override def read(options: Options): Dataset[MeasureRecordV0] = {
+  override def read(options: Options): Dataset[MeasureVersionV0] = {
     // 5. load back those chunks to verify
     val spark = SparkSession.getActiveSession.get
     import spark.implicits._
@@ -78,7 +78,7 @@ class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
       .withColumn("day", from_unixtime($"timestamp"/ 1000L, "yyyy-MM-dd"))
      // .withColumn("day", toDateUTC($"timestamp", lit("yyyy-MM-dd")))
       .drop(tagsFields: _*)
-      .as[MeasureRecordV0]
+      .as[MeasureVersionV0](Encoders.bean(classOf[MeasureVersionV0]))
 
   }
 

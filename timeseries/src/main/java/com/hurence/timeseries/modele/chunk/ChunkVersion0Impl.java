@@ -16,32 +16,32 @@ public class ChunkVersion0Impl implements ChunkVersion0 {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChunkVersion0Impl.class);
 
-    private SchemaVersion version;
-    private String name;
-    private byte[] valueBinaries;
-    private long start;
-    private long end;
-    private long count;
-    private double first;
-    private double min;
-    private double max;
-    private double sum;
-    private double avg;
-    private double last;
-    private double std;
-    private int year;
-    private int month;
-    private String day;
-    private String chunkOrigin;
-    private String sax;
-    private boolean trend;
-    private boolean outlier;
-    private List<String> compactionRunnings;
-    private String id;
+    protected SchemaVersion version;
+    protected String name;
+    protected byte[] valueBinaries;
+    protected long start;
+    protected long end;
+    protected long count;
+    protected double first;
+    protected double min;
+    protected double max;
+    protected double sum;
+    protected double avg;
+    protected double last;
+    protected double std;
+    protected int year;
+    protected int month;
+    protected String day;
+    protected String chunkOrigin;
+    protected String sax;
+    protected boolean trend;
+    protected boolean outlier;
+    protected List<String> compactionRunnings;
+    protected String id;
 
-    private Map<String, String> tags;
+    protected Map<String, String> tags;
 
-    private ChunkVersion0Impl(SchemaVersion version, String name,
+    protected ChunkVersion0Impl(SchemaVersion version, String name,
                               byte[] valueBinaries, long start, long end,
                               long count, double first, double min,
                               double max, double sum, double avg,

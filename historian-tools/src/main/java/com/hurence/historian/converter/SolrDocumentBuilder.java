@@ -9,7 +9,7 @@ import com.google.common.hash.Hashing;
 
 import java.nio.charset.StandardCharsets;
 
-public class SolrDocumentBuilder {
+public class    SolrDocumentBuilder {
 
     public static SolrInputDocument fromChunk(Chunk chunk, SchemaVersion version) {
         switch (version) {
