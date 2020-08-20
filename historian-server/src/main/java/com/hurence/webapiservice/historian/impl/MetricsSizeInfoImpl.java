@@ -115,22 +115,5 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
         return strBuilder.toString();
     }
 
-    //TODO cette mécanique devrait être externaliser je pense. MetricsSizeInfo ne contient que des informations
-    // pas de la logique métier ou fonctionnel. De plus je trouve bizarre ce if else on en reparlera lors du merge avec master.
-    @Override
-    public long getTotalNumberOfChunksToReturn() {
-        if (metricsInfo.keySet().stream().findAny().get().getQuality().getQualityValue().isNaN())
-            return getTotalNumberOfChunks();
-        else
-            return getTotalNumberOfChunksWithCorrectQuality();
-    }
 
-    //TODO pareil
-    @Override
-    public long getTotalNumberOfPointsToReturn() {
-        if (metricsInfo.keySet().stream().findAny().get().getQuality().getQualityValue().isNaN())
-            return getTotalNumberOfPoints();
-        else
-            return getTotalNumberOfPointsWithCorrectQuality();
-    }
 }

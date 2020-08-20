@@ -1,24 +1,44 @@
 package com.hurence.webapiservice.historian.impl;
 
 import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
+import org.apache.solr.client.solrj.SolrQuery;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.findNeededTagsName;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.joinListAsString;
 import static com.hurence.webapiservice.http.api.grafana.util.QualityConfig.getDefaultQualityAgg;
 
 public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPointsByMetricHelper {
 
+    String chunkCollection;
+    SolrQuery query;
     List<MetricRequest> requests;
 
-    public NumberOfPointsWithQualityOkByMetricHelperImpl(List<MetricRequest> requests){
+    public NumberOfPointsWithQualityOkByMetricHelperImpl(String chunkCollection,
+                                                         SolrQuery query,
+                                                         List<MetricRequest> requests){
+        this.chunkCollection = chunkCollection;
+        this.query = query;
         this.requests = requests;
     }
 
+
     @Override
-    public StringBuilder getExpression(StringBuilder exprBuilder, List<String> neededFields) {
+    public StringBuilder getStreamExpression() {
+        String streamExpression = "rollup(select(search(";
+        StringBuilder exprBuilder = new StringBuilder(streamExpression).append(chunkCollection)
+                .append(",q=").append(query.getQuery());
+        if (query.getFilterQueries() != null) {
+            for (String filterQuery : query.getFilterQueries()) {
+                exprBuilder
+                        .append(",fq=").append(filterQuery);
+            }
+        }
+        List<String> neededFields = findNeededTagsName(requests);
+        neededFields.add(NAME);
         List<String> overFields = new ArrayList<>(neededFields);
         overFields.add(QUALITY_CHECK);
         neededFields.add(CHUNK_COUNT_FIELD);
@@ -33,14 +53,7 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
                 .append("),");
         exprBuilder.append("over=\"").append(overString).append("\"")
                 .append(", sum(").append(CHUNK_COUNT_FIELD).append("), count(*))");
-
         return exprBuilder;
-    }
-
-
-    @Override
-    public String getStreamExpression() {
-        return "rollup(select(search(";
     }
 
     private String getIsQualityOkField(List<MetricRequest> requests) {
