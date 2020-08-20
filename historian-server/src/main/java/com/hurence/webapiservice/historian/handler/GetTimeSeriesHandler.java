@@ -56,7 +56,6 @@ public class GetTimeSeriesHandler {
             try {
                 metricsInfo = getNumberOfPointsByMetricInRequest(request.getMetricRequestsWithFinalTagsAndFinalQualities(), query, request.getUseQuality());
                 LOGGER.debug("metrics info to query : {}", metricsInfo);
-                buildFilters(request, query, true);
                 if (metricsInfo.isEmpty()) {
                     final MultiTimeSeriesExtracter timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
                     p.complete(buildTimeSeriesResponse(timeSeriesExtracter));
@@ -213,26 +212,8 @@ public class GetTimeSeriesHandler {
     }
 
     private MetricsSizeInfo getNumberOfPointsByMetricInRequest(List<MetricRequest> requests, SolrQuery query, boolean useQuality) throws IOException {
-        NumberOfPointsByMetricHelper numberOfPointsByMetricHelper = getNumberOfPointsByMetricHelperImpl(useQuality, requests);
-        //TODO getStreamExpression should return the final expression directly.
-        // for this to work you can provide information in constructor of impl,
-        // NumberOfPointsWithQualityOkByMetricHelperImpl
-        // NumberOfAllPointsByMetricHelperImpl
-        // Indeed here getStreamExpression is not really usefull, you want your object to directly provide the desired streaming expresion
-        String streamExpression = numberOfPointsByMetricHelper.getStreamExpression();
-        //TODO so this should be moved inside NumberOfPointsByMetricHelper implementations
-        StringBuilder exprBuilder = new StringBuilder(streamExpression).append(solrHistorianConf.chunkCollection)
-                .append(",q=").append(query.getQuery());
-        if (query.getFilterQueries() != null) {
-            for (String filterQuery : query.getFilterQueries()) {
-                exprBuilder
-                        .append(",fq=").append(filterQuery);
-            }
-        }
-        List<String> neededFields = findNeededTagsName(requests);
-        neededFields.add(NAME);
-        numberOfPointsByMetricHelper.getExpression(exprBuilder, neededFields);
-        //TODO until this line...
+        NumberOfPointsByMetricHelper numberOfPointsByMetricHelper = getNumberOfPointsByMetricHelperImpl(useQuality, requests, query);
+        StringBuilder exprBuilder = numberOfPointsByMetricHelper.getStreamExpression();
         LOGGER.trace("expression is : {}", exprBuilder.toString());
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
         paramsLoc.set("expr", exprBuilder.toString());
@@ -262,11 +243,11 @@ public class GetTimeSeriesHandler {
         return metricsInfo;
     }
 
-    private NumberOfPointsByMetricHelper getNumberOfPointsByMetricHelperImpl(boolean useQuality, List<MetricRequest> requests) {
+    private NumberOfPointsByMetricHelper getNumberOfPointsByMetricHelperImpl(boolean useQuality, List<MetricRequest> requests, SolrQuery query) {
         if (useQuality)
-            return new NumberOfPointsWithQualityOkByMetricHelperImpl(requests);
+            return new NumberOfPointsWithQualityOkByMetricHelperImpl(solrHistorianConf.chunkCollection, query, requests);
         else
-            return new NumberOfAllPointsByMetricHelperImpl();
+            return new NumberOfAllPointsByMetricHelperImpl(solrHistorianConf.chunkCollection, query, requests);
     }
 
     /**
@@ -283,7 +264,7 @@ public class GetTimeSeriesHandler {
      * @param requests
      * @return
      */
-    private List<String> findNeededTagsName(List<MetricRequest> requests) {
+    public static List<String> findNeededTagsName(List<MetricRequest> requests) {
         Set<String> tagsSet = new HashSet<>();
         requests.forEach(metricRequest -> {
             tagsSet.addAll(metricRequest.getTags().keySet());
@@ -324,13 +305,14 @@ public class GetTimeSeriesHandler {
     public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(Request request, SolrQuery query, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         //TODO make three different group for each metrics, not use a single strategy globally for all metrics.
         final MultiTimeSeriesExtracter timeSeriesExtracter;
-        if (metricsInfo.getTotalNumberOfPointsToReturn() < solrHistorianConf.limitNumberOfPoint ||   // TODO
-                metricsInfo.getTotalNumberOfPointsToReturn() <= getSamplingConf(request).getMaxPoint()) {
+        if (getTotalNumberOfPointsToReturn(metricsInfo, request) < solrHistorianConf.limitNumberOfPoint ||
+                getTotalNumberOfPointsToReturn(metricsInfo, request) <= getSamplingConf(request).getMaxPoint()) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
             query.addField(CHUNK_VALUE_FIELD);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
-        } else if (metricsInfo.getTotalNumberOfChunksToReturn() < solrHistorianConf.limitNumberOfChunks) {
+        } else if (getTotalNumberOfPointsToReturn(metricsInfo, request) < solrHistorianConf.limitNumberOfChunks) {
             LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
+            buildFilters(request, query, true);
             addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         } else {
@@ -435,8 +417,6 @@ public class GetTimeSeriesHandler {
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities(), request.getQualityReturn());
-        //TODO here you should set totalNumberOfPointForMetric with  totalNumberOfPointsWithCorrectQuality and not totalNumberOfPointsToReturn !
-        // so you should create a new method instead of fillingExtractorWithMetricsSizeInfo.
         fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
@@ -457,11 +437,26 @@ public class GetTimeSeriesHandler {
         timeSeriesExtracter.setAggregationList(aggregationList);
     }
 
+
     private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,
                                                      MetricsSizeInfo metricsInfo) {
         metricsInfo.getMetricRequests().forEach(MetricRequest -> {
-            timeSeriesExtracter.setTotalNumberOfPointForMetric(MetricRequest, metricsInfo.getMetricInfo(MetricRequest).totalNumberOfPointsToReturn());
+            timeSeriesExtracter.setTotalNumberOfPointForMetric(MetricRequest, metricsInfo.getMetricInfo(MetricRequest).totalNumberOfPoints);
         });
+    }
+
+    public long getTotalNumberOfChunksToReturn(MetricsSizeInfo metricsSizeInfo, Request request) {
+        if (!request.getUseQuality())
+            return metricsSizeInfo.getTotalNumberOfChunks();
+        else
+            return metricsSizeInfo.getTotalNumberOfChunksWithCorrectQuality();
+    }
+
+    public long getTotalNumberOfPointsToReturn(MetricsSizeInfo metricsSizeInfo, Request request) {
+        if (!request.getUseQuality())
+            return metricsSizeInfo.getTotalNumberOfPoints();
+        else
+            return metricsSizeInfo.getTotalNumberOfPointsWithCorrectQuality();
     }
 
     private SamplingConf getSamplingConf(Request request) {

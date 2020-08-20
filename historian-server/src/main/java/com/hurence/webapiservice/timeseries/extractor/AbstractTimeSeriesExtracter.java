@@ -95,11 +95,15 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 .sorted(Comparator.comparing(Point::getTimestamp))
                 .map(this::returnPoint)
                 .collect(Collectors.toList());
-        JsonObject toReturn = new JsonObject()
-                .put(TIMESERIE_POINT, new JsonArray(points));
-        getAggsAsJson()
-                .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
-        LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
+        JsonObject toReturn = new JsonObject();
+        if (!points.isEmpty())
+        {
+            toReturn
+                    .put(TIMESERIE_POINT, new JsonArray(points));
+            getAggsAsJson()
+                    .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
+            LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
+        }
         return toReturn;
     }
 
