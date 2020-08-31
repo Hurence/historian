@@ -1,6 +1,7 @@
 package com.hurence.historian.spark.compactor.job;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
 import com.hurence.timeseries.modele.Point;
@@ -8,6 +9,7 @@ import com.hurence.timeseries.modele.PointImpl;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
+import java.io.IOException;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +38,26 @@ public class ChunkModeleVersion0 implements ChunkModele {
 
     public static ChunkModeleVersion0 fromPoints(String metricName, List<Point> points) {
         return fromPoints(metricName, 2000, 12, 13, "logisland", points);
+    }
+
+    public static ChunkModeleVersion0 fromJson(String json) throws IOException {
+        JsonObject jsonObject = new JsonObject(json);
+        ChunkModeleVersion0 chunk = new ChunkModeleVersion0();
+        chunk.name = jsonObject.getString(HistorianChunkCollectionFieldsVersion0.NAME);
+        chunk.year = jsonObject.getInteger(HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR, 0);
+        chunk.month = jsonObject.getInteger(HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH, 0);
+        chunk.day = jsonObject.getString(HistorianChunkCollectionFieldsVersion0.CHUNK_DAY);
+        chunk.chunk_origin = jsonObject.getString(HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN);
+        chunk.firstValue = jsonObject.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_FIRST);
+        chunk.sum = jsonObject.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_SUM);
+        chunk.max = jsonObject.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_MAX);
+        chunk.min = jsonObject.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_MIN);
+        chunk.avg = jsonObject.getDouble(HistorianChunkCollectionFieldsVersion0.CHUNK_AVG);
+        chunk.end = jsonObject.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_END);
+        chunk.start = jsonObject.getLong(HistorianChunkCollectionFieldsVersion0.CHUNK_START);
+        chunk.compressedPoints = jsonObject.getBinary(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE);
+        chunk.points = BinaryCompactionUtil.unCompressPoints(chunk.compressedPoints, chunk.start, chunk.end);
+        return chunk;
     }
 
     /**
@@ -126,3 +148,4 @@ public class ChunkModeleVersion0 implements ChunkModele {
         return doc;
     }
 }
+

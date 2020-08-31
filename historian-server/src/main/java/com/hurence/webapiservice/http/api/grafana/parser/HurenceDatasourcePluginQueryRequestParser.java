@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.QUALITY_VALUE;
+import static com.hurence.historian.modele.HistorianServiceFields.QUALITY_VALUE;
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
 import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 
@@ -23,6 +23,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HurenceDatasourcePluginQueryRequestParser.class);
 
+    public final static String NAME = "name";
     private final String fromJsonPath;
     private final String toJsonPath;
     private final String namesJsonPath;
@@ -66,7 +67,8 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.qualityReturnPath = qualityReturnPath;
     }
 
-    public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
+    public HurenceDatasourcePluginQueryRequestParam parseRequest(
+            JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse requestBody : {}", requestBody);
         HurenceDatasourcePluginQueryRequestParam.Builder builder = new HurenceDatasourcePluginQueryRequestParam.Builder();
         Long from = parseFrom(requestBody);
@@ -178,13 +180,13 @@ public class HurenceDatasourcePluginQueryRequestParser {
                         if (el instanceof JsonObject) {
                             JsonObject jsonObject = (JsonObject) el;
                             JsonObject toReturn = new JsonObject()
-                                    .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME));
+                                    .put(HistorianServiceFields.NAME, jsonObject.getString(NAME));
                             Map<String, String> tags = parseTags(jsonObject);
                             Float qualityValue = parseQualityValue(jsonObject);
                             if (qualityValue != null)
                                 toReturn.put(QUALITY_VALUE, qualityValue);
                             if (!tags.isEmpty())
-                                toReturn.put(HistorianFields.TAGS, tags);
+                                toReturn.put(HistorianServiceFields.TAGS, tags);
                             if (jsonObject.containsKey(QUERY_PARAM_REF_ID))
                                 toReturn.put(QUERY_PARAM_REF_ID, jsonObject.getString(QUERY_PARAM_REF_ID));
                             return toReturn;

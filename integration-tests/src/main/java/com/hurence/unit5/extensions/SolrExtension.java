@@ -82,7 +82,7 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
                 .withExposedService(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT, Wait.forListeningPort())
                 .withExposedService(SOLR1_SERVICE_NAME, SOLR_1_PORT, Wait.forListeningPort())
                 .waitingFor(SOLR2_SERVICE_NAME, Wait.forListeningPort());
-
+        logger.info("Starting docker compose");
         this.dockerComposeContainer.start();
 
         String zkUrl = getZkUrl(dockerComposeContainer);

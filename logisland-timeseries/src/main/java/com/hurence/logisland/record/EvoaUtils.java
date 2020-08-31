@@ -1,7 +1,9 @@
 package com.hurence.logisland.record;
 
 import com.google.common.hash.Hashing;
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
@@ -23,9 +25,9 @@ public class EvoaUtils {
      * @return
      */
     public static synchronized Record setDateFields(final Record record) {
-        if (record.hasField(HistorianFields.CHUNK_START_FIELD)) {
+        if (record.hasField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START)) {
             try {
-                Instant instant = Instant.ofEpochMilli(record.getField(HistorianFields.CHUNK_START_FIELD).asLong());
+                Instant instant = Instant.ofEpochMilli(record.getField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START).asLong());
                 LocalDate localDate = instant.atZone(ZoneId.systemDefault()).toLocalDate();
                 int month = localDate.getMonthValue();
                 int day = localDate.getDayOfMonth();
@@ -51,10 +53,10 @@ public class EvoaUtils {
      * @return
      */
     public static synchronized Record setBusinessFields(Record record) {
-        if (record.hasField(HistorianFields.NAME)) {
+        if (record.hasField(HistorianChunkCollectionFieldsVersionEVOA0.NAME)) {
 
             try {
-                Matcher m = csvRegexp.matcher(record.getField(HistorianFields.NAME).asString());
+                Matcher m = csvRegexp.matcher(record.getField(HistorianChunkCollectionFieldsVersionEVOA0.NAME).asString());
                 boolean b = m.matches();
                 if (b) {
                     record.setStringField("code_install", m.group(1));
@@ -76,7 +78,7 @@ public class EvoaUtils {
      * @return
      */
     public static synchronized Record setChunkOrigin(Record record, String origin) {
-        record.setStringField(HistorianFields.CHUNK_ORIGIN, origin);
+        record.setStringField(HistorianServiceFields.ORIGIN, origin);
         return record;
     }
 
@@ -88,9 +90,9 @@ public class EvoaUtils {
      */
     public static synchronized Record setHashId(Record record) {
         try {
-            String toHash = record.getField(HistorianFields.CHUNK_VALUE_FIELD).asString() +
-                    record.getField(HistorianFields.NAME).asString() +
-                    record.getField(HistorianFields.CHUNK_START_FIELD).asLong();
+            String toHash = record.getField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_VALUE).asString() +
+                    record.getField(HistorianChunkCollectionFieldsVersionEVOA0.NAME).asString() +
+                    record.getField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START).asLong();
 
             String sha256hex = Hashing.sha256()
                     .hashString(toHash, StandardCharsets.UTF_8)

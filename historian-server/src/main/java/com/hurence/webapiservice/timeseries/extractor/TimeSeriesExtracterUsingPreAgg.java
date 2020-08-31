@@ -1,6 +1,9 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
+
 import com.hurence.timeseries.modele.Point;
+import com.hurence.historian.modele.FieldNamesInsideHistorianService;
+
 import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.timeseries.modele.PointWithQualityImpl;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
@@ -18,8 +21,6 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.hurence.historian.modele.HistorianFields.*;
 
 public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter {
 
@@ -62,7 +63,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         List<JsonObject> bucketOfChunks = new ArrayList<>();
         for (JsonObject chunk: chunks) {
             bucketOfChunks.add(chunk);
-            currentPointNumber += chunk.getInteger(CHUNK_COUNT_FIELD);
+            currentPointNumber += chunk.getInteger(FieldNamesInsideHistorianService.CHUNK_COUNT);
             if (currentPointNumber >= bucketSize) {
                 groupedChunks.add(bucketOfChunks);
                 bucketOfChunks = new ArrayList<>();
@@ -79,7 +80,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             throw new IllegalArgumentException("chunks can not be empty !");
         LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0).encodePrettily());
         long timestamp = chunks.stream()
-                .mapToLong(chunk -> chunk.getLong(CHUNK_START_FIELD))
+                .mapToLong(chunk -> chunk.getLong(FieldNamesInsideHistorianService.CHUNK_START))
                 .findFirst()
                 .getAsLong();
         double aggValue = getAggValue(chunks);
@@ -97,10 +98,10 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         switch (samplingConf.getAlgo()) {
             case AVERAGE:
                 double sum = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_SUM_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_SUM))
                         .sum();
                 long numberOfPoint = chunks.stream()
-                        .mapToLong(chunk -> chunk.getLong(CHUNK_COUNT_FIELD))
+                        .mapToLong(chunk -> chunk.getLong(FieldNamesInsideHistorianService.CHUNK_COUNT))
                         .sum();
                 aggValue = BigDecimal.valueOf(sum)
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
@@ -108,19 +109,19 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 break;
             case FIRST:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_FIRST_VALUE_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_FIRST))
                         .findFirst()
                         .getAsDouble();
                 break;
             case MIN:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_MIN_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_MIN))
                         .min()
                         .getAsDouble();
                 break;
             case MAX:
                 aggValue = chunks.stream()
-                        .mapToDouble(chunk -> chunk.getDouble(CHUNK_MAX_FIELD))
+                        .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_MAX))
                         .max()
                         .getAsDouble();
                 break;
@@ -140,10 +141,10 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             case NONE:  // is it good to chose AVG if qualityAgg is NONE ?
                 try {
                     long numberOfPoint = chunks.stream()
-                            .mapToLong(chunk -> chunk.getLong(CHUNK_COUNT_FIELD))
+                            .mapToLong(chunk -> chunk.getLong(FieldNamesInsideHistorianService.CHUNK_COUNT))
                             .sum();
                     float qualitySum = (float) chunks.stream()
-                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_SUM_FIELD))
+                            .mapToDouble(chunk -> chunk.getFloat(FieldNamesInsideHistorianService.CHUNK_QUALITY_SUM_FIELD))
                             .sum();
                     quality = BigDecimal.valueOf(qualitySum)
                             .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
@@ -155,7 +156,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             case FIRST:
                 try {
                     quality = (float) chunks.stream()
-                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_FIRST_FIELD))
+                            .mapToDouble(chunk -> chunk.getFloat(FieldNamesInsideHistorianService.CHUNK_QUALITY_FIRST_FIELD))
                             .findFirst()
                             .getAsDouble();
                 } catch (Exception e) {
@@ -165,7 +166,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             case MIN:
                 try {
                     quality = (float) chunks.stream()
-                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MIN_FIELD))
+                            .mapToDouble(chunk -> chunk.getFloat(FieldNamesInsideHistorianService.CHUNK_QUALITY_MIN_FIELD))
                             .min()
                             .getAsDouble();
                 } catch (Exception e) {
@@ -175,7 +176,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             case MAX:
                 try {
                     quality = (float) chunks.stream()
-                            .mapToDouble(chunk -> chunk.getFloat(CHUNK_QUALITY_MAX_FIELD))
+                            .mapToDouble(chunk -> chunk.getFloat(FieldNamesInsideHistorianService.CHUNK_QUALITY_MAX_FIELD))
                             .max()
                             .getAsDouble();
                 } catch (Exception e) {

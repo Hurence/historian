@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.historian.impl;
 
+import com.hurence.historian.modele.HistorianConf;
 import com.hurence.historian.modele.solr.Schema;
 import com.hurence.webapiservice.historian.HistorianService;
 import com.hurence.webapiservice.historian.handler.*;
@@ -29,11 +30,13 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     private final Vertx vertx;
     private final SolrHistorianConf solrHistorianConf;
+    private final HistorianConf historianConf;
 
     public SolrHistorianServiceImpl(Vertx vertx, SolrHistorianConf solrHistorianConf,
                                     Handler<AsyncResult<HistorianService>> readyHandler) {
         this.vertx = vertx;
         this.solrHistorianConf = solrHistorianConf;
+        this.historianConf = HistorianConf.getHistorianConf(solrHistorianConf.schemaVersion);
         LOGGER.debug("SolrHistorianServiceImpl with params:");
         LOGGER.debug("collections : {} for chunks and {} for annotations", solrHistorianConf.chunkCollection, solrHistorianConf.annotationCollection);
         LOGGER.debug("streamEndPoint : {}", solrHistorianConf.streamEndPoint);
@@ -189,7 +192,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getTimeSeriesChunk(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        GetTimeSeriesChunkHandler requestHandler = new GetTimeSeriesChunkHandler(solrHistorianConf);
+        GetTimeSeriesChunkHandler requestHandler = new GetTimeSeriesChunkHandler(historianConf, solrHistorianConf);
         Handler<Promise<JsonObject>> getTimeSeriesChunkHandler = requestHandler.getHandler(params);
         vertx.executeBlocking(getTimeSeriesChunkHandler, resultHandler);
         return this;
@@ -197,7 +200,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getMetricsName(JsonObject params, Handler<AsyncResult<JsonObject>> resultHandler) {
-        GetMetricsNameHandler requestHandler = new GetMetricsNameHandler(solrHistorianConf);
+        GetMetricsNameHandler requestHandler = new GetMetricsNameHandler(historianConf, solrHistorianConf);
         Handler<Promise<JsonObject>> getMetricsNameHandler = requestHandler.getHandler(params);
         vertx.executeBlocking(getMetricsNameHandler, resultHandler);
         return this;
@@ -213,7 +216,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getTagNames(Handler<AsyncResult<JsonArray>> resultHandler) {
-        GetTagNamesHandler requestHandler = new GetTagNamesHandler(solrHistorianConf);
+        GetTagNamesHandler requestHandler = new GetTagNamesHandler(historianConf, solrHistorianConf);
         Handler<Promise<JsonArray>> getTagNamesHandler = requestHandler.getHandler();
         vertx.executeBlocking(getTagNamesHandler, resultHandler);
         return this;
@@ -229,7 +232,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService addTimeSeries(JsonObject timeseriesObject, Handler<AsyncResult<JsonObject>> resultHandler) {
-        AddTimeSeriesHandler requestHandler = new AddTimeSeriesHandler(solrHistorianConf);
+        AddTimeSeriesHandler requestHandler = new AddTimeSeriesHandler(historianConf, solrHistorianConf);
         Handler<Promise<JsonObject>> addHandler = requestHandler.getHandler(timeseriesObject);
         vertx.executeBlocking(addHandler, resultHandler);
         return this;
@@ -237,7 +240,7 @@ public class SolrHistorianServiceImpl implements HistorianService {
 
     @Override
     public HistorianService getTimeSeries(JsonObject myParams, Handler<AsyncResult<JsonObject>> myResult) {
-        GetTimeSeriesHandler requestHandler = new GetTimeSeriesHandler(solrHistorianConf);
+        GetTimeSeriesHandler requestHandler = new GetTimeSeriesHandler(historianConf, solrHistorianConf);
         Handler<Promise<JsonObject>>  getTimeSeriesHandler = requestHandler.getTimeSeriesHandler(myParams);
         vertx.executeBlocking(getTimeSeriesHandler, myResult);
         return this;

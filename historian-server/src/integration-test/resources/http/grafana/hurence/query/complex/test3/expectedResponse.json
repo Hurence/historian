@@ -16,7 +16,8 @@
       "MAX":4.0,
       "COUNT":3.0,
       "SUM":9.0
-    }
+    },
+    "total_points":3
   },
   {
     "name":"temp_a",
@@ -33,7 +34,8 @@
       "MAX":3.0,
       "COUNT":1.0,
       "SUM":3.0
-    }
+    },
+    "total_points":1
   },
   {
     "name":"temp_b",
@@ -50,6 +52,7 @@
       "MAX":1.0,
       "COUNT":1.0,
       "SUM":1.0
-    }
+    },
+    "total_points":1
   }
 ]

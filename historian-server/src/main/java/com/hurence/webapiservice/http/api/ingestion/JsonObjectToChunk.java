@@ -1,7 +1,8 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.google.common.hash.Hashing;
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.DateInfo;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.TimeSeriesUtil;
@@ -20,8 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-
 /**
  * This class is not thread safe !
  */
@@ -35,9 +34,11 @@ public class JsonObjectToChunk {
     private List<ChronixEncoding> encodings;
     private FunctionValueMap functionValueMap;
     private String chunkOrigin;
+    private SolrFieldMapping mapping;
 
-    public JsonObjectToChunk(String chunkOrigin) {
+    public JsonObjectToChunk(String chunkOrigin, SolrFieldMapping mapping) {
         this.chunkOrigin = chunkOrigin;
+        this.mapping = mapping;
     }
 
 
@@ -59,22 +60,22 @@ public class JsonObjectToChunk {
     private SolrInputDocument convertIntoSolrInputDocument(MetricTimeSeries chunk) {
         final SolrInputDocument doc = new SolrInputDocument();
         checkChunkNotEmpty(chunk);
-        doc.addField(NAME, chunk.getName());
-        doc.addField(CHUNK_START_FIELD, chunk.getStart());
-        doc.addField(CHUNK_END_FIELD, chunk.getEnd());
-        doc.addField(CHUNK_COUNT_FIELD, chunk.getValues().size());
+        doc.addField(mapping.CHUNK_NAME, chunk.getName());
+        doc.addField(mapping.CHUNK_START_FIELD, chunk.getStart());
+        doc.addField(mapping.CHUNK_END_FIELD, chunk.getEnd());
+        doc.addField(mapping.CHUNK_COUNT_FIELD, chunk.getValues().size());
         chunk.attributes().keySet().forEach(key -> {
             doc.addField(key, chunk.attribute(key));
         });
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(chunk);
-        doc.addField(CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
+        doc.addField(mapping.CHUNK_VALUE_FIELD, Base64.getEncoder().encodeToString(compressedPoints));
         computeAndSetMetrics(doc, chunk);
         DateInfo dateInfo = TimeSeriesUtil.calculDateFields(chunk.getStart());
-        doc.addField(CHUNK_YEAR, dateInfo.year);
-        doc.addField(CHUNK_DAY, dateInfo.day);
-        doc.addField(CHUNK_MONTH, dateInfo.month);
-        doc.addField(CHUNK_ORIGIN, this.chunkOrigin);
-        doc.setField(CHUNK_ID_FIELD, calulateHash(doc));
+        doc.addField(mapping.CHUNK_YEAR, dateInfo.year);
+        doc.addField(mapping.CHUNK_DAY, dateInfo.day);
+        doc.addField(mapping.CHUNK_MONTH, dateInfo.month);
+        doc.addField(HistorianServiceFields.ORIGIN, this.chunkOrigin);
+        doc.setField(mapping.CHUNK_ID_FIELD, calulateHash(doc));
         return doc;
     }
 
@@ -85,10 +86,10 @@ public class JsonObjectToChunk {
      * @return
      */
     private String calulateHash(SolrInputDocument doc) {
-        String toHash = doc.getField(CHUNK_VALUE_FIELD).toString() +
-                doc.getField(NAME).toString() +
-                doc.getField(CHUNK_START_FIELD).toString() +
-                doc.getField(CHUNK_ORIGIN).toString();
+        String toHash = doc.getField(mapping.CHUNK_VALUE_FIELD).toString() +
+                doc.getField(mapping.CHUNK_NAME).toString() +
+                doc.getField(mapping.CHUNK_START_FIELD).toString() +
+                doc.getField(HistorianServiceFields.ORIGIN).toString();
 
         String sha256hex = Hashing.sha256()
                 .hashString(toHash, StandardCharsets.UTF_8)
@@ -151,8 +152,8 @@ public class JsonObjectToChunk {
      *                          <pre>
      *
      *                              {
-     *                                  {@value HistorianFields#NAME} : "metric name to add datapoints",
-     *                                  {@value HistorianFields#POINTS } : [
+     *                                  {@value HistorianServiceFields#NAME} : "metric name to add datapoints",
+     *                                  {@value HistorianServiceFields#POINTS } : [
      *                                      [timestamp, value, quality]
      *                                      ...
      *                                      [timestamp, value, quality]
@@ -163,9 +164,9 @@ public class JsonObjectToChunk {
      * @return
      */
     private MetricTimeSeries buildMetricTimeSeries(JsonObject json) {
-        String metricName = json.getString(NAME);
-        JsonArray points = json.getJsonArray(POINTS);
-        JsonObject tags = json.getJsonObject(TAGS, new JsonObject());
+        String metricName = json.getString(HistorianServiceFields.NAME);
+        JsonArray points = json.getJsonArray(HistorianServiceFields.POINTS);
+        JsonObject tags = json.getJsonObject(HistorianServiceFields.TAGS, new JsonObject());
 
         final long start = getStart(points);
         final long end  = getEnd(points);

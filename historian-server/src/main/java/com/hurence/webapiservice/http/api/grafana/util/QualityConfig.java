@@ -1,14 +1,11 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
-import com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler;
-import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
+import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
-
-import static com.hurence.historian.modele.HistorianFields.*;
 
 
 public class QualityConfig {
@@ -16,7 +13,6 @@ public class QualityConfig {
     private static Logger LOGGER = LoggerFactory.getLogger(QualityConfig.class);
     private Float quality;
     private QualityAgg qualityAgg;
-
 
     public QualityConfig(Float quality, String qualityAgg) {
         this.quality = quality;
@@ -35,18 +31,6 @@ public class QualityConfig {
         return qualityAgg;
     }
 
-    public static String getDefaultQualityAgg() {
-        return CHUNK_QUALITY_AVG_FIELD;
-    }
-
-    public static String getQualityCheckField() {
-        return CHUNK_QUALITY_AVG_FIELD;
-    }
-
-    public void setQualityAgg(QualityAgg qualityAgg) {
-        this.qualityAgg = qualityAgg;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -63,7 +47,7 @@ public class QualityConfig {
 
     public boolean matchChunk(JsonObject chunk) {
         Float qualityChunk;
-        String chunkQualityField = getChunkQualityField();
+        String chunkQualityField = getChunkQualityFieldForSampling();
         if(chunkQualityField == null)
             return true;
         try {
@@ -75,20 +59,20 @@ public class QualityConfig {
         return (this.quality <= qualityChunk);
     }
 
-    public String getChunkQualityField() {
+    public String getChunkQualityFieldForSampling() {
         String qualityAggName;
         switch (qualityAgg) {
             case AVG:
-                qualityAggName = CHUNK_QUALITY_AVG_FIELD; //TODO
+                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_AVG_FIELD;
                 break;
             case MIN:
-                qualityAggName = CHUNK_QUALITY_MIN_FIELD; //TODO
+                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_MIN_FIELD;
                 break;
             case MAX:
-                qualityAggName = CHUNK_QUALITY_MAX_FIELD; //TODO
+                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_MAX_FIELD;
                 break;
             case FIRST:
-                qualityAggName = CHUNK_QUALITY_FIRST_FIELD; //TODO
+                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_FIRST_FIELD;
                 break;
             case NONE:
                 qualityAggName = null;

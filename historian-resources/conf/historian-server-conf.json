@@ -7,7 +7,7 @@
     "historian.address": "historian",
     "debug": false,
     "upload_directory" : "/tmp/historian",
-    "max_data_points_allowed_for_ExportCsv" : 10000
+    "max_data_points_maximum_allowed" : 50000
   },
   "historian": {
     "schema_version": "VERSION_0",

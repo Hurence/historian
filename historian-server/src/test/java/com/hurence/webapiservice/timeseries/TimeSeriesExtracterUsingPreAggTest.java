@@ -19,8 +19,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 
 import static com.hurence.webapiservice.modele.AGG.*;
-import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.TIMESERIE_AGGS;
-import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.TIMESERIE_POINT;
+import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
 
 public class TimeSeriesExtracterUsingPreAggTest {
 
@@ -105,6 +104,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         Assert.assertEquals(new JsonObject()
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
+                .put(TOTAL_POINTS, 1)
                 , extractor.getTimeSeries());
     }
 
@@ -137,6 +137,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 2)
                 , extractor.getTimeSeries());
     }
 
@@ -166,6 +167,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         Assert.assertEquals(new JsonObject()
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 2)
                 , extractor.getTimeSeries());
     }
 
@@ -194,6 +196,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
                 Assert.assertEquals(new JsonObject()
                                         .put(TIMESERIE_POINT, expectedPoints)
                                         .put(TIMESERIE_AGGS, aggregation)
+                                        .put(TOTAL_POINTS, 2)
                                 , extractor.getTimeSeries());
             }
 
@@ -225,6 +228,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 2)
                 , extractor.getTimeSeries());
     }
 

@@ -1,5 +1,8 @@
 package com.hurence.webapiservice.historian.handler;
 
+import com.hurence.historian.modele.HistorianConf;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
 import io.vertx.core.Handler;
@@ -15,23 +18,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-
 public class AddTimeSeriesHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AddTimeSeriesHandler.class);
+    HistorianConf historianConf;
     SolrHistorianConf solrHistorianConf;
 
-
-    public AddTimeSeriesHandler(SolrHistorianConf solrHistorianConf) {
+    public AddTimeSeriesHandler(HistorianConf historianConf, SolrHistorianConf solrHistorianConf) {
+        this.historianConf = historianConf;
         this.solrHistorianConf = solrHistorianConf;
+    }
+
+    private SolrFieldMapping getHistorianFields() {
+        return this.historianConf.getFieldsInSolr();
     }
 
     public Handler<Promise<JsonObject>> getHandler(JsonObject timeseriesObject) {
         return p -> {
             try {
-                final String chunkOrigin = timeseriesObject.getString(CHUNK_ORIGIN, "ingestion-json");
-                JsonArray timeseriesPoints = timeseriesObject.getJsonArray(POINTS);
+                final String chunkOrigin = timeseriesObject.getString(HistorianServiceFields.ORIGIN, "ingestion-json");
+                JsonArray timeseriesPoints = timeseriesObject.getJsonArray(HistorianServiceFields.POINTS);
                 JsonObject response = new JsonObject();
                 Collection<SolrInputDocument> documents = new ArrayList<>();
                 int numChunk = 0;
@@ -42,7 +48,7 @@ public class AddTimeSeriesHandler {
                     LOGGER.info("building SolrDocument from a chunk");
                     document = chunkTimeSerie(timeserie, chunkOrigin);
                     documents.add(document);
-                    int totalNumPointsInChunk = (int) document.getFieldValue(CHUNK_COUNT_FIELD);
+                    int totalNumPointsInChunk = (int) document.getFieldValue(getHistorianFields().CHUNK_COUNT_FIELD);
                     numChunk++;
                     numPoints = numPoints + totalNumPointsInChunk;
                 }
@@ -52,7 +58,7 @@ public class AddTimeSeriesHandler {
                     solrHistorianConf.client.commit(solrHistorianConf.chunkCollection);
                     LOGGER.info("added with success some chunks in collection {}", solrHistorianConf.chunkCollection);
                 }
-                response.put(TOTAL_ADDED_POINTS, numPoints).put(TOTAL_ADDED_CHUNKS, numChunk);
+                response.put(HistorianServiceFields.TOTAL_ADDED_POINTS, numPoints).put(HistorianServiceFields.TOTAL_ADDED_CHUNKS, numChunk);
                 p.complete(response);
             } catch (SolrServerException | IOException e) {
                 p.fail(e);
@@ -64,7 +70,7 @@ public class AddTimeSeriesHandler {
     }
 
     private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
-        JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk(chunkOrigin);
+        JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk(chunkOrigin, getHistorianFields());
         SolrInputDocument doc = jsonObjectToChunk.chunkIntoSolrDocument(timeserie);
         return doc;
     }

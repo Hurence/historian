@@ -1,5 +1,8 @@
 package com.hurence.webapiservice.historian.handler;
 
+import com.hurence.historian.modele.HistorianConf;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.impl.*;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
@@ -24,17 +27,19 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.grafana.util.QualityConfig.getDefaultQualityAgg;
+import static com.hurence.historian.modele.HistorianServiceFields.*;
 
 public class GetTimeSeriesHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GetTimeSeriesHandler.class);
+    HistorianConf historianConf;
     SolrHistorianConf solrHistorianConf;
 
-    public GetTimeSeriesHandler(SolrHistorianConf solrHistorianConf) {
+    public GetTimeSeriesHandler(HistorianConf historianConf, SolrHistorianConf solrHistorianConf) {
+        this.historianConf = historianConf;
         this.solrHistorianConf = solrHistorianConf;
     }
+
 
     /**
      * nombre point < LIMIT_TO_DEFINE ==> Extract points from chunk
@@ -78,13 +83,13 @@ public class GetTimeSeriesHandler {
         StringBuilder queryBuilder = new StringBuilder();
         if (request.getTo() != null) {
             LOGGER.trace("requesting timeseries to {}", request.getTo());
-            queryBuilder.append(CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
+            queryBuilder.append(getHistorianFields().CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
         }
         if (request.getFrom()  != null) {
             LOGGER.trace("requesting timeseries from {}", request.getFrom());
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
+            queryBuilder.append(getHistorianFields().CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
@@ -94,27 +99,34 @@ public class GetTimeSeriesHandler {
         //FILTER
         buildFilters(request, query, false);
         //    FIELDS_TO_FETCH
-        query.setFields(CHUNK_START_FIELD,
-                CHUNK_END_FIELD,
-                CHUNK_COUNT_FIELD,
-                NAME);
+        query.setFields(getHistorianFields().CHUNK_START_FIELD,
+                getHistorianFields().CHUNK_END_FIELD,
+                getHistorianFields().CHUNK_COUNT_FIELD,
+                getHistorianFields().CHUNK_NAME);
         addQualityFields(query, request);
         addAllTagsAsFields(request.getMetricRequestsWithFinalTagsAndFinalQualities(), query);
+
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
-        query.setSort(CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setSort(getHistorianFields().CHUNK_START_FIELD, SolrQuery.ORDER.asc);
+        query.addSort(getHistorianFields().CHUNK_END_FIELD, SolrQuery.ORDER.asc);
         query.setRows(request.getMaxTotalChunkToRetrieve());
 
         return query;
     }
 
+
     private void addQualityFields(SolrQuery query, Request request) {
         request.getMetricRequestsWithFinalTagsAndFinalQualities().forEach(
                 metricRequest -> {
                     if (!metricRequest.getQuality().getQualityAgg().equals(QualityAgg.NONE))
-                        query.addField(metricRequest.getQuality().getChunkQualityField());
+                        query.addField(metricRequest.getQuality().getChunkQualityFieldForSampling());
                 });
+    }
+
+    private SolrFieldMapping getHistorianFields() {
+        return this.historianConf.getFieldsInSolr();
+
     }
 
     private void addAllTagsAsFields(List<MetricRequest> metricRequests, SolrQuery query) {
@@ -126,7 +138,7 @@ public class GetTimeSeriesHandler {
 
     private void buildFilters(Request request, SolrQuery query, boolean qualityMatterInQuery) {
         List<MetricRequest> metricOptions = request.getMetricRequestsWithFinalTagsAndFinalQualities();
-        List<String> metricFilters = buildFilterForEachMetric(metricOptions, request.getUseQuality(), qualityMatterInQuery);
+        List<String> metricFilters = buildFilterForEachMetric(metricOptions, request.getUseQuality() && qualityMatterInQuery);
         String finalFilter = buildFinalFilterQuery(metricFilters);
         query.setFilterQueries(finalFilter);
     }
@@ -159,18 +171,18 @@ public class GetTimeSeriesHandler {
      *
      */
     private List<String> buildFilterForEachMetric(List<MetricRequest> metricRequests,
-                                                  boolean useQuality, boolean qualityMatterInQuery) {
+                                                  boolean useQuality) {
         List<String> finalStringList = new ArrayList<>();
         metricRequests.forEach(metricRequest -> {
             StringBuilder queryForEachMetricBuilder = new StringBuilder();
             List<String> tagsFilter = getTagsAsPair(metricRequest);
             if(!tagsFilter.isEmpty())
-                queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", "name:\""+metricRequest.getName()+"\" AND ", "")));
+                queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", getHistorianFields().CHUNK_NAME +":\""+metricRequest.getName()+"\" AND ", "")));
             else
-                queryForEachMetricBuilder.append("name:\"").append(metricRequest.getName()).append("\"");
-            if (useQuality && qualityMatterInQuery) {
+                queryForEachMetricBuilder.append(getHistorianFields().CHUNK_NAME + ":\""+metricRequest.getName()+"\"");
+            if (useQuality) {
                 Float qualityValue = metricRequest.getQuality().getQualityValue();
-                String qualityField = getDefaultQualityAgg();
+                String qualityField = getHistorianFields().CHUNK_QUALITY_AVG_FIELD;//at the moment always use AVG to filter
                 queryForEachMetricBuilder.append(" AND ").append(qualityField).append(":[").append(qualityValue).append(" TO *]"); // TODO isn't TO 1 better ?
             }
             finalStringList.add(queryForEachMetricBuilder.toString());
@@ -191,25 +203,26 @@ public class GetTimeSeriesHandler {
         aggregationList.forEach(agg -> {
             switch (agg) {
                 case AVG:
-                    query.addField(CHUNK_AVG_FIELD);
+                    query.addField(getHistorianFields().CHUNK_AVG_FIELD);
                     break;
                 case SUM:
-                    query.addField(CHUNK_SUM_FIELD);
+                    query.addField(getHistorianFields().CHUNK_SUM_FIELD);
                     break;
                 case MIN:
-                    query.addField(CHUNK_MIN_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MIN_FIELD);
                     break;
                 case MAX:
-                    query.addField(CHUNK_MAX_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MAX_FIELD);
                     break;
                 case COUNT:
-                    query.addField(CHUNK_COUNT_FIELD);
+                    query.addField(getHistorianFields().CHUNK_COUNT_FIELD);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported aggregation: " + agg);
             }
         });
     }
+
 
     private MetricsSizeInfo getNumberOfPointsByMetricInRequest(List<MetricRequest> requests, SolrQuery query, boolean useQuality) throws IOException {
         NumberOfPointsByMetricHelper numberOfPointsByMetricHelper = getNumberOfPointsByMetricHelperImpl(useQuality, requests, query);
@@ -228,11 +241,15 @@ public class GetTimeSeriesHandler {
             LOGGER.trace("tuple : {}", tuple.jsonStr());
             for (MetricRequest request: requests) {
                 if (isTupleMatchingMetricRequest(request, tuple)) {
-                    metricsInfo.increaseNumberOfChunksForMetricRequest(request, tuple.getLong("count(*)"));
-                    metricsInfo.increaseNumberOfPointsForMetricRequest(request, tuple.getLong("sum(chunk_count)"));
-                    if (useQuality && tuple.getBool(QUALITY_CHECK)) {
+                    metricsInfo.increaseNumberOfChunksForMetricRequest(request,
+                            tuple.getLong("count(*)")
+                    );
+                    metricsInfo.increaseNumberOfPointsForMetricRequest(request,
+                            tuple.getLong("sum(" + getHistorianFields().CHUNK_COUNT_FIELD + ")")
+                    );
+                    if (useQuality && tuple.getBool(HistorianServiceFields.QUALITY_CHECK)) {
                         metricsInfo.increaseNumberOfChunksWithQualityOkForMetricRequest(request, tuple.getLong("count(*)"));
-                        metricsInfo.increaseNumberOfPointsWithQualityOkForMetricRequest(request, tuple.getLong("sum(chunk_count)"));
+                        metricsInfo.increaseNumberOfPointsWithQualityOkForMetricRequest(request, tuple.getLong("sum(" + getHistorianFields().CHUNK_COUNT_FIELD + ")"));
                     }
                 }
             }
@@ -245,9 +262,11 @@ public class GetTimeSeriesHandler {
 
     private NumberOfPointsByMetricHelper getNumberOfPointsByMetricHelperImpl(boolean useQuality, List<MetricRequest> requests, SolrQuery query) {
         if (useQuality)
-            return new NumberOfPointsWithQualityOkByMetricHelperImpl(solrHistorianConf.chunkCollection, query, requests);
+            return new NumberOfPointsWithQualityOkByMetricHelperImpl(getHistorianFields(),
+                    solrHistorianConf.chunkCollection, query, requests);
         else
-            return new NumberOfAllPointsByMetricHelperImpl(solrHistorianConf.chunkCollection, query, requests);
+            return new NumberOfAllPointsByMetricHelperImpl(getHistorianFields(),
+                    solrHistorianConf.chunkCollection, query, requests);
     }
 
     /**
@@ -288,8 +307,8 @@ public class GetTimeSeriesHandler {
      *              </pre>
      * @return
      */
-    public static boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
-        if (!request.getName().equals(tuple.fields.get(NAME))){
+    private boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
+        if (!request.getName().equals(tuple.fields.get(getHistorianFields().CHUNK_NAME))){
             return false;
         } else {
             for (Map.Entry<String, String> entry : request.getTags().entrySet()) {
@@ -305,18 +324,17 @@ public class GetTimeSeriesHandler {
     public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(Request request, SolrQuery query, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         //TODO make three different group for each metrics, not use a single strategy globally for all metrics.
         final MultiTimeSeriesExtracter timeSeriesExtracter;
-        if (getTotalNumberOfPointsToReturn(metricsInfo, request) < solrHistorianConf.limitNumberOfPoint ||
-                getTotalNumberOfPointsToReturn(metricsInfo, request) <= getSamplingConf(request).getMaxPoint()) {
-            LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
-            query.addField(CHUNK_VALUE_FIELD);
+        if (isQueryMode1(request, metricsInfo)) {
+            LOGGER.debug("QUERY MODE 1");
+            query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
-        } else if (getTotalNumberOfPointsToReturn(metricsInfo, request) < solrHistorianConf.limitNumberOfChunks) {
-            LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
+        } else if (isQueryMode2ConsideringNotQueryMode1(request, metricsInfo)) {
+            LOGGER.debug("QUERY MODE 2");
             buildFilters(request, query, true);
             addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         } else {
-            LOGGER.debug("QUERY MODE 3 : else");
+            LOGGER.debug("QUERY MODE 3");
             //TODO Sample points with chunk aggs depending on alg (min, avg),
             // but should using agg on solr side (using key partition, by month, daily ? yearly ?)
             // For the moment we use the stream api without partitionning
@@ -324,6 +342,63 @@ public class GetTimeSeriesHandler {
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         }
         return timeSeriesExtracter;
+    }
+
+    /**
+     * We suppose that we already know that this is not QUERY MODE 1
+     * @param metricsInfo
+     * @return true if we should use query mode 2 (sampling with pre agg)
+     */
+    private boolean isQueryMode2ConsideringNotQueryMode1(Request request, MetricsSizeInfo metricsInfo) {
+        if (!request.getUseQuality()) {
+            return metricsInfo.getTotalNumberOfChunks() < solrHistorianConf.limitNumberOfChunks;
+        } else {
+            return metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < solrHistorianConf.limitNumberOfChunks;
+        }
+    }
+    /**
+     *
+     * @param metricsInfo
+     * @return true if we should use query mode 1 not using pre agg and decompressing all chunks.
+     */
+    private boolean isQueryMode1(Request request, MetricsSizeInfo metricsInfo) {
+        boolean isQueryMode1;
+        if (!request.getUseQuality()) {
+            isQueryMode1 = metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint ||
+                    metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint() ||
+                    metricsInfo.getTotalNumberOfChunks() < getSamplingConf(request).getMaxPoint();
+            if (LOGGER.isDebugEnabled() && isQueryMode1) {
+                String queryModeMsg = "QUERY MODE 1 because : \n";
+                if (metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint) {
+                    queryModeMsg += "metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint\n";
+                }
+                if (metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint()) {
+                    queryModeMsg += "metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint()\n";
+                }
+                if (metricsInfo.getTotalNumberOfChunks() < getSamplingConf(request).getMaxPoint()) {
+                    queryModeMsg += "metricsInfo.getTotalNumberOfChunks() < getSamplingConf(request).getMaxPoint()\n";
+                }
+                LOGGER.debug(queryModeMsg);
+            }
+        } else {
+            isQueryMode1 = metricsInfo.getTotalNumberOfPointsWithCorrectQuality() < solrHistorianConf.limitNumberOfPoint ||
+                    metricsInfo.getTotalNumberOfPointsWithCorrectQuality() <= getSamplingConf(request).getMaxPoint() ||
+                    metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < getSamplingConf(request).getMaxPoint();
+            if (LOGGER.isDebugEnabled() && isQueryMode1) {
+                String queryModeMsg = "QUERY MODE 1 because : \n";
+                if (metricsInfo.getTotalNumberOfPointsWithCorrectQuality() < solrHistorianConf.limitNumberOfPoint) {
+                    queryModeMsg += "metricsInfo.getTotalNumberOfPointsWithCorrectQuality() < solrHistorianConf.limitNumberOfPoint\n";
+                }
+                if (metricsInfo.getTotalNumberOfPointsWithCorrectQuality() <= getSamplingConf(request).getMaxPoint()) {
+                    queryModeMsg += "metricsInfo.getTotalNumberOfPointsWithCorrectQuality() <= getSamplingConf(request).getMaxPoint()\n";
+                }
+                if (metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < getSamplingConf(request).getMaxPoint()) {
+                    queryModeMsg += "metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < getSamplingConf(request).getMaxPoint()\n";
+                }
+                LOGGER.debug(queryModeMsg);
+            }
+        }
+        return isQueryMode1;
     }
 
 
@@ -352,16 +427,16 @@ public class GetTimeSeriesHandler {
                 case NONE:
                     break;
                 case FIRST:
-                    query.addField(CHUNK_QUALITY_FIRST_FIELD);
+                    query.addField(getHistorianFields().CHUNK_QUALITY_FIRST_FIELD);
                     break;
                 case AVERAGE:
-                    query.addField(CHUNK_QUALITY_AVG_FIELD);
+                    query.addField(getHistorianFields().CHUNK_QUALITY_AVG_FIELD);
                     break;
                 case MIN:
-                    query.addField(CHUNK_QUALITY_MIN_FIELD);
+                    query.addField(getHistorianFields().CHUNK_QUALITY_MIN_FIELD);
                     break;
                 case MAX:
-                    query.addField(CHUNK_QUALITY_MAX_FIELD);
+                    query.addField(getHistorianFields().CHUNK_QUALITY_MAX_FIELD);
                     break;
                 default:
                     throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
@@ -374,19 +449,19 @@ public class GetTimeSeriesHandler {
         samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
-                    query.addField(CHUNK_VALUE_FIELD);
+                    query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
                     break;
                 case FIRST:
-                    query.addField(CHUNK_FIRST_VALUE_FIELD);
+                    query.addField(getHistorianFields().CHUNK_FIRST_VALUE_FIELD);
                     break;
                 case AVERAGE:
-                    query.addField(CHUNK_SUM_FIELD);
+                    query.addField(getHistorianFields().CHUNK_SUM_FIELD);
                     break;
                 case MIN:
-                    query.addField(CHUNK_MIN_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MIN_FIELD);
                     break;
                 case MAX:
-                    query.addField(CHUNK_MAX_FIELD);
+                    query.addField(getHistorianFields().CHUNK_MAX_FIELD);
                     break;
                 case MODE_MEDIAN:
                 case LTTB:
@@ -399,9 +474,9 @@ public class GetTimeSeriesHandler {
 
     private Set<SamplingAlgorithm> determineSamplingAlgoThatWillBeUsed(SamplingConf askedSamplingConf, MetricsSizeInfo metricsSizeInfo) {
         if (askedSamplingConf.getAlgo() != SamplingAlgorithm.NONE) {
-            Set<SamplingAlgorithm> singletonSet = new HashSet<SamplingAlgorithm>();
-            singletonSet.add(askedSamplingConf.getAlgo());
-            return singletonSet;
+            Set<SamplingAlgorithm> algos = new HashSet<SamplingAlgorithm>();
+            algos.add(askedSamplingConf.getAlgo());
+            return algos;
         }
         return metricsSizeInfo.getMetricRequests().stream()
                 .map(metricrequest -> {
@@ -417,7 +492,15 @@ public class GetTimeSeriesHandler {
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         MultiTimeSeriesExtractorUsingPreAgg timeSeriesExtracter = new MultiTimeSeriesExtractorUsingPreAgg(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities(), request.getQualityReturn());
-        fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
+        if (request.getUseQuality()) {
+            metricsInfo.getMetricRequests().forEach(metricRequest -> {
+                timeSeriesExtracter.setTotalNumberOfPointForMetric(metricRequest, metricsInfo.getMetricInfo(metricRequest).totalNumberOfPointsWithCorrectQuality);
+            });
+        } else {
+            metricsInfo.getMetricRequests().forEach(metricRequest -> {
+                timeSeriesExtracter.setTotalNumberOfPointForMetric(metricRequest, metricsInfo.getMetricInfo(metricRequest).totalNumberOfPoints);
+            });
+        }
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
     }
@@ -428,35 +511,15 @@ public class GetTimeSeriesHandler {
         long to = request.getTo();
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         MultiTimeSeriesExtracterImpl timeSeriesExtracter = new MultiTimeSeriesExtracterImpl(from, to, requestedSamplingConf, request.getMetricRequestsWithFinalTagsAndFinalQualities(), request.getQualityReturn());
-        fillingExtractorWithMetricsSizeInfo(timeSeriesExtracter, metricsInfo);
+        metricsInfo.getMetricRequests().forEach(metricRequest -> {
+            timeSeriesExtracter.setTotalNumberOfPointForMetric(metricRequest, metricsInfo.getMetricInfo(metricRequest).totalNumberOfPoints);
+        });
         fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
         return timeSeriesExtracter;
     }
 
     private void fillingExtractorWithAggregToReturn(MultiTimeSeriesExtracterImpl timeSeriesExtracter, List<AGG> aggregationList) {
         timeSeriesExtracter.setAggregationList(aggregationList);
-    }
-
-
-    private void fillingExtractorWithMetricsSizeInfo(MultiTimeSeriesExtracterImpl timeSeriesExtracter,
-                                                     MetricsSizeInfo metricsInfo) {
-        metricsInfo.getMetricRequests().forEach(MetricRequest -> {
-            timeSeriesExtracter.setTotalNumberOfPointForMetric(MetricRequest, metricsInfo.getMetricInfo(MetricRequest).totalNumberOfPoints);
-        });
-    }
-
-    public long getTotalNumberOfChunksToReturn(MetricsSizeInfo metricsSizeInfo, Request request) {
-        if (!request.getUseQuality())
-            return metricsSizeInfo.getTotalNumberOfChunks();
-        else
-            return metricsSizeInfo.getTotalNumberOfChunksWithCorrectQuality();
-    }
-
-    public long getTotalNumberOfPointsToReturn(MetricsSizeInfo metricsSizeInfo, Request request) {
-        if (!request.getUseQuality())
-            return metricsSizeInfo.getTotalNumberOfPoints();
-        else
-            return metricsSizeInfo.getTotalNumberOfPointsWithCorrectQuality();
     }
 
     private SamplingConf getSamplingConf(Request request) {
@@ -474,15 +537,15 @@ public class GetTimeSeriesHandler {
             chunk = stream.read();
         }
         timeSeriesExtracter.flush();
-        LOGGER.debug("read {} chunks in stream", stream.getNumberOfDocRead());
+        LOGGER.debug("read {} chunks in stream", stream.getNumberOfDocRead() - 1);//one doc is EOF
         LOGGER.debug("extractTimeSeries response metric : {}", chunk.encodePrettily());
         return buildTimeSeriesResponse(timeSeriesExtracter);
     }
 
     private JsonObject buildTimeSeriesResponse(MultiTimeSeriesExtracter timeSeriesExtracter) {
         return new JsonObject()
-                .put(TOTAL_POINTS, timeSeriesExtracter.pointCount())
-                .put(TIMESERIES, timeSeriesExtracter.getTimeSeries());
+                .put(HistorianServiceFields.TOTAL_POINTS, timeSeriesExtracter.pointCount())
+                .put(HistorianServiceFields.TIMESERIES, timeSeriesExtracter.getTimeSeries());
     }
 
     private JsonStream queryStream(SolrQuery query) {
@@ -519,7 +582,7 @@ public class GetTimeSeriesHandler {
         }
 
         public List<AGG> getAggs() {
-            return params.getJsonArray(AGGREGATION, new JsonArray())
+            return params.getJsonArray(HistorianServiceFields.AGGREGATION, new JsonArray())
                     .stream()
                     .map(String::valueOf)
                     .map(AGG::valueOf)
@@ -529,11 +592,11 @@ public class GetTimeSeriesHandler {
         public boolean getUseQuality() { return params.getBoolean(USE_QUALITY);}
 
         public Long getTo() {
-            return params.getLong(TO);
+            return params.getLong(HistorianServiceFields.TO);
         }
 
         public Long getFrom() {
-            return params.getLong(FROM);
+            return params.getLong(HistorianServiceFields.FROM);
         }
 
         public boolean getQualityReturn() {
@@ -541,12 +604,12 @@ public class GetTimeSeriesHandler {
         }
 
         public Integer getMaxTotalChunkToRetrieve() {
-            return params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
+            return params.getInteger(HistorianServiceFields.MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
         }
 
         public Map<String, String> getRootTags() {
             Map<String,String> tagsMap = new HashMap<>();
-            params.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+            params.getJsonObject(HistorianServiceFields.TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
             return tagsMap;
         }
 
@@ -580,19 +643,22 @@ public class GetTimeSeriesHandler {
         }
 
         public QualityConfig getRootQuality() {
-            return new QualityConfig(params.getFloat(QUALITY_VALUE, Float.NaN), params.getString(QUALITY_AGG, QualityAgg.NONE.toString())) ;
+            return new QualityConfig(
+                    params.getFloat(QUALITY_VALUE, Float.NaN),
+                    params.getString(QUALITY_AGG, QualityAgg.NONE.toString())
+            ) ;
         }
 
         public int getMaxPoint() {
-            return params.getInteger(MAX_POINT_BY_METRIC);
+            return params.getInteger(HistorianServiceFields.MAX_POINT_BY_METRIC);
         }
 
         public int getBucketSize() {
-            return params.getInteger(BUCKET_SIZE);
+            return params.getInteger(HistorianServiceFields.BUCKET_SIZE);
         }
 
         public SamplingAlgorithm getSamplingAlgo() {
-            return SamplingAlgorithm.valueOf(params.getString(SAMPLING_ALGO));
+            return SamplingAlgorithm.valueOf(params.getString(HistorianServiceFields.SAMPLING_ALGO));
         }
     }
 }

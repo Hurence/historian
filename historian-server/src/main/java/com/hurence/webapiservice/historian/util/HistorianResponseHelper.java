@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.util;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianServiceFields;
 import io.vertx.core.json.JsonObject;
 
 import java.util.List;
@@ -11,8 +11,8 @@ public class HistorianResponseHelper {
     private HistorianResponseHelper() {}
 
     public static List<JsonObject> extractChunks(JsonObject chunkResponse) throws UnsupportedOperationException {
-        final long totalFound = chunkResponse.getLong(HistorianFields.TOTAL);
-        List<JsonObject> chunks = chunkResponse.getJsonArray(HistorianFields.CHUNKS).stream()
+        final long totalFound = chunkResponse.getLong(HistorianServiceFields.TOTAL);
+        List<JsonObject> chunks = chunkResponse.getJsonArray(HistorianServiceFields.CHUNKS).stream()
                 .map(JsonObject.class::cast)
                 .collect(Collectors.toList());
         if (totalFound != chunks.size())

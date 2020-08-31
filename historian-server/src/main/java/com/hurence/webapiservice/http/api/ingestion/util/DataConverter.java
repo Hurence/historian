@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
+import com.hurence.historian.modele.HistorianServiceFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
@@ -11,7 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.util.TimeStampUnit.*;
 
 public class DataConverter {
@@ -29,14 +29,14 @@ public class DataConverter {
 
     public JsonArray toGroupedByMetricDataPoints(List<IngestionApiUtil.LineWithDateInfo> LinesWithDateInfo) {
 
-        if (multiMap.get(MAPPING_NAME) == null)
-            multiMap.add(MAPPING_NAME, DEFAULT_NAME_COLUMN_MAPPING);
-        if (multiMap.get(MAPPING_VALUE) == null)
-            multiMap.add(MAPPING_VALUE, DEFAULT_VALUE_COLUMN_MAPPING);
-        if (multiMap.get(MAPPING_TIMESTAMP) == null)
-            multiMap.add(MAPPING_TIMESTAMP, DEFAULT_TIMESTAMP_COLUMN_MAPPING);
-        if (multiMap.getAll(GROUP_BY).isEmpty())
-            multiMap.add(GROUP_BY, DEFAULT_NAME_FIELD);
+        if (multiMap.get(HistorianServiceFields.MAPPING_NAME) == null)
+            multiMap.add(HistorianServiceFields.MAPPING_NAME, DEFAULT_NAME_COLUMN_MAPPING);
+        if (multiMap.get(HistorianServiceFields.MAPPING_VALUE) == null)
+            multiMap.add(HistorianServiceFields.MAPPING_VALUE, DEFAULT_VALUE_COLUMN_MAPPING);
+        if (multiMap.get(HistorianServiceFields.MAPPING_TIMESTAMP) == null)
+            multiMap.add(HistorianServiceFields.MAPPING_TIMESTAMP, DEFAULT_TIMESTAMP_COLUMN_MAPPING);
+        if (multiMap.getAll(HistorianServiceFields.GROUP_BY).isEmpty())
+            multiMap.add(HistorianServiceFields.GROUP_BY, HistorianServiceFields.DEFAULT_NAME_FIELD);
 
         List<String> groupByList = getGroupByList();
 
@@ -51,9 +51,9 @@ public class DataConverter {
                 LinkedHashMap::new,
                 Collectors.mapping(map -> {
                     JsonObject tagsList = new JsonObject();
-                    multiMap.getAll(MAPPING_TAGS).forEach(t -> tagsList.put(t, map.mapFromOneCsvLine.get(t)));
-                    return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_TIMESTAMP)), multiMap),
-                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(MAPPING_VALUE)))),
+                    multiMap.getAll(HistorianServiceFields.MAPPING_TAGS).forEach(t -> tagsList.put(t, map.mapFromOneCsvLine.get(t)));
+                    return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(multiMap.get(HistorianServiceFields.MAPPING_TIMESTAMP)), multiMap),
+                            toDouble(map.mapFromOneCsvLine.get(multiMap.get(HistorianServiceFields.MAPPING_VALUE)))),
                             tagsList);
                 },
             Collectors.toList())))
@@ -62,27 +62,27 @@ public class DataConverter {
             .map(entry -> {
                 Map<String, Object> fieldsAndThereValues = new LinkedHashMap<>();
                 groupByList.forEach(i -> {
-                    if (i.equals(multiMap.get(MAPPING_NAME))) {
-                        fieldsAndThereValues.put(NAME, entry.getKey().get(groupByList.indexOf(i)));
+                    if (i.equals(multiMap.get(HistorianServiceFields.MAPPING_NAME))) {
+                        fieldsAndThereValues.put(HistorianServiceFields.NAME, entry.getKey().get(groupByList.indexOf(i)));
                         Map<String, Object> tags = ((JsonObject) entry.getValue().get(0).get(1)).getMap();
                         while (tags.values().remove(null));
-                        fieldsAndThereValues.put(TAGS, tags);
+                        fieldsAndThereValues.put(HistorianServiceFields.TAGS, tags);
                     }
                 });
                 List pointsList = new LinkedList();
                 entry.getValue().forEach(i -> pointsList.add(i.get(0)));
-                fieldsAndThereValues.put(POINTS, pointsList);
+                fieldsAndThereValues.put(HistorianServiceFields.POINTS, pointsList);
                 return fieldsAndThereValues;
             }).collect(Collectors.toList());
         return new JsonArray(finalGroupedPoints);
     }
 
     private List<String> getGroupByList() {
-        return multiMap.getAll(GROUP_BY).stream().map(s -> {
-            if (s.startsWith(TAGS+".")) {
+        return multiMap.getAll(HistorianServiceFields.GROUP_BY).stream().map(s -> {
+            if (s.startsWith(HistorianServiceFields.TAGS+".")) {
                 return s.substring(5);
-            }else if (s.equals(NAME))
-                return multiMap.get(MAPPING_NAME);
+            }else if (s.equals(HistorianServiceFields.NAME))
+                return multiMap.get(HistorianServiceFields.MAPPING_NAME);
             else
                 throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
         }).collect(Collectors.toList());
@@ -92,7 +92,7 @@ public class DataConverter {
         // here you should take timestamps in diff timezones and store only in utc.
         try {
             long longValue = Long.parseLong(Objects.toString(value, "0").replaceAll("\\s+", ""));
-            String format = multiMap.get(FORMAT_DATE);
+            String format = multiMap.get(HistorianServiceFields.FORMAT_DATE);
             if (format != null)
                 switch (format) {
                     case SECONDS_EPOCH:
@@ -119,11 +119,11 @@ public class DataConverter {
                 return longValue/1000000;*/
         } catch (Exception e) {
             LOGGER.trace("error in parsing date", e);
-            if (multiMap.get(TIMEZONE_DATE) == null)
-                multiMap.add(TIMEZONE_DATE, "UTC");
+            if (multiMap.get(HistorianServiceFields.TIMEZONE_DATE) == null)
+                multiMap.add(HistorianServiceFields.TIMEZONE_DATE, "UTC");
             long date = 0;
             try {
-                date = createDateFormat(multiMap.get(FORMAT_DATE),multiMap.get(TIMEZONE_DATE)).parse(value.toString()).getTime();
+                date = createDateFormat(multiMap.get(HistorianServiceFields.FORMAT_DATE),multiMap.get(HistorianServiceFields.TIMEZONE_DATE)).parse(value.toString()).getTime();
                 return date;
             } catch (ParseException ex) {
                 LOGGER.trace("error in parsing date", ex);

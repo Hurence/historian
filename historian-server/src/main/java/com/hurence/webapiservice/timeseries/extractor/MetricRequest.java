@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.webapiservice.http.api.grafana.util.QualityConfig;
 import io.vertx.core.json.JsonObject;
 
@@ -58,7 +58,7 @@ public class MetricRequest {
      * @return true if chunk is corresponding to metric query.
      */
     public boolean isChunkMatching(JsonObject chunk) {
-        final String chunkName = chunk.getString(HistorianFields.NAME);
+        final String chunkName = chunk.getString(FieldNamesInsideHistorianService.NAME);
         if (!getName().equals(chunkName)) {
             return false;
         }

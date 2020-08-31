@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
@@ -253,12 +254,12 @@ public class HurenceQueryRequestParserTest {
     @Test
     public void testParsingNamesWithComplexTypes() {
         JsonArray names = new JsonArray(Arrays.asList("temp_b",
-                new JsonObject().put(HistorianFields.NAME, "temp_a")
-                        .put(HistorianFields.TAGS, new JsonObject()
+                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_a")
+                        .put(HistorianServiceFields.TAGS, new JsonObject()
                                 .put("sensor", "sensor_1")
                         ),
-                new JsonObject().put(HistorianFields.NAME, "temp_a")
-                        .put(HistorianFields.TAGS, new JsonObject()
+                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_a")
+                        .put(HistorianServiceFields.TAGS, new JsonObject()
                                 .put("sensor", "sensor_2")
                         )
         ));
@@ -286,8 +287,8 @@ public class HurenceQueryRequestParserTest {
     @Test
     public void testBugWithObjectContainingOnlyName() {
         JsonArray names = new JsonArray(Arrays.asList("temp_b",
-                new JsonObject().put(HistorianFields.NAME, "temp_a"),
-                new JsonObject().put(HistorianFields.NAME, "temp_b")
+                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_a"),
+                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_b")
         ));
         JsonObject requestBody = new JsonObject();
         JsonPointer.from(NAMES_JSON_PATH)

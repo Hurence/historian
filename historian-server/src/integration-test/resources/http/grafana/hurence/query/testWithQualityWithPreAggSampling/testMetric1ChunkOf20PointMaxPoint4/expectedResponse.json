@@ -1,9 +1,8 @@
 [
   {
     "name":"metric_1_chunk_of_20_points",
-    "datapoints":[
-      [1.0, 1, 0.9]
-    ]
+    "datapoints":[[1.0,1,0.9],[3.0,6,0.9],[6.0,11,0.8],[8.0,16,0.9]],
+    "total_points":4
   }
 ]
 

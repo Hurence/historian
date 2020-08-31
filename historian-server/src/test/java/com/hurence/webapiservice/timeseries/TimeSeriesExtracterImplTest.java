@@ -20,8 +20,7 @@ import java.util.HashMap;
 
 import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
 import static com.hurence.webapiservice.modele.AGG.*;
-import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.TIMESERIE_AGGS;
-import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.TIMESERIE_POINT;
+import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
 
 
 public class TimeSeriesExtracterImplTest {
@@ -86,6 +85,7 @@ public class TimeSeriesExtracterImplTest {
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 3)
                 , extractor.getTimeSeries());
     }
 
@@ -111,6 +111,7 @@ public class TimeSeriesExtracterImplTest {
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 2)
                 , extractor.getTimeSeries());
     }
 
@@ -138,6 +139,7 @@ public class TimeSeriesExtracterImplTest {
         Assert.assertEquals(new JsonObject()
                 .put(TIMESERIE_POINT, expectedPoints)
                 .put(TIMESERIE_AGGS, aggregation)
+                .put(TOTAL_POINTS, 2)
                 , extractor.getTimeSeries());
     }
 
@@ -165,6 +167,7 @@ public class TimeSeriesExtracterImplTest {
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 3)
                 , extractor.getTimeSeries());
     }
 
@@ -199,6 +202,7 @@ public class TimeSeriesExtracterImplTest {
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 9)
                 , extractor.getTimeSeries());
     }
 
@@ -226,6 +230,7 @@ public class TimeSeriesExtracterImplTest {
         Assert.assertEquals(new JsonObject()
                         .put(TIMESERIE_POINT, expectedPoints)
                         .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 2)
                 , extractor.getTimeSeries());
     }
 
