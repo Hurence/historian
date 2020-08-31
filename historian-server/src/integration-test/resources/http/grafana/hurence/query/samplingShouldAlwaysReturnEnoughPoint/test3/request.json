@@ -1,0 +1,5 @@
+{
+  "names": ["metric_10_chunk"],
+  "max_data_points": 828,
+  "aggregations": ["COUNT"]
+}

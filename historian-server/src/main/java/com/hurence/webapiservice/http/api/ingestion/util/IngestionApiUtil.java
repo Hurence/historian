@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.http.api.ingestion.ImportRequestParser;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -9,8 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.hurence.historian.modele.HistorianFields.*;
 
 public class IngestionApiUtil {
 
@@ -28,11 +27,11 @@ public class IngestionApiUtil {
         JsonArray result = getGroupedByReportFromInjectedPoints(correctPointsAndFailedPointsOfAllFiles, multiMap);
         JsonObject finalResponse = new JsonObject();
         if (!result.isEmpty())
-            finalResponse.put(TAGS, new JsonArray(multiMap.getAll(MAPPING_TAGS)))
-                    .put(GROUPED_BY_IN_RESPONSE, IngestionApiUtil.getGroupedByList(multiMap))
-                    .put(REPORT, result);
+            finalResponse.put(HistorianServiceFields.TAGS, new JsonArray(multiMap.getAll(HistorianServiceFields.MAPPING_TAGS)))
+                    .put(HistorianServiceFields.GROUPED_BY_IN_RESPONSE, IngestionApiUtil.getGroupedByList(multiMap))
+                    .put(HistorianServiceFields.REPORT, result);
         if (!correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.isEmpty())
-            finalResponse.put(ERRORS, correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles);
+            finalResponse.put(HistorianServiceFields.ERRORS, correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles);
         return finalResponse;
     }
     public static JsonArray getGroupedByReportFromInjectedPoints(MultiCsvFilesConvertor.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles,
@@ -45,15 +44,15 @@ public class IngestionApiUtil {
             List<HashMap<String, String>> groupedByFieldsForEveryChunk = new LinkedList<>();
             for (Object timeserieObject : timeseriesPoints) {
                 JsonObject timeserie = (JsonObject) timeserieObject;
-                JsonObject tagsObject = timeserie.getJsonObject(TAGS);
+                JsonObject tagsObject = timeserie.getJsonObject(HistorianServiceFields.TAGS);
                 HashMap<String, String> groupedByFieldsForThisChunk = new LinkedHashMap<String,String>();
                 groupedByFields.forEach(f -> {
-                    if (f.toString().equals(NAME))
+                    if (f.toString().equals(HistorianServiceFields.NAME))
                         groupedByFieldsForThisChunk.put(f.toString(),timeserie.getString(f.toString()));
                     else
                         groupedByFieldsForThisChunk.put(f.toString(),tagsObject.getString(f.toString()));
                 });
-                int totalNumPointsInChunk = timeserie.getJsonArray(POINTS).size();
+                int totalNumPointsInChunk = timeserie.getJsonArray(HistorianServiceFields.POINTS).size();
                 groupedByFieldsForThisChunk.put("totalPointsForThisChunk", String.valueOf(totalNumPointsInChunk));
                 groupedByFieldsForEveryChunk.add(groupedByFieldsForThisChunk);
             }
@@ -98,9 +97,9 @@ public class IngestionApiUtil {
 
     public static JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
         StringBuilder message = new StringBuilder();
-        message.append("Injected ").append(response.getInteger(TOTAL_ADDED_POINTS)).append(" points of ")
-                .append(response.getInteger(TOTAL_ADDED_CHUNKS))
-                .append(" metrics in ").append(response.getInteger(TOTAL_ADDED_CHUNKS))
+        message.append("Injected ").append(response.getInteger(HistorianServiceFields.TOTAL_ADDED_POINTS)).append(" points of ")
+                .append(response.getInteger(HistorianServiceFields.TOTAL_ADDED_CHUNKS))
+                .append(" metrics in ").append(response.getInteger(HistorianServiceFields.TOTAL_ADDED_CHUNKS))
                 .append(" chunks");
         JsonObject finalResponse = new JsonObject();
         if (!responseAndErrorHolder.errorMessages.isEmpty()) {
@@ -128,8 +127,8 @@ public class IngestionApiUtil {
                 String valA = "";
                 String valB = "";
 
-                valA = (String) a.get(NAME);
-                valB = (String) b.get(NAME);
+                valA = (String) a.get(HistorianServiceFields.NAME);
+                valB = (String) b.get(HistorianServiceFields.NAME);
 
                 return valA.compareTo(valB);
             }
@@ -138,10 +137,10 @@ public class IngestionApiUtil {
     }
 
     public static JsonArray getGroupedByList(MultiMap multiMap) {
-        List<String> groupByList = multiMap.getAll(GROUP_BY).stream().map(s -> {
-            if (s.startsWith(TAGS+".")) {
+        List<String> groupByList = multiMap.getAll(HistorianServiceFields.GROUP_BY).stream().map(s -> {
+            if (s.startsWith(HistorianServiceFields.TAGS+".")) {
                 return s.substring(5);
-            }else if (s.equals(NAME))
+            }else if (s.equals(HistorianServiceFields.NAME))
                 return s;
             else return null ;
         }).collect(Collectors.toList());

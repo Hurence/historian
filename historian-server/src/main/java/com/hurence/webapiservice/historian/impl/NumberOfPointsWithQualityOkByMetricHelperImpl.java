@@ -1,25 +1,28 @@
 package com.hurence.webapiservice.historian.impl;
 
+import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianServiceFields.QUALITY_CHECK;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.findNeededTagsName;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.joinListAsString;
-import static com.hurence.webapiservice.http.api.grafana.util.QualityConfig.getDefaultQualityAgg;
 
 public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPointsByMetricHelper {
 
+    SolrFieldMapping solrMapping;
     String chunkCollection;
     SolrQuery query;
     List<MetricRequest> requests;
 
-    public NumberOfPointsWithQualityOkByMetricHelperImpl(String chunkCollection,
+    public NumberOfPointsWithQualityOkByMetricHelperImpl(SolrFieldMapping solrMapping,
+                                                         String chunkCollection,
                                                          SolrQuery query,
                                                          List<MetricRequest> requests){
+        this.solrMapping = solrMapping;
         this.chunkCollection = chunkCollection;
         this.query = query;
         this.requests = requests;
@@ -38,21 +41,21 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
             }
         }
         List<String> neededFields = findNeededTagsName(requests);
-        neededFields.add(NAME);
+        neededFields.add(solrMapping.CHUNK_NAME);
         List<String> overFields = new ArrayList<>(neededFields);
         overFields.add(QUALITY_CHECK);
-        neededFields.add(CHUNK_COUNT_FIELD);
+        neededFields.add(solrMapping.CHUNK_COUNT_FIELD);
         String overString = joinListAsString(overFields);
-        neededFields.add(getDefaultQualityAgg());
+        neededFields.add(getAggFieldForFilteringQuality());
         List<String> selectFields = new ArrayList<>(neededFields);
         selectFields.add(getIsQualityOkField(requests));
         String flString = joinListAsString(neededFields);
         exprBuilder.append(",fl=\"").append(flString).append("\"")
-                .append(",qt=\"/export\", sort=\"").append(NAME).append(" asc\"),")
+                .append(",qt=\"/export\", sort=\"").append(solrMapping.CHUNK_NAME).append(" asc\"),")
                 .append(joinListAsString(selectFields))
                 .append("),");
         exprBuilder.append("over=\"").append(overString).append("\"")
-                .append(", sum(").append(CHUNK_COUNT_FIELD).append("), count(*))");
+                .append(", sum(").append(solrMapping.CHUNK_COUNT_FIELD).append("), count(*))");
         return exprBuilder;
     }
 
@@ -91,17 +94,21 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
             StringBuilder conditionForOneMetricRequest = new StringBuilder();
             conditionForOneMetricRequest.append("and (");
             conditionForOneMetricRequest.append("eq(");
-            conditionForOneMetricRequest.append(NAME);
+            conditionForOneMetricRequest.append(solrMapping.CHUNK_NAME);
             conditionForOneMetricRequest.append(",");
             conditionForOneMetricRequest.append(metricRequest.getName());
             conditionForOneMetricRequest.append("), ");
             metricRequest.getTags().forEach((tagName, tagValue) ->
                     conditionForOneMetricRequest.append("eq("+tagName+","+tagValue+"), ")
             );
-            conditionForOneMetricRequest.append("gteq("+getDefaultQualityAgg()+","
+            conditionForOneMetricRequest.append("gteq("+ getAggFieldForFilteringQuality()+","
                     +metricRequest.getQuality().getQualityValue().toString()+"))");
             isQualityOkList.add(conditionForOneMetricRequest.toString());
         });
         return isQualityOkList;
+    }
+
+    private String getAggFieldForFilteringQuality() {
+        return solrMapping.CHUNK_QUALITY_AVG_FIELD;
     }
 }

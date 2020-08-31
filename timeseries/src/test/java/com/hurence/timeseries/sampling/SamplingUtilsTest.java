@@ -27,36 +27,6 @@ import java.util.stream.IntStream;
 public class SamplingUtilsTest {
 
     private static final Logger logger = LoggerFactory.getLogger(SamplingUtilsTest.class);
-    @Test
-    public void fitBucketSizeTestWithWanted1() {
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 1).boxed().collect(Collectors.toList()), 1));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 2).boxed().collect(Collectors.toList()), 1));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 3).boxed().collect(Collectors.toList()), 1));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 4).boxed().collect(Collectors.toList()), 1));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 5).boxed().collect(Collectors.toList()), 1));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 50).boxed().collect(Collectors.toList()), 1));
-    }
-
-    @Test
-    public void fitBucketSizeTestWithWanted2() {
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 1).boxed().collect(Collectors.toList()), 2));
-        Assertions.assertEquals(2, SamplingUtils.fitBucketSize(IntStream.range(0, 2).boxed().collect(Collectors.toList()), 2));
-        Assertions.assertEquals(2, SamplingUtils.fitBucketSize(IntStream.range(0, 3).boxed().collect(Collectors.toList()), 2));
-        Assertions.assertEquals(2, SamplingUtils.fitBucketSize(IntStream.range(0, 4).boxed().collect(Collectors.toList()), 2));
-        Assertions.assertEquals(2, SamplingUtils.fitBucketSize(IntStream.range(0, 5).boxed().collect(Collectors.toList()), 2));
-        Assertions.assertEquals(2, SamplingUtils.fitBucketSize(IntStream.range(0, 50).boxed().collect(Collectors.toList()), 2));
-    }
-
-    @Test
-    public void fitBucketSizeTestWithWanted5() {
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 1).boxed().collect(Collectors.toList()), 5));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 2).boxed().collect(Collectors.toList()), 5));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 3).boxed().collect(Collectors.toList()), 5));
-        Assertions.assertEquals(1, SamplingUtils.fitBucketSize(IntStream.range(0, 4).boxed().collect(Collectors.toList()), 5));
-        Assertions.assertEquals(5, SamplingUtils.fitBucketSize(IntStream.range(0, 5).boxed().collect(Collectors.toList()), 5));
-        Assertions.assertEquals(5, SamplingUtils.fitBucketSize(IntStream.range(0, 50).boxed().collect(Collectors.toList()), 5));
-    }
-
 
     @Test
     public void groupedWithBucket1() {

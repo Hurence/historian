@@ -8,15 +8,17 @@ public class HttpVerticleConf {
 
     private final String historianAdress;
     private final boolean isDebugModeEnabled;
-    private final int maxDataPointsAllowedForExportCsv;
+    private final int maxDataPointsAllowed;
     private final int port;
     private final String hostname;
     private final String uploadDirectory;
 
+    public static final int CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED_DEFAULT = 50000;
+
     public HttpVerticleConf(JsonObject json) {
         this.isDebugModeEnabled = json.getBoolean(CONFIG_DEBUG_MODE, false);
         this.historianAdress = json.getString(CONFIG_HISTORIAN_ADDRESS, "historian");
-        this.maxDataPointsAllowedForExportCsv = json.getInteger(CONFIG_MAX_CSV_POINTS_ALLOWED, 10000);
+        this.maxDataPointsAllowed = json.getInteger(CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED, CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED_DEFAULT);
         this.port = json.getInteger(CONFIG_HTTP_SERVER_PORT, 8080);
         this.hostname = json.getString(CONFIG_HTTP_SERVER_HOSTNAME, "localhost");
         this.uploadDirectory = json.getString(CONFIG_UPLOAD_DIRECTORY, "/tmp/hurence-historian");
@@ -27,8 +29,8 @@ public class HttpVerticleConf {
         return historianAdress;
     }
 
-    public int getMaxDataPointsAllowedForExportCsv() {
-        return maxDataPointsAllowedForExportCsv;
+    public int getMaxDataPointsAllowed() {
+        return maxDataPointsAllowed;
     }
 
     public boolean isDebugModeEnabled() {
@@ -48,7 +50,7 @@ public class HttpVerticleConf {
         return "HttpVerticleConf{" +
                 "historianAdress='" + historianAdress + '\'' +
                 ", isDebugModeEnabled=" + isDebugModeEnabled +
-                ", maxDataPointsAllowedForExportCsv=" + maxDataPointsAllowedForExportCsv +
+                ", maxDataPointsAllowedForExportCsv=" + maxDataPointsAllowed +
                 ", port=" + port +
                 ", hostname='" + hostname + '\'' +
                 '}';

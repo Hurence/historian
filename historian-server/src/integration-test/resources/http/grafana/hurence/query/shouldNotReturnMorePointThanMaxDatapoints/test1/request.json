@@ -1,0 +1,5 @@
+{
+  "names": ["U879.FQ244D_PV.F_CV"],
+  "max_data_points": 5,
+  "aggregations": ["COUNT"]
+}

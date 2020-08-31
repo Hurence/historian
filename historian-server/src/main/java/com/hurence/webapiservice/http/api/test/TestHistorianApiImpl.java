@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.test;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieJsonRequestParser;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieRequestParam;
@@ -12,7 +12,6 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
 public class TestHistorianApiImpl implements TestHistorianApi {
@@ -51,7 +50,7 @@ public class TestHistorianApiImpl implements TestHistorianApi {
         service
                 .rxGetTimeSeriesChunk(getTimeSeriesChunkParams)
                 .map(chunkResponse -> {
-                    chunkResponse.getJsonArray(CHUNKS).forEach(chunk -> {
+                    chunkResponse.getJsonArray(HistorianServiceFields.CHUNKS).forEach(chunk -> {
                         JsonObject chunkJson = (JsonObject) chunk;
                         chunkJson.remove("_version_");
                     });
@@ -75,45 +74,15 @@ public class TestHistorianApiImpl implements TestHistorianApi {
     }
 
     private JsonObject buildHistorianRequest(GetTimeSerieRequestParam request) {
-        JsonArray fieldsToFetch = new JsonArray()
-                .add(CHUNK_VALUE_FIELD)
-                .add(CHUNK_START_FIELD)
-                .add(CHUNK_END_FIELD)
-                .add(CHUNK_COUNT_FIELD)
-                .add(NAME);
-        request.getAggs().forEach(agg -> {
-            final String aggField;
-            switch (agg) {
-                case MIN:
-                    aggField = CHUNK_MIN_FIELD;
-                    break;
-                case MAX:
-                    aggField = CHUNK_MAX_FIELD;
-                    break;
-                case AVG:
-                    aggField = CHUNK_AVG_FIELD;
-                    break;
-                case COUNT:
-                    aggField = CHUNK_COUNT_FIELD;
-                    break;
-                case SUM:
-                    aggField = CHUNK_SUM_FIELD;
-                    break;
-                default:
-                    throw new IllegalStateException("Unsupported aggregation: " + agg);
-            }
-            fieldsToFetch.add(aggField);
-        });
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
-                .put(FROM, request.getFrom())
-                .put(TO, request.getTo())
-                .put(FIELDS, fieldsToFetch)
-                .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTags())
-                .put(SAMPLING_ALGO, samplingConf.getAlgo())
-                .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(HistorianServiceFields.FROM, request.getFrom())
+                .put(HistorianServiceFields.TO, request.getTo())
+                .put(HistorianServiceFields.NAMES, request.getMetricNames())
+                .put(HistorianServiceFields.TAGS, request.getTags())
+                .put(HistorianServiceFields.SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(HistorianServiceFields.BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(HistorianServiceFields.MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
 }

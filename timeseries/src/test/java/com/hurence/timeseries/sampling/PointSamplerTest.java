@@ -37,6 +37,22 @@ public class PointSamplerTest {
         );
     }
 
+    private List<Point> getPoints2() {
+        return Arrays.asList(
+                new PointImpl(1L, 48d),
+                new PointImpl(2L, 52d),
+                new PointImpl(3L, 60d),
+                new PointImpl(4L, 48d),
+                new PointImpl(5L, 52d),
+                new PointImpl(6L, 48d),
+                new PointImpl(7L, 52d),
+                new PointImpl(8L, 60d),
+                new PointImpl(9L, 48d),
+                new PointImpl(10L, 52d),
+                new PointImpl(11L, 60d)
+        );
+    }
+
     @Test
     public void testAvgSampler() {
         Sampler<Point> sampler = SamplerFactory.getPointSampler(SamplingAlgorithm.AVERAGE, 3);
@@ -45,6 +61,16 @@ public class PointSamplerTest {
         Point point1 = sampled.get(0);
         Assertions.assertEquals(1L, point1.getTimestamp());
         Assertions.assertEquals(53.333333333333336d, point1.getValue());
+    }
+
+    @Test
+    public void bug27072020WhenBucketSuperiorToSizeInputDoesNotSample() {
+        Sampler<Point> sampler = SamplerFactory.getPointSampler(SamplingAlgorithm.AVERAGE, 1000);
+        List<Point> sampled = sampler.sample(getPoints2());
+        Assertions.assertEquals(1, sampled.size());
+        Point point1 = sampled.get(0);
+        Assertions.assertEquals(1L, point1.getTimestamp());
+        Assertions.assertEquals(52.72727272727273d, point1.getValue());
     }
 
     @Test

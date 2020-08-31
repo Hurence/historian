@@ -1,11 +1,9 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
+
 import com.hurence.timeseries.modele.Point;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
-import com.hurence.timeseries.modele.PointImpl;
-import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
-import com.hurence.webapiservice.http.api.grafana.util.QualityConfig;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.PointsAggsCalculator;

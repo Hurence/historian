@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.util.models;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianServiceFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -15,10 +15,10 @@ public class ResponseAsList {
         List<SubResponse> jsonArray = new ArrayList<>();
         for (Object timeserie : timeseries) {
             JsonObject json = (JsonObject) timeserie;
-            JsonArray datapoints = json.getJsonArray(HistorianFields.DATAPOINTS);
+            JsonArray datapoints = json.getJsonArray(HistorianServiceFields.DATAPOINTS);
             for (Object datapoint : datapoints) {
                 JsonArray line = new JsonArray();
-                line.add(json.getString(HistorianFields.NAME));
+                line.add(json.getString(HistorianServiceFields.NAME));
                 for (Object point : (JsonArray) datapoint) {
                     line.add(point);
                 }

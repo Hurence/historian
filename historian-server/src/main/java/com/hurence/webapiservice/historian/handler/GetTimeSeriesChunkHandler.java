@@ -1,6 +1,8 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.HistorianConf;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -21,22 +23,25 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-
 public class GetTimeSeriesChunkHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GetTimeSeriesChunkHandler.class);
+    HistorianConf historianConf;
     SolrHistorianConf solrHistorianConf;
 
-
-    public GetTimeSeriesChunkHandler(SolrHistorianConf solrHistorianConf) {
+    public GetTimeSeriesChunkHandler(HistorianConf historianConf, SolrHistorianConf solrHistorianConf) {
+        this.historianConf = historianConf;
         this.solrHistorianConf = solrHistorianConf;
+    }
+
+    private SolrFieldMapping getHistorianFields() {
+        return this.historianConf.getFieldsInSolr();
     }
 
     public Handler<Promise<JsonObject>> getHandler(JsonObject params) {
         final SolrQuery query = buildTimeSeriesChunkQuery(params);
         //    FILTER
-        buildSolrFilterFromTags(params.getJsonObject(HistorianFields.TAGS))
+        buildSolrFilterFromTags(params.getJsonObject(HistorianServiceFields.TAGS))
                 .ifPresent(query::addFilterQuery);
         query.setFields();//so we return every fields (this endpoint is currently used only in tests, this is legacy code)
         //  EXECUTE REQUEST
@@ -50,8 +55,8 @@ public class GetTimeSeriesChunkHandler {
                         .collect(Collectors.toList())
                 );
                 p.complete(new JsonObject()
-                        .put(HistorianFields.TOTAL, documents.getNumFound())
-                        .put(CHUNKS, docs)
+                        .put(HistorianServiceFields.TOTAL, documents.getNumFound())
+                        .put(HistorianServiceFields.CHUNKS, docs)
                 );
             } catch (IOException | SolrServerException e) {
                 p.fail(e);
@@ -102,32 +107,32 @@ public class GetTimeSeriesChunkHandler {
 
     private SolrQuery buildTimeSeriesChunkQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        if (params.getLong(TO) != null) {
-            LOGGER.trace("requesting timeseries to {}", params.getLong(TO));
-            queryBuilder.append(CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(TO)).append("]");
+        if (params.getLong(HistorianServiceFields.TO) != null) {
+            LOGGER.trace("requesting timeseries to {}", params.getLong(HistorianServiceFields.TO));
+            queryBuilder.append(getHistorianFields().CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(HistorianServiceFields.TO)).append("]");
         }
-        if (params.getLong(FROM) != null) {
-            LOGGER.trace("requesting timeseries from {}", params.getLong(FROM));
+        if (params.getLong(HistorianServiceFields.FROM) != null) {
+            LOGGER.trace("requesting timeseries from {}", params.getLong(HistorianServiceFields.FROM));
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(CHUNK_END_FIELD).append(":[").append(params.getLong(FROM)).append(" TO *]");
+            queryBuilder.append(getHistorianFields().CHUNK_END_FIELD).append(":[").append(params.getLong(HistorianServiceFields.FROM)).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
         //TODO filter on names AND tags
-        buildSolrFilterFromArray(params.getJsonArray(NAMES), NAME)
+        buildSolrFilterFromArray(params.getJsonArray(HistorianServiceFields.NAMES), getHistorianFields().CHUNK_NAME)
                 .ifPresent(query::addFilterQuery);
 //            FIELDS_TO_FETCH
-        query.setFields(CHUNK_START_FIELD,
-                CHUNK_END_FIELD,
-                CHUNK_COUNT_FIELD,
-                NAME);
+        query.setFields(getHistorianFields().CHUNK_START_FIELD,
+                getHistorianFields().CHUNK_END_FIELD,
+                getHistorianFields().CHUNK_COUNT_FIELD,
+                getHistorianFields().CHUNK_NAME);
         //    SORT
-        query.setSort(CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(CHUNK_END_FIELD, SolrQuery.ORDER.asc);
-        query.setRows(params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000));
+        query.setSort(getHistorianFields().CHUNK_START_FIELD, SolrQuery.ORDER.asc);
+        query.addSort(getHistorianFields().CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setRows(params.getInteger(HistorianServiceFields.MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000));
         return query;
     }
 

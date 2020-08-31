@@ -24,11 +24,11 @@ import java.util.stream.Collectors;
 public class FirstItemRecordSampler extends AbstractRecordSampler {
 
 
-    private int numBuckets;
+    private int bucketSize;
 
-    public FirstItemRecordSampler(String valueFieldName, String timeFieldName, int numBuckets) {
+    public FirstItemRecordSampler(String valueFieldName, String timeFieldName, int bucketSize) {
         super(valueFieldName,timeFieldName);
-        this.numBuckets = numBuckets;
+        this.bucketSize = bucketSize;
     }
 
 
@@ -42,8 +42,6 @@ public class FirstItemRecordSampler extends AbstractRecordSampler {
     @Override
     public List<Record> sample(List<Record> inputRecords) {
         // simple downsample to numBucket data points
-        final int bucketSize = SamplingUtils.fitBucketSize(inputRecords, numBuckets);
-
         return SamplingUtils.grouped(inputRecords, bucketSize)
                 .map(record -> getTimeValueRecord(record.get(0)))
                 .collect(Collectors.toList());

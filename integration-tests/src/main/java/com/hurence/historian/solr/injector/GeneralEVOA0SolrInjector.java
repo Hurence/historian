@@ -16,6 +16,7 @@ public class GeneralEVOA0SolrInjector extends AbstractEVOA0SolrInjector {
         return chunks;
     }
 
+
     public void addChunk(String metric, int year, int month, int day, String origin, List<Point> points) {
         ChunkModeleVersionEVOA0 chunk = ChunkModeleVersionEVOA0.fromPoints(metric, year, month, day, origin, points);
         chunks.add(chunk);

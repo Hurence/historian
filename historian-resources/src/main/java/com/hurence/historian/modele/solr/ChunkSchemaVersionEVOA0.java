@@ -26,10 +26,6 @@ public class ChunkSchemaVersionEVOA0 implements Schema {
                     .withName(HistorianChunkCollectionFieldsVersionEVOA0.QUALITY)
                     .withType("pfloat").build(),
             new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionEVOA0.COMPACTIONS_RUNNING)
-                    .withType("string")
-                    .withMultivalued(true).build(),
-            new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_VALUE)
                     .withType("string")
                     .withIndexed(false).build(),
@@ -91,12 +87,6 @@ public class ChunkSchemaVersionEVOA0 implements Schema {
                     .withName(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_FIRST)
                     .withType("pdoubles").build(),
             new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_LAST)
-                    .withType("pdouble").build(),
-            new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_STDDEV)
-                    .withType("pdouble").build(),
-            new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SUM)
                     .withType("pdoubles").build(),
             new SolrField.Builder()
@@ -113,11 +103,7 @@ public class ChunkSchemaVersionEVOA0 implements Schema {
                     .withType("plongs").build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_WEEK)
-                    .withType("plongs").build(),
-            new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_HOUR)
-                    .withType("pint").build()
-
+                    .withType("plongs").build()
     );
 
     @Override

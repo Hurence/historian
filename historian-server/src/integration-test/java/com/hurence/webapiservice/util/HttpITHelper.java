@@ -26,7 +26,6 @@ import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.DockerComposeContainer;
 
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.HISTORIAN_ADRESS;
 
@@ -46,7 +45,7 @@ public class HttpITHelper {
                 .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, HttpITHelper.PORT)
                 .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
                 .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, HttpITHelper.HOST)
-                .put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, 10000)
+                .put(HttpServerVerticle.CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED, 10000)
                 .put(HttpServerVerticle.CONFIG_DEBUG_MODE, true);
     }
 

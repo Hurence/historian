@@ -149,6 +149,13 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggIT {
         return injector10chunk;
     }
 
+    /**
+     * QUERY MODE 1 because
+     * metricsInfo.getTotalNumberOfPointsWithCorrectQuality() <= getSamplingConf(request).getMaxPoint()
+     * metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < getSamplingConf(request).getMaxPoint()
+     * @param vertx
+     * @param testContext
+     */
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric10ChunkMax20(Vertx vertx, VertxTestContext testContext) {
@@ -157,6 +164,11 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testMetric10ChunkMaxPoint20/expectedResponse.json");
     }
 
+    /**
+     * QUERY MODE 2
+     * @param vertx
+     * @param testContext
+     */
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric10ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
@@ -165,6 +177,11 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testMetric10ChunkMaxPoint4/expectedResponse.json");
     }
 
+    /**
+     * QUERY MODE 2
+     * @param vertx
+     * @param testContext
+     */
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric9ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
@@ -173,6 +190,11 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testMetric9ChunkMaxPoint4/expectedResponse.json");
     }
 
+    /**
+     * QUERY MODE 2
+     * @param vertx
+     * @param testContext
+     */
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric7ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
@@ -181,6 +203,13 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testMetric7ChunkMaxPoint4/expectedResponse.json");
     }
 
+    /**
+     * QUERY MODE 1 because :
+     * metricsInfo.getTotalNumberOfPointsWithCorrectQuality() < solrHistorianConf.limitNumberOfPoint
+     * metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < getSamplingConf(request).getMaxPoint()
+     * @param vertx
+     * @param testContext
+     */
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric5ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
@@ -189,6 +218,12 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testMetric5ChunkMaxPoint4/expectedResponse.json");
     }
 
+    /**
+     * QUERY MODE 1 because :
+     * metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < getSamplingConf(request).getMaxPoint()
+     * @param vertx
+     * @param testContext
+     */
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric1ChunkOf20PointMax4Point(Vertx vertx, VertxTestContext testContext) {

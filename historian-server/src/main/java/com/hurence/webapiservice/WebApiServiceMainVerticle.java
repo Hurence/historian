@@ -40,10 +40,15 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
     vertx.getOrCreateContext();
     this.conf = parseConfig(config());
     LOGGER.info("deploying {} verticle with config : {}", WebApiServiceMainVerticle.class.getSimpleName(), this.conf);
+    LOGGER.debug("You see log level DEBUG");
+    LOGGER.trace("You see log level TRACE");
     Single<String> dbVerticleDeployment = deployHistorianVerticle();
     dbVerticleDeployment
             .flatMap(id -> deployHttpVerticle())
-            .doOnError(promise::fail)
+            .doOnError(t -> {
+              LOGGER.error("Could not deploy historian !", t);
+              promise.fail(t);
+            })
             .doOnSuccess(id -> promise.complete())
             .subscribe(id -> {
               LOGGER.info("{} finished to deploy verticles", WebApiServiceMainVerticle.class.getSimpleName());

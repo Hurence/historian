@@ -1,7 +1,8 @@
 package com.hurence.webapiservice.http.api.grafana;
 
 
-import com.hurence.historian.modele.HistorianFields;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
@@ -23,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.NOT_FOUND;
 
@@ -36,9 +36,11 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
     public final static String BUCKET_SIZE_TAG_KEY = "Bucket size";
     public final static List<String> FILTER_KEYS = Arrays.asList(ALGO_TAG_KEY, BUCKET_SIZE_TAG_KEY);
     public final static String TARGET = "target";
+    private int maxDataPointsAllowed;
 
-    public GrafanaSimpleJsonPluginApiImpl(HistorianService service) {
-        this.service = service;
+    public GrafanaSimpleJsonPluginApiImpl(HistorianService historianService, int maxDataPointsAllowed) {
+        this.service = historianService;
+        this.maxDataPointsAllowed = maxDataPointsAllowed;
     }
 
 
@@ -51,7 +53,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
 
     /**
      *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value HistorianFields#NAME}' value in historian.
+     *  In our case we will return each different '{@value HistorianServiceFields#NAME}' value in historian.
      * @param context
      *
      * Expected request exemple :
@@ -95,7 +97,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                     context.response().end(ex.getMessage());
                 })
                 .doOnSuccess(metricResponse -> {
-                    JsonArray array = metricResponse.getJsonArray(METRICS);
+                    JsonArray array = metricResponse.getJsonArray(HistorianServiceFields.METRICS);
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(array.encode());
@@ -104,13 +106,13 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
 
     private JsonObject buildGetMetricsParam(SearchRequestParam request) {
         return new JsonObject()
-                .put(METRIC, request.getStringToUseToFindMetrics())
-                .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
+                .put(HistorianServiceFields.METRIC, request.getStringToUseToFindMetrics())
+                .put(HistorianServiceFields.LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
     /**
      *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value HistorianFields#NAME}' value in historian.
+     *  In our case we will return each different '{@value HistorianServiceFields#NAME}' value in historian.
      * @param context
      *
      * Expected request exemple :
@@ -180,6 +182,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
             request = new QueryRequestParser().parseRequest(requestBody);
+            if (request.getSamplingConf().getMaxPoint() > this.maxDataPointsAllowed) {
+                throw new IllegalArgumentException(String.format("maximum allowed for %s is %s", "maxDataPoints", this.maxDataPointsAllowed));
+            }
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
@@ -194,7 +199,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
                 .map(sampledTimeSeries -> {
-                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES);
+                    JsonArray timeseries = sampledTimeSeries.getJsonArray(HistorianServiceFields.TIMESERIES);
                     if (LOGGER.isDebugEnabled()) {
                         timeseries.forEach(metric -> {
                             JsonObject el = (JsonObject) metric;
@@ -205,7 +210,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                         });
                         LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
                                 request.getRequestId(),
-                                sampledTimeSeries.getLong(TOTAL_POINTS, 0L),
+                                sampledTimeSeries.getLong(HistorianServiceFields.TOTAL_POINTS, 0L),
                                 System.currentTimeMillis() - startRequest);
                     }
                     return timeseries;
@@ -213,8 +218,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                 .map(timeseries -> {
                     timeseries.forEach(timeserie -> {
                         JsonObject timeserieJson = (JsonObject) timeserie;
-                        timeserieJson.put(TARGET, timeserieJson.getValue(NAME));
-                        timeserieJson.remove(NAME);
+                        timeserieJson.put(TARGET, timeserieJson.getValue(HistorianServiceFields.NAME));
+                        timeserieJson.remove(HistorianServiceFields.NAME);
+                        timeserieJson.remove(HistorianServiceFields.TOTAL_POINTS);
                     });
                     return timeseries;
                 })
@@ -233,22 +239,15 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
     }
 
     private JsonObject buildHistorianRequest(QueryRequestParam request) {
-        JsonArray fieldsToFetch = new JsonArray()
-                .add(CHUNK_VALUE_FIELD)
-                .add(CHUNK_START_FIELD)
-                .add(CHUNK_END_FIELD)
-                .add(CHUNK_COUNT_FIELD)
-                .add(NAME);
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
-                .put(FROM, request.getFrom())
-                .put(TO, request.getTo())
-                .put(FIELDS, fieldsToFetch)
-                .put(NAMES, request.getMetricNames())
-                .put(HistorianFields.TAGS, request.getTags())
-                .put(SAMPLING_ALGO, samplingConf.getAlgo())
-                .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(HistorianServiceFields.FROM, request.getFrom())
+                .put(HistorianServiceFields.TO, request.getTo())
+                .put(HistorianServiceFields.NAMES, request.getMetricNames())
+                .put(HistorianServiceFields.TAGS, request.getTags())
+                .put(HistorianServiceFields.SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(HistorianServiceFields.BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(HistorianServiceFields.MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
 
@@ -332,25 +331,25 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
     }
 
     private JsonArray modifyResponse(JsonObject annotationsRsp) {
-        JsonArray annotationsAsArray = annotationsRsp.getJsonArray(ANNOTATIONS);
+        JsonArray annotationsAsArray = annotationsRsp.getJsonArray(HistorianServiceFields.ANNOTATIONS);
         annotationsAsArray.forEach(obj -> {
             modifyAnnotation((JsonObject) obj);
         });
         return annotationsAsArray;
     }
     private JsonObject modifyAnnotation(JsonObject annotation) {
-        annotation.put("title", annotation.getString(TEXT));
+        annotation.put("title", annotation.getString(HistorianServiceFields.TEXT));
         return annotation;
     }
 
     protected JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
         return new JsonObject()
-                .put(FROM, request.getFrom())
-                .put(TO, request.getTo())
-                .put(TAGS, request.getTags())
-                .put(LIMIT, request.getMaxAnnotation())
-                .put(MATCH_ANY, request.getMatchAny())
-                .put(TYPE, request.getType());
+                .put(HistorianServiceFields.FROM, request.getFrom())
+                .put(HistorianServiceFields.TO, request.getTo())
+                .put(HistorianServiceFields.TAGS, request.getTags())
+                .put(HistorianServiceFields.LIMIT, request.getMaxAnnotation())
+                .put(HistorianServiceFields.MATCH_ANY, request.getMatchAny())
+                .put(HistorianServiceFields.TYPE, request.getType());
     }
 
     /**

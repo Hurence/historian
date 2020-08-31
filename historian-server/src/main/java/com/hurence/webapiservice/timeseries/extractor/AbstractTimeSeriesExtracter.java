@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.HistorianFields;
+
+import com.hurence.historian.modele.FieldNamesInsideHistorianService;
 import com.hurence.timeseries.modele.Point;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
@@ -44,7 +45,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     @Override
     public void addChunk(JsonObject chunk) {
         totalChunkCounter++;
-        pointCounter+=chunk.getLong(HistorianFields.CHUNK_COUNT_FIELD);
+        pointCounter+=chunk.getLong(FieldNamesInsideHistorianService.CHUNK_COUNT);
         chunks.add(chunk);
         if (isBufferFull()) {
             samplePointsInBufferAndCalculAggregThenReset();
@@ -98,8 +99,8 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         JsonObject toReturn = new JsonObject();
         if (!points.isEmpty())
         {
-            toReturn
-                    .put(TIMESERIE_POINT, new JsonArray(points));
+            toReturn.put(TIMESERIE_POINT, new JsonArray(points))
+                    .put(TOTAL_POINTS, points.size());
             getAggsAsJson()
                     .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
             LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
