@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.10">
 <meta name="author" content="© Hurence">
-<title>Guide utilisateur</title>
+<title>User Guide</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,7 +440,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="book toc2 toc-left">
 <div id="header">
-<h1>Guide utilisateur</h1>
+<h1>User Guide</h1>
 <div class="details">
 <span id="author" class="author">© Hurence</span><br>
 <span id="email" class="email"><a href="mailto:contact@hurence.com">contact@hurence.com</a></span><br>
@@ -449,62 +449,59 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <br><span id="revremark">First book</span>
 </div>
 <div id="toc" class="toc2">
-<div id="toctitle">Table des matières</div>
+<div id="toctitle">Table of content</div>
 <ul class="sectlevel1">
 <li><a href="#introduction">Introduction</a></li>
 <li><a href="#concepts">Concepts</a>
 <ul class="sectlevel2">
-<li><a href="#modèle-de-données">Modèle de données</a></li>
+<li><a href="#data-model">Data model</a></li>
 </ul>
 </li>
 <li><a href="#installation">Installation</a>
 <ul class="sectlevel2">
-<li><a href="#install-standalone">Installation standalone</a>
+<li><a href="#install-standalone">Standalone installation</a>
 <ul class="sectlevel3">
-<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester">Pre-requis pour une installation mono serveur en standalone (pour tester)</a></li>
-<li><a href="#installation-de-lhistorian">Installation de l&#8217;historian</a>
+<li><a href="#pre-requisites-for-a-standalone-single-node-installation">Pre-requisites for a standalone single node installation</a></li>
+<li><a href="#installing-the-data-historian">Installing the Data Historian</a>
 <ul class="sectlevel4">
-<li><a href="#description-du-fichier-de-configuration-de-lhistorian">Description du fichier de configuration de l&#8217;historian</a></li>
-<li><a href="#description-des-composants-installés-par-le-script-dinstallation">Description des composants installés par le script d&#8217;installation</a></li>
+<li><a href="#configuration-file-for-the-data-historian">Configuration file for the data historian</a></li>
+<li><a href="#description-of-the-installed-historian-components">Description of the installed historian components</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#install-production-mono-noeud">Installation mono noeud de production</a>
+<li><a href="#install-production-mono-noeud">Single node installation for production</a>
 <ul class="sectlevel3">
-<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-production">Pre-requis pour une installation mono serveur en production</a></li>
-<li><a href="#installation-de-apache-solr-2">Installation de Apache SolR</a></li>
-<li><a href="#install-apache-spark">Install Apache Spark</a></li>
-<li><a href="#installation-de-grafana">Installation de Grafana</a>
+<li><a href="#pre-requisite-for-a-single-node-install-in-production">Pre-requisite for a single node install in production</a></li>
+<li><a href="#installing-apache-solr">Installing Apache SolR</a></li>
+<li><a href="#installing-apache-spark">Installing Apache Spark</a></li>
+<li><a href="#commands-to-install-solr-and-spark">Commands to install Solr and Spark</a></li>
+<li><a href="#installing-grafana">Installing Grafana</a>
 <ul class="sectlevel4">
-<li><a href="#install-production-hurence-datasource-grafana-plugin">Installation Plugin Grafana pour utiliser le data historian Hurence</a></li>
+<li><a href="#install-production-hurence-datasource-grafana-plugin">Installing the Grafana data source plugin</a></li>
 </ul>
 </li>
-<li><a href="#installation-de-lhistorian-2">Installation de l&#8217;historian</a>
+<li><a href="#installing-the-hurence-data-historian-hdh">Installing the Hurence Data Historian (HDH)</a>
 <ul class="sectlevel4">
-<li><a href="#description-du-fichier-de-configuration-de-lhistorian-2">Description du fichier de configuration de l&#8217;historian</a></li>
+<li><a href="#configuration-file-for-the-data-historian-2">Configuration file for the data historian</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#gestion-des-données">Gestion des données</a>
+<li><a href="#data-management">Data management</a>
 <ul class="sectlevel2">
-<li><a href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest">Import de donnée à partir de fichiers csv avec l&#8217;api REST</a></li>
+<li><a href="#importing-data-from-csv-files-with-the-rest-api">Importing Data from CSV files with the REST API</a></li>
 <li><a href="#requêter-des-données-avec-lapi-rest">Requêter des données avec l&#8217;api REST</a></li>
-<li><a href="#utiliser-spark-pour-requếter-les-données">Utiliser Spark pour requếter les données</a></li>
-<li><a href="#linjection-temps-réel-avec-logisland">L&#8217;injection temps réel avec LogIsland</a></li>
+<li><a href="#use-spark-to-get-data">Use Spark to get data</a></li>
+<li><a href="#realtime-data-ingestion-with-logisland">Realtime data ingestion with logisland</a></li>
 </ul>
 </li>
-<li><a href="#visualisation-des-données">Visualisation des données</a>
+<li><a href="#data-visualization">Data visualization</a></li>
+<li><a href="#stopping-and-deleting-data">Stopping and deleting data</a>
 <ul class="sectlevel2">
-<li><a href="#configurer-grafana-et-vos-dashboard">Configurer Grafana et vos dashboard</a></li>
-</ul>
-</li>
-<li><a href="#stopper-et-détruire-les-données">Stopper et détruire les données</a>
-<ul class="sectlevel2">
-<li><a href="#stopper-ses-instances-solr">Stopper ses instances SolR</a></li>
+<li><a href="#stopping-your-solr-instances">Stopping your Solr instances</a></li>
 </ul>
 </li>
 </ul>
@@ -515,12 +512,9 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <h2 id="introduction"><a class="anchor" href="#introduction"></a>Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Ce guide aidera l&#8217;utilisateur du data historian dans la compréhension de la plateforme, de son installation,
-de son utilisation. Le data historian ayant été conçu dans l&#8217;optique d&#8217;un déploiement sur une infrastructure Big Data,
-qui sont par nature des environnements complexes à mettre en oeuvre, nous n&#8217;aborderons dans ce guide que les
-déploiements sur une seule machine et de manière progressive. Pour un déploiement sur une infrastructure
-Big Data multi-serveurs et sa sécurisation, il faudra se référer à d&#8217;autres documentations ou contacter Hurence à
-<a href="mailto:contact@hurence.com">contact@hurence.com</a>.</p>
+<p>This guide will help the user of the data historian in understanding the platform, its installation, its use. The data historian having been designed with a view to deployment on a Big Data infrastructure,
+which by nature are complex environments to implement, we will only discuss in this guide the
+deployments on a single machine and gradually prepare for the Big One. For deployments on a Big Data multi-node infrastructure with the necessary security, you will have to refer to other documentation or contact Hurence at <a href="mailto:contact@hurence.com">contact@hurence.com</a>.</p>
 </div>
 </div>
 </div>
@@ -528,28 +522,27 @@ Big Data multi-serveurs et sa sécurisation, il faudra se référer à d&#8217;a
 <h2 id="concepts"><a class="anchor" href="#concepts"></a>Concepts</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Hurence Data Historian est une solution open source pour gérer d&#8217;énormes quantités de time series (séries temporelles).
-Il se base sur les moteurs de recherche (comme Apache Solr).
-Les principaux concepts sont les suivants :</p>
+<p>Hurence Data Historian is a free solution to handle massive loads of timeseries data into a search engine (such as Apache SolR).
+The key concepts are simple :</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Measure</strong> C&#8217;est un point dans le temps avec une valeur de type "double" identifiée par un nom et des tags (clés valeurs).</p>
+<p><strong>Measure</strong> is a point in time with a floating point value identified by a name and some tags (categorical features)</p>
 </li>
 <li>
-<p><strong>Chunk</strong> Est un ensemble continu de Measures dans un intervalle de temps donné, groupées par date, name et éventuellement des tags.</p>
+<p><strong>Chunk</strong> is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and eventually some tags</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Le but principal de cet outil est d&#8217;aider à la création, au stockage et au requêtage de ces chunks de time series.
-Nous utilison le "chunking" à la place du stockage brut des données afin d&#8217;économiser de l&#8217;espace de stockage et afin d&#8217;améliorer les performances pour de grandes volumétries de points. En effet le chunking nous permet de pré-calculer des agrégations pour faciliter le sampling par exemple.</p>
+<p>The main purpose of this tool is to help creating, storing and retrieving these chunks of timeseries.
+We use chunking instead of raw storage in order to save some disk space and reduce costs at scale. Also chunking is very usefull to pre-compute some aggregation and to facilitate down-sampling</p>
 </div>
 <div class="sect2">
-<h3 id="modèle-de-données"><a class="anchor" href="#modèle-de-données"></a>Modèle de données</h3>
+<h3 id="data-model"><a class="anchor" href="#data-model"></a>Data model</h3>
 <div class="paragraph">
-<p>Une Measure est un point dans le temps Identifié par les champs suivants :</p>
+<p>A Measure point is identified by the following fields</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -564,7 +557,7 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d&#82
 </div>
 </div>
 <div class="paragraph">
-<p>Un Chunk est identifié par les champs suivants :</p>
+<p>A Chunk is identified by the following fields</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -585,10 +578,10 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d&#82
 </div>
 </div>
 <div class="paragraph">
-<p>Comme vous pouvez le constater lors du passage entre la Measure et le Chunk de Measure, le "timestamp" a été remplacé par "start" et "stop" qui définissent l&#8217;intervalle de temps, la valeur est, elle, passée d&#8217;un double dans le champs "value" à une string en base64 appelée "chunk". Cette string contient l&#8217;ensemble des valeurs du chunk, compressées par un algorithme.</p>
+<p>As you can see from a Measure points to a Chunk of Measures, the <code>timestamp</code> field has been replaced by a <code>start</code> and <code>stop</code> interval and the <code>value</code> is now a base64 encoded string named <code>chunk</code>.</p>
 </div>
 <div class="paragraph">
-<p>Dans solr les chunks sont stockés en format XML sous la forme du schéma suivant :</p>
+<p>In SolR the chunks will be stored according to  the following schema (for the current version)</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -607,14 +600,15 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d&#82
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_month</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_outlier</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_qualities</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sax</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ngramtext</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_start</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_stddev</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sum</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">text_en</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_timestamp</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_trend</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_year</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_origin</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">compactions_running</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
 <span class="tag">&lt;/schema&gt;</span></code></pre>
 </div>
 </div>
@@ -625,10 +619,10 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d&#82
 <h2 id="installation"><a class="anchor" href="#installation"></a>Installation</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant
-conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes
-volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d&#8217;installation n&#8217;est pas
-décrite ici par simplification car elle concerne des experts en urbanisation d&#8217;infrastructures Big Data.</p>
+<p>This section describes a simple single node installation of the Hurence Data Historian. The historian is designed for Big Data and therefore it is possible to deploy it on small to very large multi node infrastructures (on multiple racks) with potentially huge storage capacities and in any cases outstanding computing performances.</p>
+</div>
+<div class="paragraph">
+<p>This type of installation is not described here ; this is the specific domain of experts in designing Big Data infrastructures.</p>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -637,13 +631,13 @@ décrite ici par simplification car elle concerne des experts en urbanisation d&
 <i class="fa icon-note" title="Note"></i>
 </td>
 <td class="content">
-Hurence propose de l&#8217;accompagnement pour installer le data historian pour des volumétries importantes.
+Hurence proposes services to install the data historian on Big Data infrastructures for large volumes of data.
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Dans ce guide nous proposing une installation simple et rapide qui est idéale pour tester, développer et stocker de petits volumes de données peu sensibles. Nous ne recommendons pas cette installation en production car pour la production il faut se préparer pour une infrastructure qui deviendra à terme multi noeuds, et aura la nécessaire redondance des données et des mécanismes de fail over. La seconde installation est plus souhaitable si vous planifiez de faire passer à l&#8217;échelle ce que vous voulez installer.</p>
+<p>In this guide we propose a simple and quick installation on a single node which is ideal for starting. It can be used for testing, developing and storing small volumes data. We would not recommend it for production since in production we will need to prepare the infrastructure to scale and become multi-nodes and have the necessary data redundancy and fail over mechanisms. The second installation is more suitable if you plan to go this route.</p>
 </div>
 <div class="ulist">
 <ul>
@@ -656,39 +650,39 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 </ul>
 </div>
 <div class="sect2">
-<h3 id="install-standalone"><a class="anchor" href="#install-standalone"></a>Installation standalone</h3>
+<h3 id="install-standalone"><a class="anchor" href="#install-standalone"></a>Standalone installation</h3>
 <div class="paragraph">
-<p>Cette installation est celle à privilégier si vous êtes nouveau dans l&#8217;utilisation du data historian et que vous voulez essentiellement le tester. L&#8217;installation n&#8217;est pas faite pour la production (ou les noeuds seront redondés) ni pour des larges volumes de données (ce n&#8217;est qu&#8217;une seule machine). Mais cette installation peut évoluer vers une installation de production si nécessaire.</p>
+<p>This installation is the one you should use if you are new to the data historian and want to test it. It is not meant for production and large volumes (only a single node) but can evolve if needed towards a true production installation.</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">Note</dt>
 <dd>
-<p>Hurence propose de l&#8217;accompagnement pour faire évoluer vos installations mono noeuds vers une infrastructure clusterisée de production.</p>
+<p>Hurence provides assistance to evolve your single node installation towards a proper clusterized production infrastructure.</p>
 </dd>
 </dl>
 </div>
 <div class="sect3">
-<h4 id="pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"></a>Pre-requis pour une installation mono serveur en standalone (pour tester)</h4>
+<h4 id="pre-requisites-for-a-standalone-single-node-installation"><a class="anchor" href="#pre-requisites-for-a-standalone-single-node-installation"></a>Pre-requisites for a standalone single node installation</h4>
 <div class="paragraph">
-<p>Comme expliqué plus haut cette installation est la plus rapide et simple pour installer HDH. Elle est idéale pour un test ou si vous n&#8217;avez pas de gros volumes de données.</p>
+<p>As said earlier this install représents the quickest and easiest way for installing HDH. It is ideal for testing or if you do not have large volumes of data.</p>
 </div>
 <div class="paragraph">
-<p>La configuration minimale du serveur pour une installation de test du data historian est:</p>
+<p>The minimal configuration for the server, for this installation is the following:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>un OS CentOS ou Redhat 7.x</p>
+<p>OS CentOS or Redhat 7.x</p>
 </li>
 <li>
-<p>16 Gigabits de RAM</p>
+<p>16 Gigabits of RAM</p>
 </li>
 <li>
-<p>8 vcores de CPU</p>
+<p>8 vcores of CPU</p>
 </li>
 <li>
-<p>250 Giga octets de disque</p>
+<p>250 Gigabytes of disk</p>
 </li>
 <li>
 <p>Java 8</p>
@@ -697,12 +691,16 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-lhistorian"><a class="anchor" href="#installation-de-lhistorian"></a>Installation de l&#8217;historian</h4>
+<h4 id="installing-the-data-historian"><a class="anchor" href="#installing-the-data-historian"></a>Installing the Data Historian</h4>
 <div class="paragraph">
-<p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
-et les chunks. Téléchargez le script d&#8217;installation de l&#8217;historian pour votre version
-<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.
-Lancez l&#8217;installation en lançant ce script :</p>
+<p>Hurence Data Historian is a set of scripts and binary files that let you manupulate time series and chunks of time series.</p>
+</div>
+<div class="paragraph">
+<p>Download the installation script for your version of data historian at :
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.</p>
+</div>
+<div class="paragraph">
+<p>Run the installation by running this script :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -710,17 +708,19 @@ Lancez l&#8217;installation en lançant ce script :</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Il sera alors demander à l&#8217;utilisateur plusieurs informations, comme nous allons procéder à une installation de test
-en mode standalone vous pouvez laisser les valeurs par défaut et juste taper sur la touche entrée pour chaque question.
-Pour les questions sur les installations standalone tapez "1". Sauf pour l&#8217;installation de spark qui ne nous sera pas utile.
-Le programme va télécharger et installer des versions embarquées de Solr et Grafana.</p>
+<p>Some information will be needed. Since we are going to install a single node data historian, you can use the defaults values and just press ENTER for each question.</p>
 </div>
 <div class="paragraph">
-<p>Attention cependant au chemin ou vous installez l&#8217;historian (par défaut /opt/hdh). En effet l&#8217;espace disque doit être
-suffisant pour stocker les binaires, les scripts ainsi que les données de time series que vous allez injecter.</p>
+<p>To access the standalone installation you must type "1". You can skip the Spark installation that is not mandatory. It is useful for more advanced users.</p>
 </div>
 <div class="paragraph">
-<p>Voici un aperçu de l&#8217;installation :</p>
+<p>The script is going to download and install packaged and embeded versions of Solr and Grafana.</p>
+</div>
+<div class="paragraph">
+<p>Make sure you have enough space in the directory where the historian is installed (défault is /opt/hdh) to store the scripts, binaries and the time series data (these data are stored in the same directory by default).</p>
+</div>
+<div class="paragraph">
+<p>Here is an overview of the installation :</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -728,62 +728,85 @@ suffisant pour stocker les binaires, les scripts ainsi que les données de time 
 </div>
 </div>
 <div class="paragraph">
-<p>Dans la suite, on appellera le chemin indiqué pour l&#8217;installation de l&#8217;historian '$HDH_HOME'.</p>
+<p>In the following, the variable '$HDH_HOME' will be used to refer to the installation path of the data historian.</p>
 </div>
 <div class="paragraph">
-<p>A l&#8217;issue de ce script, si vous avez suivi l&#8217;exemple, vous aurez :</p>
+<p>After running the script and if you followed the example, you&#8217;ll get :</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>Un serveur solr 8.2 installé dans $HDH_HOME/solr-8.2.0</p>
+<p>A Solr 8.2 server installed in $HDH_HOME/solr-8.2.0</p>
 </li>
 <li>
-<p>Le script à démarrer le serveur solr, vous pouvez vérifier cela à l&#8217;adresse suivante :
-<a href="http://localhost:8983/solr/#/~cloud">solr UI</a>. Vous pouvez regarder la documentation solr pour
-interagir avec Solr (notamment pour démarrer le cluster et l&#8217;éteindre).</p>
+<p>The script to start the Solr server. The script has started Solr and you can check that this server is running at :
+<a href="http://localhost:8983/solr/#/~cloud">solr UI</a>. You can check the Solr documentation for managing Solr (starting, stopping the Solr server).</p>
 </li>
 <li>
-<p>Un serveur Grafana version-7.0.3 installé dans $HDH_HOME/grafana</p>
+<p>A Grafana server 7.0.3 installed in $HDH_HOME/grafana</p>
 </li>
 <li>
-<p>Le plugin <a href="https://github.com/Hurence/grafana-historian-datasource">datasource Grafana de l&#8217;historian</a>
-a été installé aussi sur ce serveur Grafana. Ce plugin permet la visualisation des time series du data historian dans Grafana.</p>
+<p>The data source plugin for Grafana <a href="https://github.com/Hurence/grafana-historian-datasource">datasource Grafana de l&#8217;historian</a>
+is installed to on this server. This plugin is the necessary tooling for visualizing the historian time series in Grafana.</p>
 </li>
 <li>
-<p>Le serveur Grafana a été lancé par le script, vous pouvez vérifier à l&#8217;adresse suivante :
-<a href="http://localhost:3000/">http://localhost:3000/</a>. Vous pouvez regarder la documentation Grafana pour
-interagir avec Grafana (notamment pour démarrer le serveur et l&#8217;éteindre).</p>
+<p>The Grafana server was started by the script. You can check it is up and running at this address:
+<a href="http://localhost:3000/">http://localhost:3000/</a>.
+You can check the Grafana documentation to interact with Grafana (starting and stopping the server for example).</p>
 </li>
 <li>
-<p>Le serveur historian installé dans $HDH_HOME/historian-1.3.5</p>
+<p>The historian server is installed in $HDH_HOME/historian-1.3.5</p>
 </li>
 <li>
-<p>Un répertoire "$HDH_HOME/data" qui va contenir les time series de l&#8217;historian.</p>
+<p>A folder "$HDH_HOME/data" has been created to receive the time series data for the historian.</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Voici la structure de $HDH_HOME à l&#8217;issue de l&#8217;installation par défaut :
-* $HDH_HOME/data : Dossier contenant les données Solr
-* $HDH_HOME/solr-8.2.0 : Dossier contenant l&#8217;installation de Solr 8.2.0
-* $HDH_HOME/solr-8.2.0/bin/solr : Script permettant de démarrer et arrêter Solr
-* $HDH_HOME/historian-1.3.5/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.
-* $HDH_HOME/historian-1.3.5/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
-* $HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
-* $HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.
-* $HDH_HOME/application.log : Le fichier de log du data historian.
-* $HDH_HOME/grafana-7.0.3 : Dossier contenant l&#8217;installation de Grafana
-* $HDH_HOME/grafana-7.0.3/bin/grafana-server : Script permettant de démarrer et arrêter grafana</p>
+<p>Here is the default structure for $HDH_HOME after the default installation :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>$HDH_HOME/data :folder contening the Solr data (timeseries)</p>
+</li>
+<li>
+<p>$HDH_HOME/solr-8.2.0 : folder containing the scripts and binaries for Solr 8.2.0</p>
+</li>
+<li>
+<p>$HDH_HOME/solr-8.2.0/bin/solr : script to start and stop Solr</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/bin/historian-server.sh : script to start and stop the REST API for the data historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/conf/log4j.properties : file to control the level of logs in production mode. (default).</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : file to control the level of logs in debug mode.</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : file that stores the configuration for the API REST server of the data historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/application.log : the log file for the data historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/grafana-7.0.3 : folder containing the scripts and binaries for Grafana 7.0.3.</p>
+</li>
+<li>
+<p>$HDH_HOME/grafana-7.0.3/bin/grafana-server : script for staring and stopping the Grafana server.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>Si l&#8217;installation se passe correctement, tous les services ont été lancés  et le data historian est prêt pour utilisation.</p>
+<p>When the installation runs successfully, all services are started and the data historian is ready to use.</p>
 </div>
 <div class="paragraph">
-<p>Les commandes suivantes sont données, pour information dans le cas où vous devriez arrêter / redémarrer votre serveur.</p>
+<p>The following commandes are provided for the case you would need to stop and restart the data historian server.</p>
 </div>
 <div class="paragraph">
-<p>Pour démarrer l&#8217;historian :</p>
+<p>To start the Hurence Data Historian :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -791,20 +814,25 @@ interagir avec Grafana (notamment pour démarrer le serveur et l&#8217;éteindre
 </div>
 </div>
 <div class="paragraph">
-<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
+<p>To stop the Hurence Data Historian :</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh stop</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Attention ces commandes n&#8217;affectent ni Grafana ni Solr qui sont des services indépendants.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Note</dt>
+<dd>
+<p>these commands affect neither Grafana nor Solr which are independant services (and need to be started / Stopped separately).</p>
+</dd>
+</dl>
 </div>
 <div class="sect4">
-<h5 id="description-du-fichier-de-configuration-de-lhistorian"><a class="anchor" href="#description-du-fichier-de-configuration-de-lhistorian"></a>Description du fichier de configuration de l&#8217;historian</h5>
+<h5 id="configuration-file-for-the-data-historian"><a class="anchor" href="#configuration-file-for-the-data-historian"></a>Configuration file for the data historian</h5>
 <div class="paragraph">
-<p>Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoires :</p>
+<p>The following file is the default configuration. It contains all possible information, some of them are not mandatory :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -855,12 +883,10 @@ interagir avec Grafana (notamment pour démarrer le serveur et l&#8217;éteindre
 <div class="ulist">
 <ul>
 <li>
-<p>web.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour répondre aux appels http des clients.
-Un verticle est capable de gérer un grand nombre de requêtes (au moins 1000, voir la documentation de vertx pour plus d&#8217;information).</p>
+<p>web.verticles.instance.number : The number of instances of verticles to be deployed to respond to all http requests from clients. A verticle can handle a large number of requests (at least 1000, check the vertx docummentation for more information).</p>
 </li>
 <li>
-<p>historian.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour le service de l&#8217;historian qui s&#8217;occupe du sampling et des interactions avec le backend. C&#8217;est ce paramètre qui va être clé. Il y a de grandes chances que ce soit
-ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.</p>
+<p>historian.verticles.instance.number : The number of instances of verticles to deploy for the historian service that manages the sampling and the interactions with the backend. This parameter is KEY. In case of performances problem it is likely that augmenting this parameter may help fix the problem.</p>
 </li>
 </ul>
 </div>
@@ -870,21 +896,19 @@ ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.<
 <div class="ulist">
 <ul>
 <li>
-<p>http_server/host : le nom du serveur http à déployer.</p>
+<p>http_server/host : the name of the http server to  be deployed.</p>
 </li>
 <li>
-<p>http_server/port : le port sur lequel est déployé l&#8217;api rest.</p>
+<p>http_server/port : the port on which the REST API is to be bound.</p>
 </li>
 <li>
-<p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx. Il est essentiel de bien connaître vertx pour toucher à ce paramètre.</p>
+<p>http_server/historian.address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. It is important to master vertx when changing this parameter.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
-accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
-trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
+<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum points the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
 </li>
 <li>
-<p>http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l&#8217;import de données achever).</p>
+<p>http_server/upload_directory : Repertory where csv file uploaded will be stored (temporarily).</p>
 </li>
 </ul>
 </div>
@@ -898,20 +922,19 @@ trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;
 <div class="ulist">
 <ul>
 <li>
-<p>historian/address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
-que vous maîtrisez vertx. Doit être identique à la valeur de 'http_server/historian.address'.</p>
+<p>historian/address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. This value must be the same as the 'http_server/historian.address'.</p>
 </li>
 <li>
-<p>historian/limit_number_of_point_before_using_pre_agg : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+<p>historian/limit_number_of_point_before_using_pre_agg : this option provides some performance tuning. Take care to not set a too large number.</p>
 </li>
 <li>
-<p>historian/limit_number_of_chunks_before_using_solr_partition : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+<p>historian/limit_number_of_chunks_before_using_solr_partition : this option provides some performance tuning. Take care to not set a too large number.</p>
 </li>
 <li>
-<p>historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métriques à retourner par défaut pour l&#8217;endpoint search.</p>
+<p>historian/api/grafana/search/default_size : this option sets the maximum number of metrics to be returned, by default, for the endpoint Search.</p>
 </li>
 <li>
-<p>historian/schema_version : La version du schéma a utiliser. (Attention ne pas modifier cette valeur manuellement !)</p>
+<p>historian/schema_version : The schema version to use. You should avoid changing this value by hand. It will changed by the system during a rolling update typically.</p>
 </li>
 </ul>
 </div>
@@ -921,52 +944,49 @@ que vous maîtrisez vertx. Doit être identique à la valeur de 'http_server/his
 <div class="ulist">
 <ul>
 <li>
-<p>historian/solr/connection_timeout : Le timeout lors de la connection au serveur Solr en millisecondes.</p>
+<p>historian/solr/connection_timeout : the connection timeout in milliseconds to the Solr server.</p>
 </li>
 <li>
-<p>historian/solr/socket_timeout : Le timeout pour tous les sockets de lecture avec Solr en millisecondes.</p>
+<p>historian/solr/socket_timeout : the connection timeout in milliseconds for all reading sockets on Solr.</p>
 </li>
 <li>
-<p>historian/solr/stream_url : l&#8217;url de la collection solr à utiliser pour l&#8217;api stream de solr. Il est recommandé de
-créer une collection dédiée (avec les ressources suffisantes).</p>
+<p>historian/solr/stream_url : the URL of the Solr collection to use for the stream API of Solr. We recommend to create a dedicated collection (with sufficient resources);</p>
 </li>
 <li>
-<p>historian/solr/chunk_collection : Le nom de la collection ou sont stockées les timeseries.</p>
+<p>historian/solr/chunk_collection : the name of the collection where time series are to be stored.</p>
 </li>
 <li>
-<p>historian/solr/annotation_collection : Le nom de la collection ou sont stockées les annotations.</p>
+<p>historian/solr/annotation_collection : the name of the collection where annotations are to be stored.</p>
 </li>
 <li>
-<p>historian/solr/sleep_milli_between_connection_attempt : Le nombre de millisecondes à attendre entre chaque tentatives
-de ping du serveur solr au démarrage de l&#8217;historian.</p>
+<p>historian/solr/sleep_milli_between_connection_attempt : the number of milliseconds to wait between two ping attempts to the Solr server when starting the historian.</p>
 </li>
 <li>
-<p>historian/solr/number_of_connection_attempt : Le nombre de tentatives pour tester la connectivité au serveur solr
-au démarrage de l&#8217;historian.</p>
+<p>historian/solr/number_of_connection_attempt : the number of attempts in testing connectivity to the Solr server when starting the historian.</p>
 </li>
 <li>
-<p>historian/solr/use_zookeeper : Si vous utilisez solr cloud (avec un serveur zookeeper ou sans)</p>
+<p>historian/solr/use_zookeeper : in case you are using Solr cloud (with or without a zookeeper server or cluster)</p>
 <div class="ulist">
 <ul>
 <li>
-<p>option si utilisation de zookeeper</p>
+<p>option if using zookeeper</p>
 <div class="ulist">
 <ul>
 <li>
-<p>historian/solr/zookeeper_urls : une liste d&#8217;au moins un serveur zookeeper (ex: ["zookeeper1:2181"]).</p>
+<p>historian/solr/zookeeper_urls : a list of at list one zookeeper server (ex: ["zookeeper1:2181"]).</p>
 </li>
 <li>
-<p>historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigner ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).</p>
+<p>historian/solr/zookeeper_chroot : the path to the root zookeeper that contains the Solr data. Do not enter or use null if there is no chroot (see the zookeeper documentation).</p>
 </li>
 </ul>
 </div>
 </li>
 <li>
-<p>option si zookeeper n&#8217;est pas utilisé</p>
+<p>option if zookeeper is not used</p>
 <div class="ulist">
 <ul>
 <li>
-<p>historian/solr/urls : Les urls http pour faire des requêtes à solr. Par exemple ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
+<p>historian/solr/urls : the http URLs to query Solr. For example ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
 </li>
 </ul>
 </div>
@@ -983,25 +1003,27 @@ au démarrage de l&#8217;historian.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Le script d&#8217;installation (install.sh) génère un fichier de configuration selon les informations renseignées.</p>
+<p>Generation of a configuration file, according to entered information, at installation.</p>
 </div>
 </div>
 <div class="sect4">
-<h5 id="description-des-composants-installés-par-le-script-dinstallation"><a class="anchor" href="#description-des-composants-installés-par-le-script-dinstallation"></a>Description des composants installés par le script d&#8217;installation</h5>
+<h5 id="description-of-the-installed-historian-components"><a class="anchor" href="#description-of-the-installed-historian-components"></a>Description of the installed historian components</h5>
 <div class="sect5">
-<h6 id="installation-de-apache-solr"><a class="anchor" href="#installation-de-apache-solr"></a>Installation de Apache SolR</h6>
+<h6 id="apache-solr"><a class="anchor" href="#apache-solr"></a>Apache SolR</h6>
 <div class="paragraph">
-<p>Apache SolR est la base de donnée utilisée par l&#8217;historian, elle peut être remplacée par un autre moteur de recherche.</p>
+<p>Apache SolR is the database / search engine used by the historian for storing and indexing time series. It can be replaced by another search engine.</p>
 </div>
 <div class="paragraph">
-<p>Le script d&#8217;installation a installé Solr au chemin '$HDH_HOME/solr-8.2.0' que nous appelleront '$SOLR_HOME'.
-Il a également lancé deux cores Solr localement dans le répertoire <code>$SOLR_HOME/data</code>.</p>
+<p>The installation script has installed Solr in the '$HDH_HOME/solr-8.2.0' folder that we will name '$SOLR_HOME' in the following.</p>
+</div>
+<div class="paragraph">
+<p>It also started to Solr cores locally in the folder <code>$SOLR_HOME/data</code>.</p>
 </div>
 </div>
 <div class="sect5">
-<h6 id="pour-démarrer-solr"><a class="anchor" href="#pour-démarrer-solr"></a>Pour démarrer solr</h6>
+<h6 id="to-start-solr"><a class="anchor" href="#to-start-solr"></a>To start solr</h6>
 <div class="paragraph">
-<p>Si vous avez coupé Solr ou bien si vous avez redémarrer votre ordinateur vous pouvez relancer ce Solr avec les commandes suivantes :</p>
+<p>If you stopped Solr or if after restarting your computer, Solr is not running, you can restart Solr with the following commands :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1013,7 +1035,7 @@ bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983</
 </div>
 </div>
 <div class="paragraph">
-<p>Vérifiez que votre instance Solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
+<p>You can check that your Solr instance is up and running by checking on its web UI at this address:
 (<a href="http://localhost:8983/solr/#/~cloud)">local solr UI</a></p>
 </div>
 </div>
@@ -1021,25 +1043,25 @@ bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983</
 </div>
 </div>
 <div class="sect2">
-<h3 id="install-production-mono-noeud"><a class="anchor" href="#install-production-mono-noeud"></a>Installation mono noeud de production</h3>
+<h3 id="install-production-mono-noeud"><a class="anchor" href="#install-production-mono-noeud"></a>Single node installation for production</h3>
 <div class="sect3">
-<h4 id="pre-requis-pour-une-installation-mono-serveur-en-production"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-production"></a>Pre-requis pour une installation mono serveur en production</h4>
+<h4 id="pre-requisite-for-a-single-node-install-in-production"><a class="anchor" href="#pre-requisite-for-a-single-node-install-in-production"></a>Pre-requisite for a single node install in production</h4>
 <div class="paragraph">
-<p>La configuration minimale du serveur pour une installation mono serveur (en production) du data historian est:</p>
+<p>The minimal configuration for the server for a single server installation of the data historian (in production) is:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>un OS CentOS ou Redhat 7.x</p>
+<p>OS CentOS or Redhat 7.x</p>
 </li>
 <li>
-<p>32 Gigabits de RAM</p>
+<p>32 Gigabits of RAM</p>
 </li>
 <li>
-<p>32 vcores de CPU</p>
+<p>32 vcores of CPU</p>
 </li>
 <li>
-<p>2 Tera octets de disque</p>
+<p>2 Terabytes of disk</p>
 </li>
 <li>
 <p>Java 8</p>
@@ -1056,35 +1078,46 @@ bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983</
 </ul>
 </div>
 <div class="paragraph">
-<p>Dans cette section nous avons prévu des petits guides pour vous aider a installer solr 8.2.0, spark 2.3.4 et grafana 7.0.3.
-Mais nous recommandons de vous référer à la documentation officielle de ces outils pour des installations de production.
-Si vous avez déjà des serveurs existants vous pouvez directement passer à cette <a href="#install-production-hurence-datasource-grafana-plugin">section</a></p>
+<p>In this section you will find quick guides to help you install Solr 8.2.0, Spark 2.3.4 and Grafana 7.0.3.</p>
+</div>
+<div class="paragraph">
+<p>We however recommend to refer to the official documentation for all these tools for production installations.</p>
+</div>
+<div class="paragraph">
+<p>If you have existing servers you can jump to this <a href="#install-production-hurence-datasource-grafana-plugin">section</a></p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-apache-solr-2"><a class="anchor" href="#installation-de-apache-solr-2"></a>Installation de Apache SolR</h4>
+<h4 id="installing-apache-solr"><a class="anchor" href="#installing-apache-solr"></a>Installing Apache SolR</h4>
 <div class="paragraph">
-<p>Apache SolR est la base de donnée utilisée par l&#8217;historian, elle peut être remplacée par un autre moteur de recherche.</p>
+<p>Apache SolR is the database/search engine used but the data historian. It could be replaced by another search engine.</p>
 </div>
 <div class="paragraph">
-<p>Vous pouvez télécharger la version 8.2.0 de solr sur le lien suivant : <a href="https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz">solr-8.2.0.tgz</a>
-ou via le <a href="https://lucene.apache.org/solr">site officiel</a>. Nous vous invitons également à suivre la documentation officielle
-pour installer un cluster solr de production.</p>
+<p>You can download the 8.2.0 version of Solr from this link: <a href="https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz">solr-8.2.0.tgz</a>
+or from this one <a href="https://lucene.apache.org/solr">site officiel</a>.</p>
 </div>
 <div class="paragraph">
-<p>Vérifiez que votre instance solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
+<p>We invite you to follow the official documentation if you want to install a Solr cluster (and not a single node) in production.</p>
+</div>
+<div class="paragraph">
+<p>See the commands in next sections for unzip and install of both SolR and Spark</p>
+</div>
+<div class="paragraph">
+<p>Vérify that your Solr instance is up and running by opening its web user interface at this address:
 "http://&lt;solrhost&gt;:8983/solr/#/~cloud"</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="install-apache-spark"><a class="anchor" href="#install-apache-spark"></a>Install Apache Spark</h4>
+<h4 id="installing-apache-spark"><a class="anchor" href="#installing-apache-spark"></a>Installing Apache Spark</h4>
 <div class="paragraph">
-<p>Pour installer spark vous pouvez téléchargez cette archive :
+<p>To install Spark you can download this archive:
 <a href="https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz">spark-2.3.4-bin-without-hadoop.tgz</a></p>
 </div>
+</div>
+<div class="sect3">
+<h4 id="commands-to-install-solr-and-spark"><a class="anchor" href="#commands-to-install-solr-and-spark"></a>Commands to install Solr and Spark</h4>
 <div class="paragraph">
-<p>Les commandes suivantes vous permettront d&#8217;avoir une installation locale. Sinon veuillez suuivre les indications officiels
-pour un cluster de production.</p>
+<p>The following commands allow you to get a local install. For a cluster in production, check the official documentation or get guidance from Hurence.</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1102,33 +1135,35 @@ cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/sp
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-grafana"><a class="anchor" href="#installation-de-grafana"></a>Installation de Grafana</h4>
+<h4 id="installing-grafana"><a class="anchor" href="#installing-grafana"></a>Installing Grafana</h4>
 <div class="paragraph">
-<p>Installez Grafana pour votre plateforme comme décrit ici : <code><a href="https://grafana.com/docs/grafana/latest/installation/requirements/" class="bare">https://grafana.com/docs/grafana/latest/installation/requirements/</a></code>.
-Une fois l&#8217;installation de votre cluster grafana effectuée nous allons passer à l&#8217;installation de notre plugin grafana datasource
-nécessaire pour consulter des dashboard basés sur notre historian.</p>
+<p>You can install Grafana on your platform following this guide: <code><a href="https://grafana.com/docs/grafana/latest/installation/requirements/" class="bare">https://grafana.com/docs/grafana/latest/installation/requirements/</a></code>.</p>
 </div>
 <div class="paragraph">
-<p>Il est nécessaire d&#8217;avoir au minimum la version 7.0.3 de Grafana.</p>
+<p>One the Grafana cluster (or single node install) up and running we can install the Grafana plugin for the data historian. This plugin turns our historian to a proper data source and allow the creation and visualisation of dashboards based on the historian.</p>
+</div>
+<div class="paragraph">
+<p>The minimal requirement for the plugin is the 7.0.3 version of Grafana.</p>
 </div>
 <div class="sect4">
-<h5 id="install-production-hurence-datasource-grafana-plugin"><a class="anchor" href="#install-production-hurence-datasource-grafana-plugin"></a>Installation Plugin Grafana pour utiliser le data historian Hurence</h5>
+<h5 id="install-production-hurence-datasource-grafana-plugin"><a class="anchor" href="#install-production-hurence-datasource-grafana-plugin"></a>Installing the Grafana data source plugin</h5>
 <div class="paragraph">
-<p>Pour consulter les données de l&#8217;historian via des dashboard nous utilisons Grafana. Dans ce but nous avons développé
-nos propres plugins Grafana que nous ferons évoluer avec l&#8217;historian.</p>
+<p>To view the historian data using dashboards we make use of Grafana. In this end, we have developed our own Grafana plugins that we update according to new historian or Grafana releases.</p>
 </div>
 <div class="paragraph">
-<p>Pour installer le plugin datasource suivez les <a href="https://github.com/Hurence/grafana-historian-datasource#installation">instruction sur le projet correspondant</a></p>
+<p>To install the data source plugin follow the specific guide <a href="https://github.com/Hurence/grafana-historian-datasource#installation">installing Grafana datasource plugin</a></p>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-lhistorian-2"><a class="anchor" href="#installation-de-lhistorian-2"></a>Installation de l&#8217;historian</h4>
+<h4 id="installing-the-hurence-data-historian-hdh"><a class="anchor" href="#installing-the-hurence-data-historian-hdh"></a>Installing the Hurence Data Historian (HDH)</h4>
 <div class="paragraph">
-<p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
-et les chunks. Téléchargez le script dinstallation de l&#8217;historian pour votre version
-<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.
-Lancez l&#8217;installation en lançant ce script :</p>
+<p>Hurence Data Historian is a set of scripts and binaries that help you work with time series and chunks.
+You can download the installation script for your version at :
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.</p>
+</div>
+<div class="paragraph">
+<p>Launch the install with this script:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1136,10 +1171,10 @@ Lancez l&#8217;installation en lançant ce script :</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Il sera alors demander à l&#8217;utilisateur plusieurs informations.</p>
+<p>You are asked for some configuration information.</p>
 </div>
 <div class="paragraph">
-<p>Voici un exemple :</p>
+<p>Here is an example:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1147,34 +1182,45 @@ Lancez l&#8217;installation en lançant ce script :</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Dans la suite, on appellera le chemin indiqué pour l&#8217;installation de l&#8217;historian '$HDH_HOME'.</p>
+<p>In the following, we will use the '$HDH_HOME' variable to figure out the installation path for the historian.</p>
 </div>
 <div class="paragraph">
-<p>A l&#8217;issue de ce script, vous aurez :</p>
+<p>At the end of the script run, you&#8217;ll get:</p>
 </div>
 <div class="ulist">
 <ul>
 <li>
-<p>l&#8217;historian installé au chemin indiqué $HDH_HOME.</p>
+<p>the HDH installed at the provided path (in $HDH_HOME).</p>
 </li>
 <li>
-<p>Le plugin <a href="https://github.com/Hurence/grafana-historian-datasource">datasource grafana de l&#8217;historian</a>
-installé sur le serveur Grafana indiqué lors de l&#8217;installation</p>
+<p>the Grafana datasource plugin <a href="https://github.com/Hurence/grafana-historian-datasource">Grafana datasource plugin</a> installed on the Grafana server as indicated at installation</p>
 </li>
 </ul>
 </div>
 <div class="paragraph">
-<p>Voici la structure de $HDH_HOME à l&#8217;issue de l&#8217;installation par défaut :
-* $HDH_HOME/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.
-* $HDH_HOME/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
-* $HDH_HOME/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
-* $HDH_HOME/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.</p>
+<p>The structure of $HDH_HOME after running the installation script is 'by default':</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>$HDH_HOME/bin/historian-server.sh : Script to start and stop the REST API server of the historian</p>
+</li>
+<li>
+<p>$HDH_HOME/conf/log4j.properties : File to control the level of logs in production mode (DEFAULT).</p>
+</li>
+<li>
+<p>$HDH_HOME/conf/log4j-debug.properties : File to contrôle the level of logs in debug mode.</p>
+</li>
+<li>
+<p>$HDH_HOME/conf/historian-server-conf.json : configuration file for the REST API server.</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
-<p>Le script $HDH_HOME/bin/historian-server.sh sert à lancer/arrêter l&#8217;api rest de l&#8217;historian.</p>
+<p>The $HDH_HOME/bin/historian-server.sh script is used to start/stop the REST API server of the historian.</p>
 </div>
 <div class="paragraph">
-<p>Pour lancer l&#8217;historian taper la commande suivante :</p>
+<p>To start the REST API server, type the following command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1182,20 +1228,25 @@ installé sur le serveur Grafana indiqué lors de l&#8217;installation</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
+<p>To stop the REST API server, type the following command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh stop</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Attention ces commandes n&#8217;affectent ni Grafana ni Solr qui sont des services indépendants.</p>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Note</dt>
+<dd>
+<p>these commands affect neither Grafana nor Solr that are independant services and need to be started and stopped separately.</p>
+</dd>
+</dl>
 </div>
 <div class="sect4">
-<h5 id="description-du-fichier-de-configuration-de-lhistorian-2"><a class="anchor" href="#description-du-fichier-de-configuration-de-lhistorian-2"></a>Description du fichier de configuration de l&#8217;historian</h5>
+<h5 id="configuration-file-for-the-data-historian-2"><a class="anchor" href="#configuration-file-for-the-data-historian-2"></a>Configuration file for the data historian</h5>
 <div class="paragraph">
-<p>Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoires :</p>
+<p>The following file is the default configuration. It contains all possible information, some of them are not mandatory :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1246,12 +1297,10 @@ installé sur le serveur Grafana indiqué lors de l&#8217;installation</p>
 <div class="ulist">
 <ul>
 <li>
-<p>web.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour répondre aux appels http des clients.
-Un verticle est capable de gérer un grand nombre de requêtes (au moins 1000, voir la documentation de vertx pour plus d&#8217;information).</p>
+<p>web.verticles.instance.number : The number of instances of verticles to be deployed to respond to all http requests from clients. A verticle can handle a large number of requests (at least 1000, check the vertx docummentation for more information).</p>
 </li>
 <li>
-<p>historian.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour le service de l&#8217;historian qui s&#8217;occupe du sampling et des interactions avec le backend. C&#8217;est ce paramètre qui va être clé. Il y a de grandes chances que ce soit
-ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.</p>
+<p>historian.verticles.instance.number : The number of instances of verticles to deploy for the historian service that manages the sampling and the interactions with the backend. This parameter is KEY. In case of performances problem it is likely that augmenting this parameter may help fix the problem.</p>
 </li>
 </ul>
 </div>
@@ -1261,21 +1310,19 @@ ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.<
 <div class="ulist">
 <ul>
 <li>
-<p>http_server/host : le nom du serveur http à déployer.</p>
+<p>http_server/host : the name of the http server to  be deployed.</p>
 </li>
 <li>
-<p>http_server/port : le port sur lequel est déployé l&#8217;api rest.</p>
+<p>http_server/port : the port on which the REST API is to be bound.</p>
 </li>
 <li>
-<p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx. Il est essentiel de bien connaître vertx pour toucher à ce paramètre.</p>
+<p>http_server/historian.address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. It is important to master vertx when changing this parameter.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
-accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
-trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
+<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum points the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
 </li>
 <li>
-<p>http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l&#8217;import de données achever).</p>
+<p>http_server/upload_directory : Repertory where csv file uploaded will be stored (temporarily).</p>
 </li>
 </ul>
 </div>
@@ -1289,20 +1336,19 @@ trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;
 <div class="ulist">
 <ul>
 <li>
-<p>historian/address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
-que vous maîtrisez vertx. Doit être identique à la valeur de 'http_server/historian.address'.</p>
+<p>historian/address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. This value must be the same as the 'http_server/historian.address'.</p>
 </li>
 <li>
-<p>historian/limit_number_of_point_before_using_pre_agg : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+<p>historian/limit_number_of_point_before_using_pre_agg : this option provides some performance tuning. Take care to not set a too large number.</p>
 </li>
 <li>
-<p>historian/limit_number_of_chunks_before_using_solr_partition : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+<p>historian/limit_number_of_chunks_before_using_solr_partition : this option provides some performance tuning. Take care to not set a too large number.</p>
 </li>
 <li>
-<p>historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métriques à retourner par défaut pour l&#8217;endpoint search.</p>
+<p>historian/api/grafana/search/default_size : this option sets the maximum number of metrics to be returned, by default, for the endpoint Search.</p>
 </li>
 <li>
-<p>historian/schema_version : La version du schéma a utiliser. (Attention ne pas modifier cette valeur manuellement !)</p>
+<p>historian/schema_version : The schema version to use. You should avoid changing this value by hand. It will changed by the system during a rolling update typically.</p>
 </li>
 </ul>
 </div>
@@ -1312,52 +1358,49 @@ que vous maîtrisez vertx. Doit être identique à la valeur de 'http_server/his
 <div class="ulist">
 <ul>
 <li>
-<p>historian/solr/connection_timeout : Le timeout lors de la connection au serveur Solr en millisecondes.</p>
+<p>historian/solr/connection_timeout : the connection timeout in milliseconds to the Solr server.</p>
 </li>
 <li>
-<p>historian/solr/socket_timeout : Le timeout pour tous les sockets de lecture avec Solr en millisecondes.</p>
+<p>historian/solr/socket_timeout : the connection timeout in milliseconds for all reading sockets on Solr.</p>
 </li>
 <li>
-<p>historian/solr/stream_url : l&#8217;url de la collection solr à utiliser pour l&#8217;api stream de solr. Il est recommandé de
-créer une collection dédiée (avec les ressources suffisantes).</p>
+<p>historian/solr/stream_url : the URL of the Solr collection to use for the stream API of Solr. We recommend to create a dedicated collection (with sufficient resources);</p>
 </li>
 <li>
-<p>historian/solr/chunk_collection : Le nom de la collection ou sont stockées les timeseries.</p>
+<p>historian/solr/chunk_collection : the name of the collection where time series are to be stored.</p>
 </li>
 <li>
-<p>historian/solr/annotation_collection : Le nom de la collection ou sont stockées les annotations.</p>
+<p>historian/solr/annotation_collection : the name of the collection where annotations are to be stored.</p>
 </li>
 <li>
-<p>historian/solr/sleep_milli_between_connection_attempt : Le nombre de millisecondes à attendre entre chaque tentatives
-de ping du serveur solr au démarrage de l&#8217;historian.</p>
+<p>historian/solr/sleep_milli_between_connection_attempt : the number of milliseconds to wait between two ping attempts to the Solr server when starting the historian.</p>
 </li>
 <li>
-<p>historian/solr/number_of_connection_attempt : Le nombre de tentatives pour tester la connectivité au serveur solr
-au démarrage de l&#8217;historian.</p>
+<p>historian/solr/number_of_connection_attempt : the number of attempts in testing connectivity to the Solr server when starting the historian.</p>
 </li>
 <li>
-<p>historian/solr/use_zookeeper : Si vous utilisez solr cloud (avec un serveur zookeeper ou sans)</p>
+<p>historian/solr/use_zookeeper : in case you are using Solr cloud (with or without a zookeeper server or cluster)</p>
 <div class="ulist">
 <ul>
 <li>
-<p>option si utilisation de zookeeper</p>
+<p>option if using zookeeper</p>
 <div class="ulist">
 <ul>
 <li>
-<p>historian/solr/zookeeper_urls : une liste d&#8217;au moins un serveur zookeeper (ex: ["zookeeper1:2181"]).</p>
+<p>historian/solr/zookeeper_urls : a list of at list one zookeeper server (ex: ["zookeeper1:2181"]).</p>
 </li>
 <li>
-<p>historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigner ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).</p>
+<p>historian/solr/zookeeper_chroot : the path to the root zookeeper that contains the Solr data. Do not enter or use null if there is no chroot (see the zookeeper documentation).</p>
 </li>
 </ul>
 </div>
 </li>
 <li>
-<p>option si zookeeper n&#8217;est pas utilisé</p>
+<p>option if zookeeper is not used</p>
 <div class="ulist">
 <ul>
 <li>
-<p>historian/solr/urls : Les urls http pour faire des requêtes à solr. Par exemple ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
+<p>historian/solr/urls : the http URLs to query Solr. For example ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
 </li>
 </ul>
 </div>
@@ -1374,7 +1417,7 @@ au démarrage de l&#8217;historian.</p>
 </ul>
 </div>
 <div class="paragraph">
-<p>Generation un fichier de configuration pendant le script d&#8217;install selon les informations renseignées</p>
+<p>Generation of a configuration file, according to entered information, at installation.</p>
 </div>
 </div>
 </div>
@@ -1382,7 +1425,7 @@ au démarrage de l&#8217;historian.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="gestion-des-données"><a class="anchor" href="#gestion-des-données"></a>Gestion des données</h2>
+<h2 id="data-management"><a class="anchor" href="#data-management"></a>Data management</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Vous pouvez consulter notre documentation sur l&#8217;api REST 'rest-api.pdf' pour connaitre les détails de chaque fonction de l&#8217;API (endpoint).
@@ -1394,7 +1437,7 @@ d&#8217;interagir avec l&#8217;historian selon votre culture et vos besoins.</p>
 dans ce guide nous allons utiliser l&#8217;import de données à partir de fichiers csv.</p>
 </div>
 <div class="sect2">
-<h3 id="import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"><a class="anchor" href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"></a>Import de donnée à partir de fichiers csv avec l&#8217;api REST</h3>
+<h3 id="importing-data-from-csv-files-with-the-rest-api"><a class="anchor" href="#importing-data-from-csv-files-with-the-rest-api"></a>Importing Data from CSV files with the REST API</h3>
 <div class="paragraph">
 <p>TODO</p>
 </div>
@@ -1425,7 +1468,7 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 </div>
 </div>
 <div class="paragraph">
-<p>Obtenir l&#8217;ensemble des noms de métriques</p>
+<p>Get all metrics names</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1439,7 +1482,7 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 </div>
 </div>
 <div class="paragraph">
-<p>Obtenir des mesures avec en spécifiant un intervalle de temps</p>
+<p>Get some measures points within a time range</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1458,15 +1501,13 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 </div>
 </div>
 <div class="sect2">
-<h3 id="utiliser-spark-pour-requếter-les-données"><a class="anchor" href="#utiliser-spark-pour-requếter-les-données"></a>Utiliser Spark pour requếter les données</h3>
+<h3 id="use-spark-to-get-data"><a class="anchor" href="#use-spark-to-get-data"></a>Use Spark to get data</h3>
 <div class="paragraph">
-<p>Apache Spark est une plateforme open source pour traiter de grandes quantités de données en parallèle sur un cluster de machines.</p>
+<p>Apache Spark is an Open Source framework designed to process hudge datasets in parallel on computing clusters.
+Hurence Data Historian is highly integrated with Spark so that you can handle dataset interactions in both ways (input and output) through a simple API.</p>
 </div>
 <div class="paragraph">
-<p>Hurence Data Historian est très intégré avec Spark de telle sorte que vous puissiez gérer des intéractions avec les données (en entrées pour en injecter ou en requêtage pour les obtenir sur des critères), et ceci avec une API Spark simple.</p>
-</div>
-<div class="paragraph">
-<p>Les commandes suivantes vous montrent comment prendre un dataset en CSV depuis HDFS (le système de fichiers de Hadoop) ou depuis un système de fichier local, et le charger dans HDH.</p>
+<p>The following commands show you how to take a CSV dataset from HDFS or local filesystem, load it as a HDH</p>
 </div>
 <div class="listingblock">
 <div class="title">./_setup_historian/spark-2.3.4-bin-hadoop2.7/bin/spark-shell --jars assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT//lib/loader-1.3.4-SNAPSHOT.jar,assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar</div>
@@ -1513,35 +1554,27 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 </div>
 <div class="sect2">
-<h3 id="linjection-temps-réel-avec-logisland"><a class="anchor" href="#linjection-temps-réel-avec-logisland"></a>L&#8217;injection temps réel avec LogIsland</h3>
+<h3 id="realtime-data-ingestion-with-logisland"><a class="anchor" href="#realtime-data-ingestion-with-logisland"></a>Realtime data ingestion with logisland</h3>
 <div class="paragraph">
-<p>Le logiciel Open Source de Hurence permettant de faire du stream processing (donc du traitement temps réel de données) permet bien sûr d&#8217;injecter des données "à la volée", notamment celles que vous aurez pu "pousser" dans un bus de message Mqtt ou Kafka.</p>
+<p>Hurence&#8217;s Open Source software for stream processing (therefore real-time data processing), LogIsland, allows you to inject data "on the fly", especially those that you could "push" in a Mqtt message bus or Kafka.</p>
 </div>
 <div class="paragraph">
-<p>Hurence Data Historian est donc capable de traiter des données de capteurs et de les stocker et grapher en temps réel.</p>
+<p>Hurence Data Historian is therefore able to process sensors data and to store and graph it in real-time. Hurence also has some OPC connectors to get sensors data from factory equipements.</p>
 </div>
 <div class="paragraph">
-<p>Pour mettre en place une chaîne d&#8217;injection temps réel, le mieux est de contacter Hurence pour un petit accompagnement car cela devient du vrai Big Data temps réel.</p>
+<p>To set up a real-time injection chain, the best is to contact Hurence (<a href="mailto:contact@hurence.com">contact@hurence.com</a>) for a little support because it becomes real Big Data in real time.</p>
 </div>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="visualisation-des-données"><a class="anchor" href="#visualisation-des-données"></a>Visualisation des données</h2>
+<h2 id="data-visualization"><a class="anchor" href="#data-visualization"></a>Data visualization</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>HDH fournit donc un plugin Grafana pour visualiser les données sous formes de graphes.</p>
+<p>To create dashboards you have to go to the graphical interface of grafana (<a href="http://localhost:3000/">http://localhost:3000/</a>) (localhost being replaced by a machine name if you are not in standalone installation).</p>
 </div>
 <div class="paragraph">
-<p>La manipulation des données depuis les data sources de votre data historian se fait comme pour les autres sources. Vous fournissez votre requête, un intervalle de temps si nécessaire, et un algorithme de sampling si vous requêtez sur une grande quantité de points (pour que la courbe soit bien lisible).</p>
-</div>
-<div class="sect2">
-<h3 id="configurer-grafana-et-vos-dashboard"><a class="anchor" href="#configurer-grafana-et-vos-dashboard"></a>Configurer Grafana et vos dashboard</h3>
-<div class="paragraph">
-<p>Pour créér des dashboard il faut aller sur l&#8217;interface graphique de grafana (<a href="http://localhost:3000/">http://localhost:3000/</a> (localhost étant à remplacer par un nom de machine si vous n&#8217;êtes pas en installation standalone).</p>
-</div>
-<div class="paragraph">
-<p>Allez ensuite dans le menu des datasources :</p>
+<p>Then go to the datasources menu:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1549,8 +1582,8 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 </div>
 <div class="paragraph">
-<p>Cherchez la datasource "Hurence-Historian" et sélectionnez la.
-Il y a juste a renseigner l&#8217;URL <a href="http://localhost:8080/api/grafana/v0" class="bare">http://localhost:8080/api/grafana/v0</a> dans le cas de l&#8217;installation standalone.</p>
+<p>Look for the "Hurence-Historian" datasource and select it.
+You just have to enter the URL <a href="http://localhost:8080/api/grafana/v0" class="bare">http://localhost:8080/api/grafana/v0</a> in the case of standalone installation.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1558,8 +1591,8 @@ Il y a juste a renseigner l&#8217;URL <a href="http://localhost:8080/api/grafana
 </div>
 </div>
 <div class="paragraph">
-<p>Testez la connectivité en cliquant sur "Save &amp; Test" button at the bottom of the page.
-Ensuite créez un nouveau dashboard.</p>
+<p>Test the connectivity by clicking on the "Save &amp; Test" button at the bottom of the page.
+Then create a new dashboard.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1567,7 +1600,7 @@ Ensuite créez un nouveau dashboard.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Ajoutez les graphes que vous voulez, un petit exemple ci-dessous :</p>
+<p>Add the graphs you want, a small example below:</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1575,37 +1608,36 @@ Ensuite créez un nouveau dashboard.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Une "query" (requête) consiste à renseigner un nom de métrique, et des paires de tag name/tag value ainsi que des options pour l&#8217;algorithme de sampling.</p>
+<p>A "query" consists of entering a metric name, and pairs of name / tag value tags as well as options for the sampling algorithm.</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">note</dt>
 <dd>
-<p>les options de sampling de la première requête sont utilisées pour toutes les autres.</p>
+<p>the sampling options of the first request are used for all the others.</p>
 </dd>
 <dt class="hdlist1">note</dt>
 <dd>
-<p>si vous n&#8217;avez pas de données d&#8217;injectées, suivez le tutorial pour injecter des données.</p>
+<p>if you don&#8217;t have data injected, follow the tutorial to inject data.</p>
 </dd>
 <dt class="hdlist1">note</dt>
 <dd>
-<p>si vous n&#8217;avez pas ajouté de tag name à l&#8217;installation vous ne pourrez pas utiliser de tags. Il est toujours possible de rajouter des tags manuellement après installation en rajoutant un champ dans le schéma.</p>
+<p>if you did not add a name tag during the installation you will not be able to use tags. It is always possible to add tags manually after installation by adding a field in the diagram.</p>
 </dd>
 </dl>
 </div>
 </div>
 </div>
-</div>
 <div class="sect1">
-<h2 id="stopper-et-détruire-les-données"><a class="anchor" href="#stopper-et-détruire-les-données"></a>Stopper et détruire les données</h2>
+<h2 id="stopping-and-deleting-data"><a class="anchor" href="#stopping-and-deleting-data"></a>Stopping and deleting data</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Cette section vous apprend à stopper les services et à détruire si nécessaire les données (après avoir testé vous voudrez alimenter avec vos données réelles).</p>
+<p>This section teaches you how to stop the services and destroy the data if necessary (after testing you will want to feed with your real data).</p>
 </div>
 <div class="sect2">
-<h3 id="stopper-ses-instances-solr"><a class="anchor" href="#stopper-ses-instances-solr"></a>Stopper ses instances SolR</h3>
+<h3 id="stopping-your-solr-instances"><a class="anchor" href="#stopping-your-solr-instances"></a>Stopping your Solr instances</h3>
 <div class="paragraph">
-<p>Cette section vous apprend à stopper les intances SolR. Attention cette commande va éteindre Solr (cela pourrait impacter d&#8217;autres service utilisant Solr).</p>
+<p>This section teaches you how to stop Solr intances. Please note this command will switch off Solr (this could impact other services using Solr).</p>
 </div>
 <div class="literalblock">
 <div class="content">

@@ -1,0 +1,5 @@
+== Introduction
+
+This guide will help the user of the data historian in understanding the platform, its installation, its use. The data historian having been designed with a view to deployment on a Big Data infrastructure,
+which by nature are complex environments to implement, we will only discuss in this guide the
+deployments on a single machine and gradually prepare for the Big One. For deployments on a Big Data multi-node infrastructure with the necessary security, you will have to refer to other documentation or contact Hurence at contact@hurence.com.

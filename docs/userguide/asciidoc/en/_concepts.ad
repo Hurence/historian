@@ -7,7 +7,7 @@ The key concepts are simple :
 - **Chunk** is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and eventually some tags
 
 The main purpose of this tool is to help creating, storing and retrieving these chunks of timeseries.
-We use chunking instead of raw storage in order to save some disk space and reduce costs at scale. Also chunking is very usefull to pre-compute some arggregation and to facilitate down-sampling
+We use chunking instead of raw storage in order to save some disk space and reduce costs at scale. Also chunking is very usefull to pre-compute some aggregation and to facilitate down-sampling
 
 === Data model
 

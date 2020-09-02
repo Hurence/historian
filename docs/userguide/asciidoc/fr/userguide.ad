@@ -1,12 +1,12 @@
-= Manuel utilisateur
-:subtitle: Data Historian 1.0
+= Guide utilisateur
+:subtitle: Data Historian 1.3.5
 :doctype: book
 :title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
-:author: (C)Hurence
+:author: © Hurence
 :email: contact@hurence.com
 :revnumber: v1.0
-:revdate: 18.02.2020
-:revremark: First draft
+:revdate: 02.07.2020
+:revremark: First book
 :toc:
 :toclevels: 4
 

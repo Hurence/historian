@@ -1,13 +1,19 @@
-= User guide
-:subtitle: Data Historian 1.0
+= User Guide
+:subtitle: Data Historian 1.3.5
 :doctype: book
-:title-logo-image: image:../../resources/images/logo.png[pdfwidth=3.5in,align=center]
-:author: (C)Hurence
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
+:author: © Hurence
 :email: contact@hurence.com
 :revnumber: v1.0
-:revdate: 18.02.2020
-:revremark: First draft
+:revdate: 02.07.2020
+:revremark: First book
+:toc:
+:toclevels: 4
 
-include::./introduction.ad[]
+include::./_introduction.ad[]
 
-include::./installation.ad[]
+include::./_concepts.ad[]
+
+include::./_installation.ad[]
+
+include::./_utilisation.ad[]
