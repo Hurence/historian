@@ -1,11 +1,10 @@
-package com.hurence.historian.spark.sql.transformer
+git statuspackage com.hurence.historian.spark.sql.transformer
 
 import java.util.Date
 
 import com.hurence.historian.modele.ChunkRecordV0
-import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
-import com.hurence.historian.spark.sql.transformer.{Rechunkifyer, RechunkifyerOptions}
-import org.apache.spark.sql.{Dataset, SparkSession}
+import com.hurence.historian.spark.ml.Chunkyfier
+import org.apache.spark.sql.SparkSession
 
 
 object RechunkifyerExemple {
@@ -58,11 +57,11 @@ object RechunkifyerExemple {
     bucketedData.show()
 
 
-    val options = new RechunkifyerOptions
-    val rech = new Rechunkifyer
-
-  val newBucketedData = rech.transform( options, bucketedData)
-      newBucketedData.show()
+//    val options = new RechunkifyerOptions
+//    val rech = new Rechunkifyer
+//
+//  val newBucketedData = rech.transform( options, bucketedData)
+//      newBucketedData.show()
 
   }
 }

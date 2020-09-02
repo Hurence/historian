@@ -20,7 +20,7 @@ public class ChunkSchemaVersionEVOA0 implements Schema {
                     .withName(HistorianChunkCollectionFieldsVersionEVOA0.NAME)
                     .withType("string").build(),
             new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionEVOA0.TAGS)
+                    .withName(HistorianChunkCollectionFieldsVersionEVOA0.TAGNAME)
                     .withType("string").build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionEVOA0.QUALITY)

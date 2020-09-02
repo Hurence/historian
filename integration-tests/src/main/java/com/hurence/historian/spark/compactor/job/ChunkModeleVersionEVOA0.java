@@ -99,7 +99,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
 
     public JsonObject toJson(String id) {
         JsonObject json = new JsonObject();
-        json.put(HistorianChunkCollectionFieldsVersionEVOA0.TAGS, tags);
+        json.put(HistorianChunkCollectionFieldsVersionEVOA0.TAGNAME, tags);
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.ID, id);
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START, this.start);
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SIZE, this.points.size());
@@ -122,7 +122,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
 
     public SolrInputDocument buildSolrDocument(String id) {
         final SolrInputDocument doc = new SolrInputDocument();
-        doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.TAGS, tags);
+        doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.TAGNAME, tags);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.ID, id);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START, this.start);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SIZE, this.points.size());

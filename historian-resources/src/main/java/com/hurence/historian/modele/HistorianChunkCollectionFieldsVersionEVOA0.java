@@ -43,7 +43,7 @@ public class HistorianChunkCollectionFieldsVersionEVOA0 {
     public static String CHUNK_MONTH = "month";
     public static String CHUNK_DAY = "day";
     public static String CHUNK_WEEK = "week";
-    public static String TAGS = "tagname";
+    public static String TAGNAME = "tagname";
 }
 
 
