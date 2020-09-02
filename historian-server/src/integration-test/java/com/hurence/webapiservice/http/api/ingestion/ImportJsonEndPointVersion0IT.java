@@ -34,7 +34,7 @@ import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class ImportJsonEndPointIT {
+public class ImportJsonEndPointVersion0IT {
 
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper1;

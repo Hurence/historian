@@ -38,11 +38,8 @@ public class QueryEndPointWithBadSchemaEVOA0IT extends AbstractQueryEndPointIT {
         injectChunksIntoSolr(client);
         JsonObject historianConf = new JsonObject();
         historianConf.put(HistorianVerticle.CONFIG_SCHEMA_VERSION, SchemaVersion.EVOA0.toString());
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.GRAFANA,
-                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
         HttpWithHistorianSolrITHelper
-                .deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
+                .deployHttpAndCustomHistorianVerticle(container, vertx, historianConf)
                 .subscribe(id -> {
                             context.completeNow();
                         },

@@ -8,6 +8,7 @@ import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.modele.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.util.HistorianVerticleConfHelper;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
 import com.hurence.webapiservice.historian.HistorianVerticle;
@@ -44,6 +45,8 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_ROOT_SOLR;
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static com.hurence.webapiservice.http.HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.OK;
 
@@ -84,12 +87,9 @@ public class QueryEndPointFocusSamplingReturnEnoughPointsVersion0IT {
 
 
     public static void initVerticlesThenFinish(DockerComposeContainer container, Vertx vertx, VertxTestContext context)  {
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.GRAFANA,
-                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
         JsonObject historianConf = buildHistorianConf();
         HttpWithHistorianSolrITHelper
-                .deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
+                .deployHttpAndCustomHistorianVerticle(container, vertx, historianConf)
                 .subscribe(id -> {
                             context.completeNow();
                         },
@@ -97,11 +97,13 @@ public class QueryEndPointFocusSamplingReturnEnoughPointsVersion0IT {
     }
 
     public static JsonObject buildHistorianConf() {
-        return new JsonObject()
-                    //10 so if more than 5 chunk (of size 2) returned we should sample
-                    //with pre aggs
-                    .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_POINT, 10L)
-                    .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L);
+        JsonObject historianConf = new JsonObject()
+                //10 so if more than 5 chunk (of size 2) returned we should sample
+                //with pre aggs
+                .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_POINT, 10L)
+                .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L);
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_0);
+        return historianConf;
     }
 
     public static SolrInjector buildInjector() {

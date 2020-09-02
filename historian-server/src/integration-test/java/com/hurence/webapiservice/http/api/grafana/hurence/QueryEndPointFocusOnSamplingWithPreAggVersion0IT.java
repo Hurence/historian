@@ -65,7 +65,7 @@ public class QueryEndPointFocusOnSamplingWithPreAggVersion0IT extends AbstractQu
                     //with pre aggs
                     .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_POINT, 10L)
                     .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L)
-                .put(HistorianVerticle.CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
+                    .put(HistorianVerticle.CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
     }
 
     public static SolrInjector buildInjector() {
