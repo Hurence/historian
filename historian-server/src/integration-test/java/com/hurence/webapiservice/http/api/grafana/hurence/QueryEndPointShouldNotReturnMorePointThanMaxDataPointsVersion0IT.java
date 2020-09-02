@@ -10,6 +10,7 @@ import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.timeseries.modele.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.util.HistorianVerticleConfHelper;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
 import com.hurence.webapiservice.historian.HistorianVerticle;
@@ -86,12 +87,9 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsVersion0IT {
 
 
     public static void initVerticlesThenFinish(DockerComposeContainer container, Vertx vertx, VertxTestContext context)  {
-        JsonObject httpConf = new JsonObject()
-                .put(HttpServerVerticle.GRAFANA,
-                        new JsonObject().put(HttpServerVerticle.VERSION, GrafanaApiVersion.HURENCE_DATASOURCE_PLUGIN.toString()));
         JsonObject historianConf = buildHistorianConf();
         HttpWithHistorianSolrITHelper
-                .deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
+                .deployHttpAndCustomHistorianVerticle(container, vertx, historianConf)
                 .subscribe(id -> {
                             context.completeNow();
                         },
@@ -99,11 +97,13 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsVersion0IT {
     }
 
     public static JsonObject buildHistorianConf() {
-        return new JsonObject()
+        JsonObject historianConf = new JsonObject()
                     //10 so if more than 5 chunk (of size 2) returned we should sample
                     //with pre aggs
                     .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_POINT, 10L)
                     .put(HistorianVerticle.CONFIG_LIMIT_NUMBER_OF_CHUNK, 10000L);
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_0);
+        return historianConf;
     }
 
     public static SolrInjector buildInjector() throws IOException {

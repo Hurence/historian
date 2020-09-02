@@ -42,10 +42,10 @@ import static com.hurence.webapiservice.http.api.modele.StatusCodes.*;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class ImportCsvEndPointIT {
+public class ImportCsvEndPointVersion0IT {
 
     private static WebClient webClient;
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportCsvEndPointIT.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImportCsvEndPointVersion0IT.class);
     public static String DEFAULT_TIMESTAMP_FIELD = "timestamp";
     public static String DEFAULT_NAME_FIELD = "name";
     public static String DEFAULT_VALUE_FIELD = "value";

@@ -5,6 +5,8 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.util.HistorianVerticleConfHelper;
+import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
@@ -22,6 +24,7 @@ import io.vertx.reactivex.ext.web.codec.BodyCodec;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.common.SolrInputDocument;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -38,9 +41,9 @@ import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEM
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class SearchEndPointIT {
+public class SearchEndPointVersion0IT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(SearchEndPointVersion0IT.class);
     private static String COLLECTION = HistorianSolrITHelper.COLLECTION_HISTORIAN;
 
     @BeforeAll
@@ -81,13 +84,18 @@ public class SearchEndPointIT {
         client.add(COLLECTION, doc7);
         client.commit(COLLECTION);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        JsonObject historianConf = new JsonObject()
-                .put(CONFIG_SCHEMA_VERSION,
-                        SchemaVersion.VERSION_0.toString());
+        JsonObject historianConf = builfHistorianConf();
         HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
+    }
+
+    @NotNull
+    private static JsonObject builfHistorianConf() {
+        JsonObject historianConf = new JsonObject();
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_0);
+        return historianConf;
     }
 
 
@@ -105,7 +113,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithQueryAndNoLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
@@ -117,7 +125,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithQueryAndLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
@@ -129,7 +137,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithEmptyQueryAndNoLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
@@ -141,7 +149,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithEmptyQueryAndLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
@@ -154,7 +162,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testNoMatch(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx)
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,

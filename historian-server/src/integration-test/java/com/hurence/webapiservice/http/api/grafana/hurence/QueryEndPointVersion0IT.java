@@ -107,8 +107,7 @@ public class QueryEndPointVersion0IT extends AbstractQueryEndPointIT {
     public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         JsonObject historianConf = new JsonObject()
-                .put(CONFIG_SCHEMA_VERSION,
-                        SchemaVersion.VERSION_0.toString());
+                .put(CONFIG_SCHEMA_VERSION, SchemaVersion.VERSION_0.toString());
         HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },

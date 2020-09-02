@@ -2,14 +2,17 @@ package com.hurence.webapiservice.http.api.main;
 
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
+import com.hurence.historian.solr.injector.Version1SolrInjectorMultipleMetricSpecificPoints;
 import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.util.HistorianVerticleConfHelper;
+import com.hurence.util.HttpVerticleConfHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -36,18 +39,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
-public class ExportCsvEndPointIT {
+public class ExportCsvEndPointVersion1IT {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(ExportCsvEndPointIT.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(ExportCsvEndPointVersion1IT.class);
     private static WebClient webClient;
     private static AssertResponseGivenRequestHelper assertHelper;
     private static String exportEndpoint =  HttpServerVerticle.CSV_EXPORT_ENDPOINT;
 
     @BeforeAll
     public static void beforeAll(SolrClient client, Vertx vertx, DockerComposeContainer container) throws IOException, SolrServerException, InterruptedException {
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_1);
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        SolrInjector injector = new Version0SolrInjectorMultipleMetricSpecificPoints(
+        SolrInjector injector = new Version1SolrInjectorMultipleMetricSpecificPoints(
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
                 Arrays.asList(
                         Arrays.asList(
@@ -121,8 +124,11 @@ public class ExportCsvEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryExportCsv(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        int maxLimitFromConfig = 10000;
-        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+        JsonObject httpConf = new JsonObject();
+        HttpVerticleConfHelper.setMaxNumberOfDatapointAllowedInExport(httpConf, 10000);
+        JsonObject historianConf = new JsonObject();
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_1);
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
                             "/http/grafana/simplejson/query/extract-algo/test1/request.json",
@@ -133,8 +139,11 @@ public class ExportCsvEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryWithMaxAllowedPointsPassed(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        int maxLimitFromConfig = 100;
-        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+        JsonObject httpConf = new JsonObject();
+        HttpVerticleConfHelper.setMaxNumberOfDatapointAllowedInExport(httpConf, 100);
+        JsonObject historianConf = new JsonObject();
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_1);
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
                             "/http/grafana/simplejson/query/extract-algo/test1/request.json");

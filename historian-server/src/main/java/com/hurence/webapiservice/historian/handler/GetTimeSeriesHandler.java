@@ -416,7 +416,9 @@ public class GetTimeSeriesHandler {
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         Set<SamplingAlgorithm> samplingAlgos = determineSamplingAlgoThatWillBeUsed(requestedSamplingConf, metricsInfo);
         addNecessaryFieldToQuery(query, samplingAlgos);
-        addNecessaryQualityFieldToQuery(request, query, samplingAlgos);
+        if (request.getQualityReturn()) {
+            addNecessaryQualityFieldToQuery(request, query, samplingAlgos);
+        }
     }
 
 
@@ -589,7 +591,7 @@ public class GetTimeSeriesHandler {
                     .collect(Collectors.toList());
         }
 
-        public boolean getUseQuality() { return params.getBoolean(USE_QUALITY);}
+        public boolean getUseQuality() { return params.getBoolean(USE_QUALITY, false);}
 
         public Long getTo() {
             return params.getLong(HistorianServiceFields.TO);
