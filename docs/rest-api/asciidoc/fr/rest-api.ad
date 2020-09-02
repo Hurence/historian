@@ -807,6 +807,30 @@ Exemple de requête minimale :
 ]
 ----
 
+Exemple de requête quand il y a de la qualité :
+
+[source,json]
+----
+{
+  "from": "2016-10-31T06:33:44.866Z",
+  "to": "2020-10-31T12:33:44.866Z",
+  "names": ["metric_1"],
+  "format": "json",
+  "max_data_points": 30,
+  "tags": {
+      "sensor" : "sensor_1"
+  },
+  "sampling":{
+     "algorithm": "MIN",
+     "bucket_size" : 100
+  },
+  "quality" :  {
+    "quality_value" : 0.75,
+    "quality_agg" : "FIRST"
+  },
+  "return_with_quality" : true
+}
+----
 
 {
 "tags": {
@@ -885,6 +909,42 @@ sous la forme d'une map de clés / valeurs.
 |
 |Pas de tags.
 
+|/return_with_quality
+|Boolean
+|S'il faut retourner des points avec sa qualité ou non
+|Non
+|true ou false
+|false
+
+|===
+
+.Paramètres de la requête quand il y a de la qualité
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possibles | valeur par défaut
+
+|/quality
+|String
+|Un objet qui va contenir les informations des paramètres à utiliser pour le requêtage des points avec qualité
+|Non
+|
+|
+
+|/quality/quality_value
+|float
+|la qualité minimale de tous les points retournés
+|Non
+|Doit être entre 0 et 1
+|NaN
+
+|/quality/quality_agg
+|String
+|la qualité à utiliser lors l’échantillonnage des points si le nombre de points
+à retourner est supérieur au nombre maximum de point demandé
+|Non
+|les valeurs possibles sont ["MIN", "MAX", "AVG", "NONE", "FIRST"]
+|"NONE"
+
 |===
 
 
@@ -905,6 +965,28 @@ Exemple de réponse
     "datapoints":[
       [861,1450754160000],
       [767,1450754220000]
+    ]
+  }
+]
+----
+
+Exemple de réponse quand il y a de qualité
+
+[source,json]
+----
+[
+  {
+    "name":"upper_75",
+    "datapoints":[
+      [622,1450754160000, 0.84],
+      [365,1450754220000, 1.0]
+    ]
+  },
+  {
+    "name":"upper_90",
+    "datapoints":[
+      [861,1450754160000, 0.96],
+      [767,1450754220000, 1.0]
     ]
   }
 ]

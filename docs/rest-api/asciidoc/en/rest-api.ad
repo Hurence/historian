@@ -797,6 +797,30 @@ Example of a minimal request :
 ]
 ----
 
+Example of request when there is quality:
+
+[source,json]
+----
+{
+  "from": "2016-10-31T06:33:44.866Z",
+  "to": "2020-10-31T12:33:44.866Z",
+  "names": ["metric_1"],
+  "format": "json",
+  "max_data_points": 30,
+  "tags": {
+      "sensor" : "sensor_1"
+  },
+  "sampling":{
+     "algorithm": "MIN",
+     "bucket_size" : 100
+  },
+  "quality" :  {
+    "quality_value" : 0.75,
+    "quality_agg" : "FIRST"
+  },
+  "return_with_quality" : true
+}
+----
 
 {
 "tags": {
@@ -869,6 +893,41 @@ Example of a minimal request :
 |
 |no tags.
 
+|/return_with_quality
+|Boolean
+|Whether to return points with its quality or not
+|No
+|true or false
+|false
+
+|===
+
+.Parameters of the query when there is quality
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/quality
+|String
+|An object that will contain the information of the parameters to be used for the querying of points with quality
+|No
+|
+|
+
+|/quality/quality_value
+|float
+|the minimum quality of all returned points
+|No
+|Must be between 0 and 1
+|NaN
+
+|/quality/quality_agg
+|String
+|the quality to use when sampling points if the number of points
+to be returned is greater than the maximum number of points requested.
+|No
+|the possible values are ["MIN", "MAX", "AVG", "NONE", "FIRST"]
+|"NONE"
 |===
 
 
@@ -889,6 +948,28 @@ Example of a response
     "datapoints":[
       [861,1450754160000],
       [767,1450754220000]
+    ]
+  }
+]
+----
+
+Example of response when there is quality
+
+[source,json]
+----
+[
+  {
+    "name":"upper_75",
+    "datapoints":[
+      [622,1450754160000, 0.84],
+      [365,1450754220000, 1.0]
+    ]
+  },
+  {
+    "name":"upper_90",
+    "datapoints":[
+      [861,1450754160000, 0.96],
+      [767,1450754220000, 1.0]
     ]
   }
 ]
