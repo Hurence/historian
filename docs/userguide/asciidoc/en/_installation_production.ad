@@ -9,11 +9,11 @@ The minimal configuration for the server for a single server installation of the
 - 32 vcores of CPU
 - 2 Terabytes of disk
 - Java 8
-- Spark 2.3.4
-- Solr 8.2.0
-- Grafana 7.0.3
+- Spark {spark_version}
+- Solr {solr_version}
+- Grafana {grafana_version}
 
-In this section you will find quick guides to help you install Solr 8.2.0, Spark 2.3.4 and Grafana 7.0.3.
+In this section you will find quick guides to help you install Solr {solr_version}, Spark {spark_version} and Grafana {grafana_version}.
 
 We however recommend to refer to the official documentation for all these tools for production installations.
 
@@ -24,7 +24,7 @@ If you have existing servers you can jump to this <<install-production-hurence-d
 
 Apache SolR is the database/search engine used but the data historian. It could be replaced by another search engine.
 
-You can download the 8.2.0 version of Solr from this link: https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz[solr-8.2.0.tgz]
+You can download the {solr_version} version of Solr from this link: https://archive.apache.org/dist/lucene/solr/{solr_version}/solr-{solr_version}.tgz[solr-{solr_version}.tgz]
 or from this one https://lucene.apache.org/solr[site officiel]. 
 
 We invite you to follow the official documentation if you want to install a Solr cluster (and not a single node) in production.
@@ -37,7 +37,7 @@ Vérify that your Solr instance is up and running by opening its web user interf
 ==== Installing Apache Spark
 
 To install Spark you can download this archive:
-https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz[spark-2.3.4-bin-without-hadoop.tgz]
+https://archive.apache.org/dist/spark/spark-{spark-version}/spark-{spark-version}-bin-without-hadoop.tgz[spark-{spark-version}-bin-without-hadoop.tgz]
 
 ==== Commands to install Solr and Spark
 
@@ -45,16 +45,16 @@ The following commands allow you to get a local install. For a cluster in produc
 
 [source,bash]
 ----
-# get Apache Spark 2.3.4 and unpack it
+# get Apache Spark {spark_version} and unpack it
 cd $HDH_HOME
-wget https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz
-tar -xvf spark-2.3.4-bin-without-hadoop.tgz
-rm spark-2.3.4-bin-without-hadoop.tgz
+wget https://archive.apache.org/dist/spark/spark-{spark-version}/spark-{spark-version}-bin-without-hadoop.tgz
+tar -xvf spark-{spark-version}-bin-without-hadoop.tgz
+rm spark-{spark-version}-bin-without-hadoop.tgz
 
 # add two additional jars to spark to handle our framework
 wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
-mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/
-cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/
+mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-{spark-version}-bin-without-hadoop/jars/
+cp $HDH_HOME/historian-{hdh_version}-SNAPSHOT/lib/loader-{hdh_version}-SNAPSHOT.jar $HDH_HOME/spark-{spark-version}-bin-without-hadoop/jars/
 ----
 
 ==== Installing Grafana
@@ -80,10 +80,24 @@ https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install
 
 Launch the install with this script:
 
+NOTE:: Solr does not like for security reasons that you install and run as root.
+So use a user who is neither sudoer nor root (an application user or yours) but make sure that you have write rights where HDH will be installed (by default / opt / hdh).
+
 [source,bash]
 ----
 bash ./install.sh
 ----
+
+NOTE:: the install.sh script must be executable. If you get an authorization problem at launch, check that it has the right properties and otherwise run this command:
+
+[source, bash]
+----
+chmod + x install.sh
+----
+
+NOTE:: during the installation Solr may warn you about your machine configuration regarding the number of open files which is generally reduced to 1024. If you want a robust installation to accommodate a lot of data you will have to change this parameter with the ulimit command (and editing a configuration file whose name depends on your OS).
+Refer to your system documentation.
+
 
 You are asked for some configuration information.
 
@@ -107,12 +121,24 @@ The structure of $HDH_HOME after running the installation script is 'by default'
 
 The $HDH_HOME/bin/historian-server.sh script is used to start/stop the REST API server of the historian.
 
-To start the REST API server, type the following command: 
+You can verify that your server has been launched with the following command:
 
-[source,bash]
+[source, bash]
+----
+curl http://localhost:8080/api/grafana/v0
+----
+
+If this is not the case, go to the logs (in the installation directory and in the subdirectory historian-${version}, there is an app.log file). In general it will be a problem of rights to create directories: especially in /tmp (check your write rights on this directory).
+
+
+To launch or restart the historian type the following command:
+
+[source, bash]
 ----
 ./bin/historian-server.sh start
+(or ./bin/historian-server.sh restart)
 ----
+
 
 To stop the REST API server, type the following command:
 

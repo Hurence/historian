@@ -9,30 +9,51 @@ dans ce guide nous allons utiliser l'import de données à partir de fichiers cs
 
 === Import de donnée à partir de fichiers csv avec l'api REST
 
-TODO
+Cette section va nous apprendre à injecter un fichier CSV dans l'historian. Le folder **samples** du data historian contient des exemples. Nous allons injecter les données du sous folder **happiness** ; quelques fichiers qui donnent le score de "happiness" des pays chaque année.
 
-=== Requêter des données avec l'api REST
+Excecutez la commande suivante (dans ce qui suit remplacez /opt/hdp par votre directorie d'installation si vous n'avez pas installé dans la directorie par défaut): 
 
 [source,bash]
 ----
-curl --location --request POST 'http://localhost:8080/api/grafana/query' \
---header 'Content-Type: application/json' \
---data-raw '{
-  "panelId": 1,
-  "range": {
-    "from": "2019-03-01T00:00:00.000Z",
-    "to": "2020-03-01T23:59:59.000Z"
-  },
-  "interval": "30s",
-  "intervalMs": 30000,
-  "targets": [
-    {
-      "target": "\"ack\"",
-      "type": "timeserie"
-    }
-  ],
-  "format": "json",
-  "maxDataPoints": 550
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@/opt/hdh/samples/happiness/2015.csv' \
+-F mapping.value="Happiness Score" \
+-F mapping.timestamp=Timestamp \
+-F mapping.tags=Country \
+-F group_by=name \
+-F group_by=tags.Country \
+-F format_date='yyyy-MM-dd HH:mm:ss'
+---
+
+et bien sûr vous pouvez appliquer la même requête à tous les fichiers de 2016 à 2020. Cela vous fait un petit jeu de données sur lequel nous allons pouvoir apprendre à faire des choses.
+
+=== Requêter des données avec l'api REST
+
+Une manière de voir si vous données ont bien été injectées est de les requêter. Essayons de voir
+la progression du bonheur (métrique happiness) en France sur les années 2015 à 2020. Et essayons de l'obtenir en Json.
+
+Déjà regardons simplement si il existe des métriques happiness dans l'historian avec la requête suivante:
+
+[source,bash]
+----
+curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
+  "names": ["happiness"],
+  "format" : "json"
+}'
+----
+
+En effet nous obtenons des données.
+
+En filtrant sur le tag Country (= France) nous devrions avoir les enregistrements de la France uniquement.
+
+
+[source,bash]
+----
+curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
+  "names": ["happiness"],
+  "Country: "France",
+  "format" : "json"
 }'
 ----
 
@@ -40,32 +61,42 @@ Obtenir l'ensemble des noms de métriques
 
 [source,bash]
 ----
-curl --location --request POST 'http://localhost:8080/api/grafana/search' \
+curl --location --request POST 'http://localhost:8080/api/grafana/v0/search' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "target": "*"
 }'
-
-# ["ack", ... ,"messages","cpu"]
-
 ----
 
-Obtenir des mesures avec en spécifiant un intervalle de temps
+Obtenir des mesures avec en spécifiant un intervalle de temps:
 
 [source,bash]
 ----
-curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+curl --location --request POST 'http://localhost:8080/api/grafana/v0/query' \
 --header 'Content-Type: application/json' \
 --data-raw '{
 	 "range": {
-          "from": "2019-11-25T23:59:59.999Z",
-          "to": "2019-11-30T23:59:59.999Z"
+          "from": "2015-01-01 00:00:00",
+          "to": "2016-01-01 00:00:00"
       },
       "targets": [
         { "target": "ack" }
       ]
 }'
 ----
+
+=== Visualisez les données dans Grafana
+
+En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur l'URL de grafana (http://localhost:3000)[http://localhost:3000]. La première fois que vous vous loggez vous pouvez entrer n'importe quel username et mot de passe (celui ci deviendra le premier utilisateur et administrateur). Vous pouvez mettre admin, admin (dans l'écran suivant il vous sera demandé de changer ce mot de passe "admin" en quelque chose de plus sécurisé).
+
+Une fois votre mot de passe changé, vous avez une page d'accueil que nous pouvez lire puis faire disparaître.
+
+- Vous allez clicker sur "Add your first data source".
+- Aller à la fin clicker sur celle qui s'appelle "Hurence-Historian".
+- Mettez dans URL l'URL de votre historian server (l'installation par défaut est http://localhost:8080/api/grafana/v0/)
+- Clickez "Save and Test"
+- Vous devez avoir un message vert vous disant que votre data source est chargée.
+
 
 
 === Utiliser Spark pour requếter les données
@@ -77,8 +108,7 @@ Hurence Data Historian est très intégré avec Spark de telle sorte que vous pu
 Les commandes suivantes vous montrent comment prendre un dataset en CSV depuis HDFS (le système de fichiers de Hadoop) ou depuis un système de fichier local, et le charger dans HDH.
 
 
-../_setup_historian/spark-2.3.4-bin-hadoop2.7/bin/spark-shell --jars assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT//lib/loader-1.3.4-SNAPSHOT.jar,assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar
-
+$HDH_HOME/spark-{spark_version}-bin-hadoop{hadoop_version}/bin/spark-shell --jars assembly/target/historian-{hdh_version}-SNAPSHOT/historian-{hdh_version}-SNAPSHOT//lib/loader-{hdh_version}-SNAPSHOT.jar,assembly/target/historian-{hdh_version}-SNAPSHOT/historian-{hdh_version}-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar
 
 
 [source,scala]
@@ -166,16 +196,3 @@ note:: les options de sampling de la première requête sont utilisées pour tou
 note:: si vous n'avez pas de données d'injectées, suivez le tutorial pour injecter des données.
 
 note:: si vous n'avez pas ajouté de tag name à l'installation vous ne pourrez pas utiliser de tags. Il est toujours possible de rajouter des tags manuellement après installation en rajoutant un champ dans le schéma.
-
-== Stopper et détruire les données
-
-Cette section vous apprend à stopper les services et à détruire si nécessaire les données (après avoir testé vous voudrez alimenter avec vos données réelles).
-
-=== Stopper ses instances SolR
-
-Cette section vous apprend à stopper les intances SolR. Attention cette commande va éteindre Solr (cela pourrait impacter d'autres service utilisant Solr).
-
-    cd $SOLR_HOME
-    bin/solr stop -all
-
-
