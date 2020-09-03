@@ -493,6 +493,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#redémarrer-solr">4.1. Redémarrer solr</a></li>
 <li><a href="#redémarrer-lhistorian">4.2. Redémarrer l&#8217;historian</a></li>
+<li><a href="#redémarrer-grafana">4.3. Redémarrer Grafana</a></li>
 </ul>
 </li>
 <li><a href="#gestion-des-données">5. Gestion des données</a>
@@ -1500,6 +1501,17 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2/ -p 7574 -z localhost:9983</c
 <p>Attention ces commandes n&#8217;affectent ni Grafana ni Solr qui sont des services indépendants.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="redémarrer-grafana"><a class="anchor" href="#redémarrer-grafana"></a>4.3. Redémarrer Grafana</h3>
+<div class="paragraph">
+<p>Utilisez restart si c&#8217;est un redémarrage. Si votre grafana ne tourne pas déjà utilisez start.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/grafana-{grafana_version}/bin/grafana-server start</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
@@ -1532,7 +1544,7 @@ http://localhost:8080/api/historian/v0/import/csv \
 -F mapping.tags=Country \
 -F group_by=name \
 -F group_by=tags.Country \
--F format_date=yyyy
+-F format_date='yyyy-MM-dd HH:mm:ss'
 ---
 
 et bien sûr vous pouvez appliquer la même requête à tous les fichiers de 2016 à 2020. Cela vous fait un petit jeu de données sur lequel nous allons pouvoir apprendre à faire des choses.
@@ -1566,9 +1578,7 @@ En filtrant sur le tag Country (= France) nous devrions avoir les enregistrement
 <div class="paragraph">
 <p>curl --header 'Content-Type: application/json' -X POST <a href="http://localhost:8080/api/grafana/v0/query" class="bare">http://localhost:8080/api/grafana/v0/query</a> -d '{
   "names": ["happiness"],
-  tags: {
-    Country: "France"
-  },
+  "Country: "France",
   "format" : "json"
 }'</p>
 </div>
@@ -1598,8 +1608,8 @@ En filtrant sur le tag Country (= France) nous devrions avoir les enregistrement
 --header 'Content-Type: application/json' \
 --data-raw '{
 	 "range": {
-          "from": "2019-11-25T23:59:59.999Z",
-          "to": "2019-11-30T23:59:59.999Z"
+          "from": "2015-01-01 00:00:00",
+          "to": "2016-01-01 00:00:00"
       },
       "targets": [
         { "target": "ack" }
@@ -1608,7 +1618,21 @@ En filtrant sur le tag Country (= France) nous devrions avoir les enregistrement
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>=== Utiliser Spark pour requếter les données
+<pre>=== Visualisez les données dans Grafana
+
+En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur l'URL de grafana (http://localhost:3000)[http://localhost:3000]. La première fois que vous vous loggez vous pouvez entrer n'importe quel username et mot de passe (celui ci deviendra le premier utilisateur et administrateur). Vous pouvez mettre admin, admin (dans l'écran suivant il vous sera demandé de changer ce mot de passe "admin" en quelque chose de plus sécurisé).
+
+Une fois votre mot de passe changé, vous avez une page d'accueil que nous pouvez lire puis faire disparaître.
+
+- Vous allez clicker sur "Add your first data source".
+- Aller à la fin clicker sur celle qui s'appelle "Hurence-Historian".
+- Mettez dans URL l'URL de votre historian server (l'installation par défaut est http://localhost:8080/api/grafana/v0/)
+- Clickez "Save and Test"
+- Vous devez avoir un message vert vous disant que votre data source est chargée.
+
+
+
+=== Utiliser Spark pour requếter les données
 
 Apache Spark est une plateforme open source pour traiter de grandes quantités de données en parallèle sur un cluster de machines.
 

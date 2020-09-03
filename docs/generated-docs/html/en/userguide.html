@@ -493,13 +493,14 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#restart-of-the-data-historian">4. Restart of the data historian</a>
 <ul class="sectlevel2">
 <li><a href="#restart-solr">4.1. Restart solr</a></li>
-<li><a href="#restart-the-historian">4.2. Restart the historian</a></li>
+<li><a href="#restart-or-start-the-historian">4.2. Restart (or start) the historian</a></li>
+<li><a href="#restart-grafana">4.3. Restart Grafana</a></li>
 </ul>
 </li>
 <li><a href="#data-management">5. Data management</a>
 <ul class="sectlevel2">
 <li><a href="#importing-data-from-csv-files-with-the-rest-api">5.1. Importing Data from CSV files with the REST API</a></li>
-<li><a href="#requêter-des-données-avec-lapi-rest">5.2. Requêter des données avec l&#8217;api REST</a></li>
+<li><a href="#request-data-with-the-rest-api">5.2. Request data with the REST API</a></li>
 <li><a href="#use-spark-to-get-data">5.3. Use Spark to get data</a></li>
 <li><a href="#realtime-data-ingestion-with-logisland">5.4. Realtime data ingestion with logisland</a></li>
 </ul>
@@ -1518,7 +1519,7 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2 -p 7574 -z localhost: 9983</c
 </div>
 </div>
 <div class="sect2">
-<h3 id="restart-the-historian"><a class="anchor" href="#restart-the-historian"></a>4.2. Restart the historian</h3>
+<h3 id="restart-or-start-the-historian"><a class="anchor" href="#restart-or-start-the-historian"></a>4.2. Restart (or start) the historian</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh start</code></pre>
@@ -1539,19 +1540,28 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2 -p 7574 -z localhost: 9983</c
 <p>Please note that these orders do not affect Grafana or Solr, which are independent services.</p>
 </div>
 </div>
+<div class="sect2">
+<h3 id="restart-grafana"><a class="anchor" href="#restart-grafana"></a>4.3. Restart Grafana</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/grafana-{grafana_version}/bin/grafana-server start</code></pre>
+</div>
+</div>
+</div>
 </div>
 </div>
 <div class="sect1">
 <h2 id="data-management"><a class="anchor" href="#data-management"></a>5. Data management</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Vous pouvez consulter notre documentation sur l&#8217;api REST 'rest-api.pdf' pour connaitre les détails de chaque fonction de l&#8217;API (endpoint).
-Maintenant que nous avons installé l&#8217;historian. Vous pouvez jouer avec des données, il y a plusieurs manières
-d&#8217;interagir avec l&#8217;historian selon votre culture et vos besoins.</p>
+<p>You can consult our documentation on the REST API 'rest-api.pdf' to know the details of each function of the API (endpoint).</p>
 </div>
 <div class="paragraph">
-<p>L&#8217;historian ne contient initialement aucune données. Il existe plusieurs moyens d&#8217;injecter des données (voir le guide sur l&#8217;api rest),
-dans ce guide nous allons utiliser l&#8217;import de données à partir de fichiers csv.</p>
+<p>Now that we&#8217;ve installed the historian. You can play with data, there are several ways
+interact with the historian according to your culture and your needs.</p>
+</div>
+<div class="paragraph">
+<p>The historian initially contains no data. There are several ways to inject data (see the guide on the API rest), in this guide we will use importing data from csv files.</p>
 </div>
 <div class="sect2">
 <h3 id="importing-data-from-csv-files-with-the-rest-api"><a class="anchor" href="#importing-data-from-csv-files-with-the-rest-api"></a>5.1. Importing Data from CSV files with the REST API</h3>
@@ -1560,7 +1570,7 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 </div>
 </div>
 <div class="sect2">
-<h3 id="requêter-des-données-avec-lapi-rest"><a class="anchor" href="#requêter-des-données-avec-lapi-rest"></a>5.2. Requêter des données avec l&#8217;api REST</h3>
+<h3 id="request-data-with-the-rest-api"><a class="anchor" href="#request-data-with-the-rest-api"></a>5.2. Request data with the REST API</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/query' \
@@ -1593,9 +1603,7 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 --header 'Content-Type: application/json' \
 --data-raw '{
     &quot;target&quot;: &quot;*&quot;
-}'
-
-# [&quot;ack&quot;, ... ,&quot;messages&quot;,&quot;cpu&quot;]</code></pre>
+}'</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1626,8 +1634,10 @@ Hurence Data Historian is highly integrated with Spark so that you can handle da
 <div class="paragraph">
 <p>The following commands show you how to take a CSV dataset from HDFS or local filesystem, load it as a HDH time serie.</p>
 </div>
-<div class="paragraph">
-<p>$HDH_HOME/spark-{spark-version}-bin-hadoop2.7/bin/spark-shell --jars assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/loader-{hdh_version}.jar,assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/spark-solr-3.6.6-shaded.jar</p>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/spark-{spark-version}-bin-hadoop{hadoop_version}/bin/spark-shell --jars assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/loader-{hdh_version}.jar,assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/spark-solr-3.6.6-shaded.jar</code></pre>
+</div>
 </div>
 <div class="listingblock">
 <div class="content">
