@@ -4,6 +4,9 @@ This section describes a simple single node installation of the Hurence Data His
 
 This type of installation is not described here ; this is the specific domain of experts in designing Big Data infrastructures. 
 
+[IMPORTANT]
+Do not open the ports of your data historian on the public network, protect it at least with a firewall, because this installation is not secure. A very secure installation is possible; Contact us for more information.
+
 [NOTE]
 Hurence proposes services to install the data historian on Big Data infrastructures for large volumes of data.
 
