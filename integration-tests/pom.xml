@@ -17,14 +17,6 @@
         <test.containers>1.12.2</test.containers>
     </properties>
 
-    <repositories>
-        <repository>
-            <id>repo.hortonworks.com</id>
-            <name>hdp</name>
-            <url>https://repo.hortonworks.com/content/repositories/releases/</url>
-        </repository>
-    </repositories>
-
     <dependencies>
         <!-- HISTORIAN modules -->
         <dependency>
@@ -42,37 +34,17 @@
             <artifactId>testcontainers</artifactId>
             <version>${test.containers}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.lucene</groupId>-->
-<!--            <artifactId>lucene-core</artifactId>-->
-<!--            <version>${solr.version}</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
             <version>${solr.version}</version>
         </dependency>
-        <!--SPARK-->
-<!--        <dependency>-->
-<!--            <groupId>org.apache.spark</groupId>-->
-<!--            <artifactId>spark-core_${scala.binary.version}</artifactId>-->
-<!--            <version>${spark.version}</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-sql_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.apache.spark</groupId>-->
-<!--            <artifactId>spark-sql-kafka-0-10_2.11</artifactId>-->
-<!--            <version>${spark.version}</version>-->
-<!--            <scope>provided</scope>-->
-<!--        </dependency>-->
-        <!--Timeseries-->
         <!--        VERTX-->
         <dependency>
             <groupId>io.vertx</groupId>
