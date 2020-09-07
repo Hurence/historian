@@ -72,8 +72,6 @@ public class TagKeysAndValuesEndPointIT {
                 "/http/grafana/simplejson/tagvalues/testBucketSize/expectedResponse.json");
     }
 
-
-
     public void assertRequestGiveResponseFromFileTagKeys(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
         assertTagKeyHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);

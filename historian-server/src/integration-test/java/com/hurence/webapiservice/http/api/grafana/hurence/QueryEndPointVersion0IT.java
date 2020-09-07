@@ -44,10 +44,13 @@ public class QueryEndPointVersion0IT extends AbstractQueryEndPointIT {
         injectChunksIntoSolr(client, vertx);
     }
 
+    private static String metricNameSpecialCharacters1 = "metric with spaces";
+    private static String metricNameSpecialCharacters2 = "metric (with && special characters)";
+
     public static void injectChunksIntoSolr(SolrClient client, Vertx vertx) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new Version0SolrInjectorMultipleMetricSpecificPoints(
-                Arrays.asList("temp_a", "temp_b", "maxDataPoints", "metric with spaces"),
+                Arrays.asList("temp_a", "temp_b", "maxDataPoints", metricNameSpecialCharacters1, metricNameSpecialCharacters2),
                 Arrays.asList(
                         Arrays.asList(
                                 new Point(0, 1477895624866L, 622),
@@ -103,6 +106,10 @@ public class QueryEndPointVersion0IT extends AbstractQueryEndPointIT {
                         Arrays.asList(
                                 new Point(0, 1477895624866L, 861),
                                 new Point(0, 1477917224866L, 767)
+                        ),
+                        Arrays.asList(
+                                new Point(0, 1477895624868L, 861),
+                                new Point(0, 1477917224869L, 767)
                         )
                 ));
         injector.injectChunks(client);

@@ -6,11 +6,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.RoutingContext;
-import org.joda.time.IllegalFieldValueException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -28,12 +26,12 @@ public class MultiCsvFilesConvertor {
     public static class CorrectPointsAndFailedPointsOfAllFiles {
 
         public JsonArray correctPoints;
-        public JsonArray namesOfTooBigFiles;
+        public JsonArray filesThatFailedToBeImported;
         public LinkedHashMap<LinkedHashMap, Integer> numberOfFailedPointsPerMetric;
 
         public CorrectPointsAndFailedPointsOfAllFiles() {
             this.correctPoints = new JsonArray();
-            this.namesOfTooBigFiles = new JsonArray();
+            this.filesThatFailedToBeImported = new JsonArray();
             this.numberOfFailedPointsPerMetric = new LinkedHashMap<>();
         }
     }
@@ -56,16 +54,20 @@ public class MultiCsvFilesConvertor {
             } catch (NoSuchElementException e) {
                 String errorMessage = "The csv mappings don't match the mappings in the attributes. this file will be skipped";
                 JsonObject errorObject = new JsonObject().put(FILE, convertor.file.fileName()).put(CAUSE, errorMessage);
-                correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.add(errorObject);
+                correctPointsAndFailedPointsOfAllFiles.filesThatFailedToBeImported.add(errorObject);
                 continue;
             } catch (IOException e) {
                 String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+MAX_LINES_FOR_CSV_FILE;
                 JsonObject errorObject = new JsonObject().put(FILE, convertor.file.fileName()).put(CAUSE, errorMessage);
-                correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.add(errorObject);
+                correctPointsAndFailedPointsOfAllFiles.filesThatFailedToBeImported.add(errorObject);
                 continue;
             }
-
-            convertor.correctPointsAndFailedPoints = new ImportRequestParser().parseCsvImportRequest(convertor.fileInArray, multiMap);
+            try {
+                convertor.correctPointsAndFailedPoints = new ImportRequestParser().parseCsvImportRequest(convertor.fileInArray, multiMap);
+            } catch (IllegalArgumentException e) {
+                JsonObject errorObject = new JsonObject().put(FILE, convertor.file.fileName()).put(CAUSE, e.getMessage());
+                correctPointsAndFailedPointsOfAllFiles.filesThatFailedToBeImported.add(errorObject);
+            }
         }
     }
 
