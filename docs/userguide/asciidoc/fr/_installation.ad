@@ -5,6 +5,9 @@ conçu pour le Big Data, il est possible de réaliser une installation avec des 
 volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d'installation n'est pas
 décrite ici par simplification car elle concerne des experts en urbanisation d'infrastructures Big Data.
 
+[IMPORTANT] 
+N'ouvrez pas les ports de votre data historian sur le réseau public, protégez le a minima par un firewall, car cette installation n'est pas sécurisée. Une installation très sécurisée est possible; contactez nous pour plus d'information.
+
 [NOTE]
 Hurence propose de l'accompagnement pour installer le data historian pour des volumétries importantes.
 
