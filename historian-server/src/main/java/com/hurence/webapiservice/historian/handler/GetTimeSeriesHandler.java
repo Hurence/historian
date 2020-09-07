@@ -117,12 +117,20 @@ public class GetTimeSeriesHandler {
 
 
     private void addQualityFields(SolrQuery query, Request request) {
+        Set<String> neededQualityFields = getNeededQualityFields(request);
+        neededQualityFields.forEach(query::addField);
+    }
+
+    private Set<String> getNeededQualityFields(Request request) {
+        final Set<String> neededQualityFields = new HashSet<>();
         request.getMetricRequestsWithFinalTagsAndFinalQualities().forEach(
                 metricRequest -> {
                     if (!metricRequest.getQuality().getQualityAgg().equals(QualityAgg.NONE))
-                        query.addField(metricRequest.getQuality().getChunkQualityFieldForSampling());
+                        neededQualityFields.add(metricRequest.getQuality().getChunkQualityFieldForSampling());
                 });
+        return neededQualityFields;
     }
+
 
     private SolrFieldMapping getHistorianFields() {
         return this.historianConf.getFieldsInSolr();
@@ -226,10 +234,10 @@ public class GetTimeSeriesHandler {
 
     private MetricsSizeInfo getNumberOfPointsByMetricInRequest(List<MetricRequest> requests, SolrQuery query, boolean useQuality) throws IOException {
         NumberOfPointsByMetricHelper numberOfPointsByMetricHelper = getNumberOfPointsByMetricHelperImpl(useQuality, requests, query);
-        StringBuilder exprBuilder = numberOfPointsByMetricHelper.getStreamExpression();
-        LOGGER.trace("expression is : {}", exprBuilder.toString());
+        String preRequestExpr = numberOfPointsByMetricHelper.getStreamExpression();
+        LOGGER.trace("expression is : {}", preRequestExpr);
         ModifiableSolrParams paramsLoc = new ModifiableSolrParams();
-        paramsLoc.set("expr", exprBuilder.toString());
+        paramsLoc.set("expr", preRequestExpr);
         paramsLoc.set("qt", "/stream");
         TupleStream solrStream = new SolrStream(solrHistorianConf.streamEndPoint, paramsLoc);
         StreamContext context = new StreamContext();
