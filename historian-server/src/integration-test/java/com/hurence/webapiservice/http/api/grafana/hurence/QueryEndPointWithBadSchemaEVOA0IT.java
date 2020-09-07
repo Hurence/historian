@@ -48,6 +48,7 @@ public class QueryEndPointWithBadSchemaEVOA0IT extends AbstractQueryEndPointIT {
                         },
                         t -> context.failNow(t));
     }
+    private static String metricNameSpecialCharacters2 = "metric (with && special characters)";
 
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
@@ -110,6 +111,11 @@ public class QueryEndPointWithBadSchemaEVOA0IT extends AbstractQueryEndPointIT {
                 Arrays.asList(
                         new Point(0, 1477895624866L, 861),
                         new Point(0, 1477917224866L, 767)
+                ));
+        injector.addChunk(metricNameSpecialCharacters2, "test",
+                Arrays.asList(
+                        new Point(0, 1477895624868L, 861),
+                        new Point(0, 1477917224869L, 767)
                 ));
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);

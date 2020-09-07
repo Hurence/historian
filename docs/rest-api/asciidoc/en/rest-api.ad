@@ -163,7 +163,7 @@ Example of a minimum curl command:
 [source,curl]
 ----
 curl -X POST \
-http://localhost:8080/historian-server/ingestion/csv \
+http://localhost:8080/api/historian/v0/import/csv \
 -F 'my_csv_file=@path/de/mon/csv/file.csv'
 ----
 
@@ -182,7 +182,7 @@ Example of a curl command :
 [source,curl]
 ----
 curl -X POST \
-http://localhost:8080/historian-server/ingestion/csv \
+http://localhost:8080/api/historian/v0/import/csv \
 -F 'my_csv_file=@path/de/mon/csv/file.csv' \
 -F 'my_csv_file2=@path/de/mon/csv/file2.csv' \
 -F mapping.name=metric_name_2 \
@@ -191,10 +191,9 @@ http://localhost:8080/historian-server/ingestion/csv \
 -F mapping.quality=quality \
 -F mapping.tags=sensor \
 -F mapping.tags=code_install \
--F timestamp_unit=MILLISECONDS_EPOCH \
 -F group_by=name \
 -F group_by=tags.sensor \
--F format_date=yyyy-D-m HH:mm:ss.SSS \
+-F format_date=yyyy-DD-MM HH:mm:ss.SSS \
 -F timezone_date=UTC \
 ----
 
@@ -203,10 +202,10 @@ Example of a csv file :
 [source,yml]
 ----
 metric_name_2,timestamp,value_2,quality,sensor,code_install
-metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
-metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
+metric_1, 1970-01-01 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
 ----
 
 with the following request:
@@ -214,7 +213,7 @@ with the following request:
 [source,curl]
 ----
 curl -X POST \
-http://localhost:8080/historian-server/ingestion/csv \
+http://localhost:8080/api/historian/v0/import/csv \
 -F 'my_csv_file=@path/de/mon/csv/file.csv' \
 -F 'my_csv_file2=@path/de/mon/csv/file.csv' \
 -F mapping.name=metric_name_2 \
@@ -223,20 +222,19 @@ http://localhost:8080/historian-server/ingestion/csv \
 -F mapping.quality=quality \
 -F mapping.tags=sensor \
 -F mapping.tags=code_install \
--F timestamp_unit=MILLISECONDS_EPOCH \
 -F group_by=name \
 -F group_by=tags.sensor \
--F format_date=yyyy-D-m HH:mm:ss.SSS \
+-F format_date=yyyy-DD-MM HH:mm:ss.SSS \
 -F timezone_date=UTC \
 ----
 and the following "file.csv":
 [source,yml]
 ----
 metric_name_2,timestamp,value_2,quality,sensor,code_install
-metric_1, 1970-1-1 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.002, 2 ,1.4,sensor_1,code_1
-metric_1, 1970-1-1 00:00:00.003, 3 ,1.4,sensor_2,code_1
-metric_2, 1970-1-1 00:00:00.004, 4 ,1.5,sensor_2,code_1
+metric_1, 1970-01-01 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
 ----
 we get this respons back:
 [source,json]
