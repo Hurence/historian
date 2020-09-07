@@ -3,10 +3,7 @@ package com.hurence.webapiservice.http.api.ingestion;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
-import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.util.MultipartRequestResponseConf;
-import com.hurence.util.RequestResponseConf;
-import com.hurence.util.RequestResponseConfI;
+import com.hurence.util.*;
 import com.hurence.webapiservice.http.api.ingestion.util.TimestampUnit;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.util.HttpITHelper;
@@ -62,12 +59,13 @@ public class ImportCsvEndPointVersion0IT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-
-        SolrITHelper.createChunkCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString());
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         SolrITHelper.addCodeInstallAndSensor(container);
         SolrITHelper.addFieldToChunkSchema(container, "date");
         webClient = HttpITHelper.buildWebClient(vertx);
-        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
+        JsonObject historianConf = new JsonObject();
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_0);
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
