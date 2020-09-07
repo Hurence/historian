@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.hurence.historian.modele.HistorianServiceFields.QUALITY_CHECK;
+import static com.hurence.solr.util.StreamExprHelper.*;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.findNeededTagsName;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.joinListAsString;
 
@@ -28,18 +29,8 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
         this.requests = requests;
     }
 
-
     @Override
-    public StringBuilder getStreamExpression() {
-        String streamExpression = "rollup(select(search(";
-        StringBuilder exprBuilder = new StringBuilder(streamExpression).append(chunkCollection)
-                .append(",q=").append(query.getQuery());
-        if (query.getFilterQueries() != null) {
-            for (String filterQuery : query.getFilterQueries()) {
-                exprBuilder
-                        .append(",fq=").append(filterQuery);
-            }
-        }
+    public String getStreamExpression() {
         List<String> neededFields = findNeededTagsName(requests);
         neededFields.add(solrMapping.CHUNK_NAME);
         List<String> overFields = new ArrayList<>(neededFields);
@@ -50,13 +41,40 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
         List<String> selectFields = new ArrayList<>(neededFields);
         selectFields.add(getIsQualityOkField(requests));
         String flString = joinListAsString(neededFields);
-        exprBuilder.append(",fl=\"").append(flString).append("\"")
-                .append(",qt=\"/export\", sort=\"").append(solrMapping.CHUNK_NAME).append(" asc\"),")
-                .append(joinListAsString(selectFields))
-                .append("),");
-        exprBuilder.append("over=\"").append(overString).append("\"")
-                .append(", sum(").append(solrMapping.CHUNK_COUNT_FIELD).append("), count(*))");
-        return exprBuilder;
+        String baseSearchQuery =  createSearch(
+                chunkCollection,
+                query.getQuery(),
+                "\"" + flString + "\"",
+                "\"/export\"",
+                "\"" +solrMapping.CHUNK_NAME + " asc\""
+        );
+        String selectedWrapper = createSelect(baseSearchQuery, selectFields);
+        List<String> fieldsAggInRoll = new ArrayList<>();
+        fieldsAggInRoll.add("sum(\"" + solrMapping.CHUNK_COUNT_FIELD + ")");
+        fieldsAggInRoll.add("count(*)");
+        String rollUpExpr = createRollup(selectedWrapper,
+                        "\"" + overString +  "\"",
+                            fieldsAggInRoll
+                );
+//        String streamExpression = "rollup(select(search(";
+//        StringBuilder exprBuilder = new StringBuilder(streamExpression).append(chunkCollection)
+//                .append(",q=").append(query.getQuery());
+//        if (query.getFilterQueries() != null) {
+//            for (String filterQuery : query.getFilterQueries()) {
+//                exprBuilder
+//                        .append(",fq=").append(filterQuery);
+//            }
+//        }
+
+
+//        exprBuilder.append(",fl=\"").append(flString).append("\"")
+//                .append(",qt=\"/export\", sort=\"").append(solrMapping.CHUNK_NAME).append(" asc\"),")
+//                .append(joinListAsString(selectFields))
+//                .append("),");
+//        exprBuilder.append("over=\"").append(overString).append("\"")
+//                .append(", sum(").append(solrMapping.CHUNK_COUNT_FIELD).append("), count(*))");
+//        return exprBuilder;
+        return rollUpExpr;
     }
 
     private String getIsQualityOkField(List<MetricRequest> requests) {
@@ -109,6 +127,7 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
     }
 
     private String getAggFieldForFilteringQuality() {
+        //for the moment we filter every time on QUALITY_AVG
         return solrMapping.CHUNK_QUALITY_AVG_FIELD;
     }
 }

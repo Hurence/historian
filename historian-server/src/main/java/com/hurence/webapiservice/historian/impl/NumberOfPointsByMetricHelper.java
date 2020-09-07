@@ -7,5 +7,5 @@ public interface NumberOfPointsByMetricHelper {
      *
      * @return StringBuilder to be used in the solr Stream query
      */
-    StringBuilder getStreamExpression();
+    String getStreamExpression();
 }

@@ -29,7 +29,7 @@ public class NumberOfAllPointsByMetricHelperImpl implements NumberOfPointsByMetr
     }
 
     @Override
-    public StringBuilder getStreamExpression() {
+    public String getStreamExpression() {
         String streamExpression = "rollup(search(";
         StringBuilder exprBuilder = new StringBuilder(streamExpression).append(chunkCollection)
                 .append(",q=").append(query.getQuery());
@@ -49,7 +49,7 @@ public class NumberOfAllPointsByMetricHelperImpl implements NumberOfPointsByMetr
                 .append(",qt=\"/export\", sort=\"").append(solrMapping.CHUNK_NAME).append(" asc\")")
                 .append(",over=\"").append(overString).append("\"")
                 .append(", sum(").append(solrMapping.CHUNK_COUNT_FIELD).append("), count(*))");
-        return exprBuilder;
+        return exprBuilder.toString();
     }
 
 
