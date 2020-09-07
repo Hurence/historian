@@ -1,17 +1,17 @@
 == Data management
 
-Vous pouvez consulter notre documentation sur l'api REST 'rest-api.pdf' pour connaitre les détails de chaque fonction de l'API (endpoint).
-Maintenant que nous avons installé l'historian. Vous pouvez jouer avec des données, il y a plusieurs manières
-d'interagir avec l'historian selon votre culture et vos besoins.
+You can consult our documentation on the REST API 'rest-api.pdf' to know the details of each function of the API (endpoint).
 
-L'historian ne contient initialement aucune données. Il existe plusieurs moyens d'injecter des données (voir le guide sur l'api rest),
-dans ce guide nous allons utiliser l'import de données à partir de fichiers csv.
+Now that we've installed the historian. You can play with data, there are several ways
+interact with the historian according to your culture and your needs.
+
+The historian initially contains no data. There are several ways to inject data (see the guide on the API rest), in this guide we will use importing data from csv files.
 
 === Importing Data from CSV files with the REST API
 
 TODO
 
-=== Requêter des données avec l'api REST
+=== Request data with the REST API
 
 [source,bash]
 ----
@@ -46,9 +46,6 @@ curl --location --request POST 'http://localhost:8080/api/grafana/search' \
 --data-raw '{
     "target": "*"
 }'
-
-# ["ack", ... ,"messages","cpu"]
-
 ----
 
 Get some measures points within a time range
@@ -68,15 +65,17 @@ curl --location --request POST 'http://localhost:8080/api/grafana/query' \
 }'
 ----
 
-
 === Use Spark to get data
+
 Apache Spark is an Open Source framework designed to process hudge datasets in parallel on computing clusters.
 Hurence Data Historian is highly integrated with Spark so that you can handle dataset interactions in both ways (input and output) through a simple API.
 
-The following commands show you how to take a CSV dataset from HDFS or local filesystem, load it as a HDH
+The following commands show you how to take a CSV dataset from HDFS or local filesystem, load it as a HDH time serie.
 
-../_setup_historian/spark-2.3.4-bin-hadoop2.7/bin/spark-shell --jars assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT//lib/loader-1.3.4-SNAPSHOT.jar,assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar
-
+[source,bash]
+----
+$HDH_HOME/spark-{spark-version}-bin-hadoop{hadoop_version}/bin/spark-shell --jars assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/loader-{hdh_version}.jar,assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/spark-solr-3.6.6-shaded.jar
+----
 
 
 [source,scala]

@@ -451,18 +451,18 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="toc" class="toc2">
 <div id="toctitle">Table des matières</div>
 <ul class="sectlevel1">
-<li><a href="#introduction">Introduction</a></li>
-<li><a href="#concepts">Concepts</a>
+<li><a href="#introduction">1. Introduction</a></li>
+<li><a href="#concepts">2. Concepts</a>
 <ul class="sectlevel2">
-<li><a href="#modèle-de-données">Modèle de données</a></li>
+<li><a href="#modèle-de-données">2.1. Modèle de données</a></li>
 </ul>
 </li>
-<li><a href="#installation">Installation</a>
+<li><a href="#installation">3. Installation</a>
 <ul class="sectlevel2">
-<li><a href="#install-standalone">Installation standalone</a>
+<li><a href="#install-standalone">3.1. Installation standalone</a>
 <ul class="sectlevel3">
-<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester">Pre-requis pour une installation mono serveur en standalone (pour tester)</a></li>
-<li><a href="#installation-de-lhistorian">Installation de l&#8217;historian</a>
+<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester">3.1.1. Pre-requis pour une installation mono serveur en standalone (pour tester)</a></li>
+<li><a href="#installation-de-lhistorian">3.1.2. Installation de l&#8217;historian</a>
 <ul class="sectlevel4">
 <li><a href="#description-du-fichier-de-configuration-de-lhistorian">Description du fichier de configuration de l&#8217;historian</a></li>
 <li><a href="#description-des-composants-installés-par-le-script-dinstallation">Description des composants installés par le script d&#8217;installation</a></li>
@@ -470,17 +470,17 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </li>
-<li><a href="#install-production-mono-noeud">Installation mono noeud de production</a>
+<li><a href="#install-production-mono-noeud">3.2. Installation mono noeud de production</a>
 <ul class="sectlevel3">
-<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-production">Pre-requis pour une installation mono serveur en production</a></li>
-<li><a href="#installation-de-apache-solr-2">Installation de Apache SolR</a></li>
-<li><a href="#install-apache-spark">Install Apache Spark</a></li>
-<li><a href="#installation-de-grafana">Installation de Grafana</a>
+<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-production">3.2.1. Pre-requis pour une installation mono serveur en production</a></li>
+<li><a href="#installation-de-apache-solr-2">3.2.2. Installation de Apache SolR</a></li>
+<li><a href="#install-apache-spark">3.2.3. Install Apache Spark</a></li>
+<li><a href="#installation-de-grafana">3.2.4. Installation de Grafana</a>
 <ul class="sectlevel4">
 <li><a href="#install-production-hurence-datasource-grafana-plugin">Installation Plugin Grafana pour utiliser le data historian Hurence</a></li>
 </ul>
 </li>
-<li><a href="#installation-de-lhistorian-2">Installation de l&#8217;historian</a>
+<li><a href="#installation-de-lhistorian-2">3.2.5. Installation de l&#8217;historian</a>
 <ul class="sectlevel4">
 <li><a href="#description-du-fichier-de-configuration-de-lhistorian-2">Description du fichier de configuration de l&#8217;historian</a></li>
 </ul>
@@ -489,22 +489,30 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </li>
 </ul>
 </li>
-<li><a href="#gestion-des-données">Gestion des données</a>
+<li><a href="#redémarrage-du-data-historian">4. Redémarrage du data historian</a>
 <ul class="sectlevel2">
-<li><a href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest">Import de donnée à partir de fichiers csv avec l&#8217;api REST</a></li>
-<li><a href="#requêter-des-données-avec-lapi-rest">Requêter des données avec l&#8217;api REST</a></li>
-<li><a href="#utiliser-spark-pour-requếter-les-données">Utiliser Spark pour requếter les données</a></li>
-<li><a href="#linjection-temps-réel-avec-logisland">L&#8217;injection temps réel avec LogIsland</a></li>
+<li><a href="#redémarrer-solr">4.1. Redémarrer solr</a></li>
+<li><a href="#redémarrer-lhistorian">4.2. Redémarrer l&#8217;historian</a></li>
+<li><a href="#redémarrer-grafana">4.3. Redémarrer Grafana</a></li>
 </ul>
 </li>
-<li><a href="#visualisation-des-données">Visualisation des données</a>
+<li><a href="#gestion-des-données">5. Gestion des données</a>
 <ul class="sectlevel2">
-<li><a href="#configurer-grafana-et-vos-dashboard">Configurer Grafana et vos dashboard</a></li>
+<li><a href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest">5.1. Import de donnée à partir de fichiers csv avec l&#8217;api REST</a></li>
+<li><a href="#requêter-des-données-avec-lapi-rest">5.2. Requêter des données avec l&#8217;api REST</a></li>
+<li><a href="#visualisez-les-données-dans-grafana">5.3. Visualisez les données dans Grafana</a></li>
+<li><a href="#utiliser-spark-pour-requếter-les-données">5.4. Utiliser Spark pour requếter les données</a></li>
+<li><a href="#linjection-temps-réel-avec-logisland">5.5. L&#8217;injection temps réel avec LogIsland</a></li>
 </ul>
 </li>
-<li><a href="#stopper-et-détruire-les-données">Stopper et détruire les données</a>
+<li><a href="#visualisation-des-données">6. Visualisation des données</a>
 <ul class="sectlevel2">
-<li><a href="#stopper-ses-instances-solr">Stopper ses instances SolR</a></li>
+<li><a href="#configurer-grafana-et-vos-dashboard">6.1. Configurer Grafana et vos dashboard</a></li>
+</ul>
+</li>
+<li><a href="#stopper-et-détruire-les-données">7. Stopper et détruire les données</a>
+<ul class="sectlevel2">
+<li><a href="#stopper-ses-instances-solr">7.1. Stopper ses instances SolR</a></li>
 </ul>
 </li>
 </ul>
@@ -512,7 +520,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="introduction"><a class="anchor" href="#introduction"></a>Introduction</h2>
+<h2 id="introduction"><a class="anchor" href="#introduction"></a>1. Introduction</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Ce guide aidera l&#8217;utilisateur du data historian dans la compréhension de la plateforme, de son installation,
@@ -525,7 +533,7 @@ Big Data multi-serveurs et sa sécurisation, il faudra se référer à d&#8217;a
 </div>
 </div>
 <div class="sect1">
-<h2 id="concepts"><a class="anchor" href="#concepts"></a>Concepts</h2>
+<h2 id="concepts"><a class="anchor" href="#concepts"></a>2. Concepts</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Hurence Data Historian est une solution open source pour gérer d&#8217;énormes quantités de time series (séries temporelles).
@@ -547,7 +555,7 @@ Les principaux concepts sont les suivants :</p>
 Nous utilison le "chunking" à la place du stockage brut des données afin d&#8217;économiser de l&#8217;espace de stockage et afin d&#8217;améliorer les performances pour de grandes volumétries de points. En effet le chunking nous permet de pré-calculer des agrégations pour faciliter le sampling par exemple.</p>
 </div>
 <div class="sect2">
-<h3 id="modèle-de-données"><a class="anchor" href="#modèle-de-données"></a>Modèle de données</h3>
+<h3 id="modèle-de-données"><a class="anchor" href="#modèle-de-données"></a>2.1. Modèle de données</h3>
 <div class="paragraph">
 <p>Une Measure est un point dans le temps Identifié par les champs suivants :</p>
 </div>
@@ -622,13 +630,25 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d&#82
 </div>
 </div>
 <div class="sect1">
-<h2 id="installation"><a class="anchor" href="#installation"></a>Installation</h2>
+<h2 id="installation"><a class="anchor" href="#installation"></a>3. Installation</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant
 conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes
 volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d&#8217;installation n&#8217;est pas
 décrite ici par simplification car elle concerne des experts en urbanisation d&#8217;infrastructures Big Data.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+N&#8217;ouvrez pas les ports de votre data historian sur le réseau public, protégez le a minima par un firewall, car cette installation n&#8217;est pas sécurisée. Une installation très sécurisée est possible; contactez nous pour plus d&#8217;information.
+</td>
+</tr>
+</table>
 </div>
 <div class="admonitionblock note">
 <table>
@@ -656,7 +676,7 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 </ul>
 </div>
 <div class="sect2">
-<h3 id="install-standalone"><a class="anchor" href="#install-standalone"></a>Installation standalone</h3>
+<h3 id="install-standalone"><a class="anchor" href="#install-standalone"></a>3.1. Installation standalone</h3>
 <div class="paragraph">
 <p>Cette installation est celle à privilégier si vous êtes nouveau dans l&#8217;utilisation du data historian et que vous voulez essentiellement le tester. L&#8217;installation n&#8217;est pas faite pour la production (ou les noeuds seront redondés) ni pour des larges volumes de données (ce n&#8217;est qu&#8217;une seule machine). Mais cette installation peut évoluer vers une installation de production si nécessaire.</p>
 </div>
@@ -669,7 +689,7 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 </dl>
 </div>
 <div class="sect3">
-<h4 id="pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"></a>Pre-requis pour une installation mono serveur en standalone (pour tester)</h4>
+<h4 id="pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"></a>3.1.1. Pre-requis pour une installation mono serveur en standalone (pour tester)</h4>
 <div class="paragraph">
 <p>Comme expliqué plus haut cette installation est la plus rapide et simple pour installer HDH. Elle est idéale pour un test ou si vous n&#8217;avez pas de gros volumes de données.</p>
 </div>
@@ -697,20 +717,42 @@ Hurence propose de l&#8217;accompagnement pour installer le data historian pour 
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-lhistorian"><a class="anchor" href="#installation-de-lhistorian"></a>Installation de l&#8217;historian</h4>
+<h4 id="installation-de-lhistorian"><a class="anchor" href="#installation-de-lhistorian"></a>3.1.2. Installation de l&#8217;historian</h4>
 <div class="paragraph">
 <p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
 et les chunks. Téléchargez le script d&#8217;installation de l&#8217;historian pour votre version
 <a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.
 Lancez l&#8217;installation en lançant ce script :</p>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Solr n&#8217;aime pas pour des questions de sécurité que vous installiez et lanciez en root.
+Utilisez donc un utilisateur qui n&#8217;est ni sudoer ni root (un utilisateur applicatif ou le vôtre) mais vérifiez bien que vous avez les droits en  écriture là où HDH va s&#8217;installer (par défaut /opt/hdh).</p>
+</dd>
+</dl>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">bash ./install.sh</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>le script install.sh doit être exécutable. Si vous obtenez un problème d&#8217;autorisation au lancement, vérifiez qu&#8217;il a les bonnes propriétés et sinon exécutez cette commande:</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">chmod +x install.sh</code></pre>
+</div>
+</div>
 <div class="paragraph">
-<p>Il sera alors demander à l&#8217;utilisateur plusieurs informations, comme nous allons procéder à une installation de test
+<p>Il sera alors demandé à l&#8217;utilisateur plusieurs informations, comme nous allons procéder à une installation de test
 en mode standalone vous pouvez laisser les valeurs par défaut et juste taper sur la touche entrée pour chaque question.
 Pour les questions sur les installations standalone tapez "1". Sauf pour l&#8217;installation de spark qui ne nous sera pas utile.
 Le programme va télécharger et installer des versions embarquées de Solr et Grafana.</p>
@@ -718,6 +760,27 @@ Le programme va télécharger et installer des versions embarquées de Solr et G
 <div class="paragraph">
 <p>Attention cependant au chemin ou vous installez l&#8217;historian (par défaut /opt/hdh). En effet l&#8217;espace disque doit être
 suffisant pour stocker les binaires, les scripts ainsi que les données de time series que vous allez injecter.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>lors de l&#8217;installation Solr vous met en garde éventuellement sur votre configuration machine en ce qui concerne le nombre de fichiers ouverts qui est généralement réduit à 1024. Si vous voulez une installation robuste pour accueillir de nombreuses données il vous faudra changer ce paramètre avec la commande ulimit (et l&#8217;édition d&#8217;un fichier de configuration dont le nom dépend de votre OS).
+Référez vous à votre documentation système.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Vous pouvez vérifier que votre serveur a bien été lancé avec la commande suivante:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl http://localhost:8080/api/grafana/v0
+[source,bash]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si ce n&#8217;est pas le cas, allez voir les logs (dans la directory d&#8217;installation et la sous directory historian-${version}, il y a un fichier app.log). En général ce sera un problème de droits pour créer des directories: notamment dans /tmp (vérifiez bien vos droits en écriture sur cette directory).</p>
 </div>
 <div class="paragraph">
 <p>Voici un aperçu de l&#8217;installation :</p>
@@ -756,7 +819,7 @@ a été installé aussi sur ce serveur Grafana. Ce plugin permet la visualisatio
 interagir avec Grafana (notamment pour démarrer le serveur et l&#8217;éteindre).</p>
 </li>
 <li>
-<p>Le serveur historian installé dans $HDH_HOME/historian-1.3.5</p>
+<p>Le serveur historian installé dans $HDH_HOME/{hdh_version}</p>
 </li>
 <li>
 <p>Un répertoire "$HDH_HOME/data" qui va contenir les time series de l&#8217;historian.</p>
@@ -764,42 +827,44 @@ interagir avec Grafana (notamment pour démarrer le serveur et l&#8217;éteindre
 </ul>
 </div>
 <div class="paragraph">
-<p>Voici la structure de $HDH_HOME à l&#8217;issue de l&#8217;installation par défaut :
-* $HDH_HOME/data : Dossier contenant les données Solr
-* $HDH_HOME/solr-8.2.0 : Dossier contenant l&#8217;installation de Solr 8.2.0
-* $HDH_HOME/solr-8.2.0/bin/solr : Script permettant de démarrer et arrêter Solr
-* $HDH_HOME/historian-1.3.5/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.
-* $HDH_HOME/historian-1.3.5/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
-* $HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
-* $HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.
-* $HDH_HOME/application.log : Le fichier de log du data historian.
-* $HDH_HOME/grafana-7.0.3 : Dossier contenant l&#8217;installation de Grafana
-* $HDH_HOME/grafana-7.0.3/bin/grafana-server : Script permettant de démarrer et arrêter grafana</p>
+<p>Voici la structure de $HDH_HOME à l&#8217;issue de l&#8217;installation par défaut :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>$HDH_HOME/data : Dossier contenant les données Solr</p>
+</li>
+<li>
+<p>$HDH_HOME/solr-8.2.0 : Dossier contenant l&#8217;installation de Solr 8.2.0</p>
+</li>
+<li>
+<p>$HDH_HOME/solr-8.2.0/bin/solr : Script permettant de démarrer et arrêter Solr</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-{hdh_version}/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-{hdh_version}/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-{hdh_version}/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/application.log : Le fichier de log du data historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/grafana-7.0.3 : Dossier contenant l&#8217;installation de Grafana</p>
+</li>
+<li>
+<p>$HDH_HOME/grafana-7.0.3/bin/grafana-server : Script permettant de démarrer et arrêter grafana</p>
+</li>
+</ul>
 </div>
 <div class="paragraph">
 <p>Si l&#8217;installation se passe correctement, tous les services ont été lancés  et le data historian est prêt pour utilisation.</p>
-</div>
-<div class="paragraph">
-<p>Les commandes suivantes sont données, pour information dans le cas où vous devriez arrêter / redémarrer votre serveur.</p>
-</div>
-<div class="paragraph">
-<p>Pour démarrer l&#8217;historian :</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh start</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh stop</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Attention ces commandes n&#8217;affectent ni Grafana ni Solr qui sont des services indépendants.</p>
 </div>
 <div class="sect4">
 <h5 id="description-du-fichier-de-configuration-de-lhistorian"><a class="anchor" href="#description-du-fichier-de-configuration-de-lhistorian"></a>Description du fichier de configuration de l&#8217;historian</h5>
@@ -995,35 +1060,16 @@ au démarrage de l&#8217;historian.</p>
 </div>
 <div class="paragraph">
 <p>Le script d&#8217;installation a installé Solr au chemin '$HDH_HOME/solr-8.2.0' que nous appelleront '$SOLR_HOME'.
-Il a également lancé deux cores Solr localement dans le répertoire <code>$SOLR_HOME/data</code>.</p>
-</div>
-</div>
-<div class="sect5">
-<h6 id="pour-démarrer-solr"><a class="anchor" href="#pour-démarrer-solr"></a>Pour démarrer solr</h6>
-<div class="paragraph">
-<p>Si vous avez coupé Solr ou bien si vous avez redémarrer votre ordinateur vous pouvez relancer ce Solr avec les commandes suivantes :</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">cd $SOLR_HOME
-# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
-bin/solr start -cloud -s $SOLR_HOME/data/solr/node1 -p 8983
-# démarre un second core Solr localement qui va utiliser le serveur zookeeper précédamment créer.
-bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Vérifiez que votre instance Solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
-(<a href="http://localhost:8983/solr/#/~cloud)">local solr UI</a></p>
+Il a également lancé deux cores Solr localement dans le répertoire <code>$HDH_HOME/data</code>.</p>
 </div>
 </div>
 </div>
 </div>
 </div>
 <div class="sect2">
-<h3 id="install-production-mono-noeud"><a class="anchor" href="#install-production-mono-noeud"></a>Installation mono noeud de production</h3>
+<h3 id="install-production-mono-noeud"><a class="anchor" href="#install-production-mono-noeud"></a>3.2. Installation mono noeud de production</h3>
 <div class="sect3">
-<h4 id="pre-requis-pour-une-installation-mono-serveur-en-production"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-production"></a>Pre-requis pour une installation mono serveur en production</h4>
+<h4 id="pre-requis-pour-une-installation-mono-serveur-en-production"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-production"></a>3.2.1. Pre-requis pour une installation mono serveur en production</h4>
 <div class="paragraph">
 <p>La configuration minimale du serveur pour une installation mono serveur (en production) du data historian est:</p>
 </div>
@@ -1062,7 +1108,7 @@ Si vous avez déjà des serveurs existants vous pouvez directement passer à cet
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-apache-solr-2"><a class="anchor" href="#installation-de-apache-solr-2"></a>Installation de Apache SolR</h4>
+<h4 id="installation-de-apache-solr-2"><a class="anchor" href="#installation-de-apache-solr-2"></a>3.2.2. Installation de Apache SolR</h4>
 <div class="paragraph">
 <p>Apache SolR est la base de donnée utilisée par l&#8217;historian, elle peut être remplacée par un autre moteur de recherche.</p>
 </div>
@@ -1077,9 +1123,9 @@ pour installer un cluster solr de production.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="install-apache-spark"><a class="anchor" href="#install-apache-spark"></a>Install Apache Spark</h4>
+<h4 id="install-apache-spark"><a class="anchor" href="#install-apache-spark"></a>3.2.3. Install Apache Spark</h4>
 <div class="paragraph">
-<p>Pour installer spark vous pouvez téléchargez cette archive :
+<p>Pour installer spark vous pouvez télécharger cette archive :
 <a href="https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz">spark-2.3.4-bin-without-hadoop.tgz</a></p>
 </div>
 <div class="paragraph">
@@ -1090,19 +1136,19 @@ pour un cluster de production.</p>
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash"># get Apache Spark 2.3.4 and unpack it
 cd $HDH_HOME
-wget https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz
-tar -xvf spark-2.3.4-bin-without-hadoop.tgz
-rm spark-2.3.4-bin-without-hadoop.tgz
+wget https://archive.apache.org/dist/spark/spark-{spark_version}/spark-{spark_version}-bin-without-hadoop.tgz
+tar -xvf spark-{spark_version}-bin-without-hadoop.tgz
+rm spark-{spark_version}-bin-without-hadoop.tgz
 
 # add two additional jars to spark to handle our framework
 wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
-mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/
-cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/</code></pre>
+mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-{spark_version}-bin-without-hadoop/jars/
+cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/spark-{spark_version}-bin-without-hadoop/jars/</code></pre>
 </div>
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-grafana"><a class="anchor" href="#installation-de-grafana"></a>Installation de Grafana</h4>
+<h4 id="installation-de-grafana"><a class="anchor" href="#installation-de-grafana"></a>3.2.4. Installation de Grafana</h4>
 <div class="paragraph">
 <p>Installez Grafana pour votre plateforme comme décrit ici : <code><a href="https://grafana.com/docs/grafana/latest/installation/requirements/" class="bare">https://grafana.com/docs/grafana/latest/installation/requirements/</a></code>.
 Une fois l&#8217;installation de votre cluster grafana effectuée nous allons passer à l&#8217;installation de notre plugin grafana datasource
@@ -1123,20 +1169,51 @@ nos propres plugins Grafana que nous ferons évoluer avec l&#8217;historian.</p>
 </div>
 </div>
 <div class="sect3">
-<h4 id="installation-de-lhistorian-2"><a class="anchor" href="#installation-de-lhistorian-2"></a>Installation de l&#8217;historian</h4>
+<h4 id="installation-de-lhistorian-2"><a class="anchor" href="#installation-de-lhistorian-2"></a>3.2.5. Installation de l&#8217;historian</h4>
 <div class="paragraph">
 <p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
 et les chunks. Téléchargez le script dinstallation de l&#8217;historian pour votre version
 <a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.
 Lancez l&#8217;installation en lançant ce script :</p>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Solr n&#8217;aime pas pour des questions de sécurité que vous installiez et lanciez en root.
+Utilisez donc un utilisateur qui n&#8217;est ni sudoer ni root (un utilisateur applicatif ou le vôtre) mais vérifiez bien que vous avez les droits en  écriture là où HDH va s&#8217;installer (par défaut /opt/hdh).</p>
+</dd>
+</dl>
+</div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">bash ./install.sh</code></pre>
 </div>
 </div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>le script install.sh doit être exécutable. Si vous obtenez un problème d&#8217;autorisation au lancement, vérifiez qu&#8217;il a les bonnes propriétés et sinon exécutez cette commande:</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">chmod +x install.sh</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>lors de l&#8217;installation Solr vous met en garde éventuellement sur votre configuration machine en ce qui concerne le nombre de fichiers ouverts qui est généralement réduit à 1024. Si vous voulez une installation robuste pour accueillir de nombreuses données il vous faudra changer ce paramètre avec la commande ulimit (et l&#8217;édition d&#8217;un fichier de configuration dont le nom dépend de votre OS).
+Référez vous à votre documentation système.</p>
+</dd>
+</dl>
+</div>
 <div class="paragraph">
-<p>Il sera alors demander à l&#8217;utilisateur plusieurs informations.</p>
+<p>Il sera alors demandé à l&#8217;utilisateur plusieurs informations.</p>
 </div>
 <div class="paragraph">
 <p>Voici un exemple :</p>
@@ -1174,11 +1251,24 @@ installé sur le serveur Grafana indiqué lors de l&#8217;installation</p>
 <p>Le script $HDH_HOME/bin/historian-server.sh sert à lancer/arrêter l&#8217;api rest de l&#8217;historian.</p>
 </div>
 <div class="paragraph">
-<p>Pour lancer l&#8217;historian taper la commande suivante :</p>
+<p>Vous pouvez vérifier que votre serveur a bien été lancé avec la commande suivante:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh start</code></pre>
+<pre class="CodeRay highlight"><code data-lang="bash">curl http://localhost:8080/api/grafana/v0
+[source,bash]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si ce n&#8217;est pas le cas, allez voir les logs (dans la directory d&#8217;installation et la sous directory historian-${version}, il y a un fichier app.log). En général ce sera un problème de droits pour créer des directories: notamment dans /tmp (vérifiez bien vos droits en écriture sur cette directory).</p>
+</div>
+<div class="paragraph">
+<p>Pour lancer ou relancer l&#8217;historian taper la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh start
+(ou ./bin/historian-server.sh restart)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -1382,7 +1472,72 @@ au démarrage de l&#8217;historian.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="gestion-des-données"><a class="anchor" href="#gestion-des-données"></a>Gestion des données</h2>
+<h2 id="redémarrage-du-data-historian"><a class="anchor" href="#redémarrage-du-data-historian"></a>4. Redémarrage du data historian</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Il y a un ordre à respecter pour démarrer ou redémarrer le data historian. Il faut dans l&#8217;ordre:</p>
+</div>
+<div class="paragraph">
+<p>1) Redémarrer Solr. Si il n&#8217;est pas complètement stoppé, stoppez le (voir la section Arrêter Solr).
+2) Redémarrer l&#8217;historian server
+3) Redémarrer Grafana</p>
+</div>
+<div class="sect2">
+<h3 id="redémarrer-solr"><a class="anchor" href="#redémarrer-solr"></a>4.1. Redémarrer solr</h3>
+<div class="paragraph">
+<p>Si vous avez coupé Solr ou bien si vous avez redémarrer votre ordinateur vous pouvez relancer ce Solr avec les commandes suivantes :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">cd $SOLR_HOME
+# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+bin/solr start -cloud -s $HDH_HOME/data/solr/node1 -p 8983
+# démarre un second core Solr localement qui va utiliser le serveur zookeeper précédamment créer.
+bin/solr start -cloud -s $HDH_HOME/data/solr/node2/ -p 7574 -z localhost:9983</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vérifiez que votre instance Solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
+(<a href="http://localhost:8983/solr/#/~cloud)">local solr UI</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="redémarrer-lhistorian"><a class="anchor" href="#redémarrer-lhistorian"></a>4.2. Redémarrer l&#8217;historian</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh start</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si cela ne marche pas car un PID (un process id) existe et le data historian est supposé up, alors faite un stop, puis refaite un start.</p>
+</div>
+<div class="paragraph">
+<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh stop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attention ces commandes n&#8217;affectent ni Grafana ni Solr qui sont des services indépendants.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="redémarrer-grafana"><a class="anchor" href="#redémarrer-grafana"></a>4.3. Redémarrer Grafana</h3>
+<div class="paragraph">
+<p>Utilisez restart si c&#8217;est un redémarrage. Si votre grafana ne tourne pas déjà utilisez start.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/grafana-{grafana_version}/bin/grafana-server start</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="gestion-des-données"><a class="anchor" href="#gestion-des-données"></a>5. Gestion des données</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Vous pouvez consulter notre documentation sur l&#8217;api REST 'rest-api.pdf' pour connaitre les détails de chaque fonction de l&#8217;API (endpoint).
@@ -1394,33 +1549,59 @@ d&#8217;interagir avec l&#8217;historian selon votre culture et vos besoins.</p>
 dans ce guide nous allons utiliser l&#8217;import de données à partir de fichiers csv.</p>
 </div>
 <div class="sect2">
-<h3 id="import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"><a class="anchor" href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"></a>Import de donnée à partir de fichiers csv avec l&#8217;api REST</h3>
+<h3 id="import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"><a class="anchor" href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"></a>5.1. Import de donnée à partir de fichiers csv avec l&#8217;api REST</h3>
 <div class="paragraph">
-<p>TODO</p>
+<p>Cette section va nous apprendre à injecter un fichier CSV dans l&#8217;historian. Le folder <strong>samples</strong> du data historian contient des exemples. Nous allons injecter les données du sous folder <strong>happiness</strong> ; quelques fichiers qui donnent le score de "happiness" des pays chaque année.</p>
+</div>
+<div class="paragraph">
+<p>Excecutez la commande suivante (dans ce qui suit remplacez /opt/hdp par votre directorie d&#8217;installation si vous n&#8217;avez pas installé dans la directorie par défaut):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@/opt/hdh/samples/happiness/2015.csv' \
+-F mapping.value=&quot;Happiness Score&quot; \
+-F mapping.timestamp=Timestamp \
+-F mapping.tags=Country \
+-F group_by=name \
+-F group_by=tags.Country \
+-F format_date='yyyy-MM-dd HH:mm:ss'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>et bien sûr vous pouvez appliquer la même requête à tous les fichiers de 2016 à 2020. Cela vous fait un petit jeu de données sur lequel nous allons pouvoir apprendre à faire des choses.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="requêter-des-données-avec-lapi-rest"><a class="anchor" href="#requêter-des-données-avec-lapi-rest"></a>Requêter des données avec l&#8217;api REST</h3>
+<h3 id="requêter-des-données-avec-lapi-rest"><a class="anchor" href="#requêter-des-données-avec-lapi-rest"></a>5.2. Requêter des données avec l&#8217;api REST</h3>
+<div class="paragraph">
+<p>Une manière de voir si vous données ont bien été injectées est de les requêter. Essayons de voir
+la progression du bonheur (métrique happiness) en France sur les années 2015 à 2020. Et essayons de l&#8217;obtenir en Json.</p>
+</div>
+<div class="paragraph">
+<p>Déjà regardons simplement si il existe des métriques happiness dans l&#8217;historian avec la requête suivante:</p>
+</div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/query' \
---header 'Content-Type: application/json' \
---data-raw '{
-  &quot;panelId&quot;: 1,
-  &quot;range&quot;: {
-    &quot;from&quot;: &quot;2019-03-01T00:00:00.000Z&quot;,
-    &quot;to&quot;: &quot;2020-03-01T23:59:59.000Z&quot;
-  },
-  &quot;interval&quot;: &quot;30s&quot;,
-  &quot;intervalMs&quot;: 30000,
-  &quot;targets&quot;: [
-    {
-      &quot;target&quot;: &quot;\&quot;ack\&quot;&quot;,
-      &quot;type&quot;: &quot;timeserie&quot;
-    }
-  ],
-  &quot;format&quot;: &quot;json&quot;,
-  &quot;maxDataPoints&quot;: 550
+<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
+  &quot;names&quot;: [&quot;happiness&quot;],
+  &quot;format&quot; : &quot;json&quot;
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>En effet nous obtenons des données.</p>
+</div>
+<div class="paragraph">
+<p>En filtrant sur le tag Country (= France) nous devrions avoir les enregistrements de la France uniquement.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
+  &quot;names&quot;: [&quot;happiness&quot;],
+  &quot;Country: &quot;France&quot;,
+  &quot;format&quot; : &quot;json&quot;
 }'</code></pre>
 </div>
 </div>
@@ -1429,26 +1610,24 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/search' \
+<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/v0/search' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     &quot;target&quot;: &quot;*&quot;
-}'
-
-# [&quot;ack&quot;, ... ,&quot;messages&quot;,&quot;cpu&quot;]</code></pre>
+}'</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Obtenir des mesures avec en spécifiant un intervalle de temps</p>
+<p>Obtenir des mesures avec en spécifiant un intervalle de temps:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/v0/query' \
 --header 'Content-Type: application/json' \
 --data-raw '{
          &quot;range&quot;: {
-          &quot;from&quot;: &quot;2019-11-25T23:59:59.999Z&quot;,
-          &quot;to&quot;: &quot;2019-11-30T23:59:59.999Z&quot;
+          &quot;from&quot;: &quot;2015-01-01 00:00:00&quot;,
+          &quot;to&quot;: &quot;2016-01-01 00:00:00&quot;
       },
       &quot;targets&quot;: [
         { &quot;target&quot;: &quot;ack&quot; }
@@ -1458,7 +1637,35 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 </div>
 </div>
 <div class="sect2">
-<h3 id="utiliser-spark-pour-requếter-les-données"><a class="anchor" href="#utiliser-spark-pour-requếter-les-données"></a>Utiliser Spark pour requếter les données</h3>
+<h3 id="visualisez-les-données-dans-grafana"><a class="anchor" href="#visualisez-les-données-dans-grafana"></a>5.3. Visualisez les données dans Grafana</h3>
+<div class="paragraph">
+<p>En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur l&#8217;URL de grafana (<a href="http://localhost:3000)">http://localhost:3000</a>. La première fois que vous vous loggez vous pouvez entrer n&#8217;importe quel username et mot de passe (celui ci deviendra le premier utilisateur et administrateur). Vous pouvez mettre admin, admin (dans l&#8217;écran suivant il vous sera demandé de changer ce mot de passe "admin" en quelque chose de plus sécurisé).</p>
+</div>
+<div class="paragraph">
+<p>Une fois votre mot de passe changé, vous avez une page d&#8217;accueil que nous pouvez lire puis faire disparaître.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Vous allez clicker sur "Add your first data source".</p>
+</li>
+<li>
+<p>Aller à la fin clicker sur celle qui s&#8217;appelle "Hurence-Historian".</p>
+</li>
+<li>
+<p>Mettez dans URL l&#8217;URL de votre historian server (l&#8217;installation par défaut est <a href="http://localhost:8080/api/grafana/v0/" class="bare">http://localhost:8080/api/grafana/v0/</a>)</p>
+</li>
+<li>
+<p>Clickez "Save and Test"</p>
+</li>
+<li>
+<p>Vous devez avoir un message vert vous disant que votre data source est chargée.</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect2">
+<h3 id="utiliser-spark-pour-requếter-les-données"><a class="anchor" href="#utiliser-spark-pour-requếter-les-données"></a>5.4. Utiliser Spark pour requếter les données</h3>
 <div class="paragraph">
 <p>Apache Spark est une plateforme open source pour traiter de grandes quantités de données en parallèle sur un cluster de machines.</p>
 </div>
@@ -1469,7 +1676,11 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 <p>Les commandes suivantes vous montrent comment prendre un dataset en CSV depuis HDFS (le système de fichiers de Hadoop) ou depuis un système de fichier local, et le charger dans HDH.</p>
 </div>
 <div class="listingblock">
-<div class="title">./_setup_historian/spark-2.3.4-bin-hadoop2.7/bin/spark-shell --jars assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT//lib/loader-1.3.4-SNAPSHOT.jar,assembly/target/historian-1.3.4-SNAPSHOT/historian-1.3.4-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar</div>
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/spark-{spark_version}-bin-hadoop{hadoop_version}/bin/spark-shell --jars assembly/target/historian-{hdh_version}-SNAPSHOT/historian-{hdh_version}-SNAPSHOT//lib/loader-{hdh_version}-SNAPSHOT.jar,assembly/target/historian-{hdh_version}-SNAPSHOT/historian-{hdh_version}-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar</code></pre>
+</div>
+</div>
+<div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="scala">import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.ml.Chunkyfier
@@ -1513,7 +1724,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 </div>
 <div class="sect2">
-<h3 id="linjection-temps-réel-avec-logisland"><a class="anchor" href="#linjection-temps-réel-avec-logisland"></a>L&#8217;injection temps réel avec LogIsland</h3>
+<h3 id="linjection-temps-réel-avec-logisland"><a class="anchor" href="#linjection-temps-réel-avec-logisland"></a>5.5. L&#8217;injection temps réel avec LogIsland</h3>
 <div class="paragraph">
 <p>Le logiciel Open Source de Hurence permettant de faire du stream processing (donc du traitement temps réel de données) permet bien sûr d&#8217;injecter des données "à la volée", notamment celles que vous aurez pu "pousser" dans un bus de message Mqtt ou Kafka.</p>
 </div>
@@ -1527,7 +1738,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 </div>
 <div class="sect1">
-<h2 id="visualisation-des-données"><a class="anchor" href="#visualisation-des-données"></a>Visualisation des données</h2>
+<h2 id="visualisation-des-données"><a class="anchor" href="#visualisation-des-données"></a>6. Visualisation des données</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>HDH fournit donc un plugin Grafana pour visualiser les données sous formes de graphes.</p>
@@ -1536,7 +1747,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 <p>La manipulation des données depuis les data sources de votre data historian se fait comme pour les autres sources. Vous fournissez votre requête, un intervalle de temps si nécessaire, et un algorithme de sampling si vous requêtez sur une grande quantité de points (pour que la courbe soit bien lisible).</p>
 </div>
 <div class="sect2">
-<h3 id="configurer-grafana-et-vos-dashboard"><a class="anchor" href="#configurer-grafana-et-vos-dashboard"></a>Configurer Grafana et vos dashboard</h3>
+<h3 id="configurer-grafana-et-vos-dashboard"><a class="anchor" href="#configurer-grafana-et-vos-dashboard"></a>6.1. Configurer Grafana et vos dashboard</h3>
 <div class="paragraph">
 <p>Pour créér des dashboard il faut aller sur l&#8217;interface graphique de grafana (<a href="http://localhost:3000/">http://localhost:3000/</a> (localhost étant à remplacer par un nom de machine si vous n&#8217;êtes pas en installation standalone).</p>
 </div>
@@ -1597,13 +1808,13 @@ Ensuite créez un nouveau dashboard.</p>
 </div>
 </div>
 <div class="sect1">
-<h2 id="stopper-et-détruire-les-données"><a class="anchor" href="#stopper-et-détruire-les-données"></a>Stopper et détruire les données</h2>
+<h2 id="stopper-et-détruire-les-données"><a class="anchor" href="#stopper-et-détruire-les-données"></a>7. Stopper et détruire les données</h2>
 <div class="sectionbody">
 <div class="paragraph">
 <p>Cette section vous apprend à stopper les services et à détruire si nécessaire les données (après avoir testé vous voudrez alimenter avec vos données réelles).</p>
 </div>
 <div class="sect2">
-<h3 id="stopper-ses-instances-solr"><a class="anchor" href="#stopper-ses-instances-solr"></a>Stopper ses instances SolR</h3>
+<h3 id="stopper-ses-instances-solr"><a class="anchor" href="#stopper-ses-instances-solr"></a>7.1. Stopper ses instances SolR</h3>
 <div class="paragraph">
 <p>Cette section vous apprend à stopper les intances SolR. Attention cette commande va éteindre Solr (cela pourrait impacter d&#8217;autres service utilisant Solr).</p>
 </div>
@@ -1620,7 +1831,7 @@ bin/solr stop -all</pre>
 <div id="footer">
 <div id="footer-text">
 Version v1.0<br>
-Last updated 2020-07-10 10:19:25 +0200
+Last updated 2020-09-07 17:10:56 +0200
 </div>
 </div>
 <style>
