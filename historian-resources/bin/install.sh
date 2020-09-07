@@ -311,10 +311,10 @@ intall_grafana_if_asked_for_linux() {
 
 intall_grafana_datasource_plugin_if_asked() {
   if [[ $INSTALLING_DATASOURCE_PLUGIN = true ]]; then
-    wget https://github.com/Hurence/grafana-historian-datasource/archive/v1.0.0.tar.gz
+    wget https://github.com/Hurence/grafana-historian-datasource/releases/download/v1.0.0/historian-datasource-plugin.tgz
     mkdir -p $GRAFANA_PLUGIN_DIR
-    tar -zxf v1.0.0.tar.gz -C $GRAFANA_PLUGIN_DIR
-    rm v1.0.0.tar.gz
+    tar -zxf historian-datasource-plugin.tgz -C $GRAFANA_PLUGIN_DIR
+    rm historian-datasource-plugin.tgz
     echo "Installed grafana plugin into $GRAFANA_PLUGIN_DIR"
     echo -e "\n"
   fi
