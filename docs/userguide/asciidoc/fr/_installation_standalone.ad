@@ -10,75 +10,42 @@ Comme expliqué plus haut cette installation est la plus rapide et simple pour i
 
 La configuration minimale du serveur pour une installation de test du data historian est:
 
-- un OS CentOS ou Redhat 7.x
+- un OS CentOS ou Redhat 7.x ou Ubuntu ou Mac
 - 16 Gigabits de RAM
 - 8 vcores de CPU
 - 250 Giga octets de disque
 - Java 8
 
 ==== Installation de l'historian
-Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
-et les chunks. Téléchargez le script d'installation de l'historian pour votre version
-https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
-Lancez l'installation en lançant ce script :
 
+include::./_installation_historian_part_1.ad[]
 
-NOTE:: Solr n'aime pas pour des questions de sécurité que vous installiez et lanciez en root.
-Utilisez donc un utilisateur qui n'est ni sudoer ni root (un utilisateur applicatif ou le vôtre) mais vérifiez bien que vous avez les droits en  écriture là où HDH va s'installer (par défaut /opt/hdh).
-
-[source,bash]
-----
-bash ./install.sh
-----
-
-NOTE:: le script install.sh doit être exécutable. Si vous obtenez un problème d'autorisation au lancement, vérifiez qu'il a les bonnes propriétés et sinon exécutez cette commande:
-
-[source,bash]
-----
-chmod +x install.sh
-----
-
-
-Il sera alors demandé à l'utilisateur plusieurs informations, comme nous allons procéder à une installation de test
-en mode standalone vous pouvez laisser les valeurs par défaut et juste taper sur la touche entrée pour chaque question.
+Comme nous allons procéder à une installation de test en mode standalone vous pouvez laisser les valeurs par défaut et juste taper sur la touche entrée pour chaque question.
 Pour les questions sur les installations standalone tapez "1". Sauf pour l'installation de spark qui ne nous sera pas utile.
 Le programme va télécharger et installer des versions embarquées de Solr et Grafana.
 
-Attention cependant au chemin ou vous installez l'historian (par défaut /opt/hdh). En effet l'espace disque doit être
-suffisant pour stocker les binaires, les scripts ainsi que les données de time series que vous allez injecter.
+Voici un exemple de l'installation :
 
-NOTE:: lors de l'installation Solr vous met en garde éventuellement sur votre configuration machine en ce qui concerne le nombre de fichiers ouverts qui est généralement réduit à 1024. Si vous voulez une installation robuste pour accueillir de nombreuses données il vous faudra changer ce paramètre avec la commande ulimit (et l'édition d'un fichier de configuration dont le nom dépend de votre OS).
-Référez vous à votre documentation système.
+image::screenshot_install_standalone.png[]
 
-Vous pouvez vérifier que votre serveur a bien été lancé avec la commande suivante:
-
-[source,bash]
-----
-curl http://localhost:8080/api/grafana/v0
-[source,bash]
-----
-
-Si ce n'est pas le cas, allez voir les logs (dans la directory d'installation et la sous directory historian-${version}, il y a un fichier app.log). En général ce sera un problème de droits pour créer des directories: notamment dans /tmp (vérifiez bien vos droits en écriture sur cette directory).
-
-Voici un aperçu de l'installation :
-
-image::Screenshot_install_standalone.png[]
+include::./_installation_historian_part_2.ad[]
 
 Dans la suite, on appellera le chemin indiqué pour l'installation de l'historian '$HDH_HOME'.
 
 A l'issue de ce script, si vous avez suivi l'exemple, vous aurez :
 
-- Un serveur solr 8.2 installé dans $HDH_HOME/solr-{solr_version}
-- Le script à démarrer le serveur solr, vous pouvez vérifier cela à l'adresse suivante :
+- Un serveur solr {solr_version} installé dans $HDH_HOME/solr-{solr_version}
+- Le serveur solr a été démarré par le script d'installation. Vous pouvez vérifier cela à l'adresse suivante :
 http://localhost:8983/solr/#/~cloud[solr UI]. Vous pouvez regarder la documentation solr pour
 interagir avec Solr (notamment pour démarrer le cluster et l'éteindre).
-- Un serveur Grafana version-7.0.3 installé dans $HDH_HOME/grafana
+- Un serveur Grafana {grafana_version} installé dans $HDH_HOME/grafana-{grafana_version}
 - Le plugin https://github.com/Hurence/grafana-historian-datasource[datasource Grafana de l'historian]
 a été installé aussi sur ce serveur Grafana. Ce plugin permet la visualisation des time series du data historian dans Grafana.
-- Le serveur Grafana a été lancé par le script, vous pouvez vérifier à l'adresse suivante :
+Les binaires du plugin sont installé dans $HDH_HOME/grafana-{grafana_version}/data/plugins/grafana-historian-datasource/dist
+- Le serveur Grafana a été lancé par le script. Vous pouvez vérifier à l'adresse suivante :
 http://localhost:3000/[http://localhost:3000/]. Vous pouvez regarder la documentation Grafana pour
 interagir avec Grafana (notamment pour démarrer le serveur et l'éteindre).
-- Le serveur historian installé dans $HDH_HOME/{hdh_version}
+- Le serveur historian installé dans $HDH_HOME/historian-{hdh_version}
 - Un répertoire "$HDH_HOME/data" qui va contenir les time series de l'historian.
 
 Voici la structure de $HDH_HOME à l'issue de l'installation par défaut :
@@ -118,5 +85,6 @@ Le script d'installation (install.sh) génère un fichier de configuration selon
 Apache SolR est la base de donnée utilisée par l'historian, elle peut être remplacée par un autre moteur de recherche.
 
 Le script d'installation a installé Solr au chemin '$HDH_HOME/solr-{solr_version}' que nous appelleront '$SOLR_HOME'.
+
 Il a également lancé deux cores Solr localement dans le répertoire `$HDH_HOME/data`.
 

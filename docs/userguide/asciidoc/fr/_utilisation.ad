@@ -107,7 +107,7 @@ Hurence Data Historian est très intégré avec Spark de telle sorte que vous pu
 
 Les commandes suivantes vous montrent comment prendre un dataset en CSV depuis HDFS (le système de fichiers de Hadoop) ou depuis un système de fichier local, et le charger dans HDH.
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
 $HDH_HOME/spark-{spark_version}-bin-hadoop{hadoop_version}/bin/spark-shell --jars assembly/target/historian-{hdh_version}-SNAPSHOT/historian-{hdh_version}-SNAPSHOT//lib/loader-{hdh_version}-SNAPSHOT.jar,assembly/target/historian-{hdh_version}-SNAPSHOT/historian-{hdh_version}-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar
 ----

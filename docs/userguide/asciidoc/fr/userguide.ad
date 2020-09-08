@@ -10,7 +10,7 @@
 :toc:
 :toclevels: 4
 :sectnums: on
-:hdp_version: 1.3.5
+:hdh_version: 1.3.5
 :solr_version: 8.2.0
 :spark_version: 2.3.4
 :grafana_version: 7.0.3

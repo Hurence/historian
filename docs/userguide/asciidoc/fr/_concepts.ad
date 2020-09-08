@@ -47,7 +47,7 @@ case class Chunk(name: String,
 
 Comme vous pouvez le constater lors du passage entre la Measure et le Chunk de Measure, le "timestamp" a été remplacé par "start" et "stop" qui définissent l'intervalle de temps, la valeur est, elle, passée d'un double dans le champs "value" à une string en base64 appelée "chunk". Cette string contient l'ensemble des valeurs du chunk, compressées par un algorithme.
 
-Dans solr les chunks sont stockés en format XML sous la forme du schéma suivant :
+Dans solr les chunks sont stockés avec le schéma suivant :
 
 [source,xml]
 ----

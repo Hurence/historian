@@ -11,7 +11,7 @@ N'ouvrez pas les ports de votre data historian sur le réseau public, protégez 
 [NOTE]
 Hurence propose de l'accompagnement pour installer le data historian pour des volumétries importantes.
 
-Dans ce guide nous proposing une installation simple et rapide qui est idéale pour tester, développer et stocker de petits volumes de données peu sensibles. Nous ne recommendons pas cette installation en production car pour la production il faut se préparer pour une infrastructure qui deviendra à terme multi noeuds, et aura la nécessaire redondance des données et des mécanismes de fail over. La seconde installation est plus souhaitable si vous planifiez de faire passer à l'échelle ce que vous voulez installer.
+Dans ce guide nous proposons une installation simple et rapide qui est idéale pour tester, développer et stocker de petits volumes de données peu sensibles. Nous ne recommendons pas cette installation en production car pour la production il faut se préparer pour une infrastructure qui deviendra à terme multi noeuds, et aura la nécessaire redondance des données et des mécanismes de fail over. La seconde installation est plus souhaitable si vous planifiez de faire passer à l'échelle ce que vous voulez installer.
 
 * <<install-standalone,Installation standalone>>
 * <<install-production-mono-noeud,Installation de production mono noeud>>.

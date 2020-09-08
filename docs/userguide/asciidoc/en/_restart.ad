@@ -2,11 +2,11 @@
 
 There is an order to follow to start or restart the data historian. In order:
 
-1) Restart Solr. If it is not completely stopped, stop it (see section Stopping Solr).
-2) Restart the historian server
-3) Restart Grafana
+1. <<restart-solr, Restart Solr>>. If it is not completely stopped, stop it (see section Stopping Solr).
+2. <<restart-historian, Restart the historian server>>
+3. <<restart-grafana, Restart Grafana>>
 
-
+[[restart-solr]]
 === Restart solr
 
 If you have cut Solr or if you have restarted your computer, you can restart this Solr with the following commands:
@@ -21,9 +21,9 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2 -p 7574 -z localhost: 9983
 ----
 
 Verify that your Solr instance is functioning correctly by going to the GUI at the following address:
-(http://localhost:8983/solr/#/~cloud) [local solr UI]
+http://localhost:8983/solr/#/~cloud[local solr UI]
 
-
+[[restart-historian]]
 === Restart (or start) the historian
 
 [source, bash]
@@ -42,6 +42,7 @@ $HDH_HOME/historian-{hdh_version}/bin/ historian-server.sh stop
 
 Please note that these orders do not affect Grafana or Solr, which are independent services.
 
+[[restart-grafana]]
 === Restart Grafana
 
 [source, bash]
