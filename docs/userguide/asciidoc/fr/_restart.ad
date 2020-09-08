@@ -2,14 +2,15 @@
 
 Il y a un ordre à respecter pour démarrer ou redémarrer le data historian. Il faut dans l'ordre:
 
-1) Redémarrer Solr. Si il n'est pas complètement stoppé, stoppez le (voir la section Arrêter Solr).
-2) Redémarrer l'historian server
-3) Redémarrer Grafana
+1. <<restart-solr, Redémarrer Solr>>. Si il n'est pas complètement stoppé, stoppez le (voir la section Arrêter Solr).
+2. <<restart-historian, Redémarrer l'historian server>>
+3. <<restart-grafana, Redémarrer Grafana>>
 
 
+[[restart-solr]]
 === Redémarrer solr
 
-Si vous avez coupé Solr ou bien si vous avez redémarrer votre ordinateur vous pouvez relancer ce Solr avec les commandes suivantes :
+Si vous avez coupé Solr ou bien si vous avez redémarré votre ordinateur vous pouvez relancer ce Solr avec les commandes suivantes :
 
 [source,bash]
 ----
@@ -21,12 +22,12 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2/ -p 7574 -z localhost:9983
 ----
 
 Vérifiez que votre instance Solr fonctionne correctement en allant sur l'interface graphique à l'adresse suivante :
-(http://localhost:8983/solr/#/~cloud)[local solr UI]
+http://localhost:8983/solr/#/~cloud[local solr UI]
 
-
+[[restart-historian]]
 === Redémarrer l'historian
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
 $HDH_HOME/historian-{hdh_version}/bin/historian-server.sh start
 ----
@@ -35,19 +36,19 @@ Si cela ne marche pas car un PID (un process id) existe et le data historian est
 
 Pour arrêter l'historian taper la commande suivante :
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
 $HDH_HOME/historian-{hdh_version}/bin/historian-server.sh stop
 ----
 
 Attention ces commandes n'affectent ni Grafana ni Solr qui sont des services indépendants.
 
-
+[[restart-grafana]]
 === Redémarrer Grafana
 
 Utilisez restart si c'est un redémarrage. Si votre grafana ne tourne pas déjà utilisez start.
 
-[source, bash]
+[source, bash, subs="attributes"]
 ----
 $HDH_HOME/grafana-{grafana_version}/bin/grafana-server start
 ----

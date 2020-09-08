@@ -493,7 +493,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#restart-of-the-data-historian">4. Restart of the data historian</a>
 <ul class="sectlevel2">
 <li><a href="#restart-solr">4.1. Restart solr</a></li>
-<li><a href="#restart-or-start-the-historian">4.2. Restart (or start) the historian</a></li>
+<li><a href="#restart-historian">4.2. Restart (or start) the historian</a></li>
 <li><a href="#restart-grafana">4.3. Restart Grafana</a></li>
 </ul>
 </li>
@@ -697,7 +697,7 @@ Hurence proposes services to install the data historian on Big Data infrastructu
 <div class="ulist">
 <ul>
 <li>
-<p>OS CentOS or Redhat 7.x</p>
+<p>OS CentOS or Redhat 7.x or Ubuntu or Mac</p>
 </li>
 <li>
 <p>16 Gigabits of RAM</p>
@@ -717,14 +717,14 @@ Hurence proposes services to install the data historian on Big Data infrastructu
 <div class="sect3">
 <h4 id="installing-the-data-historian"><a class="anchor" href="#installing-the-data-historian"></a>3.1.2. Installing the Data Historian</h4>
 <div class="paragraph">
-<p>Hurence Data Historian is a set of scripts and binary files that let you manupulate time series and chunks of time series.</p>
+<p>Hurence Data Historian is a set of scripts and binaries that help you work with time series and chunks.</p>
 </div>
 <div class="paragraph">
-<p>Download the installation script for your version of data historian at :
+<p>You can download the installation script for your version at :
 <a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.</p>
 </div>
 <div class="paragraph">
-<p>Run the installation by running this script :</p>
+<p>Launch the install with this script:</p>
 </div>
 <div class="dlist">
 <dl>
@@ -753,18 +753,6 @@ So use a user who is neither sudoer nor root (an application user or yours) but 
 <pre class="CodeRay highlight"><code data-lang="bash">chmod + x install.sh</code></pre>
 </div>
 </div>
-<div class="paragraph">
-<p>Some information will be needed. Since we are going to install a single node data historian, you can use the defaults values and just press ENTER for each question.</p>
-</div>
-<div class="paragraph">
-<p>To access the standalone installation you must type "1". You can skip the Spark installation that is not mandatory. It is useful for more advanced users.</p>
-</div>
-<div class="paragraph">
-<p>The script is going to download and install packaged and embeded versions of Solr and Grafana.</p>
-</div>
-<div class="paragraph">
-<p>Make sure you have enough space in the directory where the historian is installed (défault is /opt/hdh) to store the scripts, binaries and the time series data (these data are stored in the same directory by default).</p>
-</div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">NOTE</dt>
@@ -775,6 +763,25 @@ Refer to your system documentation.</p>
 </dl>
 </div>
 <div class="paragraph">
+<p>You are asked for some configuration information.</p>
+</div>
+<div class="paragraph">
+<p>Here is an overview of the installation :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_standalone.png" alt="screenshot install standalone">
+</div>
+</div>
+<div class="paragraph">
+<p>And here an overview if all well done during installation (verify you have no error printed) :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
+</div>
+</div>
+<div class="paragraph">
 <p>You can verify that your server has been launched with the following command:</p>
 </div>
 <div class="listingblock">
@@ -783,23 +790,15 @@ Refer to your system documentation.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>If this is not the case, go to the logs (in the installation directory and in the subdirectory historian-${version}, there is an app.log file). In general it will be a problem of rights to create directories: especially in /tmp (check your write rights on this directory).</p>
+<p>If this is not the case, go to the logs (in the installation directory and in the subdirectory historian-$1.3.5, there is an app.log file). In general it will be a problem of rights to create directories: especially in /tmp (check your write rights on this directory).</p>
 </div>
 <div class="paragraph">
-<p>To launch or restart the historian type the following command:</p>
+<p>To launch or restart the historian type the following command in the installation folder :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh start
-(or ./bin/historian-server.sh restart)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Here is an overview of the installation :</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="/home/gregoire/gitlab/historian/docs/resources/images/Screenshot_install_standalone.png" alt="Screenshot install standalone">
+<pre class="CodeRay highlight"><code data-lang="bash">historian-{hdh_version}/bin/historian-server.sh start
+(or historian-{hdh_version}/bin/historian-server.sh restart)</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -814,7 +813,7 @@ Refer to your system documentation.</p>
 <p>A Solr 8.2.0 server installed in $HDH_HOME/solr-8.2.0</p>
 </li>
 <li>
-<p>The script to start the Solr server. The script has started Solr and you can check that this server is running at :
+<p>The Solr server was started by the install script. You can check that this server is running at :
 <a href="http://localhost:8983/solr/#/~cloud">solr UI</a>. You can check the Solr documentation for managing Solr (starting, stopping the Solr server).</p>
 </li>
 <li>
@@ -822,15 +821,16 @@ Refer to your system documentation.</p>
 </li>
 <li>
 <p>The data source plugin for Grafana <a href="https://github.com/Hurence/grafana-historian-datasource">datasource Grafana de l&#8217;historian</a>
-is installed to on this server. This plugin is the necessary tooling for visualizing the historian time series in Grafana.</p>
+is installed to on this server. This plugin is the necessary tooling for visualizing the historian time series in Grafana.
+binaries of plugin are located into $HDH_HOME/grafana-7.0.3/data/plugins/grafana-historian-datasource/dist</p>
 </li>
 <li>
-<p>The Grafana server was started by the script. You can check it is up and running at this address:
+<p>The Grafana server was started by the install script. You can check it is up and running at this address:
 <a href="http://localhost:3000/">http://localhost:3000/</a>.
 You can check the Grafana documentation to interact with Grafana (starting and stopping the server for example).</p>
 </li>
 <li>
-<p>The historian server is installed in $HDH_HOME/historian-{hdh_version}</p>
+<p>The historian server is installed in $HDH_HOME/historian-1.3.5</p>
 </li>
 <li>
 <p>A folder "$HDH_HOME/data" has been created to receive the time series data for the historian.</p>
@@ -852,16 +852,16 @@ You can check the Grafana documentation to interact with Grafana (starting and s
 <p>$HDH_HOME/solr-8.2.0/bin/solr : script to start and stop Solr</p>
 </li>
 <li>
-<p>$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh : script to start and stop the REST API for the data historian.</p>
+<p>$HDH_HOME/historian-1.3.5/bin/historian-server.sh : script to start and stop the REST API for the data historian.</p>
 </li>
 <li>
-<p>$HDH_HOME/historian-{hdh_version}/conf/log4j.properties : file to control the level of logs in production mode. (default).</p>
+<p>$HDH_HOME/historian-1.3.5/conf/log4j.properties : file to control the level of logs in production mode. (default).</p>
 </li>
 <li>
-<p>$HDH_HOME/historian-{hdh_version}/conf/log4j-debug.properties : file to control the level of logs in debug mode.</p>
+<p>$HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : file to control the level of logs in debug mode.</p>
 </li>
 <li>
-<p>$HDH_HOME/historian-{hdh_version}/conf/historian-server-conf.json : file that stores the configuration for the API REST server of the data historian.</p>
+<p>$HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : file that stores the configuration for the API REST server of the data historian.</p>
 </li>
 <li>
 <p>$HDH_HOME/application.log : the log file for the data historian.</p>
@@ -1065,7 +1065,7 @@ You can check the Grafana documentation to interact with Grafana (starting and s
 <p>The installation script has installed Solr in the '$HDH_HOME/solr-8.2.0' folder that we will name '$SOLR_HOME' in the following.</p>
 </div>
 <div class="paragraph">
-<p>It also started to Solr cores locally in the folder <code>$SOLR_HOME/data</code>.</p>
+<p>It also started two Solr cores locally in the folder <code>$SOLR_HOME/data</code>.</p>
 </div>
 </div>
 </div>
@@ -1081,7 +1081,7 @@ You can check the Grafana documentation to interact with Grafana (starting and s
 <div class="ulist">
 <ul>
 <li>
-<p>OS CentOS or Redhat 7.x</p>
+<p>OS CentOS or Redhat 7.x or Ubuntu or Mac</p>
 </li>
 <li>
 <p>32 Gigabits of RAM</p>
@@ -1150,7 +1150,7 @@ or from this one <a href="https://lucene.apache.org/solr">site officiel</a>.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash"># get Apache Spark {spark_version} and unpack it
+<pre class="CodeRay highlight"><code data-lang="bash"># get Apache Spark 2.3.4 and unpack it
 cd $HDH_HOME
 wget https://archive.apache.org/dist/spark/spark-{spark-version}/spark-{spark-version}-bin-without-hadoop.tgz
 tar -xvf spark-{spark-version}-bin-without-hadoop.tgz
@@ -1159,7 +1159,7 @@ rm spark-{spark-version}-bin-without-hadoop.tgz
 # add two additional jars to spark to handle our framework
 wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
 mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-{spark-version}-bin-without-hadoop/jars/
-cp $HDH_HOME/historian-{hdh_version}-SNAPSHOT/lib/loader-{hdh_version}-SNAPSHOT.jar $HDH_HOME/spark-{spark-version}-bin-without-hadoop/jars/</code></pre>
+cp $HDH_HOME/historian-1.3.5-SNAPSHOT/lib/loader-1.3.5-SNAPSHOT.jar $HDH_HOME/spark-{spark-version}-bin-without-hadoop/jars/</code></pre>
 </div>
 </div>
 </div>
@@ -1187,8 +1187,10 @@ cp $HDH_HOME/historian-{hdh_version}-SNAPSHOT/lib/loader-{hdh_version}-SNAPSHOT.
 <div class="sect3">
 <h4 id="installing-the-hurence-data-historian-hdh"><a class="anchor" href="#installing-the-hurence-data-historian-hdh"></a>3.2.6. Installing the Hurence Data Historian (HDH)</h4>
 <div class="paragraph">
-<p>Hurence Data Historian is a set of scripts and binaries that help you work with time series and chunks.
-You can download the installation script for your version at :
+<p>Hurence Data Historian is a set of scripts and binaries that help you work with time series and chunks.</p>
+</div>
+<div class="paragraph">
+<p>You can download the installation script for your version at :
 <a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.</p>
 </div>
 <div class="paragraph">
@@ -1242,6 +1244,34 @@ Refer to your system documentation.</p>
 </div>
 </div>
 <div class="paragraph">
+<p>And here an overview if all well done during installation (verify you have no error printed) :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
+</div>
+</div>
+<div class="paragraph">
+<p>You can verify that your server has been launched with the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl http://localhost:8080/api/grafana/v0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If this is not the case, go to the logs (in the installation directory and in the subdirectory historian-$1.3.5, there is an app.log file). In general it will be a problem of rights to create directories: especially in /tmp (check your write rights on this directory).</p>
+</div>
+<div class="paragraph">
+<p>To launch or restart the historian type the following command in the installation folder :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">historian-{hdh_version}/bin/historian-server.sh start
+(or historian-{hdh_version}/bin/historian-server.sh restart)</code></pre>
+</div>
+</div>
+<div class="paragraph">
 <p>In the following, we will use the '$HDH_HOME' variable to figure out the installation path for the historian.</p>
 </div>
 <div class="paragraph">
@@ -1280,31 +1310,11 @@ Refer to your system documentation.</p>
 <p>The $HDH_HOME/bin/historian-server.sh script is used to start/stop the REST API server of the historian.</p>
 </div>
 <div class="paragraph">
-<p>You can verify that your server has been launched with the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl http://localhost:8080/api/grafana/v0</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>If this is not the case, go to the logs (in the installation directory and in the subdirectory historian-${version}, there is an app.log file). In general it will be a problem of rights to create directories: especially in /tmp (check your write rights on this directory).</p>
-</div>
-<div class="paragraph">
-<p>To launch or restart the historian type the following command:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh start
-(or ./bin/historian-server.sh restart)</code></pre>
-</div>
-</div>
-<div class="paragraph">
 <p>To stop the REST API server, type the following command:</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">./bin/historian-server.sh stop</code></pre>
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh stop</code></pre>
 </div>
 </div>
 <div class="dlist">
@@ -1502,10 +1512,18 @@ Refer to your system documentation.</p>
 <div class="paragraph">
 <p>There is an order to follow to start or restart the data historian. In order:</p>
 </div>
-<div class="paragraph">
-<p>1) Restart Solr. If it is not completely stopped, stop it (see section Stopping Solr).
-2) Restart the historian server
-3) Restart Grafana</p>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#restart-solr">Restart Solr</a>. If it is not completely stopped, stop it (see section Stopping Solr).</p>
+</li>
+<li>
+<p><a href="#restart-historian">Restart the historian server</a></p>
+</li>
+<li>
+<p><a href="#restart-grafana">Restart Grafana</a></p>
+</li>
+</ol>
 </div>
 <div class="sect2">
 <h3 id="restart-solr"><a class="anchor" href="#restart-solr"></a>4.1. Restart solr</h3>
@@ -1523,11 +1541,11 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2 -p 7574 -z localhost: 9983</c
 </div>
 <div class="paragraph">
 <p>Verify that your Solr instance is functioning correctly by going to the GUI at the following address:
-(<a href="http://localhost:8983/solr/#/~cloud" class="bare">http://localhost:8983/solr/#/~cloud</a>) [local solr UI]</p>
+<a href="http://localhost:8983/solr/#/~cloud">local solr UI</a></p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="restart-or-start-the-historian"><a class="anchor" href="#restart-or-start-the-historian"></a>4.2. Restart (or start) the historian</h3>
+<h3 id="restart-historian"><a class="anchor" href="#restart-historian"></a>4.2. Restart (or start) the historian</h3>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh start</code></pre>
@@ -1809,7 +1827,7 @@ bin / solr stop -all</pre>
 <div id="footer">
 <div id="footer-text">
 Version v1.0<br>
-Last updated 2020-09-07 17:10:56 +0200
+Last updated 2020-09-08 15:32:37 +0200
 </div>
 </div>
 <style>

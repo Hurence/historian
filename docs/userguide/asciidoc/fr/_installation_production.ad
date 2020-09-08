@@ -4,7 +4,7 @@
 
 La configuration minimale du serveur pour une installation mono serveur (en production) du data historian est:
 
-- un OS CentOS ou Redhat 7.x
+- un OS CentOS ou Redhat 7.x ou Ubuntu ou Mac
 - 32 Gigabits de RAM
 - 32 vcores de CPU
 - 2 Tera octets de disque
@@ -37,7 +37,7 @@ https://archive.apache.org/dist/spark/spark-{spark_version}/spark-{spark_version
 Les commandes suivantes vous permettront d'avoir une installation locale. Sinon veuillez suuivre les indications officiels
 pour un cluster de production.
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
 # get Apache Spark 2.3.4 and unpack it
 cd $HDH_HOME
@@ -71,34 +71,13 @@ Pour installer le plugin datasource suivez les https://github.com/Hurence/grafan
 
 ==== Installation de l'historian
 
-Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
-et les chunks. Téléchargez le script dinstallation de l'historian pour votre version
-https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
-Lancez l'installation en lançant ce script :
+include::./_installation_historian_part_1.ad[]
 
-NOTE:: Solr n'aime pas pour des questions de sécurité que vous installiez et lanciez en root.
-Utilisez donc un utilisateur qui n'est ni sudoer ni root (un utilisateur applicatif ou le vôtre) mais vérifiez bien que vous avez les droits en  écriture là où HDH va s'installer (par défaut /opt/hdh).
-
-[source,bash]
-----
-bash ./install.sh
-----
-
-NOTE:: le script install.sh doit être exécutable. Si vous obtenez un problème d'autorisation au lancement, vérifiez qu'il a les bonnes propriétés et sinon exécutez cette commande:
-
-[source,bash]
-----
-chmod +x install.sh
-----
-
-NOTE:: lors de l'installation Solr vous met en garde éventuellement sur votre configuration machine en ce qui concerne le nombre de fichiers ouverts qui est généralement réduit à 1024. Si vous voulez une installation robuste pour accueillir de nombreuses données il vous faudra changer ce paramètre avec la commande ulimit (et l'édition d'un fichier de configuration dont le nom dépend de votre OS).
-Référez vous à votre documentation système.
-
-Il sera alors demandé à l'utilisateur plusieurs informations.
-
-Voici un exemple :
+Here is an example:
 
 image::screenshot_install_mono_noeud.png[]
+
+include::./_installation_historian_part_2.ad[]
 
 Dans la suite, on appellera le chemin indiqué pour l'installation de l'historian '$HDH_HOME'.
 
@@ -110,38 +89,18 @@ installé sur le serveur Grafana indiqué lors de l'installation
 
 
 Voici la structure de $HDH_HOME à l'issue de l'installation par défaut :
-* $HDH_HOME/bin/historian-server.sh : Permet de lancer et arrêter l'api REST de l'historian.
-* $HDH_HOME/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
-* $HDH_HOME/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
-* $HDH_HOME/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l'api rest de l'historian.
+* $HDH_HOME/historian-{hdh_version}/bin/historian-server.sh : Permet de lancer et arrêter l'api REST de l'historian.
+* $HDH_HOME/historian-{hdh_version}/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
+* $HDH_HOME/historian-{hdh_version}/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
+* $HDH_HOME/historian-{hdh_version}/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l'api rest de l'historian.
 
-Le script $HDH_HOME/bin/historian-server.sh sert à lancer/arrêter l'api rest de l'historian.
-
-
-Vous pouvez vérifier que votre serveur a bien été lancé avec la commande suivante:
-
-[source,bash]
-----
-curl http://localhost:8080/api/grafana/v0
-[source,bash]
-----
-
-Si ce n'est pas le cas, allez voir les logs (dans la directory d'installation et la sous directory historian-${version}, il y a un fichier app.log). En général ce sera un problème de droits pour créer des directories: notamment dans /tmp (vérifiez bien vos droits en écriture sur cette directory).
-
-
-Pour lancer ou relancer l'historian taper la commande suivante :
-
-[source,bash]
-----
-./bin/historian-server.sh start
-(ou ./bin/historian-server.sh restart)
-----
+Le script $HDH_HOME/historian-{hdh_version}/bin/historian-server.sh sert à lancer/arrêter l'api rest de l'historian.
 
 Pour arrêter l'historian taper la commande suivante :
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
-./bin/historian-server.sh stop
+$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh stop
 ----
 
 Attention ces commandes n'affectent ni Grafana ni Solr qui sont des services indépendants.
@@ -150,4 +109,4 @@ Attention ces commandes n'affectent ni Grafana ni Solr qui sont des services ind
 
 include::./_description_conf_file.ad[]
 
-Generation un fichier de configuration pendant le script d'install selon les informations renseignées
+Generation d'un fichier de configuration pendant le script d'installation selon les informations renseignées.

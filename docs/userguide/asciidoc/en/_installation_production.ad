@@ -4,7 +4,7 @@
 
 The minimal configuration for the server for a single server installation of the data historian (in production) is:
 
-- OS CentOS or Redhat 7.x
+- OS CentOS or Redhat 7.x or Ubuntu or Mac
 - 32 Gigabits of RAM
 - 32 vcores of CPU
 - 2 Terabytes of disk
@@ -43,7 +43,7 @@ https://archive.apache.org/dist/spark/spark-{spark-version}/spark-{spark-version
 
 The following commands allow you to get a local install. For a cluster in production, check the official documentation or get guidance from Hurence.
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
 # get Apache Spark {spark_version} and unpack it
 cd $HDH_HOME
@@ -74,36 +74,13 @@ To install the data source plugin follow the specific guide https://github.com/H
 
 ==== Installing the Hurence Data Historian (HDH)
 
-Hurence Data Historian is a set of scripts and binaries that help you work with time series and chunks. 
-You can download the installation script for your version at :
-https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
-
-Launch the install with this script:
-
-NOTE:: Solr does not like for security reasons that you install and run as root.
-So use a user who is neither sudoer nor root (an application user or yours) but make sure that you have write rights where HDH will be installed (by default / opt / hdh).
-
-[source,bash]
-----
-bash ./install.sh
-----
-
-NOTE:: the install.sh script must be executable. If you get an authorization problem at launch, check that it has the right properties and otherwise run this command:
-
-[source, bash]
-----
-chmod + x install.sh
-----
-
-NOTE:: during the installation Solr may warn you about your machine configuration regarding the number of open files which is generally reduced to 1024. If you want a robust installation to accommodate a lot of data you will have to change this parameter with the ulimit command (and editing a configuration file whose name depends on your OS).
-Refer to your system documentation.
-
-
-You are asked for some configuration information.
+include::./_installation_historian_part_1.ad[]
 
 Here is an example:
 
 image::screenshot_install_mono_noeud.png[]
+
+include::./_installation_historian_part_2.ad[]
 
 In the following, we will use the '$HDH_HOME' variable to figure out the installation path for the historian. 
 
@@ -121,30 +98,11 @@ The structure of $HDH_HOME after running the installation script is 'by default'
 
 The $HDH_HOME/bin/historian-server.sh script is used to start/stop the REST API server of the historian.
 
-You can verify that your server has been launched with the following command:
-
-[source, bash]
-----
-curl http://localhost:8080/api/grafana/v0
-----
-
-If this is not the case, go to the logs (in the installation directory and in the subdirectory historian-${version}, there is an app.log file). In general it will be a problem of rights to create directories: especially in /tmp (check your write rights on this directory).
-
-
-To launch or restart the historian type the following command:
-
-[source, bash]
-----
-./bin/historian-server.sh start
-(or ./bin/historian-server.sh restart)
-----
-
-
 To stop the REST API server, type the following command:
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
-./bin/historian-server.sh stop
+$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh stop
 ----
 
 Note:: these commands affect neither Grafana nor Solr that are independant services and need to be started and stopped separately.
