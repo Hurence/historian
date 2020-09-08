@@ -396,7 +396,7 @@ start_historian_server() {
   echo "Install completed. Starting historian..."
   $HISTORIAN_HOME/bin/historian-server.sh start
   echo "The historian server is now running."
-  echo "You can use ./bin/historian-server.sh [start|stop|restart] to manage the historian server."
+  echo "You can use ${HISTORIAN_HOME}/bin/historian-server.sh [start|stop|restart] to manage the historian server."
 }
 
 go_to_home_directory() {
