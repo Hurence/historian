@@ -71,6 +71,10 @@ selectWithDefault() {
 setup_all_variables() {
   local MSG="Where do you want to install Hurence Data Historian ?"
   ask_and_set_variable "HDH_HOME" "/opt/hdh" "$MSG"
+  if [[ $HDH_HOME == "~"* ]]; then
+    HDH_HOME_WITHOUT_START_TILT="${HDH_HOME:1}"
+    HDH_HOME="$(echo ~)$HDH_HOME_WITHOUT_START_TILT"
+  fi
   MSG="Do you want us to install an embedded solr (version 8.2.0 required)? (otherwise you need to have one that can be used from this machine) [Yes] "
   ask_and_set_boolean_variable "USING_EMBEDDED_SOLR" "$MSG"
   if [[ $USING_EMBEDDED_SOLR  = false ]]; then
@@ -396,7 +400,9 @@ start_historian_server() {
 }
 
 go_to_home_directory() {
+  echo "HDH_HOME  is $HDH_HOME"
   cd ${HDH_HOME} || (echo "could not go to ${HDH_HOME} folder" && exit 1)
+  echo "directory of installation is $(pwd)"
 }
 
 
@@ -419,8 +425,6 @@ main() {
       print_conf
       create_home_directory
       go_to_home_directory
-      echo "HDH_HOME  is $HDH_HOME"
-      echo "directory of installation is $(pwd)"
       download_and_extract_historian_into_hdh_home
       install_embedded_solr_and_start_it_if_needed
       create_historian_collections
@@ -441,8 +445,6 @@ main() {
       print_conf
       create_home_directory
       go_to_home_directory
-      echo "HDH_HOME  is $HDH_HOME"
-      echo "directory of installation is $(pwd)"
       download_and_extract_historian_into_hdh_home
       install_embedded_solr_and_start_it_if_needed
       create_historian_collections
