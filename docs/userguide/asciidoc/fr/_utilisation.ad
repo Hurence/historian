@@ -1,6 +1,6 @@
 == Gestion des données
 
-Vous pouvez consulter notre documentation sur l'api REST 'rest-api.pdf' pour connaitre les détails de chaque fonction de l'API (endpoint).
+Vous pouvez consulter notre documentation sur l'api REST {url-rest-api-pdf}[api rest] pour connaitre les détails de chaque fonction de l'API (endpoint).
 Maintenant que nous avons installé l'historian. Vous pouvez jouer avec des données, il y a plusieurs manières
 d'interagir avec l'historian selon votre culture et vos besoins.
 
@@ -11,13 +11,13 @@ dans ce guide nous allons utiliser l'import de données à partir de fichiers cs
 
 Cette section va nous apprendre à injecter un fichier CSV dans l'historian. Le folder **samples** du data historian contient des exemples. Nous allons injecter les données du sous folder **happiness** ; quelques fichiers qui donnent le score de "happiness" des pays chaque année.
 
-Excecutez la commande suivante (dans ce qui suit remplacez /opt/hdp par votre directorie d'installation si vous n'avez pas installé dans la directorie par défaut): 
+Excecutez la commande suivante (dans ce qui suit remplacez $HDH_HOME par votre répertoire d'installation et éventuellement l'adresse de votre serveur historian si vous n'avez pas effectué une installation locale ):
 
-[source,bash]
+[source,bash, subs="attributes"]
 ----
 curl -X POST \
 http://localhost:8080/api/historian/v0/import/csv \
--F 'my_csv_file=@/opt/hdh/samples/happiness/2015.csv' \
+-F 'my_csv_file=@$HDH_HOME/historian-{hdh_version}/samples/happiness/2015.csv' \
 -F mapping.value="Happiness Score" \
 -F mapping.timestamp=Timestamp \
 -F mapping.tags=Country \
@@ -28,6 +28,30 @@ http://localhost:8080/api/historian/v0/import/csv \
 
 et bien sûr vous pouvez appliquer la même requête à tous les fichiers de 2016 à 2020. Cela vous fait un petit jeu de données sur lequel nous allons pouvoir apprendre à faire des choses.
 
+Ces query devraient retourner une réponse de ce type :
+
+[source,json]
+----
+{
+  "tags" : [ "Country" ],
+  "grouped_by" : [ "name", "Country" ],
+  "report" : [ {
+    "name" : "happiness",
+    "Country" : "Switzerland",
+    "number_of_points_injected" : 1,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 1
+  },
+  ...,{
+    "name" : "happiness",
+    "Country" : "Togo",
+    "number_of_points_injected" : 1,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 1
+  }]
+}
+----
+
 === Requêter des données avec l'api REST
 
 Une manière de voir si vous données ont bien été injectées est de les requêter. Essayons de voir
@@ -37,67 +61,165 @@ Déjà regardons simplement si il existe des métriques happiness dans l'histori
 
 [source,bash]
 ----
-curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
-  "names": ["happiness"],
-  "format" : "json"
+curl --header 'Content-Type: application/json' -X POST \
+http://localhost:8080/api/grafana/v0/query -d '{
+  "names": ["happiness"]
 }'
 ----
 
-En effet nous obtenons des données.
+Cette query retourne une réponse de ce type :
+
+[source,json]
+----
+[{
+   "name":"happiness",
+   "datapoints":[[7.587,1420070400000],...,[2.566900015,1577836800000]]
+}]
+----
+
 
 En filtrant sur le tag Country (= France) nous devrions avoir les enregistrements de la France uniquement.
 
-
 [source,bash]
 ----
-curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
+curl --header 'Content-Type: application/json' -X POST \
+http://localhost:8080/api/grafana/v0/query -d '{
   "names": ["happiness"],
-  "Country: "France",
-  "format" : "json"
+  "tags": {
+     "Country": "France"
+  }
 }'
 ----
 
-Obtenir l'ensemble des noms de métriques
+Cette query retourne la réponse suivante :
+
+[source,json]
+----
+[{
+  "name":"happiness",
+  "tags":{"Country":"France"},
+  "datapoints":[
+    [6.575,1420070400000],
+    [6.478,1451606400000],
+    [6.44199991226196,1483228800000],
+    [6.489,1514764800000],
+    [6.592,1546300800000],
+    [6.663799763,1577836800000]
+   ]
+}]
+----
+
+Obtenir l'ensemble des noms de métriques.
 
 [source,bash]
 ----
-curl --location --request POST 'http://localhost:8080/api/grafana/v0/search' \
+curl --X POST 'http://localhost:8080/api/grafana/v0/search' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-    "target": "*"
+  "name": "ha",
+  "limit": 100
 }'
 ----
 
-Obtenir des mesures avec en spécifiant un intervalle de temps:
+Ici on précise que l'on désire avoir toutes les noms de métrique contenant la string "ha" mais de n'en retrouner qu'un maximum de 100.
+Si l'on ne renseigne pas le champ "name" alors la requête retourne tout les noms de métrique.
+
+[source,json]
+----
+["happiness"]
+----
+
+
+Obtenir l'ensemble des tags présent dans l'historian.
 
 [source,bash]
 ----
-curl --location --request POST 'http://localhost:8080/api/grafana/v0/query' \
+curl -X POST 'http://localhost:8080/api/grafana/v0/search/tags'
+----
+
+Cette query retourne la liste des tags présent en json :
+
+[source,json]
+----
+["Country"]
+----
+
+Obtenir l'ensemble des valeurs d'un tag.
+
+[source,bash]
+----
+curl -X POST 'http://localhost:8080/api/grafana/v0/search/values' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-	 "range": {
-          "from": "2015-01-01 00:00:00",
-          "to": "2016-01-01 00:00:00"
-      },
-      "targets": [
-        { "target": "ack" }
-      ]
+  "field": "Country",
+  "query": "F",
+  "limit": 100
 }'
 ----
 
-=== Visualisez les données dans Grafana
+Ici on précise que l'on désire avoir toutes les valeurs existante pour le tag "Country" contenant la string "F" mais de n'en retrouner qu'un maximum de 100.
+Si l'on ne renseigne pas le champ "name" alors la requête retourne tous les noms de métrique.
 
-En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur l'URL de grafana (http://localhost:3000)[http://localhost:3000]. La première fois que vous vous loggez vous pouvez entrer n'importe quel username et mot de passe (celui ci deviendra le premier utilisateur et administrateur). Vous pouvez mettre admin, admin (dans l'écran suivant il vous sera demandé de changer ce mot de passe "admin" en quelque chose de plus sécurisé).
+Cette query retourne cette liste :
 
-Une fois votre mot de passe changé, vous avez une page d'accueil que nous pouvez lire puis faire disparaître.
+[source,json]
+----
+["Burkina Faso","Finland","France"]
+----
 
-- Vous allez clicker sur "Add your first data source".
-- Aller à la fin clicker sur celle qui s'appelle "Hurence-Historian".
-- Mettez dans URL l'URL de votre historian server (l'installation par défaut est http://localhost:8080/api/grafana/v0/)
-- Clickez "Save and Test"
-- Vous devez avoir un message vert vous disant que votre data source est chargée.
+Attention la requête est sensible aux majuscules. La même requête avec un "f" minuscule retournera en effet :
 
+[source,json]
+----
+["Afghanistan","Central African Republic","Hong Kong S.A.R. of China","South Africa","Taiwan Province of China"]
+----
 
+Obtenir des mesures en spécifiant :
+* Un intervalle de temps
+* La métrique dont on chercher les données est "happiness"
+* On veut au maximum 10 points
+* Si il y a besoin d'effectuer un sampling nous voulons utiliser un algorithme à base de bucket et en prenant la plus petite valeur à chaque fois.
+
+[source,bash]
+----
+curl -X POST 'http://localhost:8080/api/grafana/v0/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "from": "2015-01-01T00:00:00.000Z",
+    "to": "2016-01-01T00:00:00.000Z",
+    "names": ["happiness"],
+    "max_data_points": 10,
+    "sampling":{
+       "algorithm": "MIN",
+       "bucket_size" : 100
+    }
+}'
+----
+
+Cette query retourne cette réponse :
+
+[source,json]
+----
+[{
+  "name":"happiness",
+  "datapoints":[
+    [4.867,1420070400000],
+    [2.839,1420070400000],
+    [3.36,1451606400000],
+    [2.905,1451606400000]
+   ]
+}]
+----
+
+Nous obtenons bien moins de 10 points. Attention comme nous n'avons pas préciser de tag les valeurs de tous les pays sont mélangés !
+
+note:: Il n y a ici que 4 point de retourner alors que nous avons spécifier un maximum de 10 points. Cela n'est pas optimum car il
+ya plus de 10 points en tout ! En effet nous devrions ici avoir 10 points. Ce problème sera fixé lors de la prochaine release. En attendant
+n'hésitez pas a augmenter la valeur de "max_data_points" si cela devait vous arriver.
+
+warn:: Attention cependant a ne pas demander trop de points ! En effet si vous voulez exporter la totalité des points cette endpoint n'est
+pas l'outil adéquat. D'ailleurs si le nombre indiqué est supérieur à 2147483647 la requête ne fonctionnera pas. Dans une futur release
+le maximum pour cette variable sera revue à la baisse.
 
 === Utiliser Spark pour requếter les données
 
@@ -169,27 +291,67 @@ HDH fournit donc un plugin Grafana pour visualiser les données sous formes de g
 
 La manipulation des données depuis les data sources de votre data historian se fait comme pour les autres sources. Vous fournissez votre requête, un intervalle de temps si nécessaire, et un algorithme de sampling si vous requêtez sur une grande quantité de points (pour que la courbe soit bien lisible).
 
-=== Configurer Grafana et vos dashboard
+=== Configurer la data source grafana
 
-Pour créér des dashboard il faut aller sur l'interface graphique de grafana (http://localhost:3000/[http://localhost:3000/] (localhost étant à remplacer par un nom de machine si vous n'êtes pas en installation standalone).
+En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur {url-grafana}[l'URL de grafana]. Vous pouvez vous logger en tant que user: admin et pwd: admin (Vous pouvez passer l'écran suivant).
 
-Allez ensuite dans le menu des datasources :
+Vous avez une page d'accueil que nous pouvez lire puis faire disparaître.
+Afin de pouvoir consulter les données du data historian :
+
+==== Explication sans image
+
+1. Vous allez clicker sur le bouton de Configuration à gauche puis sur "Data Sources".
+2. Clickez sur le bouton "Add data source".
+3. Aller à la fin et clickez sur celle qui s'appelle "Hurence-Historian" ou bien filtrer dans la barre de recherche pour la faire apparaître.
+4. Mettez dans la case "URL" l'URL de votre historian server (l'installation par défaut est {url-historian-grafana-api})
+5. Clickez "Save and Test"
+6. Vous devez avoir un message vert vous disant que votre data source est chargée et bien configuré (joignable).
+
+==== Explication avec image
+
+Allez dans le menu des datasources :
 
 image::grafana_ui_datasource.png[go to datasource page]
 
 Cherchez la datasource "Hurence-Historian" et sélectionnez la.
-Il y a juste a renseigner l'URL http://localhost:8080/api/grafana/v0 dans le cas de l'installation standalone.
+Il y a juste a renseigner l'URL {url-historian-grafana-api} dans le cas de l'installation standalone.
 
 image::datasource_historian_setup.png[datasource setup]
 
 Testez la connectivité en cliquant sur "Save & Test" button at the bottom of the page.
+
+=== Configurer vos dashboard
+
+Pour créér des dashboards il faut aller sur l'interface graphique de grafana {url-grafana}[l'URL de grafana] (localhost étant à remplacer par un nom de machine si vous n'êtes pas en installation standalone).
+
 Ensuite créez un nouveau dashboard.
 
 image::grafana_ui_create_dashboard.png[go to new dashboard page]
 
 Ajoutez les graphes que vous voulez, un petit exemple ci-dessous :
 
-image::grafana_graph_config_exemple.png[exemple of query config]
+* Nous avons sélectionné la métrique "happiness" (préalablement injecté).
+* La time range choisis est de "2014-12-18 21:08:01" à "2020-01-13 14:48:41".
+
+image::grafana_dashboard_all_happiness.png[exemple of query config]
+
+Pour configurer la time range :
+
+image::grafana_dashboard_all_happiness_timerange.png[exemple of query config]
+
+TODO remarque sur la visu
+
+Si on filtre sur le tag "Country" avec la valeur France par exemple on obtient :
+
+image::grafana_dashboard_france_happiness.png[exemple of query config]
+
+Pour cela il faut cliquer sur "Add new tag filter". Puis sélectionner la valeur "Country" comme "Tag name".
+Enfin cliquer sur "Tag value" et commencer à taper le nom du pays désirer puis sélectionner "France" lorsque celui-ci apparaît.
+
+image::grafana_dashboard_add_tag.png[exemple of query config]
+
+
+TODO général note
 
 Une "query" (requête) consiste à renseigner un nom de métrique, et des paires de tag name/tag value ainsi que des options pour l'algorithme de sampling.
 
