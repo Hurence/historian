@@ -500,14 +500,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <ul class="sectlevel2">
 <li><a href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest">5.1. Import de donnée à partir de fichiers csv avec l&#8217;api REST</a></li>
 <li><a href="#requêter-des-données-avec-lapi-rest">5.2. Requêter des données avec l&#8217;api REST</a></li>
-<li><a href="#visualisez-les-données-dans-grafana">5.3. Visualisez les données dans Grafana</a></li>
-<li><a href="#utiliser-spark-pour-requếter-les-données">5.4. Utiliser Spark pour requếter les données</a></li>
-<li><a href="#linjection-temps-réel-avec-logisland">5.5. L&#8217;injection temps réel avec LogIsland</a></li>
+<li><a href="#utiliser-spark-pour-requếter-les-données">5.3. Utiliser Spark pour requếter les données</a></li>
+<li><a href="#linjection-temps-réel-avec-logisland">5.4. L&#8217;injection temps réel avec LogIsland</a></li>
 </ul>
 </li>
 <li><a href="#visualisation-des-données">6. Visualisation des données</a>
 <ul class="sectlevel2">
-<li><a href="#configurer-grafana-et-vos-dashboard">6.1. Configurer Grafana et vos dashboard</a></li>
+<li><a href="#configurer-la-data-source-grafana">6.1. Configurer la data source grafana</a>
+<ul class="sectlevel3">
+<li><a href="#explication-sans-image">6.1.1. Explication sans image</a></li>
+<li><a href="#explication-avec-image">6.1.2. Explication avec image</a></li>
+</ul>
+</li>
+<li><a href="#configurer-vos-dashboard">6.2. Configurer vos dashboard</a></li>
 </ul>
 </li>
 <li><a href="#stopper-et-détruire-les-données">7. Stopper et détruire les données</a>
@@ -1590,7 +1595,7 @@ bin/solr start -cloud -s $HDH_HOME/data/solr/node2/ -p 7574 -z localhost:9983</c
 <h2 id="gestion-des-données"><a class="anchor" href="#gestion-des-données"></a>5. Gestion des données</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>Vous pouvez consulter notre documentation sur l&#8217;api REST 'rest-api.pdf' pour connaitre les détails de chaque fonction de l&#8217;API (endpoint).
+<p>Vous pouvez consulter notre documentation sur l&#8217;api REST <a href="https://github.com/Hurence/historian/blob/release-1.3.5/docs/generated-docs/pdf/fr/rest-api.pdf">api rest</a> pour connaitre les détails de chaque fonction de l&#8217;API (endpoint).
 Maintenant que nous avons installé l&#8217;historian. Vous pouvez jouer avec des données, il y a plusieurs manières
 d&#8217;interagir avec l&#8217;historian selon votre culture et vos besoins.</p>
 </div>
@@ -1604,14 +1609,14 @@ dans ce guide nous allons utiliser l&#8217;import de données à partir de fichi
 <p>Cette section va nous apprendre à injecter un fichier CSV dans l&#8217;historian. Le folder <strong>samples</strong> du data historian contient des exemples. Nous allons injecter les données du sous folder <strong>happiness</strong> ; quelques fichiers qui donnent le score de "happiness" des pays chaque année.</p>
 </div>
 <div class="paragraph">
-<p>Excecutez la commande suivante (dans ce qui suit remplacez /opt/hdp par votre directorie d&#8217;installation si vous n&#8217;avez pas installé dans la directorie par défaut):</p>
+<p>Excecutez la commande suivante (dans ce qui suit remplacez $HDH_HOME par votre répertoire d&#8217;installation et éventuellement l&#8217;adresse de votre serveur historian si vous n&#8217;avez pas effectué une installation locale ):</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="bash">curl -X POST \
 http://localhost:8080/api/historian/v0/import/csv \
--F 'my_csv_file=@/opt/hdh/samples/happiness/2015.csv' \
--F mapping.value=&quot;Happiness Score&quot; \
+-F 'my_csv_file=@$HDH_HOME/historian-1.3.5/samples/happiness/2015.csv' \
+-F mapping.value="Happiness Score" \
 -F mapping.timestamp=Timestamp \
 -F mapping.tags=Country \
 -F group_by=name \
@@ -1621,6 +1626,31 @@ http://localhost:8080/api/historian/v0/import/csv \
 </div>
 <div class="paragraph">
 <p>et bien sûr vous pouvez appliquer la même requête à tous les fichiers de 2016 à 2020. Cela vous fait un petit jeu de données sur lequel nous allons pouvoir apprendre à faire des choses.</p>
+</div>
+<div class="paragraph">
+<p>Ces query devraient retourner une réponse de ce type :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span> : [ <span class="string"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> ],
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">grouped_by</span><span class="delimiter">&quot;</span></span> : [ <span class="string"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> ],
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">report</span><span class="delimiter">&quot;</span></span> : [ {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">Switzerland</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_points_injected</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_point_failed</span><span class="delimiter">&quot;</span></span> : <span class="integer">0</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_chunk_created</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>
+  },
+  <span class="error">.</span><span class="error">.</span><span class="error">.</span>,{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">Togo</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_points_injected</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_point_failed</span><span class="delimiter">&quot;</span></span> : <span class="integer">0</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_chunk_created</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>
+  }]
+}</code></pre>
+</div>
 </div>
 </div>
 <div class="sect2">
@@ -1634,88 +1664,189 @@ la progression du bonheur (métrique happiness) en France sur les années 2015 �
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
-  &quot;names&quot;: [&quot;happiness&quot;],
-  &quot;format&quot; : &quot;json&quot;
+<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST \
+http://localhost:8080/api/grafana/v0/query -d '{
+  &quot;names&quot;: [&quot;happiness&quot;]
 }'</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>En effet nous obtenons des données.</p>
+<p>Cette query retourne une réponse de ce type :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[{
+   <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+   <span class="key"><span class="delimiter">&quot;</span><span class="content">datapoints</span><span class="delimiter">&quot;</span></span>:[[<span class="float">7.587</span>,<span class="integer">1420070400000</span>],<span class="error">.</span><span class="error">.</span><span class="error">.</span>,[<span class="float">2.566900015</span>,<span class="integer">1577836800000</span>]]
+}]</code></pre>
+</div>
 </div>
 <div class="paragraph">
 <p>En filtrant sur le tag Country (= France) nous devrions avoir les enregistrements de la France uniquement.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST http://localhost:8080/api/grafana/v0/query -d '{
+<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST \
+http://localhost:8080/api/grafana/v0/query -d '{
   &quot;names&quot;: [&quot;happiness&quot;],
-  &quot;Country: &quot;France&quot;,
-  &quot;format&quot; : &quot;json&quot;
+  &quot;tags&quot;: {
+     &quot;Country&quot;: &quot;France&quot;
+  }
 }'</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Obtenir l&#8217;ensemble des noms de métriques</p>
+<p>Cette query retourne la réponse suivante :</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/v0/search' \
---header 'Content-Type: application/json' \
---data-raw '{
-    &quot;target&quot;: &quot;*&quot;
-}'</code></pre>
+<pre class="CodeRay highlight"><code data-lang="json">[{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span>:{<span class="key"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">France</span><span class="delimiter">&quot;</span></span>},
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">datapoints</span><span class="delimiter">&quot;</span></span>:[
+    [<span class="float">6.575</span>,<span class="integer">1420070400000</span>],
+    [<span class="float">6.478</span>,<span class="integer">1451606400000</span>],
+    [<span class="float">6.44199991226196</span>,<span class="integer">1483228800000</span>],
+    [<span class="float">6.489</span>,<span class="integer">1514764800000</span>],
+    [<span class="float">6.592</span>,<span class="integer">1546300800000</span>],
+    [<span class="float">6.663799763</span>,<span class="integer">1577836800000</span>]
+   ]
+}]</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>Obtenir des mesures avec en spécifiant un intervalle de temps:</p>
+<p>Obtenir l&#8217;ensemble des noms de métriques.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="bash">curl --location --request POST 'http://localhost:8080/api/grafana/v0/query' \
+<pre class="CodeRay highlight"><code data-lang="bash">curl --X POST 'http://localhost:8080/api/grafana/v0/search' \
 --header 'Content-Type: application/json' \
 --data-raw '{
-         &quot;range&quot;: {
-          &quot;from&quot;: &quot;2015-01-01 00:00:00&quot;,
-          &quot;to&quot;: &quot;2016-01-01 00:00:00&quot;
-      },
-      &quot;targets&quot;: [
-        { &quot;target&quot;: &quot;ack&quot; }
-      ]
+  &quot;name&quot;: &quot;ha&quot;,
+  &quot;limit&quot;: 100
 }'</code></pre>
 </div>
 </div>
+<div class="paragraph">
+<p>Ici on précise que l&#8217;on désire avoir toutes les noms de métrique contenant la string "ha" mais de n&#8217;en retrouner qu&#8217;un maximum de 100.
+Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tout les noms de métrique.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obtenir l&#8217;ensemble des tags présent dans l&#8217;historian.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST 'http://localhost:8080/api/grafana/v0/search/tags'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette query retourne la liste des tags présent en json :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obtenir l&#8217;ensemble des valeurs d&#8217;un tag.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST 'http://localhost:8080/api/grafana/v0/search/values' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  &quot;field&quot;: &quot;Country&quot;,
+  &quot;query&quot;: &quot;F&quot;,
+  &quot;limit&quot;: 100
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici on précise que l&#8217;on désire avoir toutes les valeurs existante pour le tag "Country" contenant la string "F" mais de n&#8217;en retrouner qu&#8217;un maximum de 100.
+Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tous les noms de métrique.</p>
+</div>
+<div class="paragraph">
+<p>Cette query retourne cette liste :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">Burkina Faso</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Finland</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">France</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attention la requête est sensible aux majuscules. La même requête avec un "f" minuscule retournera en effet :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">Afghanistan</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Central African Republic</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Hong Kong S.A.R. of China</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">South Africa</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Taiwan Province of China</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obtenir des mesures en spécifiant :
+* Un intervalle de temps
+* La métrique dont on chercher les données est "happiness"
+* On veut au maximum 10 points
+* Si il y a besoin d&#8217;effectuer un sampling nous voulons utiliser un algorithme à base de bucket et en prenant la plus petite valeur à chaque fois.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST 'http://localhost:8080/api/grafana/v0/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    &quot;from&quot;: &quot;2015-01-01T00:00:00.000Z&quot;,
+    &quot;to&quot;: &quot;2016-01-01T00:00:00.000Z&quot;,
+    &quot;names&quot;: [&quot;happiness&quot;],
+    &quot;max_data_points&quot;: 10,
+    &quot;sampling&quot;:{
+       &quot;algorithm&quot;: &quot;MIN&quot;,
+       &quot;bucket_size&quot; : 100
+    }
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette query retourne cette réponse :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">datapoints</span><span class="delimiter">&quot;</span></span>:[
+    [<span class="float">4.867</span>,<span class="integer">1420070400000</span>],
+    [<span class="float">2.839</span>,<span class="integer">1420070400000</span>],
+    [<span class="float">3.36</span>,<span class="integer">1451606400000</span>],
+    [<span class="float">2.905</span>,<span class="integer">1451606400000</span>]
+   ]
+}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nous obtenons bien moins de 10 points. Attention comme nous n&#8217;avons pas préciser de tag les valeurs de tous les pays sont mélangés !</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">note</dt>
+<dd>
+<p>Il n y a ici que 4 point de retourner alors que nous avons spécifier un maximum de 10 points. Cela n&#8217;est pas optimum car il
+ya plus de 10 points en tout ! En effet nous devrions ici avoir 10 points. Ce problème sera fixé lors de la prochaine release. En attendant
+n&#8217;hésitez pas a augmenter la valeur de "max_data_points" si cela devait vous arriver.</p>
+</dd>
+<dt class="hdlist1">warn</dt>
+<dd>
+<p>Attention cependant a ne pas demander trop de points ! En effet si vous voulez exporter la totalité des points cette endpoint n&#8217;est
+pas l&#8217;outil adéquat. D&#8217;ailleurs si le nombre indiqué est supérieur à 2147483647 la requête ne fonctionnera pas. Dans une futur release
+le maximum pour cette variable sera revue à la baisse.</p>
+</dd>
+</dl>
+</div>
 </div>
 <div class="sect2">
-<h3 id="visualisez-les-données-dans-grafana"><a class="anchor" href="#visualisez-les-données-dans-grafana"></a>5.3. Visualisez les données dans Grafana</h3>
-<div class="paragraph">
-<p>En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur l&#8217;URL de grafana (<a href="http://localhost:3000)">http://localhost:3000</a>. La première fois que vous vous loggez vous pouvez entrer n&#8217;importe quel username et mot de passe (celui ci deviendra le premier utilisateur et administrateur). Vous pouvez mettre admin, admin (dans l&#8217;écran suivant il vous sera demandé de changer ce mot de passe "admin" en quelque chose de plus sécurisé).</p>
-</div>
-<div class="paragraph">
-<p>Une fois votre mot de passe changé, vous avez une page d&#8217;accueil que nous pouvez lire puis faire disparaître.</p>
-</div>
-<div class="ulist">
-<ul>
-<li>
-<p>Vous allez clicker sur "Add your first data source".</p>
-</li>
-<li>
-<p>Aller à la fin clicker sur celle qui s&#8217;appelle "Hurence-Historian".</p>
-</li>
-<li>
-<p>Mettez dans URL l&#8217;URL de votre historian server (l&#8217;installation par défaut est <a href="http://localhost:8080/api/grafana/v0/" class="bare">http://localhost:8080/api/grafana/v0/</a>)</p>
-</li>
-<li>
-<p>Clickez "Save and Test"</p>
-</li>
-<li>
-<p>Vous devez avoir un message vert vous disant que votre data source est chargée.</p>
-</li>
-</ul>
-</div>
-</div>
-<div class="sect2">
-<h3 id="utiliser-spark-pour-requếter-les-données"><a class="anchor" href="#utiliser-spark-pour-requếter-les-données"></a>5.4. Utiliser Spark pour requếter les données</h3>
+<h3 id="utiliser-spark-pour-requếter-les-données"><a class="anchor" href="#utiliser-spark-pour-requếter-les-données"></a>5.3. Utiliser Spark pour requếter les données</h3>
 <div class="paragraph">
 <p>Apache Spark est une plateforme open source pour traiter de grandes quantités de données en parallèle sur un cluster de machines.</p>
 </div>
@@ -1774,7 +1905,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 </div>
 <div class="sect2">
-<h3 id="linjection-temps-réel-avec-logisland"><a class="anchor" href="#linjection-temps-réel-avec-logisland"></a>5.5. L&#8217;injection temps réel avec LogIsland</h3>
+<h3 id="linjection-temps-réel-avec-logisland"><a class="anchor" href="#linjection-temps-réel-avec-logisland"></a>5.4. L&#8217;injection temps réel avec LogIsland</h3>
 <div class="paragraph">
 <p>Le logiciel Open Source de Hurence permettant de faire du stream processing (donc du traitement temps réel de données) permet bien sûr d&#8217;injecter des données "à la volée", notamment celles que vous aurez pu "pousser" dans un bus de message Mqtt ou Kafka.</p>
 </div>
@@ -1797,12 +1928,43 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 <p>La manipulation des données depuis les data sources de votre data historian se fait comme pour les autres sources. Vous fournissez votre requête, un intervalle de temps si nécessaire, et un algorithme de sampling si vous requêtez sur une grande quantité de points (pour que la courbe soit bien lisible).</p>
 </div>
 <div class="sect2">
-<h3 id="configurer-grafana-et-vos-dashboard"><a class="anchor" href="#configurer-grafana-et-vos-dashboard"></a>6.1. Configurer Grafana et vos dashboard</h3>
+<h3 id="configurer-la-data-source-grafana"><a class="anchor" href="#configurer-la-data-source-grafana"></a>6.1. Configurer la data source grafana</h3>
 <div class="paragraph">
-<p>Pour créér des dashboard il faut aller sur l&#8217;interface graphique de grafana (<a href="http://localhost:3000/">http://localhost:3000/</a> (localhost étant à remplacer par un nom de machine si vous n&#8217;êtes pas en installation standalone).</p>
+<p>En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur <a href="http://localhost:3000">l&#8217;URL de grafana</a>. Vous pouvez vous logger en tant que user: admin et pwd: admin (Vous pouvez passer l&#8217;écran suivant).</p>
 </div>
 <div class="paragraph">
-<p>Allez ensuite dans le menu des datasources :</p>
+<p>Vous avez une page d&#8217;accueil que nous pouvez lire puis faire disparaître.
+Afin de pouvoir consulter les données du data historian :</p>
+</div>
+<div class="sect3">
+<h4 id="explication-sans-image"><a class="anchor" href="#explication-sans-image"></a>6.1.1. Explication sans image</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Vous allez clicker sur le bouton de Configuration à gauche puis sur "Data Sources".</p>
+</li>
+<li>
+<p>Clickez sur le bouton "Add data source".</p>
+</li>
+<li>
+<p>Aller à la fin et clickez sur celle qui s&#8217;appelle "Hurence-Historian" ou bien filtrer dans la barre de recherche pour la faire apparaître.</p>
+</li>
+<li>
+<p>Mettez dans la case "URL" l&#8217;URL de votre historian server (l&#8217;installation par défaut est <a href="http://localhost:8080/api/grafana/v0/" class="bare">http://localhost:8080/api/grafana/v0/</a>)</p>
+</li>
+<li>
+<p>Clickez "Save and Test"</p>
+</li>
+<li>
+<p>Vous devez avoir un message vert vous disant que votre data source est chargée et bien configuré (joignable).</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="explication-avec-image"><a class="anchor" href="#explication-avec-image"></a>6.1.2. Explication avec image</h4>
+<div class="paragraph">
+<p>Allez dans le menu des datasources :</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1811,7 +1973,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 <div class="paragraph">
 <p>Cherchez la datasource "Hurence-Historian" et sélectionnez la.
-Il y a juste a renseigner l&#8217;URL <a href="http://localhost:8080/api/grafana/v0" class="bare">http://localhost:8080/api/grafana/v0</a> dans le cas de l&#8217;installation standalone.</p>
+Il y a juste a renseigner l&#8217;URL <a href="http://localhost:8080/api/grafana/v0/" class="bare">http://localhost:8080/api/grafana/v0/</a> dans le cas de l&#8217;installation standalone.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1819,8 +1981,17 @@ Il y a juste a renseigner l&#8217;URL <a href="http://localhost:8080/api/grafana
 </div>
 </div>
 <div class="paragraph">
-<p>Testez la connectivité en cliquant sur "Save &amp; Test" button at the bottom of the page.
-Ensuite créez un nouveau dashboard.</p>
+<p>Testez la connectivité en cliquant sur "Save &amp; Test" button at the bottom of the page.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="configurer-vos-dashboard"><a class="anchor" href="#configurer-vos-dashboard"></a>6.2. Configurer vos dashboard</h3>
+<div class="paragraph">
+<p>Pour créér des dashboards il faut aller sur l&#8217;interface graphique de grafana <a href="http://localhost:3000">l&#8217;URL de grafana</a> (localhost étant à remplacer par un nom de machine si vous n&#8217;êtes pas en installation standalone).</p>
+</div>
+<div class="paragraph">
+<p>Ensuite créez un nouveau dashboard.</p>
 </div>
 <div class="imageblock">
 <div class="content">
@@ -1830,10 +2001,51 @@ Ensuite créez un nouveau dashboard.</p>
 <div class="paragraph">
 <p>Ajoutez les graphes que vous voulez, un petit exemple ci-dessous :</p>
 </div>
+<div class="ulist">
+<ul>
+<li>
+<p>Nous avons sélectionné la métrique "happiness" (préalablement injecté).</p>
+</li>
+<li>
+<p>La time range choisis est de "2014-12-18 21:08:01" à "2020-01-13 14:48:41".</p>
+</li>
+</ul>
+</div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_graph_config_exemple.png" alt="exemple of query config">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_all_happiness.png" alt="exemple of query config">
 </div>
+</div>
+<div class="paragraph">
+<p>Pour configurer la time range :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_all_happiness_timerange.png" alt="exemple of query config">
+</div>
+</div>
+<div class="paragraph">
+<p>TODO remarque sur la visu</p>
+</div>
+<div class="paragraph">
+<p>Si on filtre sur le tag "Country" avec la valeur France par exemple on obtient :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_france_happiness.png" alt="exemple of query config">
+</div>
+</div>
+<div class="paragraph">
+<p>Pour cela il faut cliquer sur "Add new tag filter". Puis sélectionner la valeur "Country" comme "Tag name".
+Enfin cliquer sur "Tag value" et commencer à taper le nom du pays désirer puis sélectionner "France" lorsque celui-ci apparaît.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_add_tag.png" alt="exemple of query config">
+</div>
+</div>
+<div class="paragraph">
+<p>TODO général note</p>
 </div>
 <div class="paragraph">
 <p>Une "query" (requête) consiste à renseigner un nom de métrique, et des paires de tag name/tag value ainsi que des options pour l&#8217;algorithme de sampling.</p>
@@ -1881,7 +2093,7 @@ bin/solr stop -all</pre>
 <div id="footer">
 <div id="footer-text">
 Version v1.0<br>
-Last updated 2020-09-08 15:32:11 +0200
+Last updated 2020-09-08 18:18:50 +0200
 </div>
 </div>
 <style>
