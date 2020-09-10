@@ -114,8 +114,8 @@ public class QueryEndPointWithBadSchemaEVOA0IT extends AbstractQueryEndPointIT {
                 ));
         injector.addChunk(metricNameSpecialCharacters2, "test",
                 Arrays.asList(
-                        new Point(0, 1477895624868L, 861),
-                        new Point(0, 1477917224869L, 767)
+                        new PointImpl(1477895624868L, 861),
+                        new PointImpl(1477917224869L, 767)
                 ));
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
