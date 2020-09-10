@@ -1,0 +1,4 @@
+metric,timestamp,value
+metric_1, 1, 1.2
+metric_1, 2, 2
+metric_1, 3, 3

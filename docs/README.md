@@ -2,7 +2,7 @@ Building the documentation is simple. You must be in the docs folder and launch 
 
 ``mvn process-resources``
 
-Currently only the french documentation is built. 
+Currently only the french and english documentation are built. 
 
 The process for editing is the following: the userguide is edited in asciidoc in all supported languages in a 
 sub-directory corresponding to the language locale. Asciidoctor processors are then used to take the asciidoc 

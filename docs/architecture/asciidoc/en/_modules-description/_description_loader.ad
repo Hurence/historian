@@ -1,0 +1,9 @@
+=== loader
+
+The loader contains batch jobs. For the time being, this module contains only one job which is used to recompact the chunks of the historian with different configurable sizes (the compactor). For example during real-time injection into the data historian, small chunks are injected. However, to optimize performance, we need large chunks.
+In addition, depending on the type of requests made and the frequency of points for a given metric, being able to play on the size of the chunks, and to vary it according to the use case, is very important.
+
+For example if we make requests over long periods, we need big chunks to gain performance. Indeed we will not even need to decompress these chunks, using their precalculated aggregation will be enough.
+Besides, this recompaction job could also be used as a basis to allow us in the future to add new pre-calculated aggregations if necessary, or to add any information that seems necessary to us.
+
+The compactor uses Spark and Solr.

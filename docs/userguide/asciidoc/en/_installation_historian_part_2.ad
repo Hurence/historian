@@ -1,0 +1,21 @@
+And here an overview if all well done during installation (verify you have no error printed) :
+
+image::screenshot_install_succeeded.png[]
+
+You can verify that your server has been launched with the following command:
+
+[source, bash]
+----
+curl http://localhost:8080/api/grafana/v0
+----
+
+If this is not the case, go to the logs (in the installation directory and in the subdirectory historian-${hdh_version}, there is an app.log file). In general it will be a problem of rights to create directories: especially in /tmp (check your write rights on this directory).
+
+
+To launch or restart the historian type the following command in the installation folder :
+
+[source, bash]
+----
+historian-{hdh_version}/bin/historian-server.sh start
+(or historian-{hdh_version}/bin/historian-server.sh restart)
+----
