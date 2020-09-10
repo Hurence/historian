@@ -13,7 +13,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
-import static com.hurence.webapiservice.http.api.ingestion.util.TimeStampUnit.*;
+import static com.hurence.webapiservice.http.api.ingestion.util.TimestampUnit.*;
 
 public class DataConverter {
 
