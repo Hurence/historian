@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.ingestion;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
+import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -14,7 +15,6 @@ import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
 
-
 public class IngestionApiImpl implements IngestionApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiImpl.class);
@@ -22,7 +22,6 @@ public class IngestionApiImpl implements IngestionApi {
 
     public IngestionApiImpl(HistorianService service) {
         this.service = service;
-
     }
 
     /**
@@ -81,13 +80,23 @@ public class IngestionApiImpl implements IngestionApi {
             JsonObject errorObject = new JsonObject().put(HistorianServiceFields.ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage("BAD REQUEST");
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
             context.response().end(String.valueOf(errorObject));
             return;
         }
+
+        JsonObject finalResponse = constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap);
+        if (multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints.isEmpty()) {
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+            return;
+        }
         JsonObject pointsToBeInjected = new JsonObject().put(HistorianServiceFields.POINTS, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
                 .put(HistorianServiceFields.ORIGIN, "ingestion-csv");
+
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
@@ -98,7 +107,7 @@ public class IngestionApiImpl implements IngestionApi {
                 .doOnSuccess(response -> {
                     context.response().setStatusCode(CREATED);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+                    context.response().end(finalResponse.encodePrettily());
                 }).subscribe();
 
     }

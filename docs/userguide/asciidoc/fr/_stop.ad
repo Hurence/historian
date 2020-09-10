@@ -1,0 +1,10 @@
+== Stopper et détruire les données
+
+Cette section vous apprend à stopper les services et à détruire si nécessaire les données (après avoir testé vous voudrez alimenter avec vos données réelles).
+
+=== Stopper ses instances SolR
+
+Cette section vous apprend à stopper les intances SolR. Attention cette commande va éteindre Solr (cela pourrait impacter d'autres service utilisant Solr).
+
+    cd $SOLR_HOME
+    bin/solr stop -all

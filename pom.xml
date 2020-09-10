@@ -61,30 +61,33 @@
         <maven.min-version>3.1.0</maven.min-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <logisland.version>1.2.0</logisland.version>
-        <jackson.version>2.9.10</jackson.version>
-<!--        logs-->
+
+        <!--        logs-->
         <org.slf4j.version>1.7.16</org.slf4j.version>
         <org.log4j.version>1.2.16</org.log4j.version>
-<!--        scala-->
+
+        <logisland.version>1.2.0</logisland.version>
+        <jackson.version>2.9.10</jackson.version>
+        <!--        scala-->
         <scala.version>2.11.12</scala.version>
         <scala.binary.version>2.11</scala.binary.version>
-<!--JVM option-->
+
+        <!--JVM option-->
         <PermGen>64m</PermGen>
         <MaxPermGen>512m</MaxPermGen>
-<!--        solr-->
+        <!--        solr-->
         <solr.version>8.2.0</solr.version>
-<!--        spark-->
+        <!--        spark-->
         <spark.version>2.3.2</spark.version>
         <spark.solr>3.6.6</spark.solr>
-<!--        junit-->
+        <!--        junit-->
         <junit.version>4.12</junit.version>
         <junit-platform.version>1.2.0</junit-platform.version>
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
-<!--        vertx-->
+        <!--        vertx-->
         <vertx.version>3.8.1</vertx.version>
         <vertx-swagger-router.version>1.5.0</vertx-swagger-router.version>
-<!--        docker-->
+        <!--        docker-->
         <test.containers>1.12.2</test.containers>
         <!-- others -->
         <logisland.shade.packageName>shade.logisland</logisland.shade.packageName>

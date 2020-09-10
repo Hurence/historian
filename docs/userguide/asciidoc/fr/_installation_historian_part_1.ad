@@ -1,0 +1,24 @@
+Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
+et les chunks. Téléchargez le script d'installation de l'historian pour votre version
+https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
+Lancez l'installation en lançant ce script :
+
+NOTE:: Solr n'aime pas pour des questions de sécurité que vous installiez et lanciez en root.
+Utilisez donc un utilisateur qui n'est ni sudoer ni root (un utilisateur applicatif ou le vôtre) mais vérifiez bien que vous avez les droits en  écriture là où HDH va s'installer (par défaut /opt/hdh).
+
+[source,bash]
+----
+bash ./install.sh
+----
+
+NOTE:: le script install.sh doit être exécutable. Si vous obtenez un problème d'autorisation au lancement, vérifiez qu'il a les bonnes propriétés et sinon exécutez cette commande:
+
+[source,bash]
+----
+chmod +x install.sh
+----
+
+NOTE:: lors de l'installation Solr vous met en garde éventuellement sur votre configuration machine en ce qui concerne le nombre de fichiers ouverts qui est généralement réduit à 1024. Si vous voulez une installation robuste pour accueillir de nombreuses données il vous faudra changer ce paramètre avec la commande ulimit (et l'édition d'un fichier de configuration dont le nom dépend de votre OS).
+Référez vous à votre documentation système.
+
+Il sera alors demandé à l'utilisateur plusieurs informations.

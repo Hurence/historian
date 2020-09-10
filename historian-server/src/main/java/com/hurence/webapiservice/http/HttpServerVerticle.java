@@ -93,7 +93,6 @@ public class HttpServerVerticle extends AbstractVerticle {
                 .getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
-        //TODO config uploads tmp then delete
         router.mountSubRouter(IMPORT_ENDPOINT, importApi);
         //grafana
         Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService,conf.getMaxDataPointsAllowed())

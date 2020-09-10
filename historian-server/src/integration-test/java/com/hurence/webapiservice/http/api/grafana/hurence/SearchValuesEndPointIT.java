@@ -82,36 +82,48 @@ public class SearchValuesEndPointIT {
         injector.addChunk(chunkTempaUsine1Sensor1);
 
         ChunkModeleVersion0 chunkTempaUsine1Sensor2 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 5, 3)
+                new PointImpl( 5, 5)
         ));
         chunkTempaUsine1Sensor2.addTag("sensor", "sensor_2");
         chunkTempaUsine1Sensor2.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1Sensor2);
 
         ChunkModeleVersion0 chunkTempaUsine2Sensor3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 6, 4)
+                new PointImpl( 6, 6)
         ));
         chunkTempaUsine2Sensor3.addTag("sensor", "sensor_3");
         chunkTempaUsine2Sensor3.addTag("usine", "usine_2");
         injector.addChunk(chunkTempaUsine2Sensor3);
 
         ChunkModeleVersion0 chunkTempaUsine1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 7, 5)
+                new PointImpl( 7, 7)
         ));
         chunkTempaUsine1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1);
 
         ChunkModeleVersion0 chunkTempaUsine3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 7, 5)
+                new PointImpl( 8, 8)
         ));
-        chunkTempaUsine1.addTag("usine", "usine_3");
+        chunkTempaUsine3.addTag("usine", "usine_3");
         injector.addChunk(chunkTempaUsine3);
 
         ChunkModeleVersion0 chunkTempaNoUsine = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 7, 5)
+                new PointImpl( 9, 9)
         ));
-        chunkTempaUsine1.addTag("usine", "no_usine");
+        chunkTempaNoUsine.addTag("usine", "no_usine");
         injector.addChunk(chunkTempaNoUsine);
+
+        ChunkModeleVersion0 chunkWithEconomyTag1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
+                new PointImpl(10, 10)
+        ));
+        chunkWithEconomyTag1.addTag("Economy (GDP per Capita)", "1.44178");
+        injector.addChunk(chunkWithEconomyTag1);
+
+        ChunkModeleVersion0 chunkWithEconomyTag2 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
+                new PointImpl(11, 11)
+        ));
+        chunkWithEconomyTag2.addTag("Economy (GDP per Capita)", "1.52733");
+        injector.addChunk(chunkWithEconomyTag2);
 
         injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
@@ -121,6 +133,7 @@ public class SearchValuesEndPointIT {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
         SolrITHelper.addFieldToChunkSchema(container, "usine");
         SolrITHelper.addFieldToChunkSchema(container, "sensor");
+        SolrITHelper.addFieldToChunkSchema(container, "Economy (GDP per Capita)");
         return HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).ignoreElement();
     }
 
@@ -194,6 +207,48 @@ public class SearchValuesEndPointIT {
                 new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
                         "/http/grafana/hurence/searchValues/testSearchUsineValuesWithLimit/request.json",
                         "/http/grafana/hurence/searchValues/testSearchUsineValuesWithLimit/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    /**
+     * Bug issue #152  at https://github.com/Hurence/historian/issues/152
+     * Solved the 3 September 2020
+     *
+     * @param vertx
+     * @param testContext
+     */
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchEconomyValues(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchTagValuesWithSpaceAndParentheses/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchTagValuesWithSpaceAndParentheses/expectedResponse.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    /**
+     * Bug issue #152  at https://github.com/Hurence/historian/issues/152
+     * Solved the 3 September 2020
+     *
+     * @param vertx
+     * @param testContext
+     */
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testSearchEconomyValues2(Vertx vertx, VertxTestContext testContext) {
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_VALUES_API_ENDPOINT,
+                        "/http/grafana/hurence/searchValues/testSearchTagValuesWithSpaceAndParentheses2/request.json",
+                        "/http/grafana/hurence/searchValues/testSearchTagValuesWithSpaceAndParentheses2/expectedResponse.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
         );
