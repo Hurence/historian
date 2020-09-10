@@ -10,6 +10,7 @@ import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.FacetField;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.client.solrj.util.ClientUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,13 +28,12 @@ public class GetFieldValuesHandler {
     }
 
     public Handler<Promise<JsonObject>> getHandler(JsonObject params) {
-
         String field = params.getString(HistorianServiceFields.FIELD);
         String query = params.getString(HistorianServiceFields.QUERY);
         int limit = params.getInteger(HistorianServiceFields.LIMIT, solrHistorianConf.maxNumberOfTargetReturned);
-        String queryString = field +":*";
+        String queryString =  ClientUtils.escapeQueryChars(field) +":*";
         if (query!=null && !query.isEmpty()) {
-            queryString = field + ":*" + query + "*";
+            queryString = ClientUtils.escapeQueryChars(field) + ":*" + ClientUtils.escapeQueryChars(query) + "*";
         }
         SolrQuery solrQuery = new SolrQuery(queryString);
         solrQuery.setFilterQueries(queryString);
@@ -42,6 +42,7 @@ public class GetFieldValuesHandler {
         solrQuery.setFacetLimit(limit);
         solrQuery.setFacetMinCount(1);
         solrQuery.addFacetField(field);
+        LOGGER.trace("solrQuery is :\"{}\".", solrQuery);
         //  EXECUTE REQUEST
         return p -> {
             try {

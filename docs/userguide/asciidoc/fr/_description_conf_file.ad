@@ -1,4 +1,4 @@
-Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoire :
+Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoires :
 
 [source,json]
 ----
@@ -11,6 +11,7 @@ Voici le fichier de configuration par défaut, il contient toutes les informatio
     "historian.address": "historian",
     "debug": false,
     "max_data_points_allowed_for_ExportCsv" : 10000,
+    "upload_directory": "/tmp/hurence-historian"
   },
   "historian": {
     "schema_version": "VERSION_0",
@@ -43,46 +44,44 @@ Voici le fichier de configuration par défaut, il contient toutes les informatio
 
 * General conf :
 
-** web.verticles.instance.number : Le nombre d'instances de verticles à déployer pour répondre aux appelles http des clients.
-Un verticle est capable de gérer un grand nombre de requête (au moins 1000, voir la documentation de vertx pour plus d'information).
-** historian.verticles.instance.number : Le nombre d'instances de verticles à déployer pour le service de l'historian qui s'occupe
-du sampling et des interactions avec le backend. C'est ce paramètre qui va être clé, il y a de grande chance que ce soit
+** web.verticles.instance.number : Le nombre d'instances de verticles à déployer pour répondre aux appels http des clients.
+Un verticle est capable de gérer un grand nombre de requêtes (au moins 1000, voir la documentation de vertx pour plus d'information).
+** historian.verticles.instance.number : Le nombre d'instances de verticles à déployer pour le service de l'historian qui s'occupe du sampling et des interactions avec le backend. C'est ce paramètre qui va être clé. Il y a de grandes chances que ce soit
 ce paramètre qu'il faille augmenter en cas de problème de performances.
 
 * Http server conf :
 
 ** http_server/host : le nom du serveur http à déployer.
-** http_server/port : le port sur lequelle déployé l'api rest.
-** http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d'autres services vertx et
-que vous savez ce que vous faites
+** http_server/port : le port sur lequel est déployé l'api rest.
+** http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d'autres services vertx. Il est essentiel de bien connaître vertx pour toucher à ce paramètre.
 ** http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l'historian
-accepte de retourner lorsqu'un client utiliser l'api rest d'export dans le format csv. Attention de ne pas choisir un maximum
-trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d'un gros export il vous faudra utiliser un
-outil comme spark.
+accepte de retourner lorsqu'un client utilise l'api rest d'export dans le format csv. Attention de ne pas choisir un maximum
+trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d'un gros export il vous faudra utiliser un outil comme spark pour réaliser l'export.
+** http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l'import de données achever).
 
 * Historian service conf :
 
 ** general conf
 *** historian/address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d'autres services vertx et
-que vous savez ce que vous faites. Doit être identique à la valeur de 'http_server/historian.address'.
+que vous maîtrisez vertx. Doit être identique à la valeur de 'http_server/historian.address'.
 *** historian/limit_number_of_point_before_using_pre_agg : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.
 *** historian/limit_number_of_chunks_before_using_solr_partition : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.
-*** historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métrique à retourner par défaut pour l'endpoint search.
+*** historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métriques à retourner par défaut pour l'endpoint search.
 *** historian/schema_version : La version du schéma a utiliser. (Attention ne pas modifier cette valeur manuellement !)
 ** solr conf
 *** historian/solr/connection_timeout : Le timeout lors de la connection au serveur Solr en millisecondes.
-*** historian/solr/socket_timeout : Le timeout pour tous les socket de lecture avec Solr en millisecondes.
-*** historian/solr/stream_url : l'url de la collection solr a utiliser pour l'api stream de solr. Il est recommandé de
-créer une collection dédié (avec les ressources suffisantes).
-*** historian/solr/chunk_collection : Le nom de la collection ou sont stockés les timeseries.
-*** historian/solr/annotation_collection : Le nom de la collection ou sont stockés les annotations.
+*** historian/solr/socket_timeout : Le timeout pour tous les sockets de lecture avec Solr en millisecondes.
+*** historian/solr/stream_url : l'url de la collection solr à utiliser pour l'api stream de solr. Il est recommandé de
+créer une collection dédiée (avec les ressources suffisantes).
+*** historian/solr/chunk_collection : Le nom de la collection ou sont stockées les timeseries.
+*** historian/solr/annotation_collection : Le nom de la collection ou sont stockées les annotations.
 *** historian/solr/sleep_milli_between_connection_attempt : Le nombre de millisecondes à attendre entre chaque tentatives
 de ping du serveur solr au démarrage de l'historian.
 *** historian/solr/number_of_connection_attempt : Le nombre de tentatives pour tester la connectivité au serveur solr
 au démarrage de l'historian.
-*** historian/solr/use_zookeeper : If you use solr cloud (using a zookeeper server) or not.
+*** historian/solr/use_zookeeper : Si vous utilisez solr cloud (avec un serveur zookeeper ou sans)
 **** option si utilisation de zookeeper
 ***** historian/solr/zookeeper_urls : une liste d'au moins un serveur zookeeper (ex: ["zookeeper1:2181"]).
-***** historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigné ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).
+***** historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigner ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).
 **** option si zookeeper n'est pas utilisé
 ***** historian/solr/urls : Les urls http pour faire des requêtes à solr. Par exemple ["http://server1:8983/solr", "http://server2:8983/solr"].

@@ -1,0 +1,4 @@
+=== gateway
+
+The gateway (or historian server) is implemented with vertx. This server offers a REST API that grafana-historian-datasource uses to trace the
+graphs in Grafana. This implies that these two modules are closely linked, if we modify the gateway API this will have an impact on the Grafana datasource and vice versa.

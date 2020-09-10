@@ -12,9 +12,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.http.api.ingestion.util.TimestampUnit.*;
-
-
 public class DataConverter {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DataConverter.class);
@@ -96,15 +93,15 @@ public class DataConverter {
             String format = multiMap.get(HistorianServiceFields.FORMAT_DATE);
             if (format != null)
                 switch (format) {
-                    case SECONDS_EPOCH:
+                    case TimestampUnit.SECONDS_EPOCH:
                         longValue = longValue*1000;
                         break;
-                    case MICROSECONDS_EPOCH:
+                    case TimestampUnit.MICROSECONDS_EPOCH:
                         longValue = longValue/1000;
                         break;
-                    case NANOSECONDS_EPOCH:
+                    case TimestampUnit.NANOSECONDS_EPOCH:
                         longValue = longValue/1000000;
-                    case MILLISECONDS_EPOCH:
+                    case TimestampUnit.MILLISECONDS_EPOCH:
                         break;
                     default:
                         throw  new IllegalArgumentException("TIMESTAMP_UNIT is not correct.");

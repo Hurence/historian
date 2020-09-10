@@ -77,7 +77,7 @@ public class HistorianVerticle extends AbstractVerticle {
         LOGGER.info("{} deployed on address : '{}'", HistorianService.class.getSimpleName(), conf.getHistorianServiceAddress());
         promise.complete();
       } else {
-        LOGGER.error("Failed to deploy historian verticle", ready.cause());
+        LOGGER.error("Initialisation of historian verticle failed", ready.cause());
         promise.fail(ready.cause());
       }
     });
