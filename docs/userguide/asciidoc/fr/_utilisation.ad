@@ -175,6 +175,7 @@ Attention la requête est sensible aux majuscules. La même requête avec un "f"
 ----
 
 Obtenir des mesures en spécifiant :
+
 * Un intervalle de temps
 * La métrique dont on chercher les données est "happiness"
 * On veut au maximum 10 points
@@ -211,14 +212,14 @@ Cette query retourne cette réponse :
 }]
 ----
 
-Nous obtenons bien moins de 10 points. Attention comme nous n'avons pas préciser de tag les valeurs de tous les pays sont mélangés !
+Nous obtenons bien moins de 10 points. Attention comme nous n'avons pas précisé de tags les valeurs de tous les pays sont mélangés !
 
-note:: Il n y a ici que 4 point de retourner alors que nous avons spécifier un maximum de 10 points. Cela n'est pas optimum car il
-ya plus de 10 points en tout ! En effet nous devrions ici avoir 10 points. Ce problème sera fixé lors de la prochaine release. En attendant
-n'hésitez pas a augmenter la valeur de "max_data_points" si cela devait vous arriver.
+note:: Il n y a ici que 4 points de retournés alors que nous avons spécifié un maximum de 10 points. Cela n'est pas optimum car il
+y a plus de 10 points en tout ! En effet nous devrions ici avoir 10 points. Ce problème sera fixé lors de la prochaine release. En attendant
+n'hésitez pas à augmenter la valeur de "max_data_points" si cela devait vous arriver.
 
 warn:: Attention cependant a ne pas demander trop de points ! En effet si vous voulez exporter la totalité des points cette endpoint n'est
-pas l'outil adéquat. D'ailleurs si le nombre indiqué est supérieur à 2147483647 la requête ne fonctionnera pas. Dans une futur release
+pas l'outil adéquat. D'ailleurs si le nombre indiqué est supérieur à {max_data_points_max} la requête ne fonctionnera pas. Dans une futur release
 le maximum pour cette variable sera revue à la baisse.
 
 === Utiliser Spark pour requếter les données

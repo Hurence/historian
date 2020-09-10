@@ -20,6 +20,7 @@
 :url-historian-grafana-api: http://localhost:8080/api/grafana/v0/
 :url-rest-api-pdf: https://github.com/Hurence/historian/blob/release-1.3.5/docs/generated-docs/pdf/fr/rest-api.pdf
 :url-architecture-pdf: https://github.com/Hurence/historian/blob/release-1.3.5/docs/generated-docs/pdf/fr/architecture.pdf
+:max_data_points_max: 2147483647
 
 include::./_introduction.ad[]
 
