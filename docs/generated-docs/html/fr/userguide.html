@@ -1787,11 +1787,23 @@ Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tous l
 </div>
 </div>
 <div class="paragraph">
-<p>Obtenir des mesures en spécifiant :
-* Un intervalle de temps
-* La métrique dont on chercher les données est "happiness"
-* On veut au maximum 10 points
-* Si il y a besoin d&#8217;effectuer un sampling nous voulons utiliser un algorithme à base de bucket et en prenant la plus petite valeur à chaque fois.</p>
+<p>Obtenir des mesures en spécifiant :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Un intervalle de temps</p>
+</li>
+<li>
+<p>La métrique dont on chercher les données est "happiness"</p>
+</li>
+<li>
+<p>On veut au maximum 10 points</p>
+</li>
+<li>
+<p>Si il y a besoin d&#8217;effectuer un sampling nous voulons utiliser un algorithme à base de bucket et en prenant la plus petite valeur à chaque fois.</p>
+</li>
+</ul>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1826,15 +1838,15 @@ Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tous l
 </div>
 </div>
 <div class="paragraph">
-<p>Nous obtenons bien moins de 10 points. Attention comme nous n&#8217;avons pas préciser de tag les valeurs de tous les pays sont mélangés !</p>
+<p>Nous obtenons bien moins de 10 points. Attention comme nous n&#8217;avons pas précisé de tags les valeurs de tous les pays sont mélangés !</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">note</dt>
 <dd>
-<p>Il n y a ici que 4 point de retourner alors que nous avons spécifier un maximum de 10 points. Cela n&#8217;est pas optimum car il
-ya plus de 10 points en tout ! En effet nous devrions ici avoir 10 points. Ce problème sera fixé lors de la prochaine release. En attendant
-n&#8217;hésitez pas a augmenter la valeur de "max_data_points" si cela devait vous arriver.</p>
+<p>Il n y a ici que 4 points de retournés alors que nous avons spécifié un maximum de 10 points. Cela n&#8217;est pas optimum car il
+y a plus de 10 points en tout ! En effet nous devrions ici avoir 10 points. Ce problème sera fixé lors de la prochaine release. En attendant
+n&#8217;hésitez pas à augmenter la valeur de "max_data_points" si cela devait vous arriver.</p>
 </dd>
 <dt class="hdlist1">warn</dt>
 <dd>
@@ -2093,7 +2105,7 @@ bin/solr stop -all</pre>
 <div id="footer">
 <div id="footer-text">
 Version v1.0<br>
-Last updated 2020-09-08 18:18:50 +0200
+Last updated 2020-09-10 16:49:58 +0200
 </div>
 </div>
 <style>
