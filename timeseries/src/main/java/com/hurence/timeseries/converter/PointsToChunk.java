@@ -8,6 +8,7 @@ import com.hurence.timeseries.modele.points.Point;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * This class is not thread safe !
@@ -17,11 +18,11 @@ public interface PointsToChunk {
     SchemaVersion getVersion();
 
     Chunk buildChunk(String name,
-                            List<? extends Point> points,
+                     TreeSet<? extends Point> points,
                             Map<String, String> tags);
 
     default Chunk buildChunk(String name,
-                            List<? extends Point> points) {
+                             TreeSet<? extends Point> points) {
         return buildChunk(name, points, Collections.emptyMap());
     }
 

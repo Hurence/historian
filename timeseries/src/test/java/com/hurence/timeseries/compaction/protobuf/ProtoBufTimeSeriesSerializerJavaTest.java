@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -64,7 +65,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
         long start = points.get(0).getTimestamp();
         long end = points.get(points.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(points, ddc);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        TreeSet<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
@@ -83,7 +84,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
         long start = expectedPoints.get(0).getTimestamp();
         long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 0);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        TreeSet<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
@@ -125,7 +126,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(50, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 1);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        TreeSet<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
@@ -149,7 +150,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(50, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 1);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        TreeSet<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
@@ -172,7 +173,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(50, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 2);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        TreeSet<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
@@ -209,7 +210,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(500, 1.2d)
         );
         byte[] compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(expectedPoints, 2);
-        List<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
+        TreeSet<PointImpl> uncompressedPoints = ProtoBufTimeSeriesSerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 500
         );

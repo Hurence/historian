@@ -16,6 +16,7 @@ import com.hurence.timeseries.query.TypeFunctions;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TreeSet;
 
 /**
  * This class is not thread safe !
@@ -36,7 +37,7 @@ public class PointsToChunkVersionEVOA0 implements PointsToChunk {
         return SchemaVersion.EVOA0;
     }
 
-    public ChunkVersionEVOA0 buildChunk(String name, List<? extends Point> points, Map<String, String> tags) {
+    public ChunkVersionEVOA0 buildChunk(String name, TreeSet<? extends Point> points, Map<String, String> tags) {
         if (points == null || points.isEmpty())
             throw new IllegalArgumentException("points should not be null or empty");
         MetricTimeSeries chunk = buildMetricTimeSeries(name, points);
@@ -51,12 +52,6 @@ public class PointsToChunkVersionEVOA0 implements PointsToChunk {
         analyses = functions.getTypeFunctions(new MetricType()).getAnalyses();
         encodings = functions.getTypeFunctions(new MetricType()).getEncodings();
         functionValueMap = new FunctionValueMap(aggregations.size(), analyses.size(), transformations.size(), encodings.size());
-    }
-
-
-    @Override
-    public Chunk buildChunk(String name, List<? extends Point> points) {
-        return null;
     }
 
     private ChunkVersionEVOA0 convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
@@ -141,7 +136,7 @@ public class PointsToChunkVersionEVOA0 implements PointsToChunk {
     }
 
 
-    private MetricTimeSeries buildMetricTimeSeries(String name, List<? extends Point> points) {
+    private MetricTimeSeries buildMetricTimeSeries(String name, TreeSet<? extends Point> points) {
         final long start = getStart(points);
         final long end  = getEnd(points);
         MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(name);
@@ -153,11 +148,11 @@ public class PointsToChunkVersionEVOA0 implements PointsToChunk {
         return tsBuilder.build();
     }
 
-    private long getEnd(List<? extends Point> points) {
-        return points.get(0).getTimestamp();
+    private long getEnd(TreeSet<? extends Point> points) {
+        return points.last().getTimestamp();
     }
 
-    private long getStart(List<? extends Point> points) {
-        return points.get(points.size() - 1).getTimestamp();
+    private long getStart(TreeSet<? extends Point> points) {
+        return points.first().getTimestamp();
     }
 }

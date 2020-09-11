@@ -8,10 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ChunkVersion0ImplTest {
 
@@ -25,8 +22,8 @@ public class ChunkVersion0ImplTest {
         }};
         PointsToChunkVersion0 converter = new PointsToChunkVersion0("test");
         ChunkVersion0 chunk = converter.buildChunk("metric 1",
-                Arrays.asList(
-                    Point.fromValue(1, 1),
+                new TreeSet<Point>(Arrays.asList(
+                        Point.fromValue(1, 1),
                         Point.fromValue(10, 2),
                         Point.fromValue(100, 3),
                         Point.fromValue(200, 4),
@@ -36,7 +33,7 @@ public class ChunkVersion0ImplTest {
                         Point.fromValue(800, 8),
                         Point.fromValue(1000, 9),
                         Point.fromValue(1111, 10)
-                ),
+                )),
                     tags
                 );
         //        origin chunk

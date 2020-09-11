@@ -12,11 +12,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
+import java.util.TreeSet;
 
 public class ChunkModeleVersionEVOA0 implements ChunkModele {
     private static int ddcThreshold = 0;
 
-    public List<PointImpl> points;
+    public TreeSet<PointImpl> points;
     public byte[] compressedPoints;
     public long start;
     public long end;
@@ -72,6 +73,15 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
                                                  int day,
                                                  String chunk_origin,
                                                  List<PointImpl> points) {
+        return fromPoints(metricName, year, month, day, chunk_origin, new TreeSet<>(points));
+    }
+
+    public static ChunkModeleVersionEVOA0 fromPoints(String metricName,
+                                                     int year,
+                                                     int month,
+                                                     int day,
+                                                     String chunk_origin,
+                                                     TreeSet<PointImpl> points) {
         ChunkModeleVersionEVOA0 chunk = new ChunkModeleVersionEVOA0();
         chunk.points = points;
         chunk.compressedPoints = compressPoints(chunk.points);
@@ -83,7 +93,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
         chunk.max = chunk.points.stream().mapToDouble(PointImpl::getValue).max().getAsDouble();
         chunk.name = metricName;
         chunk.sax = "edeebcccdf";
-        chunk.firstValue = points.get(0).getValue();
+        chunk.firstValue = points.first().getValue();
         chunk.year = year;
         chunk.month = month;
         chunk.day = String.valueOf(day);
@@ -91,7 +101,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
         return chunk;
     }
 
-    protected static byte[] compressPoints(List<PointImpl> pointsChunk) {
+    protected static byte[] compressPoints(TreeSet<PointImpl> pointsChunk) {
         byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }

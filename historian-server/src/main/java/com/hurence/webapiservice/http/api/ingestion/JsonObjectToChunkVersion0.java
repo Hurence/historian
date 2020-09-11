@@ -10,10 +10,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * This class is not thread safe !
@@ -28,7 +25,7 @@ public class JsonObjectToChunkVersion0 {
 
 
     public SolrInputDocument chunkIntoSolrDocument(JsonObject json) {
-        List<Point> points = getPoints(json);
+        TreeSet<Point> points = getPoints(json);
         String name = getName(json);
         Map<String, String> tags = getTags(json);
         Chunk chunk = converter.buildChunk(name, points, tags);
@@ -48,9 +45,9 @@ public class JsonObjectToChunkVersion0 {
         return json.getString(HistorianServiceFields.NAME);
     }
 
-    private List<Point> getPoints(JsonObject json) {
+    private TreeSet<Point> getPoints(JsonObject json) {
         JsonArray pointsJson = json.getJsonArray(HistorianServiceFields.POINTS);
-        List<Point> points = new ArrayList<>();
+        TreeSet<Point> points = new TreeSet<>();
         for (Object point : pointsJson) {
             JsonArray jsonPoint = (JsonArray) point;
             long timestamps = jsonPoint.getLong(0);

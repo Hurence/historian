@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSeriesRecord>, Serializable {
@@ -64,7 +65,7 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSe
     }
 
 
-    public List<PointImpl> deSerializeTimeseries(final byte[] chunk, final long start, final long end) throws IOException {
+    public TreeSet<PointImpl> deSerializeTimeseries(final byte[] chunk, final long start, final long end) throws IOException {
         return BinaryCompactionUtil.unCompressPoints(chunk, start,end);
     }
 

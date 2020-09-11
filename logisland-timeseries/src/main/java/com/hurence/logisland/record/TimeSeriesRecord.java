@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 /**
@@ -118,7 +119,7 @@ public class TimeSeriesRecord extends StandardRecord {
         }
     }
 
-    public static List<PointImpl> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
+    public static TreeSet<PointImpl> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
         byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
         return BinaryCompactionUtil.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
     }
@@ -180,16 +181,16 @@ public class TimeSeriesRecord extends StandardRecord {
      *
      * @return uncompressed points lazyly if not yet done
      */
-    public List<PointImpl> getPoints() {
+    public TreeSet<PointImpl> getPoints() {
         if (hasField(RECORD_CHUNK_UNCOMPRESSED_POINTS))
-            return (List<PointImpl>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue();
+            return new TreeSet((List<PointImpl>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue());
         else {
-            List<PointImpl> points = null;
+            TreeSet<PointImpl> points = null;
             try {
                 points = getPointStream(getChunkValue(), getStartChunk(), getEndChunk());
             } catch (IOException e) {
                 logger.error("chile uncompressing data points of chunk", e);
-                return Collections.emptyList();
+                return new TreeSet<>();
             }
             setField(RECORD_CHUNK_UNCOMPRESSED_POINTS, FieldType.ARRAY, points);
             return points;

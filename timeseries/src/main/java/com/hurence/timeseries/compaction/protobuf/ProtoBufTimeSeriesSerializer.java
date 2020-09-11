@@ -49,7 +49,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static List<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
+    public static TreeSet<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
         return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
     }
     /**
@@ -61,7 +61,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param from              including points from
      * @param to                including points to
      */
-    public static List<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public static TreeSet<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
         LOGGER.debug("from - timeSeriesStart={} timeSeriesEnd={} to={} from={}", timeSeriesStart, timeSeriesEnd, to, from);
         if (from == -1 || to == -1) {
             throw new IllegalArgumentException("FROM or TO have to be >= 0");
@@ -70,25 +70,25 @@ public final class ProtoBufTimeSeriesSerializer {
         //if to is left of the time series, we have no points to return
         if (to < timeSeriesStart) {
             LOGGER.debug("error to={} is lower than timeSeriesStart={}", to, timeSeriesStart);
-            return Collections.emptyList();
+            return new TreeSet<>();
         }
         //if from is greater  to, we have nothing to return
         if (from > to) {
             LOGGER.debug("error from={} is greater than to={}", from, to);
-            return Collections.emptyList();
+            return new TreeSet<>();
         }
 
         //if from is right of the time series we have nothing to return
         if (from > timeSeriesEnd) {
             LOGGER.debug("error from={} is greater than timeSeriesEnd={}", from, timeSeriesEnd);
-            return Collections.emptyList();
+            return new TreeSet<>();
         }
 
         try {
             MetricProtocolBuffers.Points protocolBufferPoints = MetricProtocolBuffers.Points.parseFrom(decompressedBytes);
 
             List<MetricProtocolBuffers.Point> pList = protocolBufferPoints.getPList();
-            List<PointImpl> pointsToReturn = new ArrayList<>();
+            TreeSet<PointImpl> pointsToReturn = new TreeSet<>();
 
             int size = pList.size();
 

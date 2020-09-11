@@ -31,6 +31,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
@@ -128,7 +129,7 @@ public class ConvertToTimeseriesTest {
         byte[] binaryTimeseries = out.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes();
 
         try {
-            List<PointImpl> points = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
+            TreeSet<PointImpl> points = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
 
             assertEquals(points.size(), recordsCount);
         } catch (IOException e) {
