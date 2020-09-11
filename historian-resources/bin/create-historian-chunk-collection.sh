@@ -221,7 +221,6 @@ create_schema() {
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_year" "pint"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_month" "pint"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_day" "string"
-            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_hour" "pint"
             ;;
         *)
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"

@@ -188,7 +188,6 @@ public abstract class AbstractQueryEndPointIT {
                 "/http/grafana/hurence/query/metric-name/special-characters/expectedResponse.json");
     }
 
-
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
         assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);

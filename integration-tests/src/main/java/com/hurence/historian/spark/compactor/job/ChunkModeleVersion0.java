@@ -1,23 +1,22 @@
 package com.hurence.historian.spark.compactor.job;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
+import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.modele.chunk.ChunkFromJsonObjectVersion0;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
 import java.io.IOException;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ChunkModeleVersion0 implements ChunkModele {
     private static int ddcThreshold = 0;
 
-    public List<PointImpl> points;
+    public TreeSet<PointImpl> points;
     public byte[] compressedPoints;
     public long start;
     public long end;
@@ -77,7 +76,7 @@ public class ChunkModeleVersion0 implements ChunkModele {
                                                  String chunk_origin,
                                                  List<PointImpl> points) {
         ChunkModeleVersion0 chunk = new ChunkModeleVersion0();
-        chunk.points = points;
+        chunk.points = new TreeSet<>(points);
         chunk.compressedPoints = compressPoints(chunk.points);
         chunk.start = chunk.points.stream().mapToLong(PointImpl::getTimestamp).min().getAsLong();
         chunk.end = chunk.points.stream().mapToLong(PointImpl::getTimestamp).max().getAsLong();;
@@ -95,7 +94,7 @@ public class ChunkModeleVersion0 implements ChunkModele {
         return chunk;
     }
 
-    protected static byte[] compressPoints(List<PointImpl> pointsChunk) {
+    protected static byte[] compressPoints(TreeSet<PointImpl> pointsChunk) {
         byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }
@@ -123,6 +122,11 @@ public class ChunkModeleVersion0 implements ChunkModele {
         json.put(HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN, this.chunk_origin);
         return json;
     }
+
+    public Chunk toChunk(String id) {
+        return new ChunkFromJsonObjectVersion0(toJson(id));
+    }
+
 
     public SolrInputDocument buildSolrDocument(String id) {
         final SolrInputDocument doc = new SolrInputDocument();

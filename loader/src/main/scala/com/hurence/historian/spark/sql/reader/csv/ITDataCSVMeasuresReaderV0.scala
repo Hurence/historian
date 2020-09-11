@@ -1,13 +1,13 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.modele.MeasureRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.functions.lit
-import org.apache.spark.sql.{Dataset, SparkSession}
+import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl
+import com.hurence.timeseries.modele.measure.MeasureVersionV0
+import org.apache.spark.sql.functions.{lit, _}
+import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 
-class ITDataCSVMeasuresReaderV0 extends Reader[MeasureRecordV0] {
+class ITDataCSVMeasuresReaderV0 extends Reader[MeasureVersionV0] {
 
   def config(): Map[String, String] = Map(
     "inferSchema" -> "true",
@@ -16,7 +16,7 @@ class ITDataCSVMeasuresReaderV0 extends Reader[MeasureRecordV0] {
     "dateFormat" -> ""
   )
 
-  override def read(options: Options): Dataset[MeasureRecordV0] = {
+  override def read(options: Options): Dataset[MeasureVersionV0] = {
 
 
     val spark = SparkSession.getActiveSession.get
@@ -39,7 +39,7 @@ class ITDataCSVMeasuresReaderV0 extends Reader[MeasureRecordV0] {
         lit("min"), $"min",
         lit("max"), $"max"))
       .select("name", "value", "timestamp", "year", "month", "day", "hour", "tags")
-      .as[MeasureRecordV0]
+      .as[MeasureVersionV0](Encoders.bean(classOf[MeasureVersionV0]))
     //  .filter("day LIKE '2019-11-2%' OR day LIKE '2019-11-3%'")
   //    .filter("name = 'ack' OR name LIKE 'consumers%' OR name LIKE 'messages%' OR name LIKE 'memory%' OR name LIKE 'cpu%'")
       .repartition($"day")

@@ -1,10 +1,15 @@
 package com.hurence.webapiservice.historian.handler;
 
 import com.hurence.historian.modele.HistorianConf;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.modele.stream.ChunkStream;
+import com.hurence.timeseries.modele.chunk.Chunk;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.historian.impl.*;
+import com.hurence.webapiservice.historian.models.MetricSizeInfo;
+import com.hurence.webapiservice.historian.models.MetricsSizeInfo;
+import com.hurence.webapiservice.historian.models.MetricsSizeInfoImpl;
+import com.hurence.webapiservice.historian.SolrHistorianConf;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.*;
@@ -120,10 +125,8 @@ public class GetTimeSeriesHandler {
     }
 
     private void buildFilters(Request request, SolrQuery query) {
-        Map<String, String> rootTags = request.getRootTags();
-        //TODO Simplify : Here rootTags is not needed as merge is already done in getMetricRequestsWithFinalTags
         List<MetricRequest> metricOptions = request.getMetricRequestsWithFinalTags();
-        List<String> metricFilters = buildFilterForEachMetric(rootTags, metricOptions);
+        List<String> metricFilters = buildFilterForEachMetric(metricOptions);
         String finalFilter = buildFinalFilterQuery(metricFilters);
         query.addFilterQuery(finalFilter);
     }
@@ -146,7 +149,6 @@ public class GetTimeSeriesHandler {
      *     each string should looks like "(name:A && usine:usine_1 && sensor:sensor_1)"
      *     we filter on metric name and on every tags we get. we use tags of metricOptions and of rootTags.
      *     If there is conflict then tags of metricOptions have priority.
-     * @param rootTags
      * @param metricOptions
      * @return filter query for each metric
      *         each string should looks like :
@@ -156,11 +158,10 @@ public class GetTimeSeriesHandler {
      *
      *
      */
-    private List<String> buildFilterForEachMetric(Map<String, String> rootTags, List<MetricRequest> metricOptions) {
+    private List<String> buildFilterForEachMetric(List<MetricRequest> metricOptions) {
         List<String> finalStringList = new ArrayList<>();
         metricOptions.forEach(metricRequest -> {
             Map<String,String> finalTagsForMetric = new HashMap<>();
-            rootTags.forEach(finalTagsForMetric::put);
             metricRequest.getTags().forEach(finalTagsForMetric::put);
             List<String> tagsFilter = new ArrayList<>();
             finalTagsForMetric.forEach((key, value) -> {
@@ -229,7 +230,7 @@ public class GetTimeSeriesHandler {
         Tuple tuple = solrStream.read();
         MetricsSizeInfoImpl metricsInfo = new MetricsSizeInfoImpl();
         while (!tuple.EOF) {
-            LOGGER.trace("tuple : {}", tuple.jsonStr());
+            LOGGER.trace("tuple : {}", tuple.jsonStr());//TODO truncate chunk if necessary how ?
             for (MetricRequest request: requests) {
                 if (isTupleMatchingMetricRequest(request, tuple)) {
                     metricsInfo.increaseNumberOfChunksForMetricRequest(request,
@@ -302,12 +303,15 @@ public class GetTimeSeriesHandler {
     public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(Request request, SolrQuery query, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         //TODO make three different group for each metrics, not use a single strategy globally for all metrics.
         final MultiTimeSeriesExtracter timeSeriesExtracter;
+        //Now CHUNK_VALUE_FIELD may potentially be needed by all mode. In case we must recompute chunks !
+        //Indeed if user query data from t1 to t3 and chunk contains data from t2 and t4 we must recompute the chunk
+        //by removing data after t3 !
+        query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
         if (metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint ||
                 metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint() ||
                 metricsInfo.getTotalNumberOfChunks() < getSamplingConf(request).getMaxPoint()
         ) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
-            query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (metricsInfo.getTotalNumberOfChunks() < solrHistorianConf.limitNumberOfChunks) {
             LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
@@ -326,7 +330,7 @@ public class GetTimeSeriesHandler {
 
 
     public void requestSolrAndBuildTimeSeries(SolrQuery query, Promise<JsonObject> p, MultiTimeSeriesExtracter timeSeriesExtracter) {
-        try (JsonStream stream = queryStream(query)) {
+        try (ChunkStream stream = queryStream(query)) {
             JsonObject timeseries = extractTimeSeriesThenBuildResponse(stream, timeSeriesExtracter);
             p.complete(timeseries);
         } catch (Exception e) {
@@ -425,16 +429,16 @@ public class GetTimeSeriesHandler {
         return new SamplingConf(algo, bucketSize, maxPoint);
     }
 
-    private JsonObject extractTimeSeriesThenBuildResponse(JsonStream stream, MultiTimeSeriesExtracter timeSeriesExtracter) throws IOException {
+    private JsonObject extractTimeSeriesThenBuildResponse(ChunkStream stream, MultiTimeSeriesExtracter timeSeriesExtracter) throws IOException {
         stream.open();
-        JsonObject chunk = stream.read();
-        while (!chunk.containsKey("EOF") || !chunk.getBoolean("EOF")) {
+        Chunk chunk = stream.read();
+        while (stream.hasNext()) {
             timeSeriesExtracter.addChunk(chunk);
             chunk = stream.read();
         }
         timeSeriesExtracter.flush();
-        LOGGER.debug("read {} chunks in stream", stream.getNumberOfDocRead());
-        LOGGER.debug("extractTimeSeries response metric : {}", chunk.encodePrettily());
+        LOGGER.debug("read {} chunks in stream", stream.getCurrentNumberRead());
+        LOGGER.debug("extractTimeSeries response metric : {}", chunk.toString());
         return buildTimeSeriesResponse(timeSeriesExtracter);
     }
 
@@ -444,7 +448,7 @@ public class GetTimeSeriesHandler {
                 .put(HistorianServiceFields.TIMESERIES, timeSeriesExtracter.getTimeSeries());
     }
 
-    private JsonStream queryStream(SolrQuery query) {
+    private ChunkStream queryStream(SolrQuery query) {
         StringBuilder exprBuilder = new StringBuilder("search(").append(solrHistorianConf.chunkCollection).append(",")
                 .append("q=\"").append(query.getQuery()).append("\",");
         if (query.getFilterQueries() != null) {
@@ -466,7 +470,7 @@ public class GetTimeSeriesHandler {
         TupleStream solrStream = new SolrStream(solrHistorianConf.streamEndPoint, paramsLoc);
         StreamContext context = new StreamContext();
         solrStream.setStreamContext(context);
-        return JsonStreamSolrStream.forVersion(solrHistorianConf.schemaVersion, solrStream);
+        return ChunkStream.fromVersionAndSolrStream(solrHistorianConf.schemaVersion, solrStream);
     }
 
     private static class Request {

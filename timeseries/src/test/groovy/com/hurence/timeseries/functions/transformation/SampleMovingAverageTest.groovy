@@ -30,7 +30,7 @@ class SampleMovingAverageTest extends Specification {
 
     def "test transform with last window contains only one point"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Sample Moving average","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Sample Moving average")
         def movAvg = new SampleMovingAverage(["5"] as String[])
 
         timeSeriesBuilder.point(dateOf("2016-05-23T10:51:00.000Z"), 5)

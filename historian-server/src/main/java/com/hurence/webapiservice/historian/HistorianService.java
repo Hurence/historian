@@ -2,8 +2,6 @@ package com.hurence.webapiservice.historian;
 
 import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
-import com.hurence.webapiservice.historian.impl.SolrHistorianServiceImpl;
 import io.vertx.codegen.annotations.Fluent;
 import io.vertx.codegen.annotations.GenIgnore;
 import io.vertx.codegen.annotations.ProxyGen;

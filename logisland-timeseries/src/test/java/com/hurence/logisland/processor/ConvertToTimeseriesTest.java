@@ -21,7 +21,7 @@ import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.util.runner.MockRecord;
 import com.hurence.logisland.util.runner.TestRunner;
 import com.hurence.logisland.util.runner.TestRunners;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +31,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.Assert.assertEquals;
 
@@ -118,7 +119,7 @@ public class ConvertToTimeseriesTest {
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_START, 1000000);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_END, 1001999);
         out.assertFieldEquals(TimeSeriesRecord.METRIC_NAME, "cpu.load");
-        out.assertFieldEquals(FieldDictionary.RECORD_TYPE, SAMPLED_RECORD);
+        out.assertFieldEquals(FieldDictionary.RECORD_TYPE, "timeseries");
         out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8063);
@@ -128,7 +129,7 @@ public class ConvertToTimeseriesTest {
         byte[] binaryTimeseries = out.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes();
 
         try {
-            List<PointImpl> points = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
+            TreeSet<PointImpl> points = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
 
             assertEquals(points.size(), recordsCount);
         } catch (IOException e) {

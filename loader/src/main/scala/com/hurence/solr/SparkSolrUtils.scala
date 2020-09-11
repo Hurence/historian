@@ -1,10 +1,10 @@
 package com.hurence.solr
 
-import com.hurence.historian.modele.ChunkRecordV0
+import com.hurence.timeseries.modele.chunk.ChunkVersion0
 import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
 
 object SparkSolrUtils {
-  def loadTimeSeriesFromSolR(spark: SparkSession, solrOpts: Map[String, String]): Dataset[ChunkRecordV0] = {
+  def loadTimeSeriesFromSolR(spark: SparkSession, solrOpts: Map[String, String]): Dataset[ChunkVersion0] = {
     //TODO
     return null;
 //    spark.read

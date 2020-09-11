@@ -1,0 +1,7 @@
+{
+  "from": "1970-01-01T02:46:40.000Z",
+  "to": "1970-01-05T15:06:40.000Z",
+  "names": ["metric"],
+  "max_data_points": 2000,
+  "aggregations": ["COUNT"]
+}

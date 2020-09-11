@@ -16,9 +16,8 @@
 package com.hurence.timeseries.functions.encoding
 
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.functions.encoding.Sax
-import com.hurence.timeseries.modele.DoubleList
-import com.hurence.timeseries.modele.LongList
+import com.hurence.timeseries.modele.list.DoubleList
+import com.hurence.timeseries.modele.list.LongList
 import com.hurence.timeseries.functions.FunctionValueMap
 import spock.lang.Specification
 
@@ -29,7 +28,7 @@ import spock.lang.Specification
 class SaxTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Sax", "metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Sax")
 
         LongList timestamps = new LongList()
         15.times {
@@ -74,7 +73,7 @@ class SaxTest extends Specification {
         def analysisResult = new FunctionValueMap(0, 0, 0, 1)
 
         when:
-        new Sax().execute(new MetricTimeSeries.Builder("Empty", "metric").build(), analysisResult)
+        new Sax().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
 
         then:
         analysisResult.getEncodingValue(0).isEmpty()

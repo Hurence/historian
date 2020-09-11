@@ -28,7 +28,7 @@ class CountTest extends Specification {
 
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Count","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Count")
         10.times {
             timeSeries.point(it, it * 10)
         }
@@ -48,7 +48,7 @@ class CountTest extends Specification {
         given:
         def analysisResult = new FunctionValueMap(1, 1, 1)
         when:
-        new Count().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Count().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == 0.0d
     }

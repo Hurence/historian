@@ -1,14 +1,14 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
+import com.hurence.timeseries.modele.chunk.Chunk;
 import io.vertx.core.json.JsonArray;
-import io.vertx.core.json.JsonObject;
 
 public interface MultiTimeSeriesExtracter {
 
     public static String TIMESERIE_TAGS = "tags";
     public static String TIMESERIE_NAME = "name";
 
-    void addChunk(JsonObject chunk);
+    void addChunk(Chunk chunk);
 
     /**
      * Sample left chunks

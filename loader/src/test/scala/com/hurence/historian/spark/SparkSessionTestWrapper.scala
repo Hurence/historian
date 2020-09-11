@@ -1,7 +1,8 @@
 package com.hurence.historian.spark
 
-import com.hurence.historian.modele.{ChunkRecordV0, MeasureRecordV0}
-import org.apache.spark.sql.SparkSession
+import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl
+import com.hurence.timeseries.modele.measure.MeasureVersionV0Impl
+import org.apache.spark.sql.{Encoders, SparkSession}
 
 
 /**
@@ -19,24 +20,20 @@ trait SparkSessionTestWrapper {
 
 
   lazy val it4MetricsDS = {
-
-    import spark.implicits._
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
 
     spark.read
       .parquet(filePath)
-      .as[MeasureRecordV0]
+      .as[MeasureVersionV0Impl](Encoders.bean(classOf[MeasureVersionV0Impl]))
       .cache()
   }
 
   lazy val it4MetricsChunksDS = {
-
-    import spark.implicits._
     val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics-chunk.parquet").getPath
 
     spark.read
       .parquet(filePath)
-      .as[ChunkRecordV0]
+      .as[ChunkVersion0Impl](Encoders.bean(classOf[ChunkVersion0Impl]))
       .cache()
   }
 }

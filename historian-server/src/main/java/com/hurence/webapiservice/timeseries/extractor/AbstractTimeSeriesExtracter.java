@@ -1,8 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -22,7 +21,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     final long from;
     final long to;
     final SamplingConf samplingConf;
-    protected final List<JsonObject> chunks = new ArrayList<>();
+    protected final List<Chunk> chunks = new ArrayList<>();
     final List<PointImpl> sampledPoints = new ArrayList<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
@@ -38,9 +37,9 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     }
 
     @Override
-    public void addChunk(JsonObject chunk) {
+    public void addChunk(Chunk chunk) {
         totalChunkCounter++;
-        pointCounter+=chunk.getLong(FieldNamesInsideHistorianService.CHUNK_COUNT);
+        pointCounter+=chunk.getCount();
         chunks.add(chunk);
         if (isBufferFull()) {
             samplePointsInBufferAndCalculAggregThenReset();
@@ -64,7 +63,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     protected void samplePointsInBufferAndCalculAggregThenReset() {
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("sample points in buffer has been called with chunks : {}",
-                    chunks.stream().map(JsonObject::encodePrettily).collect(Collectors.joining("\n")));
+                    chunks.stream().map(Chunk::toString).collect(Collectors.joining("\n")));
         }
         samplePointsFromChunksAndCalculAggreg(from, to, chunks);
         chunks.clear();
@@ -75,7 +74,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     /**
      * Sample points from the list of chunks using a strategy. Add them into sampled points then reset buffer
      */
-    protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks);
+    protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks);
 
     protected abstract Optional<JsonObject> getAggsAsJson();
 

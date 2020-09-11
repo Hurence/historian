@@ -10,7 +10,7 @@
 //import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
 //import com.hurence.logisland.record.TimeSeriesRecord
 //import com.hurence.solr.SparkSolrUtils
-//import com.hurence.timeseries.modele.PointImpl
+//import com.hurence.timeseries.modele.points.PointImpl
 //import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
 //import io.vertx.core.json.JsonObject
 //import org.apache.solr.client.solrj.SolrClient

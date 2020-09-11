@@ -44,7 +44,7 @@ import com.hurence.logisland.component.InitializationException;
     import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
     import com.hurence.timeseries.modele.Pair;
     import com.hurence.logisland.validator.StandardValidators;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import org.apache.commons.lang3.StringUtils;
     import org.slf4j.Logger;
     import org.slf4j.LoggerFactory;

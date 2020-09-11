@@ -171,7 +171,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_NAME, "metric_name")
                 .attribute(MAPPING_VALUE, "metric_value")
                 .attribute(MAPPING_QUALITY, "metric_quality")
-                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
+                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH)
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(

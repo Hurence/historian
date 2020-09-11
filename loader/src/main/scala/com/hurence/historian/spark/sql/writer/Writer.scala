@@ -5,6 +5,6 @@ import org.apache.spark.sql.Dataset
 
 trait Writer[T] {
 
-  def write(options: Options, ds: Dataset[T])
+  def write(options: Options, ds: Dataset[_ <: T])
 
 }

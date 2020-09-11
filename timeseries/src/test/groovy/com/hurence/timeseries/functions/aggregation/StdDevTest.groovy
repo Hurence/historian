@@ -27,7 +27,7 @@ import spock.lang.Specification
 class StdDevTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Stddev","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Stddev")
         10.times {
             timeSeries.point(it, it * 10)
         }
@@ -46,7 +46,7 @@ class StdDevTest extends Specification {
         given:
         def analysisResult = new FunctionValueMap(1, 1, 1)
         when:
-        new StdDev().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new StdDev().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

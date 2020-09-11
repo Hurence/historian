@@ -20,13 +20,14 @@ import com.hurence.logisland.record.*;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.Chunker;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 
 public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSeriesRecord>, Serializable {
@@ -64,7 +65,7 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSe
     }
 
 
-    public List<PointImpl> deSerializeTimeseries(final byte[] chunk, final long start, final long end) throws IOException {
+    public TreeSet<PointImpl> deSerializeTimeseries(final byte[] chunk, final long start, final long end) throws IOException {
         return BinaryCompactionUtil.unCompressPoints(chunk, start,end);
     }
 
@@ -75,12 +76,11 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSe
     private MetricTimeSeries buildTimeSeries(final List<Record> records) {
         final Record first = records.get(0);
         final Record last = records.get(records.size() - 1);
-        final String metricType = first.getType();
         final String metricName = first.getField(FieldDictionary.RECORD_NAME).asString();
         final long start = first.getTime().getTime();
         final long end = (last.getTime().getTime() == start) ? start + 1 : start;
 
-        MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(metricName, metricType);
+        MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(metricName);
         tsBuilder.start(start);
         tsBuilder.end(end);
 
