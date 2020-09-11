@@ -24,6 +24,7 @@ import spock.lang.Shared
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.lang.reflect.Array
 import java.text.DecimalFormat
 import java.time.Instant
 import java.util.zip.GZIPInputStream
@@ -45,7 +46,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def compressedProtoPoints = ProtoBufTimeSeriesSerializer.to(points.iterator())
 
         when:
-        def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(compressedProtoPoints), 0, points.size(), 0, points.size())
+        def uncompressedPoints = new ArrayList<>(ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(compressedProtoPoints), 0, points.size(), 0, points.size()))
         then:
         100.times {
             uncompressedPoints.get(it).getValue() == it * 100
@@ -71,7 +72,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), start.toEpochMilli(), end.toEpochMilli(), from, to)
 
         then:
-        List<PointImpl> list = uncompressedPoints
+        List<PointImpl> list = new ArrayList<>(uncompressedPoints)
         list.size() == size
         if (size == 21) {
             list.get(0).timestamp == 1456394850774
@@ -133,7 +134,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
         when:
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator())
-        def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1l, 1036l, 1l, 1036l)
+        def uncompressedPoints = new ArrayList<>(ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1l, 1036l, 1l, 1036l))
 
         then:
         uncompressedPoints.get(0).timestamp == 1
@@ -155,7 +156,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
         when:
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), 4)
-        def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1l, 1036l)
+        def uncompressedPoints = new ArrayList<>(ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1l, 1036l))
 
         then:
         uncompressedPoints.get(0).timestamp == 1//offset: 4
@@ -188,7 +189,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
         when:
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), 10)
-        def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 10l, 1036l)
+        def uncompressedPoints = new ArrayList<>(ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 10l, 1036l))
 
         then:                            //diff to origin
         uncompressedPoints.get(0).timestamp == 10//0
@@ -232,7 +233,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
         when:
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), 10)
-        def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1462892410L, 1462892538L)
+        def uncompressedPoints = new ArrayList<>(ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 1462892410L, 1462892538L))
         def listPoints = uncompressedPoints
 
         then:                            //diff to origin
@@ -297,7 +298,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 
         when:
         def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), 10)
-        def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 100L, 510L)
+        def uncompressedPoints = new ArrayList<>(ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), 100L, 510L))
         def listPoints = uncompressedPoints
 
         then:
@@ -310,179 +311,6 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
         ProtoBufTimeSeriesSerializer.to(Collections.emptyList(), -1)
         then:
         thrown(IllegalArgumentException)
-    }
-
-    def "test raw time series with almost_equals = 0"() {
-        given:
-        def rawTimeSeriesList = readTimeSeriesData()
-
-        when:
-        rawTimeSeriesList.each {
-            LOGGER.trace("Checking file ${it.key}")
-            def points = it.value
-            points.sort()
-            def startTs = points.get(0).getTimestamp()
-            def endTs = points.get(points.size() - 1).getTimestamp()
-
-            def start = System.currentTimeMillis()
-            def serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator())
-            def end = System.currentTimeMillis()
-
-            LOGGER.trace("Serialization took ${end - start} ms")
-
-            start = System.currentTimeMillis()
-            def uncompressedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), startTs, endTs)
-            end = System.currentTimeMillis()
-            LOGGER.trace("Deserialization took ${end - start} ms")
-            def count = points.size()
-            LOGGER.trace("Checking $count points for almost_equals = 0")
-
-            for (int i = 0; i < count; i++) {
-                if (points.get(i).getTimestamp() != uncompressedPoints.get(i).getTimestamp()) {
-                    long delta = points.get(i).getTimestamp() - uncompressedPoints.get(i).getTimestamp()
-                    throw new IllegalStateException("Points are not equals at " + i + ". Should " + points.get(i).getTimestamp() + " but is " + uncompressedPoints.get(i).getTimestamp() + " a delta of " + delta)
-                }
-                if (points.get(i).getValue() != uncompressedPoints.get(i).getValue()) {
-                    double delta = points.get(i).getValue() - uncompressedPoints.get(i).getValue()
-                    throw new IllegalStateException("Values not equals at " + i + ". Should " + points.get(i).getValue() + " but is " + uncompressedPoints.get(i).getValue() + " a delta of " + delta)
-                }
-            }
-        }
-        then:
-        noExceptionThrown()
-
-    }
-
-    def "test change rate"() {
-
-        given:
-        def rawTimeSeriesList = readTimeSeriesData()
-
-
-        when:
-        def file = new File("target/ddc-threshold.csv")
-        file.write("")
-        writeToFile(file, "Index;AlmostEquals;Legend;Value")
-
-        def index = 1
-
-        [0, 10, 25, 50, 100].eachWithIndex { def almostEquals, def almostEqualsIndex ->
-
-            LOGGER.trace( "=============================================================" )
-            LOGGER.trace( "===================     ${almostEquals} ms       =========================")
-            LOGGER.trace( "=============================================================")
-
-            def changes = 0
-            def sumOfPoint = 0
-            def maxDeviation = 0
-            def indexwiseDeltaRaw = 0
-            def indexwiseDeltaMod = 0
-            def averageDeviation = 0
-
-            def totalBytes = 0
-            def totalSerializedBytes = 0
-
-
-            rawTimeSeriesList.each { filename, points ->
-
-                points.sort()
-                def startTs = points.get(0).getTimestamp()
-                def endTs = points.get(points.size() - 1).getTimestamp()
-
-                def changesTS = 0
-                def sumOfPointTS = 0
-                def maxDeviationTS = 0
-                def indexwiseDeltaRawTS = 0
-                def indexwiseDeltaModTS = 0
-                def averageDeviationTS = 0
-                def compressedBytes = 0
-                def url = ProtoBufTimeSeriesSerializerTest.getResource("/data-mini")
-                def tsDir = new File(url.toURI())
-                def compressedFile = new File(tsDir, filename)
-                def rawBytes = new GZIPInputStream(new FileInputStream(compressedFile)).getBytes().length
-
-                def probuffedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), almostEquals)
-
-                def bytes = probuffedPoints.length
-                compressedBytes = Compression.compress(probuffedPoints).length
-
-                totalBytes += rawBytes
-                totalSerializedBytes += bytes
-
-                def unprotoBuffedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(probuffedPoints), startTs, endTs)
-
-                sumOfPoint += points.size()
-                sumOfPointTS = points.size()
-
-                for (int j = 0; j < points.size(); j++) {
-
-                    def rawTS = points.get(j).getTimestamp()
-                    def modTS = unprotoBuffedPoints.get(j).getTimestamp()
-
-                    def deviation = Math.abs(rawTS - modTS)
-
-                    averageDeviationTS += deviation
-                    averageDeviation += deviation
-
-                    if (deviation > maxDeviation) {
-                        maxDeviation = deviation
-                    }
-
-                    if (deviation > maxDeviationTS) {
-                        maxDeviationTS = deviation
-                    }
-
-                    if (j + 1 < points.size()) {
-                        indexwiseDeltaRaw += Math.abs(points.get(j + 1).getTimestamp() - rawTS)
-                        indexwiseDeltaMod += Math.abs(unprotoBuffedPoints.get(j + 1).getTimestamp() - modTS)
-
-                        indexwiseDeltaRawTS += indexwiseDeltaRaw
-                        indexwiseDeltaModTS += indexwiseDeltaMod
-                    }
-
-                    if (rawTS != modTS) {
-                        changes++
-                        changesTS++
-                    }
-                }
-                LOGGER.trace("=======================================================")
-                LOGGER.trace("TS start: ${Instant.ofEpochMilli(startTs)} end: ${Instant.ofEpochMilli(endTs)}")
-                LOGGER.trace("TS-MOD start: ${Instant.ofEpochMilli(unprotoBuffedPoints.get(0).getTimestamp())} end: ${Instant.ofEpochMilli(unprotoBuffedPoints.get(unprotoBuffedPoints.size() - 1).getTimestamp())}")
-                LOGGER.trace("Max deviation: $maxDeviationTS in milliseconds")
-                LOGGER.trace("Raw: Sum of deltas: $indexwiseDeltaRawTS in minutes")
-                LOGGER.trace("Mod: Sum of deltas: $indexwiseDeltaModTS in minutes")
-                LOGGER.trace("Change rate per point: ${changesTS / sumOfPointTS}")
-                LOGGER.trace("Average deviation per point: ${averageDeviationTS / sumOfPointTS}")
-                LOGGER.trace("Bytes after serialization: $bytes")
-                LOGGER.trace("Bytes before serialization: $rawBytes")
-                LOGGER.trace("Safes: ${(1 - bytes / rawBytes) * 100} %")
-                LOGGER.trace("Bytes per point: ${bytes / sumOfPointTS}")
-                LOGGER.trace("Compressed Bytes per point: ${compressedBytes / sumOfPointTS}")
-                LOGGER.trace("=======================================================")
-            }
-            LOGGER.trace("=======================================================")
-            LOGGER.trace("= Overall almost equals: $almostEquals")
-            LOGGER.trace("=======================================================")
-            LOGGER.trace("Max deviation: $maxDeviation in milliseconds")
-            LOGGER.trace("Raw: Sum of deltas: $indexwiseDeltaRaw in minutes")
-            LOGGER.trace("Mod: Sum of deltas: $indexwiseDeltaMod in minutes")
-            LOGGER.trace("Change rate per point: ${changes / sumOfPoint}")
-            LOGGER.trace("Average deviation per point: ${averageDeviation / sumOfPoint}")
-
-
-            def changeRate = (changes / sumOfPoint) * 100
-            def compressionRate = (1 - (totalSerializedBytes / totalBytes)) * 100
-
-            writeToFile(file, "${index};${almostEquals};Timstamp Change Rate;${changeRate}")
-            writeToFile(file, "${index};${almostEquals};Compression Rate;${compressionRate}")
-            index++
-
-        }
-
-
-
-        then:
-        noExceptionThrown()
     }
 
     void writeToFile(file, message) {
@@ -531,7 +359,7 @@ class ProtoBufTimeSeriesSerializerTest extends Specification {
 //            def builder = new MetricTimeSeries.Builder("heap", "metric")
 
             start = System.currentTimeMillis()
-            def unprotobuffedPoints = ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), startTs, endTs)
+            def unprotobuffedPoints = new ArrayList<>(ProtoBufTimeSeriesSerializer.from(new ByteArrayInputStream(serializedPoints), startTs, endTs))
             end = System.currentTimeMillis()
 
             LOGGER.trace( "Deserialization took ${end - start} ms")

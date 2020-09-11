@@ -69,7 +69,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
-        assertEquals(points, uncompressedPoints);
+        assertEquals(new TreeSet<Point>(points), uncompressedPoints);
     }
 
     @Test
@@ -130,14 +130,13 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
-        assertEquals(Arrays.asList(
+        assertEquals(new TreeSet<Point>(Arrays.asList(
                 Point.fromValue(1, 1.0d),
                 Point.fromValue(2, 1.0d),
                 Point.fromValue(3, 1.0d),
                 Point.fromValue(32, 2.0d),
-                Point.fromValue(32, 2.0d),
                 Point.fromValue(50, 1.2d)
-        ), uncompressedPoints);
+        )), uncompressedPoints);
     }
 
     @Test
@@ -154,13 +153,12 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
-        assertEquals(Arrays.asList(
+        assertEquals(new TreeSet<Point>(Arrays.asList(
                 Point.fromValue(1, 1.0d),
                 Point.fromValue(2, 1.0d),
                 Point.fromValue(31, 1.8d),
-                Point.fromValue(31, 1.8d),
                 Point.fromValue(50, 1.2d)
-        ), uncompressedPoints);
+        )), uncompressedPoints);
     }
 
     @Test
@@ -177,13 +175,12 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 50
         );
-        assertEquals(Arrays.asList(
+        assertEquals(new TreeSet<Point>(Arrays.asList(
                 Point.fromValue(1, 1.0d),
                 Point.fromValue(3, 1.0d),
                 Point.fromValue(32, 2.0d),
-                Point.fromValue(32, 2.0d),
                 Point.fromValue(50, 1.2d)
-        ), uncompressedPoints);
+        )), uncompressedPoints);
     }
 
     @Test
@@ -214,7 +211,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 new ByteArrayInputStream(compressedProtoPoints),
                 1, 500
         );
-        assertEquals(Arrays.asList(
+        assertEquals(new TreeSet<Point>(Arrays.asList(
                 Point.fromValue(1, 1.0d),
                 Point.fromValue(3, 1.0d),
                 Point.fromValue(30, 2.0d),
@@ -234,7 +231,7 @@ public class ProtoBufTimeSeriesSerializerJavaTest {
                 Point.fromValue(496, 1.2d),
                 Point.fromValue(496, 1.2d),
                 Point.fromValue(500, 1.2d)
-        ), uncompressedPoints);
+        )), uncompressedPoints);
     }
 
 
