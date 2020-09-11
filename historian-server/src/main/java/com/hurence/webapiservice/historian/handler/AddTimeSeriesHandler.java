@@ -40,15 +40,16 @@ public class AddTimeSeriesHandler {
                 JsonArray timeseriesPoints = timeseriesObject.getJsonArray(HistorianServiceFields.POINTS);
                 JsonObject response = new JsonObject();
                 Collection<SolrInputDocument> documents = new ArrayList<>();
-                int numChunk = 0;
-                int numPoints = 0;
+                long numChunk = 0;
+                long numPoints = 0;
                 for (Object timeserieObject : timeseriesPoints) {
                     JsonObject timeserie = (JsonObject) timeserieObject;
                     SolrInputDocument document;
                     LOGGER.info("building SolrDocument from a chunk");
                     document = chunkTimeSerie(timeserie, chunkOrigin);
                     documents.add(document);
-                    int totalNumPointsInChunk = (int) document.getFieldValue(getHistorianFields().CHUNK_COUNT_FIELD);
+                    LOGGER.trace("Adding document :\n {}", document);
+                    long totalNumPointsInChunk = (long) document.getFieldValue(getHistorianFields().CHUNK_COUNT_FIELD);
                     numChunk++;
                     numPoints = numPoints + totalNumPointsInChunk;
                 }

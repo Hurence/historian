@@ -23,7 +23,7 @@ public class SolrDocumentBuilder {
                 chunk.getTags().keySet().forEach(key -> {
                     doc.addField(key, chunk.getTag(key));
                 });
-                doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE, chunk.getValueAsBinary());
+                doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE, chunk.getValueAsString());
                 doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR, chunk.getYear());
                 doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH, chunk.getMonth());
                 doc.addField(HistorianChunkCollectionFieldsVersion0.CHUNK_DAY, chunk.getDay());
