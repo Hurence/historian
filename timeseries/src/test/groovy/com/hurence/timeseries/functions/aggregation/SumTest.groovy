@@ -28,7 +28,7 @@ class SumTest extends Specification {
 
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Sum","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Sum")
         10.times {
             timeSeries.point(it, it * 10)
         }
@@ -44,7 +44,7 @@ class SumTest extends Specification {
 
     def "test 2 execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Sum","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Sum")
         timeSeries.point(11, 1)
         timeSeries.point(10, 2)
         MetricTimeSeries ts = timeSeries.build()
@@ -61,7 +61,7 @@ class SumTest extends Specification {
         given:
         def analysisResult = new FunctionValueMap(1, 1, 1)
         when:
-        new Sum().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Sum().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

@@ -29,7 +29,7 @@ import spock.lang.Specification
 class FastDtwTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("FastDTW","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("FastDTW")
         10.times {
             timeSeries.point(it, it + 10)
         }
@@ -45,7 +45,7 @@ class FastDtwTest extends Specification {
     }
 
     def "test time series with equal timestamps"() {
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("FastDTW-1","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("FastDTW-1")
         timeSeries.point(0, 2)
         3.times {
             timeSeries.point(1, it)
@@ -65,8 +65,8 @@ class FastDtwTest extends Specification {
 
     def "test execute for -1 as result"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("FastDTW-1","metric")
-        MetricTimeSeries.Builder secondTimeSeries = new MetricTimeSeries.Builder("FastDTW-2","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("FastDTW-1")
+        MetricTimeSeries.Builder secondTimeSeries = new MetricTimeSeries.Builder("FastDTW-2")
         10.times {
             timeSeries.point(it, it * 10)
             secondTimeSeries.point(it, it * -10)

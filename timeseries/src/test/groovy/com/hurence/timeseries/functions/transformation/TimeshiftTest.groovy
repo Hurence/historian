@@ -27,7 +27,7 @@ import spock.lang.Specification
 class TimeshiftTest extends Specification {
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Timeshift","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Timeshift")
         10.times {
             timeSeriesBuilder.point(it * 100, it + 10)
         }
@@ -51,7 +51,7 @@ class TimeshiftTest extends Specification {
 
     def "test transform for negative amount"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Timeshift","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Timeshift")
         10.times {
             timeSeriesBuilder.point(it * 100, it + 10)
         }

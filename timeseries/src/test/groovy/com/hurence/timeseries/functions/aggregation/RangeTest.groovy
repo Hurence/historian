@@ -27,7 +27,7 @@ import spock.lang.Specification
 class RangeTest extends Specification {
 
     def "test range analysis"() {
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Range","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Range")
         10.times {
             timeSeries.point(it, it)
         }
@@ -46,7 +46,7 @@ class RangeTest extends Specification {
         given:
         def analysisResult = new FunctionValueMap(1, 1, 1)
         when:
-        new Range().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Range().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

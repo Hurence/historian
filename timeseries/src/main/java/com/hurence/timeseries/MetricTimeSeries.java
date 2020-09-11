@@ -17,9 +17,9 @@ package com.hurence.timeseries;
 
 
 
-import com.hurence.timeseries.modele.DoubleList;
-import com.hurence.timeseries.modele.LongList;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.list.DoubleList;
+import com.hurence.timeseries.modele.list.LongList;
+import com.hurence.timeseries.modele.points.PointImpl;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -45,7 +45,6 @@ public final class MetricTimeSeries implements Serializable {
     private static final long serialVersionUID = 5497398456431471102L;
 
     private String name;
-    private String type;
 
     private LongList timestamps;
     private DoubleList values;
@@ -334,13 +333,6 @@ public final class MetricTimeSeries implements Serializable {
     }
 
     /**
-     * @return the type
-     */
-    public String getType() {
-        return type;
-    }
-
-    /**
      * The Builder class
      */
     public static final class Builder {
@@ -354,12 +346,10 @@ public final class MetricTimeSeries implements Serializable {
          * Constructs a new Builder
          *
          * @param name of the time series
-         * @param type of the time series
          */
-        public Builder(String name, String type) {
+        public Builder(String name) {
             metricTimeSeries = new MetricTimeSeries();
             metricTimeSeries.name = name;
-            metricTimeSeries.type = type;
         }
 
 

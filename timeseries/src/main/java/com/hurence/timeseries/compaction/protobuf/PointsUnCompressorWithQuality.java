@@ -1,9 +1,9 @@
 package com.hurence.timeseries.compaction.protobuf;
 
 import com.hurence.timeseries.converter.serializer.MetricPointWithQualityEmbedded;
-import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
-import com.hurence.timeseries.modele.PointWithQualityImpl;
+import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.modele.points.PointWithQualityImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

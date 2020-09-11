@@ -27,7 +27,7 @@ import spock.lang.Specification
 class AddTest extends Specification {
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Add","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Add")
         10.times {
             timeSeriesBuilder.point(it * 100, it + 10)
         }

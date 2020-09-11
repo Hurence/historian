@@ -27,7 +27,7 @@ import spock.lang.Specification
 class DifferenceTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Difference","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Difference")
         10.times {
             timeSeries.point(it + 1, it * 10)
         }
@@ -44,7 +44,7 @@ class DifferenceTest extends Specification {
 
     def "test execute with negative values"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Difference","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Difference")
         10.times {
             timeSeries.point(it + 1, (it + 1) * -10)
         }
@@ -64,7 +64,7 @@ class DifferenceTest extends Specification {
         def analysisResult = new FunctionValueMap(1, 1, 1);
 
         when:
-        new Difference().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Difference().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

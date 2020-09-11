@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.converter.common
 
-import com.hurence.timeseries.modele.ListUtil
+import com.hurence.timeseries.modele.list.ListUtil
 import spock.lang.Specification
 import spock.lang.Unroll
 

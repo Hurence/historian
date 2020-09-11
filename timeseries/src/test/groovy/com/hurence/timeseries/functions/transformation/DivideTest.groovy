@@ -31,7 +31,7 @@ class DivideTest extends Specification {
 
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Div","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Div")
         def now = Instant.now()
 
         100.times {

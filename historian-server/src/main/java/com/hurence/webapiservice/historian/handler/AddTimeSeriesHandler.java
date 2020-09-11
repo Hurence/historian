@@ -3,8 +3,8 @@ package com.hurence.webapiservice.historian.handler;
 import com.hurence.historian.modele.HistorianConf;
 import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
-import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunk;
+import com.hurence.webapiservice.historian.SolrHistorianConf;
+import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunkVersion0;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -40,15 +40,16 @@ public class AddTimeSeriesHandler {
                 JsonArray timeseriesPoints = timeseriesObject.getJsonArray(HistorianServiceFields.POINTS);
                 JsonObject response = new JsonObject();
                 Collection<SolrInputDocument> documents = new ArrayList<>();
-                int numChunk = 0;
-                int numPoints = 0;
+                long numChunk = 0;
+                long numPoints = 0;
                 for (Object timeserieObject : timeseriesPoints) {
                     JsonObject timeserie = (JsonObject) timeserieObject;
                     SolrInputDocument document;
                     LOGGER.info("building SolrDocument from a chunk");
                     document = chunkTimeSerie(timeserie, chunkOrigin);
                     documents.add(document);
-                    int totalNumPointsInChunk = (int) document.getFieldValue(getHistorianFields().CHUNK_COUNT_FIELD);
+                    LOGGER.trace("Adding document :\n {}", document);
+                    long totalNumPointsInChunk = (long) document.getFieldValue(getHistorianFields().CHUNK_COUNT_FIELD);
                     numChunk++;
                     numPoints = numPoints + totalNumPointsInChunk;
                 }
@@ -70,8 +71,9 @@ public class AddTimeSeriesHandler {
     }
 
     private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
-        JsonObjectToChunk jsonObjectToChunk = new JsonObjectToChunk(chunkOrigin, getHistorianFields());
-        SolrInputDocument doc = jsonObjectToChunk.chunkIntoSolrDocument(timeserie);
+        //Only version 0 is currently supporting creation from rest api
+        JsonObjectToChunkVersion0 jsonObjectToChunkVersion0 = new JsonObjectToChunkVersion0(chunkOrigin);
+        SolrInputDocument doc = jsonObjectToChunkVersion0.chunkIntoSolrDocument(timeserie);
         return doc;
     }
 }

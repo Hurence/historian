@@ -1,12 +1,11 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
+import com.hurence.timeseries.modele.chunk.Chunk;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.util.BucketUtils;
-import io.vertx.core.json.JsonObject;
 
 import java.io.IOException;
 import java.util.List;
@@ -20,12 +19,12 @@ public class TimeSeriesExtracterUtil {
 
     private TimeSeriesExtracterUtil() {}
 
-    public static Stream<PointImpl> extractPointsAsStream(long from, long to, List<JsonObject> chunks) {
+    public static Stream<PointImpl> extractPointsAsStream(long from, long to, List<Chunk> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
-                    byte[] binaryChunk = chunk.getBinary(FieldNamesInsideHistorianService.CHUNK_VALUE);
-                    long chunkStart = chunk.getLong(FieldNamesInsideHistorianService.CHUNK_START);
-                    long chunkEnd = chunk.getLong(FieldNamesInsideHistorianService.CHUNK_END);
+                    byte[] binaryChunk = chunk.getValueAsBinary();
+                    long chunkStart = chunk.getStart();
+                    long chunkEnd = chunk.getEnd();
                     try {
                         return BinaryCompactionUtil.unCompressPoints(binaryChunk, chunkStart, chunkEnd, from, to).stream();
                     } catch (IOException ex) {

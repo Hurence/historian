@@ -27,7 +27,7 @@ import spock.lang.Specification
 class OutlierTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Out","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Out")
         10.times {
             timeSeries.point(it, it * 10)
         }
@@ -44,7 +44,7 @@ class OutlierTest extends Specification {
 
     def "test execute with a time series that has no outlier"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Out","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Out")
         10.times {
             timeSeries.point(it, 4711)
         }
@@ -62,7 +62,7 @@ class OutlierTest extends Specification {
         def analysisResult = new FunctionValueMap(1, 1, 1)
 
         when:
-        new Outlier().execute(new MetricTimeSeries.Builder("Out","metric").build(), analysisResult)
+        new Outlier().execute(new MetricTimeSeries.Builder("Out").build(), analysisResult)
         then:
         !analysisResult.getAggregationValue(0)
     }

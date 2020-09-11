@@ -30,7 +30,7 @@ class TopTest extends Specification {
         given:
         def top = new Top(["4"] as String[])
 
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Top","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Top")
         timeSeriesBuilder.point(1, 5d)
         timeSeriesBuilder.point(2, 99d)
         timeSeriesBuilder.point(3, 3d)

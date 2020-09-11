@@ -29,7 +29,7 @@ class LastTest extends Specification {
     def "test get last value"() {
 
         given:
-        def timeSeries = new MetricTimeSeries.Builder("Last-Time-Series","metric")
+        def timeSeries = new MetricTimeSeries.Builder("Last-Time-Series")
 
         10.times {
             timeSeries.point(10 - it, it)
@@ -48,7 +48,7 @@ class LastTest extends Specification {
         def analysisResult = new FunctionValueMap(1, 1, 1);
 
         when:
-        new Last().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Last().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

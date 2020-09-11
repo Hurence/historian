@@ -30,7 +30,7 @@ class BottomTest extends Specification {
         def bottom = new Bottom(["4"] as String[])
         def analysisResult = new FunctionValueMap(1, 1, 1)
 
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Bottom","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Bottom")
         timeSeriesBuilder.point(1, 5d)
         timeSeriesBuilder.point(2, 99d)
         timeSeriesBuilder.point(3, 3d)
