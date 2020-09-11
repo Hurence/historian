@@ -7,7 +7,6 @@ import com.hurence.timeseries.TimeSeriesUtil;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.functions.*;
 import com.hurence.timeseries.metric.MetricType;
-import com.hurence.timeseries.modele.chunk.Chunk;
 import com.hurence.timeseries.modele.chunk.ChunkVersion0;
 import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl;
 import com.hurence.timeseries.modele.points.Point;

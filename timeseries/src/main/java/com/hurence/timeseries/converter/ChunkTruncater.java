@@ -25,13 +25,14 @@ public class ChunkTruncater {
     public static ChunkVersion0 truncate(ChunkVersion0 chunk, long from, long to) throws IOException {
         byte[] binaries = chunk.getValueAsBinary();
         List<PointImpl> points = BinaryCompactionUtil.unCompressPoints(binaries, chunk.getStart(), chunk.getEnd(), from, to);
-        List<PointImpl> newPoints = points.stream()
-                .filter(p -> {
-                    return p.getTimestamp() > from && p.getTimestamp() < to;
-                })
-                .collect(Collectors.toList());
+        //The filter is already done in unCompressPoints
+//        List<PointImpl> newPoints = points.stream()
+//                .filter(p -> {
+//                    return p.getTimestamp() >= from && p.getTimestamp() <= to;
+//                })
+//                .collect(Collectors.toList());
         PointsToChunkVersion0 converter = new PointsToChunkVersion0(TRUNCATER_ORIGIN);
-        return converter.buildChunk(chunk.getName(), newPoints, chunk.getTags());
+        return converter.buildChunk(chunk.getName(), points, chunk.getTags());
     }
 
     /**

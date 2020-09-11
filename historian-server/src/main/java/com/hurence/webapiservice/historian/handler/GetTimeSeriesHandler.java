@@ -303,12 +303,15 @@ public class GetTimeSeriesHandler {
     public MultiTimeSeriesExtracter getMultiTimeSeriesExtracter(Request request, SolrQuery query, MetricsSizeInfo metricsInfo, List<AGG> aggregationList) {
         //TODO make three different group for each metrics, not use a single strategy globally for all metrics.
         final MultiTimeSeriesExtracter timeSeriesExtracter;
+        //Now CHUNK_VALUE_FIELD may potentially be needed by all mode. In case we must recompute chunks !
+        //Indeed if user query data from t1 to t3 and chunk contains data from t2 and t4 we must recompute the chunk
+        //by removing data after t3 !
+        query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
         if (metricsInfo.getTotalNumberOfPoints() < solrHistorianConf.limitNumberOfPoint ||
                 metricsInfo.getTotalNumberOfPoints() <= getSamplingConf(request).getMaxPoint() ||
                 metricsInfo.getTotalNumberOfChunks() < getSamplingConf(request).getMaxPoint()
         ) {
             LOGGER.debug("QUERY MODE 1: metricsInfo.getTotalNumberOfPoints() < limitNumberOfPoint");
-            query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (metricsInfo.getTotalNumberOfChunks() < solrHistorianConf.limitNumberOfChunks) {
             LOGGER.debug("QUERY MODE 2: metricsInfo.getTotalNumberOfChunks() < limitNumberOfChunks");
