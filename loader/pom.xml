@@ -13,7 +13,7 @@
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
         <encoding>UTF-8</encoding>
-        <spark.version>2.3.2.3.1.4.0-315</spark.version>
+        <spark.version>2.3.2</spark.version>
         <!--   <spark.version>2.4.5</spark.version>-->
         <spark.solr>3.6.6</spark.solr>
         <scala.version>2.11.12</scala.version>
@@ -344,15 +344,15 @@
             <build>
                 <plugins>
                     <!-- ScalaTest runs Scala tests -->
-                    <plugin>
+                    <!--<plugin>
                         <groupId>org.scalatest</groupId>
                         <artifactId>scalatest-maven-plugin</artifactId>
                         <version>1.0</version>
                         <configuration>
                             <stderr/>
-                            <!-- Log to stderr -->
+                            &lt;!&ndash; Log to stderr &ndash;&gt;
                             <junitxml>.</junitxml>
-                            <!-- Directory/ies for JUnit XML -->
+                            &lt;!&ndash; Directory/ies for JUnit XML &ndash;&gt;
                             <reportsDirectory>${project.build.directory}/surefire-reports</reportsDirectory>
                             <argLine>-ea -XX:MaxPermSize=${MaxPermSize}</argLine>
                             <systemProperties>
@@ -368,7 +368,7 @@
                                 </goals>
                             </execution>
                         </executions>
-                    </plugin>
+                    </plugin>-->
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-shade-plugin</artifactId>

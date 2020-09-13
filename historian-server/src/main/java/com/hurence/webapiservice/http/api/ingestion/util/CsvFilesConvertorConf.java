@@ -4,19 +4,20 @@ import io.vertx.reactivex.core.MultiMap;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
 public class CsvFilesConvertorConf {
 
-    String timestamp;
-    String name;
-    String value;
-    String quality;
-    String formatDate;
-    String timezoneDate;
-    List<String> group_by = new ArrayList<>();
-    List<String> tags = new ArrayList<>();
+    private final String timestamp;
+    private final String name;
+    private final String value;
+    private final String quality;
+    private String formatDate;
+    private String timezoneDate;
+    private List<String> group_by = new ArrayList<>();
+    private List<String> tags = new ArrayList<>();
 
     public static final String DEFAULT_QUALITY_COLUMN_MAPPING = "quality";
     public static final String DEFAULT_NAME_COLUMN_MAPPING = "metric";
@@ -36,7 +37,7 @@ public class CsvFilesConvertorConf {
             this.value = DEFAULT_VALUE_COLUMN_MAPPING;
         else
             this.value = multiMap.get(MAPPING_VALUE);
-        if (multiMap.get(MAPPING_QUALITY) == null)
+        if (multiMap.get(MAPPING_QUALITY) == null)   // TODO here if we take csv without quality i should let quality null
             this.quality = DEFAULT_QUALITY_COLUMN_MAPPING;
         else
             this.quality = multiMap.get(MAPPING_QUALITY);
@@ -44,6 +45,8 @@ public class CsvFilesConvertorConf {
             this.formatDate = multiMap.get(FORMAT_DATE);
         if (multiMap.getAll(GROUP_BY) != null)
             this.group_by = multiMap.getAll(GROUP_BY);
+        else
+            this.group_by.add(this.name);
         if (multiMap.getAll(MAPPING_TAGS) != null)
             this.tags = multiMap.getAll(MAPPING_TAGS);
         if (multiMap.get(TIMEZONE_DATE) == null)
@@ -82,6 +85,17 @@ public class CsvFilesConvertorConf {
 
     public String getTimezoneDate() {
         return timezoneDate;
+    }
+
+    public List<String> getGroupByList() {
+        return group_by.stream().map(s -> {
+            if (s.startsWith(TAGS+".")) {
+                return s.substring(5);
+            }else if (s.equals(NAME))
+                return name;
+            else
+                throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
+        }).collect(Collectors.toList());
     }
 
 }

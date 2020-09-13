@@ -1,57 +1,81 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
-import com.hurence.webapiservice.http.api.ingestion.ImportRequestParser;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.MultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.io.IOException;
+import java.util.List;
+import java.util.NoSuchElementException;
 
 import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseCsvImportRequest;
+import static com.hurence.webapiservice.http.api.ingestion.util.CsvConvertorUtil.ConvertCsvFileToJson;
 
 public class IngestionApiUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiUtil.class);
 
     /**
-     * @param allFilesReport          AllFilesReport
-     * @param csvFilesConvertorConf   CsvFilesConvertorConf
+     * @param csvFileConvertors        List<CsvFileConvertor>
      *
-     * construct the final response to return, which should be grouped by.
+     * parse each csv file : for each file :
+     *                       1- convert it to json then add it to CsvFileConvertor.fileInArray.
+     *                       2- parse the fileInArray to only get the correct points and store them in CsvFileConvertor.fileReport.correctPoints.
+     *                       3- fill the fileReport.numberOfFailedPointsPerMetric.
      *
-     * @return JsonObject : the response to return
+     * @return void
      */
-    public static JsonObject constructFinalResponseCsv(AllFilesReport allFilesReport,
-                                                       CsvFilesConvertorConf csvFilesConvertorConf) {
-        //TODO
-        return null;
+    public static void parseFiles(List<CsvFileConvertor> csvFileConvertors, AllFilesReport allFilesReport,
+                                  CsvFilesConvertorConf csvFilesConvertorConf) {
+        for (CsvFileConvertor convertor : csvFileConvertors) {
+            try {
+                // convert the file to json
+                ConvertCsvFileToJson(convertor, csvFilesConvertorConf);
+            } catch (NoSuchElementException e) {
+                // the file will be skipped because it's mapping aren't correct.
+                String errorMessage = "The csv mappings don't match the mappings in the attributes. this file will be skipped";
+                fillingTheNamesOfFailedFiles(errorMessage, convertor, allFilesReport);
+                continue;
+            } catch (IOException e) {
+                // the file will be skipped because it is too big (> 5000 lines)
+                String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+ MAX_LINES_FOR_CSV_FILE;
+                fillingTheNamesOfFailedFiles(errorMessage, convertor, allFilesReport);
+                continue;
+            }
+            // parse the jsonArray fileInArray
+            parseCsvImportRequest(convertor.fileInArray,csvFilesConvertorConf, convertor.fileReport);
+        }
     }
 
-    public static JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
-        StringBuilder message = new StringBuilder();
-        message.append("Injected ").append(response.getInteger(RESPONSE_TOTAL_ADDED_POINTS)).append(" points of ")
-                .append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
-                .append(" metrics in ").append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
-                .append(" chunks");
-        JsonObject finalResponse = new JsonObject();
-        if (!responseAndErrorHolder.errorMessages.isEmpty()) {
-            message.append(extractFinalErrorMessage(responseAndErrorHolder).toString());
-            finalResponse.put("status", "Done but got some errors").put("message", message.toString());
-        }else
-            finalResponse.put("status", "OK").put("message", message.toString());
-        return finalResponse;
+    private static void fillingTheNamesOfFailedFiles(String errorMessage, CsvFileConvertor convertor,
+                                                     AllFilesReport allFilesReport) {
+        JsonObject errorObject = new JsonObject().put(FILE, convertor.file.fileName()).put(CAUSE, errorMessage);
+        allFilesReport.failedFiles.add(errorObject);
     }
-    public static StringBuilder extractFinalErrorMessage(ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
-        StringBuilder errorMessage = new StringBuilder();
-        errorMessage.append(". ").append(responseAndErrorHolder.errorMessages.get(0));
-        if (responseAndErrorHolder.errorMessages.size() > 1)
-            for (int i = 1; i < responseAndErrorHolder.errorMessages.size()-1; i++) {
-                errorMessage.append("\n").append(responseAndErrorHolder.errorMessages.get(i));
+
+    /**
+     * @param csvFileConvertors        List<CsvFileConvertor>
+     * @param allFilesReport           AllFilesReport
+     *
+     * filling the allFilesReport
+     *
+     * @return void
+     */
+    public static void fillingAllFilesReport(List<CsvFileConvertor> csvFileConvertors, AllFilesReport allFilesReport) {
+        csvFileConvertors.forEach(convertor -> {
+            if (!convertor.fileReport.correctPoints.isEmpty())
+                allFilesReport.correctPoints.addAll(convertor.fileReport.correctPoints);
+            if (!convertor.fileReport.numberOfFailedPointsPerMetric.isEmpty()) {
+                convertor.fileReport.numberOfFailedPointsPerMetric.forEach((i,j) -> {
+                    if (allFilesReport.numberOfFailedPointsPerMetric.containsKey(i)) {
+                        int currentNumberOfFailedPoints = allFilesReport.numberOfFailedPointsPerMetric.get(i);
+                        allFilesReport.numberOfFailedPointsPerMetric.put(i, Integer.parseInt(j.toString())+currentNumberOfFailedPoints);
+                    } else
+                        allFilesReport.numberOfFailedPointsPerMetric.put(i, Integer.valueOf(j.toString()));
+                });
             }
-        return errorMessage;
+        });
     }
 
 }

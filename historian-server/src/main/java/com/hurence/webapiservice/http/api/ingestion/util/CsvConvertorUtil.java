@@ -9,45 +9,28 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static com.hurence.historian.modele.HistorianFields.MAX_LINES_FOR_CSV_FILE;
-import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseCsvImportRequest;
+import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.toNumber;
 
 public class CsvConvertorUtil {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CsvConvertorUtil.class);
 
-
-    /**
-     * @param csvFileConvertors        List<CsvFileConvertor>
-     *
-     * parse each csv file and convert it to json then add it to CsvFileConvertor.fileReport
-     *
-     * @return void
-     */
-    public static void parseFiles(List<CsvFileConvertor> csvFileConvertors, AllFilesReport allFilesReport, CsvFilesConvertorConf csvFilesConvertorConf) {
-        for (CsvFileConvertor convertor : csvFileConvertors) {
-            try {
-                ConvertCsvFileToJson(convertor, csvFilesConvertorConf);
-            } catch (Exception e) {
-                //TODO here skip the csv file if it is too big or it's mapping don't match the mapping in the attributes
-                // here i use allFilesReport to save that a certin file is too big or it's mapping don't match.
-            }
-            parseCsvImportRequest(convertor.fileInArray,csvFilesConvertorConf, convertor.fileReport);
-        }
-    }
-
     /**
      * @param convertor        CsvFileConvertor
      *
      * convert the csv file to json , and putting the json in convertor.fileInArray
+     *
      * @return void
      */
     public static void ConvertCsvFileToJson(CsvFileConvertor convertor, CsvFilesConvertorConf csvFilesConvertorConf) throws IOException {
         String fileName = convertor.file.uploadedFileName();
         MappingIterator<Map> rows = getMappingIteratorFromFile(fileName);
-        List<LineWithDateInfo> linesWithDateInfo = addDateInfoToEachLine(rows, csvFilesConvertorConf);
+        List<LineWithDateInfo> linesWithDateInfo = ReturnLineWithDateInfoList(rows, csvFilesConvertorConf);
 
         DataConverter dataConverter = new DataConverter(csvFilesConvertorConf);
         JsonArray groupedByMetricDataPoints = dataConverter.toGroupedByMetricDataPoints(linesWithDateInfo);
@@ -65,45 +48,83 @@ public class CsvConvertorUtil {
      * @return MappingIterator<Map>
      */
     private static MappingIterator<Map> getMappingIteratorFromFile(String fileName) throws IOException {
-        // TODO
-        return  null;
+        File uploadedFile = new File(fileName);
+        CsvMapper csvMapper = new CsvMapper();
+        return  csvMapper
+                .readerWithSchemaFor(Map.class)
+                .with(CsvSchema.emptySchema().withHeader())
+                .readValues(uploadedFile);
     }
 
     /**
      * @param rows                   MappingIterator<Map>
      * @param csvFilesConvertorConf  CsvFilesConvertorConf
      *
+     * return a list of  LineWithDateInfo
      * for each row construct a LineWithDateInfo object, if there is no date use null.
      *
      * @return List<LineWithDateInfo>
      */
-    private static List<LineWithDateInfo> addDateInfoToEachLine(MappingIterator<Map> rows, CsvFilesConvertorConf csvFilesConvertorConf) throws IOException {
-        // TODO
-        return  null;
+    private static List<LineWithDateInfo> ReturnLineWithDateInfoList(MappingIterator<Map> rows,
+                                                                     CsvFilesConvertorConf csvFilesConvertorConf) throws IOException {
+        List<Map> listFromRows = rows.readAll();
+
+        // here just checking the attributes :
+        verifyAttributes(listFromRows, csvFilesConvertorConf);
+
+        List<LineWithDateInfo> linesWithDateInfos = new LinkedList<>();
+        listFromRows.forEach(i -> {
+            try {
+                // if date is generated from timestamp successfully
+                String date = generateDateFromTime(i.get(csvFilesConvertorConf.getTimestamp()), csvFilesConvertorConf);
+                linesWithDateInfos.add(new LineWithDateInfo(i,date));
+            }catch (Exception e) {
+                // otherwise put null as date
+                LOGGER.debug("error in parsing date", e);
+                linesWithDateInfos.add(new LineWithDateInfo(i,null));
+            }
+        });
+        return  linesWithDateInfos;
+    }
+
+    /**
+     * @param listFromRows           List<Map>
+     * @param csvFilesConvertorConf  CsvFilesConvertorConf
+     *
+     * verify if this list from the csv file have the same column as the attributes in input :
+     *                               name, timestamp, value, and all the tags.
+     *
+     */
+    private static void verifyAttributes(List<Map> listFromRows, CsvFilesConvertorConf csvFilesConvertorConf) {
+        listFromRows.forEach(i ->  {
+            Set<String> keySet = i.keySet();
+            if (!keySet.contains(csvFilesConvertorConf.getName()))
+                throw new NoSuchElementException("error in the attributes");
+            if (!keySet.contains(csvFilesConvertorConf.getTimestamp()))
+                throw new NoSuchElementException("error in the attributes");
+            if (!keySet.contains(csvFilesConvertorConf.getValue()))
+                throw new NoSuchElementException("error in the attributes");
+            csvFilesConvertorConf.getTags().forEach(tag -> {
+                if (!keySet.contains(tag)) {
+                    throw new NoSuchElementException("error in the attributes");
+                }
+            });
+        });
     }
 
 
     /**
-     * @param csvFileConvertors        List<CsvFileConvertor>
-     * @param allFilesReport           AllFilesReport
+     * @param timestamp              Object
+     * @param csvFilesConvertorConf  CsvFilesConvertorConf
      *
-     * filling the allFilesReport
+     * generate the date in format yyyy-MM-dd from timestamp.
      *
-     * @return void
+     * @return List<LineWithDateInfo>
      */
-    public static void fillingAllFilesReport(List<CsvFileConvertor> csvFileConvertors, AllFilesReport allFilesReport) {
-        csvFileConvertors.forEach(convertor -> {
-            if (!convertor.fileReport.correctPoints.isEmpty())
-                allFilesReport.correctPoints.addAll(convertor.fileReport.correctPoints);
-            if (!convertor.fileReport.numberOfFailedPointsPerMetric.isEmpty()) {
-                convertor.fileReport.numberOfFailedPointsPerMetric.forEach((i,j) -> {
-                    if (allFilesReport.numberOfFailedPointsPerMetric.containsKey(i)) {
-                        int currentNumberOfFailedPoints = allFilesReport.numberOfFailedPointsPerMetric.get(i);
-                        allFilesReport.numberOfFailedPointsPerMetric.put(i, Integer.parseInt(j.toString())+currentNumberOfFailedPoints);
-                    } else
-                        allFilesReport.numberOfFailedPointsPerMetric.put(i, Integer.valueOf(j.toString()));
-                });
-            }
-        });
+    private static String generateDateFromTime (Object timestamp, CsvFilesConvertorConf csvFilesConvertorConf) {
+        long date = (long) toNumber(timestamp, csvFilesConvertorConf);
+        Date d = new Date(date);
+        DateFormat f = new SimpleDateFormat("yyyy-MM-dd");
+        return f.format(d);
     }
 }

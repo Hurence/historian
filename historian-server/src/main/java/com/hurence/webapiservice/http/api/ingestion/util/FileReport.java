@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 public class FileReport {
 
     public JsonArray correctPoints;
-    public LinkedHashMap<LinkedHashMap, Integer> numberOfFailedPointsPerMetric;
+    public LinkedHashMap<LinkedHashMap<String,String>, Integer> numberOfFailedPointsPerMetric;
 
     public FileReport() {
         this.correctPoints = new JsonArray();
