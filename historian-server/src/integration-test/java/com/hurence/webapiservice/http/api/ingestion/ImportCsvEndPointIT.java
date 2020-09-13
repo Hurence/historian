@@ -229,7 +229,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
-                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
+                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH)
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(

@@ -11,9 +11,10 @@ import org.slf4j.LoggerFactory;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseJsonImportRequest;
-import static com.hurence.webapiservice.http.api.ingestion.util.CsvConvertorUtil.fillingAllFilesReport;
-import static com.hurence.webapiservice.http.api.ingestion.util.CsvConvertorUtil.parseFiles;
-import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.*;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.fillingAllFilesReport;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.parseFiles;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionFinalResponseUtil.constructFinalResponseCsv;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionFinalResponseUtil.constructFinalResponseJson;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
 
@@ -91,8 +92,10 @@ public class IngestionApiImpl implements IngestionApi {
             context.response().end(String.valueOf(errorObject));
             return;
         }
+
         JsonObject pointsToBeInjected = new JsonObject().put(POINTS_REQUEST_FIELD, multiCsvFilesConvertor.allFilesReport.correctPoints)
                 .put(CHUNK_ORIGIN, "ingestion-csv");
+
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);

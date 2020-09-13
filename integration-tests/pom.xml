@@ -12,7 +12,7 @@
     <packaging>jar</packaging>
 
     <properties>
-        <spark.version>2.3.2.3.1.4.0-315</spark.version>
+        <spark.version>2.3.2</spark.version>
         <scala.binary.version>2.11</scala.binary.version>
         <solr.version>8.2.0</solr.version>
         <test.containers>1.12.2</test.containers>

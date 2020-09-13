@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
-import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.FileUpload;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;

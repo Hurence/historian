@@ -9,7 +9,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianFields.*;
 
@@ -135,7 +137,9 @@ public class ImportRequestParser {
         }else if (fileInArray.isEmpty()) {
             throw new IllegalArgumentException("Empty request body");
         }
+
         parseEachObjectInTheArray(fileInArray, fileReport, csvFilesConvertorConf);
+
         if (fileReport.correctPoints.isEmpty())
             throw new IllegalArgumentException("There is no valid points");
         return fileReport;
@@ -153,6 +157,7 @@ public class ImportRequestParser {
     private static void parseEachObjectInTheArray(JsonArray fileInArray, FileReport fileReport, CsvFilesConvertorConf csvFilesConvertorConf) {
         for (Object timeserieObject : fileInArray) {
             JsonObject timeserie = (JsonObject) timeserieObject;
+
             int numberOfFailedPointsForThisName = 0;
             if (!(timeserie.containsKey(NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
@@ -167,8 +172,11 @@ public class ImportRequestParser {
             } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
                 throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
             }
+
             JsonObject newTimeserie = getTimeserieWithoutPoints(timeserie);
+
             parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport, newTimeserie);
+
             calculateNumberOfFailedPoints(fileReport, csvFilesConvertorConf, timeserie, numberOfFailedPointsForThisName);
 
         }
@@ -186,9 +194,9 @@ public class ImportRequestParser {
      */
     private static void calculateNumberOfFailedPoints(FileReport fileReport, CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie, int numberOfFailedPointsForThisName) {
         int currentNumberOfFailedPoints;
-        LinkedHashMap groupByMap = getGroupedByFields(csvFilesConvertorConf, timeserie);
+        LinkedHashMap<String, String> groupByMap = getGroupedByFields(csvFilesConvertorConf, timeserie);
         if (fileReport.numberOfFailedPointsPerMetric.containsKey(groupByMap)) {
-            currentNumberOfFailedPoints = (int) fileReport.numberOfFailedPointsPerMetric.get(groupByMap);
+            currentNumberOfFailedPoints = fileReport.numberOfFailedPointsPerMetric.get(groupByMap);
             fileReport.numberOfFailedPointsPerMetric.put(groupByMap, currentNumberOfFailedPoints+numberOfFailedPointsForThisName);
         }else {
             fileReport.numberOfFailedPointsPerMetric.put(groupByMap, numberOfFailedPointsForThisName);
@@ -196,13 +204,24 @@ public class ImportRequestParser {
     }
 
     private static JsonObject getTimeserieWithoutPoints (JsonObject timeserie) {
-        //TODO
-        return null;
+        JsonObject newTimeserie = new JsonObject();
+        timeserie.fieldNames().forEach(i -> {
+            if (!i.equals(POINTS_REQUEST_FIELD))
+                newTimeserie.put(i, timeserie.getValue(i));
+        });
+        return newTimeserie;
     }
 
-    private static LinkedHashMap getGroupedByFields (CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie) {
-        //TODO
-        return null;
+    private static LinkedHashMap<String, String> getGroupedByFields (CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie) {
+        LinkedHashMap<String, String> groupByMap = new LinkedHashMap<>();
+        csvFilesConvertorConf.getGroup_by().forEach(s -> {
+            if (s.startsWith(TAGS+".")) {
+                groupByMap.put(s.substring(5), timeserie.getJsonObject(TAGS).getString(s.substring(5)));
+            }else if (s.equals(NAME)) {
+                groupByMap.put(s, timeserie.getString(s));
+            }
+        });
+        return groupByMap;
     }
 
     /**
