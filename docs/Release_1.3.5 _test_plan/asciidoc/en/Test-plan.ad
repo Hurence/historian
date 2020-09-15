@@ -1,0 +1,41 @@
+= TEST PLAN
+:subtitle: Data Historian 1.3.5
+:doctype: book
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
+:author: © Hurence
+:email: contact@hurence.com
+:revnumber: v1.0
+:revdate: 04.07.2020
+:revremark: First book
+:toc:
+:toclevels: 4
+
+== Introduction
+== Objectives and tasks
+=== Objectives
+=== Tasks
+== Scope
+== Testing strategy
+===  Alpha Testing (Unit Testing)
+=== System and Integration Testing
+=== Performance and Stress Testing
+=== User Acceptance Testing
+=== Batch Testing
+=== Automated Regression Testing
+=== Beta Testing
+== Hardware requirements
+== Environment requirements
+=== main frame
+=== Workstation
+== Test schedules
+== Controle procedures
+== Features to be tested
+== Features not to be tested
+== Resources/Roles and Responsibilities
+== Schedules
+== SIGNIFICANTLY IMPACTED DEPARTMENTS (SIDs)
+== Dependencies
+== Risks/Assumptions
+== Tools
+== Approvals
+
