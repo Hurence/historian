@@ -28,7 +28,8 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class HistorianSearchVerticleIT {
@@ -40,14 +41,7 @@ public class HistorianSearchVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
-        HistorianSolrITHelper
-                .deployHistorianVerticle(container, vertx)
-                .subscribe(id -> {
-                            historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
-                            context.completeNow();
-                        },
-                        t -> context.failNow(t));
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
 
         final SolrInputDocument doc = new SolrInputDocument();
@@ -84,6 +78,13 @@ public class HistorianSearchVerticleIT {
         final UpdateResponse updateResponse7 = client.add(COLLECTION, doc7);
         client.commit(COLLECTION, true, true);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
+        HistorianSolrITHelper
+                .deployHistorianVerticle(container, vertx)
+                .subscribe(id -> {
+                            historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
+                            context.completeNow();
+                        },
+                        t -> context.failNow(t));
     }
 
     @AfterAll

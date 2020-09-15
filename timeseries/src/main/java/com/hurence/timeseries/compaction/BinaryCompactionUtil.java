@@ -16,15 +16,15 @@
 package com.hurence.timeseries.compaction;
 
 import com.hurence.timeseries.MetricTimeSeries;
+import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesCurrentSerializer;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.modele.points.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 import java.util.TreeSet;
 
 public class BinaryCompactionUtil {
@@ -61,7 +61,7 @@ public class BinaryCompactionUtil {
      * @return
      * @throws IOException
      */
-    public static TreeSet<PointImpl> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd) throws IOException {
+    public static TreeSet<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
             return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, chunkStart, chunkEnd);
         }
@@ -77,10 +77,10 @@ public class BinaryCompactionUtil {
      * @return
      * @throws IOException
      */
-    public static TreeSet<PointImpl> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd,
+    public static TreeSet<Point> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd,
                                                       long requestedFrom, long requestedEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
-            return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd);
+            return ProtoBufTimeSeriesCurrentSerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd, chunkOfPoints);
         }
     }
 }

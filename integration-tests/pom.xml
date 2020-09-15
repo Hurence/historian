@@ -29,6 +29,11 @@
             <artifactId>timeseries</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>historian-tools</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--Docker-->
         <dependency>
             <groupId>org.testcontainers</groupId>

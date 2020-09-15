@@ -12,9 +12,7 @@ public class JsonSolrStream implements JsonStream {
 
     public static JsonSolrStream forVersion(SchemaVersion version, TupleStream stream) {
         switch (version) {
-            case EVOA0:
-                return new JsonSolrStreamSchemaVersion0(new SolrStream(stream));
-            case VERSION_0:
+            case VERSION_1:
                 return new JsonSolrStream(new SolrStream(stream));
             default:
                 throw new IllegalArgumentException(String.format(

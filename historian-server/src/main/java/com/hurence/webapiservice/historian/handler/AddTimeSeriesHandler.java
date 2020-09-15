@@ -4,7 +4,7 @@ import com.hurence.historian.modele.HistorianConf;
 import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
-import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunkVersion0;
+import com.hurence.webapiservice.http.api.ingestion.JsonObjectToChunkCurrentVersion;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -72,8 +72,8 @@ public class AddTimeSeriesHandler {
 
     private SolrInputDocument chunkTimeSerie(JsonObject timeserie, String chunkOrigin) {
         //Only version 0 is currently supporting creation from rest api
-        JsonObjectToChunkVersion0 jsonObjectToChunkVersion0 = new JsonObjectToChunkVersion0(chunkOrigin);
-        SolrInputDocument doc = jsonObjectToChunkVersion0.chunkIntoSolrDocument(timeserie);
+        JsonObjectToChunkCurrentVersion jsonObjectToChunkCurrentVersion = new JsonObjectToChunkCurrentVersion(chunkOrigin);
+        SolrInputDocument doc = jsonObjectToChunkCurrentVersion.chunkIntoSolrDocument(timeserie);
         return doc;
     }
 }

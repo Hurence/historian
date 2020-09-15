@@ -24,7 +24,13 @@ public class HistorianServiceFields {
     public static String TYPE = "type";
     public static String METRIC = "metric";
     public static String AGGREGATION = "aggregation";
+    public static String QUALITY_VALUE = "quality_value";
+    public static String QUALITY_AGG  = "quality_agg";
+    public static String QUALITY_RETURN  = "quality_return";
+    public static String USE_QUALITY  = "use_quality";
+    public static String QUALITY_CHECK  = "is_quality_ok";
     public static String ORIGIN = HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
+
     //Response fields
     public static String TOTAL_POINTS = "total_points";
     public static String TIMESERIES = "timeseries";
@@ -38,6 +44,9 @@ public class HistorianServiceFields {
     public static String TIME_END_REQUEST_FIELD = "timeEnd";
     public static String TOTAL_ADDED_POINTS = "total_added_points";
     public static String TOTAL_ADDED_CHUNKS = "total_added_chunks";
+
+    public static String CHUNK_ORIGIN = HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
+
     public static String RESPONSE_VALUES = "values";
     public static String NAME = HistorianChunkCollectionFieldsVersion0.NAME;
     /*

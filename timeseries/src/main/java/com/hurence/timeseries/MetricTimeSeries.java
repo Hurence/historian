@@ -16,10 +16,11 @@
 package com.hurence.timeseries;
 
 
-
 import com.hurence.timeseries.modele.list.DoubleList;
 import com.hurence.timeseries.modele.list.LongList;
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.modele.points.PointImpl;
+
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -142,7 +143,7 @@ public final class MetricTimeSeries implements Serializable {
             LongList sortedTimes = new LongList(timestamps.size());
             DoubleList sortedValues = new DoubleList(values.size());
 
-            points().sorted(Comparator.comparingLong(PointImpl::getTimestamp)).forEachOrdered(p -> {
+            points().sorted(Comparator.comparingLong(Point::getTimestamp)).forEachOrdered(p -> {
                 sortedTimes.add(p.getTimestamp());
                 sortedValues.add(p.getValue());
             });
@@ -159,7 +160,7 @@ public final class MetricTimeSeries implements Serializable {
      *
      * @return the points as stream (creating new points)
      */
-    public Stream<PointImpl> points() {
+    public Stream<Point> points() {
         if (timestamps.isEmpty()) {
             return Stream.empty();
         }

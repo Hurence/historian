@@ -61,16 +61,19 @@ public class ImportCsvEndPointIT {
     public static String GROUP_BY = "group_by";
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-
-        SolrITHelper.createChunkCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString());
-        SolrITHelper.addCodeInstallAndSensor(container);
-        SolrITHelper.addFieldToChunkSchema(container, "date");
+    public static void beforeAll(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
+        initSolr(container);
         webClient = HttpITHelper.buildWebClient(vertx);
         HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
+    }
+
+    private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
+        SolrITHelper.addCodeInstallAndSensor(container);
+        SolrITHelper.addFieldToChunkSchema(container, "date");
     }
 
     @AfterEach

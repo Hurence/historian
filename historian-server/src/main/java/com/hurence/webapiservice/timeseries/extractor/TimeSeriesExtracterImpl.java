@@ -1,7 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
-import com.hurence.timeseries.modele.points.PointImpl;
+
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.webapiservice.modele.AGG;
@@ -11,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -21,24 +23,42 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterImpl.class);
 
-    final Sampler<PointImpl> sampler;
+    final Sampler<Point> sampler;
     final PointsAggsCalculator aggsCalculator;
+    final Float qualityLimit;
 
     public TimeSeriesExtracterImpl(long from, long to,
                                    SamplingConf samplingConf,
                                    long totalNumberOfPoint,
-                                   List<AGG> aggregList) {
-        super(from, to, samplingConf, totalNumberOfPoint);
-        sampler = SamplerFactory.getPointSampler(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
+                                   List<AGG> aggregList,
+                                   boolean returnQuality,
+                                   Float qualityLimit) {
+        super(from, to, samplingConf, totalNumberOfPoint, returnQuality);
+        sampler = SamplerFactory.getPointSamplerWithQuality(this.samplingConf.getAlgo(), this.samplingConf.getBucketSize());
         aggsCalculator = new PointsAggsCalculator(aggregList);
+        if(!qualityLimit.isNaN())
+            this.qualityLimit = qualityLimit;
+        else
+            this.qualityLimit = 0f;
     }
 
     @Override
-    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks) {
-        List<PointImpl> points = decompressPoints(from, to, chunks);
-        List<PointImpl> sampledPoints = sampler.sample(points);
-        this.sampledPoints.addAll(sampledPoints);
+    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<ChunkVersionCurrent> chunks) {
+        List<Point> points = decompressPoints(from, to, chunks);
+        List<Point> sampledPoints = sampler.sample(points);
+        List<Point> filteredPoints = filterPointsByQuality(sampledPoints);
+        this.sampledPoints.addAll(filteredPoints);
         aggsCalculator.updateAggs(points);
+    }
+
+    private List<Point> filterPointsByQuality(List<Point> sampledPoints) {
+        List<Point> pointsToReturn = new ArrayList<>();
+        sampledPoints.forEach(point -> {
+            if ((point.hasQuality() && point.getQuality() >= qualityLimit)
+                        || (!point.hasQuality()))
+                pointsToReturn.add(point);
+        });
+        return pointsToReturn;
     }
 
     @Override
@@ -46,10 +66,10 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<PointImpl> decompressPoints(long from, long to, List<Chunk> chunks) {
-        Stream<PointImpl> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
-        Stream<PointImpl> sortedPoints = extractedPoints
-                .sorted(Comparator.comparing(PointImpl::getTimestamp));
+    private List<Point> decompressPoints(long from, long to, List<ChunkVersionCurrent> chunks) {
+        Stream<Point> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
+        Stream<Point> sortedPoints = extractedPoints
+                .sorted(Comparator.comparing(Point::getTimestamp));
         return sortedPoints.collect(Collectors.toList());
     }
 }

@@ -66,7 +66,7 @@ public abstract class AbstractQueryEndPointFocusOnSamplingWithPreAgg {
     }
 
     @Test
-    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+//    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSampleMetric5ChunkMax4Point(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/preagg-sampling-algo/testMetric5ChunkMaxPoint4/request.json",

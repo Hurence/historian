@@ -31,27 +31,27 @@ package com.hurence.logisland.processor;
  * limitations under the License.
  */
 
+import com.hurence.logisland.annotation.documentation.CapabilityDescription;
+import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
+import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.InitializationException;
-
-    import com.hurence.logisland.annotation.documentation.CapabilityDescription;
-    import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
-    import com.hurence.logisland.annotation.documentation.Tags;
-    import com.hurence.logisland.component.PropertyDescriptor;
-    import com.hurence.logisland.record.FieldDictionary;
-    import com.hurence.logisland.record.Record;
-    import com.hurence.logisland.record.StandardRecord;
-    import com.hurence.timeseries.compaction.Compression;
-    import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
-    import com.hurence.timeseries.modele.Pair;
-    import com.hurence.logisland.validator.StandardValidators;
+import com.hurence.logisland.component.PropertyDescriptor;
+import com.hurence.logisland.record.FieldDictionary;
+import com.hurence.logisland.record.Record;
+import com.hurence.logisland.record.StandardRecord;
+import com.hurence.logisland.validator.StandardValidators;
+import com.hurence.timeseries.compaction.Compression;
+import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
+import com.hurence.timeseries.modele.Pair;
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.modele.points.PointImpl;
 import org.apache.commons.lang3.StringUtils;
-    import org.slf4j.Logger;
-    import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    import java.util.*;
-    import java.util.stream.Collectors;
-    import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Tags({"record", "fields", "timeseries", "chronix", "convert"})
 @CapabilityDescription("Converts a given field records into a chronix timeseries record")
@@ -145,7 +145,7 @@ public class CompactChunkProcessor extends AbstractProcessor {
         return null;
     }
 
-    private byte[] compressPoints(Stream<PointImpl> points) {
+    private byte[] compressPoints(Stream<Point> points) {
         byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), threshold);
         return Compression.compress(serializedPoints);
     }

@@ -31,6 +31,16 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
     }
 
     @Override
+    public long getTotalNumberOfChunksWithCorrectQuality() {
+        return metricsInfo.values().stream().mapToLong(metricInfo -> metricInfo.totalNumberOfChunksWithCorrectQuality).sum();
+    }
+
+    @Override
+    public long getTotalNumberOfPointsWithCorrectQuality() {
+        return metricsInfo.values().stream().mapToLong(metricInfo -> metricInfo.totalNumberOfPointsWithCorrectQuality).sum();
+    }
+
+    @Override
     public boolean isEmpty() {
         return metricsInfo.isEmpty();
     }
@@ -60,17 +70,41 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
      * increase the number of chunks of MetricSizeInfo corresponding to this metricRequest if it already exist otherwise add a
      * new MetricSizeInfo with this metricRequest initialized with numberOfChunks.
      * @param metric
+     */
+    public void increaseNumberOfChunksForMetricRequest(MetricRequest metric) {
+        if (metricsInfo.containsKey(metric)) {
+            metricsInfo.get(metric).totalNumberOfChunks += 1;
+        } else {
+            MetricSizeInfo metricInfo = new MetricSizeInfo();
+            metricInfo.totalNumberOfChunks = 1;
+            metricInfo.metricRequest = metric;
+            setMetricInfo(metricInfo);
+        }
+    }
+
+    /**
+     * increase the number of chunks of MetricSizeInfo corresponding to this metricRequest if it already exist otherwise add a
+     * new MetricSizeInfo with this metricRequest initialized with numberOfChunks.
+     * @param metric
      * @param numberOfChunks
      */
     public void increaseNumberOfChunksForMetricRequest(MetricRequest metric, long numberOfChunks) {
         if (metricsInfo.containsKey(metric)) {
-            metricsInfo.get(metric).totalNumberOfChunks += numberOfChunks;
+            metricsInfo.get(metric).totalNumberOfChunks += numberOfChunks;;
         } else {
             MetricSizeInfo metricInfo = new MetricSizeInfo();
-            metricInfo.totalNumberOfChunks = numberOfChunks;
+            metricInfo.totalNumberOfChunks = numberOfChunks;;
             metricInfo.metricRequest = metric;
             setMetricInfo(metricInfo);
         }
+    }
+
+    public void increaseNumberOfChunksWithQualityOkForMetricRequest(MetricRequest metric, long numberOfChunksWithCorrectQuality) {
+        metricsInfo.get(metric).totalNumberOfChunksWithCorrectQuality += numberOfChunksWithCorrectQuality;
+    }
+
+    public void increaseNumberOfPointsWithQualityOkForMetricRequest(MetricRequest metric, long numberOfPointsWithCorrectQuality) {
+        metricsInfo.get(metric).totalNumberOfPointsWithCorrectQuality += numberOfPointsWithCorrectQuality;
     }
 
     @Override
@@ -80,4 +114,6 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
         strBuilder.append("}");
         return strBuilder.toString();
     }
+
+
 }

@@ -1,14 +1,16 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
+
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.util.BucketUtils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -19,7 +21,19 @@ public class TimeSeriesExtracterUtil {
 
     private TimeSeriesExtracterUtil() {}
 
-    public static Stream<PointImpl> extractPointsAsStream(long from, long to, List<Chunk> chunks) {
+    /**
+     *
+     * @param from
+     * @param to
+     * @param chunks
+     * @return return all points uncompressing chunks
+     */
+    public static List<Point> extractPoints(long from, long to, List<ChunkVersionCurrent> chunks) {
+        return extractPointsAsStream(from, to, chunks).collect(Collectors.toList());
+    }
+
+
+    public static Stream<Point> extractPointsAsStream(long from, long to, List<ChunkVersionCurrent> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
                     byte[] binaryChunk = chunk.getValueAsBinary();

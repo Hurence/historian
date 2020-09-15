@@ -2,7 +2,6 @@ package com.hurence.historian.spark.sql.reader.csv
 
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
-import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl
 import com.hurence.timeseries.modele.measure.MeasureVersionV0
 import org.apache.spark.sql.functions.{lit, _}
 import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
