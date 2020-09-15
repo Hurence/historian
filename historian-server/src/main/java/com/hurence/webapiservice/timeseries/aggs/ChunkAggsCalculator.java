@@ -1,29 +1,43 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
 import com.hurence.webapiservice.modele.AGG;
-import io.vertx.core.json.JsonObject;
 
-import java.util.*;
+import java.util.List;
+import java.util.OptionalDouble;
 
-import java.util.stream.DoubleStream;
-
-public class ChunkAggsCalculator extends AbstractAggsCalculator<JsonObject> {
+public class ChunkAggsCalculator extends AbstractAggsCalculator<ChunkVersionCurrent> {
 
     public ChunkAggsCalculator(List<AGG> aggregList) {
         super(aggregList);
     }
 
     @Override
-    protected DoubleStream getDoubleStreamFromElementsToAgg(List<JsonObject> chunks, String field) {
+    protected double calculSum(List<ChunkVersionCurrent> chunks) {
         return chunks.stream()
-                .mapToDouble(chunk -> chunk.getDouble(field));
+                .mapToDouble(ChunkVersionCurrent::getSum)
+                .sum();
     }
 
     @Override
-    protected double getDoubleCount(List<JsonObject> chunks) {
+    protected OptionalDouble calculMin(List<ChunkVersionCurrent> chunks) {
         return chunks.stream()
-                .mapToDouble(chunk -> chunk.getDouble(FieldNamesInsideHistorianService.CHUNK_COUNT))
+                .mapToDouble(ChunkVersionCurrent::getMin)
+                .min();
+    }
+
+    @Override
+    protected OptionalDouble calculMax(List<ChunkVersionCurrent> chunks) {
+        return chunks.stream()
+                .mapToDouble(ChunkVersionCurrent::getMax)
+                .max();
+    }
+
+    @Override
+    protected long getCount(List<ChunkVersionCurrent> chunks) {
+        return chunks.stream()
+                .mapToLong(chunk -> chunk.getCount())
                 .sum();
     }
 

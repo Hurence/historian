@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.compaction.protobuf;
 
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.points.Point;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -66,11 +67,11 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
         long start = points.get(0).getTimestamp();
         long end = points.get(points.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(points, ddc);
-        List<Point> uncompressedPoints = ProtoBufTimeSeriesWithQualitySerializer.from(
+        TreeSet<Point> uncompressedPoints = ProtoBufTimeSeriesWithQualitySerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
-        assertEquals(points, uncompressedPoints);
+        assertEquals(new TreeSet<>(points), uncompressedPoints);
     }
 
     @Test
@@ -85,11 +86,11 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
         long start = expectedPoints.get(0).getTimestamp();
         long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(expectedPoints, 0);
-        List<Point> uncompressedPoints = ProtoBufTimeSeriesWithQualitySerializer.from(
+        TreeSet<Point> uncompressedPoints = ProtoBufTimeSeriesWithQualitySerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
-        assertNotEquals(expectedPoints, uncompressedPoints);
+        assertNotEquals(new TreeSet<>(expectedPoints), uncompressedPoints);
     }
 
     @Test

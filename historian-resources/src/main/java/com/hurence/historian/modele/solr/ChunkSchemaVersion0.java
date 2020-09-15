@@ -75,10 +75,7 @@ public class ChunkSchemaVersion0 implements Schema {
                     .withType("pint").build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersion0.CHUNK_DAY)
-                    .withType("string").build(),
-            new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersion0.CHUNK_HOUR)
-                    .withType("pint").build()
+                    .withType("string").build()
     );
 
     @Override

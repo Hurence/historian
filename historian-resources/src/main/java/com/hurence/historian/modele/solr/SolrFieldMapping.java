@@ -2,7 +2,7 @@ package com.hurence.historian.modele.solr;
 
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion1;
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
 import com.hurence.historian.modele.SchemaVersion;
 
@@ -36,11 +36,11 @@ public class SolrFieldMapping {
     public String CHUNK_DAY = HistorianChunkCollectionFieldsVersion0.CHUNK_DAY;
     public String CHUNK_ORIGIN = HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
     //since VERSION 1
-    public String CHUNK_QUALITY_FIRST_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_FIRST;
-    public String CHUNK_QUALITY_AVG_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_AVG;
-    public String CHUNK_QUALITY_MIN_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MIN;
-    public String CHUNK_QUALITY_MAX_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MAX;
-    public String CHUNK_QUALITY_SUM_FIELD = HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_SUM;
+    public String CHUNK_QUALITY_FIRST_FIELD = HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST;
+    public String CHUNK_QUALITY_AVG_FIELD = HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_AVG;
+    public String CHUNK_QUALITY_MIN_FIELD = HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN;
+    public String CHUNK_QUALITY_MAX_FIELD = HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX;
+    public String CHUNK_QUALITY_SUM_FIELD = HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_SUM;
 
     public SolrFieldMapping() {}
 

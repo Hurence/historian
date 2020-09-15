@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.hurence.timeseries.modele.Point.DEFAULT_QUALITY;
+import static com.hurence.timeseries.modele.points.Point.DEFAULT_QUALITY;
 
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
 
@@ -24,8 +24,10 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     final long from;
     final long to;
     final SamplingConf samplingConf;
-    protected final List<JsonObject> chunks = new ArrayList<>();
+
+    protected final List<ChunkVersionCurrent> chunks = new ArrayList<>();
     final List<Point> sampledPoints = new ArrayList<>();
+
     private long totalChunkCounter = 0L;
     long totalPointCounter = 0L;
     long pointCounter = 0L;
@@ -43,9 +45,9 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     }
 
     @Override
-    public void addChunk(JsonObject chunk) {
+    public void addChunk(ChunkVersionCurrent chunk) {
         totalChunkCounter++;
-        pointCounter+=chunk.getLong(FieldNamesInsideHistorianService.CHUNK_COUNT);
+        pointCounter+=chunk.getCount();
         chunks.add(chunk);
         if (isBufferFull()) {
             samplePointsInBufferAndCalculAggregThenReset();
@@ -69,7 +71,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     protected void samplePointsInBufferAndCalculAggregThenReset() {
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("sample points in buffer has been called with chunks : {}",
-                    chunks.stream().map(JsonObject::encodePrettily).collect(Collectors.joining("\n")));
+                    chunks.stream().map(ChunkVersionCurrent::toString).collect(Collectors.joining("\n")));
         }
         samplePointsFromChunksAndCalculAggreg(from, to, chunks);
         chunks.clear();
@@ -80,7 +82,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     /**
      * Sample points from the list of chunks using a strategy. Add them into sampled points then reset buffer
      */
-    protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks);
+    protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<ChunkVersionCurrent> chunks);
 
     protected abstract Optional<JsonObject> getAggsAsJson();
 

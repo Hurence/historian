@@ -1,14 +1,13 @@
 package com.hurence.historian.spark.loader
 
-import com.hurence.historian.modele.ChunkRecordV0
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.functions._
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrentImpl
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Encoders, SparkSession}
 import org.slf4j.LoggerFactory
 
 
@@ -171,8 +170,6 @@ object DataLoaderV2 {
       .master(options.master)
       .getOrCreate()
 
-    import spark.implicits._
-
 
     val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
     val measuresDS = reader.read(sql.Options(
@@ -197,7 +194,9 @@ object DataLoaderV2 {
       .setSaxStringLength(options.saxStringLength)
 
 
-    val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0].repartition(1)
+    val chunksDS = chunkyfier.transform(measuresDS)
+      .as[ChunkVersionCurrentImpl](Encoders.bean(classOf[ChunkVersionCurrentImpl]))
+      .repartition(1)
 
 
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)

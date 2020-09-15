@@ -17,7 +17,7 @@ package com.hurence.timeseries.functions.analyse;
 
 
 import com.hurence.timeseries.MetricTimeSeries;
-import com.hurence.timeseries.modele.DoubleList;
+import com.hurence.timeseries.modele.list.DoubleList;
 import com.hurence.timeseries.functions.ChronixAnalysis;
 import com.hurence.timeseries.functions.FunctionValueMap;
 import com.hurence.timeseries.functions.math.Percentile;

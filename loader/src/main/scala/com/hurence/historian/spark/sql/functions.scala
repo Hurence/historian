@@ -46,7 +46,7 @@ object functions {
   val chunk = udf { (name: String, start: Long, end: Long, timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
 
     // @TODO move this into timeseries modules and do the same for Chronix functions call
-    val builder = new MetricTimeSeries.Builder(name, "measures")
+    val builder = new MetricTimeSeries.Builder(name)
       .start(start)
       .end(end)
 

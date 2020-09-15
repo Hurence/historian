@@ -30,7 +30,7 @@ import java.time.temporal.ChronoUnit
 class FrequencyTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Freq","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Freq")
         def start = Instant.now()
 
         //First add a window with normal values

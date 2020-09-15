@@ -15,8 +15,8 @@
  */
 package com.hurence.timeseries.sampling;
 
-import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.modele.points.PointImpl;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;

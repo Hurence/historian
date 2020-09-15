@@ -27,7 +27,7 @@ import spock.lang.Specification
 class SubtractTest extends Specification {
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Sub","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Sub")
         10.times {
             timeSeriesBuilder.point(it * 100, it + 10)
         }

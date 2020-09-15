@@ -16,9 +16,8 @@
 package com.hurence.timeseries.functions.aggregation
 
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.functions.aggregation.Median
-import com.hurence.timeseries.modele.DoubleList
-import com.hurence.timeseries.modele.LongList
+import com.hurence.timeseries.modele.list.DoubleList
+import com.hurence.timeseries.modele.list.LongList
 import com.hurence.timeseries.functions.FunctionValueMap
 import spock.lang.Specification
 
@@ -29,7 +28,7 @@ import spock.lang.Specification
 class MedianTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Median", "metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Median")
 
         LongList timestamps = new LongList()
         15.times {
@@ -70,7 +69,7 @@ class MedianTest extends Specification {
         def analysisResult = new FunctionValueMap(1, 1, 1)
 
         when:
-        new Median().execute(new MetricTimeSeries.Builder("Empty", "metric").build(), analysisResult)
+        new Median().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

@@ -41,17 +41,7 @@ public class HistorianSearchVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
-        JsonObject historianConf = new JsonObject()
-                .put(CONFIG_SCHEMA_VERSION,
-                        SchemaVersion.VERSION_0.toString());
-        HistorianSolrITHelper
-                .deployHistorianVerticle(container, vertx, historianConf)
-                .subscribe(id -> {
-                            historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
-                            context.completeNow();
-                        },
-                        t -> context.failNow(t));
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
 
         final SolrInputDocument doc = new SolrInputDocument();
@@ -88,6 +78,13 @@ public class HistorianSearchVerticleIT {
         final UpdateResponse updateResponse7 = client.add(COLLECTION, doc7);
         client.commit(COLLECTION, true, true);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
+        HistorianSolrITHelper
+                .deployHistorianVerticle(container, vertx)
+                .subscribe(id -> {
+                            historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
+                            context.completeNow();
+                        },
+                        t -> context.failNow(t));
     }
 
     @AfterAll

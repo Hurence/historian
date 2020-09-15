@@ -48,8 +48,8 @@ public class SearchTagsEndPointIT {
 
 
     @BeforeAll
-    public static void initSolrAnderticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+    public static void initSolrAndVerticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
         Completable solrAndVerticlesDeployed = initVerticles(container, vertx, context);
         solrAndVerticlesDeployed
                 .subscribe(context::completeNow,
@@ -57,10 +57,7 @@ public class SearchTagsEndPointIT {
     }
 
     public static Completable initVerticles(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException, InterruptedException {
-        JsonObject historianConf = new JsonObject()
-                .put(CONFIG_SCHEMA_VERSION,
-                        SchemaVersion.VERSION_0.toString());
-        return HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).ignoreElement();
+        return HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).ignoreElement();
     }
 
     @BeforeAll

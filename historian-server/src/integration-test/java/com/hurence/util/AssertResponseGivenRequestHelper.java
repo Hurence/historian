@@ -1,6 +1,6 @@
 package com.hurence.util;
 
-import com.hurence.webapiservice.http.api.ingestion.ImportCsvEndPointVersion0IT;
+import com.hurence.webapiservice.http.api.ingestion.ImportCsvEndPointIT;
 import io.reactivex.Completable;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AssertResponseGivenRequestHelper {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(ImportCsvEndPointVersion0IT.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(ImportCsvEndPointIT.class);
     protected WebClient webClient;
     protected String endpoint;
 

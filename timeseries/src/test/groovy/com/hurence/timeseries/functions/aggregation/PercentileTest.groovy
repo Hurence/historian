@@ -27,7 +27,7 @@ import spock.lang.Specification
 class PercentileTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("P","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("P")
         10.times {
             timeSeries.point(it, it * 10)
         }
@@ -44,7 +44,7 @@ class PercentileTest extends Specification {
         given:
         def analysisResult = new FunctionValueMap(1, 1, 1)
         when:
-        new Percentile(["0.5"] as String[]).execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Percentile(["0.5"] as String[]).execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

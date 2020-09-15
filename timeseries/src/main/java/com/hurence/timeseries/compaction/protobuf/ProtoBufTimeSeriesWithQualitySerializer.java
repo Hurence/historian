@@ -16,8 +16,7 @@
 package com.hurence.timeseries.compaction.protobuf;
 
 
-import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.timeseries.modele.points.Point;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Class to easily convert the protocol buffer into List<Point>
@@ -49,7 +49,7 @@ public final class ProtoBufTimeSeriesWithQualitySerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
+    public static TreeSet<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
         return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
     }
     /**
@@ -63,7 +63,7 @@ public final class ProtoBufTimeSeriesWithQualitySerializer {
      * @param from              including points from
      * @param to                including points to
      */
-    public static List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public static TreeSet<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
         PointsUnCompressorWithQuality unCompressor = new PointsUnCompressorWithQuality();
         return unCompressor.from(decompressedBytes, timeSeriesStart, timeSeriesEnd, from, to);
     }

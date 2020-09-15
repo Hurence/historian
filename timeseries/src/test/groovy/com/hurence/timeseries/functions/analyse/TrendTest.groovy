@@ -27,7 +27,7 @@ import spock.lang.Specification
 class TrendTest extends Specification {
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Trend","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Trend")
         10.times {
             timeSeries.point(it, it * 10)
         }

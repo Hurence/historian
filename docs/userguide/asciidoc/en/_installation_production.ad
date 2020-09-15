@@ -1,0 +1,114 @@
+=== Single node installation for production
+
+==== Pre-requisite for a single node install in production
+
+The minimal configuration for the server for a single server installation of the data historian (in production) is:
+
+- OS CentOS or Redhat 7.x or Ubuntu or Mac
+- 32 Gigabits of RAM
+- 32 vcores of CPU
+- 2 Terabytes of disk
+- Java 8
+- Spark {spark_version}
+- Solr {solr_version}
+- Grafana {grafana_version}
+
+In this section you will find quick guides to help you install Solr {solr_version}, Spark {spark_version} and Grafana {grafana_version}.
+
+We however recommend to refer to the official documentation for all these tools for production installations.
+
+If you have existing servers you can jump to this <<install-production-hurence-datasource-grafana-plugin,section>>
+
+
+==== Installing Apache SolR
+
+Apache SolR is the database/search engine used but the data historian. It could be replaced by another search engine.
+
+You can download the {solr_version} version of Solr from this link: https://archive.apache.org/dist/lucene/solr/{solr_version}/solr-{solr_version}.tgz[solr-{solr_version}.tgz]
+or from this one https://lucene.apache.org/solr[site officiel]. 
+
+We invite you to follow the official documentation if you want to install a Solr cluster (and not a single node) in production.
+
+See the commands in next sections for unzip and install of both SolR and Spark
+
+Vérify that your Solr instance is up and running by opening its web user interface at this address:
+"http://<solrhost>:8983/solr/#/~cloud"
+
+==== Installing Apache Spark
+
+To install Spark you can download this archive:
+https://archive.apache.org/dist/spark/spark-{spark-version}/spark-{spark-version}-bin-without-hadoop.tgz[spark-{spark-version}-bin-without-hadoop.tgz]
+
+==== Commands to install Solr and Spark
+
+The following commands allow you to get a local install. For a cluster in production, check the official documentation or get guidance from Hurence.
+
+[source,bash, subs="attributes"]
+----
+# get Apache Spark {spark_version} and unpack it
+cd $HDH_HOME
+wget https://archive.apache.org/dist/spark/spark-{spark-version}/spark-{spark-version}-bin-without-hadoop.tgz
+tar -xvf spark-{spark-version}-bin-without-hadoop.tgz
+rm spark-{spark-version}-bin-without-hadoop.tgz
+
+# add two additional jars to spark to handle our framework
+wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
+mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-{spark-version}-bin-without-hadoop/jars/
+cp $HDH_HOME/historian-{hdh_version}-SNAPSHOT/lib/loader-{hdh_version}-SNAPSHOT.jar $HDH_HOME/spark-{spark-version}-bin-without-hadoop/jars/
+----
+
+==== Installing Grafana
+
+You can install Grafana on your platform following this guide: `https://grafana.com/docs/grafana/latest/installation/requirements/`.
+
+One the Grafana cluster (or single node install) up and running we can install the Grafana plugin for the data historian. This plugin turns our historian to a proper data source and allow the creation and visualisation of dashboards based on the historian.
+
+The minimal requirement for the plugin is the 7.0.3 version of Grafana.
+
+[[install-production-hurence-datasource-grafana-plugin]]
+===== Installing the Grafana data source plugin
+
+To view the historian data using dashboards we make use of Grafana. In this end, we have developed our own Grafana plugins that we update according to new historian or Grafana releases.
+
+To install the data source plugin follow the specific guide https://github.com/Hurence/grafana-historian-datasource#installation[installing Grafana datasource plugin]
+
+==== Installing the Hurence Data Historian (HDH)
+
+include::./_installation_historian_part_1.ad[]
+
+Here is an example:
+
+image::screenshot_install_mono_noeud.png[]
+
+include::./_installation_historian_part_2.ad[]
+
+In the following, we will use the '$HDH_HOME' variable to figure out the installation path for the historian. 
+
+At the end of the script run, you'll get:
+
+* the HDH installed at the provided path (in $HDH_HOME).
+* the Grafana datasource plugin https://github.com/Hurence/grafana-historian-datasource[Grafana datasource plugin] installed on the Grafana server as indicated at installation
+
+The structure of $HDH_HOME after running the installation script is 'by default': 
+
+* $HDH_HOME/bin/historian-server.sh : Script to start and stop the REST API server of the historian
+* $HDH_HOME/conf/log4j.properties : File to control the level of logs in production mode (DEFAULT).
+* $HDH_HOME/conf/log4j-debug.properties : File to contrôle the level of logs in debug mode.
+* $HDH_HOME/conf/historian-server-conf.json : configuration file for the REST API server.
+
+The $HDH_HOME/bin/historian-server.sh script is used to start/stop the REST API server of the historian.
+
+To stop the REST API server, type the following command:
+
+[source,bash, subs="attributes"]
+----
+$HDH_HOME/historian-{hdh_version}/bin/historian-server.sh stop
+----
+
+Note:: these commands affect neither Grafana nor Solr that are independant services and need to be started and stopped separately.
+
+===== Configuration file for the data historian
+
+include::./_description_conf_file.ad[]
+
+Generation of a configuration file, according to entered information, at installation.

@@ -16,8 +16,10 @@
 package com.hurence.logisland.record;
 
 import com.hurence.timeseries.functions.*;
-import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
+
+import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.modele.points.PointImpl;
+
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
@@ -30,6 +32,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Stream;
 
 /**
@@ -81,7 +84,7 @@ public class TimeSeriesRecord extends StandardRecord {
 
 
     public TimeSeriesRecord(MetricTimeSeries timeSeries) {
-        super(timeSeries.getType());
+        super("timeseries");
         this.timeSeries = timeSeries;
 
         setStringField(METRIC_NAME, timeSeries.getName());
@@ -105,7 +108,7 @@ public class TimeSeriesRecord extends StandardRecord {
         try {
             Stream<Point> pointStream = getPointStream(chunkValue, chunkStart, chunkEnd).stream();
 
-            MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(name, type)
+            MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(name)
                     .start(chunkStart)
                     .end(chunkEnd);
             //     .attributes(attributes);
@@ -119,7 +122,8 @@ public class TimeSeriesRecord extends StandardRecord {
         }
     }
 
-    public static List<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
+
+    public static TreeSet<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
         byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
         return BinaryCompactionUtil.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
     }
@@ -181,16 +185,16 @@ public class TimeSeriesRecord extends StandardRecord {
      *
      * @return uncompressed points lazyly if not yet done
      */
-    public List<Point> getPoints() {
+    public TreeSet<Point> getPoints() {
         if (hasField(RECORD_CHUNK_UNCOMPRESSED_POINTS))
-            return (List<Point>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue();
+            return new TreeSet((List<Point>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue());
         else {
-            List<Point> points = null;
+            TreeSet<Point> points = null;
             try {
                 points = getPointStream(getChunkValue(), getStartChunk(), getEndChunk());
             } catch (IOException e) {
                 logger.error("chile uncompressing data points of chunk", e);
-                return Collections.emptyList();
+                return new TreeSet<>();
             }
             setField(RECORD_CHUNK_UNCOMPRESSED_POINTS, FieldType.ARRAY, points);
             return points;

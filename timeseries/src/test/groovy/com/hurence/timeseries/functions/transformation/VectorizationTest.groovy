@@ -35,7 +35,7 @@ class VectorizationTest extends Specification {
 
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Vector","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Vector")
 
         def now = Instant.now()
 
@@ -55,7 +55,7 @@ class VectorizationTest extends Specification {
 
     def "test transform - 0 points"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Vector","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Vector")
 
         def timeSeries = timeSeriesBuilder.build()
         def analysisResult = new FunctionValueMap(1, 1, 1)
@@ -69,9 +69,9 @@ class VectorizationTest extends Specification {
 
     def "test transform - 1..3 Points"() {
         given:
-        def timeSeriesBuilder1 = new MetricTimeSeries.Builder("Vector","metric")
-        def timeSeriesBuilder2 = new MetricTimeSeries.Builder("Vector","metric")
-        def timeSeriesBuilder3 = new MetricTimeSeries.Builder("Vector","metric")
+        def timeSeriesBuilder1 = new MetricTimeSeries.Builder("Vector")
+        def timeSeriesBuilder2 = new MetricTimeSeries.Builder("Vector")
+        def timeSeriesBuilder3 = new MetricTimeSeries.Builder("Vector")
 
         def now = Instant.now()
         def analysisResult = new FunctionValueMap(1, 1, 3)
