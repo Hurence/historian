@@ -1,24 +1,21 @@
 package com.hurence.historian.spark.sql.reader.parquet
 
-import com.hurence.historian.modele.ChunkRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
-import org.apache.spark.sql.functions._
-import org.apache.spark.sql.{Dataset, SparkSession}
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent
+import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 
-class ParquetChunksReader extends Reader[ChunkRecordV0] {
+class ParquetChunksReader extends Reader[ChunkVersionCurrent] {
 
 
-  override def read(options: Options): Dataset[ChunkRecordV0] = {
+  override def read(options: Options): Dataset[ChunkVersionCurrent] = {
 
 
     val spark = SparkSession.getActiveSession.get
-
-    import spark.implicits._
    // implicit val tsrEncoder = org.apache.spark.sql.Encoders.kryo[ChunkRecordV0]
 
     spark.read.parquet(options.path)
      // .withColumn("day", from_unixtime($"timestamp" / 1000, "yyyy-MM-dd"))
-      .as[ChunkRecordV0]
+      .as[ChunkVersionCurrent](Encoders.bean(classOf[ChunkVersionCurrent]))
   }
 }

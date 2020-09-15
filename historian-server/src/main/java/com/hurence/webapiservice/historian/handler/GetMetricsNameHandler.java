@@ -3,7 +3,7 @@ package com.hurence.webapiservice.historian.handler;
 import com.hurence.historian.modele.HistorianConf;
 import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.webapiservice.historian.impl.SolrHistorianConf;
+import com.hurence.webapiservice.historian.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;

@@ -16,6 +16,9 @@ public class IngestionApiUtil {
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiUtil.class);
 
     public static void constructCsvFileConvertors(MultiCsvFilesConvertor multiCsvFilesConvertor) {
+        if (multiCsvFilesConvertor.uploads.isEmpty()) {
+            throw new IllegalArgumentException("Request is not containing any files");
+        }
         multiCsvFilesConvertor.uploads.forEach(file -> multiCsvFilesConvertor.csvFileConvertors.add(new CsvFileConvertor(multiCsvFilesConvertor.multiMap, file)));
         multiCsvFilesConvertor.parseFiles();
         multiCsvFilesConvertor.fillingAllFilesConvertor();
@@ -30,8 +33,8 @@ public class IngestionApiUtil {
             finalResponse.put(HistorianServiceFields.TAGS, new JsonArray(multiMap.getAll(HistorianServiceFields.MAPPING_TAGS)))
                     .put(HistorianServiceFields.GROUPED_BY_IN_RESPONSE, IngestionApiUtil.getGroupedByList(multiMap))
                     .put(HistorianServiceFields.REPORT, result);
-        if (!correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles.isEmpty())
-            finalResponse.put(HistorianServiceFields.ERRORS, correctPointsAndFailedPointsOfAllFiles.namesOfTooBigFiles);
+        if (!correctPointsAndFailedPointsOfAllFiles.filesThatFailedToBeImported.isEmpty())
+            finalResponse.put(HistorianServiceFields.ERRORS, correctPointsAndFailedPointsOfAllFiles.filesThatFailedToBeImported);
         return finalResponse;
     }
     public static JsonArray getGroupedByReportFromInjectedPoints(MultiCsvFilesConvertor.CorrectPointsAndFailedPointsOfAllFiles correctPointsAndFailedPointsOfAllFiles,

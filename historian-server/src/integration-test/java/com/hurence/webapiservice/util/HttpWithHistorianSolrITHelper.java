@@ -56,9 +56,9 @@ public abstract class HttpWithHistorianSolrITHelper {
             Vertx vertx, VertxTestContext context,
             JsonObject historianConf) throws IOException, SolrServerException, InterruptedException {
         LOGGER.info("Initializing Historian chunk collection");
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_1);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Initializing Historian annotation collection");
-        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_1);
+        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Initializing Verticles");
         deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();

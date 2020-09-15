@@ -28,7 +28,7 @@ class IntegralTest extends Specification {
     def "test get last value"() {
 
         given:
-        def timeSeries = new MetricTimeSeries.Builder("Integral","metric")
+        def timeSeries = new MetricTimeSeries.Builder("Integral")
 
         10.times {
             timeSeries.point(it + 1, it)
@@ -47,7 +47,7 @@ class IntegralTest extends Specification {
         def analysisResult = new FunctionValueMap(1, 1, 1);
 
         when:
-        new Integral().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Integral().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

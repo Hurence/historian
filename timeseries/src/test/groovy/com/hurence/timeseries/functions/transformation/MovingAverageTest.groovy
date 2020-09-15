@@ -29,7 +29,7 @@ import java.time.Instant
 class MovingAverageTest extends Specification {
     def "test transform with last window contains only one point"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Moving average","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Moving average")
         def movAvg = new MovingAverage(["5", "SECONDS"] as String[])
 
         timeSeriesBuilder.point(dateOf("2016-05-23T10:51:00.000Z"), 5)//0
@@ -90,7 +90,7 @@ class MovingAverageTest extends Specification {
 
     def "test transform with last window contains several points"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Moving average","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Moving average")
         def movAvg = new MovingAverage(["5", "SECONDS"] as String[])
 
         timeSeriesBuilder.point(dateOf("2016-05-23T10:51:00.000Z"), 5)//0
@@ -148,7 +148,7 @@ class MovingAverageTest extends Specification {
 
     def "test transform with gaps"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Moving average","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Moving average")
         def movAvg = new MovingAverage(["5", "SECONDS"] as String[])
 
         timeSeriesBuilder.point(dateOf("2016-05-23T10:51:00.000Z"), 5)//0

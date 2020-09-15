@@ -1,7 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.webapiservice.modele.AGG;
@@ -42,7 +43,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
     }
 
     @Override
-    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<JsonObject> chunks) {
+    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<ChunkVersionCurrent> chunks) {
         List<Point> points = decompressPoints(from, to, chunks);
         List<Point> sampledPoints = sampler.sample(points);
         List<Point> filteredPoints = filterPointsByQuality(sampledPoints);
@@ -65,7 +66,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<Point> decompressPoints(long from, long to, List<JsonObject> chunks) {
+    private List<Point> decompressPoints(long from, long to, List<ChunkVersionCurrent> chunks) {
         Stream<Point> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
         Stream<Point> sortedPoints = extractedPoints
                 .sorted(Comparator.comparing(Point::getTimestamp));

@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.compactor
 
-import com.hurence.timeseries.modele.PointImpl
+import com.hurence.timeseries.modele.points.PointImpl
 
 case class CompactionChunkInfo(value: String, start: Long, end: Long, size: Long) {
 

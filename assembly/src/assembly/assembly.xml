@@ -53,6 +53,16 @@
                 <include>**/*</include>
             </includes>
         </fileSet>
+
+        <fileSet>
+            <directory>../historian-resources/samples</directory>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0770</fileMode>
+            <outputDirectory>./samples</outputDirectory>
+            <includes>
+                <include>**/*</include>
+            </includes>
+        </fileSet>
         <!-- Add extra jars for redirecting log4j logging into slf4j api. (This may reduce performance)
             See https://logging.apache.org/log4j/2.x/log4j-to-slf4j/index.html
          -->

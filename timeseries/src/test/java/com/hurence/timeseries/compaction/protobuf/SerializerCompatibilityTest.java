@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.compaction.protobuf;
 
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.points.Point;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -62,11 +63,11 @@ public class SerializerCompatibilityTest {
         byte[] compressedOlgAlgo = ProtoBufTimeSeriesCurrentSerializer.to(expectedPoints);
         long start = expectedPoints.get(0).getTimestamp();
         long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
-        List<Point> uncompressedPoints = ProtoBufTimeSeriesCurrentSerializer.from(
+        TreeSet<Point> uncompressedPoints = ProtoBufTimeSeriesCurrentSerializer.from(
                 new ByteArrayInputStream(compressedOlgAlgo),
                 start, end, compressedOlgAlgo
         );
-        assertEquals(expectedPoints, uncompressedPoints);
+        assertEquals(new TreeSet<Point>(expectedPoints), new TreeSet<>(uncompressedPoints));
     }
 
 

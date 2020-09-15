@@ -15,9 +15,9 @@
  */
 package com.hurence.timeseries
 
-import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.modele.DoubleList
-import com.hurence.timeseries.modele.LongList
+
+import com.hurence.timeseries.modele.list.DoubleList
+import com.hurence.timeseries.modele.list.LongList
 import spock.lang.Specification
 
 /**
@@ -38,7 +38,7 @@ class MetricTimeSeriesTest extends Specification {
         attributes.put("thread", 2 as long)
 
         when:
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric")
+        def ts = new MetricTimeSeries.Builder("//CPU//Load")
                 .attributes(attributes)
                 .attribute("host", "laptop")
                 .attribute("avg", 2.23)
@@ -50,7 +50,6 @@ class MetricTimeSeriesTest extends Specification {
         ts.start == 0
         ts.end == 10
         ts.name == "//CPU//Load"
-        ts.type == "metric"
         ts.attributes().size() == 3
         ts.attributesReference.size() == 3
         ts.attribute("host") == "laptop"
@@ -75,7 +74,7 @@ class MetricTimeSeriesTest extends Specification {
             times.add(100 - it as long)
             values.add(it * 10 as double)
         }
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").points(times, values).build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").points(times, values).build()
 
         when:
 
@@ -93,7 +92,7 @@ class MetricTimeSeriesTest extends Specification {
             times.add(100 - it as long)
             values.add(100 - it as double)
         }
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").build()
         ts.addAll(times, values)
 
         when:
@@ -105,7 +104,7 @@ class MetricTimeSeriesTest extends Specification {
 
     def "test sort on empty time series"() {
         given:
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").build()
 
         when:
         ts.sort()
@@ -125,7 +124,7 @@ class MetricTimeSeriesTest extends Specification {
             values.add(it * 10 as double)
         }
 
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric")
+        def ts = new MetricTimeSeries.Builder("//CPU//Load")
                 .points(times, values)
                 .build()
 
@@ -141,7 +140,7 @@ class MetricTimeSeriesTest extends Specification {
 
     def "test to string"() {
         given:
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").build()
 
         when:
         def string = ts.toString()
@@ -152,7 +151,7 @@ class MetricTimeSeriesTest extends Specification {
 
     def "test equals"() {
         given:
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").build()
 
         when:
         def result = ts == other
@@ -161,13 +160,13 @@ class MetricTimeSeriesTest extends Specification {
         result == expected
 
         where:
-        other << [null, 1, new MetricTimeSeries.Builder("//CPU//Load","metric").build()]
+        other << [null, 1, new MetricTimeSeries.Builder("//CPU//Load").build()]
         expected << [false, false, true]
     }
 
     def "test equals same instance"() {
         given:
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").build()
 
         expect:
         ts == ts
@@ -175,9 +174,9 @@ class MetricTimeSeriesTest extends Specification {
 
     def "test hash code"() {
         given:
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
-        def ts2 = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
-        def ts3 = new MetricTimeSeries.Builder("//CPU//Load//","metric").build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").build()
+        def ts2 = new MetricTimeSeries.Builder("//CPU//Load").build()
+        def ts3 = new MetricTimeSeries.Builder("//CPU//Load//").build()
 
         expect:
         ts.hashCode() == ts2.hashCode()
@@ -186,7 +185,7 @@ class MetricTimeSeriesTest extends Specification {
 
     def "test empty points"() {
         expect:
-        def ts = new MetricTimeSeries.Builder("","").build()
+        def ts = new MetricTimeSeries.Builder("").build()
         ts.points().count() == 0l
         ts.isEmpty()
     }
@@ -199,7 +198,7 @@ class MetricTimeSeriesTest extends Specification {
             times.add(100 - it as long)
             values.add(100 - it as double)
         }
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric").build()
+        def ts = new MetricTimeSeries.Builder("//CPU//Load").build()
         ts.addAll(times as long[], values as double[])
 
         when:
@@ -211,7 +210,7 @@ class MetricTimeSeriesTest extends Specification {
 
     def "test attribute reference"() {
         given:
-        def ts = new MetricTimeSeries.Builder("//CPU//Load","metric")
+        def ts = new MetricTimeSeries.Builder("//CPU//Load")
                 .attribute("added via builder", "oh dear")
                 .build()
         when:

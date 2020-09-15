@@ -1,11 +1,11 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
-import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
+
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.webapiservice.modele.AGG;
 
 import java.util.List;
-import java.util.stream.DoubleStream;
+import java.util.OptionalDouble;
 
 public class PointsAggsCalculator extends AbstractAggsCalculator<Point> {
 
@@ -13,13 +13,22 @@ public class PointsAggsCalculator extends AbstractAggsCalculator<Point> {
         super(aggregList);
     }
 
-    @Override
-    protected DoubleStream getDoubleStreamFromElementsToAgg(List<Point> points, String field) {
-        return points.stream().mapToDouble(Point::getValue);
+    protected double calculSum(List<Point> points) {
+        return points.stream().mapToDouble(Point::getValue).sum();
     }
 
     @Override
-    protected double getDoubleCount(List<Point> points) {
+    protected OptionalDouble calculMin(List<Point> points) {
+        return points.stream().mapToDouble(Point::getValue).min();
+    }
+
+    @Override
+    protected OptionalDouble calculMax(List<Point> points) {
+        return points.stream().mapToDouble(Point::getValue).max();
+    }
+
+    @Override
+    protected long getCount(List<Point> points) {
         return points.size();
     }
 }

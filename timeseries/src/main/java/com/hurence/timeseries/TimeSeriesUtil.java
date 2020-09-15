@@ -16,11 +16,18 @@
 package com.hurence.timeseries;
 
 
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.Point;
+
+import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.WeekFields;
+import java.util.List;
+import java.util.stream.Stream;
 
 
 /**
@@ -30,8 +37,6 @@ import java.time.temporal.WeekFields;
  * @author johannes.siedersleben
  */
 public final class TimeSeriesUtil {
-
-
 
     public static ZoneId DEFAULT_TIMEZONE = ZoneId.of("UTC");
 
@@ -58,6 +63,21 @@ public final class TimeSeriesUtil {
         DateTimeFormatter dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
                 .withZone(zoneId);
         return dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC));
+    }
+
+
+    public static Stream<Point> extractPointsAsStream(long from, long to, List<ChunkVersionCurrent> chunks) {
+        return chunks.stream()
+                .flatMap(chunk -> {
+                    byte[] binaryChunk = chunk.getValueAsBinary();
+                    long chunkStart = chunk.getStart();
+                    long chunkEnd = chunk.getEnd();
+                    try {
+                        return BinaryCompactionUtil.unCompressPoints(binaryChunk, chunkStart, chunkEnd, from, to).stream();
+                    } catch (IOException ex) {
+                        throw new IllegalArgumentException("error during uncompression of a chunk !", ex);
+                    }
+                });
     }
 
     /**

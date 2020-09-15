@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
+
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
 import com.hurence.webapiservice.http.api.grafana.util.QualityConfig;
-import io.vertx.core.json.JsonObject;
 
 import java.util.Map;
 import java.util.Objects;
@@ -57,8 +57,8 @@ public class MetricRequest {
      * @param chunk
      * @return true if chunk is corresponding to metric query.
      */
-    public boolean isChunkMatching(JsonObject chunk) {
-        final String chunkName = chunk.getString(FieldNamesInsideHistorianService.NAME);
+    public boolean isChunkMatching(ChunkVersionCurrent chunk) {
+        final String chunkName = chunk.getName();
         if (!getName().equals(chunkName)) {
             return false;
         }
@@ -67,10 +67,10 @@ public class MetricRequest {
         }
         boolean isChunkMatching = true;
         for(Map.Entry<String, String> entry : getTags().entrySet()) {
-            if (!chunk.containsKey(entry.getKey())) {
+            if (!chunk.containsTag(entry.getKey())) {
                 return false;
             } else {
-                if (!chunk.getString(entry.getKey()).equals(entry.getValue())) {
+                if (!chunk.getTag(entry.getKey()).equals(entry.getValue())) {
                     isChunkMatching = false;
                     break;
                 }

@@ -1,8 +1,9 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
+import com.hurence.historian.solr.util.ChunkBuilderHelper;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.timeseries.modele.PointImpl;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -28,8 +29,11 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     private long START_CHUNK_2 = 1477917224866L;
     private long START_CHUNK_1 = 1477895624866L;
-    JsonObject getChunk1() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
+
+
+
+    ChunkVersionCurrent getChunk1() {
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
                 new PointImpl(START_CHUNK_1, 1),
                 new PointImpl(1477916224866L, 1),
                 new PointImpl(1477916224867L, 1),
@@ -40,44 +44,39 @@ public class TimeSeriesExtracterUsingPreAggTest {
                 new PointImpl(1477916224872L, 1),
                 new PointImpl(1477917224865L, 1)
         ));
-        return chunk.toJson("id1");
     }
 
-    JsonObject getChunk2() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
+    ChunkVersionCurrent getChunk2() {
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
                 new PointImpl( START_CHUNK_2, 2),
                 new PointImpl( 1477917224867L, 2),
                 new PointImpl( 1477917224868L, 2)
         ));
-        return chunk.toJson("id2");
     }
 
 
-    JsonObject getChunk3() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
+    ChunkVersionCurrent getChunk3() {
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
                 new PointImpl(1477917224868L, 3),
                 new PointImpl(1477917224869L, 3),
                 new PointImpl(1477917224870L, 3)
         ));
-        return chunk.toJson("id2");
     }
 
-    JsonObject getChunk4() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
+    ChunkVersionCurrent getChunk4() {
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
                 new PointImpl( 1477917224870L, 4),
                 new PointImpl( 1477917224871L, 4),
                 new PointImpl( 1477917224872L, 4)
         ));
-        return chunk.toJson("id2");
     }
 
-    JsonObject getChunk5() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
+    ChunkVersionCurrent getChunk5() {
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
                 new PointImpl( 1477917224873L, 5),
                 new PointImpl( 1477917224874L, 5),
                 new PointImpl( 1477917224875L, 5)
         ));
-        return chunk.toJson("id2");
     }
 
     @Test

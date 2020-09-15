@@ -1,6 +1,6 @@
 package com.hurence.historian.modele.solr;
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion1;
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
 import com.hurence.historian.modele.SchemaVersion;
 
 import java.util.ArrayList;
@@ -14,19 +14,19 @@ public class ChunkSchemaVersion1 extends ChunkSchemaVersion0 implements Schema{
     public ChunkSchemaVersion1(){ // TODO check this correct or not !
         fields.addAll(Arrays.asList(
                 new SolrField.Builder()
-                        .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_AVG)
+                        .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_AVG)
                         .withType("pfloat").build(),
                 new SolrField.Builder()
-                        .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MIN)
+                        .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN)
                         .withType("pfloat").build(),
                 new SolrField.Builder()
-                        .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_MAX)
+                        .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX)
                         .withType("pfloat").build(),
                 new SolrField.Builder()
-                        .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_SUM)
+                        .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_SUM)
                         .withType("pfloat").build(),
                 new SolrField.Builder()
-                        .withName(HistorianChunkCollectionFieldsVersion1.CHUNK_QUALITY_FIRST)
+                        .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST)
                         .withType("pfloat").build()
         ));
     }

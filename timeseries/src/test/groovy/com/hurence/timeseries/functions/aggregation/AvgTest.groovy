@@ -28,7 +28,7 @@ class AvgTest extends Specification {
 
     def "test execute"() {
         given:
-        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Avg","metric")
+        MetricTimeSeries.Builder timeSeries = new MetricTimeSeries.Builder("Avg")
         10.times {
             timeSeries.point(it, it * 10)
         }
@@ -47,7 +47,7 @@ class AvgTest extends Specification {
         given:
         def analysisResult = new FunctionValueMap(1, 1, 1)
         when:
-        new Avg().execute(new MetricTimeSeries.Builder("Empty","metric").build(), analysisResult)
+        new Avg().execute(new MetricTimeSeries.Builder("Empty").build(), analysisResult)
         then:
         analysisResult.getAggregationValue(0) == Double.NaN
     }

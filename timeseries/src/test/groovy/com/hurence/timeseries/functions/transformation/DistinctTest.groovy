@@ -27,7 +27,7 @@ import spock.lang.Specification
 class DistinctTest extends Specification {
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Distinct","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Distinct")
 
         10.times {
             timeSeriesBuilder.point(it * 100, it + 10)

@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
-import com.hurence.historian.modele.FieldNamesInsideHistorianService;
-import io.vertx.core.json.JsonObject;
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,41 +45,44 @@ public class QualityConfig {
         return Objects.hash(quality, qualityAgg);
     }
 
-    public boolean matchChunk(JsonObject chunk) {
-        Float qualityChunk;
-        String chunkQualityField = getChunkQualityFieldForSampling();
-        if(chunkQualityField == null)
+    public boolean matchChunk(ChunkVersionCurrent chunk) {
+        Float qualityChunk = getQualityOfChunk(chunk);
+        if(qualityChunk == null)
             return true;
-        try {
-            qualityChunk = chunk.getFloat(chunkQualityField);
-        } catch (Exception e) {
-            LOGGER.trace("chunk don't have field "+chunkQualityField);
-            return false;
-        }
         return (this.quality <= qualityChunk);
     }
 
-    public String getChunkQualityFieldForSampling() {
-        String qualityAggName;
+    private Float getQualityOfChunk(ChunkVersionCurrent chunk) {
         switch (qualityAgg) {
             case AVG:
-                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_AVG_FIELD;
-                break;
+                return Double.valueOf(chunk.getQualityAvg()).floatValue();
             case MIN:
-                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_MIN_FIELD;
-                break;
+                return Double.valueOf(chunk.getQualityMin()).floatValue();
             case MAX:
-                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_MAX_FIELD;
-                break;
+                return Double.valueOf(chunk.getQualityMax()).floatValue();
             case FIRST:
-                qualityAggName = FieldNamesInsideHistorianService.CHUNK_QUALITY_FIRST_FIELD;
-                break;
+                return Double.valueOf(chunk.getQualityFirst()).floatValue();
             case NONE:
-                qualityAggName = null;
-                break;
+                return null;
             default:
                 throw new IllegalStateException("Unsupported quality aggregation: " + qualityAgg);
         }
-        return qualityAggName;
+    }
+
+    public String getChunkQualityFieldForSampling() {
+        switch (qualityAgg) {
+            case AVG:
+                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_AVG;
+            case MIN:
+                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN;
+            case MAX:
+                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX;
+            case FIRST:
+                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST;
+            case NONE:
+                return null;
+            default:
+                throw new IllegalStateException("Unsupported quality aggregation: " + qualityAgg);
+        }
     }
 }

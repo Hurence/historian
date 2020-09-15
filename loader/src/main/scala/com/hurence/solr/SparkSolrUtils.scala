@@ -1,22 +1,11 @@
 package com.hurence.solr
 
-import com.hurence.historian.modele.ChunkRecordV0
-import org.apache.spark.sql.{DataFrame, Dataset, SparkSession}
+import org.apache.spark.sql.{DataFrame, SparkSession}
 
 object SparkSolrUtils {
-  def loadTimeSeriesFromSolR(spark: SparkSession, solrOpts: Map[String, String]): Dataset[ChunkRecordV0] = {
-    //TODO
-    return null;
-//    spark.read
-//      .format("solr")
-//      .options(solrOpts)
-//      .load
-//      .map(r => new TimeSeriesRecord("evoa_measure",
-//        r.getAs[String]("name"),
-//        r.getAs[String]("chunk_value"),
-//        r.getAs[Long]("chunk_start"),
-//        r.getAs[Long]("chunk_end")))(org.apache.spark.sql.Encoders.kryo[TimeSeriesRecord])
-  }
+//  def loadTimeSeriesFromSolR(spark: SparkSession, solrOpts: Map[String, String]): Dataset[ChunkVersion0] = {
+//    return null;
+//  }
 
   def loadFromSolR(spark: SparkSession, solrOpts: Map[String, String]): DataFrame = {
     spark.read

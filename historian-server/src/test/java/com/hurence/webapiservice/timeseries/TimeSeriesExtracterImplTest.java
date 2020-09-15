@@ -1,9 +1,9 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
+import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.timeseries.modele.PointImpl;
-import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -17,8 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.TreeSet;
 
-import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
 import static com.hurence.webapiservice.modele.AGG.*;
 import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.*;
 
@@ -33,33 +33,31 @@ public class TimeSeriesExtracterImplTest {
     private long START_CHUNK_2 = 1477895624869L;
     private long MIDDLE_CHUNK_2 = 1477895624870L;
     private long END_CHUNK_2 = 1477895624871L;
+    private PointsToChunkVersionCurrent chunkGenerator = new PointsToChunkVersionCurrent("test");
 
-    JsonObject getChunk1() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl( START_CHUNK_1, 1),
-                new PointImpl( MIDDLE_CHUNK_1, 2),
-                new PointImpl( END_CHUNK_1, 3)
-        ));
-        return chunk.toJson("id1");
+    ChunkVersionCurrent getChunk1() {
+        return chunkGenerator.buildChunk("fake", new TreeSet<>(Arrays.asList(
+                new PointImpl(START_CHUNK_1, 1),
+                new PointImpl(MIDDLE_CHUNK_1, 2),
+                new PointImpl(END_CHUNK_1, 3)
+        )));
     }
 
 
-    JsonObject getChunk2() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
+    ChunkVersionCurrent getChunk2() {
+        return chunkGenerator.buildChunk("fake", new TreeSet<>(Arrays.asList(
                 new PointImpl( START_CHUNK_2, 4),
                 new PointImpl( MIDDLE_CHUNK_2, 5),
                 new PointImpl( END_CHUNK_2, 6)
-        ));
-        return chunk.toJson("id1");
+        )));
     }
 
-    JsonObject getConflictingChunk() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
+    ChunkVersionCurrent getConflictingChunk() {
+        return chunkGenerator.buildChunk("fake", new TreeSet<>(Arrays.asList(
                 new PointImpl( MIDDLE_CHUNK_1, 4),
                 new PointImpl( START_CHUNK_2, 5),
                 new PointImpl( MIDDLE_CHUNK_2, 6)
-        ));
-        return chunk.toJson("id1");
+        )));
     }
 
     @Test

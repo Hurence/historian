@@ -5,11 +5,13 @@ name: Run integration tests
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, release-1.3.5 ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, release-1.3.5 ]
   workflow_dispatch:
     inputs:
+    branches: [ master, release-1.3.5 ]
+
 
 jobs:
   build:

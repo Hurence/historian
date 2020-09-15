@@ -15,9 +15,9 @@
  */
 package com.hurence.timeseries.sampling;
 
-import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
-import com.hurence.timeseries.modele.PointWithQualityImpl;
+import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.modele.points.PointWithQualityImpl;
 
 public class SamplerFactory {
 
@@ -80,26 +80,26 @@ public class SamplerFactory {
     }
 
     //TODO
-    public static Sampler<Point> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
-        switch (algorithm) {
-            case FIRST:
-                return new FirstItemSamplerWithSpecificBucketing<Point>(bucketingStrategy);
-            case AVERAGE:
-//                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
-            case NONE:
-//                return new IsoSampler<Point>();
-            case MIN:
-//                return new MinSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
-            case MAX:
-//                return new MaxSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
-            case MIN_MAX:
-            case LTTB:
-            case MODE_MEDIAN:
-            default:
-                throw new UnsupportedOperationException("algorithm " + algorithm.name() + " is not yet supported !");
-
-        }
-    }
+//    public static Sampler<Point> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
+//        switch (algorithm) {
+//            case FIRST:
+////                return new FirstItemSamplerWithSpecificBucketing<Point>(bucketingStrategy);
+//            case AVERAGE:
+////                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+//            case NONE:
+////                return new IsoSampler<Point>();
+//            case MIN:
+////                return new MinSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+//            case MAX:
+////                return new MaxSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+//            case MIN_MAX:
+//            case LTTB:
+//            case MODE_MEDIAN:
+//            default:
+//                throw new UnsupportedOperationException("algorithm " + algorithm.name() + " is not yet supported !");
+//
+//        }
+//    }
 
     public static TimeSerieHandler<Point> getPointTimeSerieHandler() {
         return new TimeSerieHandler<Point>() {

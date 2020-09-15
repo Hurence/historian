@@ -1,9 +1,9 @@
 package com.hurence.timeseries.compaction.protobuf;
 
 import com.hurence.timeseries.converter.serializer.MetricPointWithQualityEmbedded;
-import com.hurence.timeseries.modele.Point;
-import com.hurence.timeseries.modele.PointImpl;
-import com.hurence.timeseries.modele.PointWithQualityImpl;
+import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.modele.points.PointWithQualityImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,7 +32,7 @@ public class PointsUnCompressorWithQuality {
      * @param from              including points from
      * @param to                including points to
      */
-    public List<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public TreeSet<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
         LOGGER.debug("from - timeSeriesStart={} timeSeriesEnd={} to={} from={}", timeSeriesStart, timeSeriesEnd, to, from);
         if (from == -1 || to == -1) {
             throw new IllegalArgumentException("FROM or TO have to be >= 0");
@@ -41,18 +41,18 @@ public class PointsUnCompressorWithQuality {
         //if to is left of the time series, we have no points to return
         if (to < timeSeriesStart) {
             LOGGER.debug("error to={} is lower than timeSeriesStart={}", to, timeSeriesStart);
-            return Collections.emptyList();
+            return new TreeSet<>();
         }
         //if from is greater  to, we have nothing to return
         if (from > to) {
             LOGGER.debug("error from={} is greater than to={}", from, to);
-            return Collections.emptyList();
+            return new TreeSet<>();
         }
 
         //if from is right of the time series we have nothing to return
         if (from > timeSeriesEnd) {
             LOGGER.debug("error from={} is greater than timeSeriesEnd={}", from, timeSeriesEnd);
-            return Collections.emptyList();
+            return new TreeSet<>();
         }
 
         try {
@@ -65,7 +65,7 @@ public class PointsUnCompressorWithQuality {
                 //Then this means this is an old version without quality
                 throw new IllegalArgumentException("qList should not be empty. Bad or icompatible compressedBytes !");
             }
-            List<Point> pointsToReturn = new ArrayList<>();
+            TreeSet<Point> pointsToReturn = new TreeSet<>();
             int size = pList.size();
             currentQuality = getQuality(qList, qListIterator.next());
             Optional<Integer> indexForNextQuality = findIndexForNextQuality(qListIterator);

@@ -31,7 +31,7 @@ class ScaleTest extends Specification {
 
     def "test transform"() {
         given:
-        def timeSeriesBuilder = new MetricTimeSeries.Builder("Scale","metric")
+        def timeSeriesBuilder = new MetricTimeSeries.Builder("Scale")
         def now = Instant.now()
 
         100.times {

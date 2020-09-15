@@ -15,14 +15,11 @@
  */
 package com.hurence.timeseries.compaction.protobuf;
 
-import com.hurence.timeseries.modele.Point;
+import com.hurence.timeseries.modele.points.Point;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;

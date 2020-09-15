@@ -33,7 +33,6 @@ public class HistorianChunkCollectionFieldsVersion0 {
     public static String CHUNK_YEAR = "chunk_year";
     public static String CHUNK_MONTH = "chunk_month";
     public static String CHUNK_DAY = "chunk_day";
-    public static String CHUNK_HOUR = "chunk_hour";
     public static String CHUNK_STDDEV = "chunk_stddev";
 }
 

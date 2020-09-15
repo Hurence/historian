@@ -3,8 +3,10 @@ package com.hurence.webapiservice.historian;
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags;
-import com.hurence.timeseries.modele.PointImpl;
+import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
+import com.hurence.historian.solr.util.ChunkBuilderHelper;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
@@ -32,10 +34,7 @@ import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.concurrent.TimeUnit;
-
-import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,56 +48,45 @@ public class HistorianVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempA = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
-                "temp_a",
+        GeneralInjectorCurrentVersion injector = new GeneralInjectorCurrentVersion();
+        ChunkVersionCurrent chunk1 = ChunkBuilderHelper.fromPoints("temp_a",
                 Arrays.asList(
-                        Collections.emptyMap(),
-                        Collections.emptyMap(),
-                        Collections.emptyMap()
-                ),
-                Arrays.asList(
-                        Arrays.asList(
-                                new PointImpl( 1L, 5),
-                                new PointImpl( 2L, 8),
-                                new PointImpl( 3L, 1.2),
-                                new PointImpl( 4L, 6.5)
-                        ),
-                        Arrays.asList(
-                                new PointImpl( 5L, -2),
-                                new PointImpl( 6L, 8.8),
-                                new PointImpl( 7L, 13.3),
-                                new PointImpl( 8L, 2)
-                        ),
-                        Arrays.asList(
-                                new PointImpl( 9L, -5),
-                                new PointImpl( 10L, 80),
-                                new PointImpl( 11L, 1.2),
-                                new PointImpl( 12L, 5.5)
-                        )
+                        new PointImpl( 1L, 5),
+                        new PointImpl( 2L, 8),
+                        new PointImpl( 3L, 1.2),
+                        new PointImpl( 4L, 6.5)
                 ));
-        Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags injectorTempB = new Version0SolrInjectorOneMetricMultipleChunksSpecificPointsWithTags(
-                "temp_b",
+        injector.addChunk(chunk1);
+        ChunkVersionCurrent chunk2 = ChunkBuilderHelper.fromPoints("temp_a",
                 Arrays.asList(
-                        Collections.emptyMap()
-                ),
-                Arrays.asList(
-                        Arrays.asList(
-                                new PointImpl( 9L, -5),
-                                new PointImpl( 10L, 80),
-                                new PointImpl( 11L, 1.2),
-                                new PointImpl( 12L, 5.5)
-                        )
+                        new PointImpl( 5L, -2),
+                        new PointImpl( 6L, 8.8),
+                        new PointImpl( 7L, 13.3),
+                        new PointImpl( 8L, 2)
                 ));
-        injectorTempA.addChunk(injectorTempB);
-        injectorTempA.injectChunks(client);
+        injector.addChunk(chunk2);
+        ChunkVersionCurrent chunk3 = ChunkBuilderHelper.fromPoints("temp_a",
+                Arrays.asList(
+                        new PointImpl( 9L, -5),
+                        new PointImpl( 10L, 80),
+                        new PointImpl( 11L, 1.2),
+                        new PointImpl( 12L, 5.5)
+                ));
+        injector.addChunk(chunk3);
+        ChunkVersionCurrent chunk4 = ChunkBuilderHelper.fromPoints("temp_b",
+                Arrays.asList(
+                        new PointImpl( 9L, -5),
+                        new PointImpl( 10L, 80),
+                        new PointImpl( 11L, 1.2),
+                        new PointImpl( 12L, 5.5)
+                ));
+        injector.addChunk(chunk4);
+        injector.injectChunks(client);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        JsonObject historianConf = new JsonObject()
-                .put(CONFIG_SCHEMA_VERSION,
-                        SchemaVersion.VERSION_0.toString());
         HistorianSolrITHelper
-                .deployHistorianVerticle(container, vertx, historianConf)
+                .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
                             historian = com.hurence.webapiservice.historian.HistorianService.createProxy(vertx.getDelegate(), "historian_service");
                             context.completeNow();

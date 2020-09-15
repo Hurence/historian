@@ -221,7 +221,6 @@ create_schema() {
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_year" "pint"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_month" "pint"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_day" "string"
-            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_hour" "pint"
             ;;
           "VERSION_1")
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"name\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
