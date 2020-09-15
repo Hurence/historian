@@ -16,7 +16,10 @@
 package com.hurence.logisland.record;
 
 import com.hurence.timeseries.functions.*;
+
+import com.hurence.timeseries.modele.points.Point;
 import com.hurence.timeseries.modele.points.PointImpl;
+
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
@@ -103,7 +106,7 @@ public class TimeSeriesRecord extends StandardRecord {
         setField(CHUNK_END, FieldType.LONG, chunkEnd);
 
         try {
-            Stream<PointImpl> pointStream = getPointStream(chunkValue, chunkStart, chunkEnd).stream();
+            Stream<Point> pointStream = getPointStream(chunkValue, chunkStart, chunkEnd).stream();
 
             MetricTimeSeries.Builder builder = new MetricTimeSeries.Builder(name)
                     .start(chunkStart)
@@ -119,7 +122,8 @@ public class TimeSeriesRecord extends StandardRecord {
         }
     }
 
-    public static TreeSet<PointImpl> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
+
+    public static TreeSet<Point> getPointStream(String chunkValue, long chunkStart, long chunkEnd) throws IOException {
         byte[] chunkBytes = BinaryEncodingUtils.decode(chunkValue);
         return BinaryCompactionUtil.unCompressPoints(chunkBytes, chunkStart, chunkEnd);
     }
@@ -181,11 +185,11 @@ public class TimeSeriesRecord extends StandardRecord {
      *
      * @return uncompressed points lazyly if not yet done
      */
-    public TreeSet<PointImpl> getPoints() {
+    public TreeSet<Point> getPoints() {
         if (hasField(RECORD_CHUNK_UNCOMPRESSED_POINTS))
-            return new TreeSet((List<PointImpl>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue());
+            return new TreeSet((List<Point>) getField(RECORD_CHUNK_UNCOMPRESSED_POINTS).getRawValue());
         else {
-            TreeSet<PointImpl> points = null;
+            TreeSet<Point> points = null;
             try {
                 points = getPointStream(getChunkValue(), getStartChunk(), getEndChunk());
             } catch (IOException e) {

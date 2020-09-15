@@ -49,7 +49,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static TreeSet<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
+    public static TreeSet<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
         return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
     }
     /**
@@ -57,11 +57,11 @@ public final class ProtoBufTimeSeriesSerializer {
      *
      * @param decompressedBytes the compressed bytes holding the data points
      * @param timeSeriesStart   the start of the time series
-     * @param timeSeriesEnd     the end of the time series
+     * @param timeSeriesEnd     the end of the time seriesList<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to)
      * @param from              including points from
      * @param to                including points to
      */
-    public static TreeSet<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public static TreeSet<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
         LOGGER.debug("from - timeSeriesStart={} timeSeriesEnd={} to={} from={}", timeSeriesStart, timeSeriesEnd, to, from);
         if (from == -1 || to == -1) {
             throw new IllegalArgumentException("FROM or TO have to be >= 0");
@@ -88,7 +88,8 @@ public final class ProtoBufTimeSeriesSerializer {
             MetricProtocolBuffers.Points protocolBufferPoints = MetricProtocolBuffers.Points.parseFrom(decompressedBytes);
 
             List<MetricProtocolBuffers.Point> pList = protocolBufferPoints.getPList();
-            TreeSet<PointImpl> pointsToReturn = new TreeSet<>();
+
+            TreeSet<Point> pointsToReturn = new TreeSet<>();
 
             int size = pList.size();
 
@@ -120,6 +121,7 @@ public final class ProtoBufTimeSeriesSerializer {
                         LOGGER.debug("remaining {} points are skipped after t={}", size - i, calculatedPointDate);
                         return pointsToReturn;
                     }
+                    // TODO  add here quality
                     pointsToReturn.add(new PointImpl(calculatedPointDate, value));
                 } else {
                     LOGGER.debug("not adding point at t={}", calculatedPointDate);
@@ -141,10 +143,9 @@ public final class ProtoBufTimeSeriesSerializer {
      * @return the serialized points as byte[]
      */
     public static byte[] to(List<Point> metricDataPoints, final int ddcThreshold) {
-        Iterator<PointImpl> removePointsWithQuality = metricDataPoints.
+        Iterator<Point> removePointsWithQuality = metricDataPoints.
                 stream()
                 .filter(p -> !p.hasQuality())
-                .map(PointImpl.class::cast)
                 .iterator();
         return to(removePointsWithQuality, ddcThreshold);
     }
@@ -165,7 +166,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(Iterator<PointImpl> metricDataPoints) {
+    public static byte[] to(Iterator<Point> metricDataPoints) {
         return to(metricDataPoints, 0);
     }
 
@@ -177,7 +178,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param ddcThreshold     - the aberration threshold for the deltas
      * @return the serialized points as byte[]
      */
-    public static byte[] to(final Iterator<PointImpl> metricDataPoints, final int ddcThreshold) {
+    public static byte[] to(final Iterator<Point> metricDataPoints, final int ddcThreshold) {
 
         if (ddcThreshold < 0) {
             throw new IllegalArgumentException("DDC Threshold must not be lower than 0. Current value is: " + ddcThreshold);
@@ -203,7 +204,7 @@ public final class ProtoBufTimeSeriesSerializer {
         int index = 0;
         while (metricDataPoints.hasNext()) {
 
-            PointImpl p = metricDataPoints.next();
+            Point p = metricDataPoints.next();
             if (p == null) {
                 LOGGER.debug("Skipping 'null' point.");
                 continue;

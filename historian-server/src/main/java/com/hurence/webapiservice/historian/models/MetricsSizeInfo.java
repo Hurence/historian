@@ -6,13 +6,17 @@ import java.util.Set;
 
 public interface MetricsSizeInfo {
 
-    public Set<MetricRequest> getMetricRequests();
+    Set<MetricRequest> getMetricRequests();
 
-    public MetricSizeInfo getMetricInfo(MetricRequest metric);
+    MetricSizeInfo getMetricInfo(MetricRequest metric);
 
-    public long getTotalNumberOfPoints();
+    long getTotalNumberOfPoints();
 
-    public long getTotalNumberOfChunks();
+    long getTotalNumberOfChunks();
+
+    long getTotalNumberOfChunksWithCorrectQuality();
+
+    long getTotalNumberOfPointsWithCorrectQuality();
 
     boolean isEmpty();
 }

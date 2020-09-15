@@ -1,7 +1,10 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
+import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.util.HistorianVerticleConfHelper;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
 import com.hurence.webapiservice.util.HttpITHelper;
@@ -40,11 +43,19 @@ public class ImportJsonEndPointIT {
     private static AssertResponseGivenRequestHelper assertHelper1;
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HttpWithHistorianSolrITHelper
-                .initHistorianSolrCollectionAndHttpVerticleAndHistorianVerticle(client, container, vertx, context);
+    public static void beforeAll(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
+        initSolr(container);
         webClient = HttpITHelper.buildWebClient(vertx);
         assertHelper1 = new AssertResponseGivenRequestHelper(webClient, IMPORT_JSON_ENDPOINT);
+        HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
+                    context.completeNow();
+                },
+                t -> context.failNow(t));
+    }
+
+
+    private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
     }
 
     @AfterAll

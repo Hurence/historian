@@ -40,4 +40,8 @@ public interface Sampler<ELEMENT> {
         List<ELEMENT> toBeSampledList = toBeSampled.collect(Collectors.toList());
         return sample(toBeSampledList).stream();
     }
+
+    default Stream<ELEMENT> sampleListToStream(List<ELEMENT> toBeSampled) {
+        return sample(toBeSampled).stream();
+    }
 }

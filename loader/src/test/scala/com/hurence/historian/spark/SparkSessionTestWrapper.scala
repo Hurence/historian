@@ -1,6 +1,6 @@
 package com.hurence.historian.spark
 
-import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrentImpl
 import com.hurence.timeseries.modele.measure.MeasureVersionV0Impl
 import org.apache.spark.sql.{Encoders, SparkSession}
 
@@ -33,7 +33,7 @@ trait SparkSessionTestWrapper {
 
     spark.read
       .parquet(filePath)
-      .as[ChunkVersion0Impl](Encoders.bean(classOf[ChunkVersion0Impl]))
+      .as[ChunkVersionCurrentImpl](Encoders.bean(classOf[ChunkVersionCurrentImpl]))
       .cache()
   }
 }

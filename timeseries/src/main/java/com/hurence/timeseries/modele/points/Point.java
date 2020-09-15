@@ -4,6 +4,8 @@ import java.io.Serializable;
 
 public interface Point extends Comparable<Point>, Serializable {
 
+    float DEFAULT_QUALITY = 1;
+
     static Point fromValueAndQuality(long timestamp, double value, float quality) {
         return new PointWithQualityImpl(timestamp, value, quality);
     }

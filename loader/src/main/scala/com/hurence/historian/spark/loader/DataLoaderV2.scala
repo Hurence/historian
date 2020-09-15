@@ -4,7 +4,7 @@ import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
-import com.hurence.timeseries.modele.chunk.{ChunkVersion0, ChunkVersion0Impl}
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrentImpl
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.spark.sql.{Encoders, SparkSession}
@@ -195,7 +195,7 @@ object DataLoaderV2 {
 
 
     val chunksDS = chunkyfier.transform(measuresDS)
-      .as[ChunkVersion0Impl](Encoders.bean(classOf[ChunkVersion0Impl]))
+      .as[ChunkVersionCurrentImpl](Encoders.bean(classOf[ChunkVersionCurrentImpl]))
       .repartition(1)
 
 

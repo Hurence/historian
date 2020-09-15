@@ -2,6 +2,7 @@ package com.hurence.historian.modele.stream.impl;
 
 import com.hurence.historian.modele.stream.ChunkStream;
 import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
 import io.vertx.core.json.JsonObject;
 
 import java.io.IOException;
@@ -20,7 +21,7 @@ public abstract class AbstractChunkSolrStream implements ChunkStream {
     }
 
     @Override
-    public Chunk read() throws IOException {
+    public ChunkVersionCurrent read() throws IOException {
         JsonObject json = stream.read();
         return toChunk(json);
     }
@@ -35,11 +36,11 @@ public abstract class AbstractChunkSolrStream implements ChunkStream {
         return stream.hasNext();
     }
 
-    protected Chunk toChunk(JsonObject json) {
+    protected ChunkVersionCurrent toChunk(JsonObject json) {
         return convertJsonToChunk(json);
     }
 
-    abstract Chunk convertJsonToChunk(JsonObject json);
+    abstract ChunkVersionCurrent convertJsonToChunk(JsonObject json);
 
     @Override
     public void close() throws IOException {

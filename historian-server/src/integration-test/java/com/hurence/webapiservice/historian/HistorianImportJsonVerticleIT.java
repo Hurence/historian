@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
@@ -26,8 +25,8 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class HistorianImportJsonVerticleIT {
@@ -39,7 +38,7 @@ public class HistorianImportJsonVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         HistorianSolrITHelper
                 .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {
