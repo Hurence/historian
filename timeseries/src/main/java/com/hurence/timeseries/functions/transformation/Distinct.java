@@ -19,8 +19,8 @@ package com.hurence.timeseries.functions.transformation;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.functions.ChronixTransformation;
 import com.hurence.timeseries.functions.FunctionValueMap;
-import com.hurence.timeseries.modele.list.DoubleList;
-import com.hurence.timeseries.modele.list.LongList;
+import com.hurence.timeseries.model.list.DoubleList;
+import com.hurence.timeseries.model.list.LongList;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 

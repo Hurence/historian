@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.model.Chunk;
 import io.vertx.core.json.JsonArray;
 
 public interface MultiTimeSeriesExtracter {

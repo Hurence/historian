@@ -14,7 +14,7 @@
 
     <packaging>jar</packaging>
     <properties>
-        <protobuf.version>2.6.1</protobuf.version>
+        <protobuf.version>3.13.0</protobuf.version>
         <!--        To use a newer version of groovy we must upgrade spock core as well but api changed and test code would have to be changed-->
         <spock.core.version>1.1-groovy-2.4</spock.core.version>
         <groovy.version>2.4.17</groovy.version>
@@ -135,6 +135,11 @@
         </dependency>
 
 
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.12</version>
+        </dependency>
     </dependencies>
 
     <build>

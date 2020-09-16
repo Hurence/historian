@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.ChunkAggsCalculator;
@@ -30,8 +30,8 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     @Override
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks) {
-        List<PointImpl> sampledPoint = extractPoints(chunks);
-        this.sampledPoints.addAll(sampledPoint);
+        List<Measure> sampledMeasure = extractPoints(chunks);
+        this.sampledMeasures.addAll(sampledMeasure);
         aggsCalculator.updateAggs(chunks);
     }
 
@@ -40,11 +40,11 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<PointImpl> extractPoints(List<Chunk> chunks) {
+    private List<Measure> extractPoints(List<Chunk> chunks) {
         List<List<Chunk>> groupedChunks = groupChunks(chunks, this.samplingConf.getBucketSize());
         return groupedChunks.stream()
                 .map(this::sampleChunksIntoOneAggPoint)
-                .sorted(Comparator.comparing(PointImpl::getTimestamp))
+                .sorted(Comparator.comparing(Measure::getTimestamp))
                 .collect(Collectors.toList());
     }
 
@@ -66,7 +66,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return groupedChunks;
     }
 
-    private PointImpl sampleChunksIntoOneAggPoint(List<Chunk> chunks) {
+    private Measure sampleChunksIntoOneAggPoint(List<Chunk> chunks) {
         if (chunks.isEmpty())
             throw new IllegalArgumentException("chunks can not be empty !");
         LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0));
@@ -112,6 +112,6 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             default:
                 throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
         }
-        return new PointImpl(timestamp, aggValue);
+        return new Measure(timestamp, aggValue);
     }
 }

@@ -23,7 +23,7 @@
  */
 package com.hurence.timeseries.dt
 
-import com.hurence.timeseries.modele.list.IntList
+import com.hurence.timeseries.model.list.IntList
 import spock.lang.Specification
 import spock.lang.Unroll
 

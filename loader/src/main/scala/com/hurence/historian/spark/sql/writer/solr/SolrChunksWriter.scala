@@ -6,7 +6,7 @@ import org.apache.spark.sql.{Column, Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 import org.apache.spark.sql.functions._
 import com.hurence.historian.spark.sql.functions._
-import com.hurence.timeseries.modele.chunk.ChunkVersion0
+import com.hurence.timeseries.model.Chunk
 
 /**
   * val options.config = Map(
@@ -15,12 +15,12 @@ import com.hurence.timeseries.modele.chunk.ChunkVersion0
   * )
   *
   */
-class SolrChunksWriter extends Writer[ChunkVersion0] {
+class SolrChunksWriter extends Writer[Chunk] {
 
 
   private val logger = LoggerFactory.getLogger(classOf[SolrChunksWriter])
 
-  override def write(options: Options, ds: Dataset[_ <: ChunkVersion0]): Unit = {
+  override def write(options: Options, ds: Dataset[_ <: Chunk]): Unit = {
 
     logger.info(s"start saving new chunks to ${options.config("collection")}")
 

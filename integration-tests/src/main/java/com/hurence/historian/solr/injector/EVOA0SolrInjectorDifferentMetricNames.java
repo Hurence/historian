@@ -1,7 +1,7 @@
 //package com.hurence.historian.solr.injector;
 //
 //import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-//import com.hurence.logisland.record.Point;
+//import com.hurence.logisland.record.Measure;
 //
 //import java.util.Arrays;
 //import java.util.List;
@@ -31,10 +31,10 @@
 //
 //    private ChunkModeleVersion0 buildChunkWithMetricName(String metricName) {
 //        return ChunkModeleVersion0.fromPoints(metricName, Arrays.asList(
-//                new Point(0, 1L, 5),
-//                new Point(0, 2L, 8),
-//                new Point(0, 3L, 1.2),
-//                new Point(0, 4L, 6.5)
+//                new Measure(0, 1L, 5),
+//                new Measure(0, 2L, 8),
+//                new Measure(0, 3L, 1.2),
+//                new Measure(0, 4L, 6.5)
 //        ));
 //    }
 //

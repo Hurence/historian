@@ -222,21 +222,21 @@
              implement org.apache.lucene.index.IndexDeletionPolicy.
 
              The default Solr IndexDeletionPolicy implementation supports
-             deleting index commit points on number of commits, age of
-             commit point and optimized status.
+             deleting index commit measures on number of commits, age of
+             commit measure and optimized status.
 
-             The latest commit point should always be preserved regardless
+             The latest commit measure should always be preserved regardless
              of the criteria.
         -->
         <!--
         <deletionPolicy class="solr.SolrDeletionPolicy">
         -->
-        <!-- The number of commit points to be kept -->
+        <!-- The number of commit measures to be kept -->
         <!-- <str name="maxCommitsToKeep">1</str> -->
-        <!-- The number of optimized commit points to be kept -->
+        <!-- The number of optimized commit measures to be kept -->
         <!-- <str name="maxOptimizedCommitsToKeep">0</str> -->
         <!--
-            Delete all commit points once they have reached the given age.
+            Delete all commit measures once they have reached the given age.
             Supports DateMathParser syntax e.g.
           -->
         <!--

@@ -18,7 +18,7 @@ package com.hurence.timeseries.functions.analyse
 import com.hurence.timeseries.MetricTimeSeries
 import com.hurence.timeseries.functions.analyse.FastDtw
 import com.hurence.timeseries.functions.analyse.Outlier
-import com.hurence.timeseries.modele.Pair
+import com.hurence.timeseries.model.Pair
 import com.hurence.timeseries.functions.FunctionValueMap
 import spock.lang.Specification
 

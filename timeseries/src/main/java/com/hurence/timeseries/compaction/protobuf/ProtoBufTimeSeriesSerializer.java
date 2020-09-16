@@ -16,9 +16,8 @@
 package com.hurence.timeseries.compaction.protobuf;
 
 
-import com.hurence.timeseries.converter.serializer.MetricProtocolBuffers;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.converter.serializer.ChunkProtocolBuffers;
+import com.hurence.timeseries.model.Measure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,7 @@ import java.io.InputStream;
 import java.util.*;
 
 /**
- * Class to easily convert the protocol buffer into Point<Long,Double>
+ * Class to easily convert the protocol buffer into Measure<Long,Double>
  *
  * @author f.lautenschlager
  */
@@ -49,7 +48,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static TreeSet<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
+    public static TreeSet<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
         return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
     }
     /**
@@ -61,7 +60,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param from              including points from
      * @param to                including points to
      */
-    public static TreeSet<PointImpl> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public static TreeSet<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
         LOGGER.debug("from - timeSeriesStart={} timeSeriesEnd={} to={} from={}", timeSeriesStart, timeSeriesEnd, to, from);
         if (from == -1 || to == -1) {
             throw new IllegalArgumentException("FROM or TO have to be >= 0");
@@ -85,10 +84,10 @@ public final class ProtoBufTimeSeriesSerializer {
         }
 
         try {
-            MetricProtocolBuffers.Points protocolBufferPoints = MetricProtocolBuffers.Points.parseFrom(decompressedBytes);
+            ChunkProtocolBuffers.Chunk protocolBufferPoints = ChunkProtocolBuffers.Chunk.parseFrom(decompressedBytes);
 
-            List<MetricProtocolBuffers.Point> pList = protocolBufferPoints.getPList();
-            TreeSet<PointImpl> pointsToReturn = new TreeSet<>();
+            List<ChunkProtocolBuffers.Point> pList = protocolBufferPoints.getPList();
+            TreeSet<Measure> pointsToReturn = new TreeSet<>();
 
             int size = pList.size();
 
@@ -100,7 +99,7 @@ public final class ProtoBufTimeSeriesSerializer {
 
             for (int i = 0; i < size; i++) {
 
-                MetricProtocolBuffers.Point p = pList.get(i);
+                ChunkProtocolBuffers.Point p = pList.get(i);
 
 
                 //Decode the time
@@ -120,7 +119,10 @@ public final class ProtoBufTimeSeriesSerializer {
                         LOGGER.debug("remaining {} points are skipped after t={}", size - i, calculatedPointDate);
                         return pointsToReturn;
                     }
-                    pointsToReturn.add(new PointImpl(calculatedPointDate, value));
+
+
+
+                    pointsToReturn.add( Measure.fromValue(calculatedPointDate, value));
                 } else {
                     LOGGER.debug("not adding point at t={}", calculatedPointDate);
                 }
@@ -136,15 +138,15 @@ public final class ProtoBufTimeSeriesSerializer {
     /**
      * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
      *
-     * @param metricDataPoints - the list with points (expected te be already sorted !)
+     * @param metricDataMeasures - the list with points (expected te be already sorted !)
      * @param ddcThreshold     - the aberration threshold for the deltas
      * @return the serialized points as byte[]
      */
-    public static byte[] to(List<Point> metricDataPoints, final int ddcThreshold) {
-        Iterator<PointImpl> removePointsWithQuality = metricDataPoints.
+    public static byte[] to(List<Measure> metricDataMeasures, final int ddcThreshold) {
+        Iterator<Measure> removePointsWithQuality = metricDataMeasures.
                 stream()
                 .filter(p -> !p.hasQuality())
-                .map(PointImpl.class::cast)
+                .map(Measure.class::cast)
                 .iterator();
         return to(removePointsWithQuality, ddcThreshold);
     }
@@ -152,11 +154,11 @@ public final class ProtoBufTimeSeriesSerializer {
     /**
      * Converts the given iterator of our point class to protocol buffers and compresses (gzip) it.
      *
-     * @param metricDataPoints - the list with points (expected te be already sorted !)
+     * @param metricDataMeasures - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(List<Point> metricDataPoints) {
-        return to(metricDataPoints, 0);
+    public static byte[] to(List<Measure> metricDataMeasures) {
+        return to(metricDataMeasures, 0);
     }
 
     /**
@@ -165,7 +167,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(Iterator<PointImpl> metricDataPoints) {
+    public static byte[] to(Iterator<Measure> metricDataPoints) {
         return to(metricDataPoints, 0);
     }
 
@@ -177,7 +179,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param ddcThreshold     - the aberration threshold for the deltas
      * @return the serialized points as byte[]
      */
-    public static byte[] to(final Iterator<PointImpl> metricDataPoints, final int ddcThreshold) {
+    public static byte[] to(final Iterator<Measure> metricDataPoints, final int ddcThreshold) {
 
         if (ddcThreshold < 0) {
             throw new IllegalArgumentException("DDC Threshold must not be lower than 0. Current value is: " + ddcThreshold);
@@ -196,14 +198,14 @@ public final class ProtoBufTimeSeriesSerializer {
 
         Map<Double, Integer> valueIndex = new HashMap<>();
 
-        MetricProtocolBuffers.Point.Builder point = MetricProtocolBuffers.Point.newBuilder();
-        MetricProtocolBuffers.Points.Builder points = MetricProtocolBuffers.Points.newBuilder();
+        ChunkProtocolBuffers.Point.Builder point = ChunkProtocolBuffers.Point.newBuilder();
+        ChunkProtocolBuffers.Chunk.Builder points = ChunkProtocolBuffers.Chunk.newBuilder();
 
 
         int index = 0;
         while (metricDataPoints.hasNext()) {
 
-            PointImpl p = metricDataPoints.next();
+            Measure p = metricDataPoints.next();
             if (p == null) {
                 LOGGER.debug("Skipping 'null' point.");
                 continue;
@@ -281,7 +283,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param lastOffset the last stored offset
      * @return the time stamp of the point or the last offset if the point do not have any information about the time stamp
      */
-    private static long getTimestamp(final MetricProtocolBuffers.Point p, final long lastOffset) {
+    private static long getTimestamp(final ChunkProtocolBuffers.Point p, final long lastOffset) {
         //Normal delta
         if (p.hasTint() || p.hasTlong()) {
             return p.getTint() + p.getTlong();//Todo in my opinion either getTint either getTint,
@@ -306,8 +308,8 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param currentTimestamp the current time stamp
      */
     private static void handleLastPoint(int ddcThreshold, long startDate,
-                                        MetricProtocolBuffers.Point.Builder point,
-                                        MetricProtocolBuffers.Points.Builder points,
+                                        ChunkProtocolBuffers.Point.Builder point,
+                                        ChunkProtocolBuffers.Chunk.Builder points,
                                         long currentTimestamp) {
         long calcPoint = calculateTimeStamp(startDate, points.getPList(), ddcThreshold);
         //Calc offset
@@ -331,7 +333,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param value             the current value
      * @param point             the current point builder
      */
-    private static void setValueOrRefIndexOnPoint(Map<Double, Integer> index, int currentPointIndex, double value, MetricProtocolBuffers.Point.Builder point) {
+    private static void setValueOrRefIndexOnPoint(Map<Double, Integer> index, int currentPointIndex, double value, ChunkProtocolBuffers.Point.Builder point) {
         //build value index
         if (index.containsKey(value)) {
             point.setVIndex(index.get(value));
@@ -347,7 +349,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param point          the point
      * @param timestampDelta the timestamp delta
      */
-    private static void setTimeStamp(MetricProtocolBuffers.Point.Builder point, long timestampDelta) {
+    private static void setTimeStamp(ChunkProtocolBuffers.Point.Builder point, long timestampDelta) {
         if (safeLongToUInt(timestampDelta)) {
             point.setTint((int) timestampDelta);
         } else {
@@ -362,7 +364,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param point          the point
      * @param timestampDelta the timestamp delta
      */
-    private static void setBPTimeStamp(MetricProtocolBuffers.Point.Builder point, long timestampDelta) {
+    private static void setBPTimeStamp(ChunkProtocolBuffers.Point.Builder point, long timestampDelta) {
         if (safeLongToUInt(timestampDelta)) {
             point.setTintBP((int) timestampDelta);
         } else {
@@ -382,13 +384,13 @@ public final class ProtoBufTimeSeriesSerializer {
      */
     private static void rearrangePoints(final long startDate, final long currentTimestamp,
                                         final long deltaToEndTimestamp, final int ddcThreshold,
-                                        final MetricProtocolBuffers.Points.Builder points,
-                                        final MetricProtocolBuffers.Point.Builder point) {
+                                        final ChunkProtocolBuffers.Chunk.Builder points,
+                                        final ChunkProtocolBuffers.Point.Builder point) {
         //break the offset down on all points
         long avgPerDelta = (long) Math.ceil((double) deltaToEndTimestamp * -1 + ddcThreshold / (double) (points.getPCount() - 1));
 
         for (int i = 1; i < points.getPCount(); i++) {
-            MetricProtocolBuffers.Point mod = points.getP(i);
+            ChunkProtocolBuffers.Point mod = points.getP(i);
             long t = getT(mod);
 
             //check if can correct the deltas
@@ -402,7 +404,7 @@ public final class ProtoBufTimeSeriesSerializer {
                 //if we have a t value
                 if (t > avgPerDelta) {
                     newOffset = t - avgPerDelta;
-                    MetricProtocolBuffers.Point.Builder modPoint = mod.toBuilder();
+                    ChunkProtocolBuffers.Point.Builder modPoint = mod.toBuilder();
                     setT(modPoint, newOffset);
                     mod = modPoint.build();
                 }
@@ -433,7 +435,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param builder the point builder
      * @param delta   the new delta to set on the given point
      */
-    private static void setT(MetricProtocolBuffers.Point.Builder builder, long delta) {
+    private static void setT(ChunkProtocolBuffers.Point.Builder builder, long delta) {
         if (safeLongToUInt(delta)) {
             if (builder.hasTintBP()) {
                 builder.setTintBP((int) delta);
@@ -456,7 +458,7 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param point the current point
      * @return the value of t
      */
-    private static long getT(MetricProtocolBuffers.Point point) {
+    private static long getT(ChunkProtocolBuffers.Point point) {
         //only one is set, others are zero
         return point.getTlongBP() + point.getTlong() + point.getTint() + point.getTintBP();
     }
@@ -477,13 +479,13 @@ public final class ProtoBufTimeSeriesSerializer {
      * @param ddcThreshold the threshold of the ddc
      * @return the calculated timestamp using the ddc threshold
      */
-    private static long calculateTimeStamp(long startDate, List<MetricProtocolBuffers.Point> pList, long ddcThreshold) {
+    private static long calculateTimeStamp(long startDate, List<ChunkProtocolBuffers.Point> pList, long ddcThreshold) {
 
         long lastDelta = ddcThreshold;
         long calculatedPointDate = startDate;
 
         for (int i = 1; i < pList.size(); i++) {
-            MetricProtocolBuffers.Point p = pList.get(i);
+            ChunkProtocolBuffers.Point p = pList.get(i);
             lastDelta = getTimestamp(p, lastDelta);
             calculatedPointDate += lastDelta;
         }

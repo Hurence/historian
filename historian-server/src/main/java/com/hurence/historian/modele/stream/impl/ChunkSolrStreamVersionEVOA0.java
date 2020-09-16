@@ -1,7 +1,6 @@
 package com.hurence.historian.modele.stream.impl;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
-import com.hurence.timeseries.modele.chunk.ChunkFromJsonObjectVersionEVOA0;
+import com.hurence.timeseries.model.Chunk;
 import io.vertx.core.json.JsonObject;
 
 public class ChunkSolrStreamVersionEVOA0 extends AbstractChunkSolrStream {

@@ -2,6 +2,8 @@ package com.hurence.historian.spark.ml
 
 
 import com.hurence.historian.spark.sql.functions.{chunk, sax, toDateUTC}
+import com.hurence.timeseries.compaction.BinaryEncodingUtils
+import com.hurence.timeseries.model.Chunk
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util._
@@ -10,7 +12,7 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev}
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
-
+import scala.collection.JavaConverters._
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -49,6 +51,7 @@ final class Chunkyfier(override val uid: String)
 
   /** @group setParam */
   def setValueCol(value: String): this.type = set(valueCol, value)
+
   setDefault(valueCol, "value")
 
 
@@ -57,6 +60,7 @@ final class Chunkyfier(override val uid: String)
 
   /** @group setParam */
   def setTimestampCol(value: String): this.type = set(timestampCol, value)
+
   setDefault(timestampCol, "timestamp")
 
 
@@ -65,6 +69,7 @@ final class Chunkyfier(override val uid: String)
 
   /** @group setParam */
   def setChunkCol(value: String): this.type = set(chunkCol, value)
+
   setDefault(chunkCol, "chunk")
 
   /** @group setParam */
@@ -72,6 +77,7 @@ final class Chunkyfier(override val uid: String)
 
   /** @group setParam */
   def doDropLists(value: Boolean): this.type = set(dropLists, value)
+
   setDefault(dropLists, true)
 
   /** @group param */
@@ -79,6 +85,7 @@ final class Chunkyfier(override val uid: String)
 
   /** @group setParam */
   def setDateBucketFormat(value: String): this.type = set(dateBucketFormat, value)
+
   setDefault(dateBucketFormat, "yyyy-MM-dd")
 
   /**
@@ -98,6 +105,7 @@ final class Chunkyfier(override val uid: String)
 
   /** @group setParam */
   def setSaxAlphabetSize(value: Int): this.type = set(saxAlphabetSize, value)
+
   setDefault(saxAlphabetSize, 5)
 
   val saxStringLength: Param[Int] = new Param[Int](this, "saxStringLength",
@@ -106,25 +114,28 @@ final class Chunkyfier(override val uid: String)
 
   /** @group setParam */
   def setSaxStringLength(value: Int): this.type = set(saxStringLength, value)
+
   setDefault(saxStringLength, 20)
 
   val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
-    "the chunk max points count",
+    "the chunk max measures count",
     ParamValidators.inRange(0, 100000))
 
   /** @group setParam */
   def setChunkMaxSize(value: Int): this.type = set(chunkMaxSize, value)
+
   setDefault(chunkMaxSize, 1440)
 
 
   def transform(df: Dataset[_]): DataFrame = {
+    implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
 
     val grougingCols = col("day") :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
     val w = Window.partitionBy(grougingCols: _*)
       .orderBy(col($(timestampCol)))
 
     val groupedDF = df
-      .withColumn("day", toDateUTC(  col($(timestampCol)) , lit($(dateBucketFormat))))
+      .withColumn("day", toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
       .withColumn("values", collect_list(col($(valueCol))).over(w))
       .withColumn("timestamps", collect_list(col($(timestampCol))).over(w))
       .groupBy(grougingCols: _*)
@@ -163,7 +174,7 @@ final class Chunkyfier(override val uid: String)
 
     // .map(r => (r._1, r._2.sortWith((l1, l2) => l1._1 < l2._1).grouped(1440).toList))
 
-    val chunkDF = groupedDF
+    groupedDF
       .withColumn($(chunkCol), chunk(
         groupedDF.col("name"),
         groupedDF.col("start"),
@@ -176,13 +187,31 @@ final class Chunkyfier(override val uid: String)
         lit($(saxStringLength)),
         groupedDF.col("values")))
 
-    if ($(dropLists)) {
-      log.debug("droping columns values and timestamps")
-      chunkDF.drop("values", "timestamps")
-    } else {
-      chunkDF
-    }
+      .drop("values", "timestamps")
+      .map(r => {
 
+        Chunk.builder()
+          .name(r.getAs[String]("name"))
+          .start(r.getAs[Long]("start"))
+          .end(r.getAs[Long]("end"))
+          .count(r.getAs[Long]("count"))
+          .avg(r.getAs[Double]("avg"))
+          .std(r.getAs[Double]("stddev"))
+          .min(r.getAs[Double]("min"))
+          .max(r.getAs[Double]("max"))
+          .chunkOrigin("it-data-4metrics-chunk.parquet")
+          .first(r.getAs[Double]("first"))
+          .last(r.getAs[Double]("last"))
+          .sax(r.getAs[String]("sax"))
+          .valueBinaries(BinaryEncodingUtils.decode(r.getAs[String]("chunk")))
+          .tags(r.getAs[Map[String, String]]("tags").asJava)
+          // .buildId()
+          .computeMetrics()
+          .build()
+
+      })
+      .as[Chunk]
+      .toDF()
 
   }
 

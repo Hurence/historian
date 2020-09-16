@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -22,7 +22,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     final long to;
     final SamplingConf samplingConf;
     protected final List<Chunk> chunks = new ArrayList<>();
-    final List<PointImpl> sampledPoints = new ArrayList<>();
+    final List<Measure> sampledMeasures = new ArrayList<>();
     private long totalChunkCounter = 0L;
     long toatlPointCounter = 0L;
     long pointCounter = 0L;
@@ -58,11 +58,11 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
 
 
     /**
-     * Extract/Sample points from the list of chunks in buffer using a strategy. Add them into sampled points then reset buffer
+     * Extract/Sample measures from the list of chunks in buffer using a strategy. Add them into sampled measures then reset buffer
      */
     protected void samplePointsInBufferAndCalculAggregThenReset() {
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("sample points in buffer has been called with chunks : {}",
+            LOGGER.trace("sample measures in buffer has been called with chunks : {}",
                     chunks.stream().map(Chunk::toString).collect(Collectors.joining("\n")));
         }
         samplePointsFromChunksAndCalculAggreg(from, to, chunks);
@@ -72,7 +72,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     }
 
     /**
-     * Sample points from the list of chunks using a strategy. Add them into sampled points then reset buffer
+     * Sample measures from the list of chunks using a strategy. Add them into sampled measures then reset buffer
      */
     protected abstract void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks);
 
@@ -80,14 +80,14 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
 
     @Override
     public JsonObject getTimeSeries() {
-        List<JsonArray> points = sampledPoints.stream()
+        List<JsonArray> points = sampledMeasures.stream()
                 /*
-                * Here we have to sort sampled points in case some chunks are intersecting.
+                * Here we have to sort sampled measures in case some chunks are intersecting.
                 * The best would be to repare the chunk though. A mechanism that would track those chunks and rebuild them
                 * may be the best solution I think. The requesting code here should suppose chunks are not intersecting.
                 * We sort just so that user can not realize there is a problem in chunks.
                 */
-                .sorted(Comparator.comparing(PointImpl::getTimestamp))
+                .sorted(Comparator.comparing(Measure::getTimestamp))
                 .map(p -> new JsonArray().add(p.getValue()).add(p.getTimestamp()))
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject()

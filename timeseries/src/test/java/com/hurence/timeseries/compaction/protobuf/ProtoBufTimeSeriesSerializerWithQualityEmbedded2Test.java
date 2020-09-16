@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.compaction.protobuf;
 
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.model.Measure;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,68 +34,68 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded2Test {
 
     @Test
     public void test1() throws IOException {
-        List<Point> expectedPoints = Arrays.asList(
-                Point.fromValueAndQuality(1, 1.2d, 1.0f),
-                Point.fromValueAndQuality(2, 1.0d, 1.0f),
-                Point.fromValueAndQuality(3, 1.8d, 0.2f),
-                Point.fromValueAndQuality(4, 1.3d, 0.1f),
-                Point.fromValueAndQuality(5, 1.2d, 1.0f)
+        List<Measure> expectedMeasures = Arrays.asList(
+                Measure.fromValueAndQuality(1, 1.2d, 1.0f),
+                Measure.fromValueAndQuality(2, 1.0d, 1.0f),
+                Measure.fromValueAndQuality(3, 1.8d, 0.2f),
+                Measure.fromValueAndQuality(4, 1.3d, 0.1f),
+                Measure.fromValueAndQuality(5, 1.2d, 1.0f)
         );
-        testThereIsNoInformationLost(expectedPoints);
+        testThereIsNoInformationLost(expectedMeasures);
     }
 
-    private void testThereIsNoInformationLost(List<Point> points) throws IOException {
-        long start = points.get(0).getTimestamp();
-        long end = points.get(points.size() - 1).getTimestamp();
-        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(points.iterator(), 0, 0);
-        List<Point> uncompressedPoints = ProtoBufTimeSeriesWithQualitySerializer.from(
+    private void testThereIsNoInformationLost(List<Measure> measures) throws IOException {
+        long start = measures.get(0).getTimestamp();
+        long end = measures.get(measures.size() - 1).getTimestamp();
+        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(measures.iterator(), 0, 0);
+        List<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
-        assertEquals(points, uncompressedPoints);
+        assertEquals(measures, uncompressedMeasures);
     }
 
     @Test
     public void testThatItDoesNotWorkIfInputPointsAreNotSorted() throws IOException {
-        List<Point> expectedPoints = Arrays.asList(
-                Point.fromValueAndQuality(3, 1.2d, 1.0f),
-                Point.fromValueAndQuality(2, 1.0d, 1.0f),
-                Point.fromValueAndQuality(1, 1.8d, 0.2f),
-                Point.fromValueAndQuality(4, 1.3d, 0.1f),
-                Point.fromValueAndQuality(5, 1.2d, 1.0f)
+        List<Measure> expectedMeasures = Arrays.asList(
+                Measure.fromValueAndQuality(3, 1.2d, 1.0f),
+                Measure.fromValueAndQuality(2, 1.0d, 1.0f),
+                Measure.fromValueAndQuality(1, 1.8d, 0.2f),
+                Measure.fromValueAndQuality(4, 1.3d, 0.1f),
+                Measure.fromValueAndQuality(5, 1.2d, 1.0f)
         );
-        long start = expectedPoints.get(0).getTimestamp();
-        long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
-        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(expectedPoints);
-        List<Point> uncompressedPoints = ProtoBufTimeSeriesWithQualitySerializer.from(
+        long start = expectedMeasures.get(0).getTimestamp();
+        long end = expectedMeasures.get(expectedMeasures.size() - 1).getTimestamp();
+        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(expectedMeasures);
+        List<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
-        assertNotEquals(expectedPoints, uncompressedPoints);
+        assertNotEquals(expectedMeasures, uncompressedMeasures);
     }
 
     @Test
     public void testWithPointWithSameTimeStamp() throws IOException {
-        List<Point> expectedPoints = Arrays.asList(
-                Point.fromValueAndQuality(1, 1.2d, 1.0f),
-                Point.fromValueAndQuality(1, 1.0d, 1.0f),
-                Point.fromValueAndQuality(3, 1.8d, 0.2f),
-                Point.fromValueAndQuality(3, 1.3d, 0.1f),
-                Point.fromValueAndQuality(5, 1.2d, 1.0f)
+        List<Measure> expectedMeasures = Arrays.asList(
+                Measure.fromValueAndQuality(1, 1.2d, 1.0f),
+                Measure.fromValueAndQuality(1, 1.0d, 1.0f),
+                Measure.fromValueAndQuality(3, 1.8d, 0.2f),
+                Measure.fromValueAndQuality(3, 1.3d, 0.1f),
+                Measure.fromValueAndQuality(5, 1.2d, 1.0f)
         );
-        testThereIsNoInformationLost(expectedPoints);
+        testThereIsNoInformationLost(expectedMeasures);
     }
 
     @Test
     public void testWithPointWithDuplicate() throws IOException {
-        List<Point> expectedPoints = Arrays.asList(
-                Point.fromValueAndQuality(1, 1.0d , 1.0f),
-                Point.fromValueAndQuality(1, 1.0d , 1.0f),
-                Point.fromValueAndQuality(30, 2.0d, 0.2f),
-                Point.fromValueAndQuality(30, 2.0d, 0.1f),
-                Point.fromValueAndQuality(50, 1.2d, 1.0f)
+        List<Measure> expectedMeasures = Arrays.asList(
+                Measure.fromValueAndQuality(1, 1.0d , 1.0f),
+                Measure.fromValueAndQuality(1, 1.0d , 1.0f),
+                Measure.fromValueAndQuality(30, 2.0d, 0.2f),
+                Measure.fromValueAndQuality(30, 2.0d, 0.1f),
+                Measure.fromValueAndQuality(50, 1.2d, 1.0f)
         );
-        testThereIsNoInformationLost(expectedPoints);
+        testThereIsNoInformationLost(expectedMeasures);
     }
 
 }

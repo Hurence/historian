@@ -1,8 +1,7 @@
 package com.hurence.historian.solr.injector;
 
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -11,15 +10,15 @@ import java.util.stream.IntStream;
 public class Version0SolrInjectorOneMetricMultipleChunksSpecificPoints extends AbstractVersion0SolrInjector {
 
     private final String metricName;
-    private final List<List<PointImpl>> pointsByChunk;
+    private final List<List<Measure>> pointsByChunk;
 
     public static Version0SolrInjectorOneMetricMultipleChunksSpecificPoints
         fromMetricsAndPoints(String metricName,
-                                                                                               List<List<Point>> pointsByChunk) {
-        List<List<PointImpl>> pointsByChunkConverted = pointsByChunk.stream()
+                                                                                               List<List<Measure>> pointsByChunk) {
+        List<List<Measure>> pointsByChunkConverted = pointsByChunk.stream()
                 .map(points -> {
                     return points.stream()
-                            .map(p -> new PointImpl(p.getTimestamp(), p.getValue()))
+                            .map(p -> Measure.fromValue(p.getTimestamp(), p.getValue()))
                             .collect(Collectors.toList());
                 })
                 .collect(Collectors.toList());
@@ -27,7 +26,7 @@ public class Version0SolrInjectorOneMetricMultipleChunksSpecificPoints extends A
     }
 
     public Version0SolrInjectorOneMetricMultipleChunksSpecificPoints(String metricName,
-                                                                     List<List<PointImpl>> pointsByChunk) {
+                                                                     List<List<Measure>> pointsByChunk) {
         this.metricName = metricName;
         this.pointsByChunk = pointsByChunk;
     }

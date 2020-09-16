@@ -4,7 +4,7 @@ import com.hurence.historian.modele.HistorianConf;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.stream.ChunkStream;
-import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.models.MetricSizeInfo;
 import com.hurence.webapiservice.historian.models.MetricsSizeInfo;
@@ -43,9 +43,9 @@ public class GetTimeSeriesHandler {
 
 
     /**
-     * nombre point < LIMIT_TO_DEFINE ==> Extract points from chunk
-     * nombre point >= LIMIT_TO_DEFINE && nombre de chunk < LIMIT_TO_DEFINE ==> Sample points with chunk aggs depending on alg (min, avg)
-     * nombre de chunk >= LIMIT_TO_DEFINE ==> Sample points with chunk aggs depending on alg (min, avg),
+     * nombre point < LIMIT_TO_DEFINE ==> Extract measures from chunk
+     * nombre point >= LIMIT_TO_DEFINE && nombre de chunk < LIMIT_TO_DEFINE ==> Sample measures with chunk aggs depending on alg (min, avg)
+     * nombre de chunk >= LIMIT_TO_DEFINE ==> Sample measures with chunk aggs depending on alg (min, avg),
      * but should using agg on solr side (using key partition, by month, daily ? yearly ?)
      */
     public Handler<Promise<JsonObject>> getTimeSeriesHandler(JsonObject myParams) {
@@ -274,7 +274,7 @@ public class GetTimeSeriesHandler {
      * return true if the tuple (one document response from solr) match the query for MetricRequest
      *
      * @param request the asked query. This is a combinaison of "name" and tags.
-     * @param tuple the count of chunks and points for all chunk matching the query.
+     * @param tuple the count of chunks and measures for all chunk matching the query.
      *              There is a tuple for each combinaison of name/tag found.
      *
      *              for example something like that (each line is a tuple except the header)
@@ -319,7 +319,7 @@ public class GetTimeSeriesHandler {
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         } else {
             LOGGER.debug("QUERY MODE 3 : else");
-            //TODO Sample points with chunk aggs depending on alg (min, avg),
+            //TODO Sample measures with chunk aggs depending on alg (min, avg),
             // but should using agg on solr side (using key partition, by month, daily ? yearly ?)
             // For the moment we use the stream api without partitionning
             addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);

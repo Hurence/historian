@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.webapiservice.modele.AGG;
@@ -21,7 +21,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterImpl.class);
 
-    final Sampler<PointImpl> sampler;
+    final Sampler<Measure> sampler;
     final PointsAggsCalculator aggsCalculator;
 
     public TimeSeriesExtracterImpl(long from, long to,
@@ -35,10 +35,10 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     @Override
     protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks) {
-        List<PointImpl> points = decompressPoints(from, to, chunks);
-        List<PointImpl> sampledPoints = sampler.sample(points);
-        this.sampledPoints.addAll(sampledPoints);
-        aggsCalculator.updateAggs(points);
+        List<Measure> measures = decompressPoints(from, to, chunks);
+        List<Measure> sampledMeasures = sampler.sample(measures);
+        this.sampledMeasures.addAll(sampledMeasures);
+        aggsCalculator.updateAggs(measures);
     }
 
     @Override
@@ -46,10 +46,10 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<PointImpl> decompressPoints(long from, long to, List<Chunk> chunks) {
-        Stream<PointImpl> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
-        Stream<PointImpl> sortedPoints = extractedPoints
-                .sorted(Comparator.comparing(PointImpl::getTimestamp));
+    private List<Measure> decompressPoints(long from, long to, List<Chunk> chunks) {
+        Stream<Measure> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
+        Stream<Measure> sortedPoints = extractedPoints
+                .sorted(Comparator.comparing(Measure::getTimestamp));
         return sortedPoints.collect(Collectors.toList());
     }
 }

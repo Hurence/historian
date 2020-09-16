@@ -9,7 +9,7 @@
 //import com.hurence.historian.spark.compactor.job.{CompactorJobReport, JobStatus}
 //import com.hurence.logisland.record.TimeSeriesRecord
 //import com.hurence.solr.SparkSolrUtils
-//import com.hurence.timeseries.modele.points.PointImpl
+//import com.hurence.timeseries.model.measures.Measure
 //import com.hurence.unit5.extensions.{SolrExtension, SparkExtension}
 //import io.vertx.core.json.JsonObject
 //import org.apache.solr.client.solrj.SolrClient
@@ -87,10 +87,10 @@
 //    assertEquals(1477926224866L, recordsB.get(1).getEndChunk)
 //    assertEquals(2, recordsB.get(1).getChunkSize)
 //
-//    //Test on points of chunks
-//    val pointsA: List[PointImpl] = recordsA.flatMap(_.getPoints)
+//    //Test on measures of chunks
+//    val pointsA: List[Measure] = recordsA.flatMap(_.getPoints)
 //    assertEquals(12, pointsA.size())
-//    val pointsB: List[PointImpl] = recordsB.flatMap(_.getPoints)
+//    val pointsB: List[Measure] = recordsB.flatMap(_.getPoints)
 //    assertEquals(12, pointsB.size())
 //    assertEquals(pointsA, pointsB)
 //    assertEquals(622, pointsA.head.getValue)
@@ -142,62 +142,62 @@
 //   def addSeveralChunksForMetric(injector: GeneralVersion0SolrInjector, metric: String) = {
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477895624866L, 622)
+//        new Measure( 1477895624866L, 622)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477916224866L, -3)
+//        new Measure( 1477916224866L, -3)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477917224866L, 365)
+//        new Measure( 1477917224866L, 365)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477918224866L, 120)
+//        new Measure( 1477918224866L, 120)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477919224866L, 15)
+//        new Measure( 1477919224866L, 15)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477920224866L, -100)
+//        new Measure( 1477920224866L, -100)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477921224866L, 0)
+//        new Measure( 1477921224866L, 0)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl(1477922224866L, 120)
+//        new Measure(1477922224866L, 120)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477923224866L, 250)
+//        new Measure( 1477923224866L, 250)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477924224866L, 275)
+//        new Measure( 1477924224866L, 275)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477925224866L, 288)
+//        new Measure( 1477925224866L, 288)
 //      )
 //    )
 //    injector.addChunk(metric, year, month, day, chunkOrigin,
 //      util.Arrays.asList(
-//        new PointImpl( 1477926224866L, 198)
+//        new Measure( 1477926224866L, 198)
 //      )
 //    )
 //  }

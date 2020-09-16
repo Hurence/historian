@@ -1,9 +1,9 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -30,24 +30,24 @@ public class TimeSeriesExtracterUsingPreAggTest {
     private long START_CHUNK_1 = 1477895624866L;
     Chunk getChunk1() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl(START_CHUNK_1, 1),
-                new PointImpl(1477916224866L, 1),
-                new PointImpl(1477916224867L, 1),
-                new PointImpl(1477916224868L, 1),
-                new PointImpl(1477916224869L, 1),
-                new PointImpl(1477916224870L, 1),
-                new PointImpl(1477916224871L, 1),
-                new PointImpl(1477916224872L, 1),
-                new PointImpl(1477917224865L, 1)
+                new Measure(START_CHUNK_1, 1),
+                new Measure(1477916224866L, 1),
+                new Measure(1477916224867L, 1),
+                new Measure(1477916224868L, 1),
+                new Measure(1477916224869L, 1),
+                new Measure(1477916224870L, 1),
+                new Measure(1477916224871L, 1),
+                new Measure(1477916224872L, 1),
+                new Measure(1477917224865L, 1)
         ));
         return chunk.toChunk("id1");
     }
 
     Chunk getChunk2() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl( START_CHUNK_2, 2),
-                new PointImpl( 1477917224867L, 2),
-                new PointImpl( 1477917224868L, 2)
+                new Measure( START_CHUNK_2, 2),
+                new Measure( 1477917224867L, 2),
+                new Measure( 1477917224868L, 2)
         ));
         return chunk.toChunk("id2");
     }
@@ -55,27 +55,27 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     Chunk getChunk3() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl(1477917224868L, 3),
-                new PointImpl(1477917224869L, 3),
-                new PointImpl(1477917224870L, 3)
+                new Measure(1477917224868L, 3),
+                new Measure(1477917224869L, 3),
+                new Measure(1477917224870L, 3)
         ));
         return chunk.toChunk("id2");
     }
 
     Chunk getChunk4() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl( 1477917224870L, 4),
-                new PointImpl( 1477917224871L, 4),
-                new PointImpl( 1477917224872L, 4)
+                new Measure( 1477917224870L, 4),
+                new Measure( 1477917224871L, 4),
+                new Measure( 1477917224872L, 4)
         ));
         return chunk.toChunk("id2");
     }
 
     Chunk getChunk5() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl( 1477917224873L, 5),
-                new PointImpl( 1477917224874L, 5),
-                new PointImpl( 1477917224875L, 5)
+                new Measure( 1477917224873L, 5),
+                new Measure( 1477917224874L, 5),
+                new Measure( 1477917224875L, 5)
         ));
         return chunk.toChunk("id2");
     }

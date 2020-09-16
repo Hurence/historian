@@ -15,7 +15,7 @@
  */
 package com.hurence.timeseries.sampling;
 
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
 
 public class SamplerFactory {
 
@@ -28,18 +28,18 @@ public class SamplerFactory {
      * @param bucketSize an int parameter
      * @return the sampler
      */
-    public static Sampler<PointImpl> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
+    public static Sampler<Measure> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSampler<PointImpl>(bucketSize);
+                return new FirstItemSampler<Measure>(bucketSize);
             case AVERAGE:
-                return new AverageSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
+                return new AverageSampler<Measure>(getPointTimeSerieHandler(), bucketSize);
             case NONE:
-                return new IsoSampler<PointImpl>();
+                return new IsoSampler<Measure>();
             case MIN:
-                return new MinSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
+                return new MinSampler<Measure>(getPointTimeSerieHandler(), bucketSize);
             case MAX:
-                return new MaxSampler<PointImpl>(getPointTimeSerieHandler(), bucketSize);
+                return new MaxSampler<Measure>(getPointTimeSerieHandler(), bucketSize);
             case MIN_MAX:
             case LTTB:
             case MODE_MEDIAN:
@@ -49,18 +49,18 @@ public class SamplerFactory {
         }
     }
     //TODO
-    public static Sampler<PointImpl> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
+    public static Sampler<Measure> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSamplerWithSpecificBucketing<PointImpl>(bucketingStrategy);
+                return new FirstItemSamplerWithSpecificBucketing<Measure>(bucketingStrategy);
             case AVERAGE:
-//                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+//                return new AverageSampler<Measure>(getPointTimeSerieHandler(), bucketingStrategy);
             case NONE:
-//                return new IsoSampler<Point>();
+//                return new IsoSampler<Measure>();
             case MIN:
-//                return new MinSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+//                return new MinSampler<Measure>(getPointTimeSerieHandler(), bucketingStrategy);
             case MAX:
-//                return new MaxSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+//                return new MaxSampler<Measure>(getPointTimeSerieHandler(), bucketingStrategy);
             case MIN_MAX:
             case LTTB:
             case MODE_MEDIAN:
@@ -70,21 +70,21 @@ public class SamplerFactory {
         }
     }
 
-    public static TimeSerieHandler<PointImpl> getPointTimeSerieHandler() {
-        return new TimeSerieHandler<PointImpl>() {
+    public static TimeSerieHandler<Measure> getPointTimeSerieHandler() {
+        return new TimeSerieHandler<Measure>() {
                 @Override
-                public PointImpl createTimeserie(long timestamp, double value) {
-                    return new PointImpl(timestamp, value);
+                public Measure createTimeserie(long timestamp, double value) {
+                    return Measure.fromValue(timestamp, value);
                 }
 
                 @Override
-                public long getTimeserieTimestamp(PointImpl point) {
-                    return point.getTimestamp();
+                public long getTimeserieTimestamp(Measure measure) {
+                    return measure.getTimestamp();
                 }
 
                 @Override
-                public Double getTimeserieValue(PointImpl point) {
-                    return point.getValue();
+                public Double getTimeserieValue(Measure measure) {
+                    return measure.getValue();
                 }
             };
     }

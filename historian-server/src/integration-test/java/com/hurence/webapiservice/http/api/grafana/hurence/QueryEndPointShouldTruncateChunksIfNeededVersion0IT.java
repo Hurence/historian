@@ -5,7 +5,7 @@ import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
@@ -118,20 +118,20 @@ public class QueryEndPointShouldTruncateChunksIfNeededVersion0IT {
         GeneralVersion0SolrInjector chunkInjector = new GeneralVersion0SolrInjector();
         ChunkModeleVersion0 chunk1 = ChunkModeleVersion0.fromPoints("metric",
                 Arrays.asList(
-                        new PointImpl(1000, 1),
-                        new PointImpl(1000000, 2),
-                        new PointImpl(10000000, 3),//1970-01-01T02:46:40.000Z   10000000
-                        new PointImpl(150000000, 4),//1970-01-02T17:40:00.000Z  150000000
-                        new PointImpl(200000000, 5)
+                        new Point(1000, 1),
+                        new Point(1000000, 2),
+                        new Point(10000000, 3),//1970-01-01T02:46:40.000Z   10000000
+                        new Point(150000000, 4),//1970-01-02T17:40:00.000Z  150000000
+                        new Point(200000000, 5)
                 )
         );
         ChunkModeleVersion0 chunk2 = ChunkModeleVersion0.fromPoints("metric",
                 Arrays.asList(
-                        new PointImpl(200500000, 1),
-                        new PointImpl(300000000, 2),
-                        new PointImpl(400000000, 3),//1970-01-05T15:06:40.000Z
-                        new PointImpl(500000000, 4),
-                        new PointImpl(600000000, 5)
+                        new Point(200500000, 1),
+                        new Point(300000000, 2),
+                        new Point(400000000, 3),//1970-01-05T15:06:40.000Z
+                        new Point(500000000, 4),
+                        new Point(600000000, 5)
                 )
         );
         chunkInjector.addChunk(chunk1);

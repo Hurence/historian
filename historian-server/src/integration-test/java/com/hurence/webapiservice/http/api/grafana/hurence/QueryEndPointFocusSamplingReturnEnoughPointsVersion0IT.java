@@ -5,7 +5,7 @@ import com.hurence.historian.solr.injector.AbstractVersion0SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.Version0SolrInjectorOneMetricMultipleChunksSpecificPoints;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.model.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;

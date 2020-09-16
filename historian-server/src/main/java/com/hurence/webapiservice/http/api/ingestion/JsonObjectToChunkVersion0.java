@@ -3,9 +3,8 @@ package com.hurence.webapiservice.http.api.ingestion;
 import com.hurence.historian.converter.SolrDocumentBuilder;
 import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.converter.PointsToChunkVersion0;
-import com.hurence.timeseries.modele.chunk.Chunk;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
@@ -25,10 +24,10 @@ public class JsonObjectToChunkVersion0 {
 
 
     public SolrInputDocument chunkIntoSolrDocument(JsonObject json) {
-        TreeSet<Point> points = getPoints(json);
+        TreeSet<Measure> measures = getPoints(json);
         String name = getName(json);
         Map<String, String> tags = getTags(json);
-        Chunk chunk = converter.buildChunk(name, points, tags);
+        Chunk chunk = converter.buildChunk(name, measures, tags);
         return SolrDocumentBuilder.fromChunk(chunk);
     }
 
@@ -45,15 +44,15 @@ public class JsonObjectToChunkVersion0 {
         return json.getString(HistorianServiceFields.NAME);
     }
 
-    private TreeSet<Point> getPoints(JsonObject json) {
+    private TreeSet<Measure> getPoints(JsonObject json) {
         JsonArray pointsJson = json.getJsonArray(HistorianServiceFields.POINTS);
-        TreeSet<Point> points = new TreeSet<>();
+        TreeSet<Measure> measures = new TreeSet<>();
         for (Object point : pointsJson) {
             JsonArray jsonPoint = (JsonArray) point;
             long timestamps = jsonPoint.getLong(0);
             double value = jsonPoint.getDouble(1);
-            points.add(new PointImpl(timestamps, value));
+            measures.add(new Measure(timestamps, value));
         }
-        return points;
+        return measures;
     }
 }

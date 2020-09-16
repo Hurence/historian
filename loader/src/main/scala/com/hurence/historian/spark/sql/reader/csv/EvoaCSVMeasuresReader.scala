@@ -3,11 +3,11 @@ package com.hurence.historian.spark.sql.reader.csv
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
-import com.hurence.timeseries.modele.measure.MeasureVersionV0
+import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-class EvoaCSVMeasuresReader extends Reader[MeasureVersionV0] {
+class EvoaCSVMeasuresReader extends Reader[Measure] {
 
   def config(): Map[String, String] = Map(
     "inferSchema" -> "true",
@@ -17,7 +17,7 @@ class EvoaCSVMeasuresReader extends Reader[MeasureVersionV0] {
   )
 
 
-  override def read(options: Options): Dataset[MeasureVersionV0] = {
+  override def read(options: Options): Dataset[Measure] = {
 
 
     val spark = SparkSession.getActiveSession.get

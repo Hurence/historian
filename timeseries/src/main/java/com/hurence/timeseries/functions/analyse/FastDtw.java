@@ -21,7 +21,7 @@ import com.hurence.timeseries.MultivariateTimeSeries;
 import com.hurence.timeseries.distance.DistanceFunction;
 import com.hurence.timeseries.distance.DistanceFunctionEnum;
 import com.hurence.timeseries.distance.DistanceFunctionFactory;
-import com.hurence.timeseries.modele.Pair;
+import com.hurence.timeseries.model.Pair;
 import com.hurence.timeseries.dtw.FastDTW;
 import com.hurence.timeseries.dtw.TimeWarpInfo;
 import com.hurence.timeseries.functions.ChronixPairAnalysis;

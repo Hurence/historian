@@ -18,7 +18,7 @@
 
 package com.hurence.webapiservice.http;
 
-import com.hurence.logisland.record.Point;
+import com.hurence.logisland.record.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.http.api.main.MainHistorianApi;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
@@ -73,22 +73,22 @@ public class HttpServerVerticleSmallChunksIT {
                 ),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 1L, 5),
-                                new Point(0, 2L, 8),
-                                new Point(0, 3L, 1.2),
-                                new Point(0, 4L, 6.5)
+                                new Measure(0, 1L, 5),
+                                new Measure(0, 2L, 8),
+                                new Measure(0, 3L, 1.2),
+                                new Measure(0, 4L, 6.5)
                         ),
                         Arrays.asList(
-                                new Point(0, 5L, -2),
-                                new Point(0, 6L, 8.8),
-                                new Point(0, 7L, 13.3),
-                                new Point(0, 8L, 2)
+                                new Measure(0, 5L, -2),
+                                new Measure(0, 6L, 8.8),
+                                new Measure(0, 7L, 13.3),
+                                new Measure(0, 8L, 2)
                         ),
                         Arrays.asList(
-                                new Point(0, 9L, -5),
-                                new Point(0, 10L, 80),
-                                new Point(0, 11L, 1.2),
-                                new Point(0, 12L, 5.5)
+                                new Measure(0, 9L, -5),
+                                new Measure(0, 10L, 80),
+                                new Measure(0, 11L, 1.2),
+                                new Measure(0, 12L, 5.5)
                         )
                 ));
         injector.injectChunks(client);

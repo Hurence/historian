@@ -17,8 +17,8 @@ package com.hurence.timeseries;
 
 
 
-import com.hurence.timeseries.modele.list.IntList;
-import com.hurence.timeseries.modele.list.LongList;
+import com.hurence.timeseries.model.list.IntList;
+import com.hurence.timeseries.model.list.LongList;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.util.ArrayList;

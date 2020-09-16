@@ -4,7 +4,7 @@ import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.Compression;
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
 
@@ -17,7 +17,7 @@ import java.util.TreeSet;
 public class ChunkModeleVersionEVOA0 implements ChunkModele {
     private static int ddcThreshold = 0;
 
-    public TreeSet<PointImpl> points;
+    public TreeSet<Measure> measures;
     public byte[] compressedPoints;
     public long start;
     public long end;
@@ -35,8 +35,8 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
     public String chunk_origin;
     public List<String> tags = new ArrayList<>();
 
-    public static ChunkModeleVersionEVOA0 fromPoints(String metricName, List<PointImpl> points) {
-        return fromPoints(metricName, 2000, 12, 13, "logisland", points);
+    public static ChunkModeleVersionEVOA0 fromPoints(String metricName, List<Measure> measures) {
+        return fromPoints(metricName, 2000, 12, 13, "logisland", measures);
     }
 
     public static ChunkModeleVersionEVOA0 fromJson(String json) throws IOException {
@@ -58,7 +58,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
         chunk.end = json.getLong(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_END);
         chunk.start = json.getLong(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START);
         chunk.compressedPoints = json.getBinary(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_VALUE);
-        chunk.points = BinaryCompactionUtil.unCompressPoints(chunk.compressedPoints, chunk.start, chunk.end);
+        chunk.measures = BinaryCompactionUtil.unCompressPoints(chunk.compressedPoints, chunk.start, chunk.end);
         return chunk;
     }
 
@@ -72,8 +72,8 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
                                                  int month,
                                                  int day,
                                                  String chunk_origin,
-                                                 List<PointImpl> points) {
-        return fromPoints(metricName, year, month, day, chunk_origin, new TreeSet<>(points));
+                                                 List<Measure> measures) {
+        return fromPoints(metricName, year, month, day, chunk_origin, new TreeSet<>(measures));
     }
 
     public static ChunkModeleVersionEVOA0 fromPoints(String metricName,
@@ -81,19 +81,19 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
                                                      int month,
                                                      int day,
                                                      String chunk_origin,
-                                                     TreeSet<PointImpl> points) {
+                                                     TreeSet<Measure> measures) {
         ChunkModeleVersionEVOA0 chunk = new ChunkModeleVersionEVOA0();
-        chunk.points = points;
-        chunk.compressedPoints = compressPoints(chunk.points);
-        chunk.start = chunk.points.stream().mapToLong(PointImpl::getTimestamp).min().getAsLong();
-        chunk.end = chunk.points.stream().mapToLong(PointImpl::getTimestamp).max().getAsLong();;
-        chunk.sum = chunk.points.stream().mapToDouble(PointImpl::getValue).sum();
-        chunk.avg = chunk.sum / chunk.points.size();
-        chunk.min = chunk.points.stream().mapToDouble(PointImpl::getValue).min().getAsDouble();
-        chunk.max = chunk.points.stream().mapToDouble(PointImpl::getValue).max().getAsDouble();
+        chunk.measures = measures;
+        chunk.compressedPoints = compressPoints(chunk.measures);
+        chunk.start = chunk.measures.stream().mapToLong(Measure::getTimestamp).min().getAsLong();
+        chunk.end = chunk.measures.stream().mapToLong(Measure::getTimestamp).max().getAsLong();;
+        chunk.sum = chunk.measures.stream().mapToDouble(Measure::getValue).sum();
+        chunk.avg = chunk.sum / chunk.measures.size();
+        chunk.min = chunk.measures.stream().mapToDouble(Measure::getValue).min().getAsDouble();
+        chunk.max = chunk.measures.stream().mapToDouble(Measure::getValue).max().getAsDouble();
         chunk.name = metricName;
         chunk.sax = "edeebcccdf";
-        chunk.firstValue = points.first().getValue();
+        chunk.firstValue = measures.first().getValue();
         chunk.year = year;
         chunk.month = month;
         chunk.day = String.valueOf(day);
@@ -101,7 +101,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
         return chunk;
     }
 
-    protected static byte[] compressPoints(TreeSet<PointImpl> pointsChunk) {
+    protected static byte[] compressPoints(TreeSet<Measure> pointsChunk) {
         byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(pointsChunk.iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }
@@ -112,7 +112,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.TAGS, tags);
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.ID, id);
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START, this.start);
-        json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SIZE, this.points.size());
+        json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SIZE, this.measures.size());
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_END, this.end);
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SAX, this.sax);
         json.put(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_VALUE, this.compressedPoints);
@@ -135,7 +135,7 @@ public class ChunkModeleVersionEVOA0 implements ChunkModele {
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.TAGS, tags);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.ID, id);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_START, this.start);
-        doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SIZE, this.points.size());
+        doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SIZE, this.measures.size());
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_END, this.end);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_SAX, this.sax);
         doc.addField(HistorianChunkCollectionFieldsVersionEVOA0.CHUNK_VALUE, Base64.getEncoder().encodeToString(this.compressedPoints));

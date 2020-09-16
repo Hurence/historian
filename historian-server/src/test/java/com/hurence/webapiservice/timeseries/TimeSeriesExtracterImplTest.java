@@ -1,9 +1,9 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.timeseries.modele.chunk.Chunk;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.timeseries.modele.points.PointImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -35,9 +35,9 @@ public class TimeSeriesExtracterImplTest {
 
     Chunk getChunk1() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl( START_CHUNK_1, 1),
-                new PointImpl( MIDDLE_CHUNK_1, 2),
-                new PointImpl( END_CHUNK_1, 3)
+                new Measure( START_CHUNK_1, 1),
+                new Measure( MIDDLE_CHUNK_1, 2),
+                new Measure( END_CHUNK_1, 3)
         ));
         return chunk.toChunk("id1");
     }
@@ -45,18 +45,18 @@ public class TimeSeriesExtracterImplTest {
 
     Chunk getChunk2() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl( START_CHUNK_2, 4),
-                new PointImpl( MIDDLE_CHUNK_2, 5),
-                new PointImpl( END_CHUNK_2, 6)
+                new Measure( START_CHUNK_2, 4),
+                new Measure( MIDDLE_CHUNK_2, 5),
+                new Measure( END_CHUNK_2, 6)
         ));
         return chunk.toChunk("id1");
     }
 
     Chunk getConflictingChunk() {
         ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new PointImpl( MIDDLE_CHUNK_1, 4),
-                new PointImpl( START_CHUNK_2, 5),
-                new PointImpl( MIDDLE_CHUNK_2, 6)
+                new Measure( MIDDLE_CHUNK_1, 4),
+                new Measure( START_CHUNK_2, 5),
+                new Measure( MIDDLE_CHUNK_2, 6)
         ));
         return chunk.toChunk("id1");
     }

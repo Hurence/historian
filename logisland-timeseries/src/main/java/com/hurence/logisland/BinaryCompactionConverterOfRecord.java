@@ -20,7 +20,7 @@ import com.hurence.logisland.record.*;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.Chunker;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,7 @@ public class BinaryCompactionConverterOfRecord implements Chunker<Record, TimeSe
     }
 
 
-    public TreeSet<PointImpl> deSerializeTimeseries(final byte[] chunk, final long start, final long end) throws IOException {
+    public TreeSet<Measure> deSerializeTimeseries(final byte[] chunk, final long start, final long end) throws IOException {
         return BinaryCompactionUtil.unCompressPoints(chunk, start,end);
     }
 

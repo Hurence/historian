@@ -4,7 +4,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralVersion0SolrInjector;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Point;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
@@ -69,37 +69,37 @@ public class ComplexQueryEndPointVersion0IT {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralVersion0SolrInjector injector = new GeneralVersion0SolrInjector();
         ChunkModeleVersion0 chunkTempbUsine1Sensor3 = ChunkModeleVersion0.fromPoints("temp_b", Arrays.asList(
-                new PointImpl( 1, 1)
+                new Point( 1, 1)
         ));
         chunkTempbUsine1Sensor3.addTag("sensor", "sensor_3");
         chunkTempbUsine1Sensor3.addTag("usine", "usine_1");
         injector.addChunk(chunkTempbUsine1Sensor3);
 
         ChunkModeleVersion0 chunkTempaUsine1Sensor1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 2, 2),
-                new PointImpl( 3, 3),
-                new PointImpl( 4, 4)
+                new Point( 2, 2),
+                new Point( 3, 3),
+                new Point( 4, 4)
         ));
         chunkTempaUsine1Sensor1.addTag("sensor", "sensor_1");
         chunkTempaUsine1Sensor1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1Sensor1);
 
         ChunkModeleVersion0 chunkTempaUsine1Sensor2 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 5, 3)
+                new Point( 5, 3)
         ));
         chunkTempaUsine1Sensor2.addTag("sensor", "sensor_2");
         chunkTempaUsine1Sensor2.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1Sensor2);
 
         ChunkModeleVersion0 chunkTempaUsine2Sensor3 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 6, 4)
+                new Point( 6, 4)
         ));
         chunkTempaUsine2Sensor3.addTag("sensor", "sensor_3");
         chunkTempaUsine2Sensor3.addTag("usine", "usine_2");
         injector.addChunk(chunkTempaUsine2Sensor3);
 
         ChunkModeleVersion0 chunkTempaUsine1 = ChunkModeleVersion0.fromPoints("temp_a", Arrays.asList(
-                new PointImpl( 7, 5)
+                new Point( 7, 5)
         ));
         chunkTempaUsine1.addTag("usine", "usine_1");
         injector.addChunk(chunkTempaUsine1);
