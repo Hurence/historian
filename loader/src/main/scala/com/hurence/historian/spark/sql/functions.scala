@@ -1,11 +1,13 @@
 package com.hurence.historian.spark.sql
 
 import java.nio.charset.StandardCharsets
+import java.util
 
 import com.google.common.hash.Hashing
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
 import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils}
+import com.hurence.timeseries.modele.points.Point
 import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
 import org.apache.spark.sql.functions.udf
 
@@ -66,7 +68,11 @@ object functions {
 
     val bytes = BinaryEncodingUtils.decode(chunk)
 
-    BinaryCompactionUtil.unCompressPoints(bytes, start, end).asScala.map(p => (p.getTimestamp, p.getValue))
+    val sortedPoints: java.util.Set[Point] = BinaryCompactionUtil.unCompressPoints(bytes, start, end)
+
+    val pointsList: java.util.List[Point]  = new util.ArrayList[Point](sortedPoints)
+
+    pointsList.asScala.map(p => (p.getTimestamp, p.getValue))
   }
 
   /**
