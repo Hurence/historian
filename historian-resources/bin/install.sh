@@ -211,8 +211,8 @@ ask_and_update_array() {
           _array+=("$tag_name")
         fi
       done
-      echo "Tags :"
-      join_by , "${_array[@]}"
+      echo "Tags : [$(join_by , "${_array[@]}")]"
+
       CREATE=true
       ;;
 
