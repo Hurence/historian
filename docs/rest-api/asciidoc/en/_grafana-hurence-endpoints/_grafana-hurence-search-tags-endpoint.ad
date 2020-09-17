@@ -1,5 +1,4 @@
-
-[[grafana-hurence-datasource-tag-keys]]
+[[grafana-hurence-datasource-search-tags]]
 ===== POST /api/grafana/v0/tag-keys
 
 Used to find out the keys that can be used in the _tag_values_ endpoint.

@@ -1,11 +1,11 @@
 ==== Api compatible avec le plugin "SimpleJson"
 
-include::./grafana-simplejson-endpoints/_grafana-simplejson-root-endpoint.ad[]
-include::./grafana-simplejson-endpoints/_grafana-simplejson-query-endpoint.ad[]
-include::./grafana-simplejson-endpoints/_grafana-simplejson-search-endpoint.ad[]
-include::./grafana-simplejson-endpoints/_grafana-simplejson-tag-keys-endpoint.ad[]
-include::./grafana-simplejson-endpoints/_grafana-simplejson-tag-values-endpoint.ad[]
-include::./grafana-simplejson-endpoints/_grafana-simplejson-annotations-endpoint.ad[]
+include::./_grafana-simplejson-endpoints/_grafana-simplejson-root-endpoint.ad[]
+include::./_grafana-simplejson-endpoints/_grafana-simplejson-query-endpoint.ad[]
+include::./_grafana-simplejson-endpoints/_grafana-simplejson-search-endpoint.ad[]
+include::./_grafana-simplejson-endpoints/_grafana-simplejson-tag-keys-endpoint.ad[]
+include::./_grafana-simplejson-endpoints/_grafana-simplejson-tag-values-endpoint.ad[]
+include::./_grafana-simplejson-endpoints/_grafana-simplejson-annotations-endpoint.ad[]
 
 
 

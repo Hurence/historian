@@ -1,8 +1,8 @@
 ==== Api compatible avec le plugin "Hurence-Historian"
 
-include::./grafana-hurence-endpoints/_grafana-hurence-root-endpoint.ad[]
-include::./grafana-hurence-endpoints/_grafana-hurence-query-endpoint.ad[]
-include::./grafana-hurence-endpoints/_grafana-hurence-search-endpoint.ad[]
-include::./grafana-hurence-endpoints/_grafana-hurence-search-tags-endpoint.ad[]
-include::./grafana-hurence-endpoints/_grafana-hurence-search-values-endpoint.ad[]
-include::./grafana-hurence-endpoints/_grafana-hurence-annotations-endpoint.ad[]
+include::./_grafana-hurence-endpoints/_grafana-hurence-root-endpoint.ad[]
+include::./_grafana-hurence-endpoints/_grafana-hurence-query-endpoint.ad[]
+include::./_grafana-hurence-endpoints/_grafana-hurence-search-endpoint.ad[]
+include::./_grafana-hurence-endpoints/_grafana-hurence-search-tags-endpoint.ad[]
+include::./_grafana-hurence-endpoints/_grafana-hurence-search-values-endpoint.ad[]
+include::./_grafana-hurence-endpoints/_grafana-hurence-annotations-endpoint.ad[]
