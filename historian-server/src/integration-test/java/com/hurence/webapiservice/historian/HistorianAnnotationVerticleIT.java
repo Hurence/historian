@@ -29,7 +29,8 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
 public class HistorianAnnotationVerticleIT {
@@ -41,8 +42,8 @@ public class HistorianAnnotationVerticleIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, DockerComposeContainer container, io.vertx.reactivex.core.Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
-        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
+        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.getCurrentVersion());
         HistorianSolrITHelper
                 .deployHistorianVerticle(container, vertx)
                 .subscribe(id -> {

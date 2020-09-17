@@ -21,6 +21,11 @@
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>historian-resources</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <!--        VERTX-->
         <dependency>
             <groupId>io.vertx</groupId>

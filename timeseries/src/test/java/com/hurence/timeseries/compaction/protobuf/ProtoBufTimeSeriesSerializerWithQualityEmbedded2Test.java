@@ -24,6 +24,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -48,11 +49,11 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded2Test {
         long start = measures.get(0).getTimestamp();
         long end = measures.get(measures.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(measures.iterator(), 0, 0);
-        List<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
+        TreeSet<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
-        assertEquals(measures, uncompressedMeasures);
+        assertEquals(new TreeSet<>(measures), uncompressedMeasures);
     }
 
     @Test
@@ -67,11 +68,11 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded2Test {
         long start = expectedMeasures.get(0).getTimestamp();
         long end = expectedMeasures.get(expectedMeasures.size() - 1).getTimestamp();
         byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(expectedMeasures);
-        List<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
+        TreeSet<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
                 new ByteArrayInputStream(compressedProtoPoints),
                 start, end
         );
-        assertNotEquals(expectedMeasures, uncompressedMeasures);
+        assertNotEquals(new TreeSet<>(expectedMeasures), uncompressedMeasures);
     }
 
     @Test

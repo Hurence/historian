@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ChunkFromJsonObjectVersionCurrent  {
+public class ChunkFromJsonObjectVersionCurrent extends Chunk {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChunkFromJsonObjectVersionCurrent.class);
 
@@ -26,14 +26,17 @@ public class ChunkFromJsonObjectVersionCurrent  {
     private boolean tagsInitialized = false;
 
 
+    @Override
     public boolean containsTag(String tagName) {
         return chunk.containsKey(tagName);
     }
 
+    @Override
     public String getTag(String tagName) {
         return chunk.getString(tagName);
     }
 
+    @Override
     public Map<String, String> getTags() {
         if (tagsInitialized)
             return tags;
@@ -54,116 +57,143 @@ public class ChunkFromJsonObjectVersionCurrent  {
         this.chunk = chunk;
     }
 
+    @Override
     public String getName() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.NAME);
     }
 
+    @Override
     public String getValueAsString() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_VALUE);
     }
 
+    @Override
     public byte[] getValueAsBinary() {
         return chunk.getBinary(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_VALUE);
     }
 
+    @Override
     public long getStart() {
         return chunk.getLong(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_START);
     }
 
+    @Override
     public long getEnd() {
         return chunk.getLong(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_END);
     }
 
+    @Override
     public long getCount() {
         return chunk.getLong(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_COUNT);
     }
 
+    @Override
     public double getFirst() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_FIRST);
     }
 
+    @Override
     public double getLast() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_LAST);
     }
 
+    @Override
     public double getMin() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MIN);
     }
 
+    @Override
     public double getMax() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MAX);
     }
 
+    @Override
     public double getSum() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_SUM);
     }
 
+    @Override
     public double getAvg() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_AVG);
     }
 
+    @Override
     public int getYear() {
         return chunk.getInteger(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_YEAR);
     }
 
+    @Override
     public int getMonth() {
         return chunk.getInteger(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MONTH);
     }
 
+    @Override
     public String getDay() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_DAY);
     }
 
-    public double getStddev() {
+    @Override
+    public double getStd() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV);
     }
 
+    @Override
     public SchemaVersion getVersion() {
         return SchemaVersion.VERSION_0;
     }
 
+    @Override
     public String getId() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.ID);
     }
 
-    public List<String> getCompactionsRunning() {
+   /* public List<String> getCompactionsRunnings() {
         return chunk.getJsonArray(HistorianChunkCollectionFieldsVersionCurrent.COMPACTIONS_RUNNING).stream()
                 .map(String.class::cast)
                 .collect(Collectors.toList());
-    }
+    }*/
 
-    public boolean getTrend() {
+    @Override
+    public boolean isTrend() {
         return chunk.getBoolean(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_TREND);
     }
 
-    public boolean getOutlier() {
+    @Override
+    public boolean isOutlier() {
         return chunk.getBoolean(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_OUTLIER);
     }
 
+    @Override
     public float getQualityMin() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN);
     }
 
+    @Override
     public float getQualityMax() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX);
     }
 
+    @Override
     public float getQualitySum() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_SUM);
     }
 
+    @Override
     public float getQualityFirst() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST);
     }
 
+    @Override
     public float getQualityAvg() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_AVG);
     }
 
-    public String getOrigin() {
+    @Override
+    public String getChunkOrigin() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN);
     }
 
+    @Override
     public String getSax() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_SAX);
     }

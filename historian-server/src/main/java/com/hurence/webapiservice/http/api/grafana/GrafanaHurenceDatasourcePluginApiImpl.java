@@ -54,7 +54,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
 
     /**
      *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value HistorianServiceFields#NAME}' value in historian.
+     *  In our case we will return each different '{@value HistorianServiceFields#METRIC}' value in historian.
      * @param context
      *
      * Expected request exemple :
@@ -205,6 +205,11 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
     public final static String REQUEST_ID_JSON_PATH = "/request_id";
     public final static String AGGREGATION_JSON_PATH = "/aggregations";
+    public final static String QUALITY_JSON_PATH = "/quality";
+    public final static String QUALITY_RETURN_JSON_PATH = "/return_with_quality";
+    public final static String QUALITY_VALUE_JSON_PATH = QUALITY_JSON_PATH+"/quality_value";
+    public final static String QUALITY_AGG_JSON_PATH = QUALITY_JSON_PATH+"/quality_agg";
+
 
     /**
      *  used to query metrics datapoints in grafana panels.
@@ -272,7 +277,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH)
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH)
                     .parseRequest(requestBody);
             if (request.getSamplingConf().getMaxPoint() > this.maxDataPointsAllowed) {
                 throw new IllegalArgumentException(String.format("maximum allowed for %s is %s", MAX_DATA_POINTS_JSON_PATH, this.maxDataPointsAllowed));
@@ -373,7 +378,11 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 .put(HistorianServiceFields.SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(HistorianServiceFields.BUCKET_SIZE, samplingConf.getBucketSize())
                 .put(HistorianServiceFields.MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
-                .put(HistorianServiceFields.AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()));
+                .put(HistorianServiceFields.AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()))
+                .put(HistorianServiceFields.QUALITY_VALUE, request.getQualityValue())
+                .put(HistorianServiceFields.QUALITY_AGG, request.getQualityAgg().toString())
+                .put(HistorianServiceFields.QUALITY_RETURN, request.getQualityReturn())
+                .put(HistorianServiceFields.USE_QUALITY, request.getUseQuality());
     }
 
     public final static String LIMIT_JSON_PATH = "/limit";

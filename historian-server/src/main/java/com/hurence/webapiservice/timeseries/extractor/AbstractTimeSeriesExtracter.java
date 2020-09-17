@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.hurence.timeseries.model.Measure.DEFAULT_QUALITY;
+
 public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AbstractTimeSeriesExtracter.class);
@@ -23,16 +25,20 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
     final SamplingConf samplingConf;
     protected final List<Chunk> chunks = new ArrayList<>();
     final List<Measure> sampledMeasures = new ArrayList<>();
+
     private long totalChunkCounter = 0L;
-    long toatlPointCounter = 0L;
+    long totalPointCounter = 0L;
     long pointCounter = 0L;
+    boolean returnQuality;
 
     public AbstractTimeSeriesExtracter(long from, long to,
                                        SamplingConf samplingConf,
-                                       long totalNumberOfPoint) {
+                                       long totalNumberOfPoint,
+                                       boolean returnQuality) {
         this.from = from;
         this.to = to;
         this.samplingConf = TimeSeriesExtracterUtil.calculSamplingConf(samplingConf, totalNumberOfPoint);
+        this.returnQuality = returnQuality;
         LOGGER.debug("Initialized {}  with samplingConf : {}", this.getClass(), this.samplingConf);
     }
 
@@ -67,7 +73,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
         }
         samplePointsFromChunksAndCalculAggreg(from, to, chunks);
         chunks.clear();
-        toatlPointCounter+=pointCounter;
+        totalPointCounter +=pointCounter;
         pointCounter = 0;
     }
 
@@ -88,15 +94,27 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 * We sort just so that user can not realize there is a problem in chunks.
                 */
                 .sorted(Comparator.comparing(Measure::getTimestamp))
-                .map(p -> new JsonArray().add(p.getValue()).add(p.getTimestamp()))
+                .map(this::returnPoint)
                 .collect(Collectors.toList());
-        JsonObject toReturn = new JsonObject()
-                .put(TIMESERIE_POINT, new JsonArray(points))
-                .put(TOTAL_POINTS, points.size());
-        getAggsAsJson()
-                .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
-        LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
+        JsonObject toReturn = new JsonObject();
+        if (!points.isEmpty())
+        {
+            toReturn.put(TIMESERIE_POINT, new JsonArray(points))
+                    .put(TOTAL_POINTS, points.size());
+            getAggsAsJson()
+                    .ifPresent(aggs -> toReturn.put(TIMESERIE_AGGS, aggs));
+            LOGGER.trace("getTimeSeries return : {}", toReturn.encodePrettily());
+        }
         return toReturn;
+    }
+
+    private JsonArray returnPoint(Measure measure) {
+        if (returnQuality && measure.hasQuality())
+            return new JsonArray().add(measure.getValue()).add(measure.getTimestamp()).add(measure.getQuality());
+        else if (returnQuality && !measure.hasQuality())
+            return new JsonArray().add(measure.getValue()).add(measure.getTimestamp()).add(DEFAULT_QUALITY);
+        else
+            return new JsonArray().add(measure.getValue()).add(measure.getTimestamp());
     }
 
     @Override
@@ -106,6 +124,6 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
 
     @Override
     public long pointCount() {
-        return toatlPointCounter;
+        return totalPointCounter;
     }
 }

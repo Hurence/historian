@@ -2,7 +2,7 @@ package com.hurence.timeseries.model.chunk;
 
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.timeseries.converter.PointsToChunk;
-import com.hurence.timeseries.converter.PointsToChunkVersion0;
+import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
 import org.junit.Test;
@@ -22,7 +22,7 @@ public class ChunkVersion0ImplTest {
             put("couNtry", "France");
             put("usine", "usine 2 ;;Alpha go");
         }};
-        PointsToChunk converter = new PointsToChunkVersion0("test");
+        PointsToChunk converter = new PointsToChunkVersionCurrent("test");
         Chunk chunk = converter.buildChunk("metric 1",
                 new TreeSet<Measure>(Arrays.asList(
                         Measure.fromValue(1, 1),
@@ -48,7 +48,7 @@ public class ChunkVersion0ImplTest {
         Assertions.assertEquals(3.0276503540974917, chunk.getStd());
         Assertions.assertEquals("aabcddefgg", chunk.getSax());
         Assertions.assertEquals(5.5, chunk.getAvg());
-        Assertions.assertEquals(SchemaVersion.VERSION_0, chunk.getVersion());
+        Assertions.assertEquals(SchemaVersion.VERSION_1, chunk.getVersion());
         Assertions.assertEquals("1970-01-01", chunk.getDay());
         //    Assertions.assertEquals("2c6191ea9a9abe5443b73da0c3c072819d5b6e6f2d2c379513067356e2dae019",chunk.getId());
         Assertions.assertEquals(1, chunk.getFirst());
@@ -73,7 +73,7 @@ public class ChunkVersion0ImplTest {
         Assertions.assertEquals(0.7071067811865476, truncatedChunk.getStd());
         Assertions.assertEquals("ab", truncatedChunk.getSax());
         Assertions.assertEquals(6.5, truncatedChunk.getAvg());
-        Assertions.assertEquals(SchemaVersion.VERSION_0, truncatedChunk.getVersion());
+        Assertions.assertEquals(SchemaVersion.VERSION_1, truncatedChunk.getVersion());
         Assertions.assertEquals("1970-01-01", truncatedChunk.getDay());
         //     Assertions.assertEquals("e5fc729560a76e72c439d9c614cf77ce876dc2da0175f563a542d8d5c90383a3",truncatedChunk.getId());
         Assertions.assertEquals(6, truncatedChunk.getFirst());

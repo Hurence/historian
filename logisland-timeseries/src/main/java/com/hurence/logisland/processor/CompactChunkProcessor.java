@@ -46,12 +46,12 @@ import com.hurence.logisland.component.InitializationException;
     import com.hurence.logisland.validator.StandardValidators;
 import com.hurence.timeseries.model.Measure;
 import org.apache.commons.lang3.StringUtils;
-    import org.slf4j.Logger;
-    import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-    import java.util.*;
-    import java.util.stream.Collectors;
-    import java.util.stream.Stream;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Tags({"record", "fields", "timeseries", "chronix", "convert"})
 @CapabilityDescription("Converts a given field records into a chronix timeseries record")
@@ -155,7 +155,7 @@ public class CompactChunkProcessor extends AbstractProcessor {
                 .filter(record -> record.getField(FieldDictionary.RECORD_VALUE) != null && record.getField(FieldDictionary.RECORD_VALUE).getRawValue() != null)
                 .map(record -> new Pair<>(record.getTime().getTime(), record.getField(FieldDictionary.RECORD_VALUE).asDouble()))
                 .filter(longDoublePair -> longDoublePair.getSecond() != null && Double.isFinite(longDoublePair.getSecond()))
-                .map(pair -> new Measure(pair.getFirst(), pair.getSecond()));
+                .map(pair ->  Measure.fromValue(pair.getFirst(), pair.getSecond()));
     }
     /*
      * Build a map of mapping rules of the form:

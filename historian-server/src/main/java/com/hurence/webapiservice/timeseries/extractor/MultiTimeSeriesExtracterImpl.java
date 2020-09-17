@@ -22,16 +22,19 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     final long from;
     final long to;
     final SamplingConf samplingConf;
+    boolean returnQuality;
 
     public MultiTimeSeriesExtracterImpl(long from,
                                         long to,
                                         SamplingConf samplingConf,
-                                        List<MetricRequest> metricRequests) {
+                                        List<MetricRequest> metricRequests,
+                                        boolean returnQuality) {
         this.from = from;
         this.to = to;
         this.samplingConf = samplingConf;
         this.extractorByMetricRequest = new HashMap<>();
         this.metricRequests = metricRequests;
+        this.returnQuality = returnQuality;
     }
 
 
@@ -66,7 +69,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     }
 
     protected TimeSeriesExtracter createTimeSeriesExtractor(MetricRequest metricRequest) {
-        return new TimeSeriesExtracterImpl(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList);
+        return new TimeSeriesExtracterImpl(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList, returnQuality, metricRequest.getQuality().getQualityValue());
     }
 
     public void setTotalNumberOfPointForMetric(MetricRequest metric, long totalNumberOfPoints) {
@@ -77,6 +80,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     public JsonArray getTimeSeries() {
         List<JsonObject> timeseries = extractorByMetricRequest.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(MetricRequest::getName)))
+                .filter(entry -> !entry.getValue().getTimeSeries().isEmpty())
                 .map(entry -> {
                     JsonObject timeSerie = new JsonObject();
                     timeSerie.put(TIMESERIE_NAME, entry.getKey().getName());

@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
@@ -62,19 +63,19 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
         testThereIsNoInformationLost(expectedMeasures, ddc);
     }
 
-    private void testThereIsNoInformationLost(List<Measure> measures, int ddc) throws IOException {
-        long start = measures.get(0).getTimestamp();
-        long end = measures.get(measures.size() - 1).getTimestamp();
-        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(measures, ddc);
-        List<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
-                new ByteArrayInputStream(compressedProtoPoints),
+    private void testThereIsNoInformationLost(List<Measure> Measures, int ddc) throws IOException {
+        long start = Measures.get(0).getTimestamp();
+        long end = Measures.get(Measures.size() - 1).getTimestamp();
+        byte[] compressedProtoMeasures = ProtoBufTimeSeriesWithQualitySerializer.to(Measures, ddc);
+        TreeSet<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
+                new ByteArrayInputStream(compressedProtoMeasures),
                 start, end
         );
-        assertEquals(measures, uncompressedMeasures);
+        assertEquals(new TreeSet<>(Measures), uncompressedMeasures);
     }
 
     @Test
-    public void testThatItDoesNotWorkIfInputPointsAreNotSorted() throws IOException {
+    public void testThatItDoesNotWorkIfInputMeasuresAreNotSorted() throws IOException {
         List<Measure> expectedMeasures = Arrays.asList(
                 Measure.fromValue(3, 1.2d),
                 Measure.fromValue(2, 1.0d),
@@ -84,16 +85,16 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
         );
         long start = expectedMeasures.get(0).getTimestamp();
         long end = expectedMeasures.get(expectedMeasures.size() - 1).getTimestamp();
-        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(expectedMeasures, 0);
-        List<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
-                new ByteArrayInputStream(compressedProtoPoints),
+        byte[] compressedProtoMeasures = ProtoBufTimeSeriesWithQualitySerializer.to(expectedMeasures, 0);
+        TreeSet<Measure> uncompressedMeasures = ProtoBufTimeSeriesWithQualitySerializer.from(
+                new ByteArrayInputStream(compressedProtoMeasures),
                 start, end
         );
-        assertNotEquals(expectedMeasures, uncompressedMeasures);
+        assertNotEquals(new TreeSet<>(expectedMeasures), uncompressedMeasures);
     }
 
     @Test
-    public void testWithPointWithSameTimeStamp() throws IOException {
+    public void testWithMeasureWithSameTimeStamp() throws IOException {
         List<Measure> expectedMeasures = Arrays.asList(
                 Measure.fromValue(1, 1.2d),
                 Measure.fromValue(1, 1.0d),
@@ -105,7 +106,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
     }
 
     @Test
-    public void testWithPointWithDuplicate() throws IOException {
+    public void testWithMeasureWithDuplicate() throws IOException {
         List<Measure> expectedMeasures = Arrays.asList(
                 Measure.fromValue(1, 1.0d),
                 Measure.fromValue(1, 1.0d),
@@ -117,7 +118,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
     }
 
     @Test
-    public void testWithPointWithDuplicateAndDdc1() throws IOException {
+    public void testWithMeasureWithDuplicateAndDdc1() throws IOException {
         List<Measure> expectedMeasures = Arrays.asList(
                 Measure.fromValue(1, 1.0d),
                 Measure.fromValue(1, 1.0d),
@@ -130,7 +131,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
     }
 
     @Test
-    public void testWithPointWithDuplicateDoubleAndDdc1() throws IOException {
+    public void testWithMeasureWithDuplicateDoubleAndDdc1() throws IOException {
         List<Measure> expectedMeasures = Arrays.asList(
                 Measure.fromValue(1, 1.0d),
                 Measure.fromValue(1, 1.0d),
@@ -142,7 +143,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
     }
 
     @Test
-    public void testWithPointWithDuplicateAndDdc2() throws IOException {
+    public void testWithMeasureWithDuplicateAndDdc2() throws IOException {
         List<Measure> expectedMeasures = Arrays.asList(
                 Measure.fromValue(1, 1.0d),
                 Measure.fromValue(1, 1.0d),
@@ -154,7 +155,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbeddedTest {
     }
 
     @Test
-    public void testWithPointWithDuplicateAndDdc2_2() throws IOException {
+    public void testWithMeasureWithDuplicateAndDdc2_2() throws IOException {
         List<Measure> expectedMeasures = Arrays.asList(
                 Measure.fromValue(1, 1.0d),
                 Measure.fromValue(1, 1.0d),

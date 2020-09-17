@@ -1,9 +1,10 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.timeseries.model.Measure;
+import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.timeseries.model.Chunk;
-import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -28,56 +29,54 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     private long START_CHUNK_2 = 1477917224866L;
     private long START_CHUNK_1 = 1477895624866L;
+
+
+
     Chunk getChunk1() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new Measure(START_CHUNK_1, 1),
-                new Measure(1477916224866L, 1),
-                new Measure(1477916224867L, 1),
-                new Measure(1477916224868L, 1),
-                new Measure(1477916224869L, 1),
-                new Measure(1477916224870L, 1),
-                new Measure(1477916224871L, 1),
-                new Measure(1477916224872L, 1),
-                new Measure(1477917224865L, 1)
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
+                Measure.fromValue(START_CHUNK_1, 1),
+                Measure.fromValue(1477916224866L, 1),
+                Measure.fromValue(1477916224867L, 1),
+                Measure.fromValue(1477916224868L, 1),
+                Measure.fromValue(1477916224869L, 1),
+                Measure.fromValue(1477916224870L, 1),
+                Measure.fromValue(1477916224871L, 1),
+                Measure.fromValue(1477916224872L, 1),
+                Measure.fromValue(1477917224865L, 1)
         ));
-        return chunk.toChunk("id1");
     }
 
     Chunk getChunk2() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new Measure( START_CHUNK_2, 2),
-                new Measure( 1477917224867L, 2),
-                new Measure( 1477917224868L, 2)
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
+                Measure.fromValue( START_CHUNK_2, 2),
+                Measure.fromValue( 1477917224867L, 2),
+                Measure.fromValue( 1477917224868L, 2)
         ));
-        return chunk.toChunk("id2");
     }
 
 
     Chunk getChunk3() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new Measure(1477917224868L, 3),
-                new Measure(1477917224869L, 3),
-                new Measure(1477917224870L, 3)
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
+                Measure.fromValue(1477917224868L, 3),
+                Measure.fromValue(1477917224869L, 3),
+                Measure.fromValue(1477917224870L, 3)
         ));
-        return chunk.toChunk("id2");
     }
 
     Chunk getChunk4() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new Measure( 1477917224870L, 4),
-                new Measure( 1477917224871L, 4),
-                new Measure( 1477917224872L, 4)
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
+                Measure.fromValue( 1477917224870L, 4),
+                Measure.fromValue( 1477917224871L, 4),
+                Measure.fromValue( 1477917224872L, 4)
         ));
-        return chunk.toChunk("id2");
     }
 
     Chunk getChunk5() {
-        ChunkModeleVersion0 chunk = ChunkModeleVersion0.fromPoints("fake", Arrays.asList(
-                new Measure( 1477917224873L, 5),
-                new Measure( 1477917224874L, 5),
-                new Measure( 1477917224875L, 5)
+        return ChunkBuilderHelper.fromPoints("fake", Arrays.asList(
+                Measure.fromValue( 1477917224873L, 5),
+                Measure.fromValue( 1477917224874L, 5),
+                Measure.fromValue( 1477917224875L, 5)
         ));
-        return chunk.toChunk("id2");
     }
 
     @Test
@@ -85,7 +84,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.NONE, 2, 3),
-                9, Arrays.asList(AGG.values()));
+                9, Arrays.asList(AGG.values()), false,
+                QualityAgg.NONE);
         extractor.addChunk(getChunk1());
         extractor.flush();
         Assert.assertEquals(1, extractor.chunkCount());
@@ -101,9 +101,9 @@ public class TimeSeriesExtracterUsingPreAggTest {
         aggregation.put(AVG.toString(), 1.0);
 
         Assert.assertEquals(new JsonObject()
-                .put(TIMESERIE_POINT, expectedPoints)
-                .put(TIMESERIE_AGGS, aggregation)
-                .put(TOTAL_POINTS, 1)
+                        .put(TIMESERIE_POINT, expectedPoints)
+                        .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 1)
                 , extractor.getTimeSeries());
     }
 
@@ -114,7 +114,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
-                15, Arrays.asList(AGG.values()));
+                15, Arrays.asList(AGG.values()), false,
+                QualityAgg.AVG);
         extractor.addChunk(getChunk1());
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
@@ -142,10 +143,10 @@ public class TimeSeriesExtracterUsingPreAggTest {
     @Test
     public void testAvgSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
-
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
-                12, Arrays.asList(AGG.values()));
+                12, Arrays.asList(AGG.values()), false,
+                QualityAgg.AVG);
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -163,8 +164,8 @@ public class TimeSeriesExtracterUsingPreAggTest {
         aggregation.put(COUNT.toString(), 12.0);
         aggregation.put(AVG.toString(), 3.5);
         Assert.assertEquals(new JsonObject()
-                .put(TIMESERIE_POINT, expectedPoints)
-                .put(TIMESERIE_AGGS, aggregation)
+                        .put(TIMESERIE_POINT, expectedPoints)
+                        .put(TIMESERIE_AGGS, aggregation)
                         .put(TOTAL_POINTS, 2)
                 , extractor.getTimeSeries());
     }
@@ -172,39 +173,41 @@ public class TimeSeriesExtracterUsingPreAggTest {
 
     @Test
     public void testMinSampler() {
-                TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
-                        Long.MIN_VALUE , Long.MAX_VALUE,
-                                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.values()));
-                extractor.addChunk(getChunk1());
-                extractor.addChunk(getChunk2());
-                extractor.addChunk(getChunk3());
-                extractor.flush();
-                Assert.assertEquals(3, extractor.chunkCount());
-                Assert.assertEquals(15, extractor.pointCount());
-                JsonArray expectedPoints = new JsonArray();
-                expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
-                expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477917224866L)));
-                JsonObject aggregation = new JsonObject();
-                aggregation.put(MIN.toString(), 1.0);
-                aggregation.put(MAX.toString(), 3.0);
-                aggregation.put(SUM.toString(), 24.0);
-                aggregation.put(COUNT.toString(), 15.0);
-                aggregation.put(AVG.toString(), 1.6);
-                Assert.assertEquals(new JsonObject()
-                                        .put(TIMESERIE_POINT, expectedPoints)
-                                        .put(TIMESERIE_AGGS, aggregation)
-                                        .put(TOTAL_POINTS, 2)
-                                , extractor.getTimeSeries());
-            }
+        TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
+                Long.MIN_VALUE , Long.MAX_VALUE,
+                new SamplingConf(SamplingAlgorithm.MIN, 2, 3), 15, Arrays.asList(AGG.values()),
+                false, QualityAgg.MIN);
+        extractor.addChunk(getChunk1());
+        extractor.addChunk(getChunk2());
+        extractor.addChunk(getChunk3());
+        extractor.flush();
+        Assert.assertEquals(3, extractor.chunkCount());
+        Assert.assertEquals(15, extractor.pointCount());
+        JsonArray expectedPoints = new JsonArray();
+        expectedPoints.add(new JsonArray(Arrays.asList(1.0, 1477895624866L)));
+        expectedPoints.add(new JsonArray(Arrays.asList(2.0, 1477917224866L)));
+        JsonObject aggregation = new JsonObject();
+        aggregation.put(MIN.toString(), 1.0);
+        aggregation.put(MAX.toString(), 3.0);
+        aggregation.put(SUM.toString(), 24.0);
+        aggregation.put(COUNT.toString(), 15.0);
+        aggregation.put(AVG.toString(), 1.6);
+        Assert.assertEquals(new JsonObject()
+                        .put(TIMESERIE_POINT, expectedPoints)
+                        .put(TIMESERIE_AGGS, aggregation)
+                        .put(TOTAL_POINTS, 2)
+                , extractor.getTimeSeries());
+    }
 
 
 
     @Test
     public void testMinSampler2() {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterUsingPreAgg(
-                 Long.MIN_VALUE, Long.MAX_VALUE,
+                Long.MIN_VALUE, Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.MIN, 2, 3),
-                12, Arrays.asList(AGG.values()));
+                12, Arrays.asList(AGG.values()),
+                false, QualityAgg.MIN);
         extractor.addChunk(getChunk2());
         extractor.addChunk(getChunk3());
         extractor.addChunk(getChunk4());
@@ -234,7 +237,7 @@ public class TimeSeriesExtracterUsingPreAggTest {
         TimeSeriesExtracter extractor = new TimeSeriesExtracterImpl(
                 Long.MIN_VALUE , Long.MAX_VALUE,
                 new SamplingConf(SamplingAlgorithm.AVERAGE, 2, 3),
-                21, Arrays.asList(AGG.values()));
+                21, Arrays.asList(AGG.values()), false, 0f);
         extractor.addChunk(getChunk1());
         extractor.flush();
         extractor.addChunk(getChunk2());

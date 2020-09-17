@@ -9,6 +9,7 @@ import com.hurence.webapiservice.timeseries.util.BucketUtils;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -18,6 +19,19 @@ public class TimeSeriesExtracterUtil {
 
 
     private TimeSeriesExtracterUtil() {}
+
+
+    /**
+     *
+     * @param from
+     * @param to
+     * @param chunks
+     * @return return all points uncompressing chunks
+     */
+    public static List<Measure> extractPoints(long from, long to, List<Chunk> chunks) {
+        return extractPointsAsStream(from, to, chunks).collect(Collectors.toList());
+    }
+
 
     public static Stream<Measure> extractPointsAsStream(long from, long to, List<Chunk> chunks) {
         return chunks.stream()

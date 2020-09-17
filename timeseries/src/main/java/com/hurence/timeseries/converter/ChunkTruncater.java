@@ -23,7 +23,7 @@ public class ChunkTruncater {
     public static Chunk truncate(Chunk chunk, long from, long to) throws IOException {
         byte[] binaries = chunk.getValueAsBinary();
         TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(binaries, chunk.getStart(), chunk.getEnd(), from, to);///
-        PointsToChunkVersion0 converter = new PointsToChunkVersion0(TRUNCATER_ORIGIN);
+        PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent(TRUNCATER_ORIGIN);
         return converter.buildChunk(chunk.getName(), measures, chunk.getTags());
     }
 

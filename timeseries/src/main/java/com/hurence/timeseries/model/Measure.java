@@ -17,10 +17,11 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Measure implements Serializable, Comparable<Measure> {
+    public static final Float DEFAULT_QUALITY = Float.NaN;
     private String name;
     private long timestamp;
     private double value;
-    private float quality = Float.NaN;
+    private float quality = DEFAULT_QUALITY;
     protected Map<String, String> tags;
     protected String day;
 

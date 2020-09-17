@@ -17,11 +17,11 @@ package com.hurence.logisland.processor;
 
 
 import com.hurence.logisland.record.*;
-import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.logisland.util.runner.MockRecord;
 import com.hurence.logisland.util.runner.TestRunner;
 import com.hurence.logisland.util.runner.TestRunners;
 import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,7 +122,7 @@ public class ConvertToTimeseriesTest {
         out.assertFieldEquals(FieldDictionary.RECORD_TYPE, "timeseries");
         out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
-        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8063);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8062);
 
         out.assertRecordSizeEquals(7);
 

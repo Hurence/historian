@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TreeSet;
 
 /**
  * Class to easily convert the protocol buffer into List<Measure>
@@ -48,7 +49,7 @@ public final class ProtoBufTimeSeriesWithQualitySerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static List<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
+    public static TreeSet<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd) throws IOException, IllegalArgumentException {
         return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd);
     }
     /**
@@ -62,7 +63,7 @@ public final class ProtoBufTimeSeriesWithQualitySerializer {
      * @param from              including points from
      * @param to                including points to
      */
-    public static List<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
+    public static TreeSet<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to) throws IOException, IllegalArgumentException {
         PointsUnCompressorWithQuality unCompressor = new PointsUnCompressorWithQuality();
         return unCompressor.from(decompressedBytes, timeSeriesStart, timeSeriesEnd, from, to);
     }

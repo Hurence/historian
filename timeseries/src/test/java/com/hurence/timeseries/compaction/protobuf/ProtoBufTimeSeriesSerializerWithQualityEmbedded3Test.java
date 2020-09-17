@@ -15,6 +15,7 @@
  */
 package com.hurence.timeseries.compaction.protobuf;
 
+
 import com.hurence.timeseries.model.Measure;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -24,6 +25,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TreeSet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
@@ -47,15 +49,15 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded3Test {
                 Measure.fromValueAndQuality(4, 1.3d, 0.1f),
                 Measure.fromValueAndQuality(5, 1.2d, 1.0f)
         );
-        List<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.09f);
-        List<Measure> expectedMeasures = Arrays.asList(
+        TreeSet<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.09f);
+        TreeSet<Measure> expectedMeasures = new TreeSet<>(Arrays.asList(
                 Measure.fromValueAndQuality(1, 1.2d, 1.0f),
                 Measure.fromValueAndQuality(2, 1.0d, 1.0f),
                 Measure.fromValueAndQuality(3, 1.8d, 0.2f),
                 Measure.fromValueAndQuality(3, 1.8d, 0.10000001f),
                 Measure.fromValueAndQuality(4, 1.3d, 0.10000001f),
                 Measure.fromValueAndQuality(5, 1.2d, 1.0f)
-        );
+        ));
         assertEquals(expectedMeasures, actualMeasures);
     }
 
@@ -68,14 +70,14 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded3Test {
                 Measure.fromValueAndQuality(4, 1.3d, 1.451f),
                 Measure.fromValueAndQuality(5, 1.2d, 1.45f)
         );
-        List<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.049f);
-        List<Measure> expectedMeasures = Arrays.asList(
+        TreeSet<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.049f);
+        TreeSet<Measure> expectedMeasures = new TreeSet(Arrays.asList(
                 Measure.fromValueAndQuality(1, 1.2d, 1.0f),
                 Measure.fromValueAndQuality(2, 1.0d, 1.5f),
                 Measure.fromValueAndQuality(3, 1.8d, 1.549f),
                 Measure.fromValueAndQuality(4, 1.3d, 1.451f),
                 Measure.fromValueAndQuality(5, 1.2d, 1.451f)
-        );
+        ));
         assertEquals(expectedMeasures, actualMeasures);
     }
 
@@ -99,8 +101,8 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded3Test {
                 Measure.fromValueAndQuality(14, 1.2d, 0.99f),
                 Measure.fromValueAndQuality(15, 1.2d, 1f)
         );
-        List<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.33f);
-        List<Measure> expectedMeasures = Arrays.asList(
+        TreeSet<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.33f);
+        TreeSet<Measure> expectedMeasures = new TreeSet(Arrays.asList(
                 Measure.fromValueAndQuality(1, 1.2d, 1.0f),
                 Measure.fromValueAndQuality(2, 1.0d, 1.0f),
                 Measure.fromValueAndQuality(3, 1.0d, 1.0f),
@@ -116,7 +118,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded3Test {
                 Measure.fromValueAndQuality(13, 1.2d, 0.9f),
                 Measure.fromValueAndQuality(14, 1.2d, 0.9f),
                 Measure.fromValueAndQuality(15, 1.2d, 1f)
-        );
+        ));
         assertEquals(expectedMeasures, actualMeasures);
     }
 
@@ -132,8 +134,8 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded3Test {
                 Measure.fromValueAndQuality(6, 1.3d, 0.09f),
                 Measure.fromValueAndQuality(7, 1.2d, 1.0f)
         );
-        List<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.1f);
-        List<Measure> expectedMeasures = Arrays.asList(
+        TreeSet<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.1f);
+        TreeSet<Measure> expectedMeasures = new TreeSet(Arrays.asList(
                 Measure.fromValueAndQuality(1, 1.2d, 1.0f),
                 Measure.fromValueAndQuality(2, 1.0d, 1.0f),
                 Measure.fromValueAndQuality(3, 1.8d, 0.2f),
@@ -141,7 +143,7 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded3Test {
                 Measure.fromValueAndQuality(5, 1.3d, 0.2f),
                 Measure.fromValueAndQuality(6, 1.3d, 0.09f),
                 Measure.fromValueAndQuality(7, 1.2d, 1.0f)
-        );
+        ));
         assertEquals(expectedMeasures, actualMeasures);
     }
 
@@ -156,24 +158,24 @@ public class ProtoBufTimeSeriesSerializerWithQualityEmbedded3Test {
                 Measure.fromValueAndQuality(5, 1.2d, 1.45f),
                 Measure.fromValueAndQuality(6, 1.2d, 1.449f)
         );
-        List<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.05f);
-        List<Measure> expectedMeasures = Arrays.asList(
+        TreeSet<Measure> actualMeasures = testThereIsNoInformationLost(inputMeasures, 0.05f);
+        TreeSet<Measure> expectedMeasures = new TreeSet(Arrays.asList(
                 Measure.fromValueAndQuality(1, 1.2d, 1.0f),
                 Measure.fromValueAndQuality(2, 1.0d, 1.5f),
                 Measure.fromValueAndQuality(3, 1.8d, 1.5f),
                 Measure.fromValueAndQuality(4, 1.3d, 1.5f),
                 Measure.fromValueAndQuality(5, 1.2d, 1.5f),
                 Measure.fromValueAndQuality(6, 1.2d, 1.449f)
-        );
+        ));
         assertEquals(expectedMeasures, actualMeasures);
     }
 
-    private List<Measure> testThereIsNoInformationLost(List<Measure> measures, float diffAcceptedForQuality) throws IOException {
-        long start = measures.get(0).getTimestamp();
-        long end = measures.get(measures.size() - 1).getTimestamp();
-        byte[] compressedProtoPoints = ProtoBufTimeSeriesWithQualitySerializer.to(measures.iterator(), diffAcceptedForQuality,0);
+    private TreeSet<Measure> testThereIsNoInformationLost(List<Measure> Measures, float diffAcceptedForQuality) throws IOException {
+        long start = Measures.get(0).getTimestamp();
+        long end = Measures.get(Measures.size() - 1).getTimestamp();
+        byte[] compressedProtoMeasures = ProtoBufTimeSeriesWithQualitySerializer.to(Measures.iterator(), diffAcceptedForQuality,0);
         return ProtoBufTimeSeriesWithQualitySerializer.from(
-                new ByteArrayInputStream(compressedProtoPoints),
+                new ByteArrayInputStream(compressedProtoMeasures),
                 start, end
         );
     }

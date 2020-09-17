@@ -56,7 +56,7 @@ public final class ProtoBufTimeSeriesSerializer {
      *
      * @param decompressedBytes the compressed bytes holding the data points
      * @param timeSeriesStart   the start of the time series
-     * @param timeSeriesEnd     the end of the time series
+     * @param timeSeriesEnd     the end of the time seriesList<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, long from, long to)
      * @param from              including points from
      * @param to                including points to
      */

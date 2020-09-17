@@ -14,7 +14,5 @@ public interface HistorianConf {
 
     Schema getChunkSchema();
 
-//    Schema getReportSchema();
-
     SolrFieldMapping getFieldsInSolr();
 }

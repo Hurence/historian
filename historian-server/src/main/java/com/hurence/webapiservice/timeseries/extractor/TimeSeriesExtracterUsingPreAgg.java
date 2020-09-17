@@ -2,6 +2,7 @@ package com.hurence.webapiservice.timeseries.extractor;
 
 import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.model.Chunk;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.aggs.ChunkAggsCalculator;
@@ -23,9 +24,13 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
 
     final ChunkAggsCalculator aggsCalculator;
 
-    public TimeSeriesExtracterUsingPreAgg(long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList) {
-        super(from, to, samplingConf, totalNumberOfPoint);
+    final QualityAgg qualityAgg;
+
+    public TimeSeriesExtracterUsingPreAgg(long from, long to, SamplingConf samplingConf, long totalNumberOfPoint, List<AGG> aggregList,
+                                          boolean returnQuality, QualityAgg qualityAgg) {
+        super(from, to, samplingConf, totalNumberOfPoint, returnQuality);
         aggsCalculator = new ChunkAggsCalculator(aggregList);
+        this.qualityAgg = qualityAgg;
     }
 
     @Override
@@ -74,6 +79,17 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 .mapToLong(Chunk::getStart)
                 .findFirst()
                 .getAsLong();
+        double aggValue = getAggValue(chunks);
+        Float quality = getQualityValue(chunks);
+        if (returnQuality && !quality.isNaN())
+            return Measure.fromValueAndQuality(timestamp, aggValue, quality);
+        else if (returnQuality)
+            return Measure.fromValueAndQuality(timestamp, aggValue, Measure.DEFAULT_QUALITY);
+        else
+            return Measure.fromValue(timestamp, aggValue);
+    }
+
+    private double getAggValue(List<Chunk> chunks) {
         double aggValue;
         switch (samplingConf.getAlgo()) {
             case AVERAGE:
@@ -112,6 +128,65 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             default:
                 throw new IllegalStateException("Unsupported algo: " + samplingConf.getAlgo());
         }
-        return new Measure(timestamp, aggValue);
+        return aggValue;
     }
+
+    private Float getQualityValue(List<Chunk> chunks) {
+        Float quality;
+        switch (qualityAgg) {
+            case AVG:
+            case NONE:  // is it good to chose AVG if qualityAgg is NONE ?
+                try {
+                    long numberOfPoint = chunks.stream()
+                            .mapToLong(Chunk::getCount)
+                            .sum();
+                    float qualitySum = (float) chunks.stream()
+                            .mapToDouble(Chunk::getQualitySum)
+                            .sum();
+                    quality = BigDecimal.valueOf(qualitySum)
+                            .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
+                            .floatValue();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            case FIRST:
+                try {
+                    quality = (float) chunks.stream()
+                            .mapToDouble(Chunk::getQualityFirst)
+                            .findFirst()
+                            .getAsDouble();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            case MIN:
+                try {
+                    quality = (float) chunks.stream()
+                            .mapToDouble(Chunk::getQualityMin)
+                            .min()
+                            .getAsDouble();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            case MAX:
+                try {
+                    quality = (float) chunks.stream()
+                            .mapToDouble(Chunk::getQualityMax)
+                            .max()
+                            .getAsDouble();
+                } catch (Exception e) {
+                    quality = Float.NaN;
+                }
+                break;
+            /*case NONE:
+                quality = Float.NaN;
+                break;*/
+            default:
+                throw new IllegalStateException("Unsupported algo: " + qualityAgg);
+        }
+        return quality;
+    }
+
 }
