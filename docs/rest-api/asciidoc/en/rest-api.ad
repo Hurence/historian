@@ -10,45 +10,60 @@
 :toc:
 :toclevels: 4
 :main-endpoint: /api/historian/v0
-:import-csv-endpoint: ${main-endpoint}/import/csv
-:import-json-endpoint: ${main-endpoint}/import/json
-:export-csv-endpoint: ${main-endpoint}/export/csv
+:import-csv-endpoint: {main-endpoint}/import/csv
+:import-json-endpoint: {main-endpoint}/import/json
+:export-csv-endpoint: {main-endpoint}/export/csv
 :grafana-hurence-endpoint: /api/grafana/v0
-:grafana-hurence-query-endpoint: ${grafana-hurence-endpoint}/query
-:grafana-hurence-search-endpoint: ${grafana-hurence-endpoint}/search
-:grafana-hurence-search-tags-endpoint: ${grafana-hurence-endpoint}/search/tags
-:grafana-hurence-search-values-endpoint: ${grafana-hurence-endpoint}/search/values
-:grafana-hurence--annotations-endpoint: ${grafana-hurence-endpoint}/annotations
+:grafana-hurence-query-endpoint: {grafana-hurence-endpoint}/query
+:grafana-hurence-search-endpoint: {grafana-hurence-endpoint}/search
+:grafana-hurence-search-tags-endpoint: {grafana-hurence-endpoint}/search/tags
+:grafana-hurence-search-values-endpoint: {grafana-hurence-endpoint}/search/values
+:grafana-hurence-annotations-endpoint: {grafana-hurence-endpoint}/annotations
 :grafana-simplejson-endpoint: /api/grafana/simplejson
-:grafana-simplejson-query-endpoint: ${grafana-simplejson-endpoint}/query
-:grafana-simplejson-search-endpoint: ${grafana-simplejson-endpoint}/search
-:grafana-simplejson-annotations-endpoint: ${grafana-simplejson-endpoint}/annotations
-:grafana-simplejson-tag-keys-endpoint: ${grafana-simplejson-endpoint}/tag-keys
-:grafana-simplejson-tag-values-endpoint: ${grafana-simplejson-endpoint}/tag-values
+:grafana-simplejson-query-endpoint: {grafana-simplejson-endpoint}/query
+:grafana-simplejson-search-endpoint: {grafana-simplejson-endpoint}/search
+:grafana-simplejson-annotations-endpoint: {grafana-simplejson-endpoint}/annotations
+:grafana-simplejson-tag-keys-endpoint: {grafana-simplejson-endpoint}/tag-keys
+:grafana-simplejson-tag-values-endpoint: {grafana-simplejson-endpoint}/tag-values
 
 == Introduction
 
 The REST API for the data historian is currently exposing the following enpoints:
 
-* _{main-endpoint}_ :                                                                                   The main API of the historian which currently only contains endpoints for importing and exporting data.
-  * POST <<import-csv,_{import-csv-endpoint}_>>:                                                        Un endpoint pour importer des points depuis des fichiers csv.
-  * POST <<import-json,_{import-json-endpoint}_>>:                                                      An endpoint to import points sent in the body of the request, in json format .
-  * POST <<export-csv,_{export-csv-endpoint}_>>:                                                        An endpoint to export points in csv format.
-* GET <<grafana-hurence-datasource-root,_{grafana-hurence-endpoint}_>>:                                 The API to interact with Grafana using the hurence "Hurence-Historian" datasource plugin.
-  * POST <<grafana-hurence-datasource-query,_{grafana-hurence-query-endpoint}_>>:                       Get the points of the historian.
-  * POST <<grafana-hurence-datasource-search,_{grafana-hurence-search-endpoint}_>>:                     Get the name of the metrics stored in the historian.
-  * POST <<grafana-hurence-datasource-search-tags,_{grafana-hurence-search-tags-endpoint}_>>:           Get the values for the specified key.
-  * POST <<grafana-hurence-datasource-search-values,_{grafana-hurence-search-values-endpoint}_>>:       Get the annotations stored in the historian.
-  * POST <<grafana-hurence-datasource-annotations,_{grafana-hurence-annotations-endpoint}_>>:           Get the keys available to use the endpoint '_/api/grafana/v0/tag-values_'.
-* [DEPRECATED] GET <<grafana-simplejson-root,_{grafana-simplejson-endpoint}_>>:                         Get the possible values for the specified key.
-  * POST <<grafana-simplejson-query,_{grafana-simplejson-query-endpoint}_>>:                            The API to interact with Grafana using the "SimpleJson" datasource plugin.
-  * POST <<grafana-simplejson-search,_{grafana-simplejson-search-endpoint}_>>:                          Used to obtain historian points from a query.
-  * POST <<grafana-simplejson-annotations,_{grafana-simplejson-annotations-endpoint}_>>:                Get names of historian metrics.
-  * POST <<grafana-simplejson-tag-keys,_{grafana-simplejson-tag-keys-endpoint}_>>:                      Used to obtain the annotations stored in the historian.
-  * POST <<grafana-simplejson-tag-values,_{grafana-simplejson-tag-values-endpoint}_>>:                  Get the keys available to use the endpoint '_/api/grafana/simplejson/tag-values_'.
-     Get the possible values for the specified key.
+* _{main-endpoint}_ :
+The main API of the historian which currently only contains endpoints for importing and exporting data.
+  * POST <<import-csv,_{import-csv-endpoint}_>>:
+Un endpoint pour importer des points depuis des fichiers csv.
+  * POST <<import-json,_{import-json-endpoint}_>>:
+An endpoint to import points sent in the body of the request, in json format .
+  * POST <<export-csv,_{export-csv-endpoint}_>>:
+An endpoint to export points in csv format.
+* GET <<grafana-hurence-datasource-root,_{grafana-hurence-endpoint}_>>:
+The API to interact with Grafana using the hurence "Hurence-Historian" datasource plugin.
+  * POST <<grafana-hurence-datasource-query,_{grafana-hurence-query-endpoint}_>>:
+Get the points of the historian.
+  * POST <<grafana-hurence-datasource-search,_{grafana-hurence-search-endpoint}_>>:
+Get the name of the metrics stored in the historian.
+  * POST <<grafana-hurence-datasource-search-tags,_{grafana-hurence-search-tags-endpoint}_>>:
+Get the different tag names in historian.
+  * POST <<grafana-hurence-datasource-search-values,_{grafana-hurence-search-values-endpoint}_>>:
+Get the values for specified field (the field can be a tag name).
+  * POST <<grafana-hurence-datasource-annotations,_{grafana-hurence-annotations-endpoint}_>>:
+Get the annotations stored in the historian.
+* [DEPRECATED] GET <<grafana-simplejson-root,_{grafana-simplejson-endpoint}_>>:
+The API to interact with Grafana using the "SimpleJson" datasource plugin.
+note::The 'tag-keys' and 'tag-values' endpoints are only useful for Grafana.
+  * POST <<grafana-simplejson-query,_{grafana-simplejson-query-endpoint}_>>:
+Used to obtain historian points from a query.
+  * POST <<grafana-simplejson-search,_{grafana-simplejson-search-endpoint}_>>:
+Get names of historian metrics.
+  * POST <<grafana-simplejson-annotations,_{grafana-simplejson-annotations-endpoint}_>>:
+Used to obtain the annotations stored in the historian.
+  * POST <<grafana-simplejson-tag-keys,_{grafana-simplejson-tag-keys-endpoint}_>>:
+Get the keys available to use the endpoint '_/api/grafana/simplejson/tag-values_'.
+  * POST <<grafana-simplejson-tag-values,_{grafana-simplejson-tag-values-endpoint}_>>:
+Get the possible values for the specified key.
 
-The 'tag-keys' and 'tag-values' endpoints are only useful for Grafana.
 
 == Detailed descriptions of the API endpoints
 
