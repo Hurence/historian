@@ -1,0 +1,84 @@
+[[import-json]]
+===== POST /api/historian/v0/import/json
+
+Permet d'injecter des points dans l'historian à partir d'un corps de requête au format json.
+Le format de la requête attendue est une requête avec Content-Type: application/json;
+
+Exemple de requête :
+
+[source,json]
+----
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
+]
+----
+
+Exemple de requête minimal :
+
+[source,json]
+----
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0]
+        ]
+    }
+]
+----
+
+Le corps de la requête attendue est une liste json d'objets. Chaque objet doit être composé des attributs suivants :
+
+
+.Propriété des objets json
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis
+
+|/name
+|String
+|Le nom de la métrique pour laquelle on va injecter les points.
+|Oui
+
+|/points
+|Array d'array
+|Les points pour créer un chunk avec le nom de métrique assigné à 'name'. Les points sont a renseigner sous la forme
+[[timestsamp<long>, value<double>],..,[timestsamp<long>, value<double>]].
+|Oui
+
+|===
+
+Exemple de réponse
+
+[source,json]
+----
+[
+  {
+    "target":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "target":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----

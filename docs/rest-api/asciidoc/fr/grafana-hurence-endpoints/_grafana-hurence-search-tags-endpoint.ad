@@ -1,0 +1,29 @@
+[[grafana-hurence-datasource-tag-keys]]
+===== POST /api/grafana/v0/tag-keys
+
+Permet de connaître les clés utilisables dans l'endpoint _tag_values_.
+
+Exemple de requête :
+
+[source,json]
+----
+{}
+----
+
+Exemple de réponse :
+
+[source,json]
+----
+[
+    {
+        "type": "string",
+        "text": "Algo"
+    },
+    {
+        "type": "int",
+        "text": "Bucket size"
+    }
+]
+----
+
+Les valeurs dans "text" sont les valeurs utilisables comme clé dans l'endpoint tag-values.

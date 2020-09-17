@@ -1,0 +1,18 @@
+[[export-csv]]
+==== POST /api/historian/v0/export/csv
+
+Allows you to search for points and export them to csv for the desired metrics.
+
+This endpoint uses the same request as the endpoint query but it gives the response in csv.
+
+Example of a response :
+
+[source,csv]
+----
+metric,value,date
+temp_a,622.1,1477895624866
+temp_a,-3.0,1477916224866
+temp_a,365.0,1477917224866
+temp_b,861.0,1477895624866
+temp_b,767.0,1477917224866
+----

@@ -1,0 +1,84 @@
+[[import-json]]
+==== POST /api/historian/v0/import/json
+
+Allows you to inject points into the historian from a request body in json format.
+The format of the expected request is a request with Content-Type: application / json;
+
+Example of a request:
+
+[source,json]
+----
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
+]
+----
+
+Example of a minimal request:
+
+[source,json]
+----
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0]
+        ]
+    }
+]
+----
+
+The body of the expected request is a list of objects. Each object must be composed of the following attributes:
+
+
+.Properties of the JSON objects
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | mandatory
+
+|/name
+|String
+|The name of the metric for which we are going to inject the points.
+|Yes
+
+|/points
+|Array d'array
+|Points for creating a chunk with the metric name assigned to 'name'. The points are to be completed in the form
+[[timestsamp<long>, value<double>],..,[timestsamp<long>, value<double>]].
+|Yes
+
+|===
+
+Example of a response
+
+[source,json]
+----
+[
+  {
+    "target":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "target":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----

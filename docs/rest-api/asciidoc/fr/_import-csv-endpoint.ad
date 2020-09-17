@@ -1,0 +1,232 @@
+[[import-csv]]
+===== POST /api/historian/v0/import/csv
+
+Permet d'injecter des points dans l'historian à partir de fichiers csv.
+Le format de la requête attendue est une requête avec Content-Type: multipart/form-data;
+
+
+.Paramètres de la requête
+[cols="10,7,39,7,30,7"]
+|===
+| attribut | multivalué | description | requis | valeurs possibles | valeur par défaut
+
+|my_csv_file
+|Oui
+|le chemin des fichier csv à importer. Attention chaque fichier est importé individuellement de manière indépendante.
+Autrement dit, joindre plusieurs fichiers ou faire une requête par fichier est équivalent. Les paramètres
+de la requêtes sont communs à tous les fichiers listés dans la requête. Les fichiers doivent obligatoirement contenir un header.
+|Oui
+|
+|
+
+|mapping.name
+|Non
+|le nom de la colonne qui correspond à "name". C'est l'identifiant principal d'une métrique.
+|Non
+|doit être un nom de colonne du header des fichiers csv joints.
+|"metric"
+
+|mapping.value
+|Non
+|le nom de la colonne qui correspond à "value". C'est la valeur du point.
+Les valeurs de cette colonne doivent être des valeurs numériques.
+|Non
+|Doit être un nom de colonne du header des fichiers csv joints.
+|"value"
+
+|mapping.timestamp
+|Non
+|Le nom de la colonne du header qui correspond à "timestamp". C'est la date du point.
+Par défaut cette colonne doit contenir un timestamp epoch en milliseconde (voir <<import-csv-format_date,format_date>>)
+|Non
+|Doit être un nom de colonne du header des fichiers csv joints.
+|"timestamp"
+
+|mapping.quality
+|Non
+|Le nom de la colonne du header qui correspond à "quality". C'est la qualité du point
+(pour le moment la qualité n'est pas stockée dans l'historian)
+|Non
+|Doit être un nom de colonne du header des fichiers csv joints.
+|"quality"
+
+|mapping.tags
+|Oui
+|Les noms des colonnes du header à considérer comme un tag. Les tags sont des notions qui décrivent la métrique en plus de son
+nom (colonne "name"). Toutes les colonnes non renseignées dans le mapping seront ignorées lors de l'injection.
+TODO expliquer on prend le first
+|Non
+|Doit être un nom de colonne du header des fichiers csv joints.
+|
+
+[[import-csv-format_date]]
+|format_date
+|Non
+|Le format attendu pour les valeurs de la colonne "timestamp".
+|Non
+|Doit être soit une valeur parmi: [MILLISECONDS_EPOCH,SECONDS_EPOCH,MICROSECONDS_EPOCH,NANOSECONDS_EPOCH]
+NANOSECONDS_EPOCH :  la valeur doit être le nombre de nanosecondes depuis le 1 janvier 1970 UTC.
+MICROSECONDS_EPOCH :  la valeur doit être le nombre de microsecondes depuis le 1 janvier 1970 UTC.
+MILLISECONDS_EPOCH :  la valeur doit être le nombre de millisecondes depuis le 1 janvier 1970 UTC.
+SECONDS_EPOCH :  la valeur doit être le nombre de secondes depuis le 1 janvier 1970 UTC.
+Soit une autre valeur, dans ce cas cette valeur doit être un format de date valide, par exemple "yyyy-mm-dd".
+|"MILLISECONDS_EPOCH"
+
+|timezone_date
+|Non
+|le timezone pour les dates dans le csv.
+|Non
+|doit être un timezone valide.
+|"UTC"
+
+|group_by
+|Oui
+|Ce paramètre est très important ! Si il est mal utilisé il est possible de corrompre les données déjà existantes.
+Il faut lister ici tous les champs qui vont être utilisés pour construire les chunks. Par défaut on groupe les points
+en chunk uniquement en fonction de leur nom. Cependant il est possible de grouper également en fonction de la valeur de
+certains tags. Il faut savoir que cela va impacter la manière dont les données seront récupérées par la suite.
+Par exemple si on injecte des données en groupant par "name" et le tag "usine". Alors on pourra requêter les valeurs
+pour chaque usine en filtrant sur la bonne valeur du tag usine (voir l'api pour requêter les points). Seulement si
+par la suite quelqu'un injecte d'autres données sans grouper par le tag "usine" alors les données vont se retrouver mélangées.
+|Non
+|Les valeurs acceptées sont "name" (peu importe le mapping utilisez "name" et non le nom de la colonne dans le csv).
+Sinon les autres valeurs acceptées sont les noms de colonnes ajoutées comme tag.
+|"name"
+
+|===
+
+* S’il y a un problème avec la requête on reçoit une réponse 400 BAD_REQUEST.
+
+* Si tout s'est bien passé on reçoit une réponse 201 CREATED :
+
+.Description de la réponse
+[cols="13,10,40"]
+|===
+| json path | type | description
+
+|tags
+|array
+|les tags renseignés dans la requête.
+
+|grouped_by
+|array
+|les champs qui sont utilisés pour le group by (renseignés dans la requête).
+
+|report
+|json object
+|un rapport sur les chunks qui ont été injectés.
+
+|===
+
+Exemple de commande curl minimal :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv'
+----
+
+Exemple csv minimal :
+
+[source,csv]
+----
+metric,timestamp,value
+metric_1, 1, 1.2
+metric_1, 2, 2
+metric_1, 3, 3
+----
+
+Exemple de commande curl :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@path/de/mon/csv/file2.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-DD-MM HH:mm:ss.SSS \
+-F timezone_date=UTC \
+----
+
+Exemple de fichier csv :
+
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-01-01 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+
+
+
+avec la requête suivante :
+
+[source,curl]
+----
+curl -X POST \
+http://localhost:8080/historian-server/ingestion/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@path/de/mon/csv/file.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-DD-MM HH:mm:ss.SSS \
+-F timezone_date=UTC \
+----
+et le fichier "file.csv" :
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-01-01 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+on reçoit cette réponse :
+[source,json]
+----
+{
+  "tags": ["sensor", "code_install"],
+  "grouped_by": ["name", "sensor"],
+  "report" : [
+    {
+      "name": "metric_1",
+      "sensor": "sensor_1",
+      "number_of_points_injected": 4,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    },
+    {
+      "name": "metric_1",
+      "sensor": "sensor_2",
+      "number_of_points_injected": 2,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    },
+    {
+      "name": "metric_2",
+      "sensor": "sensor_2",
+      "number_of_points_injected": 2,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 2
+    }
+  ]
+}
+----
+(on remarque ici que l'on a utilisé le même fichier deux fois.)

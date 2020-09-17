@@ -1,0 +1,46 @@
+
+[[grafana-hurence-datasource-search]]
+===== POST /api/grafana/v0/search
+
+
+Lets you search for the different metrics available.
+
+Example of a request:
+
+[source,json]
+----
+{
+  "name": "upper_50",
+  "limit": 5
+}
+----
+
+.Parameter of the request
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/name
+|String
+|Part of the name of the metric you are looking for.
+|No
+|
+|
+
+|/limit
+|Int
+|The maximum number of metric names to return.
+|No
+|
+|
+
+|===
+
+NOTE: The body of the request is optional.
+
+Example of a response:
+
+[source,json]
+----
+["upper_25","upper_50","upper_75","upper_90","upper_95"]
+----

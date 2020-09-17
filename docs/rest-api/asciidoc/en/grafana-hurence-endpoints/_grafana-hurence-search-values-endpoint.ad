@@ -1,0 +1,54 @@
+
+[[grafana-hurence-datasource-search-values]]
+===== POST /api/grafana/v0/search/values
+
+
+Allows you to search for the different values for the indicated key.
+
+Example of a request:
+
+[source,json]
+----
+{
+  "field": "name",
+  "query": "up",
+  "limit": 5
+}
+----
+
+.Parameters of the request
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/field
+|String
+|the searched key.
+|Yes
+|
+|
+
+|/query
+|String
+|Part of the name of the key you are looking for.
+|Yes
+|
+|
+
+|/limit
+|Int
+|The maximum number of metric names to return.
+|No
+|
+|
+
+|===
+
+NOTE: The query and limit parameters of the query are optional.
+
+Example of a response:
+
+[source,json]
+----
+["upper_25","upper_50","upper_75","upper_90","upper_95"]
+----

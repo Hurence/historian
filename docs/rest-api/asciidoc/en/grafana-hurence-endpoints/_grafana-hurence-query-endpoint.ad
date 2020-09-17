@@ -1,0 +1,148 @@
+
+[[grafana-hurence-datasource-query]]
+===== POST /api/grafana/v0/query
+
+
+Used to search for points for the desired metrics. Various parameters are available.
+
+Example of a request:
+
+[source,json]
+----
+{
+  "from": "2016-10-31T06:33:44.866Z",
+  "to": "2020-10-31T12:33:44.866Z",
+  "names": ["metric_1"],
+  "format": "json",
+  "max_data_points": 30,
+  "tags": {
+      "sensor" : "sensor_1"
+  },
+  "sampling":{
+     "algorithm": "MIN",
+     "bucket_size" : 100
+  }
+}
+----
+
+Example of a minimal request :
+
+[source,json]
+----
+[
+    {
+        "name": "metric_1",
+        "datapoints": [
+            [
+                622,
+                1477895624866
+            ],
+            [
+                -3,
+                1477916224866
+            ],
+            [
+                365,
+                1477917224866
+            ]
+        ]
+    }
+]
+----
+
+
+{
+"tags": {
+"sensor" : "sensor_1"
+},
+"sampling":{
+"algorithm": "MIN",
+"bucket_size" : 100
+}
+}
+
+.Parameters for the request
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/names
+|array
+|Allows you to enter the metrics for which you want to obtain points.
+|Yes
+|
+|
+
+|from
+|String
+|The start date to search for points. Only points with a date greater than or equal to this date.
+|No
+|Must represent a date in the following format (UTC): * yyyy-MM-dd'T'HH: mm: ss.SSS *
+|January 1, 1970 (UTC)
+
+|to
+|String
+|The end date to search for points. Only points with a date less than or equal to this date.
+|No
+|Must represent a date in the following format (UTC): * yyyy-MM-dd'T'HH: mm: ss.SSS *
+|The default is infinity
+
+|/max_data_points
+|long
+|The maximum number of points desired for each metric (Indeed the goal is to draw points on a graph). If necessary the points will be sampled with a default sampling algorithm.
+|No
+|positive
+|1000
+
+|/sampling
+|String
+|An object which will contain the information of the parameters to be used for the sampling of the points if the number of points to return is greater than the maximum number of points requested.
+|No
+|
+|
+
+|/sampling/algorithm
+|String
+|L'algorithme à utiliser pour l'échantillonnage
+|No
+|les valeurs possibles sont ["NONE", "AVERAGE", "FIRST", "MIN", "MAX"]
+|AVERAGE (la moyenne des points pour chaque bucket, le timestamp utilisé est celui du premier point du bucket)
+
+|/sampling/bucket_size
+|Int
+|The size of the buckets desired to sample the data. Please note this size can be changed by the server if this is incompatible with the maximum number of points returned desired.
+|No
+|
+|Automatically computed by the server in order to obtain at most the maximum number of points.
+
+|/tags
+|String
+|Allows you to obtain only the points of the chunks which contain the filled tags. The tags must be indicated in the form of a key / value map.
+|No
+|
+|no tags.
+
+|===
+
+
+Example of a response
+
+[source,json]
+----
+[
+  {
+    "name":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "name":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----

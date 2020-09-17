@@ -1,0 +1,24 @@
+[[grafana-simplejson-tag-values]]
+===== POST /api/grafana/simplejson/tag-values
+
+Permet de chercher les différentes métriques disponibles.
+
+Exemple de requête :
+
+[source,json]
+----
+{"key": "City"}
+----
+
+Exemple de réponse :
+
+[source,json]
+----
+[
+    {"text": "Eins!"},
+    {"text": "Zwei"},
+    {"text": "Drei!"}
+]
+----
+
+Voici les valeurs disponibles pour les clés correspondantes.

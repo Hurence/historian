@@ -1,0 +1,13 @@
+=== Api principal
+
+==== Ingestion de données
+
+Ces endpoints servent à injecter des points dans l'historian :
+
+include::./_import-csv-endpoint.ad[]
+
+include::./_import-json-endpoint.ad[]
+
+==== Export de données
+
+include::./_export-csv-endpoint.ad[]
