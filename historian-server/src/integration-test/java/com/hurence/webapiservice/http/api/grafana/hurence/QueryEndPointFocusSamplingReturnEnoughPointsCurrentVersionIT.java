@@ -4,7 +4,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.model.Point;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
@@ -100,7 +100,7 @@ public class QueryEndPointFocusSamplingReturnEnoughPointsCurrentVersionIT {
     }
 
     public static SolrInjector buildInjector() {
-        List<List<Point>> pointsByChunk10Chunks = createChunks(1, 80000, 55);
+        List<List<Measure>> pointsByChunk10Chunks = createChunks(1, 80000, 55);
         SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersion injector = new SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersion(
                 "metric_10_chunk", pointsByChunk10Chunks
         );
@@ -109,7 +109,7 @@ public class QueryEndPointFocusSamplingReturnEnoughPointsCurrentVersionIT {
     }
 
     @NotNull
-    private static List<List<Point>> createChunks(long firstPointTtimestamp,
+    private static List<List<Measure>> createChunks(long firstPointTtimestamp,
                                                       long lastPointTtimestamp,
                                                       int numberOfChunk) {
         long numberOfTotalPoint = lastPointTtimestamp - firstPointTtimestamp;
@@ -123,10 +123,10 @@ public class QueryEndPointFocusSamplingReturnEnoughPointsCurrentVersionIT {
             .collect(Collectors.toList());
     }
 
-    private static List<Point> createPointFromTo(long from, long to) {
+    private static List<Measure> createPointFromTo(long from, long to) {
         return LongStream.range(from, to)
                 .mapToObj(l -> {
-                    return Point.fromValueAndQuality(l, l, 1f);
+                    return Measure.fromValueAndQuality(l, l, 1f);
                 })
                 .collect(Collectors.toList());
     }

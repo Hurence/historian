@@ -5,10 +5,8 @@ import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.historian.spark.compactor.job.ChunkModeleVersion0;
-import com.hurence.timeseries.model.Point;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
@@ -119,22 +117,22 @@ public class QueryEndPointShouldTruncateChunksIfNeededCurrentVersionIT {
 
     public static SolrInjector buildInjector() {
         GeneralInjectorCurrentVersion chunkInjector = new GeneralInjectorCurrentVersion();
-        ChunkVersionCurrent chunk1 = ChunkBuilderHelper.fromPoints("metric",
+        Chunk chunk1 = ChunkBuilderHelper.fromPoints("metric",
                 Arrays.asList(
-                        new Point(1000, 1),
-                        new Point(1000000, 2),
-                        new Point(10000000, 3),//1970-01-01T02:46:40.000Z   10000000
-                        new Point(150000000, 4),//1970-01-02T17:40:00.000Z  150000000
-                        new Point(200000000, 5)
+                        Measure.fromValue(1000, 1),
+                        Measure.fromValue(1000000, 2),
+                        Measure.fromValue(10000000, 3),//1970-01-01T02:46:40.000Z   10000000
+                        Measure.fromValue(150000000, 4),//1970-01-02T17:40:00.000Z  150000000
+                        Measure.fromValue(200000000, 5)
                 )
         );
-        ChunkVersionCurrent chunk2 = ChunkBuilderHelper.fromPoints("metric",
+        Chunk chunk2 = ChunkBuilderHelper.fromPoints("metric",
                 Arrays.asList(
-                        new Point(200500000, 1),
-                        new Point(300000000, 2),
-                        new Point(400000000, 3),//1970-01-05T15:06:40.000Z
-                        new Point(500000000, 4),
-                        new Point(600000000, 5)
+                        Measure.fromValue(200500000, 1),
+                        Measure.fromValue(300000000, 2),
+                        Measure.fromValue(400000000, 3),//1970-01-05T15:06:40.000Z
+                        Measure.fromValue(500000000, 4),
+                        Measure.fromValue(600000000, 5)
                 )
         );
         chunkInjector.addChunk(chunk1);

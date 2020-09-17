@@ -5,8 +5,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.points.PointImpl;
-import com.hurence.timeseries.modele.points.PointWithQualityImpl;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
@@ -61,52 +60,52 @@ public class QueryEndPointWithQualityCurrentVersionIT {
                 Arrays.asList("temp_a", "temp_b", "temp_c", "mixed1", "mixed2", "non_mixed"),
                 Arrays.asList(
                         Arrays.asList(
-                                new PointWithQualityImpl( 1477895624866L, 622, 0.9f),
-                                new PointWithQualityImpl( 1477916224866L, -3, 0.8f),
-                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),      // avg = 0.75
-                                new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
-                                new PointWithQualityImpl( 1477948224866L, 14, 0.8f),
-                                new PointWithQualityImpl( 1477957224866L, 86, 0.7f)
+                                Measure.fromValueAndQuality( 1477895624866L, 622, 0.9f),
+                                Measure.fromValueAndQuality( 1477916224866L, -3, 0.8f),
+                                Measure.fromValueAndQuality( 1477917224866L, 365, 0.7f),      // avg = 0.75
+                                Measure.fromValueAndQuality( 1477924624866L, 568, 0.6f),
+                                Measure.fromValueAndQuality( 1477948224866L, 14, 0.8f),
+                                Measure.fromValueAndQuality( 1477957224866L, 86, 0.7f)
                         ),//temp_b
                         Arrays.asList(
-                                new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
-                                new PointWithQualityImpl( 1477917224866L, 767, 0.9f),
-                                new PointWithQualityImpl( 1477927624866L, 57, 0.7f),
-                                new PointWithQualityImpl( 1477931224866L, 125, 0.6f),    // avg = 0.783
-                                new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
-                                new PointWithQualityImpl( 1477985224866L, 7, 0.9f)
+                                Measure.fromValueAndQuality( 1477895624866L, 861, 0.8f),
+                                Measure.fromValueAndQuality( 1477917224866L, 767, 0.9f),
+                                Measure.fromValueAndQuality( 1477927624866L, 57, 0.7f),
+                                Measure.fromValueAndQuality( 1477931224866L, 125, 0.6f),    // avg = 0.783
+                                Measure.fromValueAndQuality( 1477945624866L, 710, 0.8f),
+                                Measure.fromValueAndQuality( 1477985224866L, 7, 0.9f)
                         ),//temp_c
                         Arrays.asList(
-                                new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
-                                new PointWithQualityImpl( 1477917224866L, 767, 0.8f),
-                                new PointWithQualityImpl( 1477927624866L, 57, 0.8f),     // avg = 0.8
-                                new PointWithQualityImpl( 1477931224866L, 125, 0.8f),
-                                new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
-                                new PointWithQualityImpl( 1477985224866L, 7, 0.8f)
+                                Measure.fromValueAndQuality( 1477895624866L, 861, 0.8f),
+                                Measure.fromValueAndQuality( 1477917224866L, 767, 0.8f),
+                                Measure.fromValueAndQuality( 1477927624866L, 57, 0.8f),     // avg = 0.8
+                                Measure.fromValueAndQuality( 1477931224866L, 125, 0.8f),
+                                Measure.fromValueAndQuality( 1477945624866L, 710, 0.8f),
+                                Measure.fromValueAndQuality( 1477985224866L, 7, 0.8f)
                         ),//mixed1
                         Arrays.asList(
-                                new PointWithQualityImpl( 1477895624866L, 861, 0.8f),
-                                new PointImpl( 1477917224866L, 767),
-                                new PointWithQualityImpl( 1477927624866L, 57, 0.7f),     //avg = 0.81
-                                new PointWithQualityImpl( 1477931224866L, 125, 0.6f),
-                                new PointWithQualityImpl( 1477945624866L, 710, 0.8f),
-                                new PointImpl( 1477985224866L, 7)
+                                Measure.fromValueAndQuality( 1477895624866L, 861, 0.8f),
+                                Measure.fromValue( 1477917224866L, 767),
+                                Measure.fromValueAndQuality( 1477927624866L, 57, 0.7f),     //avg = 0.81
+                                Measure.fromValueAndQuality( 1477931224866L, 125, 0.6f),
+                                Measure.fromValueAndQuality( 1477945624866L, 710, 0.8f),
+                                Measure.fromValue( 1477985224866L, 7)
                         ),//mixed2
                         Arrays.asList(
-                                new PointImpl( 1477895624866L, 622),
-                                new PointWithQualityImpl( 1477916224866L, -3, 0.4f),
-                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),
-                                new PointWithQualityImpl( 1477924624866L, 568, 0.6f),     // avg = 0.65
-                                new PointImpl( 1477948224866L, 14),
-                                new PointWithQualityImpl( 1477957224866L, 86, 0.2f)
+                                Measure.fromValue( 1477895624866L, 622),
+                                Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
+                                Measure.fromValueAndQuality( 1477917224866L, 365, 0.7f),
+                                Measure.fromValueAndQuality( 1477924624866L, 568, 0.6f),     // avg = 0.65
+                                Measure.fromValue( 1477948224866L, 14),
+                                Measure.fromValueAndQuality( 1477957224866L, 86, 0.2f)
                         ),//non_mixed
                         Arrays.asList(
-                                new PointWithQualityImpl( 1477895624866L, 622, 0.8f),
-                                new PointWithQualityImpl( 1477916224866L, -3, 0.4f),
-                                new PointWithQualityImpl( 1477917224866L, 365, 0.7f),    // avg = 0.58
-                                new PointWithQualityImpl( 1477924624866L, 568, 0.6f),
-                                new PointWithQualityImpl( 1477948224866L, 14, 0.8f),
-                                new PointWithQualityImpl( 1477957224866L, 86, 0.2f)
+                                Measure.fromValueAndQuality( 1477895624866L, 622, 0.8f),
+                                Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
+                                Measure.fromValueAndQuality( 1477917224866L, 365, 0.7f),    // avg = 0.58
+                                Measure.fromValueAndQuality( 1477924624866L, 568, 0.6f),
+                                Measure.fromValueAndQuality( 1477948224866L, 14, 0.8f),
+                                Measure.fromValueAndQuality( 1477957224866L, 86, 0.2f)
                         )
                 ));
         injector.injectChunks(client);
