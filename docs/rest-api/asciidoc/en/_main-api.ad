@@ -4,10 +4,10 @@
 
 The following endpoints are used to inject data points in the historian :
 
-include::./_import-csv-endpoint.ad[]
+include::./_main-endpoints/_import-csv-endpoint.ad[]
 
-include::./_import-json-endpoint.ad[]
+include::./_main-endpoints/_import-json-endpoint.ad[]
 
 === Data Export
 
-include::./_export-csv-endpoint.ad[]
+include::./_main-endpoints/_export-csv-endpoint.ad[]
