@@ -54,7 +54,7 @@ public class RunHistorianServerInLocalJob {
                 .put(HistorianVerticle.CONFIG_SOLR_ANNOTATION_COLLECTION, "annotations")
                 .put(HistorianVerticle.CONFIG_SOLR_USE_ZOOKEEPER, true)
                 .put(HistorianVerticle.CONFIG_SOLR_ZOOKEEPER_URLS, new JsonArray().add("localhost:9983"))
-                .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://localhost:8983/solr/historian")
+                .put(HistorianVerticle.CONFIG_SOLR_STREAM_ENDPOINT, "http://localhost:8983/solr/historian");
 //                .put(HistorianVerticle.MAX_NUMBER_OF_TARGET_RETURNED, 100);
 //        JsonObject grafana = new JsonObject()
 //                .put(HistorianVerticle.CONFIG_GRAFANA_HISTORAIN, new JsonObject()
