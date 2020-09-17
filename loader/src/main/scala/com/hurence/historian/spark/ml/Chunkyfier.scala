@@ -2,6 +2,7 @@ package com.hurence.historian.spark.ml
 
 
 import com.hurence.historian.spark.sql.functions.{chunk, sax, toDateUTC}
+import com.hurence.timeseries.core.ChunkOrigin
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util._
@@ -51,6 +52,12 @@ final class Chunkyfier(override val uid: String)
   def setValueCol(value: String): this.type = set(valueCol, value)
   setDefault(valueCol, "value")
 
+  /** @group setParam */
+  final val origin: Param[String] = new Param[String](this, "origin", "which historian component wrote this chunk")
+
+  /** @group setParam */
+  def setOrigin(value: String): this.type = set(origin, value)
+  setDefault(origin, ChunkOrigin.INJECTOR.toString)
 
   /** @group setParam */
   final val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
@@ -175,6 +182,7 @@ final class Chunkyfier(override val uid: String)
         lit(0.01),
         lit($(saxStringLength)),
         groupedDF.col("values")))
+      .withColumn("origin", lit($(origin)))
 
     if ($(dropLists)) {
       log.debug("droping columns values and timestamps")
