@@ -2,20 +2,14 @@ package com.hurence.historian.solr.injector;
 
 import com.hurence.historian.converter.SolrDocumentBuilder;
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.model.Chunk;
 import org.apache.solr.common.SolrInputDocument;
 
-import java.util.List;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-public abstract class AbstractSolrInjectorChunkCurrentVersion extends AbstractSolrInjector<ChunkVersionCurrent> {
+public abstract class AbstractSolrInjectorChunkCurrentVersion extends AbstractSolrInjector<Chunk> {
 
     @Override
-    protected SolrInputDocument buildSolrDocument(ChunkVersionCurrent chunk) {
+    protected SolrInputDocument buildSolrDocument(Chunk chunk) {
         return SolrDocumentBuilder.fromChunk(chunk);
     }
 

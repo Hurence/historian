@@ -18,7 +18,7 @@ package com.hurence.timeseries.dtw;
 
 
 import com.hurence.timeseries.matrix.ColMajorCell;
-import com.hurence.timeseries.modele.list.IntList;
+import com.hurence.timeseries.model.list.IntList;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.NoSuchElementException;

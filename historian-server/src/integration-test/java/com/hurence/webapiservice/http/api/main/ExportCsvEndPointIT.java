@@ -3,7 +3,7 @@ package com.hurence.webapiservice.http.api.main;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.HistorianVerticleConfHelper;
@@ -54,55 +54,55 @@ public class ExportCsvEndPointIT {
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
                 Arrays.asList(
                         Arrays.asList(
-                                new PointImpl( 1477895624866L, 622.1),
-                                new PointImpl( 1477916224866L, -3),
-                                new PointImpl( 1477917224866L, 365)
+                                Measure.fromValue( 1477895624866L, 622.1),
+                                Measure.fromValue( 1477916224866L, -3),
+                                Measure.fromValue( 1477917224866L, 365)
                         ),
                         Arrays.asList(
-                                new PointImpl( 1477895624866L, 861),
-                                new PointImpl( 1477917224866L, 767)
+                                Measure.fromValue( 1477895624866L, 861),
+                                Measure.fromValue( 1477917224866L, 767)
                         ),
                         Arrays.asList(//maxDataPoints we are not testing value only sampling
-                                new PointImpl( 1477895624866L, 1),
-                                new PointImpl( 1477895624867L, 1),
-                                new PointImpl( 1477895624868L, 1),
-                                new PointImpl( 1477895624869L, 1),
-                                new PointImpl( 1477895624870L, 1),
-                                new PointImpl( 1477895624871L, 1),
-                                new PointImpl( 1477895624872L, 1),
-                                new PointImpl( 1477895624873L, 1),
-                                new PointImpl( 1477895624874L, 1),
-                                new PointImpl( 1477895624875L, 1),
-                                new PointImpl( 1477895624876L, 1),
-                                new PointImpl( 1477895624877L, 1),
-                                new PointImpl( 1477895624878L, 1),
-                                new PointImpl( 1477895624879L, 1),
-                                new PointImpl( 1477895624880L, 1),
-                                new PointImpl( 1477895624881L, 1),
-                                new PointImpl( 1477895624882L, 1),
-                                new PointImpl( 1477895624883L, 1),
-                                new PointImpl( 1477895624884L, 1),
-                                new PointImpl( 1477895624885L, 1),
-                                new PointImpl( 1477895624886L, 1),
-                                new PointImpl( 1477895624887L, 1),
-                                new PointImpl( 1477895624888L, 1),
-                                new PointImpl( 1477895624889L, 1),
-                                new PointImpl( 1477895624890L, 1),
-                                new PointImpl( 1477895624891L, 1),
-                                new PointImpl( 1477895624892L, 1),
-                                new PointImpl( 1477895624893L, 1),
-                                new PointImpl( 1477895624894L, 1),
-                                new PointImpl( 1477895624895L, 1),
-                                new PointImpl( 1477895624896L, 1),
-                                new PointImpl( 1477895624897L, 1),
-                                new PointImpl( 1477895624898L, 1),
-                                new PointImpl( 1477895624899L, 1),
-                                new PointImpl( 1477895624900L, 1),
-                                new PointImpl( 1477895624901L, 1),
-                                new PointImpl( 1477895624902L, 1),
-                                new PointImpl( 1477895624903L, 1),
-                                new PointImpl( 1477895624904L, 1),
-                                new PointImpl( 1477895624905L, 1)
+                                Measure.fromValue( 1477895624866L, 1),
+                                Measure.fromValue( 1477895624867L, 1),
+                                Measure.fromValue( 1477895624868L, 1),
+                                Measure.fromValue( 1477895624869L, 1),
+                                Measure.fromValue( 1477895624870L, 1),
+                                Measure.fromValue( 1477895624871L, 1),
+                                Measure.fromValue( 1477895624872L, 1),
+                                Measure.fromValue( 1477895624873L, 1),
+                                Measure.fromValue( 1477895624874L, 1),
+                                Measure.fromValue( 1477895624875L, 1),
+                                Measure.fromValue( 1477895624876L, 1),
+                                Measure.fromValue( 1477895624877L, 1),
+                                Measure.fromValue( 1477895624878L, 1),
+                                Measure.fromValue( 1477895624879L, 1),
+                                Measure.fromValue( 1477895624880L, 1),
+                                Measure.fromValue( 1477895624881L, 1),
+                                Measure.fromValue( 1477895624882L, 1),
+                                Measure.fromValue( 1477895624883L, 1),
+                                Measure.fromValue( 1477895624884L, 1),
+                                Measure.fromValue( 1477895624885L, 1),
+                                Measure.fromValue( 1477895624886L, 1),
+                                Measure.fromValue( 1477895624887L, 1),
+                                Measure.fromValue( 1477895624888L, 1),
+                                Measure.fromValue( 1477895624889L, 1),
+                                Measure.fromValue( 1477895624890L, 1),
+                                Measure.fromValue( 1477895624891L, 1),
+                                Measure.fromValue( 1477895624892L, 1),
+                                Measure.fromValue( 1477895624893L, 1),
+                                Measure.fromValue( 1477895624894L, 1),
+                                Measure.fromValue( 1477895624895L, 1),
+                                Measure.fromValue( 1477895624896L, 1),
+                                Measure.fromValue( 1477895624897L, 1),
+                                Measure.fromValue( 1477895624898L, 1),
+                                Measure.fromValue( 1477895624899L, 1),
+                                Measure.fromValue( 1477895624900L, 1),
+                                Measure.fromValue( 1477895624901L, 1),
+                                Measure.fromValue( 1477895624902L, 1),
+                                Measure.fromValue( 1477895624903L, 1),
+                                Measure.fromValue( 1477895624904L, 1),
+                                Measure.fromValue( 1477895624905L, 1)
                         )
                 ));
         injector.injectChunks(client);
@@ -158,7 +158,7 @@ public class ExportCsvEndPointIT {
                 .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(413, rsp.statusCode());
-                        assertEquals("max data points is bigger than allowed", rsp.statusMessage());
+                        assertEquals("max data measures is bigger than allowed", rsp.statusMessage());
                         testContext.completeNow();
                     });
                 }));

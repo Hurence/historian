@@ -540,7 +540,7 @@ The key concepts are simple :</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Measure</strong> is a point in time with a floating point value identified by a name and some tags (categorical features)</p>
+<p><strong>Measure</strong> is a measure in time with a floating measure value identified by a name and some tags (categorical features)</p>
 </li>
 <li>
 <p><strong>Chunk</strong> is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and eventually some tags</p>
@@ -554,7 +554,7 @@ We use chunking instead of raw storage in order to save some disk space and redu
 <div class="sect2">
 <h3 id="data-model"><a class="anchor" href="#data-model"></a>2.1. Data model</h3>
 <div class="paragraph">
-<p>A Measure point is identified by the following fields</p>
+<p>A Measure measure is identified by the following fields</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -590,7 +590,7 @@ We use chunking instead of raw storage in order to save some disk space and redu
 </div>
 </div>
 <div class="paragraph">
-<p>As you can see from a Measure points to a Chunk of Measures, the <code>timestamp</code> field has been replaced by a <code>start</code> and <code>stop</code> interval and the <code>value</code> is now a base64 encoded string named <code>chunk</code>.</p>
+<p>As you can see from a Measure measures to a Chunk of Measures, the <code>timestamp</code> field has been replaced by a <code>start</code> and <code>stop</code> interval and the <code>value</code> is now a base64 encoded string named <code>chunk</code>.</p>
 </div>
 <div class="paragraph">
 <p>In SolR the chunks will be stored according to  the following schema (for the current version)</p>
@@ -953,7 +953,7 @@ You can check the Grafana documentation to interact with Grafana (starting and s
 <p>http_server/historian.address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. It is important to master vertx when changing this parameter.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum points the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
+<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum measures the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
 </li>
 <li>
 <p>http_server/upload_directory : Repertory where csv file uploaded will be stored (temporarily).</p>
@@ -1401,7 +1401,7 @@ Refer to your system documentation.</p>
 <p>http_server/historian.address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. It is important to master vertx when changing this parameter.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum points the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
+<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum measures the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
 </li>
 <li>
 <p>http_server/upload_directory : Repertory where csv file uploaded will be stored (temporarily).</p>
@@ -1633,7 +1633,7 @@ interact with the historian according to your culture and your needs.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Get some measures points within a time range</p>
+<p>Get some measures measures within a time range</p>
 </div>
 <div class="listingblock">
 <div class="content">

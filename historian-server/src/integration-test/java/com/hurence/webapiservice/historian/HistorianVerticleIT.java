@@ -5,8 +5,8 @@ import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
@@ -51,36 +51,36 @@ public class HistorianVerticleIT {
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralInjectorCurrentVersion injector = new GeneralInjectorCurrentVersion();
-        ChunkVersionCurrent chunk1 = ChunkBuilderHelper.fromPoints("temp_a",
+        Chunk chunk1 = ChunkBuilderHelper.fromPoints("temp_a",
                 Arrays.asList(
-                        new PointImpl( 1L, 5),
-                        new PointImpl( 2L, 8),
-                        new PointImpl( 3L, 1.2),
-                        new PointImpl( 4L, 6.5)
+                        Measure.fromValue( 1L, 5),
+                        Measure.fromValue( 2L, 8),
+                        Measure.fromValue( 3L, 1.2),
+                        Measure.fromValue( 4L, 6.5)
                 ));
         injector.addChunk(chunk1);
-        ChunkVersionCurrent chunk2 = ChunkBuilderHelper.fromPoints("temp_a",
+        Chunk chunk2 = ChunkBuilderHelper.fromPoints("temp_a",
                 Arrays.asList(
-                        new PointImpl( 5L, -2),
-                        new PointImpl( 6L, 8.8),
-                        new PointImpl( 7L, 13.3),
-                        new PointImpl( 8L, 2)
+                        Measure.fromValue( 5L, -2),
+                        Measure.fromValue( 6L, 8.8),
+                        Measure.fromValue( 7L, 13.3),
+                        Measure.fromValue( 8L, 2)
                 ));
         injector.addChunk(chunk2);
-        ChunkVersionCurrent chunk3 = ChunkBuilderHelper.fromPoints("temp_a",
+        Chunk chunk3 = ChunkBuilderHelper.fromPoints("temp_a",
                 Arrays.asList(
-                        new PointImpl( 9L, -5),
-                        new PointImpl( 10L, 80),
-                        new PointImpl( 11L, 1.2),
-                        new PointImpl( 12L, 5.5)
+                        Measure.fromValue( 9L, -5),
+                        Measure.fromValue( 10L, 80),
+                        Measure.fromValue( 11L, 1.2),
+                        Measure.fromValue( 12L, 5.5)
                 ));
         injector.addChunk(chunk3);
-        ChunkVersionCurrent chunk4 = ChunkBuilderHelper.fromPoints("temp_b",
+        Chunk chunk4 = ChunkBuilderHelper.fromPoints("temp_b",
                 Arrays.asList(
-                        new PointImpl( 9L, -5),
-                        new PointImpl( 10L, 80),
-                        new PointImpl( 11L, 1.2),
-                        new PointImpl( 12L, 5.5)
+                        Measure.fromValue( 9L, -5),
+                        Measure.fromValue( 10L, 80),
+                        Measure.fromValue( 11L, 1.2),
+                        Measure.fromValue( 12L, 5.5)
                 ));
         injector.addChunk(chunk4);
         injector.injectChunks(client);
@@ -212,7 +212,7 @@ public class HistorianVerticleIT {
     void getTimeSeriesChunkTestWithSelectedFields(VertxTestContext testContext) {
         JsonObject params = new JsonObject()
                 .put(HistorianServiceFields.FIELDS, new JsonArray()
-                    .add(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE)
+                        .add(HistorianChunkCollectionFieldsVersion0.CHUNK_VALUE)
                         .add(HistorianChunkCollectionFieldsVersion0.CHUNK_START)
                         .add(HistorianChunkCollectionFieldsVersion0.CHUNK_MAX).add("id")
                 );
@@ -259,4 +259,3 @@ public class HistorianVerticleIT {
     }
 
 }
-

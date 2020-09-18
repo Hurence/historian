@@ -67,7 +67,7 @@ public class GuessSaxParameters {
      *            It's the ratio of (number of rules in the pruned grammar) by
      *                               (number of rules in the full grammar)
      *
-     *PS: For each parameter (inputed window size, PAA size and Alphabet size) combination a grammar is inferred and pruned in order to compute the reduction coefficient value.
+     *PS: For each parameter (inputed window size, PAA size and Alphabet size) combination a grammar is inferred and pruned in order to computeMetrics the reduction coefficient value.
      *Among all sampled and valid combinations we select one which yields the minimal value of the reduction coefficient as optimal discretization parameter set.
      *
      * RQ: NThreshold (normalization threshold value) can be used in SAX to deal with one special case (normalization to a subsequence which is almost constant)

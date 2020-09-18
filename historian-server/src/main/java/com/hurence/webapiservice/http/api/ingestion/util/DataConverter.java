@@ -56,7 +56,7 @@ public class DataConverter {
                 },
             Collectors.toList())))
             .entrySet().stream()
-            // convert to Map: metric + tag's values + points
+            // convert to Map: metric + tag's values + measures
             .map(entry -> {
                 Map<String, Object> fieldsAndThereValues = new LinkedHashMap<>();
                 groupByList.forEach(i -> {
