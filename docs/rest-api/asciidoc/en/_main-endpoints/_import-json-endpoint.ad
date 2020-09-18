@@ -1,8 +1,33 @@
 [[import-json]]
-==== POST /api/historian/v0/import/json
+==== POST {import-json-endpoint}
+
+===== General description
 
 Allows you to inject points into the historian from a request body in json format.
 The format of the expected request is a request with Content-Type: application / json;
+
+The body of the expected request is a list of objects. Each object must be composed of the following attributes:
+
+
+.Properties of the JSON objects
+[cols="10,10,70,10"]
+|===
+| json path | type | description | mandatory
+
+|/name
+|String
+|The name of the metric for which we are going to inject the points.
+|Yes
+
+|/points
+|Array d'array
+|Points for creating a chunk with the metric name assigned to 'name'. The points are to be completed in the form
+[[timestsamp<long>, value<double>],..,[timestsamp<long>, value<double>]].
+|Yes
+
+|===
+
+===== Examples
 
 Example of a request:
 
@@ -40,45 +65,37 @@ Example of a minimal request:
 ]
 ----
 
-The body of the expected request is a list of objects. Each object must be composed of the following attributes:
+Example of a command curl and its response :
 
+Request :
 
-.Properties of the JSON objects
-[cols="13,10,40,7,20,10"]
-|===
-| json path | type | description | mandatory
-
-|/name
-|String
-|The name of the metric for which we are going to inject the points.
-|Yes
-
-|/points
-|Array d'array
-|Points for creating a chunk with the metric name assigned to 'name'. The points are to be completed in the form
-[[timestsamp<long>, value<double>],..,[timestsamp<long>, value<double>]].
-|Yes
-
-|===
-
-Example of a response
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
+]'
+----
 
 [source,json]
 ----
-[
-  {
-    "target":"upper_75",
-    "datapoints":[
-      [622,1450754160000],
-      [365,1450754220000]
-    ]
-  },
-  {
-    "target":"upper_90",
-    "datapoints":[
-      [861,1450754160000],
-      [767,1450754220000]
-    ]
-  }
-]
+{
+    "status": "OK",
+    "message": "Injected 4 points of 2 metrics in 2 chunks"
+}
 ----

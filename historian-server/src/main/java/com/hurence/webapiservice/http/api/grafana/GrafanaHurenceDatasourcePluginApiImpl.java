@@ -277,7 +277,8 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
              */
             request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
                     TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
-                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH, AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH)
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH,
+                    AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH)
                     .parseRequest(requestBody);
             if (request.getSamplingConf().getMaxPoint() > this.maxDataPointsAllowed) {
                 throw new IllegalArgumentException(String.format("maximum allowed for %s is %s", MAX_DATA_POINTS_JSON_PATH, this.maxDataPointsAllowed));

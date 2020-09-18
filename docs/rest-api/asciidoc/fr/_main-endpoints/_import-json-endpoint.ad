@@ -1,5 +1,7 @@
 [[import-json]]
-===== POST /api/historian/v0/import/json
+===== POST {import-json-endpoint}
+
+====== Description Général
 
 Permet d'injecter des points dans l'historian à partir d'un corps de requête au format json.
 Le format de la requête attendue est une requête avec Content-Type: application/json;
@@ -44,7 +46,7 @@ Le corps de la requête attendue est une liste json d'objets. Chaque objet doit 
 
 
 .Propriété des objets json
-[cols="13,10,40,7,20,10"]
+[cols="10,10,70,10"]
 |===
 | json path | type | description | requis
 
@@ -61,24 +63,74 @@ Le corps de la requête attendue est une liste json d'objets. Chaque objet doit 
 
 |===
 
-Exemple de réponse
+
+====== Exemples
+
+Exemple d'une requête (le body) :
 
 [source,json]
 ----
 [
-  {
-    "target":"upper_75",
-    "datapoints":[
-      [622,1450754160000],
-      [365,1450754220000]
-    ]
-  },
-  {
-    "target":"upper_90",
-    "datapoints":[
-      [861,1450754160000],
-      [767,1450754220000]
-    ]
-  }
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
 ]
+----
+
+Exemple d'une requête minimal (le body) :
+
+[source,json]
+----
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0]
+        ]
+    }
+]
+----
+
+Exemple d'une requête avec curl et de sa réponse :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
+]'
+----
+
+[source,json]
+----
+{
+    "status": "OK",
+    "message": "Injected 4 points of 2 metrics in 2 chunks"
+}
 ----

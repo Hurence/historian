@@ -1,9 +1,14 @@
 [[export-csv]]
-==== POST /api/historian/v0/export/csv
+==== POST {export-csv-endpoint}
+
+===== General description
 
 Allows you to search for points and export them to csv for the desired metrics.
 
-This endpoint uses the same request as the endpoint query but it gives the response in csv.
+This endpoint uses the same request as the <<grafana-hurence-datasource-query,_{grafana-hurence-query-endpoint}_>> but it gives the response in csv.
+
+
+===== Examples
 
 Example of a response :
 

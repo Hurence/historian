@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.util.ErrorMsgHelper;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.models.ResponseAsList;
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
@@ -38,7 +39,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
     public void root(RoutingContext context) {
         context.response()
                 .setStatusCode(200)
-                .end("Historian grafana api is Working fine");
+                .end("Historian api is Working fine");
     }
 
     @Override
@@ -55,9 +56,9 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         } catch (Exception ex) {
             LOGGER.debug("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage("error parsing request !");//string must not contain special character for status message !
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
 
@@ -67,7 +68,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
             context.response().setStatusCode(PAYLOAD_TOO_LARGE);
             context.response().setStatusMessage("max data points is bigger than allowed");
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end("max data points is bigger than allowed");
             return;
         }
 
@@ -123,7 +124,6 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                     context.response().end(timeseries);
                 }).subscribe();
     }
-
 
     private JsonObject buildGetTimeSeriesRequest(QueryRequestParam request) {
         SamplingConf samplingConf = request.getSamplingConf();

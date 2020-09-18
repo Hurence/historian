@@ -1,5 +1,7 @@
 [[import-csv]]
-===== POST /api/historian/v0/import/csv
+===== POST {import-csv-endpoint}
+
+====== Description Général
 
 Permet d'injecter des points dans l'historian à partir de fichiers csv.
 Le format de la requête attendue est une requête avec Content-Type: multipart/form-data;
@@ -10,7 +12,7 @@ Le format de la requête attendue est une requête avec Content-Type: multipart/
 |===
 | attribut | multivalué | description | requis | valeurs possibles | valeur par défaut
 
-|my_csv_file
+|<a_name>
 |Oui
 |le chemin des fichier csv à importer. Attention chaque fichier est importé individuellement de manière indépendante.
 Autrement dit, joindre plusieurs fichiers ou faire une requête par fichier est équivalent. Les paramètres
@@ -69,7 +71,7 @@ NANOSECONDS_EPOCH :  la valeur doit être le nombre de nanosecondes depuis le 1 
 MICROSECONDS_EPOCH :  la valeur doit être le nombre de microsecondes depuis le 1 janvier 1970 UTC.
 MILLISECONDS_EPOCH :  la valeur doit être le nombre de millisecondes depuis le 1 janvier 1970 UTC.
 SECONDS_EPOCH :  la valeur doit être le nombre de secondes depuis le 1 janvier 1970 UTC.
-Soit une autre valeur, dans ce cas cette valeur doit être un format de date valide, par exemple "yyyy-mm-dd".
+Soit une autre valeur, dans ce cas cette valeur doit être un format de date valide, par exemple "yyyy-MM-dd".
 |"MILLISECONDS_EPOCH"
 
 |timezone_date
@@ -118,16 +120,21 @@ Sinon les autres valeurs acceptées sont les noms de colonnes ajoutées comme ta
 
 |===
 
+
+===== Exemples
+
+===== Exemple 1
+
 Exemple de commande curl minimal :
 
-[source,curl]
+[source,curl,subs="attributes"]
 ----
 curl -X POST \
-http://localhost:8080/api/historian/v0/import/csv \
--F 'my_csv_file=@path/de/mon/csv/file.csv'
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/file.csv'
 ----
 
-Exemple csv minimal :
+Contenu du fichier csv utilisé :
 
 [source,csv]
 ----
@@ -137,14 +144,33 @@ metric_1, 2, 2
 metric_1, 3, 3
 ----
 
+La réponse est la suivante :
+
+[source,json]
+----
+{
+    "tags" : [ ],
+    "grouped_by" : [ "name" ],
+    "report" : [
+        {
+            "name" : "metric_1",
+            "number_of_points_injected" : 3,
+            "number_of_point_failed" : 0,
+            "number_of_chunk_created" : 1
+        }
+    ]
+}
+----
+
+===== Exemple 2
+
 Exemple de commande curl :
 
-[source,curl]
+[source,curl,subs="attributes"]
 ----
 curl -X POST \
-http://localhost:8080/api/historian/v0/import/csv \
--F 'my_csv_file=@path/de/mon/csv/file.csv' \
--F 'my_csv_file2=@path/de/mon/csv/file2.csv' \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/file.csv' \
 -F mapping.name=metric_name_2 \
 -F mapping.value=value_2 \
 -F mapping.timestamp=timestamp \
@@ -153,11 +179,11 @@ http://localhost:8080/api/historian/v0/import/csv \
 -F mapping.tags=code_install \
 -F group_by=name \
 -F group_by=tags.sensor \
--F format_date=yyyy-DD-MM HH:mm:ss.SSS \
--F timezone_date=UTC \
+-F format_date=yyyy-dd-MM HH:mm:ss.SSS \
+-F timezone_date=UTC
 ----
 
-Exemple de fichier csv :
+Contenu du fichier csv utilisé :
 
 [source,yml]
 ----
@@ -167,17 +193,50 @@ metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
 metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
 metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
 ----
+
+La réponse est la suivante :
+
+[source,json]
+----
+{
+    "tags" : [ "sensor", "code_install" ],
+    "grouped_by" : [ "name", "sensor" ],
+    "report" : [ {
+        "name" : "metric_1",
+        "sensor" : "sensor_1",
+        "number_of_points_injected" : 2,
+        "number_of_point_failed" : 0,
+        "number_of_chunk_created" : 1
+    }, {
+        "name" : "metric_1",
+        "sensor" : "sensor_2",
+        "number_of_points_injected" : 1,
+        "number_of_point_failed" : 0,
+        "number_of_chunk_created" : 1
+    }, {
+        "name" : "metric_2",
+        "sensor" : "sensor_2",
+        "number_of_points_injected" : 1,
+        "number_of_point_failed" : 0,
+        "number_of_chunk_created" : 1
+    }]
+}
+----
+
+===== Exemple 3
+
+
 
 
 
 avec la requête suivante :
 
-[source,curl]
+[source,curl,subs="attributes"]
 ----
 curl -X POST \
-http://localhost:8080/historian-server/ingestion/csv \
--F 'my_csv_file=@path/de/mon/csv/file.csv' \
--F 'my_csv_file2=@path/de/mon/csv/file.csv' \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@/path/de/mon/csv/file.csv' \
 -F mapping.name=metric_name_2 \
 -F mapping.value=value_2 \
 -F mapping.timestamp=timestamp \
@@ -186,10 +245,12 @@ http://localhost:8080/historian-server/ingestion/csv \
 -F mapping.tags=code_install \
 -F group_by=name \
 -F group_by=tags.sensor \
--F format_date=yyyy-DD-MM HH:mm:ss.SSS \
--F timezone_date=UTC \
+-F format_date=yyyy-dd-MM HH:mm:ss.SSS \
+-F timezone_date=UTC
 ----
-et le fichier "file.csv" :
+
+Contenu du fichier csv utilisé :
+
 [source,yml]
 ----
 metric_name_2,timestamp,value_2,quality,sensor,code_install
@@ -198,35 +259,38 @@ metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
 metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
 metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
 ----
+
 on reçoit cette réponse :
+
 [source,json]
 ----
 {
-  "tags": ["sensor", "code_install"],
-  "grouped_by": ["name", "sensor"],
-  "report" : [
-    {
-      "name": "metric_1",
-      "sensor": "sensor_1",
-      "number_of_points_injected": 4,
-      "number_of_point_failed": 0,
-      "number_of_chunk_created": 2
-    },
-    {
-      "name": "metric_1",
-      "sensor": "sensor_2",
-      "number_of_points_injected": 2,
-      "number_of_point_failed": 0,
-      "number_of_chunk_created": 2
-    },
-    {
-      "name": "metric_2",
-      "sensor": "sensor_2",
-      "number_of_points_injected": 2,
-      "number_of_point_failed": 0,
-      "number_of_chunk_created": 2
-    }
-  ]
+  "tags" : [ "sensor", "code_install" ],
+  "grouped_by" : [ "name", "sensor" ],
+  "report" : [ {
+    "name" : "metric_1",
+    "sensor" : "sensor_1",
+    "number_of_points_injected" : 4,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 2
+  }, {
+    "name" : "metric_1",
+    "sensor" : "sensor_2",
+    "number_of_points_injected" : 2,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 2
+  }, {
+    "name" : "metric_2",
+    "sensor" : "sensor_2",
+    "number_of_points_injected" : 2,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 2
+  } ]
 }
 ----
-(on remarque ici que l'on a utilisé le même fichier deux fois.)
+
+Note::  On remarquera qu'on a utiliser le même fichier deux fois avec les même paramètres.
+Si un même fichier est injecter plusieurs fois avec les même paramètres alors l'import du deuxième fichier
+écrase les chunks du premier. Il n y a donc pas de doublons.
+
+Rappel:: Un chunk est créer par métrique et par la valeurs des tags sélection mais aussi pour chaque changement de jour !

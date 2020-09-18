@@ -369,7 +369,7 @@ generate_historian_server_conf() {
       "max_data_points_maximum_allowed" : 50000
     },
     "historian": {
-      "schema_version": "VERSION_0",
+      "schema_version": "VERSION_1",
       "address" : "historian",
       "limit_number_of_point_before_using_pre_agg" : 50000,
       "limit_number_of_chunks_before_using_solr_partition" : 50000,

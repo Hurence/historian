@@ -18,7 +18,7 @@ public class RunHistorianServerInLocalJob {
 
     public static void main(String[] args) {
         vertx = Vertx.vertx();
-        deployWebApiServiceMainVerticle();
+        deployWebApiServiceMainVerticle().subscribe();
         try {
             while(true) {
                 LOGGER.info("sleep 100000");
