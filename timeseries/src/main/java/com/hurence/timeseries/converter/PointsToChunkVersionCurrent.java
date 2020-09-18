@@ -7,9 +7,8 @@ import com.hurence.timeseries.TimeSeriesUtil;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.functions.*;
 import com.hurence.timeseries.metric.MetricType;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrentImpl;
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.query.QueryEvaluator;
 import com.hurence.timeseries.query.TypeFunctions;
 
@@ -43,21 +42,21 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
     /**
      *
      * @param name
-     * @param points expected to be f the same year, month, day
+     * @param measures expected to be f the same year, month, day
      * @param tags
      * @return
      */
-    public ChunkVersionCurrent buildChunk(String name, TreeSet<? extends Point> points, Map<String, String> tags) {
-        if (points == null || points.isEmpty())
+    public Chunk buildChunk(String name, TreeSet<? extends Measure> measures, Map<String, String> tags) {
+        if (measures == null || measures.isEmpty())
             throw new IllegalArgumentException("points should not be null or empty");
-        MetricTimeSeries chunk = buildMetricTimeSeries(name, points);
+        MetricTimeSeries chunk = buildMetricTimeSeries(name, measures);
         return convertIntoChunk(chunk, tags);
     }
 
     @Override
-    public ChunkVersionCurrent buildChunk(String name,
-                             TreeSet<? extends Point> points) {
-        return buildChunk(name, points, Collections.emptyMap());
+    public Chunk buildChunk(String name,
+                             TreeSet<? extends Measure> measures) {
+        return buildChunk(name, measures, Collections.emptyMap());
     }
     private void configMetricsCalcul(String[] metrics) {
         // init metric functions
@@ -69,23 +68,26 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
         functionValueMap = new FunctionValueMap(aggregations.size(), analyses.size(), transformations.size(), encodings.size());
     }
 
-    private ChunkVersionCurrent convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
-        ChunkVersionCurrentImpl.Builder builder = new ChunkVersionCurrentImpl.Builder();
+    private Chunk convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
+
+
+        Chunk.ChunkBuilder builder = Chunk.builder();
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(timeSerie);
         builder
-                .setChunkOrigin(this.chunkOrigin)
-                .setTags(tags)
-                .setEnd(timeSerie.getEnd())
-                .setName(timeSerie.getName())
-                .setStart(timeSerie.getStart())
-                .setValueBinaries(compressedPoints)
-                .setVersion(getVersion());
+                .chunkOrigin(this.chunkOrigin)
+                .tags(tags)
+                .end(timeSerie.getEnd())
+                .name(timeSerie.getName())
+                .start(timeSerie.getStart())
+                .valueBinaries(compressedPoints)
+                .version(getVersion());
+
         computeAndSetAggs(builder, timeSerie);
         DateInfo dateInfo = TimeSeriesUtil.calculDateFields(timeSerie.getStart());
         builder
-                .setYear(dateInfo.year)
-                .setMonth(dateInfo.month)
-                .setDay(dateInfo.day);
+                .year(dateInfo.year)
+                .month(dateInfo.month)
+                .day(dateInfo.day);
         return builder.build();
     }
 
@@ -94,7 +96,7 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
      *
      * @return
      */
-    private void computeAndSetAggs(ChunkVersionCurrentImpl.Builder builder, MetricTimeSeries timeSeries) {
+    private void computeAndSetAggs(Chunk.ChunkBuilder builder, MetricTimeSeries timeSeries) {
         Integer sax_alphabet_size = Math.max(Math.min(timeSeries.size(), 7), 2);
         Integer sax_string_length = Math.min(timeSeries.size(), 100);
         String metricString = String.format(METRIC_STRING, sax_alphabet_size, sax_string_length);
@@ -112,28 +114,28 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
             double value = functionValueMap.getAggregationValue(i);
             switch (name) {
                 case "first" :
-                    builder.setFirst(value);
+                    builder.first(value);
                     break;
                 case "last" :
-                    builder.setLast(value);
+                    builder.last(value);
                     break;
                 case "min" :
-                    builder.setMin(value);
+                    builder.min(value);
                     break;
                 case "max" :
-                    builder.setMax(value);
+                    builder.max(value);
                     break;
                 case "sum" :
-                    builder.setSum(value);
+                    builder.sum(value);
                     break;
                 case "avg" :
-                    builder.setAvg(value);
+                    builder.avg(value);
                     break;
                 case "count" :
-                    builder.setCount((long)value);
+                    builder.count((long)value);
                     break;
                 case "dev" :
-                    builder.setStd(value);
+                    builder.std(value);
                     break;
             }
         }
@@ -142,10 +144,10 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
             boolean value = functionValueMap.getAnalysisValue(i);
             switch (name) {
                 case "trend" :
-                    builder.setTrend(value);
+                    builder.trend(value);
                     break;
                 case "outlier" :
-                    builder.setOutlier(value);
+                    builder.outlier(value);
                     break;
             }
         }
@@ -154,14 +156,14 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
             String value = functionValueMap.getEncodingValue(i);
             switch (name) {
                 case "sax" :
-                    builder.setSax(value);
+                    builder.sax(value);
                     break;
             }
         }
     }
 
 
-    private MetricTimeSeries buildMetricTimeSeries(String name, TreeSet<? extends Point> points) {
+    private MetricTimeSeries buildMetricTimeSeries(String name, TreeSet<? extends Measure> points) {
         final long start = getStart(points);
         final long end  = getEnd(points);
         MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(name);
@@ -173,11 +175,11 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
         return tsBuilder.build();
     }
 
-    private long getEnd(TreeSet<? extends Point> points) {
+    private long getEnd(TreeSet<? extends Measure> points) {
         return points.last().getTimestamp();
     }
 
-    private long getStart(TreeSet<? extends Point> points) {
+    private long getStart(TreeSet<? extends Measure> points) {
         return points.first().getTimestamp();
     }
 }

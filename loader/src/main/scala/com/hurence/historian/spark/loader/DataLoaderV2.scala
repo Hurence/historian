@@ -4,7 +4,7 @@ import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrentImpl
+import com.hurence.timeseries.model.Chunk
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.spark.sql.{Encoders, SparkSession}
@@ -89,7 +89,7 @@ object DataLoaderV2 {
       .longOpt("chunks-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default $DEFAULT_CHUNK_SIZE")
+      .desc(s"num measures in a chunk, default $DEFAULT_CHUNK_SIZE")
       .build()
     )
 
@@ -105,7 +105,7 @@ object DataLoaderV2 {
       .longOpt("sax-string-length")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
+      .desc(s"num measures in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
       .build()
     )
 
@@ -195,7 +195,7 @@ object DataLoaderV2 {
 
 
     val chunksDS = chunkyfier.transform(measuresDS)
-      .as[ChunkVersionCurrentImpl](Encoders.bean(classOf[ChunkVersionCurrentImpl]))
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
       .repartition(1)
 
 

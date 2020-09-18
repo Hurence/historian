@@ -1,7 +1,7 @@
 package com.hurence.timeseries.compaction.protobuf;
 
-import com.hurence.timeseries.converter.serializer.MetricPointWithQualityEmbedded;
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.converter.serializer.ChunkProtocolBuffers;
+import com.hurence.timeseries.model.Measure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,8 +25,8 @@ public class PointsCompressorWithQuality {
     private int numberOfPointSinceLastDelta = 0;
     private Map<Double, Integer> valueIndex = new HashMap<>();
     private Map<Float, Integer> qualityIndex = new HashMap<>();
-    private MetricPointWithQualityEmbedded.Point.Builder point = MetricPointWithQualityEmbedded.Point.newBuilder();
-    private MetricPointWithQualityEmbedded.Points.Builder points = MetricPointWithQualityEmbedded.Points.newBuilder();
+    private ChunkProtocolBuffers.Point.Builder point = ChunkProtocolBuffers.Point.newBuilder();
+    private ChunkProtocolBuffers.Chunk.Builder points = ChunkProtocolBuffers.Chunk.newBuilder();
     private Optional<Float> previousStoredQuality = Optional.empty();
     private boolean shoudBeReset = false;
 
@@ -50,13 +50,13 @@ public class PointsCompressorWithQuality {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public byte[] to(final Iterator<Point> metricDataPoints, float diffAcceptedForQuality, long ddcThreshold) {
+    public byte[] to(final Iterator<Measure> metricDataPoints, float diffAcceptedForQuality, long ddcThreshold) {
         if (shoudBeReset) {
             resetProps();
         }
         int index = 0;
         while (metricDataPoints.hasNext()) {
-            Point p = metricDataPoints.next();
+            Measure p = metricDataPoints.next();
             if (p == null) {
                 LOGGER.debug("Skipping 'null' point.");
                 continue;
@@ -97,7 +97,7 @@ public class PointsCompressorWithQuality {
         return points.build().toByteArray();
     }
 
-    private void saveTimestampOffsetForPoint(Point p, long delta) {
+    private void saveTimestampOffsetForPoint(Measure p, long delta) {
         long timeStampOffset = delta;
         if (numberOfPointSinceLastDelta > 0 && delta > previousDrift) {
             timeStampOffset = delta - previousDrift;
@@ -139,7 +139,7 @@ public class PointsCompressorWithQuality {
      * @param point          the point
      * @param timestampDelta the timestamp delta
      */
-    private static void setBPTimeStamp(MetricPointWithQualityEmbedded.Point.Builder point, long timestampDelta) {
+    private static void setBPTimeStamp(ChunkProtocolBuffers.Point.Builder point, long timestampDelta) {
         if (safeLongToUInt(timestampDelta)) {
             point.setTintBP((int) timestampDelta);
         } else {
@@ -184,7 +184,7 @@ public class PointsCompressorWithQuality {
 
     private void addQualityToPoint(int index, float currentQuality) {
         LOGGER.trace("Saved quality of point index {} with quality {}", index, currentQuality);
-        MetricPointWithQualityEmbedded.Quality q = buildQuality(qualityIndex, index, currentQuality);
+        ChunkProtocolBuffers.Quality q = buildQuality(qualityIndex, index, currentQuality);
         points.addQ(q);
         previousStoredQuality = Optional.of(currentQuality);
     }
@@ -198,7 +198,7 @@ public class PointsCompressorWithQuality {
         return diff <= 0;
     }
 
-    private static float getQualityOfPoint(Point p) {
+    private static float getQualityOfPoint(Measure p) {
         if (p.hasQuality()) {
             return p.getQuality();
         } else {
@@ -206,11 +206,11 @@ public class PointsCompressorWithQuality {
         }
     }
 
-    private static MetricPointWithQualityEmbedded.Quality buildQuality(
+    private static ChunkProtocolBuffers.Quality buildQuality(
             Map<Float, Integer> qualityIndex,
             int index, float quality) {
         //build value index
-        MetricPointWithQualityEmbedded.Quality.Builder q = MetricPointWithQualityEmbedded.Quality.newBuilder();
+        ChunkProtocolBuffers.Quality.Builder q = ChunkProtocolBuffers.Quality.newBuilder();
         if (qualityIndex.containsKey(quality)) {
             q.setVIndex(qualityIndex.get(quality));
         } else {
@@ -237,7 +237,7 @@ public class PointsCompressorWithQuality {
      * @param value             the current value
      * @param point             the current point builder
      */
-    private static void setValueOrRefIndexOnPoint(Map<Double, Integer> index, int currentPointIndex, double value, MetricPointWithQualityEmbedded.Point.Builder point) {
+    private static void setValueOrRefIndexOnPoint(Map<Double, Integer> index, int currentPointIndex, double value, ChunkProtocolBuffers.Point.Builder point) {
         //build value index
         if (index.containsKey(value)) {
             point.setVIndex(index.get(value));
@@ -253,7 +253,7 @@ public class PointsCompressorWithQuality {
      * @param point          the point
      * @param timestampDelta the timestamp delta
      */
-    private static void setTimeStamp(MetricPointWithQualityEmbedded.Point.Builder point, long timestampDelta) {
+    private static void setTimeStamp(ChunkProtocolBuffers.Point.Builder point, long timestampDelta) {
         if (safeLongToUInt(timestampDelta)) {
             point.setTint((int) timestampDelta);
         } else {

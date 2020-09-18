@@ -1,10 +1,11 @@
-package com.hurence.timeseries.modele.chunk;
+package com.hurence.timeseries.converter;
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
+
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.modele.solr.Schema;
 import com.hurence.historian.modele.solr.SolrField;
-import com.hurence.timeseries.converter.ChunkTruncater;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class ChunkFromJsonObjectVersionCurrent implements ChunkVersionCurrent {
+public class ChunkFromJsonObjectVersionCurrent extends Chunk {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChunkFromJsonObjectVersionCurrent.class);
 
@@ -70,6 +71,7 @@ public class ChunkFromJsonObjectVersionCurrent implements ChunkVersionCurrent {
     public byte[] getValueAsBinary() {
         return chunk.getBinary(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_VALUE);
     }
+
     @Override
     public long getStart() {
         return chunk.getLong(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_START);
@@ -131,13 +133,13 @@ public class ChunkFromJsonObjectVersionCurrent implements ChunkVersionCurrent {
     }
 
     @Override
-    public double getStddev() {
+    public double getStd() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV);
     }
 
     @Override
     public SchemaVersion getVersion() {
-        return SchemaVersion.VERSION_1;
+        return SchemaVersion.VERSION_0;
     }
 
     @Override
@@ -145,20 +147,19 @@ public class ChunkFromJsonObjectVersionCurrent implements ChunkVersionCurrent {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.ID);
     }
 
-    @Override
-    public List<String> getCompactionsRunning() {
+   /* public List<String> getCompactionsRunnings() {
         return chunk.getJsonArray(HistorianChunkCollectionFieldsVersionCurrent.COMPACTIONS_RUNNING).stream()
                 .map(String.class::cast)
                 .collect(Collectors.toList());
-    }
+    }*/
 
     @Override
-    public boolean getTrend() {
+    public boolean isTrend() {
         return chunk.getBoolean(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_TREND);
     }
 
     @Override
-    public boolean getOutlier() {
+    public boolean isOutlier() {
         return chunk.getBoolean(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_OUTLIER);
     }
 
@@ -188,7 +189,7 @@ public class ChunkFromJsonObjectVersionCurrent implements ChunkVersionCurrent {
     }
 
     @Override
-    public String getOrigin() {
+    public String getChunkOrigin() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN);
     }
 
@@ -204,13 +205,5 @@ public class ChunkFromJsonObjectVersionCurrent implements ChunkVersionCurrent {
                 '}';
     }
 
-    @Override
-    public ChunkVersionCurrent truncate(long from, long to) {
-        try {
-            return ChunkTruncater.truncate(this, from, to);
-        } catch (IOException e) {
-            LOGGER.error("Error encoding binaries", e);
-            throw new IllegalArgumentException(e);
-        }
-    }
+
 }

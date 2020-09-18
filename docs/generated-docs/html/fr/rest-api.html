@@ -508,19 +508,19 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p><em>/api/historian/v0</em> : L&#8217;api principale de l&#8217;historian qui ne contient actuellement que des endpoints pour l&#8217;import et l&#8217;export de données.</p>
 </li>
 <li>
-<p>POST <a href="#import-csv"><em>/api/historian/v0/import/csv</em></a>: Un endpoint pour importer des points depuis des fichiers csv.</p>
+<p>POST <a href="#import-csv"><em>/api/historian/v0/import/csv</em></a>: Un endpoint pour importer des measures depuis des fichiers csv.</p>
 </li>
 <li>
-<p>POST <a href="#import-json"><em>/api/historian/v0/import/json</em></a>: Un endpoint pour importer des points au format json envoyé dans le corps de la requête.</p>
+<p>POST <a href="#import-json"><em>/api/historian/v0/import/json</em></a>: Un endpoint pour importer des measures au format json envoyé dans le corps de la requête.</p>
 </li>
 <li>
-<p>POST <a href="#export-csv"><em>/api/historian/v0/export/csv</em></a>: Un endpoint pour exporter des points au format csv.</p>
+<p>POST <a href="#export-csv"><em>/api/historian/v0/export/csv</em></a>: Un endpoint pour exporter des measures au format csv.</p>
 </li>
 <li>
 <p>GET <a href="#grafana-simplejson-root"><em>/api/grafana/simplejson</em></a>: L&#8217;api pour interagir avec Grafana en utilisant le plugin datasource "SimpleJson".</p>
 </li>
 <li>
-<p>POST <a href="#grafana-simplejson-query"><em>/api/grafana/simplejson/query</em></a>: Permet d&#8217;obtenir les points de l&#8217;historian sur la base d&#8217;une requête.</p>
+<p>POST <a href="#grafana-simplejson-query"><em>/api/grafana/simplejson/query</em></a>: Permet d&#8217;obtenir les measures de l&#8217;historian sur la base d&#8217;une requête.</p>
 </li>
 <li>
 <p>POST <a href="#grafana-simplejson-search"><em>/api/grafana/simplejson/search</em></a>: Permet d&#8217;obtenir les noms des métriques de l&#8217;historian.</p>
@@ -538,7 +538,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <p>GET <a href="#grafana-hurence-datasource-root"><em>/api/grafana/v0</em></a>: L&#8217;api pour interagir avec Grafana en utilisant le plugin datasource de hurence "Hurence-Historian".</p>
 </li>
 <li>
-<p>POST <a href="#grafana-hurence-datasource-query"><em>/api/grafana/v0/query</em></a>: Permet d&#8217;obtenir les points de l&#8217;historian.</p>
+<p>POST <a href="#grafana-hurence-datasource-query"><em>/api/grafana/v0/query</em></a>: Permet d&#8217;obtenir les measures de l&#8217;historian.</p>
 </li>
 <li>
 <p>POST <a href="#grafana-hurence-datasource-search"><em>/api/grafana/v0/search</em></a>: Permet d&#8217;obtenir les noms des métriques de l&#8217;historian.</p>
@@ -568,12 +568,12 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sect2">
 <h3 id="ingestion-de-données"><a class="anchor" href="#ingestion-de-données"></a>Ingestion de données</h3>
 <div class="paragraph">
-<p>Ces endpoints servent à injecter des points dans l&#8217;historian :</p>
+<p>Ces endpoints servent à injecter des measures dans l&#8217;historian :</p>
 </div>
 <div class="sect3">
 <h4 id="import-csv"><a class="anchor" href="#import-csv"></a>POST /api/historian/v0/import/csv</h4>
 <div class="paragraph">
-<p>Permet d&#8217;injecter des points dans l&#8217;historian à partir de fichiers csv.
+<p>Permet d&#8217;injecter des measures dans l&#8217;historian à partir de fichiers csv.
 Le format de la requête attendue est une requête avec Content-Type: multipart/form-data;</p>
 </div>
 <table class="tableblock frame-all grid-all stretch">
@@ -618,7 +618,7 @@ Autrement dit, joindre plusieurs fichiers ou faire une requête par fichier est 
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">mapping.value</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">le nom de la colonne qui correspond à "value". C&#8217;est la valeur du point.
+<td class="tableblock halign-left valign-top"><p class="tableblock">le nom de la colonne qui correspond à "value". C&#8217;est la valeur du measure.
 Les valeurs de cette colonne doivent être des valeurs numériques.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Doit être un nom de colonne du header des fichiers csv joints.</p></td>
@@ -627,7 +627,7 @@ Les valeurs de cette colonne doivent être des valeurs numériques.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">mapping.timestamp</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom de la colonne du header qui correspond à "timestamp". C&#8217;est la date du point.
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom de la colonne du header qui correspond à "timestamp". C&#8217;est la date du measure.
 Par défaut cette colonne doit contenir un timestamp epoch en milliseconde (voir <a href="#import-csv-format_date">format_date</a>)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Doit être un nom de colonne du header des fichiers csv joints.</p></td>
@@ -636,7 +636,7 @@ Par défaut cette colonne doit contenir un timestamp epoch en milliseconde (voir
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">mapping.quality</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom de la colonne du header qui correspond à "quality". C&#8217;est la qualité du point
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom de la colonne du header qui correspond à "quality". C&#8217;est la qualité du measure
 (pour le moment la qualité n&#8217;est pas stockée dans l&#8217;historian)</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Doit être un nom de colonne du header des fichiers csv joints.</p></td>
@@ -677,11 +677,11 @@ Soit une autre valeur, dans ce cas cette valeur doit être un format de date val
 <td class="tableblock halign-left valign-top"><p class="tableblock">group_by</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Oui</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Ce paramètre est très important ! Si il est mal utilisé il est possible de corrompre les données déjà existantes.
-Il faut lister ici tous les champs qui vont être utilisés pour construire les chunks. Par défaut on groupe les points
+Il faut lister ici tous les champs qui vont être utilisés pour construire les chunks. Par défaut on groupe les measures
 en chunk uniquement en fonction de leur nom. Cependant il est possible de grouper également en fonction de la valeur de
 certains tags. Il faut savoir que cela va impacter la manière dont les données seront récupérées par la suite.
 Par exemple si on injecte des données en groupant par "name" et le tag "usine". Alors on pourra requêter les valeurs
-pour chaque usine en filtrant sur la bonne valeur du tag usine (voir l&#8217;api pour requêter les points). Seulement si
+pour chaque usine en filtrant sur la bonne valeur du tag usine (voir l&#8217;api pour requêter les measures). Seulement si
 par la suite quelqu&#8217;un injecte d&#8217;autres données sans grouper par le tag "usine" alors les données vont se retrouver mélangées.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Les valeurs acceptées sont "name" (peu importe le mapping utilisez "name" et non le nom de la colonne dans le csv).
@@ -862,7 +862,7 @@ http://localhost:8080/historian-server/ingestion/csv \
 <div class="sect3">
 <h4 id="import-json"><a class="anchor" href="#import-json"></a>POST /api/historian/v0/import/json</h4>
 <div class="paragraph">
-<p>Permet d&#8217;injecter des points dans l&#8217;historian à partir d&#8217;un corps de requête au format json.
+<p>Permet d&#8217;injecter des measures dans l&#8217;historian à partir d&#8217;un corps de requête au format json.
 Le format de la requête attendue est une requête avec Content-Type: application/json;</p>
 </div>
 <div class="paragraph">
@@ -873,14 +873,14 @@ Le format de la requête attendue est une requête avec Content-Type: applicatio
 <pre class="CodeRay highlight"><code data-lang="json">[
     {
         <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">temp</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">points</span><span class="delimiter">&quot;</span></span>: [
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">measures</span><span class="delimiter">&quot;</span></span>: [
             [<span class="integer">100</span>, <span class="float">1.0</span>],
             [<span class="integer">200</span>, <span class="float">1.2</span>]
         ]
     },
    {
         <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">temp_2</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">points</span><span class="delimiter">&quot;</span></span>: [
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">measures</span><span class="delimiter">&quot;</span></span>: [
            [<span class="integer">100</span>, <span class="float">1.7</span>],
            [<span class="integer">200</span>, <span class="float">1.9</span>]
         ]
@@ -896,7 +896,7 @@ Le format de la requête attendue est une requête avec Content-Type: applicatio
 <pre class="CodeRay highlight"><code data-lang="json">[
     {
         <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">temp</span><span class="delimiter">&quot;</span></span>,
-        <span class="key"><span class="delimiter">&quot;</span><span class="content">points</span><span class="delimiter">&quot;</span></span>: [
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">measures</span><span class="delimiter">&quot;</span></span>: [
             [<span class="integer">100</span>, <span class="float">1.0</span>]
         ]
     }
@@ -928,11 +928,11 @@ Le format de la requête attendue est une requête avec Content-Type: applicatio
 </thead>
 <tbody>
 <tr>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom de la métrique pour laquelle on va injecter les points.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom de la métrique pour laquelle on va injecter les measures.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Oui</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">/points</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">/measures</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Array d&#8217;array</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Les points pour créer un chunk avec le nom de métrique assigné à 'name'. Les points sont a renseigner sous la forme
+<td class="tableblock halign-left valign-top"><p class="tableblock">Les measures pour créer un chunk avec le nom de métrique assigné à 'name'. Les measures sont a renseigner sous la forme
 [[timestsamp&lt;long&gt;, value&lt;double&gt;],..,[timestsamp&lt;long&gt;, value&lt;double&gt;]].</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Oui</p></td>
 </tr>
@@ -968,7 +968,7 @@ Le format de la requête attendue est une requête avec Content-Type: applicatio
 <div class="sect3">
 <h4 id="export-csv"><a class="anchor" href="#export-csv"></a>POST /api/historian/v0/export/csv</h4>
 <div class="paragraph">
-<p>Permet de rechercher des points et les exporter en csv pour les métriques désirées.</p>
+<p>Permet de rechercher des measures et les exporter en csv pour les métriques désirées.</p>
 </div>
 <div class="paragraph">
 <p>Ce endpoint utilise la même requête que l&#8217;endpoint query mais il donne la réponse en csv.</p>
@@ -1004,7 +1004,7 @@ temp_b,767.0,1477917224866</code></pre>
 <div class="sect4">
 <h5 id="grafana-simplejson-query"><a class="anchor" href="#grafana-simplejson-query"></a>POST /api/grafana/simplejson/query</h5>
 <div class="paragraph">
-<p>Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponibles.</p>
+<p>Permet de rechercher des measures pour les métriques désirées. Divers paramètres sont disponibles.</p>
 </div>
 <div class="paragraph">
 <p>Exemple de requête :</p>
@@ -1077,7 +1077,7 @@ temp_b,767.0,1477917224866</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/targets</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">array</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Permet de renseigner les métriques pour lesquelles on souhaite obtenir des points.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Permet de renseigner les métriques pour lesquelles on souhaite obtenir des measures.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Oui</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -1085,7 +1085,7 @@ temp_b,767.0,1477917224866</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/targets/target</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom d&#8217;une métrique pour laquelle on souhaite obtenir des points.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le nom d&#8217;une métrique pour laquelle on souhaite obtenir des measures.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Oui (au moins une métrique doit être renseignée)</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -1093,7 +1093,7 @@ temp_b,767.0,1477917224866</code></pre>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/range/from</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">La date de début pour rechercher les points. Il ne sera retourné que les points avec une
+<td class="tableblock halign-left valign-top"><p class="tableblock">La date de début pour rechercher les measures. Il ne sera retourné que les measures avec une
 date supérieure ou égale à cette date.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Doit réprésenter une date au format suivant (UTC) : <strong>yyyy-MM-dd&#8217;T&#8217;HH:mm:ss.SSS</strong></p></td>
@@ -1102,7 +1102,7 @@ date supérieure ou égale à cette date.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/range/to</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">La date de fin pour rechercher les points. Il ne sera retourné que les points avec une
+<td class="tableblock halign-left valign-top"><p class="tableblock">La date de fin pour rechercher les measures. Il ne sera retourné que les measures avec une
 date inférieure ou égale à cette date.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Doit réprésenter une date au format suivant (UTC) : <strong>yyyy-MM-dd&#8217;T&#8217;HH:mm:ss.SSS</strong></p></td>
@@ -1111,8 +1111,8 @@ date inférieure ou égale à cette date.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/maxDataPoints</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">long</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Le nombre maximum de point désirés pour chaque métrique (En effet le but est de tracer des points sur un graphe).
-Si nécessaire les points seront échantillonnés avec un algorithme de sampling par défaut.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le nombre maximum de measure désirés pour chaque métrique (En effet le but est de tracer des measures sur un graphe).
+Si nécessaire les measures seront échantillonnés avec un algorithme de sampling par défaut.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">positif</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1000</p></td>
@@ -1489,7 +1489,7 @@ la valeur de <em>matchAny</em>.</p></td>
 <div class="sect4">
 <h5 id="grafana-hurence-datasource-query"><a class="anchor" href="#grafana-hurence-datasource-query"></a>POST /api/grafana/v0/query</h5>
 <div class="paragraph">
-<p>Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponibles.</p>
+<p>Permet de rechercher des measures pour les métriques désirées. Divers paramètres sont disponibles.</p>
 </div>
 <div class="paragraph">
 <p>Exemple de requête :</p>
@@ -1573,7 +1573,7 @@ la valeur de <em>matchAny</em>.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/names</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">array</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Permet de renseigner les métriques pour lesquelles on souhaite obtenir des points.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Permet de renseigner les métriques pour lesquelles on souhaite obtenir des measures.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Oui</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -1581,7 +1581,7 @@ la valeur de <em>matchAny</em>.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">from</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">La date de début pour rechercher les points. Il ne sera retourné que les points avec une
+<td class="tableblock halign-left valign-top"><p class="tableblock">La date de début pour rechercher les measures. Il ne sera retourné que les measures avec une
 date supérieure ou égale à cette date.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Doit réprésenter une date au format suivant (UTC) : <strong>yyyy-MM-dd&#8217;T&#8217;HH:mm:ss.SSS</strong></p></td>
@@ -1590,7 +1590,7 @@ date supérieure ou égale à cette date.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">to</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">La date de fin pour rechercher les points. Il ne sera retourné que les points avec une
+<td class="tableblock halign-left valign-top"><p class="tableblock">La date de fin pour rechercher les measures. Il ne sera retourné que les measures avec une
 date inférieure ou égale à cette date.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Doit réprésenter une date au format suivant (UTC) : <strong>yyyy-MM-dd&#8217;T&#8217;HH:mm:ss.SSS</strong></p></td>
@@ -1599,8 +1599,8 @@ date inférieure ou égale à cette date.</p></td>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/max_data_points</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">long</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Le nombre maximum de point désirés pour chaque métrique (En effet le but est de tracer des points sur un graphe).
-Si nécessaire les points seront échantillonnés avec un algorithme de sampling par défaut.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Le nombre maximum de measure désirés pour chaque métrique (En effet le but est de tracer des measures sur un graphe).
+Si nécessaire les measures seront échantillonnés avec un algorithme de sampling par défaut.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">positif</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">1000</p></td>
@@ -1608,8 +1608,8 @@ Si nécessaire les points seront échantillonnés avec un algorithme de sampling
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/sampling</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Un objet qui va contenir les information des paramètres à utiliser pour l&#8217;échantillonage des points si le nombre de points
-à retourner est supérieur au nombre maximum de point demandé.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Un objet qui va contenir les information des paramètres à utiliser pour l&#8217;échantillonage des measures si le nombre de measures
+à retourner est supérieur au nombre maximum de measure demandé.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"></td>
 <td class="tableblock halign-left valign-top"></td>
@@ -1620,21 +1620,21 @@ Si nécessaire les points seront échantillonnés avec un algorithme de sampling
 <td class="tableblock halign-left valign-top"><p class="tableblock">L&#8217;algorithme à utiliser pour l&#8217;échantillonnage</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">les valeurs possibles sont ["NONE", "AVERAGE", "FIRST", "MIN", "MAX"]</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">AVERAGE (la moyenne des points pour chaque bucket, le timestamp utilisé est celui du premier point du bucket)</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">AVERAGE (la moyenne des measures pour chaque bucket, le timestamp utilisé est celui du premier measure du bucket)</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/sampling/bucket_size</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Int</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">La taille des buckets souhaité pour échantillonner les données. Attention cette taille peut être changée par le serveur
-si cela est incompatible avec le nombre maximum de point retournés souhaité.</p></td>
+si cela est incompatible avec le nombre maximum de measure retournés souhaité.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Calculé automatiquement par le serveur afin d&#8217;obtenir au plus le nombre maximum de points.</p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock">Calculé automatiquement par le serveur afin d&#8217;obtenir au plus le nombre maximum de measures.</p></td>
 </tr>
 <tr>
 <td class="tableblock halign-left valign-top"><p class="tableblock">/tags</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">String</p></td>
-<td class="tableblock halign-left valign-top"><p class="tableblock">Permet d&#8217;obtenir uniquement les points des chunks qui contiennent les tags renseignés. Les tags doivent être indiqués
+<td class="tableblock halign-left valign-top"><p class="tableblock">Permet d&#8217;obtenir uniquement les measures des chunks qui contiennent les tags renseignés. Les tags doivent être indiqués
 sous la forme d&#8217;une map de clés / valeurs.</p></td>
 <td class="tableblock halign-left valign-top"><p class="tableblock">Non</p></td>
 <td class="tableblock halign-left valign-top"></td>

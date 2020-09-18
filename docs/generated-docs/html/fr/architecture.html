@@ -545,7 +545,7 @@ nécessaires pour créer les différentes collections utilisées par notre histo
 <h3 id="loader"><a class="anchor" href="#loader"></a>loader</h3>
 <div class="paragraph">
 <p>Le loader contient des jobs batch. Pour l&#8217;instant ce module ne contient qu&#8217;un unique job qui sert a recompacter les chunks de l&#8217;historian avec différentes tailles paramétrables (le compacteur). Par exemple lors de l&#8217;injection temps réel dans le data historian, on injecte des chunks de petites tailles. Hors, pour optimiser les performances nous avons besoin de chunks de grosses tailles.
-De plus selon le type de requêtes effectuées et la fréquence des points pour une métrique donnée , pouvoir jouer sur la taille des chunks, et la faire varier selon le cas d&#8217;usage, est très important.</p>
+De plus selon le type de requêtes effectuées et la fréquence des measures pour une métrique donnée , pouvoir jouer sur la taille des chunks, et la faire varier selon le cas d&#8217;usage, est très important.</p>
 </div>
 <div class="paragraph">
 <p>Par exemple si l&#8217;on fait des requêtes sur de grandes périodes, nous avons besoin de gros chunks pour gagner en performance. En effet nous n&#8217;aurons même pas besoin de décompresser ces chunks, utiliser leur agrégation précalculée sera suffisant.

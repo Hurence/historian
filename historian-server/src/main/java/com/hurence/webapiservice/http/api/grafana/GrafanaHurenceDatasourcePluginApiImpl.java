@@ -328,10 +328,10 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                         JsonObject el = (JsonObject) metric;
                         String metricName = el.getString(TIMESERIE_NAME);
                         int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
-                        LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
+                        LOGGER.debug("[REQUEST ID {}] return {} measures for metric {}.",
                                 request.getRequestId(),size, metricName);
                     });
-                    LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
+                    LOGGER.debug("[REQUEST ID {}] Sampled a total of {} measures in {} ms.",
                             request.getRequestId(),
                             sampledTimeSeriesRsp.getLong(HistorianServiceFields.TOTAL_POINTS, 0L),
                             System.currentTimeMillis() - startRequest);

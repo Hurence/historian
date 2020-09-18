@@ -1,10 +1,7 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
-import com.hurence.timeseries.modele.points.PointWithQualityImpl;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -37,9 +34,9 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
     }
 
     @Override
-    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<ChunkVersionCurrent> chunks) {
-        List<Point> sampledPoint = extractPoints(chunks);
-        this.sampledPoints.addAll(sampledPoint);
+    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks) {
+        List<Measure> sampledMeasure = extractPoints(chunks);
+        this.sampledMeasures.addAll(sampledMeasure);
         aggsCalculator.updateAggs(chunks);
     }
 
@@ -48,19 +45,19 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<Point> extractPoints(List<ChunkVersionCurrent> chunks) {
-        List<List<ChunkVersionCurrent>> groupedChunks = groupChunks(chunks, this.samplingConf.getBucketSize());
+    private List<Measure> extractPoints(List<Chunk> chunks) {
+        List<List<Chunk>> groupedChunks = groupChunks(chunks, this.samplingConf.getBucketSize());
         return groupedChunks.stream()
                 .map(this::sampleChunksIntoOneAggPoint)
-                .sorted(Comparator.comparing(Point::getTimestamp))
+                .sorted(Comparator.comparing(Measure::getTimestamp))
                 .collect(Collectors.toList());
     }
 
-    private List<List<ChunkVersionCurrent>> groupChunks(List<ChunkVersionCurrent> chunks, int bucketSize) {
-        List<List<ChunkVersionCurrent>> groupedChunks = new ArrayList<>();
+    private List<List<Chunk>> groupChunks(List<Chunk> chunks, int bucketSize) {
+        List<List<Chunk>> groupedChunks = new ArrayList<>();
         int currentPointNumber = 0;
-        List<ChunkVersionCurrent> bucketOfChunks = new ArrayList<>();
-        for (ChunkVersionCurrent chunk: chunks) {
+        List<Chunk> bucketOfChunks = new ArrayList<>();
+        for (Chunk chunk: chunks) {
             bucketOfChunks.add(chunk);
             currentPointNumber += chunk.getCount();
             if (currentPointNumber >= bucketSize) {
@@ -74,33 +71,33 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         return groupedChunks;
     }
 
-    private Point sampleChunksIntoOneAggPoint(List<ChunkVersionCurrent> chunks) {
+    private Measure sampleChunksIntoOneAggPoint(List<Chunk> chunks) {
         if (chunks.isEmpty())
             throw new IllegalArgumentException("chunks can not be empty !");
         LOGGER.trace("sampling chunks (showing first one) : {}", chunks.get(0));
         long timestamp = chunks.stream()
-                .mapToLong(ChunkVersionCurrent::getStart)
+                .mapToLong(Chunk::getStart)
                 .findFirst()
                 .getAsLong();
         double aggValue = getAggValue(chunks);
         Float quality = getQualityValue(chunks);
         if (returnQuality && !quality.isNaN())
-            return new PointWithQualityImpl(timestamp, aggValue, quality);
+            return Measure.fromValueAndQuality(timestamp, aggValue, quality);
         else if (returnQuality)
-            return new PointWithQualityImpl(timestamp, aggValue, Point.DEFAULT_QUALITY);
+            return Measure.fromValueAndQuality(timestamp, aggValue, Measure.DEFAULT_QUALITY);
         else
-            return new PointImpl(timestamp, aggValue);
+            return Measure.fromValue(timestamp, aggValue);
     }
 
-    private double getAggValue(List<ChunkVersionCurrent> chunks) {
+    private double getAggValue(List<Chunk> chunks) {
         double aggValue;
         switch (samplingConf.getAlgo()) {
             case AVERAGE:
                 double sum = chunks.stream()
-                        .mapToDouble(ChunkVersionCurrent::getSum)
+                        .mapToDouble(Chunk::getSum)
                         .sum();
                 long numberOfPoint = chunks.stream()
-                        .mapToLong(ChunkVersionCurrent::getCount)
+                        .mapToLong(Chunk::getCount)
                         .sum();
                 aggValue = BigDecimal.valueOf(sum)
                         .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
@@ -108,19 +105,19 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
                 break;
             case FIRST:
                 aggValue = chunks.stream()
-                        .mapToDouble(ChunkVersionCurrent::getFirst)
+                        .mapToDouble(Chunk::getFirst)
                         .findFirst()
                         .getAsDouble();
                 break;
             case MIN:
                 aggValue = chunks.stream()
-                        .mapToDouble(ChunkVersionCurrent::getMin)
+                        .mapToDouble(Chunk::getMin)
                         .min()
                         .getAsDouble();
                 break;
             case MAX:
                 aggValue = chunks.stream()
-                        .mapToDouble(ChunkVersionCurrent::getMax)
+                        .mapToDouble(Chunk::getMax)
                         .max()
                         .getAsDouble();
                 break;
@@ -133,17 +130,18 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
         }
         return aggValue;
     }
-    private Float getQualityValue(List<ChunkVersionCurrent> chunks) {
+
+    private Float getQualityValue(List<Chunk> chunks) {
         Float quality;
         switch (qualityAgg) {
             case AVG:
             case NONE:  // is it good to chose AVG if qualityAgg is NONE ?
                 try {
                     long numberOfPoint = chunks.stream()
-                            .mapToLong(ChunkVersionCurrent::getCount)
+                            .mapToLong(Chunk::getCount)
                             .sum();
                     float qualitySum = (float) chunks.stream()
-                            .mapToDouble(ChunkVersionCurrent::getQualitySum)
+                            .mapToDouble(Chunk::getQualitySum)
                             .sum();
                     quality = BigDecimal.valueOf(qualitySum)
                             .divide(BigDecimal.valueOf(numberOfPoint), 3, RoundingMode.HALF_UP)
@@ -155,7 +153,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             case FIRST:
                 try {
                     quality = (float) chunks.stream()
-                            .mapToDouble(ChunkVersionCurrent::getQualityFirst)
+                            .mapToDouble(Chunk::getQualityFirst)
                             .findFirst()
                             .getAsDouble();
                 } catch (Exception e) {
@@ -165,7 +163,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             case MIN:
                 try {
                     quality = (float) chunks.stream()
-                            .mapToDouble(ChunkVersionCurrent::getQualityMin)
+                            .mapToDouble(Chunk::getQualityMin)
                             .min()
                             .getAsDouble();
                 } catch (Exception e) {
@@ -175,7 +173,7 @@ public class TimeSeriesExtracterUsingPreAgg extends AbstractTimeSeriesExtracter 
             case MAX:
                 try {
                     quality = (float) chunks.stream()
-                            .mapToDouble(ChunkVersionCurrent::getQualityMax)
+                            .mapToDouble(Chunk::getQualityMax)
                             .max()
                             .getAsDouble();
                 } catch (Exception e) {
