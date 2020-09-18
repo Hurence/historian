@@ -175,6 +175,19 @@ public abstract class AbstractQueryEndPointIT {
                 "/http/grafana/hurence/query/testNames/objectNameWithoutTags/expectedResponse.json");
     }
 
+    /**
+     * bug found the 03/09/2020. Not working with special characters !
+     * @param vertx
+     * @param testContext
+     */
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithSpecialCharacters(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/metric-name/special-characters/request.json",
+                "/http/grafana/hurence/query/metric-name/special-characters/expectedResponse.json");
+    }
+
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
         assertHelper.assertRequestGiveArrayResponseFromFile(vertx, testContext, requestFile, responseFile);

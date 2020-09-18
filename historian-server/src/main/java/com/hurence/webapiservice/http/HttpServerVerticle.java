@@ -34,7 +34,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     public static final String CONFIG_HISTORIAN_ADDRESS = "historian.address";
     public static final String CONFIG_DEBUG_MODE = "debug";
     public static final String CONFIG_TIMESERIES_ADDRESS = "timeseries.address";
-    public static final String CONFIG_MAX_CSV_POINTS_ALLOWED = "max_data_points_allowed_for_ExportCsv";
+    public static final String CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED = "max_data_points_maximum_allowed";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HttpServerVerticle.class);
 
@@ -89,14 +89,16 @@ public class HttpServerVerticle extends AbstractVerticle {
                 .setDeleteUploadedFilesOnEnd(true)
         );
         //main
-        Router mainApi = new MainHistorianApiImpl(historianService, conf.getMaxDataPointsAllowedForExportCsv()).getMainRouter(vertx);
+        Router mainApi = new MainHistorianApiImpl(historianService, conf.getMaxDataPointsAllowed())
+                .getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
-        //TODO config uploads tmp then delete
         router.mountSubRouter(IMPORT_ENDPOINT, importApi);
         //grafana
-        Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService).getGraphanaRouter(vertx);
-        Router simpleJsonGraphanaApi = new  GrafanaSimpleJsonPluginApiImpl(historianService).getGraphanaRouter(vertx);
+        Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService,conf.getMaxDataPointsAllowed())
+                .getGraphanaRouter(vertx);
+        Router simpleJsonGraphanaApi = new  GrafanaSimpleJsonPluginApiImpl(historianService,conf.getMaxDataPointsAllowed())
+                .getGraphanaRouter(vertx);
         router.mountSubRouter(SIMPLE_JSON_GRAFANA_API_ENDPOINT, simpleJsonGraphanaApi);
         router.mountSubRouter(HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT, hurenceGraphanaApi);
 

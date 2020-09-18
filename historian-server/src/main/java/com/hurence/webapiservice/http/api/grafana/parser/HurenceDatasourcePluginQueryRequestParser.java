@@ -1,8 +1,9 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
-import com.hurence.historian.modele.HistorianFields;
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
+import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.hurence.historian.modele.HistorianServiceFields.QUALITY_VALUE;
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;
 import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 
@@ -21,6 +23,7 @@ public class HurenceDatasourcePluginQueryRequestParser {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(HurenceDatasourcePluginQueryRequestParser.class);
 
+    public final static String NAME = "name";
     private final String fromJsonPath;
     private final String toJsonPath;
     private final String namesJsonPath;
@@ -31,6 +34,10 @@ public class HurenceDatasourcePluginQueryRequestParser {
     private final String bucketSizeJsonPath;
     private final String requestIdJsonPath;
     private final String aggregationPath;
+    private final String qualityValuePath;
+    private final String qualityAggPath;
+    private final String qualityReturnPath;
+
 
     public HurenceDatasourcePluginQueryRequestParser(String fromJsonPath,
                                                      String toJsonPath,
@@ -41,7 +48,10 @@ public class HurenceDatasourcePluginQueryRequestParser {
                                                      String samplingAlgoJsonPath,
                                                      String bucketSizeJsonPath,
                                                      String requestIdJsonPath,
-                                                     String aggregationPath) {
+                                                     String aggregationPath,
+                                                     String qualityValuePath,
+                                                     String qualityAggPath,
+                                                     String qualityReturnPath) {
         this.fromJsonPath = fromJsonPath;
         this.toJsonPath = toJsonPath;
         this.namesJsonPath = namesJsonPath;
@@ -52,9 +62,13 @@ public class HurenceDatasourcePluginQueryRequestParser {
         this.bucketSizeJsonPath = bucketSizeJsonPath;
         this.requestIdJsonPath = requestIdJsonPath;
         this.aggregationPath= aggregationPath;
+        this.qualityValuePath = qualityValuePath;
+        this.qualityAggPath = qualityAggPath;
+        this.qualityReturnPath = qualityReturnPath;
     }
 
-    public HurenceDatasourcePluginQueryRequestParam parseRequest(JsonObject requestBody) throws IllegalArgumentException {
+    public HurenceDatasourcePluginQueryRequestParam parseRequest(
+            JsonObject requestBody) throws IllegalArgumentException {
         LOGGER.debug("trying to parse requestBody : {}", requestBody);
         HurenceDatasourcePluginQueryRequestParam.Builder builder = new HurenceDatasourcePluginQueryRequestParam.Builder();
         Long from = parseFrom(requestBody);
@@ -106,8 +120,28 @@ public class HurenceDatasourcePluginQueryRequestParser {
         if (agreg != null) {
             builder.withAggreg(agreg);
         }
+        Float qualityValue = parseQualityValue(requestBody);
+
+        boolean useQuality;
+        if (qualityValue != null) {
+            builder.withQualityValue(qualityValue);
+            useQuality = true;
+        } else {
+            useQuality = false;
+        }
+        builder.withUseQuality(useQuality);
+
+        QualityAgg qualityAgg = parseQualityAgg(requestBody);
+        if (qualityAgg != null) {
+            builder.withQualityAgg(qualityAgg);
+        }
+        Boolean qualityReturn = parseQualityReturn(requestBody);
+        if (qualityReturn != null) {
+            builder.withQualityReturn(qualityReturn);
+        }
         return builder.build();
     }
+
 
     private List<AGG> parseAggreg(JsonObject requestBody) {
         return parseListAGG(requestBody, aggregationPath);
@@ -131,6 +165,10 @@ public class HurenceDatasourcePluginQueryRequestParser {
         return SamplingAlgorithm.valueOf(algoStr.toUpperCase());
     }
 
+    private Boolean parseQualityReturn(JsonObject requestBody) {
+        return parseBoolean(requestBody, qualityReturnPath);
+    }
+
     private JsonArray parseMetricNames(JsonObject requestBody) {
         try {
             JsonPointer jsonPointer = JsonPointer.from(namesJsonPath);
@@ -142,10 +180,13 @@ public class HurenceDatasourcePluginQueryRequestParser {
                         if (el instanceof JsonObject) {
                             JsonObject jsonObject = (JsonObject) el;
                             JsonObject toReturn = new JsonObject()
-                                    .put(HistorianFields.NAME, jsonObject.getString(HistorianFields.NAME));
+                                    .put(HistorianServiceFields.NAME, jsonObject.getString(NAME));
                             Map<String, String> tags = parseTags(jsonObject);
+                            Float qualityValue = parseQualityValue(jsonObject);
+                            if (qualityValue != null)
+                                toReturn.put(QUALITY_VALUE, qualityValue);
                             if (!tags.isEmpty())
-                                toReturn.put(HistorianFields.TAGS, tags);
+                                toReturn.put(HistorianServiceFields.TAGS, tags);
                             if (jsonObject.containsKey(QUERY_PARAM_REF_ID))
                                 toReturn.put(QUERY_PARAM_REF_ID, jsonObject.getString(QUERY_PARAM_REF_ID));
                             return toReturn;
@@ -179,6 +220,14 @@ public class HurenceDatasourcePluginQueryRequestParser {
 
     private Integer parseMaxDataPoints(JsonObject requestBody) {
         return parse(requestBody, maxDatapointsJsonPath, Integer.class);
+    }
+
+    private Float parseQualityValue(JsonObject requestBody) {
+        return parseFloat(requestBody, qualityValuePath);
+    }
+
+    private QualityAgg parseQualityAgg(JsonObject requestBody) {
+        return parseQualityAggregation(requestBody, qualityAggPath);
     }
 
 }

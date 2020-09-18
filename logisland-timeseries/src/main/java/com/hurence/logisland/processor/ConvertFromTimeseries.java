@@ -21,7 +21,7 @@ import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
 import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.PropertyDescriptor;
 import com.hurence.logisland.record.*;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord;
+import com.hurence.logisland.BinaryCompactionConverterOfRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

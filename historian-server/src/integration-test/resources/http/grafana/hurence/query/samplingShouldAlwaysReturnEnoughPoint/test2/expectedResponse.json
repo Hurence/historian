@@ -1,0 +1,10 @@
+[
+  {
+    "name":"metric_10_chunk",
+    "datapoints":[[19629.0,1],[58887.0,39259]],
+    "total_points":2,
+    "aggregation":{
+      "COUNT":78462.0
+    }
+  }
+]

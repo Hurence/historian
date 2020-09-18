@@ -1,12 +1,13 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.model.MeasureRecordV0
+import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
+import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.{Dataset, SparkSession}
 
-class EvoaCSVMeasuresReader extends Reader[MeasureRecordV0] {
+class EvoaCSVMeasuresReader extends Reader[Measure] {
 
   def config(): Map[String, String] = Map(
     "inferSchema" -> "true",
@@ -16,7 +17,7 @@ class EvoaCSVMeasuresReader extends Reader[MeasureRecordV0] {
   )
 
 
-  override def read(options: Options): Dataset[MeasureRecordV0] = {
+  override def read(options: Options): Dataset[Measure] = {
 
 
     val spark = SparkSession.getActiveSession.get
@@ -31,18 +32,19 @@ class EvoaCSVMeasuresReader extends Reader[MeasureRecordV0] {
       .format("csv")
       .options(options.config)
       .load(options.path)
-      .withColumn("time_ms", unix_timestamp($"timestamp", dateFmt) * 1000)
-      .withColumn("year", year(to_date($"timestamp", dateFmt)))
-      .withColumn("month", month(to_date($"timestamp", dateFmt)))
-      .withColumn("day", dayofmonth(to_date($"timestamp", dateFmt)))
-      .withColumn("week", weekofyear(to_date($"timestamp", dateFmt)))
-      .withColumn("name", regexp_extract($"tagname", csvRegexp, 1))
+      .withColumn(HistorianChunkCollectionFieldsVersion0.CHUNK_YEAR, year(to_date($"timestamp", dateFmt)))
+      .withColumn(HistorianChunkCollectionFieldsVersion0.CHUNK_MONTH, month(to_date($"timestamp", dateFmt)))
+      .withColumn(HistorianChunkCollectionFieldsVersion0.CHUNK_DAY, dayofmonth(to_date($"timestamp", dateFmt)))
+      .withColumn(HistorianChunkCollectionFieldsVersion0.NAME, regexp_extract($"tagname", csvRegexp, 1))
+      //TODO should add those as tags
       .withColumn("code_install", regexp_extract($"tagname", csvRegexp, 2))
       .withColumn("sensor", regexp_extract($"tagname", csvRegexp, 3))
-      .withColumn("numeric_type", regexp_extract($"tagname", csvRegexp, 4))
-      .select("name", "value", "quality", "code_install", "sensor", "timestamp", "time_ms", "year", "month", "week", "day")
-      .orderBy(asc("name"), asc("time_ms"))
+      .select("name", "value", "quality", "code_install",
+        "sensor", "timestamp", "time_ms", "year", "month", "week", "day")
+      .orderBy(asc("name"), asc("timestamp"))
 
-    measuresDF.as[MeasureRecordV0]
+//    measuresDF.as[MeasureVersionV0]
+    null
+    //TODO
   }
 }

@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.modele;
 
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 
 public class SamplingConf {
     private SamplingAlgorithm algo;

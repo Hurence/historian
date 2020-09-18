@@ -1,12 +1,10 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
-import com.hurence.logisland.timeseries.functions.aggregation.Max;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.core.json.pointer.JsonPointer;
-import org.json.simple.JSONArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,7 +15,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam.DEFAULT_ALL_AGGREGATION_LIST;
-import static com.hurence.webapiservice.modele.AGG.*;
+import static com.hurence.webapiservice.modele.AGG.values;
 
 public class RequestParserUtil {
 
@@ -107,6 +105,64 @@ public class RequestParserUtil {
 
     public static String parseString(JsonObject requestBody, String pointer) {
         return parse(requestBody, pointer, String.class);
+    }
+
+    public static QualityAgg parseQualityAggregation(JsonObject requestBody, String qualityAggPath) {
+        LOGGER.debug("trying to parse pointer {}", qualityAggPath);
+        JsonPointer jsonPointer = JsonPointer.from(qualityAggPath);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        try {
+            return QualityAgg.valueOf(fromObj.toString());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(fromObj.toString()+ " is not a recognized aggregation ");
+        }
+    }
+
+    public static Float parseFloat(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof Number) { // TODO check this !
+            try {
+                return convertToFloat(fromObj);
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid Float !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not of class Float !",
+                        pointer, fromObj));
+    }
+
+    public static Boolean parseBoolean(JsonObject requestBody, String pointer) {
+        LOGGER.debug("trying to parse pointer {}", pointer);
+        JsonPointer jsonPointer = JsonPointer.from(pointer);
+        Object fromObj = jsonPointer.queryJson(requestBody);
+        if (fromObj == null)
+            return null;
+        if (fromObj instanceof Boolean) {
+            try {
+                return (Boolean) fromObj;
+            } catch (ClassCastException e) {
+                throw new IllegalArgumentException(
+                        String.format("'%s' json pointer value '%s' could not be cast as a valid Boolean !",
+                                pointer, fromObj), e);
+            }
+        }
+        throw new IllegalArgumentException(
+                String.format("'%s' json pointer value '%s' is not of class Boolean !",
+                        pointer, fromObj));
+    }
+
+    public static Float convertToFloat(Object value) {
+        Double doubleValue = (Double) value;
+        return doubleValue.floatValue();
     }
 
     public static <T> T parse(JsonObject requestBody, String pointer, Class<T> clazz) {

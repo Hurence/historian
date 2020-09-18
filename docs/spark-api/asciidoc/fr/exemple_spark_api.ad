@@ -1,0 +1,333 @@
+= Exemple SPARK API
+:subtitle: Data Historian 1.0
+:doctype: book
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
+:author: (C)Hurence
+:email: contact@hurence.com
+:revnumber: v1.0
+:revdate: 18.02.2020
+:revremark: First draft
+:toc:
+:toclevels: 4
+
+== Setup environnement
+Pour commencer veuillez créer un dossier hdh_workspace par exemple qu'on va appeler $HDH_HOME.
+
+```
+# create the workspace anywhere you want
+mkdir ~/hdh_workspace
+export HDH_HOME=~/hdh_workspace
+```
+== Installation de l'historian
+
+Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
+et les chunks. Téléchargez la dernière version de l'historian à l'adresse suivante
+https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-install.tgz[historian-1.3.5.tgz].
+Décompressez l'archive et entrez dedans, ensuite commencez l'installation en tapant la commande suivante :
+
+[source,bash]
+----
+sudo ./bin/install.sh
+----
+== Démarrer Apache Solr
+Apache SolR est la base de donnée utilisée par l’historian, elle peut être remplacée par un autre
+moteur de recherche.
+Rendez-vous dans le dossier solr-8.2.0 et appliquez ces commandes :
+
+```
+# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node1 -p 8983
+# démarre un second core Solr localement qui va utiliser le serveur zookeeper
+précédamment créer.
+bin/solr start -cloud -s $SOLR_HOME/data/solr/node2/ -p 7574 -z localhost:9983
+```
+
+Vérifiez que votre instance solr fonctionne correctement en allant sur l’interface graphique à
+l’adresse suivante : "http://<solrhost>:8983/solr/#/~cloud"
+
+== Création du projet
+Pour tester notre api vous aurez besoin d'installez un IDE, dans notre cas nous allons utilizer
+IntelliJ IDEA:
+Créez un nouveau projet:
+
+File > New > Project
+
+Il faut spécifier Maven : un outil de gestion et automatisation de production
+des projets logiciels JAVA.
+Il faut choisir aussi la version 1.8 de java dans "project SDK" (il faut télécharger et installer le
+Java SE Development Kit).
+
+Ensuite nommez votre projet et valider (dans notre cas on va l'appeller SPARK API tutorial).
+
+
+
+Créez un dossier sous le nom "scala" sous le chemin SPARK API tutorial > src > main
+
+et le convertir en un dossier "source root" pour qu'il soit compilable : clic droit sur le dossier, mark directory as
+puis source root.
+
+
+== Modification du fichier pom.xml
+Maven nous offre la possibilité d'ajouter des bibliothèques tierces à notre application.
+il suffit alors d'ajouter une balise <dependency> sous la section <dependencies>.
+On commence par l'ajout de scala car notre SPARK API est codé en scala.
+
+```
+<dependency>
+    <groupId>org.scala-lang</groupId>
+    <artifactId>scala-library</artifactId>
+    <version>2.11.12</version>
+</dependency>
+```
+On aura besoin aussi de plusieurs autres bibliothèques comme :
+
+spark-core:
+```
+<dependency>
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-core_2.11</artifactId>
+    <version>2.3.2</version>
+    <exclusions>
+        <exclusion>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </exclusion>
+    </exclusions>
+</dependency>
+```
+Apache spark-sql:
+```
+<dependency>
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-sql_2.11</artifactId>
+    <version>2.3.2</version>
+</dependency>
+```
+Apache spark mllib:
+```
+<dependency>
+    <groupId>org.apache.spark</groupId>
+    <artifactId>spark-mllib_2.11</artifactId>
+    <version>2.3.2</version>
+    <scope>runtime</scope>
+</dependency>
+```
+Apache solr:
+```
+<dependency>
+    <groupId>org.apache.solr</groupId>
+    <artifactId>solr-core</artifactId>
+    <version>8.2.0</version>
+    <type>jar</type>
+    <scope>compile</scope>
+</dependency>
+```
+Spark solr:
+```
+<dependency>
+    <groupId>com.lucidworks.spark</groupId>
+    <artifactId>spark-solr</artifactId>
+    <version>3.6.6</version>
+</dependency>
+```
+log4j:
+```
+<dependency>
+    <groupId>log4j</groupId>
+    <artifactId>log4j</artifactId>
+    <version>1.2.16</version>
+</dependency>
+```
+le jar du loader (obtenu lors de l'installation de l'historian)  :
+```
+<dependency>
+    <groupId>org.example</groupId>
+    <artifactId>loader</artifactId>
+    <version>1.3.5</version>
+    <scope>system</scope>
+    <systemPath>$HDH_HOME/historian-1.3.5/lib/loader-1.3.5.jar</systemPath>
+</dependency>
+```
+
+puis créez une section <build> et au-dessous d'elle créez une section <plugins> pour ajouter
+les balises de plugins:
+
+maven-enforcer-plugin:
+```
+<plugin>
+<groupId>org.apache.maven.plugins</groupId>
+<artifactId>maven-enforcer-plugin</artifactId>
+<version>1.4.1</version>
+<executions>
+    <execution>
+        <goals>
+            <goal>enforce</goal>
+        </goals>
+        <configuration>
+            <rules>
+                <bannedDependencies>
+                    <excludes>
+                        <!--implementation binding-->
+                        <exclude>org.slf4j:slf4j-jdk14</exclude>
+                        <exclude>org.slf4j:slf4j-nop</exclude>
+                        <exclude>org.slf4j:slf4j-simple</exclude>
+                        <exclude>org.slf4j:slf4j-jcl</exclude>
+                        <exclude>org.slf4j:logback-classic</exclude>
+                        <exclude>org.slf4j:log4j-over-slf4j</exclude>
+                    </excludes>
+                </bannedDependencies>
+            </rules>
+        </configuration>
+    </execution>
+</executions>
+</plugin>
+```
+
+maven-surefire-plugin:
+```
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-surefire-plugin</artifactId>
+    <version>2.22.2</version>
+</plugin>
+```
+
+scala-maven-plugin:
+```
+<plugin>
+    <!-- see http://davidb.github.com/scala-maven-plugin -->
+    <groupId>net.alchim31.maven</groupId>
+    <artifactId>scala-maven-plugin</artifactId>
+    <executions>
+        <execution>
+            <id>scala-compile-first</id>
+            <phase>process-resources</phase>
+            <goals>
+                <goal>add-source</goal>
+                <goal>compile</goal>
+            </goals>
+        </execution>
+        <execution>
+            <id>scala-test-compile</id>
+            <phase>process-test-resources</phase>
+            <goals>
+                <goal>testCompile</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>compile</phase>
+            <goals>
+                <goal>compile</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+maven-compiler-plugin:
+```
+<plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-compiler-plugin</artifactId>
+    <executions>
+        <execution>
+            <phase>compile</phase>
+            <goals>
+                <goal>compile</goal>
+            </goals>
+        </execution>
+    </executions>
+</plugin>
+```
+
+Après avoir ajouté les bibliothèques que InetlliJ IDEA les a téléchargés.
+
+Créez un package sous le dossier scala et créez un object scala sous ce package.
+dans l'exemple suivant le package est nommé spark et l'objet scala est nommé JustSimpleTest.
+
+== Exemple test de SPARK API
+L'exemple suivant montre comment vous pouvez lire un fichier csv contenant des timeseries, le transformer (chunkifier)
+et puis l'injecter dans solr.
+```
+package spark
+
+import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.spark.ml.Chunkyfier
+import com.hurence.historian.spark.sql
+import com.hurence.historian.spark.sql.reader.MeasuresReaderType
+import com.hurence.historian.spark.sql.reader.ReaderFactory
+import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import org.apache.spark.sql.SparkSession
+
+object JustSimpleTest {
+
+  def main(args: Array[String]): Unit = {
+    val origpath = "$HDH_HOME/historian/loader/src/test/resources/it-data-4metrics.csv.gz"
+
+    val spark = SparkSession.builder
+      .config("spark.master", "local[1]")
+      .getOrCreate()
+
+    import spark.implicits._
+
+
+    val brutData = spark.read.format("csv").option("inferSchema", "true").option("header", "true").load(origpath)
+```
+
+image::CSV_before_transformations.png[]
+
+```
+    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val measuresDS = reader.read(sql.Options(
+      origpath,
+      Map(
+        "inferSchema" -> "true",
+        "delimiter" -> ",",
+        "header" -> "true",
+        "nameField" -> "metric_name",
+        "timestampField" -> "timestamp",
+        "timestampDateFormat" -> "ms",
+        "valueField" -> "value",
+        "tagsFields" -> "metric_id,warn,crit"
+      )))
+    //measuresDS.show(20,200)
+```
+image::reader_transormation.png[]
+
+
+```
+    val chunkyfier = new Chunkyfier().setGroupByCols(Array("name", "tags.metric_id"))
+    val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0]
+```
+
+image::chunkified_data.png[]
+
+```
+    chunksDS.show()
+
+    val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
+    writer.write(sql.Options("historian", Map(
+      "zkhost" -> "localhost:9983",
+      "collection" -> "historian",
+      "tag_names" -> "metric_id,warn,crit"
+    )), chunksDS)
+
+
+    spark.stop()
+  }
+}
+```
+image::data inejected in solr.png[]
+
+```
+
+
+
+
+
+

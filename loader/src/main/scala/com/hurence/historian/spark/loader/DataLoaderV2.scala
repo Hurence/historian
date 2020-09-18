@@ -1,14 +1,13 @@
 package com.hurence.historian.spark.loader
 
-import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.functions._
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import com.hurence.timeseries.model.Chunk
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
-import org.apache.spark.sql.SparkSession
+import org.apache.spark.sql.{Encoders, SparkSession}
 import org.slf4j.LoggerFactory
 
 
@@ -90,7 +89,7 @@ object DataLoaderV2 {
       .longOpt("chunks-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default $DEFAULT_CHUNK_SIZE")
+      .desc(s"num measures in a chunk, default $DEFAULT_CHUNK_SIZE")
       .build()
     )
 
@@ -106,7 +105,7 @@ object DataLoaderV2 {
       .longOpt("sax-string-length")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
+      .desc(s"num measures in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
       .build()
     )
 
@@ -171,8 +170,6 @@ object DataLoaderV2 {
       .master(options.master)
       .getOrCreate()
 
-    import spark.implicits._
-
 
     val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
     val measuresDS = reader.read(sql.Options(
@@ -197,7 +194,9 @@ object DataLoaderV2 {
       .setSaxStringLength(options.saxStringLength)
 
 
-    val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0].repartition(1)
+    val chunksDS = chunkyfier.transform(measuresDS)
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
+      .repartition(1)
 
 
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)

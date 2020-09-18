@@ -3,9 +3,7 @@
 
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-echo "DIR is $DIR"
 ROOT_DIR="$DIR/.."
-echo "ROOT_DIR is $ROOT_DIR"
 PID=$ROOT_DIR/app.pid
 LOG=$ROOT_DIR/app.log
 ERROR=$ROOT_DIR/app-error.log
@@ -36,7 +34,6 @@ EOF
 
 # Parse method is not used for now but we put one exemple here if we want to add arguments
 parse_args() {
-    echo "parsing command line args"
     POSITIONAL=()
     while [[ $# -gt 0 ]]
     do
@@ -58,8 +55,16 @@ parse_args() {
         esac
     done
 
+    if [[ $DEBUG_MODE = true ]]
+    then
+      echo "parsing command line args"
+      echo "DEBUG_MODE is set to '${DEBUG_MODE}'";
+      echo "DIR is $DIR"
+      echo "ROOT_DIR is $ROOT_DIR"
+    fi
+
     set -- "${POSITIONAL[@]}" # restore positional parameters
-    echo "DEBUG_MODE is set to '${DEBUG_MODE}'";
+
 }
 
 status() {
@@ -78,35 +83,60 @@ status() {
     fi
 }
 
+start_historian() {
+  echo "==== Start"
+  touch "$PID"
+#       Using an array to stock command hinder double interpretation of args
+#       see https://unix.stackexchange.com/questions/444946/how-can-we-run-a-command-stored-in-a-variable for more info
+  COMMAND=(java)
+  if [[ $DEBUG_MODE = true ]]
+  then
+    COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j-debug.properties")
+    COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j-debug.properties")
+  else
+    COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j.properties")
+    COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j.properties")
+  fi
+  COMMAND+=(-jar "$ROOT_DIR/lib/historian-server-1.3.5-fat.jar" --conf "$ROOT_DIR/conf/historian-server-conf.json")
+  if [[ $DEBUG_MODE = true ]]
+  then
+    echo "run below command"
+    echo "nohup ${COMMAND[@]} >> ${LOG} 2>&1 &"
+  fi
+  if nohup "${COMMAND[@]}" >> "$LOG" 2>&1 &
+  then echo $! > "$PID"
+       echo -e "${GREEN}Started.${NOCOLOR}"
+       echo -e "${GREEN}check logs at '$LOG'${NOCOLOR}"
+       echo "$(date '+%Y-%m-%d %X'): START" >> "$LOG"
+  else echo "Error... "
+       /bin/rm "$PID"
+  fi
+}
+
 start() {
     if [ -f "$PID" ]
     then
-        echo
-        echo "Already started. PID: [$( cat $PID )]"
-    else
-        echo "==== Start"
-        touch "$PID"
-#       Using an array to stock command hinder double interpretation of args
-#       see https://unix.stackexchange.com/questions/444946/how-can-we-run-a-command-stored-in-a-variable for more info
-        COMMAND=(java)
-        if [[ $DEBUG_MODE = true ]]
-        then
-          COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j-debug.properties")
-          COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j-debug.properties")
+#                        check if really exist
+        pid_in_file=$(cat $PID )
+        kill -0 $pid_in_file
+        if [[ $? = 0 ]];then
+#          find historian-server-processes
+          historian_process=$(ps u --pid $pid_in_file)
+          if [[ "$historian_process" == *historian-server-1.3.5-fat.jar* ]];then
+            echo
+            echo "Already started. PID: [$( cat $PID )]"
+          else
+            echo "cleaning not empty PID file. (processus not running anymore)."
+            rm $PID
+            start_historian
+          fi
         else
-          COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j.properties")
-          COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j.properties")
+          echo "cleaning not empty PID file. (processus not running anymore)."
+          rm $PID
+          start_historian
         fi
-        COMMAND+=(-jar "$ROOT_DIR/lib/historian-server-1.3.5-fat.jar" --conf "$ROOT_DIR/conf/historian-server-conf.json")
-        echo "run below command"
-        echo "nohup ${COMMAND[@]} >> ${LOG} 2>&1 &"
-        if nohup "${COMMAND[@]}" >> "$LOG" 2>&1 &
-        then echo $! > "$PID"
-             echo -e "${GREEN}Started. ${NOCOLOR}"
-             echo "$(date '+%Y-%m-%d %X'): START" >> "$LOG"
-        else echo "Error... "
-             /bin/rm "$PID"
-        fi
+    else
+        start_historian
     fi
 }
 
@@ -134,14 +164,13 @@ kill_cmd() {
 
 stop() {
     echo "==== Stop"
-
     if [ -f $PID ]
     then
         if kill $( cat $PID )
         then echo -e "${GREEN}Stopped. ${NOCOLOR}"
              echo "$(date '+%Y-%m-%d %X'): STOP" >>$LOG
         fi
-        /bin/rm $PID
+        rm $PID
         kill_cmd
     else
         echo "No pid file. Already stopped?"
@@ -175,3 +204,6 @@ main() {
 
 main "$@"
 exit 0
+
+
+

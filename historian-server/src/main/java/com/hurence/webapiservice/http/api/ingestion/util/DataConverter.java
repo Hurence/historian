@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
-import com.hurence.historian.modele.HistorianFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
@@ -11,8 +10,10 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.POINTS_REQUEST_FIELD;
-import static com.hurence.historian.modele.HistorianFields.TAGS;
+
+import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0.NAME;
+import static com.hurence.historian.modele.HistorianServiceFields.POINTS;
+import static com.hurence.historian.modele.HistorianServiceFields.TAGS;
 import static com.hurence.webapiservice.http.api.ingestion.util.TimestampUnit.*;
 
 public class DataConverter {
@@ -79,7 +80,7 @@ public class DataConverter {
                                            Map.Entry<List<Object>, List<List<Iterable<? extends Object>>>> entry) {
         csvFilesConvertorConf.getGroupByList().forEach(i -> {
             if (i.equals(csvFilesConvertorConf.getName())) {
-                fieldsAndThereValues.put(HistorianFields.NAME, entry.getKey().get(csvFilesConvertorConf.getGroupByList().indexOf(i)));
+                fieldsAndThereValues.put(NAME, entry.getKey().get(csvFilesConvertorConf.getGroupByList().indexOf(i)));
                 Map<String, Object> tags = ((JsonObject) entry.getValue().get(0).get(1)).getMap();
                 tags.values().remove(null);
                 fieldsAndThereValues.put(TAGS, tags);
@@ -98,7 +99,8 @@ public class DataConverter {
                                            Map.Entry<List<Object>, List<List<Iterable<? extends Object>>>> entry) {
         List pointsList = new LinkedList();
         entry.getValue().forEach(i -> pointsList.add(i.get(0)));
-        fieldsAndThereValues.put(POINTS_REQUEST_FIELD, pointsList);
+        fieldsAndThereValues.put(POINTS, pointsList);
+
     }
 
     /**
@@ -140,6 +142,7 @@ public class DataConverter {
                     break;
                 default:
                     throw  new IllegalArgumentException("TIMESTAMP_UNIT is not correct.");
+
             }
         return longValue;
     }

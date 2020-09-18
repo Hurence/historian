@@ -1,0 +1,12 @@
+[
+  {
+    "name":"metric",
+    "datapoints":[
+      [3.5,10000000]
+    ],
+    "total_points":1,
+    "aggregation":{
+      "COUNT":2
+    }
+  }
+]

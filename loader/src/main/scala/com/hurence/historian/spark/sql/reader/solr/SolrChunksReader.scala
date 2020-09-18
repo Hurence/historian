@@ -1,17 +1,16 @@
 package com.hurence.historian.spark.sql.reader.solr
 
-import com.hurence.historian.model.ChunkRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
-import org.apache.spark.sql.functions.{base64, col, lit, map}
-import org.apache.spark.sql.{Column, Dataset, SparkSession}
+import com.hurence.timeseries.model.Chunk
+import org.apache.spark.sql.functions.{col, lit, map}
+import org.apache.spark.sql.{Column, Dataset, Encoders, SparkSession}
 
-class SolrChunksReader extends Reader[ChunkRecordV0] {
+class SolrChunksReader extends Reader[Chunk] {
 
-  override def read(options: Options): Dataset[ChunkRecordV0] = {
+  override def read(options: Options): Dataset[_ <: Chunk] = {
     // 5. load back those chunks to verify
     val spark = SparkSession.getActiveSession.get
-    import spark.implicits._
 
 
     val tagNames: List[Column] = options.config(Options.TAG_NAMES)
@@ -32,7 +31,7 @@ class SolrChunksReader extends Reader[ChunkRecordV0] {
       .select(mainCols: _*)
       .withColumn("chunk", col("value"))
       .withColumn("tags", map(tags: _*))
-      .as[ChunkRecordV0]
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
 
   }
 

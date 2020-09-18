@@ -9,7 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+
 
 public class IngestionFinalResponseUtil {
 
@@ -94,7 +95,7 @@ public class IngestionFinalResponseUtil {
                 else
                     groupedByFieldsForThisChunk.put(f.toString(),tagsObject.getString(f.toString()));
             });
-            int totalNumPointsInChunk = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
+            int totalNumPointsInChunk = timeserie.getJsonArray(POINTS).size();
             groupedByFieldsForThisChunk.put("totalPointsForThisChunk", String.valueOf(totalNumPointsInChunk));
             groupedByFieldsForEveryChunk.add(groupedByFieldsForThisChunk);
         }
@@ -191,9 +192,9 @@ public class IngestionFinalResponseUtil {
 
     public static JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
         StringBuilder message = new StringBuilder();
-        message.append("Injected ").append(response.getInteger(RESPONSE_TOTAL_ADDED_POINTS)).append(" points of ")
-                .append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
-                .append(" metrics in ").append(response.getInteger(RESPONSE_TOTAL_ADDED_CHUNKS))
+        message.append("Injected ").append(response.getInteger(TOTAL_ADDED_POINTS)).append(" points of ")
+                .append(response.getInteger(TOTAL_ADDED_CHUNKS))
+                .append(" metrics in ").append(response.getInteger(TOTAL_ADDED_CHUNKS))
                 .append(" chunks");
         JsonObject finalResponse = new JsonObject();
         if (!responseAndErrorHolder.errorMessages.isEmpty()) {

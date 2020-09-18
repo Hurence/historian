@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.modele;
 
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.GrafanaSimpleJsonPluginApiImpl;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;

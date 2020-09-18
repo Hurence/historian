@@ -1,13 +1,29 @@
-= User guide
-:subtitle: Data Historian 1.0
+= User Guide
+:subtitle: Data Historian 1.3.5
 :doctype: book
-:title-logo-image: image:../../resources/images/logo.png[pdfwidth=3.5in,align=center]
-:author: (C)Hurence
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
+:author: © Hurence
 :email: contact@hurence.com
 :revnumber: v1.0
-:revdate: 18.02.2020
-:revremark: First draft
+:revdate: 02.07.2020
+:revremark: First book
+:toc:
+:toclevels: 4
+:sectnums: on
+:hdh_version: 1.3.5
+:solr_version: 8.2.0
+:spark_version: 2.3.4
+:grafana_version: 7.0.3
+:hadoop_version: 2.7
 
-include::./introduction.ad[]
+include::./_introduction.ad[]
 
-include::./installation.ad[]
+include::./_concepts.ad[]
+
+include::./_installation.ad[]
+
+include::./_restart.ad[]
+
+include::./_utilisation.ad[]
+
+include::./_stop.ad[]

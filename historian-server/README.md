@@ -39,8 +39,8 @@ Go to the historian dashboard and see your data ! We added three variables so th
 the sampling algorithm to use, the bucket size or filter on a tag. Currently tags are just the name of the metric but we could
 imagine tagging several different metric names with a same tag. For exemple 'temp' for metrics 'temp_a' and 'temp_b'.
 
-By default no sampling is used if there is not too many point to draw. Otherwise we calculate the bucket size depending on
-the total number of points that is being queried with the average algorithm. At the moment only basic algorithms are available.
+By default no sampling is used if there is not too many measure to draw. Otherwise we calculate the bucket size depending on
+the total number of measures that is being queried with the average algorithm. At the moment only basic algorithms are available.
 
 #Run server on cluster
 

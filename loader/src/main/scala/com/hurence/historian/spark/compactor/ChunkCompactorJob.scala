@@ -1,7 +1,8 @@
 package com.hurence.historian.spark.compactor
 
+import com.hurence.historian.modele.SchemaVersion
+import com.hurence.historian.modele.solr.SolrFieldMapping
 import com.hurence.historian.spark.compactor.job.CompactorJobReport
-import com.hurence.logisland.record.TimeSeriesRecord
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
@@ -13,6 +14,7 @@ object ChunkCompactorJob extends Serializable {
   val DEFAULT_CHUNK_SIZE = 1440
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 100
+  val historianFields = SolrFieldMapping.fromVersion(SchemaVersion.VERSION_0)
 
   case class ChunkCompactorJobOptions(master: String,
                                       appName: String,
@@ -51,7 +53,9 @@ object ChunkCompactorJob extends Serializable {
 
   private def createCompactor(jobConf: ChunkCompactorJobOptions): ChunkCompactor = {
     val conf = buildCompactorConf2(jobConf)
-    new ChunkCompactorJobStrategy2SchemaVersion0(conf)
+    //TODO
+//    new ChunkCompactorJobStrategySchemaVersion1(conf)
+    null
   }
 
 
@@ -63,7 +67,7 @@ object ChunkCompactorJob extends Serializable {
       jobConf.chunkSize,
       jobConf.saxAlphabetSize,
       jobConf.saxStringLength,
-      s"${TimeSeriesRecord.CHUNK_ORIGIN}:logisland",
+      s"${historianFields.CHUNK_ORIGIN}:logisland",
       jobConf.taggingChunksToCompact,
       jobConf.useCache
     )
@@ -104,7 +108,7 @@ object ChunkCompactorJob extends Serializable {
       .longOpt("chunks-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default ${ChunkCompactorJob.DEFAULT_CHUNK_SIZE}")
+      .desc(s"num measures in a chunk, default ${ChunkCompactorJob.DEFAULT_CHUNK_SIZE}")
       .build()
     )
 
@@ -120,7 +124,7 @@ object ChunkCompactorJob extends Serializable {
       .longOpt("sax-string-length")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default ${ChunkCompactorJob.DEFAULT_SAX_STRING_LENGTH}")
+      .desc(s"num measures in a chunk, default ${ChunkCompactorJob.DEFAULT_SAX_STRING_LENGTH}")
       .build()
     )
 

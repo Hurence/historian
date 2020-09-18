@@ -1,34 +1,26 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.logisland.record.Point;
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionUtil;
-import com.hurence.logisland.timeseries.sampling.Sampler;
-import com.hurence.logisland.timeseries.sampling.SamplerFactory;
-import com.hurence.logisland.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.historian.util.ChunkUtil;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.util.BucketUtils;
-import io.vertx.core.json.JsonObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static com.hurence.historian.modele.HistorianFields.*;
-
 
 public class TimeSeriesExtracterUtil {
-    public final static String TIMESERIES_TIMESTAMPS = "timestamps";
-    public final static String TIMESERIES_VALUES = "values";
+
     public final static SamplingAlgorithm DEFAULT_SAMPLING_ALGORITHM = SamplingAlgorithm.AVERAGE;
-    private static final Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterUtil.class);
 
 
     private TimeSeriesExtracterUtil() {}
+
+
     /**
      *
      * @param from
@@ -36,16 +28,17 @@ public class TimeSeriesExtracterUtil {
      * @param chunks
      * @return return all points uncompressing chunks
      */
-    public static List<Point> extractPoints(long from, long to, List<JsonObject> chunks) {
+    public static List<Measure> extractPoints(long from, long to, List<Chunk> chunks) {
         return extractPointsAsStream(from, to, chunks).collect(Collectors.toList());
     }
 
-    public static Stream<Point> extractPointsAsStream(long from, long to, List<JsonObject> chunks) {
+
+    public static Stream<Measure> extractPointsAsStream(long from, long to, List<Chunk> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
-                    byte[] binaryChunk = chunk.getBinary(RESPONSE_CHUNK_VALUE_FIELD);
-                    long chunkStart = chunk.getLong(RESPONSE_CHUNK_START_FIELD);
-                    long chunkEnd = chunk.getLong(RESPONSE_CHUNK_END_FIELD);
+                    byte[] binaryChunk = chunk.getValueAsBinary();
+                    long chunkStart = chunk.getStart();
+                    long chunkEnd = chunk.getEnd();
                     try {
                         return BinaryCompactionUtil.unCompressPoints(binaryChunk, chunkStart, chunkEnd, from, to).stream();
                     } catch (IOException ex) {
@@ -55,58 +48,13 @@ public class TimeSeriesExtracterUtil {
     }
 
     /**
-     *
-     * @param samplingConf how to sample points to retrieve
-     * @param chunks to sample, chunks should be corresponding to the same timeserie !*
-     *               Should contain the compressed binary points as well as all needed aggs.
-     *               Chunks should be ordered as well.
-     * @return sampled points as an array
-     * <pre>
-     * {
-     *     {@value TIMESERIES_TIMESTAMPS} : [longs]
-     *     {@value TIMESERIES_VALUES} : [doubles]
-     * }
-     * DOCS contains at minimum chunk_value, chunk_start
-     * </pre>
+     * return the sampling in input if it is compatible with totalNumberOfPoint to sample.
+     * If totalNumberOfPoint > maxpoint then we have to sample.
+     * Calcul bucket size if needed (dependending on samplingConf.getMaxPoint() and totalNumberOfPoint
+     * @param samplingConf
+     * @param totalNumberOfPoint
+     * @return
      */
-    public static List<Point> extractPointsThenSample(long from, long to, SamplingConf samplingConf, List<JsonObject> chunks) {
-        Sampler<Point> sampler = SamplerFactory.getPointSampler(samplingConf.getAlgo(), samplingConf.getBucketSize());
-        return sampler.sample(extractPoints(from, to, chunks));
-    }
-
-    /**
-     *
-     * @param samplingConf how to sample points to retrieve
-     * @param chunks to sample, chunks should be corresponding to the same timeserie !*
-     *               Should contain the compressed binary points as well as all needed aggs.
-     *               Chunks should be ordered as well.
-     * @return sampled points as an array
-     * <pre>
-     * {
-     *     {@value TIMESERIES_TIMESTAMPS} : [longs]
-     *     {@value TIMESERIES_VALUES} : [doubles]
-     * }
-     * DOCS contains at minimum chunk_value, chunk_start
-     * </pre>
-     */
-    public static List<Point> extractPointsThenSortThenSample(long from, long to, SamplingConf samplingConf, List<JsonObject> chunks) {
-        Stream<Point> extractedPoints = extractPointsAsStream(from, to, chunks);
-        Stream<Point> sortedPoints = extractedPoints
-                .sorted(Comparator.comparing(Point::getTimestamp));
-        return samplePoints(samplingConf, chunks, sortedPoints);
-    }
-
-    public static List<Point> samplePoints(SamplingConf samplingConf, List<JsonObject> chunks, Stream<Point> sortedPoints) {
-        int totalNumberOfPoint = ChunkUtil.countTotalNumberOfPointInChunks(chunks);
-        Sampler<Point> sampler = getPointSampler(samplingConf, totalNumberOfPoint);
-        return sampler.sample(sortedPoints.collect(Collectors.toList()));
-    }
-
-    public static Sampler<Point> getPointSampler(SamplingConf samplingConf, long totalNumberOfPoint) {
-        SamplingConf calculatedConf = calculSamplingConf(samplingConf, totalNumberOfPoint);
-        return SamplerFactory.getPointSampler(calculatedConf.getAlgo(), calculatedConf.getBucketSize());
-    }
-
     public static SamplingConf calculSamplingConf(SamplingConf samplingConf, long totalNumberOfPoint) {
         SamplingAlgorithm algorithm = calculSamplingAlgorithm(samplingConf, totalNumberOfPoint);
         int bucketSize = samplingConf.getBucketSize();
@@ -127,25 +75,7 @@ public class TimeSeriesExtracterUtil {
         return samplingConf.getAlgo();
     }
 
-
-    private static int calculBucketSize(int maxPoint, int totalNumberOfPoint) {
-        return BucketUtils.calculBucketSize(totalNumberOfPoint, maxPoint);
-    }
-
     private static int calculBucketSize(int maxPoint, long totalNumberOfPoint) {
         return BucketUtils.calculBucketSize(totalNumberOfPoint, maxPoint);
-    }
-
-
-    public static JsonObject formatTimeSeriePointsJson(List<Point> sampledPoints) {
-        List<Long> timestamps = sampledPoints.stream()
-                .map(Point::getTimestamp)
-                .collect(Collectors.toList());
-        List<Double> values = sampledPoints.stream()
-                .map(Point::getValue)
-                .collect(Collectors.toList());
-        return new JsonObject()
-                .put(TIMESERIES_TIMESTAMPS, timestamps)
-                .put(TIMESERIES_VALUES, values);
     }
 }

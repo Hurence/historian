@@ -13,7 +13,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.hurence.historian.modele.HistorianFields.MAX_LINES_FOR_CSV_FILE;
+import static com.hurence.historian.modele.HistorianServiceFields.MAX_LINES_FOR_CSV_FILE;
 import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.toNumber;
 
 public class CsvConvertorUtil {

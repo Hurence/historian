@@ -2,14 +2,17 @@ package com.hurence.webapiservice.http.api.main;
 
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
-import com.hurence.historian.solr.injector.Version0SolrInjectorMultipleMetricSpecificPoints;
-import com.hurence.logisland.record.Point;
+import com.hurence.historian.solr.injector.SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
+import com.hurence.util.HistorianVerticleConfHelper;
+import com.hurence.util.HttpVerticleConfHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
@@ -45,61 +48,61 @@ public class ExportCsvEndPointIT {
 
     @BeforeAll
     public static void beforeAll(SolrClient client, Vertx vertx, DockerComposeContainer container) throws IOException, SolrServerException, InterruptedException {
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        SolrInjector injector = new Version0SolrInjectorMultipleMetricSpecificPoints(
+        SolrInjector injector = new SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion(
                 Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
                 Arrays.asList(
                         Arrays.asList(
-                                new Point(0, 1477895624866L, 622.1),
-                                new Point(0, 1477916224866L, -3),
-                                new Point(0, 1477917224866L, 365)
+                                Measure.fromValue( 1477895624866L, 622.1),
+                                Measure.fromValue( 1477916224866L, -3),
+                                Measure.fromValue( 1477917224866L, 365)
                         ),
                         Arrays.asList(
-                                new Point(0, 1477895624866L, 861),
-                                new Point(0, 1477917224866L, 767)
+                                Measure.fromValue( 1477895624866L, 861),
+                                Measure.fromValue( 1477917224866L, 767)
                         ),
                         Arrays.asList(//maxDataPoints we are not testing value only sampling
-                                new Point(0, 1477895624866L, 1),
-                                new Point(0, 1477895624867L, 1),
-                                new Point(0, 1477895624868L, 1),
-                                new Point(0, 1477895624869L, 1),
-                                new Point(0, 1477895624870L, 1),
-                                new Point(0, 1477895624871L, 1),
-                                new Point(0, 1477895624872L, 1),
-                                new Point(0, 1477895624873L, 1),
-                                new Point(0, 1477895624874L, 1),
-                                new Point(0, 1477895624875L, 1),
-                                new Point(0, 1477895624876L, 1),
-                                new Point(0, 1477895624877L, 1),
-                                new Point(0, 1477895624878L, 1),
-                                new Point(0, 1477895624879L, 1),
-                                new Point(0, 1477895624880L, 1),
-                                new Point(0, 1477895624881L, 1),
-                                new Point(0, 1477895624882L, 1),
-                                new Point(0, 1477895624883L, 1),
-                                new Point(0, 1477895624884L, 1),
-                                new Point(0, 1477895624885L, 1),
-                                new Point(0, 1477895624886L, 1),
-                                new Point(0, 1477895624887L, 1),
-                                new Point(0, 1477895624888L, 1),
-                                new Point(0, 1477895624889L, 1),
-                                new Point(0, 1477895624890L, 1),
-                                new Point(0, 1477895624891L, 1),
-                                new Point(0, 1477895624892L, 1),
-                                new Point(0, 1477895624893L, 1),
-                                new Point(0, 1477895624894L, 1),
-                                new Point(0, 1477895624895L, 1),
-                                new Point(0, 1477895624896L, 1),
-                                new Point(0, 1477895624897L, 1),
-                                new Point(0, 1477895624898L, 1),
-                                new Point(0, 1477895624899L, 1),
-                                new Point(0, 1477895624900L, 1),
-                                new Point(0, 1477895624901L, 1),
-                                new Point(0, 1477895624902L, 1),
-                                new Point(0, 1477895624903L, 1),
-                                new Point(0, 1477895624904L, 1),
-                                new Point(0, 1477895624905L, 1)
+                                Measure.fromValue( 1477895624866L, 1),
+                                Measure.fromValue( 1477895624867L, 1),
+                                Measure.fromValue( 1477895624868L, 1),
+                                Measure.fromValue( 1477895624869L, 1),
+                                Measure.fromValue( 1477895624870L, 1),
+                                Measure.fromValue( 1477895624871L, 1),
+                                Measure.fromValue( 1477895624872L, 1),
+                                Measure.fromValue( 1477895624873L, 1),
+                                Measure.fromValue( 1477895624874L, 1),
+                                Measure.fromValue( 1477895624875L, 1),
+                                Measure.fromValue( 1477895624876L, 1),
+                                Measure.fromValue( 1477895624877L, 1),
+                                Measure.fromValue( 1477895624878L, 1),
+                                Measure.fromValue( 1477895624879L, 1),
+                                Measure.fromValue( 1477895624880L, 1),
+                                Measure.fromValue( 1477895624881L, 1),
+                                Measure.fromValue( 1477895624882L, 1),
+                                Measure.fromValue( 1477895624883L, 1),
+                                Measure.fromValue( 1477895624884L, 1),
+                                Measure.fromValue( 1477895624885L, 1),
+                                Measure.fromValue( 1477895624886L, 1),
+                                Measure.fromValue( 1477895624887L, 1),
+                                Measure.fromValue( 1477895624888L, 1),
+                                Measure.fromValue( 1477895624889L, 1),
+                                Measure.fromValue( 1477895624890L, 1),
+                                Measure.fromValue( 1477895624891L, 1),
+                                Measure.fromValue( 1477895624892L, 1),
+                                Measure.fromValue( 1477895624893L, 1),
+                                Measure.fromValue( 1477895624894L, 1),
+                                Measure.fromValue( 1477895624895L, 1),
+                                Measure.fromValue( 1477895624896L, 1),
+                                Measure.fromValue( 1477895624897L, 1),
+                                Measure.fromValue( 1477895624898L, 1),
+                                Measure.fromValue( 1477895624899L, 1),
+                                Measure.fromValue( 1477895624900L, 1),
+                                Measure.fromValue( 1477895624901L, 1),
+                                Measure.fromValue( 1477895624902L, 1),
+                                Measure.fromValue( 1477895624903L, 1),
+                                Measure.fromValue( 1477895624904L, 1),
+                                Measure.fromValue( 1477895624905L, 1)
                         )
                 ));
         injector.injectChunks(client);
@@ -121,8 +124,11 @@ public class ExportCsvEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryExportCsv(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        int maxLimitFromConfig = 10000;
-        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+        JsonObject httpConf = new JsonObject();
+        HttpVerticleConfHelper.setMaxNumberOfDatapointAllowedInExport(httpConf, 10000);
+        JsonObject historianConf = new JsonObject();
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_1);
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
                             "/http/grafana/simplejson/query/extract-algo/test1/request.json",
@@ -133,8 +139,11 @@ public class ExportCsvEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQueryWithMaxAllowedPointsPassed(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        int maxLimitFromConfig = 100;
-        HttpWithHistorianSolrITHelper.deployCustomHttpAndHistorianVerticle(container, vertx, maxLimitFromConfig)
+        JsonObject httpConf = new JsonObject();
+        HttpVerticleConfHelper.setMaxNumberOfDatapointAllowedInExport(httpConf, 100);
+        JsonObject historianConf = new JsonObject();
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_1);
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
                             "/http/grafana/simplejson/query/extract-algo/test1/request.json");
@@ -149,7 +158,7 @@ public class ExportCsvEndPointIT {
                 .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(413, rsp.statusCode());
-                        assertEquals("max data points is bigger than allowed", rsp.statusMessage());
+                        assertEquals("max data measures is bigger than allowed", rsp.statusMessage());
                         testContext.completeNow();
                     });
                 }));
