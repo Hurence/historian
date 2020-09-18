@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.modele.list;
+package com.hurence.timeseries.model.list;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -23,7 +23,7 @@ import java.io.Serializable;
 import java.util.Arrays;
 import java.util.stream.DoubleStream;
 
-import static com.hurence.timeseries.modele.list.ListUtil.*;
+import static com.hurence.timeseries.model.list.ListUtil.*;
 
 /**
  * Implementation of a list with primitive doubles.

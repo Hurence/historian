@@ -4,8 +4,8 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
@@ -72,8 +72,8 @@ public class ComplexQueryEndPointCurrentVersionIT {
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralInjectorCurrentVersion injector = new GeneralInjectorCurrentVersion();
-        ChunkVersionCurrent chunkTempbUsine1Sensor3 = ChunkBuilderHelper.fromPointsAndTags(
-                "temp_b", Arrays.asList(new PointImpl(1, 1)),
+        Chunk chunkTempbUsine1Sensor3 = ChunkBuilderHelper.fromPointsAndTags(
+                "temp_b", Arrays.asList(Measure.fromValue(1, 1)),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_3");
                     put("usine", "usine_1");
@@ -81,10 +81,10 @@ public class ComplexQueryEndPointCurrentVersionIT {
         );
         injector.addChunk(chunkTempbUsine1Sensor3);
 
-        ChunkVersionCurrent chunkTempaUsine1Sensor1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl(2, 2),
-                new PointImpl(3, 3),
-                new PointImpl(4, 4)
+        Chunk chunkTempaUsine1Sensor1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue(2, 2),
+                Measure.fromValue(3, 3),
+                Measure.fromValue(4, 4)
                 ),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_1");
@@ -92,8 +92,8 @@ public class ComplexQueryEndPointCurrentVersionIT {
                 }});
         injector.addChunk(chunkTempaUsine1Sensor1);
 
-        ChunkVersionCurrent chunkTempaUsine1Sensor2 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl(5, 3)
+        Chunk chunkTempaUsine1Sensor2 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue(5, 3)
                 ),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_2");
@@ -101,8 +101,8 @@ public class ComplexQueryEndPointCurrentVersionIT {
                 }});
         injector.addChunk(chunkTempaUsine1Sensor2);
 
-        ChunkVersionCurrent chunkTempaUsine2Sensor3 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl(6, 4)
+        Chunk chunkTempaUsine2Sensor3 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue(6, 4)
                 ),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_3");
@@ -110,8 +110,8 @@ public class ComplexQueryEndPointCurrentVersionIT {
                 }});
         injector.addChunk(chunkTempaUsine2Sensor3);
 
-        ChunkVersionCurrent chunkTempaUsine1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl(7, 5)
+        Chunk chunkTempaUsine1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue(7, 5)
                 ),
                 new HashMap<String, String>() {{
                     put("usine", "usine_1");

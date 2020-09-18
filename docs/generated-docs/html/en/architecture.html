@@ -544,7 +544,7 @@ to form a Solr cluster with docker compose. This module also contains in its res
 <h3 id="loader"><a class="anchor" href="#loader"></a>loader</h3>
 <div class="paragraph">
 <p>The loader contains batch jobs. For the time being, this module contains only one job which is used to recompact the chunks of the historian with different configurable sizes (the compactor). For example during real-time injection into the data historian, small chunks are injected. However, to optimize performance, we need large chunks.
-In addition, depending on the type of requests made and the frequency of points for a given metric, being able to play on the size of the chunks, and to vary it according to the use case, is very important.</p>
+In addition, depending on the type of requests made and the frequency of measures for a given metric, being able to play on the size of the chunks, and to vary it according to the use case, is very important.</p>
 </div>
 <div class="paragraph">
 <p>For example if we make requests over long periods, we need big chunks to gain performance. Indeed we will not even need to decompress these chunks, using their precalculated aggregation will be enough.

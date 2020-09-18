@@ -1,8 +1,9 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
 
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.Point;
+
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.sampling.Sampler;
 import com.hurence.timeseries.sampling.SamplerFactory;
 import com.hurence.webapiservice.modele.AGG;
@@ -23,7 +24,7 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
 
     private static Logger LOGGER = LoggerFactory.getLogger(TimeSeriesExtracterImpl.class);
 
-    final Sampler<Point> sampler;
+    final Sampler<Measure> sampler;
     final PointsAggsCalculator aggsCalculator;
     final Float qualityLimit;
 
@@ -43,19 +44,19 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
     }
 
     @Override
-    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<ChunkVersionCurrent> chunks) {
-        List<Point> points = decompressPoints(from, to, chunks);
-        List<Point> sampledPoints = sampler.sample(points);
-        List<Point> filteredPoints = filterPointsByQuality(sampledPoints);
-        this.sampledPoints.addAll(filteredPoints);
+    protected void samplePointsFromChunksAndCalculAggreg(long from, long to, List<Chunk> chunks) {
+        List<Measure> points = decompressPoints(from, to, chunks);
+        List<Measure> sampledPoints = sampler.sample(points);
+        List<Measure> filteredPoints = filterPointsByQuality(sampledPoints);
+        this.sampledMeasures.addAll(filteredPoints);
         aggsCalculator.updateAggs(points);
     }
 
-    private List<Point> filterPointsByQuality(List<Point> sampledPoints) {
-        List<Point> pointsToReturn = new ArrayList<>();
+    private List<Measure> filterPointsByQuality(List<Measure> sampledPoints) {
+        List<Measure> pointsToReturn = new ArrayList<>();
         sampledPoints.forEach(point -> {
             if ((point.hasQuality() && point.getQuality() >= qualityLimit)
-                        || (!point.hasQuality()))
+                    || (!point.hasQuality()))
                 pointsToReturn.add(point);
         });
         return pointsToReturn;
@@ -66,10 +67,10 @@ public class TimeSeriesExtracterImpl extends AbstractTimeSeriesExtracter impleme
         return aggsCalculator.getAggsAsJson();
     }
 
-    private List<Point> decompressPoints(long from, long to, List<ChunkVersionCurrent> chunks) {
-        Stream<Point> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
-        Stream<Point> sortedPoints = extractedPoints
-                .sorted(Comparator.comparing(Point::getTimestamp));
+    private List<Measure> decompressPoints(long from, long to, List<Chunk> chunks) {
+        Stream<Measure> extractedPoints = TimeSeriesExtracterUtil.extractPointsAsStream(from, to, chunks);
+        Stream<Measure> sortedPoints = extractedPoints
+                .sorted(Comparator.comparing(Measure::getTimestamp));
         return sortedPoints.collect(Collectors.toList());
     }
 }

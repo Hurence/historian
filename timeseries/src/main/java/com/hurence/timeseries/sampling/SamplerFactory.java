@@ -15,9 +15,8 @@
  */
 package com.hurence.timeseries.sampling;
 
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
-import com.hurence.timeseries.modele.points.PointWithQualityImpl;
+
+import com.hurence.timeseries.model.Measure;
 
 public class SamplerFactory {
 
@@ -30,18 +29,18 @@ public class SamplerFactory {
      * @param bucketSize an int parameter
      * @return the sampler
      */
-    public static Sampler<Point> getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
+    public static Sampler<Measure>getPointSampler(SamplingAlgorithm algorithm, int bucketSize) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSampler<Point>(bucketSize);
+                return new FirstItemSampler<Measure>(bucketSize);
             case AVERAGE:
-                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketSize);
+                return new AverageSampler<Measure>(getPointTimeSerieHandler(), bucketSize);
             case NONE:
-                return new IsoSampler<Point>();
+                return new IsoSampler<Measure>();
             case MIN:
-                return new MinSampler<Point>(getPointTimeSerieHandler(), bucketSize);
+                return new MinSampler<Measure>(getPointTimeSerieHandler(), bucketSize);
             case MAX:
-                return new MaxSampler<Point>(getPointTimeSerieHandler(), bucketSize);
+                return new MaxSampler<Measure>(getPointTimeSerieHandler(), bucketSize);
             case MIN_MAX:
             case LTTB:
             case MODE_MEDIAN:
@@ -58,14 +57,14 @@ public class SamplerFactory {
      * @param bucketSize an int parameter
      * @return the sampler
      */
-    public static Sampler<Point> getPointSamplerWithQuality(SamplingAlgorithm algorithm, int bucketSize) {
+    public static Sampler<Measure>getPointSamplerWithQuality(SamplingAlgorithm algorithm, int bucketSize) {
         switch (algorithm) {
             case FIRST:
-                return new FirstItemSampler<Point>(bucketSize);
+                return new FirstItemSampler<Measure>(bucketSize);
             case AVERAGE:
                 return new AverageSamplerWithQuality<>(getPointTimeSerieHandlerWithQuality(), bucketSize);
             case NONE:
-                return new IsoSampler<Point>();
+                return new IsoSampler<Measure>();
             case MIN:
                 return new MinSamplerWithQuality<>(getPointTimeSerieHandlerWithQuality(), bucketSize);
             case MAX:
@@ -80,18 +79,18 @@ public class SamplerFactory {
     }
 
     //TODO
-//    public static Sampler<Point> getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
+//    public static Sampler<Measure>getOneTimePointSampler(SamplingAlgorithm algorithm, BucketingStrategy bucketingStrategy) {
 //        switch (algorithm) {
 //            case FIRST:
-////                return new FirstItemSamplerWithSpecificBucketing<Point>(bucketingStrategy);
+////                return new FirstItemSamplerWithSpecificBucketing<Measure>(bucketingStrategy);
 //            case AVERAGE:
-////                return new AverageSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+////                return new AverageSampler<Measure>(getPointTimeSerieHandler(), bucketingStrategy);
 //            case NONE:
-////                return new IsoSampler<Point>();
+////                return new IsoSampler<Measure>();
 //            case MIN:
-////                return new MinSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+////                return new MinSampler<Measure>(getPointTimeSerieHandler(), bucketingStrategy);
 //            case MAX:
-////                return new MaxSampler<Point>(getPointTimeSerieHandler(), bucketingStrategy);
+////                return new MaxSampler<Measure>(getPointTimeSerieHandler(), bucketingStrategy);
 //            case MIN_MAX:
 //            case LTTB:
 //            case MODE_MEDIAN:
@@ -101,50 +100,50 @@ public class SamplerFactory {
 //        }
 //    }
 
-    public static TimeSerieHandler<Point> getPointTimeSerieHandler() {
-        return new TimeSerieHandler<Point>() {
+    public static TimeSerieHandler<Measure>getPointTimeSerieHandler() {
+        return new TimeSerieHandler<Measure>() {
 
             @Override
-            public Point createTimeserie(long timestamp, double value) {
-                return new PointImpl(timestamp, value);
+            public Measure createTimeserie(long timestamp, double value) {
+                return Measure.fromValue(timestamp, value);
             }
 
             @Override
-                public long getTimeserieTimestamp(Point point) {
-                    return point.getTimestamp();
-                }
-
-                @Override
-                public Double getTimeserieValue(Point point) {
-                    return point.getValue();
-                }
-        };
-    }
-
-    public static TimeSerieHandlerWithQuality<Point> getPointTimeSerieHandlerWithQuality() {
-        return new TimeSerieHandlerWithQuality<Point>() {
-
-            @Override
-            public Point createTimeserie(long timestamp, double value, float quality) {
-                return new PointWithQualityImpl(timestamp, value, quality);
-            }
-
-            @Override
-            public long getTimeserieTimestamp(Point point) {
+            public long getTimeserieTimestamp(Measure point) {
                 return point.getTimestamp();
             }
 
             @Override
-            public Double getTimeserieValue(Point point) {
+            public Double getTimeserieValue(Measure point) {
+                return point.getValue();
+            }
+        };
+    }
+
+    public static TimeSerieHandlerWithQuality<Measure>getPointTimeSerieHandlerWithQuality() {
+        return new TimeSerieHandlerWithQuality<Measure>() {
+
+            @Override
+            public Measure createTimeserie(long timestamp, double value, float quality) {
+                return Measure.fromValueAndQuality(timestamp, value, quality);
+            }
+
+            @Override
+            public long getTimeserieTimestamp(Measure point) {
+                return point.getTimestamp();
+            }
+
+            @Override
+            public Double getTimeserieValue(Measure point) {
                 return point.getValue();
             }
 
             @Override
-            public Float getTimeserieQuality(Point point) {
+            public Float getTimeserieQuality(Measure point) {
                 if (point.hasQuality())
                     return point.getQuality();
                 else
-                    return Point.DEFAULT_QUALITY;
+                    return Measure.DEFAULT_QUALITY;
             }
         };
     }

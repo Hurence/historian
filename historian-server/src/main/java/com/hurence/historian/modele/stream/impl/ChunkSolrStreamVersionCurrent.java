@@ -1,7 +1,8 @@
 package com.hurence.historian.modele.stream.impl;
 
-import com.hurence.timeseries.modele.chunk.ChunkFromJsonObjectVersionCurrent;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+
+import com.hurence.timeseries.converter.ChunkFromJsonObjectVersionCurrent;
+import com.hurence.timeseries.model.Chunk;
 import io.vertx.core.json.JsonObject;
 
 public class ChunkSolrStreamVersionCurrent extends AbstractChunkSolrStream {
@@ -11,7 +12,7 @@ public class ChunkSolrStreamVersionCurrent extends AbstractChunkSolrStream {
     }
 
     @Override
-    ChunkVersionCurrent convertJsonToChunk(JsonObject json) {
+    Chunk convertJsonToChunk(JsonObject json) {
         return new ChunkFromJsonObjectVersionCurrent(json);
     }
 }

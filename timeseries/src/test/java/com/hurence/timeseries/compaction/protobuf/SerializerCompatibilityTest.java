@@ -15,7 +15,8 @@
  */
 package com.hurence.timeseries.compaction.protobuf;
 
-import com.hurence.timeseries.modele.points.Point;
+
+import com.hurence.timeseries.model.Measure;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,39 +36,39 @@ public class SerializerCompatibilityTest {
 
     @Test
     public void testCompression1() throws IOException {
-        List<Point> expectedPoints = LongStream.range(0, 10000)
+        List<Measure> expectedMeasures = LongStream.range(0, 10000)
                 .mapToObj(l -> {
                     if (l < 50) {
-                        return Point.fromValue(10, 1.5d);
+                        return Measure.fromValue(10, 1.5d);
                     } else if (l < 1000) {
-                        return Point.fromValue(100, 3d);
+                        return Measure.fromValue(100, 3d);
                     }else if (l < 2000) {
-                        return Point.fromValue(1000, 50d);
+                        return Measure.fromValue(1000, 50d);
                     }else if (l < 3000) {
-                        return Point.fromValue(2000, 50.5d);
+                        return Measure.fromValue(2000, 50.5d);
                     }else if (l < 4000) {
-                        return Point.fromValue(3000, 50.6d);
+                        return Measure.fromValue(3000, 50.6d);
                     }else if (l < 5000) {
-                        return Point.fromValue(3300, 50.7d);
+                        return Measure.fromValue(3300, 50.7d);
                     }else if (l < 6000) {
-                        return Point.fromValue(3500, 49.5d);
+                        return Measure.fromValue(3500, 49.5d);
                     }else if (l < 8000) {
-                        return Point.fromValue(4000, 1.5d);
+                        return Measure.fromValue(4000, 1.5d);
                     }else if (l < 9000) {
-                        return Point.fromValue(5000, 2d);
+                        return Measure.fromValue(5000, 2d);
                     } else {
-                        return Point.fromValue(l, 80d);
+                        return Measure.fromValue(l, 80d);
                     }
                 })
                 .collect(Collectors.toList());
-        byte[] compressedOlgAlgo = ProtoBufTimeSeriesCurrentSerializer.to(expectedPoints);
-        long start = expectedPoints.get(0).getTimestamp();
-        long end = expectedPoints.get(expectedPoints.size() - 1).getTimestamp();
-        TreeSet<Point> uncompressedPoints = ProtoBufTimeSeriesCurrentSerializer.from(
+        byte[] compressedOlgAlgo = ProtoBufTimeSeriesCurrentSerializer.to(expectedMeasures);
+        long start = expectedMeasures.get(0).getTimestamp();
+        long end = expectedMeasures.get(expectedMeasures.size() - 1).getTimestamp();
+        TreeSet<Measure> uncompressedMeasures = ProtoBufTimeSeriesCurrentSerializer.from(
                 new ByteArrayInputStream(compressedOlgAlgo),
                 start, end, compressedOlgAlgo
         );
-        assertEquals(new TreeSet<Point>(expectedPoints), new TreeSet<>(uncompressedPoints));
+        assertEquals(new TreeSet<Measure>(expectedMeasures), new TreeSet<>(uncompressedMeasures));
     }
 
 

@@ -188,7 +188,7 @@
 //  }
 //
 //  /**
-//   * determine grouping criteria depending on number of points
+//   * determine grouping criteria depending on number of measures
 //   * If 10 per day, 300 per month, 3000 per year then group by year for those metrics
 //   * If 10000 per day then group by day for those metrics
 //   *
@@ -243,7 +243,7 @@
 //    val ends = r.getAs[ArrayDF[Long]](endsColumnName)
 //    val sizes = r.getAs[ArrayDF[Long]](sizesColumnName)
 //    val totalPoints = r.getAs[Long](totalNumberOfPointColumnName)
-//    logger.trace(s"A total of points of $totalPoints")
+//    logger.trace(s"A total of measures of $totalPoints")
 //    val chunked = chunkIntoSeveralHistorianChunkCollectionFieldsVersion0("evoa_measure", name, values, starts, ends, sizes)
 //    chunked
 //  }
@@ -466,7 +466,7 @@
 //  private def deleteOldChunks = {
 //    if (options.tagging) {
 //      try {
-//        //TODO check chunked data equal not chunked data ? (so we are sure of not loosing data) Maybe a count of points for each metrics (would be a first verif)
+//        //TODO check chunked data equal not chunked data ? (so we are sure of not loosing data) Maybe a count of measures for each metrics (would be a first verif)
 //        deleteTaggedChunks()
 //      } catch {
 //        case ex: Throwable => {

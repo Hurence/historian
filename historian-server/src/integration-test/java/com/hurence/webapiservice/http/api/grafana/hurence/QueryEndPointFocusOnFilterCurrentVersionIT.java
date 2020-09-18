@@ -4,8 +4,8 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.http.HttpServerVerticle;
@@ -49,12 +49,12 @@ public class QueryEndPointFocusOnFilterCurrentVersionIT {
         SolrITHelper.addFieldToChunkSchema(container, "pays");
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralInjectorCurrentVersion injector = new GeneralInjectorCurrentVersion();
-        ChunkVersionCurrent chunk1 = ChunkBuilderHelper.fromPointsAndTags(
+        Chunk chunk1 = ChunkBuilderHelper.fromPointsAndTags(
                 "metric_to_filter",
                 Arrays.asList(
-                        new PointImpl( 1477895624866L, 1.0),
-                        new PointImpl( 1477916224866L, 1.0),
-                        new PointImpl( 1477917224866L, 1.0)
+                        Measure.fromValue( 1477895624866L, 1.0),
+                        Measure.fromValue( 1477916224866L, 1.0),
+                        Measure.fromValue( 1477917224866L, 1.0)
                 ),
                 new HashMap<String, String>(){{
                     put("pays", "Berlin");
@@ -63,11 +63,11 @@ public class QueryEndPointFocusOnFilterCurrentVersionIT {
         );
         injector.addChunk(chunk1);
 
-        ChunkVersionCurrent chunk2 = ChunkBuilderHelper.fromPointsAndTags(
+        Chunk chunk2 = ChunkBuilderHelper.fromPointsAndTags(
                 "metric_to_filter",
                 Arrays.asList(
-                        new PointImpl( 1477917224868L, 2.0),
-                        new PointImpl( 1477917224886L, 2.0)
+                        Measure.fromValue( 1477917224868L, 2.0),
+                        Measure.fromValue( 1477917224886L, 2.0)
                 ),
                 new HashMap<String, String>(){{
                     put("pays", "France");
@@ -75,11 +75,11 @@ public class QueryEndPointFocusOnFilterCurrentVersionIT {
                 }});
         injector.addChunk(chunk2);
 
-        ChunkVersionCurrent chunk3 = ChunkBuilderHelper.fromPointsAndTags(
+        Chunk chunk3 = ChunkBuilderHelper.fromPointsAndTags(
                 "metric_to_filter",
                 Arrays.asList(
-                        new PointImpl( 1477917224980L, 3.0),
-                        new PointImpl( 1477917224981L, 3.0)
+                        Measure.fromValue( 1477917224980L, 3.0),
+                        Measure.fromValue( 1477917224981L, 3.0)
                 ),
                 new HashMap<String, String>(){{
                     put("usine", "usine_1");
@@ -87,11 +87,11 @@ public class QueryEndPointFocusOnFilterCurrentVersionIT {
                 }});
         injector.addChunk(chunk3);
 
-        ChunkVersionCurrent chunk4 = ChunkBuilderHelper.fromPointsAndTags(
+        Chunk chunk4 = ChunkBuilderHelper.fromPointsAndTags(
                 "metric_to_filter",
                         Arrays.asList(//maxDataPoints we are not testing value only sampling
-                                new PointImpl(1477917224988L, 4.0),
-                                new PointImpl(1477917324988L, 4.0)
+                                Measure.fromValue(1477917224988L, 4.0),
+                                Measure.fromValue(1477917324988L, 4.0)
                         ),
                         new HashMap<String, String>() {{
                             put("pays", "France");

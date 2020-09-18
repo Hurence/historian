@@ -1,13 +1,13 @@
 package com.hurence.historian.modele.stream;
 
 import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.historian.modele.stream.impl.ChunkSolrStreamVersionCurrent;
 import com.hurence.historian.modele.stream.impl.JsonSolrStream;
 import com.hurence.historian.modele.stream.impl.SolrStream;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
 
-public interface ChunkStream extends Stream<ChunkVersionCurrent> {
+public interface ChunkStream extends Stream<Chunk> {
 
 
     static ChunkStream fromVersionAndSolrStream(SchemaVersion version, TupleStream stream) {

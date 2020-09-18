@@ -23,7 +23,7 @@ public interface IngestionApi {
     }
 
     /**
-     * should post points based on json input.
+     * should post measures based on json input.
      * @param context
      */
     void importJson(RoutingContext context);
