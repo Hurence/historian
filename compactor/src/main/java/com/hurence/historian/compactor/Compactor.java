@@ -13,6 +13,10 @@ import org.apache.commons.cli.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.*;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -135,6 +139,30 @@ public class Compactor implements Runnable {
 
     public void setStartNow(boolean startNow) {
         this.startNow = startNow;
+    }
+
+    /**
+     * Get the first timestamp (in milliseconds) of the current day in UTC format.
+     * For instance if you call this method on Friday 18 September 2020 in the middle of the day,
+     * this should return 1600387200000 which corresponds to GMT: Friday 18 September 2020 00:00:00
+     * @return
+     */
+    private static long utcFirstTimestampOfTodayMs() {
+
+        // Get current time in UTC timezone
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DATE);
+        calendar.set(year, month, day, 0, 0, 0); // Remove hour, minute and seconds of the day from the time
+
+        // This may return 1600387200388 timestamp in milliseconds which is GMT: Friday 18 September 2020 00:00:00.388
+        long timestampMillis = calendar.getTime().getTime();
+
+        // Remove the milliseconds by rounding down to number of seconds and passing again into ms
+        // 1600387200388 -> 1600387200000
+
+        return (timestampMillis / 1000L) * 1000L;
     }
 
     /**
