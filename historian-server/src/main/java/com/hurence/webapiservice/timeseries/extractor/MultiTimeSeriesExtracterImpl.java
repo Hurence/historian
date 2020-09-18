@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonArray;
@@ -21,28 +22,39 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     final long from;
     final long to;
     final SamplingConf samplingConf;
+    boolean returnQuality;
 
     public MultiTimeSeriesExtracterImpl(long from,
                                         long to,
                                         SamplingConf samplingConf,
-                                        List<MetricRequest> metricRequests) {
+                                        List<MetricRequest> metricRequests,
+                                        boolean returnQuality) {
         this.from = from;
         this.to = to;
         this.samplingConf = samplingConf;
         this.extractorByMetricRequest = new HashMap<>();
         this.metricRequests = metricRequests;
+        this.returnQuality = returnQuality;
     }
 
 
     @Override
-    public void addChunk(JsonObject chunk) {
+    public void addChunk(Chunk chunk) {
+        final Chunk finalChunk = rebuildChunkIfNeeded(chunk);
         metricRequests.forEach(metricRequest -> {
-            if (metricRequest.isChunkMatching(chunk)) {
+            if (metricRequest.isChunkMatching(finalChunk)) {
                 extractorByMetricRequest
                         .computeIfAbsent(metricRequest, this::createTimeSeriesExtractor)
-                        .addChunk(chunk);
+                        .addChunk(finalChunk);
             }
         });
+    }
+
+    private Chunk rebuildChunkIfNeeded(Chunk chunk) {
+        if (from > chunk.getStart() || to < chunk.getEnd()) {
+            return chunk.truncate(from, to);
+        }
+        return chunk;
     }
 
     @Override
@@ -57,7 +69,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     }
 
     protected TimeSeriesExtracter createTimeSeriesExtractor(MetricRequest metricRequest) {
-        return new TimeSeriesExtracterImpl(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList);
+        return new TimeSeriesExtracterImpl(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList, returnQuality, metricRequest.getQuality().getQualityValue());
     }
 
     public void setTotalNumberOfPointForMetric(MetricRequest metric, long totalNumberOfPoints) {
@@ -68,6 +80,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     public JsonArray getTimeSeries() {
         List<JsonObject> timeseries = extractorByMetricRequest.entrySet().stream()
                 .sorted(Map.Entry.comparingByKey(Comparator.comparing(MetricRequest::getName)))
+                .filter(entry -> !entry.getValue().getTimeSeries().isEmpty())
                 .map(entry -> {
                     JsonObject timeSerie = new JsonObject();
                     timeSerie.put(TIMESERIE_NAME, entry.getKey().getName());

@@ -1,10 +1,12 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
+
 import io.vertx.core.json.JsonArray;
 import io.vertx.reactivex.core.MultiMap;
 import io.vertx.reactivex.ext.web.FileUpload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 public class CsvFileConvertor {
 
@@ -20,6 +22,7 @@ public class CsvFileConvertor {
     }
 
 
+
     public FileUpload getFile() {
         return file;
     }
@@ -30,5 +33,6 @@ public class CsvFileConvertor {
 
     public FileReport getFileReport() {
         return fileReport;
+
     }
 }

@@ -1,25 +1,21 @@
 package com.hurence.historian.spark.sql
 
 import java.nio.charset.StandardCharsets
+import java.util.stream.Collectors
 
 import com.google.common.hash.Hashing
-import com.hurence.logisland.timeseries.MetricTimeSeries
-import com.hurence.logisland.timeseries.converter.compaction.BinaryCompactionConverterOfRecord
-import com.hurence.logisland.timeseries.sax.{GuessSaxParameters, SaxConverter, SaxAnalyzer}
-import com.hurence.logisland.util.DateUtil
-import com.hurence.logisland.util.string.BinaryEncodingUtils
+import com.hurence.historian.date.util.DateUtil
+import com.hurence.timeseries.MetricTimeSeries
+import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils}
+import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
 import org.apache.spark.sql.functions.udf
-import spire.std.int
 
-import scala.collection.mutable
 import scala.collection.JavaConverters._
+import scala.collection.mutable
 import scala.util.control.NonFatal
 
 
 object functions {
-
-  private val converter = new BinaryCompactionConverterOfRecord.Builder().build
-
 
   val sha256 = udf { toHash: String =>
     Hashing.sha256.hashString(toHash, StandardCharsets.UTF_8).toString
@@ -51,13 +47,13 @@ object functions {
   val chunk = udf { (name: String, start: Long, end: Long, timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
 
     // @TODO move this into timeseries modules and do the same for Chronix functions call
-    val builder = new MetricTimeSeries.Builder(name, "measures")
+    val builder = new MetricTimeSeries.Builder(name)
       .start(start)
       .end(end)
 
     (timestamps zip values).map { case (t, v) => builder.point(t, v) }
 
-    val bytes = converter.serializeTimeseries(builder.build())
+    val bytes = BinaryCompactionUtil.serializeTimeseries(builder.build());
     BinaryEncodingUtils.encode(bytes)
 
   }
@@ -71,9 +67,11 @@ object functions {
 
     val bytes = BinaryEncodingUtils.decode(chunk)
 
-    converter.deSerializeTimeseries(bytes, start, end).asScala.map(p => (p.getTimestamp, p.getValue))
-
-
+    BinaryCompactionUtil.unCompressPoints(bytes, start, end)
+      .stream()
+      .collect(Collectors.toList())
+      .asScala
+      .map(p => (p.getTimestamp, p.getValue))
   }
 
   /**
@@ -102,7 +100,7 @@ object functions {
     *
     *
     */
-  val guess = udf { ( values: mutable.WrappedArray[Double]) =>
+  val guess = udf { (values: mutable.WrappedArray[Double]) =>
 
     val list = values.map(Double.box).asJava
 
@@ -111,13 +109,13 @@ object functions {
   }
 
   /**
-   * Encoding function: returns the sax string of the values using the best guess.
-   */
-  val sax_best_guess = udf { ( nThreshold: Float ,values: mutable.WrappedArray[Double]) =>
+    * Encoding function: returns the sax string of the values using the best guess.
+    */
+  val sax_best_guess = udf { (nThreshold: Float, values: mutable.WrappedArray[Double]) =>
 
     val list = values.map(Double.box).asJava
     val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
-    val paaSize =best_guess(1).toString.toInt
+    val paaSize = best_guess(1).toString.toInt
     val alphabetSize = best_guess(2).toString.toInt
 
     val saxConverter = new SaxConverter.Builder()
@@ -129,7 +127,7 @@ object functions {
     saxConverter.getSaxStringFromValues(list)
 
   }
-  val sax_best_guess_paa_fixed = udf { ( nThreshold: Float, paaSize: Int ,values: mutable.WrappedArray[Double]) =>
+  val sax_best_guess_paa_fixed = udf { (nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
 
     val list = values.map(Double.box).asJava
     val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
@@ -146,12 +144,12 @@ object functions {
 
   }
   /**
-   * Encoding function: returns the sax string of the values using the best guess.
-   */
-  val anomalie_test = udf { ( str: String) =>
+    * Encoding function: returns the sax string of the values using the best guess.
+    */
+  val anomalie_test = udf { (str: String) =>
 
-    val saxThreshold =  SaxAnalyzer.saxThreshold(str,0.1)
-    SaxAnalyzer.anomalyDetect(str,saxThreshold).toString
+    val saxThreshold = SaxAnalyzer.saxThreshold(str, 0.1)
+    SaxAnalyzer.anomalyDetect(str, saxThreshold).toString
 
   }
 }

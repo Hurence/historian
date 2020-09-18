@@ -9,7 +9,8 @@
       [2.0,2],
       [3.0,3],
       [4.0,4]
-    ]
+    ],
+    "total_points":3
   },
   {
     "name":"temp_a",
@@ -19,7 +20,8 @@
     },
     "datapoints":[
       [3.0,5]
-    ]
+    ],
+    "total_points":1
   },
   {
     "name":"temp_b",
@@ -29,6 +31,7 @@
     },
     "datapoints":[
       [1.0,1]
-    ]
+    ],
+    "total_points":1
   }
 ]

@@ -1,0 +1,23 @@
+NOTE:: Attention au chemin ou vous installez l'historian (par défaut /opt/hdh). En effet l'espace disque doit être
+suffisant pour stocker les binaires, les scripts ainsi que les données de time series que vous allez injecter.
+
+Et voici un aperçu des derniers logs si tout s'est bien passé lors de l'installation (verifiez que vous n'avez pas eu d'erreur d'affiché) :
+
+image::screenshot_install_succeeded.png[]
+
+Vous pouvez vérifier que votre serveur a bien été lancé avec la commande suivante:
+
+[source,bash]
+----
+curl http://localhost:8080/api/grafana/v0
+----
+
+Si ce n'est pas le cas, allez voir les logs (dans le répertoire d'installation et le sous répertoire _historian-{hdh_version}_, il y a un fichier app.log). En général ce sera un problème de droits pour créer des répertoires: notamment dans /tmp (vérifiez bien vos droits en écriture sur ce répertoire).
+
+Pour démarrer ou redémarrer l'historian (en cas de problème), tapez la commande suivante dans le répertoire d'installation :
+
+[source, bash, subs="attributes"]
+----
+historian-{hdh_version}/bin/historian-server.sh start
+(or historian-{hdh_version}/bin/historian-server.sh restart)
+----

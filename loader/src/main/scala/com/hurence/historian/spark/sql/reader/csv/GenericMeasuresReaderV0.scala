@@ -1,14 +1,15 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.model.{ChunkRecordV0, MeasureRecordV0}
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.functions.{toDateUTC, toTimestampUTC}
+import com.hurence.historian.spark.sql.functions.toTimestampUTC
 import com.hurence.historian.spark.sql.reader.Reader
+import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions.{lit, _}
-import org.apache.spark.sql.{Dataset, SparkSession}
+import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 import org.slf4j.LoggerFactory
+import scala.collection.JavaConverters._
 
-class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
+class GenericMeasuresReaderV0 extends Reader[Measure] {
 
   private val logger = LoggerFactory.getLogger(classOf[GenericMeasuresReaderV0])
 
@@ -23,16 +24,19 @@ class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
     "tagsFields" -> "tag_a,tag_b"
   )
 
-  override def read(options: Options): Dataset[MeasureRecordV0] = {
+  override def read(options: Options): Dataset[Measure] = {
     // 5. load back those chunks to verify
     val spark = SparkSession.getActiveSession.get
     import spark.implicits._
+
+    implicit val measureEncoder = Encoders.bean(classOf[Measure])
 
 
     val valueField = options.config("valueField")
     val nameField = options.config("nameField")
     val timestampField = options.config("timestampField")
     val timestampDateFormat = options.config("timestampDateFormat")
+    val hasQuality = options.config.isDefinedAt("qualityField") && !options.config("qualityField").isEmpty
 
     val isTimestampInSeconds = timestampDateFormat.equalsIgnoreCase("s") ||
       timestampDateFormat.equalsIgnoreCase("seconds")
@@ -42,10 +46,18 @@ class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
       .split(",").toList
     val tagsMapping = tagsFields.flatMap(tag => List(lit(tag), col(tag)))
 
-    val mainCols = List(
-      col(nameField).as("name"),
-      col(valueField).as("value"),
-      col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag))
+
+    val mainCols = if (!hasQuality)
+      List(
+        col(nameField).as("name"),
+        col(valueField).as("value"),
+        col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag))
+    else
+      List(
+        col(nameField).as("name"),
+        col(valueField).as("value"),
+        col(options.config("qualityField")).as("quality"),
+        col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag))
 
 
     val df = spark.read
@@ -61,7 +73,7 @@ class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
       logger.info("getting date from timestamp in seconds")
       df.withColumn("timestamp", $"timestamp" * 1000L)
     }
-    else if(isTimestampInMilliSeconds)  {
+    else if (isTimestampInMilliSeconds) {
       logger.info("getting date from timestamp in milliseconds")
       df.withColumn("timestamp", $"timestamp" * 1L)
     }
@@ -75,10 +87,25 @@ class GenericMeasuresReaderV0 extends Reader[MeasureRecordV0] {
       .withColumn("year", year(from_unixtime($"timestamp" / 1000L)))
       .withColumn("month", month(from_unixtime($"timestamp" / 1000L)))
       .withColumn("hour", hour(from_unixtime($"timestamp" / 1000L)))
-      .withColumn("day", from_unixtime($"timestamp"/ 1000L, "yyyy-MM-dd"))
-     // .withColumn("day", toDateUTC($"timestamp", lit("yyyy-MM-dd")))
+      .withColumn("day", from_unixtime($"timestamp" / 1000L, "yyyy-MM-dd"))
+      // .withColumn("day", toDateUTC($"timestamp", lit("yyyy-MM-dd")))
       .drop(tagsFields: _*)
-      .as[MeasureRecordV0]
+      .map(r => {
+        val builder = Measure.builder()
+
+        builder
+          .name(r.getAs[String]("name"))
+          .timestamp(r.getAs[Long]("timestamp"))
+          .value(r.getAs[Double]("value"))
+          .tags(r.getAs[Map[String, String]]("tags").asJava)
+
+        if (!hasQuality)
+          builder.quality(r.getAs[Float]("quality"))
+
+        builder.compute().build()
+
+      })
+      .as[Measure]
 
   }
 

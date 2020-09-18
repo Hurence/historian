@@ -61,16 +61,19 @@ public class ImportCsvEndPointIT {
     public static String GROUP_BY = "group_by";
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
-
-        SolrITHelper.createChunkCollection(client, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0.toString());
-        SolrITHelper.addCodeInstallAndSensor(container);
-        SolrITHelper.addFieldToChunkSchema(container, "date");
+    public static void beforeAll(DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
+        initSolr(container);
         webClient = HttpITHelper.buildWebClient(vertx);
         HttpWithHistorianSolrITHelper.deployHttpAndHistorianVerticle(container, vertx).subscribe(id -> {
                     context.completeNow();
                 },
                 t -> context.failNow(t));
+    }
+
+    private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
+        SolrITHelper.addCodeInstallAndSensor(container);
+        SolrITHelper.addFieldToChunkSchema(container, "date");
     }
 
     @AfterEach
@@ -171,7 +174,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_NAME, "metric_name")
                 .attribute(MAPPING_VALUE, "metric_value")
                 .attribute(MAPPING_QUALITY, "metric_quality")
-                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
+                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH)
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
@@ -496,7 +499,7 @@ public class ImportCsvEndPointIT {
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
                         multipartForm,
                         "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_too_big.json",
-                        CREATED, StatusMessages.CREATED,
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
                         BodyCodec.jsonObject(), vertx)
         );
         AssertResponseGivenRequestHelper
@@ -682,6 +685,50 @@ public class ImportCsvEndPointIT {
                         "/http/ingestion/csv/onemetric-3points/testQuery/csv-exemple-expectedResponse.json",
                         OK, StatusMessages.OK,
                         BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testBug10072020EmptyResponseWhenNoFileIsSent(Vertx vertx, VertxTestContext testContext) {
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "Timestamp")
+                .attribute(MAPPING_NAME, "Metric")
+                .attribute(MAPPING_VALUE, "Happiness Score")
+                .attribute("timestamp_unit", "MILLISECONDS_EPOCH")
+                .attribute(FORMAT_DATE, "yyyy-m-DTHH:mm+ss.SSS")
+                .attribute(TIMEZONE_DATE, "UTC");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/bug/testBug10072020EmptyResponseWhenNoFileIsSent/expectedResponse.json",
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    //date format 2015-01-31T23:59:59+99:999
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testParsingFile_10072020_novalid_points_should_give_a_reason(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/bug/csv/2015.txt").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "Timestamp")
+                .attribute(MAPPING_NAME, "Metric")
+                .attribute(MAPPING_VALUE, "Happiness Score")
+                .attribute(FORMAT_DATE, "yyyy-MM-dd'T'HH:mm+ss.SSS")
+                .attribute(TIMEZONE_DATE, "UTC")
+                .textFileUpload("csv-exemple.csv", "csv-exemple.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/bug/testParsingFile_10072020_novalid_points_should_give_a_reason/expectedResponse.json",
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
+                        BodyCodec.jsonObject(), vertx)
         );
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);

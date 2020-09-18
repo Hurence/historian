@@ -102,7 +102,7 @@ final class UnChunkyfier(override val uid: String)
   setDefault(saxStringLength, 20)
 
   val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
-    "the chunk max points count",
+    "the chunk max measures count",
     ParamValidators.inRange(0, 100000))
 
   /** @group setParam */
@@ -113,14 +113,14 @@ final class UnChunkyfier(override val uid: String)
   def transform(df: Dataset[_]): DataFrame = {
 
 
-   df.withColumn("points", unchunk(col($(chunkCol)), col("start"), col("end")))
-      .withColumn("point", explode(col("points")))
+   df.withColumn("measures", unchunk(col($(chunkCol)), col("start"), col("end")))
+      .withColumn("point", explode(col("measures")))
       .select(
         col("name"),
         col("point._2").as($(valueCol) ),
         col("point._1").as($(timestampCol)),
         col("tags"))
-      .drop( "sax","chunk", "avg", "stddev", "first", "last","min", "max", "count","points", "start", "end", "point")
+      .drop( "sax","chunk", "avg", "stddev", "first", "last","min", "max", "count","measures", "start", "end", "point")
 
 
 

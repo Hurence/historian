@@ -1,5 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion.util;
 
+
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,9 +9,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianServiceFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseCsvImportRequest;
 import static com.hurence.webapiservice.http.api.ingestion.util.CsvConvertorUtil.ConvertCsvFileToJson;
+
 
 public class IngestionApiUtil {
 
@@ -42,6 +44,7 @@ public class IngestionApiUtil {
                 String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+ MAX_LINES_FOR_CSV_FILE;
                 fillingTheNamesOfFailedFiles(errorMessage, convertor, allFilesReport);
                 continue;
+
             }
             // parse the jsonArray fileInArray
             parseCsvImportRequest(convertor.fileInArray,csvFilesConvertorConf, convertor.fileReport);
@@ -76,6 +79,7 @@ public class IngestionApiUtil {
                 });
             }
         });
+
     }
 
 }

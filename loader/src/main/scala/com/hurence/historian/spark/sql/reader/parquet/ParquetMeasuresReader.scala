@@ -1,24 +1,32 @@
 package com.hurence.historian.spark.sql.reader.parquet
 
-import com.hurence.historian.model.MeasureRecordV0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
-import org.apache.spark.sql.{Dataset, SparkSession}
+import com.hurence.timeseries.model.Measure
+import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
+import scala.collection.JavaConverters._
 
-class ParquetMeasuresReader extends Reader[MeasureRecordV0] {
+class ParquetMeasuresReader extends Reader[Measure] {
 
 
-  override def read(options: Options): Dataset[MeasureRecordV0] = {
+  override def read(options: Options): Dataset[Measure] = {
 
 
     val spark = SparkSession.getActiveSession.get
 
-    import spark.implicits._
 
+    implicit val measureEncoder = Encoders.bean(classOf[Measure])
 
     spark.read
       .parquet(options.path)
-  //    .withColumn("day", from_unixtime($"timestamp" / 1000, "yyyy-MM-dd"))
-      .as[MeasureRecordV0]
+      .map(r => Measure.builder()
+        .name(r.getAs[String]("name"))
+        .timestamp(r.getAs[Long]("timestamp"))
+        .value(r.getAs[Double]("value"))
+        .tags(r.getAs[Map[String, String]]("tags").asJava)
+        .compute()
+        .build()
+      )
+      .as[Measure](Encoders.bean(classOf[Measure]))
   }
 }

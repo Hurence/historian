@@ -17,19 +17,14 @@
 
 package com.hurence.webapiservice.historian;
 
+import com.hurence.webapiservice.historian.models.HistorianVerticleConf;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.serviceproxy.ServiceBinder;
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 
 public class HistorianVerticle extends AbstractVerticle {
@@ -77,6 +72,7 @@ public class HistorianVerticle extends AbstractVerticle {
         LOGGER.info("{} deployed on address : '{}'", HistorianService.class.getSimpleName(), conf.getHistorianServiceAddress());
         promise.complete();
       } else {
+        LOGGER.error("Initialisation of historian verticle failed", ready.cause());
         promise.fail(ready.cause());
       }
     });

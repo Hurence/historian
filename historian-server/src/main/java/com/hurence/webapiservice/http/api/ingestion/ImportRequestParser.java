@@ -13,7 +13,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianFields.*;
+import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0.NAME;
+import static com.hurence.historian.modele.HistorianServiceFields.POINTS;
+import static com.hurence.historian.modele.HistorianServiceFields.TAGS;
 
 public class ImportRequestParser {
 
@@ -24,22 +26,22 @@ public class ImportRequestParser {
      *                                 [
      *                                  {
      *                                      "name": ...
-     *                                      "points": [
+     *                                      "measures": [
      *                                          [time, value],
      *                                          [time, value]
      *                                      ]
      *                                  },
      *                                 {
      *                                      "name": ...
-     *                                      "points": [
+     *                                      "measures": [
      *                                          [time, value],
      *                                          [time, value]
      *                                      ]
      *                                 }
      *                                 ]
      *
-     * @return CorrectPointsAndErrorMessages an object that have the correct points in a jsonArray and a list of the error
-     *          messages if there is bad points
+     * @return CorrectPointsAndErrorMessages an object that have the correct measures in a jsonArray and a list of the error
+     *          messages if there is bad measures
      */
     public static CorrectPointsAndErrorMessages parseJsonImportRequest(JsonArray jsonImportRequest) {
         if (null == jsonImportRequest) {
@@ -52,23 +54,23 @@ public class ImportRequestParser {
             JsonObject timeserie = (JsonObject) metricsObject;
             if (!(timeserie.containsKey(NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) || (timeserie.getValue(NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
-                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" points for metric with name "+timeserie.getValue(NAME)+" because this is not a valid name");
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS).size();
+                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" measures for metric with name "+timeserie.getValue(NAME)+" because this is not a valid name");
                 continue;
             } else if (!(timeserie.getValue(NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD))) {
-                throw new IllegalArgumentException("field 'points' is required");
-            } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
-                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
+            } else if (!(timeserie.containsKey(POINTS))) {
+                throw new IllegalArgumentException("field 'measures' is required");
+            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
+                throw new IllegalArgumentException("field 'measures' : " + timeserie.getValue(POINTS) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
             newTimeserie.put(NAME, timeserie.getString(NAME));
             JsonArray newPoints = new JsonArray();
-            for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
+            for (Object point : timeserie.getJsonArray(POINTS)) {
                 JsonArray pointArray;
-                String commonErrorMessage = "Ignored 1 points for metric with name '" + timeserie.getString(NAME);
+                String commonErrorMessage = "Ignored 1 measures for metric with name '" + timeserie.getString(NAME);
                 try {
                     pointArray = (JsonArray) point;
                     pointArray.size();
@@ -102,12 +104,12 @@ public class ImportRequestParser {
                 newPoints.add(pointArray);
             }
             if(!newPoints.isEmpty()) {
-                newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
+                newTimeserie.put(POINTS, newPoints);
                 correctPointsAndErrorMessages.correctPoints.add(newTimeserie);
             }
         }
         if (correctPointsAndErrorMessages.correctPoints.isEmpty())
-            throw new IllegalArgumentException("There is no valid points");
+            throw new IllegalArgumentException("There is no valid measures");
         return correctPointsAndErrorMessages;
     }
     public static class CorrectPointsAndErrorMessages {
@@ -161,16 +163,16 @@ public class ImportRequestParser {
             int numberOfFailedPointsForThisName = 0;
             if (!(timeserie.containsKey(NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS_REQUEST_FIELD) != null)) || (timeserie.getValue(NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(POINTS_REQUEST_FIELD).size();
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS).size();
                 numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints;
                 continue;
             } else if (!(timeserie.getValue(NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(POINTS_REQUEST_FIELD))) {
-                throw new IllegalArgumentException("field 'points' is required");
-            } else if  ((!(timeserie.getValue(POINTS_REQUEST_FIELD) instanceof JsonArray)) || (timeserie.getValue(POINTS_REQUEST_FIELD)==null)) {
-                throw new IllegalArgumentException("field 'points' : " + timeserie.getValue(POINTS_REQUEST_FIELD) + " is not an array");
+            } else if (!(timeserie.containsKey(POINTS))) {
+                throw new IllegalArgumentException("field 'measures' is required");
+            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
+                throw new IllegalArgumentException("field 'measures' : " + timeserie.getValue(POINTS) + " is not an array");
             }
 
             JsonObject newTimeserie = getTimeserieWithoutPoints(timeserie);
@@ -206,7 +208,7 @@ public class ImportRequestParser {
     private static JsonObject getTimeserieWithoutPoints (JsonObject timeserie) {
         JsonObject newTimeserie = new JsonObject();
         timeserie.fieldNames().forEach(i -> {
-            if (!i.equals(POINTS_REQUEST_FIELD))
+            if (!i.equals(POINTS))
                 newTimeserie.put(i, timeserie.getValue(i));
         });
         return newTimeserie;
@@ -236,7 +238,7 @@ public class ImportRequestParser {
      */
     private static void parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport, JsonObject newTimeserie) {
         JsonArray newPoints = new JsonArray();
-        for (Object point : timeserie.getJsonArray(POINTS_REQUEST_FIELD)) {
+        for (Object point : timeserie.getJsonArray(POINTS)) {
             JsonArray pointArray;
             try {
                 pointArray = (JsonArray) point;
@@ -271,7 +273,7 @@ public class ImportRequestParser {
             newPoints.add(pointArray);
         }
         if(!newPoints.isEmpty()) {
-            newTimeserie.put(POINTS_REQUEST_FIELD, newPoints);
+            newTimeserie.put(POINTS, newPoints);
             fileReport.correctPoints.add(newTimeserie);
         }
     }

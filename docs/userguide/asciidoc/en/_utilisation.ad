@@ -1,0 +1,171 @@
+== Data management
+
+You can consult our documentation on the REST API 'rest-api.pdf' to know the details of each function of the API (endpoint).
+
+Now that we've installed the historian. You can play with data, there are several ways
+interact with the historian according to your culture and your needs.
+
+The historian initially contains no data. There are several ways to inject data (see the guide on the API rest), in this guide we will use importing data from csv files.
+
+=== Importing Data from CSV files with the REST API
+
+TODO
+
+=== Request data with the REST API
+
+[source,bash]
+----
+curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  "panelId": 1,
+  "range": {
+    "from": "2019-03-01T00:00:00.000Z",
+    "to": "2020-03-01T23:59:59.000Z"
+  },
+  "interval": "30s",
+  "intervalMs": 30000,
+  "targets": [
+    {
+      "target": "\"ack\"",
+      "type": "timeserie"
+    }
+  ],
+  "format": "json",
+  "maxDataPoints": 550
+}'
+----
+
+
+Get all metrics names
+
+[source,bash]
+----
+curl --location --request POST 'http://localhost:8080/api/grafana/search' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "target": "*"
+}'
+----
+
+Get some measures points within a time range
+
+[source,bash]
+----
+curl --location --request POST 'http://localhost:8080/api/grafana/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+	 "range": {
+          "from": "2019-11-25T23:59:59.999Z",
+          "to": "2019-11-30T23:59:59.999Z"
+      },
+      "targets": [
+        { "target": "ack" }
+      ]
+}'
+----
+
+=== Use Spark to get data
+
+Apache Spark is an Open Source framework designed to process hudge datasets in parallel on computing clusters.
+Hurence Data Historian is highly integrated with Spark so that you can handle dataset interactions in both ways (input and output) through a simple API.
+
+The following commands show you how to take a CSV dataset from HDFS or local filesystem, load it as a HDH time serie.
+
+[source,bash]
+----
+$HDH_HOME/spark-{spark-version}-bin-hadoop{hadoop_version}/bin/spark-shell --jars assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/loader-{hdh_version}.jar,assembly/target/historian-{hdh_version}/historian-{hdh_version}/lib/spark-solr-3.6.6-shaded.jar
+----
+
+
+[source,scala]
+----
+import com.hurence.historian.model.ChunkRecordV0
+import com.hurence.historian.spark.ml.Chunkyfier
+import com.hurence.historian.spark.sql
+import com.hurence.historian.spark.sql.functions._
+import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import com.lucidworks.spark.util.SolrSupport
+import org.apache.commons.cli.{DefaultParser, Option, Options}
+import org.apache.spark.sql.SparkSession
+import org.slf4j.LoggerFactory
+
+ val filePath = "/Users/tom/Documents/workspace/historian/loader/src/test/resources/it-data-4metrics.csv.gz"
+ val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val measuresDS = reader.read(sql.Options(
+      filePath,
+      Map(
+        "inferSchema" -> "true",
+        "delimiter" -> ",",
+        "header" -> "true",
+        "nameField" -> "metric_name",
+        "timestampField" -> "timestamp",
+        "timestampDateFormat" -> "s",
+        "valueField" -> "value",
+        "tagsFields" -> "metric_id,warn,crit"
+      )))
+
+
+
+val chunkyfier = new Chunkyfier().setGroupByCols(Array(  "name", "tags.metric_id"))
+val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0]
+
+
+val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
+    writer.write(sql.Options("historian", Map(
+      "zkhost" -> "localhost:9983",
+      "collection" -> "historian",
+      "tag_names" -> "metric_id,warn,crit"
+    )), chunksDS)
+----
+
+
+=== Realtime data ingestion with logisland
+
+Hurence's Open Source software for stream processing (therefore real-time data processing), LogIsland, allows you to inject data "on the fly", especially those that you could "push" in a Mqtt message bus or Kafka.
+
+Hurence Data Historian is therefore able to process sensors data and to store and graph it in real-time. Hurence also has some OPC connectors to get sensors data from factory equipements.
+
+To set up a real-time injection chain, the best is to contact Hurence (contact@hurence.com) for a little support because it becomes real Big Data in real time.
+
+== Data visualization
+
+To create dashboards you have to go to the graphical interface of grafana (http://localhost:3000/[http://localhost:3000/]) (localhost being replaced by a machine name if you are not in standalone installation).
+
+Then go to the datasources menu:
+
+image::grafana_ui_datasource.png[go to datasource page]
+
+Look for the "Hurence-Historian" datasource and select it.
+You just have to enter the URL http://localhost:8080/api/grafana/v0 in the case of standalone installation.
+
+image::datasource_historian_setup.png[datasource setup]
+
+Test the connectivity by clicking on the "Save & Test" button at the bottom of the page.
+Then create a new dashboard.
+
+image::grafana_ui_create_dashboard.png[go to new dashboard page]
+
+Add the graphs you want, a small example below:
+
+image::grafana_graph_config_exemple.png[exemple of query config]
+
+A "query" consists of entering a metric name, and pairs of name / tag value tags as well as options for the sampling algorithm.
+
+note:: the sampling options of the first request are used for all the others.
+
+note:: if you don't have data injected, follow the tutorial to inject data.
+
+note:: if you did not add a name tag during the installation you will not be able to use tags. It is always possible to add tags manually after installation by adding a field in the diagram.
+
+== Stopping and deleting data
+
+This section teaches you how to stop the services and destroy the data if necessary (after testing you will want to feed with your real data).
+
+=== Stopping your Solr instances
+
+This section teaches you how to stop Solr intances. Please note this command will switch off Solr (this could impact other services using Solr).
+
+    cd $SOLR_HOME
+    bin/solr stop -all

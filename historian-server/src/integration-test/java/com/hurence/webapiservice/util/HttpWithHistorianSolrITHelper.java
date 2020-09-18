@@ -56,9 +56,9 @@ public abstract class HttpWithHistorianSolrITHelper {
             Vertx vertx, VertxTestContext context,
             JsonObject historianConf) throws IOException, SolrServerException, InterruptedException {
         LOGGER.info("Initializing Historian chunk collection");
-        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.VERSION_0);
+        HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Initializing Historian annotation collection");
-        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.VERSION_0);
+        HistorianSolrITHelper.createAnnotationCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Initializing Verticles");
         deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
@@ -88,7 +88,7 @@ public abstract class HttpWithHistorianSolrITHelper {
 
     public static Single<String> deployCustomHttpAndHistorianVerticle(DockerComposeContainer container, Vertx vertx, int maxLimitFromConfig) {
         return deployCustomHttpAndCustomHistorianVerticle(container, vertx, new JsonObject(),
-                new JsonObject().put(HttpServerVerticle.CONFIG_MAX_CSV_POINTS_ALLOWED, maxLimitFromConfig)
+                new JsonObject().put(HttpServerVerticle.CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED, maxLimitFromConfig)
         );
     }
 
