@@ -1,9 +1,8 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.util.BucketUtils;
@@ -21,6 +20,7 @@ public class TimeSeriesExtracterUtil {
 
     private TimeSeriesExtracterUtil() {}
 
+
     /**
      *
      * @param from
@@ -28,12 +28,12 @@ public class TimeSeriesExtracterUtil {
      * @param chunks
      * @return return all points uncompressing chunks
      */
-    public static List<Point> extractPoints(long from, long to, List<ChunkVersionCurrent> chunks) {
+    public static List<Measure> extractPoints(long from, long to, List<Chunk> chunks) {
         return extractPointsAsStream(from, to, chunks).collect(Collectors.toList());
     }
 
 
-    public static Stream<Point> extractPointsAsStream(long from, long to, List<ChunkVersionCurrent> chunks) {
+    public static Stream<Measure> extractPointsAsStream(long from, long to, List<Chunk> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
                     byte[] binaryChunk = chunk.getValueAsBinary();

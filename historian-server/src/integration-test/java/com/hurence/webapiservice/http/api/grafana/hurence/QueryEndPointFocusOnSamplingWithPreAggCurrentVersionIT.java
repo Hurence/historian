@@ -4,9 +4,8 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
@@ -66,65 +65,65 @@ public class QueryEndPointFocusOnSamplingWithPreAggCurrentVersionIT extends Abst
 
     public static SolrInjector buildInjector() {
         GeneralInjectorCurrentVersion injector = new GeneralInjectorCurrentVersion();
-        List<List<Point>> pointsByChunk10Chunks = Arrays.asList(
+        List<List<Measure>> pointsByChunk10Chunks = Arrays.asList(
                 Arrays.asList(
-                        new PointImpl( 1L, 1.0),
-                        new PointImpl( 2L, 1.0)
+                        Measure.fromValue( 1L, 1.0),
+                        Measure.fromValue( 2L, 1.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 3L, 2.0),
-                        new PointImpl( 4L, 2.0)
+                        Measure.fromValue( 3L, 2.0),
+                        Measure.fromValue( 4L, 2.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 5L, 3.0),
-                        new PointImpl( 6L, 3.0)
+                        Measure.fromValue( 5L, 3.0),
+                        Measure.fromValue( 6L, 3.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 7L, 4.0),
-                        new PointImpl( 8L, 4.0)
+                        Measure.fromValue( 7L, 4.0),
+                        Measure.fromValue( 8L, 4.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 9L, 5.0),
-                        new PointImpl( 10L, 5.0)
+                        Measure.fromValue( 9L, 5.0),
+                        Measure.fromValue( 10L, 5.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 11L, 6.0),
-                        new PointImpl( 12L, 6.0)
+                        Measure.fromValue( 11L, 6.0),
+                        Measure.fromValue( 12L, 6.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 13L, 7.0),
-                        new PointImpl( 14L, 7.0)
+                        Measure.fromValue( 13L, 7.0),
+                        Measure.fromValue( 14L, 7.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 15L, 8.0),
-                        new PointImpl( 16L, 8.0)
+                        Measure.fromValue( 15L, 8.0),
+                        Measure.fromValue( 16L, 8.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 17L, 9.0),
-                        new PointImpl( 18L, 9.0)
+                        Measure.fromValue( 17L, 9.0),
+                        Measure.fromValue( 18L, 9.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 19L, 10.0),
-                        new PointImpl( 20L, 10.0)
+                        Measure.fromValue( 19L, 10.0),
+                        Measure.fromValue( 20L, 10.0)
                 )
         );
-        List<ChunkVersionCurrent> metric_10_chunk = buildChunks(
+        List<Chunk> metric_10_chunk = buildChunks(
                 "metric_10_chunk",
                 pointsByChunk10Chunks);
         injector.addChunks(metric_10_chunk);
-        List<ChunkVersionCurrent> metric_9_chunk = buildChunks(
+        List<Chunk> metric_9_chunk = buildChunks(
                 "metric_9_chunk",
                 pointsByChunk10Chunks).stream().limit(9).collect(Collectors.toList());
         injector.addChunks(metric_9_chunk);
-        List<ChunkVersionCurrent> metric_7_chunk = buildChunks(
+        List<Chunk> metric_7_chunk = buildChunks(
                 "metric_7_chunk",
                 pointsByChunk10Chunks).stream().limit(7).collect(Collectors.toList());
         injector.addChunks(metric_7_chunk);
-        List<ChunkVersionCurrent> metric_5_chunk = buildChunks(
+        List<Chunk> metric_5_chunk = buildChunks(
                 "metric_5_chunk",
                 pointsByChunk10Chunks).stream().limit(5).collect(Collectors.toList());
         injector.addChunks(metric_5_chunk);
-        List<ChunkVersionCurrent> metric_1_chunk_of_20_points = buildChunks(
+        List<Chunk> metric_1_chunk_of_20_points = buildChunks(
                 "metric_1_chunk_of_20_points",
                 Arrays.asList(
                         pointsByChunk10Chunks.stream().flatMap(List::stream).collect(Collectors.toList())
@@ -134,7 +133,7 @@ public class QueryEndPointFocusOnSamplingWithPreAggCurrentVersionIT extends Abst
         return injector;
     }
 
-    private static List<ChunkVersionCurrent> buildChunks(String metric_10_chunk, List<List<Point>> pointsByChunk10Chunks) {
+    private static List<Chunk> buildChunks(String metric_10_chunk, List<List<Measure>> pointsByChunk10Chunks) {
         return null;
     }
 

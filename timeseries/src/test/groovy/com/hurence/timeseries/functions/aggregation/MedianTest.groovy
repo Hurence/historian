@@ -16,8 +16,8 @@
 package com.hurence.timeseries.functions.aggregation
 
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.modele.list.DoubleList
-import com.hurence.timeseries.modele.list.LongList
+import com.hurence.timeseries.model.list.DoubleList
+import com.hurence.timeseries.model.list.LongList
 import com.hurence.timeseries.functions.FunctionValueMap
 import spock.lang.Specification
 

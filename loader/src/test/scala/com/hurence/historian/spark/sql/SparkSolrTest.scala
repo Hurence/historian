@@ -8,7 +8,7 @@
 //import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 //import com.hurence.historian.{SolrCloudUtilForTests, SolrUtils}
 //import com.hurence.test.framework.SparkSolrTests
-//import com.hurence.timeseries.modele.chunk.ChunkVersion0Impl
+//import com.hurence.timeseries.model.ChunkVersion0Impl
 //import com.lucidworks.spark.util.SolrSupport
 //import io.vertx.core.json.JsonArray
 //import org.apache.spark.sql.SaveMode.Overwrite

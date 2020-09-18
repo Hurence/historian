@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.hurence.timeseries.modele.list;
+package com.hurence.timeseries.model.list;
 
 /**
  * A class with common used list functions like grow or rangeCheck.

@@ -1,41 +1,40 @@
 package com.hurence.webapiservice.timeseries.aggs;
 
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.webapiservice.modele.AGG;
 
 import java.util.List;
 import java.util.OptionalDouble;
 
-public class ChunkAggsCalculator extends AbstractAggsCalculator<ChunkVersionCurrent> {
+public class ChunkAggsCalculator extends AbstractAggsCalculator<Chunk> {
 
     public ChunkAggsCalculator(List<AGG> aggregList) {
         super(aggregList);
     }
 
     @Override
-    protected double calculSum(List<ChunkVersionCurrent> chunks) {
+    protected double calculSum(List<Chunk> chunks) {
         return chunks.stream()
-                .mapToDouble(ChunkVersionCurrent::getSum)
+                .mapToDouble(Chunk::getSum)
                 .sum();
     }
 
     @Override
-    protected OptionalDouble calculMin(List<ChunkVersionCurrent> chunks) {
+    protected OptionalDouble calculMin(List<Chunk> chunks) {
         return chunks.stream()
-                .mapToDouble(ChunkVersionCurrent::getMin)
+                .mapToDouble(Chunk::getMin)
                 .min();
     }
 
     @Override
-    protected OptionalDouble calculMax(List<ChunkVersionCurrent> chunks) {
+    protected OptionalDouble calculMax(List<Chunk> chunks) {
         return chunks.stream()
-                .mapToDouble(ChunkVersionCurrent::getMax)
+                .mapToDouble(Chunk::getMax)
                 .max();
     }
 
     @Override
-    protected long getCount(List<ChunkVersionCurrent> chunks) {
+    protected long getCount(List<Chunk> chunks) {
         return chunks.stream()
                 .mapToLong(chunk -> chunk.getCount())
                 .sum();

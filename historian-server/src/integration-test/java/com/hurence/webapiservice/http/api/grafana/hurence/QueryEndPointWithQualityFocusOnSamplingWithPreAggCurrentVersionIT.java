@@ -4,8 +4,7 @@ package com.hurence.webapiservice.http.api.grafana.hurence;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.*;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointWithQualityImpl;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.webapiservice.historian.HistorianVerticle;
@@ -86,46 +85,46 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggCurrentVersionIT {
     }
 
     public static SolrInjector buildInjector() {
-        List<List<Point>> pointsByChunk10Chunks = Arrays.asList(
+        List<List<Measure>> pointsByChunk10Chunks = Arrays.asList(
                 Arrays.asList(
-                        new PointWithQualityImpl( 1L, 1.0, 0.9f),
-                        new PointWithQualityImpl( 2L, 1.0, 0.8f)
+                        Measure.fromValueAndQuality( 1L, 1.0, 0.9f),
+                        Measure.fromValueAndQuality( 2L, 1.0, 0.8f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 3L, 2.0, 0.7f),
-                        new PointWithQualityImpl( 4L, 2.0, 0.7f)
+                        Measure.fromValueAndQuality( 3L, 2.0, 0.7f),
+                        Measure.fromValueAndQuality( 4L, 2.0, 0.7f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 5L, 3.0, 0.8f),
-                        new PointWithQualityImpl( 6L, 3.0, 0.9f)
+                        Measure.fromValueAndQuality( 5L, 3.0, 0.8f),
+                        Measure.fromValueAndQuality( 6L, 3.0, 0.9f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 7L, 4.0, 0.7f),
-                        new PointWithQualityImpl( 8L, 4.0, 0.7f)
+                        Measure.fromValueAndQuality( 7L, 4.0, 0.7f),
+                        Measure.fromValueAndQuality( 8L, 4.0, 0.7f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 9L, 5.0, 0.85f),
-                        new PointWithQualityImpl( 10L, 5.0, 0.9f)
+                        Measure.fromValueAndQuality( 9L, 5.0, 0.85f),
+                        Measure.fromValueAndQuality( 10L, 5.0, 0.9f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 11L, 6.0, 0.8f),
-                        new PointWithQualityImpl( 12L, 6.0, 0.9f)
+                        Measure.fromValueAndQuality( 11L, 6.0, 0.8f),
+                        Measure.fromValueAndQuality( 12L, 6.0, 0.9f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 13L, 7.0, 0.9f),
-                        new PointWithQualityImpl( 14L, 7.0, 0.9f)
+                        Measure.fromValueAndQuality( 13L, 7.0, 0.9f),
+                        Measure.fromValueAndQuality( 14L, 7.0, 0.9f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 15L, 8.0, 0.9f),
-                        new PointWithQualityImpl( 16L, 8.0, 0.9f)
+                        Measure.fromValueAndQuality( 15L, 8.0, 0.9f),
+                        Measure.fromValueAndQuality( 16L, 8.0, 0.9f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 17L, 9.0, 0.8f),
-                        new PointWithQualityImpl( 18L, 9.0, 0.9f)
+                        Measure.fromValueAndQuality( 17L, 9.0, 0.8f),
+                        Measure.fromValueAndQuality( 18L, 9.0, 0.9f)
                 ),
                 Arrays.asList(
-                        new PointWithQualityImpl( 19L, 10.0, 0.9f),
-                        new PointWithQualityImpl( 20L, 10.0, 0.9f)
+                        Measure.fromValueAndQuality( 19L, 10.0, 0.9f),
+                        Measure.fromValueAndQuality( 20L, 10.0, 0.9f)
                 )
         );
         AbstractSolrInjectorChunkCurrentVersion injector10chunk = new SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersion(

@@ -4,8 +4,8 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
 import com.hurence.util.RequestResponseConf;
@@ -28,6 +28,7 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.spatial4j.shape.impl.PointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -60,8 +61,8 @@ public class SearchValuesEndPointIT {
     public static void injectChunksIntoSolr(SolrClient client) throws IOException, SolrServerException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         GeneralInjectorCurrentVersion injector = new GeneralInjectorCurrentVersion();
-        ChunkVersionCurrent chunkTempbUsine1Sensor3 = ChunkBuilderHelper.fromPointsAndTags("temp_b", Arrays.asList(
-                    new PointImpl(1, 1)
+        Chunk chunkTempbUsine1Sensor3 = ChunkBuilderHelper.fromPointsAndTags("temp_b", Arrays.asList(
+                    Measure.fromValue(1, 1)
                 ),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_3");
@@ -70,10 +71,10 @@ public class SearchValuesEndPointIT {
         );
         injector.addChunk(chunkTempbUsine1Sensor3);
 
-        ChunkVersionCurrent chunkTempaUsine1Sensor1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl( 2, 2),
-                new PointImpl( 3, 3),
-                new PointImpl( 4, 4)
+        Chunk chunkTempaUsine1Sensor1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue( 2, 2),
+                Measure.fromValue( 3, 3),
+                Measure.fromValue( 4, 4)
         ),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_1");
@@ -81,8 +82,8 @@ public class SearchValuesEndPointIT {
                 }});
         injector.addChunk(chunkTempaUsine1Sensor1);
 
-        ChunkVersionCurrent chunkTempaUsine1Sensor2 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl( 5, 5)
+        Chunk chunkTempaUsine1Sensor2 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue( 5, 5)
         ),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_2");
@@ -90,8 +91,8 @@ public class SearchValuesEndPointIT {
                 }});
         injector.addChunk(chunkTempaUsine1Sensor2);
 
-        ChunkVersionCurrent chunkTempaUsine2Sensor3 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl( 6, 6)
+        Chunk chunkTempaUsine2Sensor3 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue( 6, 6)
         ),
                 new HashMap<String, String>() {{
                     put("sensor", "sensor_3");
@@ -99,40 +100,40 @@ public class SearchValuesEndPointIT {
                 }});
         injector.addChunk(chunkTempaUsine2Sensor3);
 
-        ChunkVersionCurrent chunkTempaUsine1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl( 7, 7)
+        Chunk chunkTempaUsine1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue( 7, 7)
         ),
                 new HashMap<String, String>() {{
                     put("usine", "usine_1");
                 }});
         injector.addChunk(chunkTempaUsine1);
 
-        ChunkVersionCurrent chunkTempaUsine3 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl( 8, 8)
+        Chunk chunkTempaUsine3 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue( 8, 8)
         ),
                 new HashMap<String, String>() {{
                     put("usine", "usine_3");
                 }});
         injector.addChunk(chunkTempaUsine3);
 
-        ChunkVersionCurrent chunkTempaNoUsine = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl( 9, 9)
+        Chunk chunkTempaNoUsine = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue( 9, 9)
         ),
                 new HashMap<String, String>() {{
                     put("usine", "no_usine");
                 }});
         injector.addChunk(chunkTempaNoUsine);
 
-        ChunkVersionCurrent chunkWithEconomyTag1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl(10, 10)
+        Chunk chunkWithEconomyTag1 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue(10, 10)
         ),
                 new HashMap<String, String>() {{
                     put("Economy (GDP per Capita)", "1.44178");
                 }});
         injector.addChunk(chunkWithEconomyTag1);
 
-        ChunkVersionCurrent chunkWithEconomyTag2 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
-                new PointImpl(11, 11)
+        Chunk chunkWithEconomyTag2 = ChunkBuilderHelper.fromPointsAndTags("temp_a", Arrays.asList(
+                Measure.fromValue(11, 11)
         ),
                 new HashMap<String, String>() {{
                     put("Economy (GDP per Capita)", "1.52733");

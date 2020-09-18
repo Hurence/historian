@@ -100,7 +100,7 @@ public class IngestionApiUtil {
 
     public static JsonObject constructFinalResponseJson(JsonObject response, ImportRequestParser.CorrectPointsAndErrorMessages responseAndErrorHolder) {
         StringBuilder message = new StringBuilder();
-        message.append("Injected ").append(response.getInteger(HistorianServiceFields.TOTAL_ADDED_POINTS)).append(" points of ")
+        message.append("Injected ").append(response.getInteger(HistorianServiceFields.TOTAL_ADDED_POINTS)).append(" measures of ")
                 .append(response.getInteger(HistorianServiceFields.TOTAL_ADDED_CHUNKS))
                 .append(" metrics in ").append(response.getInteger(HistorianServiceFields.TOTAL_ADDED_CHUNKS))
                 .append(" chunks");

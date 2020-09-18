@@ -31,20 +31,20 @@ package com.hurence.logisland.processor;
  * limitations under the License.
  */
 
-import com.hurence.logisland.annotation.documentation.CapabilityDescription;
-import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
-import com.hurence.logisland.annotation.documentation.Tags;
 import com.hurence.logisland.component.InitializationException;
-import com.hurence.logisland.component.PropertyDescriptor;
-import com.hurence.logisland.record.FieldDictionary;
-import com.hurence.logisland.record.Record;
-import com.hurence.logisland.record.StandardRecord;
-import com.hurence.logisland.validator.StandardValidators;
-import com.hurence.timeseries.compaction.Compression;
-import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
-import com.hurence.timeseries.modele.Pair;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
+
+    import com.hurence.logisland.annotation.documentation.CapabilityDescription;
+    import com.hurence.logisland.annotation.documentation.ExtraDetailFile;
+    import com.hurence.logisland.annotation.documentation.Tags;
+    import com.hurence.logisland.component.PropertyDescriptor;
+    import com.hurence.logisland.record.FieldDictionary;
+    import com.hurence.logisland.record.Record;
+    import com.hurence.logisland.record.StandardRecord;
+    import com.hurence.timeseries.compaction.Compression;
+    import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
+    import com.hurence.timeseries.model.Pair;
+    import com.hurence.logisland.validator.StandardValidators;
+import com.hurence.timeseries.model.Measure;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -140,22 +140,22 @@ public class CompactChunkProcessor extends AbstractProcessor {
 
     private Record chunkRecords(List<Record> records) {
         final StandardRecord chunkedRecord = new StandardRecord();
-        List<PointImpl> points = extractPoints(records.stream()).collect(Collectors.toList());
-//        chunkedRecord.setCompressedPoints(compressPoints(points.stream()));
+        List<Measure> measures = extractPoints(records.stream()).collect(Collectors.toList());
+//        chunkedRecord.setCompressedPoints(compressPoints(measures.stream()));
         return null;
     }
 
-    private byte[] compressPoints(Stream<Point> points) {
+    private byte[] compressPoints(Stream<Measure> points) {
         byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(points.iterator(), threshold);
         return Compression.compress(serializedPoints);
     }
 
-    private Stream<PointImpl> extractPoints(Stream<Record> records) {
+    private Stream<Measure> extractPoints(Stream<Record> records) {
         return records
                 .filter(record -> record.getField(FieldDictionary.RECORD_VALUE) != null && record.getField(FieldDictionary.RECORD_VALUE).getRawValue() != null)
                 .map(record -> new Pair<>(record.getTime().getTime(), record.getField(FieldDictionary.RECORD_VALUE).asDouble()))
                 .filter(longDoublePair -> longDoublePair.getSecond() != null && Double.isFinite(longDoublePair.getSecond()))
-                .map(pair -> new PointImpl(pair.getFirst(), pair.getSecond()));
+                .map(pair ->  Measure.fromValue(pair.getFirst(), pair.getSecond()));
     }
     /*
      * Build a map of mapping rules of the form:
