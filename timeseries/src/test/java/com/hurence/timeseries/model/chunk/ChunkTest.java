@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-public class ChunkVersion0ImplTest {
+public class ChunkTest {
 
-    private static final Logger logger = LoggerFactory.getLogger(ChunkVersion0ImplTest.class);
+    private static final Logger logger = LoggerFactory.getLogger(ChunkTest.class);
 
     @Test
     public void testTruncate() {
@@ -86,5 +86,54 @@ public class ChunkVersion0ImplTest {
         Assertions.assertEquals(600, truncatedChunk.getEnd());
         Assertions.assertEquals(tags, truncatedChunk.getTags());
         Assertions.assertEquals(1970, truncatedChunk.getYear());
+    }
+
+    @Test
+    public void testDatesInUtc() {
+        PointsToChunk converter = new PointsToChunkVersionCurrent("test");
+        Chunk chunk = converter.buildChunk("metric 1",
+                new TreeSet<Measure>(Arrays.asList(
+                        Measure.fromValue(0, 1)
+                ))
+        );
+        Assertions.assertEquals("1970-01-01", chunk.getDay());
+        Assertions.assertEquals(1, chunk.getMonth());
+        Assertions.assertEquals(1970, chunk.getYear());
+
+        chunk = converter.buildChunk("metric 1",
+                new TreeSet<Measure>(Arrays.asList(
+                        Measure.fromValue(24l * 60l * 60l * 1000l - 1l, 1)
+                ))
+        );
+        Assertions.assertEquals("1970-01-01", chunk.getDay());
+        Assertions.assertEquals(1, chunk.getMonth());
+        Assertions.assertEquals(1970, chunk.getYear());
+
+        chunk = converter.buildChunk("metric 1",
+                new TreeSet<Measure>(Arrays.asList(
+                        Measure.fromValue( 24l * 60l * 60l * 1000l, 1)
+                ))
+        );
+        Assertions.assertEquals("1970-01-02", chunk.getDay());
+        Assertions.assertEquals(1, chunk.getMonth());
+        Assertions.assertEquals(1970, chunk.getYear());
+
+        chunk = converter.buildChunk("metric 1",
+                new TreeSet<Measure>(Arrays.asList(
+                        Measure.fromValue( 2l * 24l * 60l * 60l * 1000l - 1l, 1)
+                ))
+        );
+        Assertions.assertEquals("1970-01-02", chunk.getDay());
+        Assertions.assertEquals(1, chunk.getMonth());
+        Assertions.assertEquals(1970, chunk.getYear());
+
+        chunk = converter.buildChunk("metric 1",
+                new TreeSet<Measure>(Arrays.asList(
+                        Measure.fromValue( 2l * 24l * 60l * 60l * 1000l, 1)
+                ))
+        );
+        Assertions.assertEquals("1970-01-03", chunk.getDay());
+        Assertions.assertEquals(1, chunk.getMonth());
+        Assertions.assertEquals(1970, chunk.getYear());
     }
 }

@@ -6,6 +6,7 @@ import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.converter.ChunkTruncater;
 import lombok.*;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,16 +15,18 @@ import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Chunk  implements Serializable {
+public class Chunk implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chunk.class);
 
@@ -94,16 +97,11 @@ public class Chunk  implements Serializable {
          * @return
          */
         public ChunkBuilder computeMetrics() {
-
-
-            DateTime time = new DateTime(start);
+            DateTime time = new DateTime(start)
+                    .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
             day = time.toString("yyyy-MM-dd");
             year = time.getYear();
             month = time.getMonthOfYear();
-
-
-            LOGGER.info("todo");
-
             return this;
         }
 
