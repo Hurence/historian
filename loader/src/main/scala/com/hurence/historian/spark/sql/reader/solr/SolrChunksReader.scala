@@ -17,7 +17,8 @@ class SolrChunksReader extends Reader[Chunk] {
     val tagNames: List[Column] = options.config(Options.TAG_NAMES)
       .split(",").toList
       .map(tag => col(tag))
-    val mainCols = List("day", "start", "end", "count", "avg", "std_dev", "min", "max", "first", "last", "sax", "value", "origin")
+    val mainCols = List("day", "start", "end", "count", "avg", "std_dev", "min", "max", "first", "last", "sax", "value",
+      "origin", "quality_min", "quality_max", "quality_first", "quality_sum", "quality_avg")
       .map(name => col(s"chunk_$name").as(name)) ::: List("name").map(col) ::: List("id").map(col) ::: tagNames
 
 
