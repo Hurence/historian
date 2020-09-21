@@ -35,7 +35,8 @@ class SolrChunksWriter extends Writer[Chunk] {
     val tagNames = options.config("tag_names")
       .split(",").toList
     val tagCols = tagNames.map(tag => col("tags")(tag).as(tag))
-    val mainCols = List( "day", "start", "end", "count", "avg", "std_dev", "min", "max", "first", "last", "sax", "value", "origin")
+    val mainCols = List( "day", "start", "end", "count", "avg", "std_dev", "min", "max", "first", "last", "sax", "value",
+      "origin", "quality_min", "quality_max", "quality_first", "quality_sum", "quality_avg")
       .map(name => col(name).as(s"chunk_$name")) ::: List("name").map(col)
 
 

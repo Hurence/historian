@@ -57,6 +57,13 @@ final class Chunkyfier(override val uid: String)
   setDefault(valueCol, "value")
 
   /** @group setParam */
+  final val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
+
+  /** @group setParam */
+  def setQualityCol(value: String): this.type = set(qualityCol, value)
+  setDefault(qualityCol, "quality")
+
+  /** @group setParam */
   final val origin: Param[String] = new Param[String](this, "origin", "which historian component wrote this chunk")
 
   /** @group setParam */
@@ -144,7 +151,12 @@ final class Chunkyfier(override val uid: String)
         first(col($(valueCol))).as("first"),
         last(col($(valueCol))).as("last"),
         stddev(col($(valueCol))).as("std_dev"),
-        avg(col($(valueCol))).as("avg"))
+        avg(col($(valueCol))).as("avg"),
+        min(col($(qualityCol))).as("quality_min"),
+        max(col($(qualityCol))).as("quality_max"),
+        first(col($(qualityCol))).as("quality_first"),
+        sum(col($(qualityCol))).as("quality_sum"),
+        avg(col($(qualityCol))).as("quality_avg"))
 
     groupedDF
       .withColumn(CHUNK_COLUMN, chunk(
@@ -178,6 +190,11 @@ final class Chunkyfier(override val uid: String)
           .sax(r.getAs[String]("sax"))
           .value(BinaryEncodingUtils.decode(r.getAs[String](CHUNK_COLUMN)))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
+          .quality_min(r.getAs[Float]("quality_min"))
+          .quality_max(r.getAs[Float]("quality_max"))
+          .quality_first(r.getAs[Float]("quality_first"))
+          .quality_sum(r.getAs[Double]("quality_sum").toFloat)
+          .quality_avg(r.getAs[Double]("quality_avg").toFloat)
           .buildId()
           .computeMetrics()
           .build()
