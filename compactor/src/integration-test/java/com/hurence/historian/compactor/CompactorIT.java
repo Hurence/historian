@@ -164,6 +164,7 @@ public class CompactorIT {
         // 2. make chunks from measures
         Chunkyfier chunkyfier = new Chunkyfier()
                 .setValueCol("value")
+                .setQualityCol("quality")
                 .setOrigin(ChunkOrigin.COMPACTOR.toString())
                 .setTimestampCol("timestamp")
                 .setGroupByCols(new String[]{"name", "tags.metric_id"})

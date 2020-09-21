@@ -47,6 +47,8 @@ import scala.collection.JavaConverters._
 final class Chunkyfier(override val uid: String)
   extends Model[Chunkyfier] with DefaultParamsWritable {
 
+  var withQuality: Boolean = false
+
   def this() = this(Identifiable.randomUID("chunkyfier"))
 
   /** @group setParam */
@@ -60,7 +62,10 @@ final class Chunkyfier(override val uid: String)
   final val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
 
   /** @group setParam */
-  def setQualityCol(value: String): this.type = set(qualityCol, value)
+  def setQualityCol(value: String): this.type = {
+    withQuality = true
+    set(qualityCol, value)
+  }
   setDefault(qualityCol, "quality")
 
   /** @group setParam */
@@ -134,7 +139,13 @@ final class Chunkyfier(override val uid: String)
     val w = Window.partitionBy(groupingCols: _*)
       .orderBy(col($(timestampCol)))
 
-    val groupedDF = df
+    var baseDf = df
+    // If no quality column has in the input df, create one default with 0 as value
+    if (!withQuality) {
+      baseDf = baseDf.withColumn("quality", lit(0f))
+    }
+
+    val groupedDF = baseDf
       .withColumn("day", toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
       .withColumn("values", collect_list(col($(valueCol))).over(w))
       .withColumn("timestamps", collect_list(col($(timestampCol))).over(w))
