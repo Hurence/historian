@@ -74,12 +74,12 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
         Chunk.ChunkBuilder builder = Chunk.builder();
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(timeSerie);
         builder
-                .chunkOrigin(this.chunkOrigin)
+                .origin(this.chunkOrigin)
                 .tags(tags)
                 .end(timeSerie.getEnd())
                 .name(timeSerie.getName())
                 .start(timeSerie.getStart())
-                .valueBinaries(compressedPoints)
+                .value(compressedPoints)
                 .version(getVersion());
 
         computeAndSetAggs(builder, timeSerie);
@@ -88,7 +88,7 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
                 .year(dateInfo.year)
                 .month(dateInfo.month)
                 .day(dateInfo.day);
-        return builder.build();
+        return builder.buildId().build();
     }
 
     /**
@@ -135,7 +135,7 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
                     builder.count((long)value);
                     break;
                 case "dev" :
-                    builder.std(value);
+                    builder.std_dev(value);
                     break;
             }
         }

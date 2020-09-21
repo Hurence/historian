@@ -133,7 +133,7 @@ public class ChunkFromJsonObjectVersionCurrent extends Chunk {
     }
 
     @Override
-    public double getStd() {
+    public double getStd_dev() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV);
     }
 
@@ -164,32 +164,32 @@ public class ChunkFromJsonObjectVersionCurrent extends Chunk {
     }
 
     @Override
-    public float getQualityMin() {
+    public float getQuality_min() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN);
     }
 
     @Override
-    public float getQualityMax() {
+    public float getQuality_max() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX);
     }
 
     @Override
-    public float getQualitySum() {
+    public float getQuality_sum() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_SUM);
     }
 
     @Override
-    public float getQualityFirst() {
+    public float getQuality_first() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST);
     }
 
     @Override
-    public float getQualityAvg() {
+    public float getQuality_avg() {
         return chunk.getFloat(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_AVG);
     }
 
     @Override
-    public String getChunkOrigin() {
+    public String getOrigin() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN);
     }
 

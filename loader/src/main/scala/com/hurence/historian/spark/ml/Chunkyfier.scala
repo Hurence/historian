@@ -1,8 +1,10 @@
 package com.hurence.historian.spark.ml
 
 
+import com.hurence.historian.spark.common.Definitions._
 import com.hurence.historian.spark.sql.functions.{chunk, sax, toDateUTC}
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
+import com.hurence.timeseries.core.ChunkOrigin
 import com.hurence.timeseries.model.Chunk
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
@@ -12,6 +14,7 @@ import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev}
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
+
 import scala.collection.JavaConverters._
 
 /*
@@ -67,14 +70,6 @@ final class Chunkyfier(override val uid: String)
   def setTimestampCol(value: String): this.type = set(timestampCol, value)
   setDefault(timestampCol, "timestamp")
 
-
-  /** @group setParam */
-  final val chunkCol: Param[String] = new Param[String](this, "chunkCol", "column name for encoded chunk")
-
-  /** @group setParam */
-  def setChunkCol(value: String): this.type = set(chunkCol, value)
-  setDefault(chunkCol, "chunk")
-
   /** @group setParam */
   final val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
 
@@ -126,16 +121,17 @@ final class Chunkyfier(override val uid: String)
 
 
   def transform(df: Dataset[_]): DataFrame = {
+    implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
 
-    val grougingCols = col("day") :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
-    val w = Window.partitionBy(grougingCols: _*)
+    val groupingCols = col("day") :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
+    val w = Window.partitionBy(groupingCols: _*)
       .orderBy(col($(timestampCol)))
 
     val groupedDF = df
       .withColumn("day", toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
       .withColumn("values", collect_list(col($(valueCol))).over(w))
       .withColumn("timestamps", collect_list(col($(timestampCol))).over(w))
-      .groupBy(grougingCols: _*)
+      .groupBy(groupingCols: _*)
       .agg(
         last(col("values")).as("values"),
         last(col("timestamps")).as("timestamps"),
@@ -147,32 +143,11 @@ final class Chunkyfier(override val uid: String)
         max(col($(valueCol))).as("max"),
         first(col($(valueCol))).as("first"),
         last(col($(valueCol))).as("last"),
-        stddev(col($(valueCol))).as("stddev"),
+        stddev(col($(valueCol))).as("std_dev"),
         avg(col($(valueCol))).as("avg"))
 
-
-    /*  val groupedDF = df
-        .groupBy(grougingCols: _*)
-        .agg(
-          min(df.col("timestamp")).as("start"),
-          max(df.col("timestamp")).as("end"),
-          collect_list(df.col("value")).as("values"),
-          collect_list(df.col("timestamp")).as("timestamps"),
-          count(df.col("value")).as("count"),
-          min(df.col("value")).as("min"),
-          max(df.col("value")).as("max"),
-          first(df.col("value")).as("first"),
-          last(df.col("value")).as("last"),
-          stddev(df.col("value")).as("stddev"),
-          avg(df.col("value")).as("avg"),
-          first(df.col("tags")).as("tags"))
- */
-
-
-    // .map(r => (r._1, r._2.sortWith((l1, l2) => l1._1 < l2._1).grouped(1440).toList))
-
     groupedDF
-      .withColumn($(chunkCol), chunk(
+      .withColumn(CHUNK_COLUMN, chunk(
         groupedDF.col("name"),
         groupedDF.col("start"),
         groupedDF.col("end"),
@@ -193,35 +168,34 @@ final class Chunkyfier(override val uid: String)
           .end(r.getAs[Long]("end"))
           .count(r.getAs[Long]("count"))
           .avg(r.getAs[Double]("avg"))
-          .std(r.getAs[Double]("stddev"))
+          .std_dev(r.getAs[Double]("std_dev"))
           .min(r.getAs[Double]("min"))
           .max(r.getAs[Double]("max"))
-          .chunkOrigin($(origin))
+          .origin($(origin))
           .first(r.getAs[Double]("first"))
           .last(r.getAs[Double]("last"))
+          .std_dev(r.getAs[Double]("std_dev"))
           .sax(r.getAs[String]("sax"))
-          .valueBinaries(BinaryEncodingUtils.decode(r.getAs[String]("chunk")))
+          .value(BinaryEncodingUtils.decode(r.getAs[String](CHUNK_COLUMN)))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
-          // .buildId()
+          .buildId()
           .computeMetrics()
           .build()
-
       })
       .as[Chunk]
       .toDF()
 
   }
 
-
   override def transformSchema(schema: StructType): StructType = {
     // Check that the input type is a string
-    val idx = schema.fieldIndex(chunkCol.name)
+    val idx = schema.fieldIndex(CHUNK_COLUMN)
     val field = schema.fields(idx)
     if (field.dataType != ArrayType) {
       throw new Exception(s"Input type ${field.dataType} did not match input type ArrayType")
     }
     // Add the return field
-    schema.add(StructField(chunkCol.name, StringType, true))
+    schema.add(StructField(CHUNK_COLUMN, StringType, true))
   }
 
   override def copy(extra: ParamMap): Chunkyfier = {

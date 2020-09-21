@@ -36,7 +36,7 @@ case class Chunk(name: String,
      chunk: String,
      count: Long,
      avg: Double,
-     stddev: Double,
+     std_dev: Double,
      min: Double,
      max: Double,
      first: Double,
@@ -68,7 +68,7 @@ Dans solr les chunks sont stockés avec le schéma suivant :
     <field name="chunk_outlier" type="boolean" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_start" type="plong" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_stddev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_std_dev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_trend" type="boolean" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_year" type="pint" multiValued="false" indexed="true" stored="true"/>

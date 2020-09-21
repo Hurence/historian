@@ -130,7 +130,7 @@
   <field name="chunk_size" type="pint"/>
   <field name="chunk_size_bytes" type="pint"/>
   <field name="chunk_start" type="plong"/>
-  <field name="chunk_stddev" type="pdouble"/>
+  <field name="chunk_std_dev" type="pdouble"/>
   <field name="chunk_sum" type="pdouble"/>
   <field name="chunk_trend" type="boolean"/>
   <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
