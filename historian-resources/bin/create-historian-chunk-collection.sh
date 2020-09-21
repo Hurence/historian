@@ -238,7 +238,7 @@ create_schema() {
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_outlier" "boolean"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_first" "pdouble"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_last" "pdouble"
-            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_stddev" "pdouble"
+            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_std_dev" "pdouble"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_sum" "pdouble"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_year" "pint"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_month" "pint"

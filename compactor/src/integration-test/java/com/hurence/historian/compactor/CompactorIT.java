@@ -18,9 +18,8 @@ import com.hurence.historian.spark.sql.writer.WriterFactory;
 import com.hurence.historian.spark.sql.writer.WriterType;
 import com.hurence.historian.spark.sql.writer.solr.SolrChunksWriter;
 import com.hurence.timeseries.core.ChunkOrigin;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrentImpl;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.unit5.extensions.SparkExtension;
 import org.apache.solr.client.solrj.SolrClient;
@@ -72,7 +71,7 @@ public class CompactorIT {
     }
 
     private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_0);
+        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
         SolrITHelper.addFieldToChunkSchema(container, "sensor");
     }
 
@@ -84,22 +83,22 @@ public class CompactorIT {
 
     public static SolrInjector buildInjector() throws IOException {
         GeneralInjectorCurrentVersion chunkInjector = new GeneralInjectorCurrentVersion();
-        ChunkVersionCurrent chunk1 = ChunkBuilderHelper.fromPoints("metric",
+        Chunk chunk1 = ChunkBuilderHelper.fromPoints("metric",
                 Arrays.asList(
-                        new PointImpl(1000, 1),
-                        new PointImpl(1000000, 2),
-                        new PointImpl(10000000, 3),//1970-01-01T02:46:40.000Z   10000000
-                        new PointImpl(150000000, 4),//1970-01-02T17:40:00.000Z  150000000
-                        new PointImpl(200000000, 5)
+                        Measure.fromValue(1000, 1),
+                        Measure.fromValue(1000000, 2),
+                        Measure.fromValue(10000000, 3),//1970-01-01T02:46:40.000Z   10000000
+                        Measure.fromValue(150000000, 4),//1970-01-02T17:40:00.000Z  150000000
+                        Measure.fromValue(200000000, 5)
                 )
         );
-        ChunkVersionCurrent chunk2 = ChunkBuilderHelper.fromPoints("metric",
+        Chunk chunk2 = ChunkBuilderHelper.fromPoints("metric",
                 Arrays.asList(
-                        new PointImpl(200500000, 1),
-                        new PointImpl(300000000, 2),
-                        new PointImpl(400000000, 3),//1970-01-05T15:06:40.000Z
-                        new PointImpl(500000000, 4),
-                        new PointImpl(600000000, 5)
+                        Measure.fromValue(200500000, 1),
+                        Measure.fromValue(300000000, 2),
+                        Measure.fromValue(400000000, 3),//1970-01-05T15:06:40.000Z
+                        Measure.fromValue(500000000, 4),
+                        Measure.fromValue(600000000, 5)
                 )
         );
         chunkInjector.addChunk(chunk1);
@@ -168,7 +167,6 @@ public class CompactorIT {
                 .setValueCol("value")
                 .setOrigin(ChunkOrigin.COMPACTOR.toString())
                 .setTimestampCol("timestamp")
-                .setChunkCol("chunk")
                 .setGroupByCols(new String[]{"name", "tags.metric_id"})
                 .setDateBucketFormat("yyyy-MM-dd")
                 .setSaxAlphabetSize(7)
@@ -179,8 +177,8 @@ public class CompactorIT {
 
         ack08Rows.show();
 
-        Dataset<ChunkVersionCurrentImpl> ack08 = ack08Rows
-                .as(Encoders.bean(ChunkVersionCurrentImpl.class));
+        Dataset<Chunk> ack08 = ack08Rows
+                .as(Encoders.bean(Chunk.class));
 
         // 3. write those chunks to SolR
         SolrChunksWriter solrChunksWriter = (SolrChunksWriter)WriterFactory.getChunksWriter(WriterType.SOLR());
@@ -214,7 +212,7 @@ public class CompactorIT {
         // JavaConverters used to convert from java Map to scala immutable Map
         sqlOptions = new Options(collectionName, JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
                 Predef.<Tuple2<String, String>>conforms()));
-        Dataset<ChunkVersionCurrent> chunks = solrChunksReader.read(sqlOptions)
+        Dataset<Chunk> chunks = (Dataset<Chunk>) solrChunksReader.read(sqlOptions)
                 .where("metric_id LIKE '08%'");
 
         chunks.show(100, false);
@@ -222,8 +220,7 @@ public class CompactorIT {
         assertTrue(chunks.count() == 5);
 
         // Unchunkify and display matching metrics
-        UnChunkyfier unchunkyfier = new UnChunkyfier()
-                .setChunkCol("chunk");
+        UnChunkyfier unchunkyfier = new UnChunkyfier();
         unchunkyfier.transform(chunks).show();
     }
 

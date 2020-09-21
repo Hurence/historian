@@ -21,7 +21,7 @@ public class SolrDocumentBuilder {
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_YEAR, chunk.getYear());
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MONTH, chunk.getMonth());
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_DAY, chunk.getDay());
-        doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN, chunk.getChunkOrigin());
+        doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN, chunk.getOrigin());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.ID, chunk.getId());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MAX, chunk.getMax());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MIN, chunk.getMin());
@@ -32,7 +32,7 @@ public class SolrDocumentBuilder {
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_FIRST, chunk.getFirst());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_LAST, chunk.getLast());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_SUM, chunk.getSum());
-        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV, chunk.getStd());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV, chunk.getStd_dev());
         return doc;
     }
 

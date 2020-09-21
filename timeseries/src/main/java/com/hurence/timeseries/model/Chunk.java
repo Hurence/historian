@@ -14,13 +14,9 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-
 
 @Builder
 @Data
@@ -32,7 +28,7 @@ public class Chunk implements Serializable {
 
     protected SchemaVersion version;
     protected String name;
-    protected byte[] valueBinaries;
+    protected byte[] value;
     protected long start;
     protected long end;
     protected long count;
@@ -42,20 +38,20 @@ public class Chunk implements Serializable {
     protected double sum;
     protected double avg;
     protected double last;
-    protected double std;
+    protected double std_dev;
 
     // agg quality
-    protected float qualityFirst = Float.NaN;
-    protected float qualityMin;
-    protected float qualityMax  = Float.NaN;
-    protected float qualitySum;
-    protected float qualityAvg;
+    protected float quality_first = Float.NaN;
+    protected float quality_min;
+    protected float quality_max  = Float.NaN;
+    protected float quality_sum;
+    protected float quality_avg;
 
     // meta
     protected int year;
     protected int month;
     protected String day;
-    protected String chunkOrigin;
+    protected String origin;
     protected String sax;
     protected boolean trend;
     protected boolean outlier;
@@ -64,21 +60,27 @@ public class Chunk implements Serializable {
     protected Map<String, String> tags;
 
 
+    // Naming pattern <Class>Builder of this class will make lombok use this class
+    // as the builder for Chunk. Ssaid differently, an instance of this ChunkBuilder
+    // class will be returned by Chunk.build().
     public static class ChunkBuilder {
-
-
 
         /**
          * sets id to an idempotent hash
          *
          * @return
+         *
+         * TODO: tried to have this method automatically with lombok but did not work:
+         * Tried with @Builder.ObtainVia(method = "buildId") as annotation for id field
+         * Further lombok documentation for the builder at:
+         * https://www.projectlombok.org/features/Builder
          */
         public ChunkBuilder buildId() {
             String toHash = name +
                     start +
-                    chunkOrigin;
+                    origin;
             try {
-                toHash += BinaryEncodingUtils.encode(valueBinaries) ;
+                toHash += BinaryEncodingUtils.encode(value) ;
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Error encoding binaries", e);
             }
@@ -107,8 +109,6 @@ public class Chunk implements Serializable {
 
     }
 /*
-
-
     protected Chunk(SchemaVersion version, String name,
                                       byte[] valueBinaries, long start, long end,
                                       long count, double first, double min,
@@ -160,11 +160,9 @@ public class Chunk implements Serializable {
     }
 */
 
-
-
     public String getValueAsString() {
         try {
-            return BinaryEncodingUtils.encode(valueBinaries);
+            return BinaryEncodingUtils.encode(value);
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("Error encoding binaries", e);
             throw new IllegalArgumentException(e);
@@ -172,22 +170,16 @@ public class Chunk implements Serializable {
     }
 
     public byte[] getValueAsBinary() {
-        return valueBinaries;
+        return value;
     }
-
-
 
     public boolean containsTag(String tagName) {
         return tags.containsKey(tagName);
     }
 
-
     public String getTag(String tagName) {
         return tags.get(tagName);
     }
-
-
-
 
     public Chunk truncate(long from, long to) {
         try {

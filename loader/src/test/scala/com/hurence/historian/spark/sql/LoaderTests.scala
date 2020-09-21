@@ -43,13 +43,13 @@ class LoaderTests extends SparkSessionTestWrapper {
         max($"value").as("max"),
         first($"value").as("first"),
         last($"value").as("last"),
-        stddev($"value").as("stddev"),
+        stddev($"value").as("std_dev"),
         first($"timestamp").as("start"),
         last($"timestamp").as("end"),
         first($"tags").as("tags"))
       .withColumn("chunk", chunk($"name", $"start", $"end", $"timestamps", $"values"))
       .withColumn("sax", sax(lit(7), lit(0.01), lit(50), $"values"))
-      .select($"name", $"day", $"start", $"end", $"chunk", $"timestamps", $"values", $"count", $"avg", $"stddev", $"min", $"max", $"first", $"last", $"sax", $"tags")
+      .select($"name", $"day", $"start", $"end", $"chunk", $"timestamps", $"values", $"count", $"avg", $"std_dev", $"min", $"max", $"first", $"last", $"sax", $"tags")
       .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
       //.as[Chunk]
       .collect()
@@ -79,7 +79,6 @@ class LoaderTests extends SparkSessionTestWrapper {
     val chunkyfier = new Chunkyfier()
       .setValueCol("value")
       .setTimestampCol("timestamp")
-      .setChunkCol("chunk")
       .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
@@ -104,7 +103,7 @@ class LoaderTests extends SparkSessionTestWrapper {
     assertEquals("H4sIAAAAAAAAAGWWe0gUURTGdzfBWpLWkkow2iBIbMONFlJ6TWFB/dGDgoIKemgYQfRHRBCU9DSD2lJ3Z3Zm2i2DFhISKVJ60BMNKiQKKkRKlogyKnqCUu2M7fkNzYBw9vjd737fuec+/KOKt1nflrjiLyhOaNlvZkwJv7441j9q+OcbVcmGjx9lvzw7nGV/qyS8l5IwqVmhx/p6wX4lWxoTsrqEZFtjgv3JbM/iEm6yQ1vo3UbB/okJQx2At2QvMHEwJoA+AFFVwmpmG0L6h5hVFhugqEr4V3KsvyCQLc4/uzBF4P9hM9m1m4Kx2XEJ4xRhQBNsJWRhdCsIqHALGDwtwA5VmN6g5Sl1KdMFcBzbYWRdjks2ExPsTbsxbMCluFPAcLEp1QGGpzCYh5UrKFyqybAWwjksQRhsM1omqeKmHwufqeFzNHg0IWulpwJkFaQ3UoQWsPWs40zChYicCrYEDfNQdgPpmzFkstDpZjG0jGFBsN+jit8XDOVAOxlaQt0OsUTrNecSDfcglqMsRgbBMwDc1ujipGBHAihC2jkE76bstxMCuKpZsuxhqYRTlg3ci5YAnfmRQ2GDIdnFhgg4rMt+KNVdpLUM7zZgolSNTHUTwETTIrVtnzRcPV4GsIPhL03RtAt5a0wONUPstxkupVMBpnR6Eqb7hizFeAP9AL7pHGOQRQH0UKp1plOA/d/Ss0K61RRXDx1Fof4zEDAOgIruKla9kmF3qJbpKBEMGV3qvt9wHW4rGNOEwW9kM5ToB+Erx8Lokl10VrIRk1MEY+Vg+wgP0lA9CWHoZrY+UximZbMjgimvXFqg+pnyPParmH2QWg4YchN/dHd4EaRHqUQI0pVk58J/imxY504inAx2jCbHyWp34/ZSnCcJCZfTjNWEaTbedEOacbfb1WHsh+A/k5DhEwAU4TWMgPP02hGGzYFsiaNEAE5gey0HUg91+cSJ6NOt9W335uYpxOgL5EUIM8z+iuYZQHQ73VXLsF6sPCAbZV9VwnAL3iH0t6E/icgmKhDiRK9AZL9tMO3N/W5gV39PSE906a6duoDLpBNLbdwK9chch/jf2WH5wQ7v/wfucjgqkK+yVPvoq1PcQs+40PMRdJwnWD5+NpI91sR+4HbbDq/jHVCDj3oAo5mtULXu67k5h3d5fr1nxus8Y+YzYw1r8o73yCz6bw8vj2rHM4ZsmrCW2g81WpIm5ghHxK2f67N/nuxid8lpFcHllyarDxp8uQ27V3XdHq02iy9Hes22XZ77uYMy1WHlnmbRfpH902k9W3inzNOUgOcvC7L81I8MAAA=", sample(0).getValueAsString)
     assertEquals(288, sample(0).getCount)
     assertEquals(1651.561111111111, sample(0).getAvg)
-    assertEquals(178.49958904923878, sample(0).getStd)
+    assertEquals(178.49958904923878, sample(0).getStd_dev)
     assertEquals(68.8, sample(0).getMin)
     assertEquals(2145.6, sample(0).getMax)
     assertEquals(1496.6, sample(0).getFirst)
@@ -134,7 +133,7 @@ class LoaderTests extends SparkSessionTestWrapper {
 
     assertEquals(288, sample(0).getCount)
     assertEquals(1651.561111111111, sample(0).getAvg)
-    assertEquals(178.49958904923878, sample(0).getStd)
+    assertEquals(178.49958904923878, sample(0).getStd_dev)
     assertEquals(68.8, sample(0).getMin)
     assertEquals(2145.6, sample(0).getMax)
     assertEquals(1496.6, sample(0).getFirst)

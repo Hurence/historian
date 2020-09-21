@@ -1,9 +1,10 @@
 package com.hurence.historian.spark.sql.reader.parquet
 
+import com.hurence.historian.spark.common.Definitions._
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
-import com.hurence.timeseries.model.{Chunk, Measure}
+import com.hurence.timeseries.model.{Chunk}
 import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -26,16 +27,15 @@ class ParquetChunksReader extends Reader[Chunk] {
           .end(r.getAs[Long]("end"))
           .count(r.getAs[Long]("count"))
           .avg(r.getAs[Double]("avg"))
-          .std(r.getAs[Double]("stddev"))
+          .std_dev(r.getAs[Double]("std_dev"))
           .min(r.getAs[Double]("min"))
           .max(r.getAs[Double]("max"))
-          .chunkOrigin("it-data-4metrics-chunk.parquet")
           .first(r.getAs[Double]("first"))
           .last(r.getAs[Double]("last"))
           .sax(r.getAs[String]("sax"))
-          .valueBinaries(BinaryEncodingUtils.decode(r.getAs[String]("chunk")))
+          .value(BinaryEncodingUtils.decode(r.getAs[String](CHUNK_COLUMN)))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
-          // .buildId()
+          .buildId()
           .computeMetrics()
           .build()
       })

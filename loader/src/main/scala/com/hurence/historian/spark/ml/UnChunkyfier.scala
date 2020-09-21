@@ -1,11 +1,11 @@
 package com.hurence.historian.spark.ml
 
-import com.hurence.historian.spark.sql.functions.{unchunk, sax}
+import com.hurence.historian.spark.common.Definitions._
+import com.hurence.historian.spark.sql.functions.{sax, unchunk}
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util._
 import org.apache.spark.sql._
-import org.apache.spark.sql.expressions.Window
 import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev, _}
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
 
@@ -51,14 +51,6 @@ final class UnChunkyfier(override val uid: String)
   /** @group setParam */
   def setTimestampCol(value: String): this.type = set(timestampCol, value)
   setDefault(timestampCol, "timestamp")
-
-
-  /** @group setParam */
-  final val chunkCol: Param[String] = new Param[String](this, "chunkCol", "column name for encoded chunk")
-
-  /** @group setParam */
-  def setChunkCol(value: String): this.type = set(chunkCol, value)
-  setDefault(chunkCol, "chunk")
 
   /** @group setParam */
   final val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
@@ -113,29 +105,26 @@ final class UnChunkyfier(override val uid: String)
   def transform(df: Dataset[_]): DataFrame = {
 
 
-   df.withColumn("measures", unchunk(col($(chunkCol)), col("start"), col("end")))
+   df.withColumn("measures", unchunk(col(CHUNK_COLUMN), col("start"), col("end")))
       .withColumn("point", explode(col("measures")))
       .select(
         col("name"),
         col("point._2").as($(valueCol) ),
         col("point._1").as($(timestampCol)),
         col("tags"))
-      .drop( "sax","chunk", "avg", "stddev", "first", "last","min", "max", "count","measures", "start", "end", "point")
-
-
-
+      .drop( "sax", CHUNK_COLUMN, "avg", "std_dev", "first", "last","min", "max", "count","measures", "start", "end", "point")
   }
 
 
   override def transformSchema(schema: StructType): StructType = {
     // Check that the input type is a string
-    val idx = schema.fieldIndex(chunkCol.name)
+    val idx = schema.fieldIndex(CHUNK_COLUMN)
     val field = schema.fields(idx)
     if (field.dataType != ArrayType) {
       throw new Exception(s"Input type ${field.dataType} did not match input type ArrayType")
     }
     // Add the return field
-    schema.add(StructField(chunkCol.name, StringType, true))
+    schema.add(StructField(CHUNK_COLUMN, StringType, true))
   }
 
   override def copy(extra: ParamMap): UnChunkyfier = {
