@@ -21,8 +21,16 @@ public class ChunkBuilderHelper {
         return fromPoints(metricName, new TreeSet<>(points));
     }
 
+    public static Chunk fromPoints(String metricName, List<Measure> points, String origin) {
+        return fromPoints(metricName, new TreeSet<>(points), origin);
+    }
+
     public static Chunk fromPoints(String metricName, TreeSet<Measure> points) {
-        PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent("test");
+        return fromPoints(metricName, points, "test");
+    }
+
+    public static Chunk fromPoints(String metricName, TreeSet<Measure> points, String origin) {
+        PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent(origin);
         return converter.buildChunk(metricName, points);
     }
 
@@ -33,9 +41,23 @@ public class ChunkBuilderHelper {
     }
 
     public static Chunk fromPointsAndTags(String metricName,
+                                          List<Measure> points,
+                                          Map<String, String> tags,
+                                          String origin) {
+        return fromPointsAndTags(metricName, new TreeSet<>(points), tags, origin);
+    }
+
+    public static Chunk fromPointsAndTags(String metricName,
                                                         TreeSet<Measure> points,
                                                         Map<String, String> tags) {
-        PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent("test");
+        return fromPointsAndTags(metricName, points, tags, "test");
+    }
+
+    public static Chunk fromPointsAndTags(String metricName,
+                                          TreeSet<Measure> points,
+                                          Map<String, String> tags,
+                                          String origin) {
+        PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent(origin);
         return converter.buildChunk(metricName, points, tags);
     }
 
