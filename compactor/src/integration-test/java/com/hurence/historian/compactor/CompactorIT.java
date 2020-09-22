@@ -70,7 +70,9 @@ public class CompactorIT {
 
     private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
-        SolrITHelper.addFieldToChunkSchema(container, "sensor");
+        // Add fields for tags
+        SolrITHelper.addFieldToChunkSchema(container, "dataCenter");
+        SolrITHelper.addFieldToChunkSchema(container, "room");
     }
 
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
@@ -81,26 +83,295 @@ public class CompactorIT {
 
     public static SolrInjector buildInjector() throws IOException {
         GeneralInjectorCurrentVersion chunkInjector = new GeneralInjectorCurrentVersion();
-        Chunk chunk1 = ChunkBuilderHelper.fromPoints("metric",
+
+        /**
+         * metric1 tags1 2020-08-28
+         */
+
+        Chunk chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
                 Arrays.asList(
-                        Measure.fromValue(1000, 1),
-                        Measure.fromValue(1000000, 2),
-                        Measure.fromValue(10000000, 3),//1970-01-01T02:46:40.000Z   10000000
-                        Measure.fromValue(150000000, 4),//1970-01-02T17:40:00.000Z  150000000
-                        Measure.fromValue(200000000, 5)
-                )
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:51.001", 11, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:52.002", 12, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:53.003", 13, 93),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:54.004", 14, 94),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:55.005", 15, 95)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
         );
-        Chunk chunk2 = ChunkBuilderHelper.fromPoints("metric",
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
                 Arrays.asList(
-                        Measure.fromValue(200500000, 1),
-                        Measure.fromValue(300000000, 2),
-                        Measure.fromValue(400000000, 3),//1970-01-05T15:06:40.000Z
-                        Measure.fromValue(500000000, 4),
-                        Measure.fromValue(600000000, 5)
-                )
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:40:51.006", 11, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:40:52.007", 12, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:40:53.008", 13, 93)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
         );
-        chunkInjector.addChunk(chunk1);
-        chunkInjector.addChunk(chunk2);
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 16:10:51.009", 11, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 16:10:52.010", 12, 92)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags2 2020-08-28
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:51.011", 21, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:52.012", 22, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:53.013", 23, 93),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:54.014", 24, 94),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:55.015", 25, 95)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "2");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:10:51.016", 21, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:10:52.017", 22, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:10:53.018", 23, 93)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "2");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:05:51.019", 21, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:05:52.020", 22, 92)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "2");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags1 2020-08-27
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:51.021", 31, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:52.022", 32, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:53.023", 33, 93),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:54.024", 34, 94),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:55.025", 35, 95)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:20:51.026", 31, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:20:52.027", 32, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:20:53.028", 33, 93)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 11:20:51.029", 31, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 11:20:52.030", 32, 92)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags3 2020-08-27
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:51.031", 41, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:52.032", 42, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:53.033", 43, 93),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:54.034", 44, 94),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:55.035", 45, 95)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:20:51.036", 41, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:20:52.037", 42, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:20:53.038", 43, 93)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 11:20:51.039", 41, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 11:20:52.040", 42, 92)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric2 tags1 2020-08-28
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric2",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:47:51.041", 51, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:47:52.042", 52, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:47:53.043", 53, 93),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:47:54.044", 54, 94),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:47:55.045", 55, 95)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric2",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:57:51.046", 51, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:57:52.047", 52, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:57:53.048", 53, 93)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric2",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 22:57:51.049", 51, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 22:57:52.050", 52, 92)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags1 2020-08-29
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 09:10:51.051", 61, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 09:10:52.052", 62, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 09:10:53.053", 63, 93),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 09:10:54.054", 64, 94),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 09:10:55.055", 65, 95)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:05:51.056", 61, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:05:52.057", 62, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:05:53.058", 63, 93)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 06:05:51.059", 61, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 06:05:52.060", 62, 92)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
         return chunkInjector;
     }
 
@@ -148,6 +419,9 @@ public class CompactorIT {
         //   - more parallelization by splitting each shard into ranges
         //   - results are streamed back from Solr using deep-paging and streaming response
 //        Dataset<Row> chunks = sparkSession.read().format("solr").options(options).load();
+
+//        printSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
+//        System.exit(0);
 
         // 1. load measures from parquet file
         String filePath = new File("../loader/src/test/resources/it-data-4metrics.parquet").getAbsolutePath();
@@ -228,11 +502,12 @@ public class CompactorIT {
 
         SolrDocumentList solrDocumentList = getSolrDocs(solrClient, collection);
 
-        System.out.println(JSONUtil.toJSON(solrDocumentList));
+        System.out.println("Solr contains " + solrDocumentList.size() +
+                " document(s):\n" + JSONUtil.toJSON(solrDocumentList));
     }
 
     private static SolrDocumentList getSolrDocs(SolrClient solrClient, String collection) {
-        SolrParams solrQuery = new SolrQuery("*:*");
+        SolrParams solrQuery = new SolrQuery("*:*").setRows(1000);
         QueryResponse queryResponse = null;
         try {
             queryResponse = solrClient.query(collection, solrQuery);
