@@ -1,9 +1,11 @@
 package com.hurence.historian.spark.sql.reader.parquet
 
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.reader.Reader
+import com.hurence.historian.spark.sql.functions.reorderColumns
+import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, Reader, ReaderFactory}
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
+
 import scala.collection.JavaConverters._
 
 class ParquetMeasuresReader extends Reader[Measure] {
@@ -17,7 +19,9 @@ class ParquetMeasuresReader extends Reader[Measure] {
 
     implicit val measureEncoder = Encoders.bean(classOf[Measure])
 
-    spark.read
+
+
+    val df = spark.read
       .parquet(options.path)
       .map(r => Measure.builder()
         .name(r.getAs[String]("name"))
@@ -27,6 +31,8 @@ class ParquetMeasuresReader extends Reader[Measure] {
         .compute()
         .build()
       )
-      .as[Measure](Encoders.bean(classOf[Measure]))
+
+    reorderColumns(df.toDF(),Seq("name","value","timestamp", "quality", "day", "tags"))
+      .as[Measure]
   }
 }

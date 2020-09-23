@@ -1,10 +1,12 @@
 package com.hurence.historian.spark.sql.reader.csv
 
 import com.hurence.historian.spark.sql.Options
+import com.hurence.historian.spark.sql.functions.reorderColumns
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions.{lit, _}
 import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
+
 import scala.collection.JavaConverters._
 
 class ITDataCSVMeasuresReaderV0 extends Reader[Measure] {
@@ -24,7 +26,7 @@ class ITDataCSVMeasuresReaderV0 extends Reader[Measure] {
     import spark.implicits._
     implicit val measureEncoder = Encoders.bean(classOf[Measure])
 
-    spark.read
+   val df = spark.read
       .format("csv")
       .options(options.config)
       .load(options.path)
@@ -49,11 +51,13 @@ class ITDataCSVMeasuresReaderV0 extends Reader[Measure] {
         .compute()
         .build()
       )
-      .as[Measure]
       .repartition($"day")
       .sortWithinPartitions(asc("name"), asc("timestamp"))
 
 
+
+    reorderColumns(df.toDF(),Seq("name","value","timestamp", "quality", "day", "tags"))
+      .as[Measure]
   }
 
 }

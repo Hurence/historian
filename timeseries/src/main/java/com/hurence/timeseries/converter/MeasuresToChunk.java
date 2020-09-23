@@ -11,7 +11,7 @@ import java.util.TreeSet;
 /**
  * This class is not thread safe !
  */
-public interface PointsToChunk {
+public interface MeasuresToChunk {
 
     SchemaVersion getVersion();
 

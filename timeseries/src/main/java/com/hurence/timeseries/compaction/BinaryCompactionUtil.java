@@ -16,7 +16,7 @@
 package com.hurence.timeseries.compaction;
 
 import com.hurence.timeseries.MetricTimeSeries;
-import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesSerializer;
+import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesWithQualitySerializer;
 import com.hurence.timeseries.model.Measure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,12 +34,12 @@ public class BinaryCompactionUtil {
     public static int DEFAULT_DDC_THRESHOLD = 0;
 
     public static byte[] serializeTimeseries(final MetricTimeSeries timeSeries) {
-        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(timeSeries.points().iterator(), DEFAULT_DDC_THRESHOLD);
+        byte[] serializedPoints = ProtoBufTimeSeriesWithQualitySerializer.to(timeSeries.points().iterator(), DEFAULT_DDC_THRESHOLD);
         return Compression.compress(serializedPoints);
     }
 
     public static byte[] serializeTimeseries(final MetricTimeSeries timeSeries, int ddcThreshold) {
-        byte[] serializedPoints = ProtoBufTimeSeriesSerializer.to(timeSeries.points().iterator(), ddcThreshold);
+        byte[] serializedPoints = ProtoBufTimeSeriesWithQualitySerializer.to(timeSeries.points().iterator(), ddcThreshold);
         return Compression.compress(serializedPoints);
     }
 
@@ -63,7 +63,7 @@ public class BinaryCompactionUtil {
      */
     public static TreeSet<Measure> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
-            return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, chunkStart, chunkEnd);
+            return ProtoBufTimeSeriesWithQualitySerializer.from(decompressed, chunkStart, chunkEnd, chunkStart, chunkEnd);
         }
     }
 
@@ -80,7 +80,7 @@ public class BinaryCompactionUtil {
     public static TreeSet<Measure> unCompressPoints(byte[] chunkOfPoints, long chunkStart, long chunkEnd,
                                                     long requestedFrom, long requestedEnd) throws IOException {
         try (InputStream decompressed = Compression.decompressToStream(chunkOfPoints)) {
-            return ProtoBufTimeSeriesSerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd);
+            return ProtoBufTimeSeriesWithQualitySerializer.from(decompressed, chunkStart, chunkEnd, requestedFrom, requestedEnd);
         }
     }
 }

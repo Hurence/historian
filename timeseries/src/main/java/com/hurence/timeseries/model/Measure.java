@@ -7,11 +7,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.builder.*;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 
 import java.io.Serializable;
+import java.time.ZoneId;
 import java.util.Map;
+import java.util.Objects;
+import java.util.TimeZone;
 
 
+/**
+ * A Measure is a value in time with som tags
+ * the comparability is based on the timestamps to sort them
+ * @see Chunk
+ */
 @Builder
 @Data
 @NoArgsConstructor
@@ -21,7 +30,7 @@ public class Measure implements Serializable, Comparable<Measure> {
     private String name;
     private long timestamp;
     private double value;
-    private float quality = DEFAULT_QUALITY;
+    @Builder.Default private float quality = DEFAULT_QUALITY;
     protected Map<String, String> tags;
     protected String day;
 
@@ -31,6 +40,7 @@ public class Measure implements Serializable, Comparable<Measure> {
                 .timestamp(timestamp)
                 .value(value)
                 .quality(quality)
+                .compute()
                 .build();
     }
 
@@ -39,80 +49,50 @@ public class Measure implements Serializable, Comparable<Measure> {
                 .timestamp(timestamp)
                 .value(value)
                 .quality(Float.NaN)
+                .compute()
                 .build();
     }
 
+    /**
+     * Custom builder methods
+     */
     public static class MeasureBuilder {
 
-        public Measure.MeasureBuilder compute() {
+        public MeasureBuilder compute() {
 
-
-            DateTime time = new DateTime(timestamp);
+            DateTime time = new DateTime(timestamp)
+                    .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
             day = time.toString("yyyy-MM-dd");
 
 
             return this;
         }
     }
-    /**
-     * @return the timestamp
-     */
-    public long getTimestamp() {
-        return timestamp;
-    }
+
 
     /**
-     * @return the value
+     * @return true if quality is set to something else than NaN
      */
-    public double getValue() {
-        return value;
-    }
-
-    public float getQuality() {
-        return quality;
-    }
-
     public boolean hasQuality() {
         return !Float.isNaN(quality);
     }
 
-
     @Override
-    public boolean equals(Object obj) {
-        if (obj == null) {
-            return false;
-        }
-        if (obj == this) {
-            return true;
-        }
-        if (obj.getClass() != getClass()) {
-            return false;
-        }
-        Measure rhs = (Measure) obj;
-        return new EqualsBuilder()
-                .append(this.quality, rhs.quality)
-                .append(this.timestamp, rhs.timestamp)
-                .append(this.value, rhs.value)
-                .isEquals();
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Measure measure = (Measure) o;
+        return timestamp == measure.timestamp &&
+                Double.compare(measure.value, value) == 0 &&
+                Float.compare(measure.quality, quality) == 0 &&
+                Objects.equals(name, measure.name) &&
+                Objects.equals(tags, measure.tags) &&
+                Objects.equals(day, measure.day);
     }
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder()
-                .append(quality)
-                .append(timestamp)
-                .append(value)
-                .toHashCode();
-    }
-
-
-    @Override
-    public String toString() {
-        return new ToStringBuilder(this)
-                .append("timestamp", timestamp)
-                .append("value", value)
-                .append("quality", quality)
-                .toString();
+        return Objects.hash(name, timestamp, value, quality, tags, day);
     }
 
     @Override

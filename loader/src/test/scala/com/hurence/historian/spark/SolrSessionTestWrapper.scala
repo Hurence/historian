@@ -4,6 +4,7 @@ package com.hurence.historian.spark
 
 import org.apache.solr.client.solrj.embedded.EmbeddedSolrServer
 import org.apache.solr.core.CoreContainer
+import org.apache.spark.sql.DataFrame
 
 
 /**

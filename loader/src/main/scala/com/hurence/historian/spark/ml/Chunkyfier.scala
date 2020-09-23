@@ -154,26 +154,6 @@ final class Chunkyfier(override val uid: String)
         avg(col($(valueCol))).as("avg"))
 
 
-    /*  val groupedDF = df
-        .groupBy(grougingCols: _*)
-        .agg(
-          min(df.col("timestamp")).as("start"),
-          max(df.col("timestamp")).as("end"),
-          collect_list(df.col("value")).as("values"),
-          collect_list(df.col("timestamp")).as("timestamps"),
-          count(df.col("value")).as("count"),
-          min(df.col("value")).as("min"),
-          max(df.col("value")).as("max"),
-          first(df.col("value")).as("first"),
-          last(df.col("value")).as("last"),
-          stddev(df.col("value")).as("stddev"),
-          avg(df.col("value")).as("avg"),
-          first(df.col("tags")).as("tags"))
- */
-
-
-    // .map(r => (r._1, r._2.sortWith((l1, l2) => l1._1 < l2._1).grouped(1440).toList))
-
     groupedDF
       .withColumn($(chunkCol), chunk(
         groupedDF.col("name"),
@@ -203,7 +183,7 @@ final class Chunkyfier(override val uid: String)
           .first(r.getAs[Double]("first"))
           .last(r.getAs[Double]("last"))
           .sax(r.getAs[String]("sax"))
-          .valueBinaries(BinaryEncodingUtils.decode(r.getAs[String]("chunk")))
+          .valueBinaries(r.getAs[Array[Byte]]($(chunkCol)))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
           // .buildId()
           .computeMetrics()

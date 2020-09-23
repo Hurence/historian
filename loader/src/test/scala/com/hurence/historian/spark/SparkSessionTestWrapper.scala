@@ -1,9 +1,7 @@
 package com.hurence.historian.spark
 
-import com.hurence.historian.spark.sql.functions.sax
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
 import com.hurence.timeseries.model.{Chunk, Measure}
-import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev}
 import org.apache.spark.sql.{Encoders, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -74,7 +72,9 @@ trait SparkSessionTestWrapper {
     implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
     val ds = spark.read
       .parquet(filePath)
+      .filter(r => r.getAs[String]("chunk") != null)
       .map(r => {
+
         Chunk.builder()
           .name(r.getAs[String]("name"))
           .start(r.getAs[Long]("start"))
@@ -98,10 +98,7 @@ trait SparkSessionTestWrapper {
       }).as[Chunk]
       .cache()
 
-
     ds
 
   }
 }
-
-case class ScalaChunk(name: String, start: Long, end: Long, value: Array[Byte])

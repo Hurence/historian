@@ -46,6 +46,13 @@ final class UnChunkyfier(override val uid: String)
 
 
   /** @group setParam */
+  final val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
+
+  /** @group setParam */
+  def setQualityCol(value: String): this.type = set(qualityCol, value)
+  setDefault(qualityCol, "quality")
+
+  /** @group setParam */
   final val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
 
   /** @group setParam */
@@ -119,6 +126,8 @@ final class UnChunkyfier(override val uid: String)
         col("name"),
         col("point._2").as($(valueCol) ),
         col("point._1").as($(timestampCol)),
+        col("point._3").as($(qualityCol)),
+        col("point._4").as("day"),
         col("tags"))
       .drop( "sax","chunk", "avg", "stddev", "first", "last","min", "max", "count","measures", "start", "end", "point")
 

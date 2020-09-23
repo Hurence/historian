@@ -12,7 +12,6 @@ import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.query.QueryEvaluator;
 import com.hurence.timeseries.query.TypeFunctions;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -20,7 +19,7 @@ import java.util.TreeSet;
 /**
  * This class is not thread safe !
  */
-public class PointsToChunkVersionEVOA0 implements PointsToChunk {
+public class MeasuresToChunkVersionEVOA0 implements MeasuresToChunk {
 
     private List<ChronixTransformation> transformations;
     private List<ChronixAggregation> aggregations;
@@ -29,7 +28,7 @@ public class PointsToChunkVersionEVOA0 implements PointsToChunk {
     private FunctionValueMap functionValueMap;
     private static final String METRIC_STRING = "first;min;max;sum;avg;count;trend;sax:%s,0.01,%s";
 
-    public PointsToChunkVersionEVOA0() {
+    public MeasuresToChunkVersionEVOA0() {
     }
 
     @Override

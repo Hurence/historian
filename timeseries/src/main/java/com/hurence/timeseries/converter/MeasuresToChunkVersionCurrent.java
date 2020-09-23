@@ -20,7 +20,7 @@ import java.util.TreeSet;
 /**
  * This class is not thread safe !
  */
-public class PointsToChunkVersionCurrent implements PointsToChunk {
+public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
 
     private List<ChronixTransformation> transformations;
     private List<ChronixAggregation> aggregations;
@@ -30,7 +30,7 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
     private String chunkOrigin;
     private static final String METRIC_STRING = "first;last;min;max;sum;avg;count;dev;trend;outlier;sax:%s,0.01,%s";
 
-    public PointsToChunkVersionCurrent(String chunkOrigin) {
+    public MeasuresToChunkVersionCurrent(String chunkOrigin) {
         this.chunkOrigin = chunkOrigin;
     }
 
@@ -40,7 +40,6 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
     }
 
     /**
-     *
      * @param name
      * @param measures expected to be f the same year, month, day
      * @param tags
@@ -55,9 +54,10 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
 
     @Override
     public Chunk buildChunk(String name,
-                             TreeSet<? extends Measure> measures) {
+                            TreeSet<? extends Measure> measures) {
         return buildChunk(name, measures, Collections.emptyMap());
     }
+
     private void configMetricsCalcul(String[] metrics) {
         // init metric functions
         TypeFunctions functions = QueryEvaluator.extractFunctions(metrics);
@@ -113,28 +113,28 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
             String name = functionValueMap.getAggregation(i).getQueryName();
             double value = functionValueMap.getAggregationValue(i);
             switch (name) {
-                case "first" :
+                case "first":
                     builder.first(value);
                     break;
-                case "last" :
+                case "last":
                     builder.last(value);
                     break;
-                case "min" :
+                case "min":
                     builder.min(value);
                     break;
-                case "max" :
+                case "max":
                     builder.max(value);
                     break;
-                case "sum" :
+                case "sum":
                     builder.sum(value);
                     break;
-                case "avg" :
+                case "avg":
                     builder.avg(value);
                     break;
-                case "count" :
-                    builder.count((long)value);
+                case "count":
+                    builder.count((long) value);
                     break;
-                case "dev" :
+                case "dev":
                     builder.std(value);
                     break;
             }
@@ -143,10 +143,10 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
             String name = functionValueMap.getAnalysis(i).getQueryName();
             boolean value = functionValueMap.getAnalysisValue(i);
             switch (name) {
-                case "trend" :
+                case "trend":
                     builder.trend(value);
                     break;
-                case "outlier" :
+                case "outlier":
                     builder.outlier(value);
                     break;
             }
@@ -155,7 +155,7 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
             String name = functionValueMap.getEncoding(i).getQueryName();
             String value = functionValueMap.getEncodingValue(i);
             switch (name) {
-                case "sax" :
+                case "sax":
                     builder.sax(value);
                     break;
             }
@@ -165,12 +165,15 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
 
     private MetricTimeSeries buildMetricTimeSeries(String name, TreeSet<? extends Measure> points) {
         final long start = getStart(points);
-        final long end  = getEnd(points);
+        final long end = getEnd(points);
         MetricTimeSeries.Builder tsBuilder = new MetricTimeSeries.Builder(name);
         tsBuilder.start(start);
         tsBuilder.end(end);
         points.forEach(p -> {
-            tsBuilder.point(p.getTimestamp(), p.getValue());
+            if (p.hasQuality())
+                tsBuilder.point(p.getTimestamp(), p.getValue(), p.getQuality());
+            else
+                tsBuilder.point(p.getTimestamp(), p.getValue());
         });
         return tsBuilder.build();
     }

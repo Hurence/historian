@@ -1,12 +1,11 @@
 package com.hurence.historian.solr.util;
 
 import com.hurence.timeseries.converter.ChunkFromJsonObjectVersionCurrent;
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
+import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
 import io.vertx.core.json.JsonObject;
 
-import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -22,7 +21,7 @@ public class ChunkBuilderHelper {
     }
 
     public static Chunk fromPoints(String metricName, TreeSet<Measure> points) {
-        PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent("test");
+        MeasuresToChunkVersionCurrent converter = new MeasuresToChunkVersionCurrent("test");
         return converter.buildChunk(metricName, points);
     }
 
@@ -35,7 +34,7 @@ public class ChunkBuilderHelper {
     public static Chunk fromPointsAndTags(String metricName,
                                                         TreeSet<Measure> points,
                                                         Map<String, String> tags) {
-        PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent("test");
+        MeasuresToChunkVersionCurrent converter = new MeasuresToChunkVersionCurrent("test");
         return converter.buildChunk(metricName, points, tags);
     }
 

@@ -19,6 +19,7 @@ class ParquetChunksReader extends Reader[Chunk] {
     implicit val encoder = Encoders.bean(classOf[Chunk])
 
     spark.read.parquet(options.path)
+      .filter(r => r.getAs[String]("chunk") != null)
       .map(r => {
         Chunk.builder()
           .name(r.getAs[String]("name"))

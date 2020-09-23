@@ -1,14 +1,18 @@
 package com.hurence.historian.spark.sql
 
+import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 
 import com.google.common.hash.Hashing
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils}
+import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesWithQualitySerializer
+import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils, Compression}
+import com.hurence.timeseries.model.Measure
 import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
-import org.apache.spark.sql.functions.udf
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.functions.{col, udf}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
@@ -53,8 +57,8 @@ object functions {
 
     (timestamps zip values).map { case (t, v) => builder.point(t, v) }
 
-    val bytes = BinaryCompactionUtil.serializeTimeseries(builder.build());
-    BinaryEncodingUtils.encode(bytes)
+    BinaryCompactionUtil.serializeTimeseries(builder.build())
+    // BinaryEncodingUtils.encode(bytes)
 
   }
 
@@ -62,34 +66,46 @@ object functions {
   /**
     * Decoding function: returns the base64 encoding as a Chronix chunk.
     */
-  val unchunk = udf { (chunk: String, start: Long, end: Long) =>
+  val unchunk = udf { (bytes: Array[Byte], start: Long, end: Long) =>
 
-
-    val bytes = BinaryEncodingUtils.decode(chunk)
+    var decompressed: InputStream = null
+    try {
+      decompressed = Compression.decompressToStream(bytes)
+      ProtoBufTimeSeriesWithQualitySerializer.from(decompressed, start, end)
+        .stream()
+        .collect(Collectors.toList())
+        .asScala
+        .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
+    } finally {
+      if (decompressed != null) decompressed.close()
+    }
+    /*val bytes = BinaryEncodingUtils.decode(chunk)
 
     BinaryCompactionUtil.unCompressPoints(bytes, start, end)
       .stream()
       .collect(Collectors.toList())
       .asScala
-      .map(p => (p.getTimestamp, p.getValue))
+      .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
+  */
   }
 
   /**
     * Encoding function: returns the sax string of the values.
     */
-  val sax = udf { (alphabetSize: Int, nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
+  val sax = udf {
+    (alphabetSize: Int, nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
 
 
-    val saxConverter = new SaxConverter.Builder()
-      .alphabetSize(alphabetSize)
-      .nThreshold(nThreshold)
-      .paaSize(paaSize)
-      .build()
+      val saxConverter = new SaxConverter.Builder()
+        .alphabetSize(alphabetSize)
+        .nThreshold(nThreshold)
+        .paaSize(paaSize)
+        .build()
 
-    val list = values.map(Double.box).asJava
+      val list = values.map(Double.box).asJava
 
 
-    saxConverter.getSaxStringFromValues(list)
+      saxConverter.getSaxStringFromValues(list)
 
   }
 
@@ -100,56 +116,78 @@ object functions {
     *
     *
     */
-  val guess = udf { (values: mutable.WrappedArray[Double]) =>
+  val guess = udf {
+    (values: mutable.WrappedArray[Double]) =>
 
-    val list = values.map(Double.box).asJava
+      val list = values.map(Double.box).asJava
 
-    GuessSaxParameters.computeBestParam(list).toString
+      GuessSaxParameters.computeBestParam(list).toString
 
   }
 
   /**
     * Encoding function: returns the sax string of the values using the best guess.
     */
-  val sax_best_guess = udf { (nThreshold: Float, values: mutable.WrappedArray[Double]) =>
+  val sax_best_guess = udf {
+    (nThreshold: Float, values: mutable.WrappedArray[Double]) =>
 
-    val list = values.map(Double.box).asJava
-    val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
-    val paaSize = best_guess(1).toString.toInt
-    val alphabetSize = best_guess(2).toString.toInt
+      val list = values.map(Double.box).asJava
+      val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
+      val paaSize = best_guess(1).toString.toInt
+      val alphabetSize = best_guess(2).toString.toInt
 
-    val saxConverter = new SaxConverter.Builder()
-      .alphabetSize(alphabetSize)
-      .nThreshold(nThreshold)
-      .paaSize(paaSize)
-      .build()
+      val saxConverter = new SaxConverter.Builder()
+        .alphabetSize(alphabetSize)
+        .nThreshold(nThreshold)
+        .paaSize(paaSize)
+        .build()
 
-    saxConverter.getSaxStringFromValues(list)
-
-  }
-  val sax_best_guess_paa_fixed = udf { (nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
-
-    val list = values.map(Double.box).asJava
-    val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
-    //val paaSize =best_guess(1).toString.toInt
-    val alphabetSize = best_guess(2).toString.toInt
-
-    val saxConverter = new SaxConverter.Builder()
-      .alphabetSize(alphabetSize)
-      .nThreshold(nThreshold)
-      .paaSize(paaSize)
-      .build()
-
-    saxConverter.getSaxStringFromValues(list)
+      saxConverter.getSaxStringFromValues(list)
 
   }
+  val sax_best_guess_paa_fixed = udf {
+    (nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
+
+      val list = values.map(Double.box).asJava
+      val best_guess = GuessSaxParameters.computeBestParam(list).asScala.toList
+      //val paaSize =best_guess(1).toString.toInt
+      val alphabetSize = best_guess(2).toString.toInt
+
+      val saxConverter = new SaxConverter.Builder()
+        .alphabetSize(alphabetSize)
+        .nThreshold(nThreshold)
+        .paaSize(paaSize)
+        .build()
+
+      saxConverter.getSaxStringFromValues(list)
+
+  }
+
   /**
     * Encoding function: returns the sax string of the values using the best guess.
     */
-  val anomalie_test = udf { (str: String) =>
+  val anomalie_test = udf {
+    (str: String) =>
 
-    val saxThreshold = SaxAnalyzer.saxThreshold(str, 0.1)
-    SaxAnalyzer.anomalyDetect(str, saxThreshold).toString
+      val saxThreshold = SaxAnalyzer.saxThreshold(str, 0.1)
+      SaxAnalyzer.anomalyDetect(str, saxThreshold).toString
 
+  }
+
+  /**
+    * Reorders columns as specified
+    * Reorders the columns in a DataFrame.
+    *
+    * {{{
+    * val actualDF = sourceDF.reorderColumns(
+    *   Seq("greeting", "team", "cats")
+    * )
+    * }}}
+    *
+    * The `actualDF` will have the `greeting` column first, then the `team` column then the `cats` column.
+    */
+  def reorderColumns(df:DataFrame, colNames: Seq[String]): DataFrame = {
+    val cols = colNames.map(col(_))
+    df.select(cols: _*)
   }
 }
