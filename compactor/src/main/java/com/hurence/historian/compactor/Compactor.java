@@ -9,6 +9,7 @@ import com.hurence.historian.spark.sql.reader.solr.SolrChunksReader;
 import com.hurence.historian.spark.sql.writer.WriterFactory;
 import com.hurence.historian.spark.sql.writer.WriterType;
 import com.hurence.historian.spark.sql.writer.solr.SolrChunksWriter;
+import com.hurence.timeseries.core.ChunkOrigin;
 import com.hurence.timeseries.model.Chunk;
 import org.apache.commons.cli.*;
 import org.apache.spark.sql.Dataset;
@@ -27,6 +28,8 @@ import java.util.TimeZone;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
+import static com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent.*;
 
 public class Compactor implements Runnable {
 
@@ -127,16 +130,16 @@ public class Compactor implements Runnable {
 
         Map<String, String> sparkConfig = configuration.getSparkConfig();
 
-        if (sparkConfig.size() > 0) {
+        if (sparkConfig.size() == 0) {
             logger.info("No spark options");
         } else {
             // Apply spark config entries defined in the configuration
             StringBuilder sb = new StringBuilder();
             configuration.getSparkConfig().forEach((configKey, configValue) -> {
                 sessionBuilder.config(configKey, configValue);
-                sb.append(configKey + ": " + configValue);
+                sb.append("\n" + configKey + ": " + configValue);
             });
-            logger.info("Using the following spark options:\n" + sb);
+            logger.info("Using the following spark options:" + sb);
         }
 
         sparkSession = sessionBuilder.getOrCreate();
@@ -218,11 +221,18 @@ public class Compactor implements Runnable {
          * - metric_key
          * - chunk_day
          * Documentation for query parameters of spark-solr: https://github.com/lucidworks/spark-solr#query-parameters
+         * Example:
+         *
+         * chunk_start:[* TO 1600387199999]
+         * AND -chunk_origin:compactor
+         * fields metric_key,chunk_day
+         * rows 1000
+         * request_handler /export
          */
         String query = "chunk_start:[* TO " + (utcFirstTimestampOfTodayMs()-1L)+ "]" // Chunks from epoch to yesterday (included)
-                + "AND -chunk_origin:compactor"; // Only not yet compacted chunks
+                + "AND -" + CHUNK_ORIGIN + ":" + ChunkOrigin.COMPACTOR; // Only not yet compacted chunks
         options.put("query", query);
-        options.put("fields","metric_key,chunk_day"); // Return only metric_key and chunk_day fields
+        options.put("fields", METRIC_KEY + "," + CHUNK_DAY); // Return only metric_key and chunk_day fields
         options.put("rows", "1000");
         // Specify to use the /export handler instead of the /select  so that we don't loose any chunk
         // (we do not have to specify a max_rows parameter)
@@ -232,6 +242,10 @@ public class Compactor implements Runnable {
                 .format("solr")
                 .options(options)
                 .load();
+
+        resultDs.show(100, false);
+
+        resultDs = resultDs.sort(resultDs.col(METRIC_KEY), resultDs.col(CHUNK_DAY));
 
         resultDs.show(100, false);
 

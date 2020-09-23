@@ -53,7 +53,7 @@ public class ConfigurationBuilder {
     }
 
     public ConfigurationBuilder withSparkConfig(String configKey, String configValue) {
-        sparkConfig.put(configKey, configValue);
+        sparkConfig.put("spark." + configKey, configValue);
         return this;
     }
 
