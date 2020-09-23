@@ -1,6 +1,6 @@
 package com.hurence.historian.solr.injector;
 
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
+import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
 
 import java.util.ArrayList;
@@ -16,7 +16,7 @@ public class GeneralInjectorCurrentVersion extends AbstractSolrInjectorChunkCurr
     }
 
     public void addChunk(String metric, String origin, List<Chunk> points) {
-        final PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent(origin);
+        final MeasuresToChunkVersionCurrent converter = new MeasuresToChunkVersionCurrent(origin);
         Chunk chunk = converter.buildChunk(metric, new TreeSet(points));
         chunks.add(chunk);
     }

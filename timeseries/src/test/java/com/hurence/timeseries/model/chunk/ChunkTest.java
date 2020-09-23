@@ -1,16 +1,23 @@
 package com.hurence.timeseries.model.chunk;
 
 import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.timeseries.converter.PointsToChunk;
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
+import com.hurence.timeseries.converter.ChunkToMeasures;
+import com.hurence.timeseries.converter.ChunkToMeasuresConverter;
+import com.hurence.timeseries.converter.MeasuresToChunk;
+import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.ZoneId;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class ChunkTest {
 
@@ -22,7 +29,7 @@ public class ChunkTest {
             put("couNtry", "France");
             put("usine", "usine 2 ;;Alpha go");
         }};
-        PointsToChunk converter = new PointsToChunkVersionCurrent("test");
+        MeasuresToChunk converter = new MeasuresToChunkVersionCurrent("test");
         Chunk chunk = converter.buildChunk("metric 1",
                 new TreeSet<Measure>(Arrays.asList(
                         Measure.fromValue(1, 1),
@@ -41,7 +48,7 @@ public class ChunkTest {
         //        origin chunk
         Assertions.assertEquals(10L, chunk.getCount());
         Assertions.assertEquals(10, chunk.getLast());
-       // Assertions.assertEquals(Collections.emptyList(), chunk.getCompactionRunnings());
+        // Assertions.assertEquals(Collections.emptyList(), chunk.getCompactionRunnings());
         Assertions.assertEquals("test", chunk.getChunkOrigin());
         Assertions.assertEquals(false, chunk.isOutlier());
         Assertions.assertEquals(true, chunk.isTrend());
@@ -66,7 +73,7 @@ public class ChunkTest {
         Chunk truncatedChunk = chunk.truncate(301, 799);
         Assertions.assertEquals(2, truncatedChunk.getCount());
         Assertions.assertEquals(7, truncatedChunk.getLast());
-      //  Assertions.assertEquals(Collections.emptyList(), truncatedChunk.getCompactionRunnings());
+        //  Assertions.assertEquals(Collections.emptyList(), truncatedChunk.getCompactionRunnings());
         Assertions.assertEquals("ChunkTruncater", truncatedChunk.getChunkOrigin());
         Assertions.assertEquals(false, truncatedChunk.isOutlier());
         Assertions.assertEquals(true, truncatedChunk.isTrend());
@@ -90,7 +97,7 @@ public class ChunkTest {
 
     @Test
     public void testDatesInUtc() {
-        PointsToChunk converter = new PointsToChunkVersionCurrent("test");
+        MeasuresToChunk converter = new MeasuresToChunkVersionCurrent("test");
         Chunk chunk = converter.buildChunk("metric 1",
                 new TreeSet<Measure>(Arrays.asList(
                         Measure.fromValue(0, 1)
@@ -111,7 +118,7 @@ public class ChunkTest {
 
         chunk = converter.buildChunk("metric 1",
                 new TreeSet<Measure>(Arrays.asList(
-                        Measure.fromValue( 24l * 60l * 60l * 1000l, 1)
+                        Measure.fromValue(24l * 60l * 60l * 1000l, 1)
                 ))
         );
         Assertions.assertEquals("1970-01-02", chunk.getDay());
@@ -120,7 +127,7 @@ public class ChunkTest {
 
         chunk = converter.buildChunk("metric 1",
                 new TreeSet<Measure>(Arrays.asList(
-                        Measure.fromValue( 2l * 24l * 60l * 60l * 1000l - 1l, 1)
+                        Measure.fromValue(2l * 24l * 60l * 60l * 1000l - 1l, 1)
                 ))
         );
         Assertions.assertEquals("1970-01-02", chunk.getDay());
@@ -129,11 +136,52 @@ public class ChunkTest {
 
         chunk = converter.buildChunk("metric 1",
                 new TreeSet<Measure>(Arrays.asList(
-                        Measure.fromValue( 2l * 24l * 60l * 60l * 1000l, 1)
+                        Measure.fromValue(2l * 24l * 60l * 60l * 1000l, 1)
                 ))
         );
         Assertions.assertEquals("1970-01-03", chunk.getDay());
         Assertions.assertEquals(1, chunk.getMonth());
         Assertions.assertEquals(1970, chunk.getYear());
+    }
+
+
+    Measure randomMeasure(String name, Map<String,String> tags) {
+        DateTime time = new DateTime(1977,3,2,2,13)
+                .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
+        String day = time.toString("yyyy-MM-dd");
+
+        long newTimestamp = time.getMillis() + (long) (Math.random() * 1000L);
+        return Measure.builder()
+                .name(name)
+                .day(day)
+                .value(Math.random())
+                .quality( (float) (Math.random() * 100.0f))
+                .timestamp(newTimestamp)
+                .tags(tags)
+                .build();
+    }
+
+    @Test
+    public void testConversion() {
+        // build a bunch of random measures
+        String name = "cpu";
+        Map<String, String> tags = new HashMap<String, String>() {{
+            put("couNtry", "France");
+            put("usine", "usine 2 ;;Alpha go");
+        }};
+        TreeSet<Measure> inputMeasures = new TreeSet<>();
+        for(int i=0; i<100; i++)
+            inputMeasures.add(randomMeasure(name, tags));
+
+        // convert them as a Chunk
+        MeasuresToChunk converter = new MeasuresToChunkVersionCurrent("test");
+        Chunk chunk = converter.buildChunk(name, inputMeasures, tags);
+
+        // convert back to measures
+        ChunkToMeasures chunkToMeasures = new ChunkToMeasuresConverter();
+        TreeSet<Measure> outputMeasures = chunkToMeasures.buildMeasures(chunk);
+
+        // check if this is the same
+        Assertions.assertEquals(new ArrayList<>(inputMeasures), new ArrayList<>(outputMeasures));
     }
 }
