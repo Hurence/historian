@@ -405,14 +405,25 @@ We have got as a result:
 }
 ----
 
-=== Export data
+==== POST api/historian/v0/export/csv
+We tried at this address:
+http://localhost:8080/api/historian/v0/export/csv :
+----
+{}
+----
+
+we received as a result:
+
+----
+Internal Server Error
+----
 
 
 
-=== SimpleJson
-==== Query
-We used postman to search for points for the desired metrics from this address:
-http://localhost:8080/api/grafana/simplejson/query
+==== POST /api/grafana/simplejson/query
+
+We tried at this address:
+http://localhost:8080/api/grafana/simplejson/query :
 
 Request exemple
 ----
@@ -477,11 +488,107 @@ trying some fields hat does not exist, we have got:
 ----
 []
 ----
+==== GET /api/grafana/v0
+We tried at this address:
+http://localhost:8080/api/grafana/v0 :
+----
+{}
+----
+we have got:
+----
+Historian grafana api is Working fine
+----
 
-==== Search
+==== POST /api/grafana/v0/query
+We tried at this address:
+http://localhost:8080/api/grafana/v0/query :
+----
+{
+"names": ["metric_1"],
+"format": "json",
+}
+----
+we have got:
+----
+Internal Server Error
+----
 
-We used postman to search for the different metrics available using this address:
-http://localhost:8080/api/grafana/simplejson/search
+==== POST /api/grafana/v0/search
+We tried at this address:
+http://localhost:8080/api/grafana/v0/search :
+----
+{
+    "name": "m"
+}
+----
+we have got:
+----
+[
+    "temp",
+    "metric_1",
+    "temp_2"
+]
+----
+
+==== POST /api/grafana/v0/tag-keys
+We tried at this address:
+http://localhost:8080/api/grafana/v0/tag-keys :
+----
+{}
+----
+
+we have got:
+----
+<html>
+
+<body>
+	<h1>Resource not found</h1>
+</body>
+
+</html>
+----
+
+==== POST /api/grafana/v0/search/values
+
+We tried at this address:
+http://localhost:8080/api/grafana/v0/values :
+----
+{
+"field": "name",
+"query": "up",
+"limit": 5
+}
+----
+we have got :
+----
+[]
+----
+
+==== POST /api/grafana/v0/annotations
+We tried at this address:
+http://localhost:8080/api/grafana/v0/annotations :
+----
+{
+"from": "2020-2-14T01:43:14.070Z",
+"to": "2020-2-14T06:50:14.070Z",
+"limit" : 100,
+"tags": ["tag1", "tag2"],
+"matchAny": false,
+"type": "tags"
+}
+----
+
+we have got:
+----
+Collection not found: annotation
+----
+
+
+
+==== POST /api/grafana/simplejson/search
+
+We tried at this address:
+http://localhost:8080/api/grafana/simplejson/search :
 
 As a result for empty request we have got:
 ----
@@ -522,37 +629,68 @@ trying a metric that does not exist we have got as a result:
 ----
 
 
+we tried to get from this address: http://localhost:8080/api/grafana/v0
+
+and we have got as a result :
+----
+Historian grafana api is Working fine
+----
+==== GET /api/grafana/simplejson
+we tried to get from this address: http://localhost:8080/api/grafana/simplejson
+
+and we have got as a result :
+----
+Historian grafana api is Working fine
+----
+
+==== POST /api/grafana/simplejson/tag-keys
+we tried at this address  http://localhost:8080/api/grafana/simplejson/tag-keys :
+----
+{}
+----
+we have got :
+----
+[
+    {
+        "type": "string",
+        "text": "Algo"
+    },
+    {
+        "type": "int",
+        "text": "Bucket size"
+    }
+]
+----
+
+==== POST /api/grafana/simplejson/tag-values
+we tried at this address  http://localhost:8080/api/grafana/simplejson/tag-values :
+----
+{"key": "temp"}
+----
+we have got : nothing
+----
+----
+
+==== POST /api/grafana/simplejson/annotations
+we tried at this address  http://localhost:8080/api/grafana/simplejson/annotations :
+----
+{
+"range": {
+"from": "2020-2-14T01:43:14.070Z",
+"to": "2020-2-14T06:50:14.070Z"
+},
+"limit" : 100,
+"tags": ["tag1", "tag2"],
+"matchAny": false,
+"type": "tags"
+}
+----
+
+we have got :
+----
+Collection not found: annotation
+----
 
 
 
-
-
-
-=== Data visualization test
-//=== Objectives
-//=== Tasks
-//== Scope
-//== Testing strategy
-//===  Alpha Testing (Unit Testing)
-//=== System and Integration Testing
-//=== Performance and Stress Testing
-//=== User Acceptance Testing
-//=== Batch Testing
-//=== Automated Regression Testing
-//=== Beta Testing
-//== Hardware requirements
-//== Environment requirements
-//=== main frame
-//=== Workstation
-//== Test schedules
-//== Controle procedures
-//== Features to be tested
-//== Features not to be tested
-//== Resources/Roles and Responsibilities
-//== Schedules
-//== SIGNIFICANTLY IMPACTED DEPARTMENTS (SIDs)
-//== Dependencies
-//== Risks/Assumptions
-//== Tools
-//== Approvals
 
