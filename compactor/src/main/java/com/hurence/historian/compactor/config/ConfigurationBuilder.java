@@ -7,6 +7,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class ConfigurationBuilder {
@@ -18,6 +19,8 @@ public class ConfigurationBuilder {
     private static final String KEY_SOLR_ZKHOST = "zkHost";
     private static final String KEY_SOLR_COLLECTION = "collection";
 
+    private static final String KEY_SPARK = "spark";
+
     private static final String KEY_COMPACTION = "compaction";
     private static final String KEY_COMPACTION_SCHEDULING = "scheduling";
     private static final String KEY_COMPACTION_SCHEDULING_PERIOD = "period";
@@ -27,6 +30,7 @@ public class ConfigurationBuilder {
     private String solrCollection = null;
     private int compactionSchedulingPeriod = -1;
     private boolean compactionSchedulingStartNow = true;
+    private Map<String, String> sparkConfig = new HashMap<String, String>();
 
     public ConfigurationBuilder withSolrZkHost(String solrZkHost) {
         this.solrZkHost = solrZkHost;
@@ -45,6 +49,11 @@ public class ConfigurationBuilder {
 
     public ConfigurationBuilder withCompactionSchedulingStartNow(boolean compactionSchedulingStartNow) {
         this.compactionSchedulingStartNow = compactionSchedulingStartNow;
+        return this;
+    }
+
+    public ConfigurationBuilder withSparkConfig(String configKey, String configValue) {
+        sparkConfig.put(configKey, configValue);
         return this;
     }
 
@@ -79,6 +88,7 @@ public class ConfigurationBuilder {
         configuration.setSolrCollection(solrCollection);
         configuration.setCompactionSchedulingPeriod(compactionSchedulingPeriod);
         configuration.setCompactionSchedulingStartNow(compactionSchedulingStartNow);
+        configuration.setSparkConfig(sparkConfig);
 
         return  configuration;
     }
@@ -141,6 +151,20 @@ public class ConfigurationBuilder {
         {
             configurationBuilder.withSolrCollection((String)solrCollection);
         }
+
+        /**
+         * Parse spark section
+         */
+
+        Object sparkValues = config.get(KEY_SPARK);
+        if (sparkValues == null) {
+            throw new ConfigurationException("Missing " + KEY_SPARK + " entry");
+        }
+        Map<String, Object> spark = (Map<String, Object>)sparkValues;
+
+        spark.forEach((configKey, configValue) -> {
+            configurationBuilder.withSparkConfig(configKey, (String)configValue);
+        });
 
         /**
          * Parse compaction section

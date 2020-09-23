@@ -1,6 +1,13 @@
 solr:
   zkHost: localhost # Will be overwritten in integration test with the runtime docker url
   collection: historian
+spark:
+  # Any entry under the spark entry is expected to match the spark application configuration
+  # specified at https://spark.apache.org/docs/latest/configuration.html#application-properties
+  # without the "spark." prefix. For instance app.name for spark.app.name, master for spark.master...
+  app.name: HistorianCompactor
+  master: local[*]
+
 compaction:
   scheduling:
     # Period at which the compaction algorithm is launched in seconds
