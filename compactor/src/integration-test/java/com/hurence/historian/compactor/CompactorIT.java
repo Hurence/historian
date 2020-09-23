@@ -70,6 +70,10 @@ public class CompactorIT {
 
     private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
+
+        // TODO: remove when integrated in create collection script
+        SolrITHelper.addFieldToChunkSchema(container, "metric_key");
+
         // Add fields for tags
         SolrITHelper.addFieldToChunkSchema(container, "dataCenter");
         SolrITHelper.addFieldToChunkSchema(container, "room");
@@ -397,8 +401,9 @@ public class CompactorIT {
         }
 
         compactorConfig.setSolrZkHost(zkHost);
+        logger.info("Using compactor configuration: " + compactorConfig);
         Compactor compactor = new Compactor(compactorConfig);
-        compactor.start();
+        //compactor.start();
 
 //        sparkSession.read().format("solr");
 
@@ -420,8 +425,10 @@ public class CompactorIT {
         //   - results are streamed back from Solr using deep-paging and streaming response
 //        Dataset<Row> chunks = sparkSession.read().format("solr").options(options).load();
 
-//        printSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
-//        System.exit(0);
+        printSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
+
+        compactor.doCompact();
+        System.exit(1);
 
         // 1. load measures from parquet file
         String filePath = new File("../loader/src/test/resources/it-data-4metrics.parquet").getAbsolutePath();

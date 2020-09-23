@@ -16,7 +16,9 @@ import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
 
 @Builder
 @Data
@@ -56,6 +58,7 @@ public class Chunk implements Serializable {
     protected boolean trend;
     protected boolean outlier;
     protected String id;
+    protected String metric_key;
 
     protected Map<String, String> tags;
 
@@ -89,9 +92,24 @@ public class Chunk implements Serializable {
                     .hashString(toHash, StandardCharsets.UTF_8)
                     .toString();
 
+            metric_key = buildMetricKey();
+
             return this;
         }
 
+        private String buildMetricKey() {
+
+            StringBuilder idBuilder = new StringBuilder(name);
+            // If there are some tags, add them with their values in an alphabetically sorted way
+            // according to the tag key
+            if (tags.size() > 0) {
+                SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
+                sortedTags.forEach( (tagKey) -> {
+                    idBuilder.append(",").append(tagKey).append("=").append(tags.get(tagKey));
+                });
+            }
+            return idBuilder.toString();
+        }
 
         /**
          * compute the metrics from the valueBinaries field

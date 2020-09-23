@@ -6,6 +6,7 @@ public class HistorianChunkCollectionFieldsVersionCurrent {
 
     public static String NAME = "name";
     public static String ID = "id";
+    public static String METRIC_KEY = "metric_key";
     public static String COMPACTIONS_RUNNING = "compactions_running";
     public static String CHUNK_VALUE = "chunk_value";
     public static String CHUNK_START = "chunk_start";
