@@ -122,7 +122,7 @@ public class ConvertToTimeseriesTest {
         out.assertFieldEquals(FieldDictionary.RECORD_TYPE, "timeseries");
         out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
-        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8062);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8066);
 
         out.assertRecordSizeEquals(7);
 
