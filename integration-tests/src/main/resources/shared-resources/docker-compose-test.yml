@@ -4,6 +4,8 @@ services:
 
   zookeeper:
     image: wurstmeister/zookeeper
+    networks:
+      - solr_net
 
   solr1:
     image: solr:8.2.0
@@ -11,7 +13,9 @@ services:
       /bin/bash -c "/opt/solr/bin/solr -c -z zookeeper:2181 -m 1g; tail -f /var/solr/logs/solr.log"
     ports:
       - "8981:8983"
-    links:
+    networks:
+      - solr_net
+    depends_on:
       - zookeeper
 
   solr2:
@@ -20,6 +24,16 @@ services:
       /bin/bash -c "/opt/solr/bin/solr -c -f -z zookeeper:2181 -m 1g; tail -f /var/solr/logs/solr.log"
     ports:
       - "8982:8983"
-    links:
-      - solr1
+    networks:
+      - solr_net
+    depends_on:
       - zookeeper
+      - solr1
+
+# Use a named network instead of just links (that let creating a network with automatic name)
+# so that we don't have the following error from docker after a lot of integrations tests run:
+# ERROR: could not find an available, non-overlapping IPv4 address pool among the defaults to assign to the network
+# This is due to too much networks created and can however be fixed deleting unused networks with:
+# docker network prune
+networks:
+  solr_net:
