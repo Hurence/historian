@@ -691,6 +691,29 @@ we have got :
 Collection not found: annotation
 ----
 
+= Some suggestions
 
+* A command to create the environment variables such as $HDH_HOME and $SOLR_HOME and maintain their existence
+even at the restart of the machine.
+* A shell script to stop and restart data historian, solr and grafana at the same time.
+* A shell script to verify that the data historian, solr, and  grafana are working fine at the same time
+like a sort of message.
+* For the REST APIs, it would be much simpler to add a sample (for exemple: a csv file) that could
+fit all the test cases of the api and their parameters.
+* Make sure if that the user did use the sample we gave him, he must get the same results
+as the documentation if he tests the APIs.
+* Explain to the user the difference between Hurence-Historian plugin and SimpleJson plugin.
+* Explain to the user what are the main fields that every csv/json file must have to get a better injection.
+* REST APIs documentation must contain every API: input, request (curl request or postman) and output for every
+API and it used request parameters.
+* It would be better to explain how to install Postman and how to use it to test data historian REST API.
+* For import CSV, it would be better to add a feature that could help input raw/text data not just files,
+or even a folder that contains many csv files and if this feature does exist, giving exemple on how to use it in the doc.
+* For import json it would be better to explain how to add a json file, or a folder containing many json files not just
+data that we inject threw the request.
+* It would be better to explain the difference between export data and query.
+* For more friendly user experience, data historian could have a front-end module that could contain
+injection parts taking many types of data (csv/json/...), taking whole folders containing data and displays results
+depending on which api we used.
 
 
