@@ -80,7 +80,8 @@ public class PointsToChunkVersionCurrent implements PointsToChunk {
                 .name(timeSerie.getName())
                 .start(timeSerie.getStart())
                 .valueBinaries(compressedPoints)
-                .version(getVersion());
+                .version(getVersion())
+                .buildId();
 
         computeAndSetAggs(builder, timeSerie);
         DateInfo dateInfo = TimeSeriesUtil.calculDateFields(timeSerie.getStart());
