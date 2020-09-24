@@ -19,6 +19,8 @@ import com.hurence.timeseries.compaction.Compression
 import org.apache.commons.io.IOUtils
 import spock.lang.Specification
 
+import java.util.zip.ZipException
+
 /**
  * The unit test for the compression class
  * @author f.lautenschlager

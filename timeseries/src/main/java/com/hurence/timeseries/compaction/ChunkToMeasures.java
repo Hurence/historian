@@ -67,6 +67,7 @@ public class ChunkToMeasures /* implements Chunker<Measure, Chunk> */ {
 
         return builder
                 .computeMetrics()
+                .buildId()
                 .build();
     }
 
