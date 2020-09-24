@@ -6,6 +6,7 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -15,7 +16,7 @@ public class MultiCsvFilesConvertor {
     private static final Logger LOGGER = LoggerFactory.getLogger(MultiCsvFilesConvertor.class);
 
     public Set<FileUpload> uploads;
-    public List<CsvFileConvertor> csvFileConvertors;
+    public List<CsvFileConvertor> csvFileConvertors = new ArrayList<>();
     public AllFilesReport allFilesReport;
 
 

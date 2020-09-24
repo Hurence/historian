@@ -33,11 +33,11 @@ public class IngestionFinalResponseUtil {
 
         if (!report.isEmpty())
             finalResponse.put(TAGS, new JsonArray(csvFilesConvertorConf.getTags()))
-                    .put(GROUPED_BY_IN_RESPONSE, new JsonArray(csvFilesConvertorConf.getGroupByList()))
+                    .put(GROUPED_BY_IN_RESPONSE, new JsonArray(csvFilesConvertorConf.getGroupByListWithNAME()))
                     .put(REPORT, report);
 
-        if (!allFilesReport.failedFiles.isEmpty())
-            finalResponse.put(ERRORS, allFilesReport.failedFiles);
+        if (!allFilesReport.filesThatFailedToBeImported.isEmpty())
+            finalResponse.put(ERRORS, allFilesReport.filesThatFailedToBeImported);
 
         return finalResponse;
     }
@@ -57,7 +57,7 @@ public class IngestionFinalResponseUtil {
         try {
 
             JsonArray timeseriesPoints = allFilesReport.correctPoints;
-            JsonArray groupedByFields = new JsonArray(csvFilesConvertorConf.getGroupByList());
+            JsonArray groupedByFields = new JsonArray(csvFilesConvertorConf.getGroupByListWithNAME());
             List<HashMap<String, String>> groupedByFieldsForEveryChunk = new LinkedList<>();
 
             fillingThe_groupedByFieldsForEveryChunk_List(timeseriesPoints, groupedByFields, groupedByFieldsForEveryChunk);
@@ -127,11 +127,11 @@ public class IngestionFinalResponseUtil {
         List<Map<String, Object>> finalReport = customGroupedByMap
                 .entrySet().stream().map(entry -> {
                     Map<String, Object> resultObject = new LinkedHashMap<>();
-                    int totalNumberOfPointsPerGroupedFildes = 0;
+                    int totalNumberOfPointsPerGroupedFiles = 0;
                     int chunkNumber = entry.getValue().size();
                     entry.getKey().forEach(resultObject::put);
-                    totalNumberOfPointsPerGroupedFildes = entry.getValue().stream().mapToInt(Integer::valueOf).sum();
-                    resultObject.put("number_of_points_injected", totalNumberOfPointsPerGroupedFildes);
+                    totalNumberOfPointsPerGroupedFiles = entry.getValue().stream().mapToInt(Integer::valueOf).sum();
+                    resultObject.put("number_of_points_injected", totalNumberOfPointsPerGroupedFiles);
                     int integer = failedPoints.get(entry.getKey());
                     resultObject.put("number_of_point_failed", integer);
                     failedPoints.remove(entry.getKey());

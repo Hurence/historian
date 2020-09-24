@@ -13,7 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
-import static com.hurence.historian.modele.HistorianServiceFields.POINTS;
+import static com.hurence.historian.modele.HistorianServiceFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseJsonImportRequest;
 import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.fillingAllFilesReport;
 import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.parseFiles;
@@ -43,7 +43,7 @@ public class IngestionApiImpl implements IngestionApi {
             JsonArray jsonImportRequest = context.getBodyAsJsonArray();
             correctPointsAndErrorMessages = parseJsonImportRequest(jsonImportRequest);
         }catch (Exception ex) {
-            JsonObject errorObject = new JsonObject().put(HistorianServiceFields.ERRORS_RESPONSE_FIELD, ex.getMessage());
+            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
             context.response().setStatusMessage("BAD REQUEST");
@@ -79,19 +79,47 @@ public class IngestionApiImpl implements IngestionApi {
     public void importCsv(RoutingContext context) {
         LOGGER.trace("received request at importCsv: {}", context.request());
 
-        CsvFilesConvertorConf csvFilesConvertorConf = new CsvFilesConvertorConf(context.request().formAttributes());
+        CsvFilesConvertorConf csvFilesConvertorConf;
         MultiCsvFilesConvertor multiCsvFilesConvertor = new MultiCsvFilesConvertor(context);
+
+        try {
+            csvFilesConvertorConf = new CsvFilesConvertorConf(context.request().formAttributes());
+        } catch (Exception ex) {
+            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
+            LOGGER.error("error parsing attributes", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end(String.valueOf(errorObject));
+            return;
+        }
+
+        if (multiCsvFilesConvertor.uploads.isEmpty()) {
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end(new JsonObject().put(ERRORS_RESPONSE_FIELD, "Request is not containing any files").encodePrettily());
+            return;
+        }
 
         try {
             parseFiles(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport, csvFilesConvertorConf);
             fillingAllFilesReport(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport);
         } catch (Exception ex) {
-            JsonObject errorObject = new JsonObject().put(HistorianServiceFields.ERRORS_RESPONSE_FIELD, ex.getMessage());
+            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
             context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
             context.response().end(String.valueOf(errorObject));
+            return;
+        }
+
+        if (multiCsvFilesConvertor.allFilesReport.correctPoints.isEmpty()) {
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end(new JsonObject().put(ERRORS, multiCsvFilesConvertor.allFilesReport.filesThatFailedToBeImported).encodePrettily());
             return;
         }
 
