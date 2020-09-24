@@ -9,13 +9,17 @@ services:
     image: solr:8.2.0
     command: >
       /bin/bash -c "/opt/solr/bin/solr -c -z zookeeper:2181 -m 1g; tail -f /var/solr/logs/solr.log"
+    ports:
+      - "8981:8983"
     links:
       - zookeeper
 
   solr2:
     image: solr:8.2.0
     command: >
-      /bin/bash -c "/opt/solr/bin/solr -c -f -z zookeeper:2181 -m 1g"
+      /bin/bash -c "/opt/solr/bin/solr -c -f -z zookeeper:2181 -m 1g; tail -f /var/solr/logs/solr.log"
+    ports:
+      - "8982:8983"
     links:
       - solr1
       - zookeeper

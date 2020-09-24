@@ -68,7 +68,7 @@ public class ChunkFromJsonObjectVersionCurrent extends Chunk {
     }
 
     @Override
-    public byte[] getValueAsBinary() {
+    public byte[] getValue() {
         return chunk.getBinary(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_VALUE);
     }
 
@@ -133,7 +133,7 @@ public class ChunkFromJsonObjectVersionCurrent extends Chunk {
     }
 
     @Override
-    public double getStd() {
+    public double getStdDev() {
         return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV);
     }
 
@@ -189,7 +189,7 @@ public class ChunkFromJsonObjectVersionCurrent extends Chunk {
     }
 
     @Override
-    public String getChunkOrigin() {
+    public String getOrigin() {
         return chunk.getString(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN);
     }
 

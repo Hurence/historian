@@ -48,11 +48,10 @@ public class ChunkTest {
         //        origin chunk
         Assertions.assertEquals(10L, chunk.getCount());
         Assertions.assertEquals(10, chunk.getLast());
-        // Assertions.assertEquals(Collections.emptyList(), chunk.getCompactionRunnings());
-        Assertions.assertEquals("test", chunk.getChunkOrigin());
+        Assertions.assertEquals("test", chunk.getOrigin());
         Assertions.assertEquals(false, chunk.isOutlier());
         Assertions.assertEquals(true, chunk.isTrend());
-        Assertions.assertEquals(3.0276503540974917, chunk.getStd());
+        Assertions.assertEquals(3.0276503540974917, chunk.getStdDev());
         Assertions.assertEquals("aabcddefgg", chunk.getSax());
         Assertions.assertEquals(5.5, chunk.getAvg());
         Assertions.assertEquals(SchemaVersion.VERSION_1, chunk.getVersion());
@@ -74,10 +73,12 @@ public class ChunkTest {
         Assertions.assertEquals(2, truncatedChunk.getCount());
         Assertions.assertEquals(7, truncatedChunk.getLast());
         //  Assertions.assertEquals(Collections.emptyList(), truncatedChunk.getCompactionRunnings());
-        Assertions.assertEquals("ChunkTruncater", truncatedChunk.getChunkOrigin());
+        Assertions.assertEquals("ChunkTruncater", truncatedChunk.getOrigin());
+      //  Assertions.assertEquals(Collections.emptyList(), truncatedChunk.getCompactionRunnings());
+        Assertions.assertEquals("ChunkTruncater", truncatedChunk.getOrigin());
         Assertions.assertEquals(false, truncatedChunk.isOutlier());
         Assertions.assertEquals(true, truncatedChunk.isTrend());
-        Assertions.assertEquals(0.7071067811865476, truncatedChunk.getStd());
+        Assertions.assertEquals(0.7071067811865476, truncatedChunk.getStdDev());
         Assertions.assertEquals("ab", truncatedChunk.getSax());
         Assertions.assertEquals(6.5, truncatedChunk.getAvg());
         Assertions.assertEquals(SchemaVersion.VERSION_1, truncatedChunk.getVersion());

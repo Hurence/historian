@@ -29,7 +29,7 @@ public class ChunkToMeasures /* implements Chunker<Measure, Chunk> */ {
         });
 
         builder.avg(valueStats.getMean())
-                .std(valueStats.getStandardDeviation())
+                .stdDev(valueStats.getStandardDeviation())
                 .sum(valueStats.getSum())
                 .min(valueStats.getMin())
                 .max(valueStats.getMax())
@@ -61,7 +61,7 @@ public class ChunkToMeasures /* implements Chunker<Measure, Chunk> */ {
                 .name(measures.first().getName())
                 .tags(measures.first().getTags())
                 .day(measures.first().getDay())
-                .valueBinaries(compressedData);
+                .value(compressedData);
 
         computeStats(measures, builder);
 
@@ -74,7 +74,7 @@ public class ChunkToMeasures /* implements Chunker<Measure, Chunk> */ {
     // @Override
     public TreeSet<Measure> unchunk(Chunk chunk) throws IOException {
 
-        try (InputStream decompressed = Compression.decompressToStream(chunk.getValueBinaries())) {
+        try (InputStream decompressed = Compression.decompressToStream(chunk.getValue())) {
             return ProtoBufTimeSeriesSerializer.from(decompressed, chunk.getStart(), chunk.getEnd());
         }
 

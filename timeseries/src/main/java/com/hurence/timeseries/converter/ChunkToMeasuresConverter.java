@@ -18,7 +18,7 @@ public class ChunkToMeasuresConverter implements ChunkToMeasures {
 
     @Override
     public TreeSet<Measure> buildMeasures(Chunk chunk)  {
-        try (InputStream decompressed = Compression.decompressToStream(chunk.getValueBinaries())) {
+        try (InputStream decompressed = Compression.decompressToStream(chunk.getValue())) {
 
 
             TreeSet<Measure> measures = ProtoBufTimeSeriesWithQualitySerializer.from(decompressed, chunk.getStart(), chunk.getEnd());

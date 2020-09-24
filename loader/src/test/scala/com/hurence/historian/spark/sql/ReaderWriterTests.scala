@@ -95,7 +95,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
     val chunkyfier = new Chunkyfier()
       .setValueCol("value")
       .setTimestampCol("timestamp")
-      .setChunkCol("valueBinaries")
+      .setChunkValueCol("value")
       .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
@@ -103,7 +103,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
       .setSaxStringLength(50)
 
     val unchunkyfier = new UnChunkyfier()
-      .setChunkCol("valueBinaries")
+      .setValueCol("value")
 
     // load measures data with parquet
     val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)

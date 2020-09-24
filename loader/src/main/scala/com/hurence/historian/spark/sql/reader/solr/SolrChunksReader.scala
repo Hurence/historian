@@ -1,5 +1,6 @@
 package com.hurence.historian.spark.sql.reader.solr
 
+import com.hurence.historian.spark.common.Definitions._
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Chunk
@@ -16,8 +17,9 @@ class SolrChunksReader extends Reader[Chunk] {
     val tagNames: List[Column] = options.config(Options.TAG_NAMES)
       .split(",").toList
       .map(tag => col(tag))
-    val mainCols = List("day", "start", "end", "count", "avg", "stddev", "min", "max", "first", "last", "sax", "value")
-      .map(name => col(s"chunk_$name").as(name)) ::: List("name").map(col) ::: tagNames
+    val mainCols = List("day", "start", "end", "count", "avg", "std_dev", "min", "max", "first", "last", "sax", "value",
+      "origin", "quality_min", "quality_max", "quality_first", "quality_sum", "quality_avg")
+      .map(name => col(s"chunk_$name").as(name)) ::: List("name").map(col) ::: List("id").map(col) ::: tagNames
 
 
     val tags: List[Column] = options.config("tag_names")
@@ -29,10 +31,8 @@ class SolrChunksReader extends Reader[Chunk] {
       .options(options.config)
       .load()
       .select(mainCols: _*)
-      .withColumn("chunk", col("value"))
+      .withColumn(CHUNK_COLUMN, col("value"))
       .withColumn("tags", map(tags: _*))
       .as[Chunk](Encoders.bean(classOf[Chunk]))
-
   }
-
 }
