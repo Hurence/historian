@@ -89,7 +89,7 @@ public class CompactorIT {
         GeneralInjectorCurrentVersion chunkInjector = new GeneralInjectorCurrentVersion();
 
         /**
-         * metric1 tags1 2020-08-28
+         * metric1 tags1 2020-08-28 from injector
          */
 
         Chunk chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
@@ -137,7 +137,44 @@ public class CompactorIT {
         chunkInjector.addChunk(chunk);
 
         /**
-         * metric1 tags2 2020-08-28
+         * metric1 tags1 2020-08-28 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:29:51.001", 1001, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:52.502", 1002, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:53.503", 1003, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:54.504", 1004, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:31:55.005", 1005, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 15:29:51.001", 1006, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 16:30:54.504", 1007, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:30:52.503", 1008, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 17:40:52.008", 1009, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 18:31:55.005", 1010, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags2 2020-08-28 from injector
          */
 
         chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
@@ -185,7 +222,44 @@ public class CompactorIT {
         chunkInjector.addChunk(chunk);
 
         /**
-         * metric1 tags1 2020-08-27
+         * metric1 tags2 2020-08-28 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:09:51.011", 1011, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:52.112", 1012, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:53.113", 1013, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:10:54.114", 1014, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:11:55.015", 1015, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "2");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:06:51.011", 1016, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:06:52.112", 1017, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 01:12:53.113", 1018, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:15:54.114", 1019, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 02:15:55.015", 1020, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "2");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags1 2020-08-27 from injector
          */
 
         chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
@@ -233,7 +307,44 @@ public class CompactorIT {
         chunkInjector.addChunk(chunk);
 
         /**
-         * metric1 tags3 2020-08-27
+         * metric1 tags1 2020-08-27 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:52.121", 1021, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:52.122", 1022, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:54.123", 1023, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:54.124", 1024, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:10:56.025", 1025, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 11:10:52.121", 1026, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:13:52.122", 1027, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:13:54.123", 1028, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:25:54.124", 1029, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:25:56.025", 1030, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags3 2020-08-27 from injector
          */
 
         chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
@@ -281,7 +392,44 @@ public class CompactorIT {
         chunkInjector.addChunk(chunk);
 
         /**
-         * metric2 tags1 2020-08-28
+         * metric1 tags3 2020-08-27 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:11:51.031", 1031, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:11:52.032", 1032, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:11:53.033", 1033, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:11:54.034", 1034, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:11:55.035", 1035, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:12:51.031", 1036, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:12:52.032", 1037, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:12:53.033", 1038, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:12:54.034", 1039, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:12:55.035", 1040, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric2 tags1 2020-08-28 from injector
          */
 
         chunk = ChunkBuilderHelper.fromPointsAndTags("metric2",
@@ -329,7 +477,44 @@ public class CompactorIT {
         chunkInjector.addChunk(chunk);
 
         /**
-         * metric1 tags1 2020-08-29
+         * metric2 tags1 2020-08-28 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric2",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:07:51.041", 1041, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:17:52.042", 1042, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:27:53.043", 1043, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:37:54.044", 1044, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 21:57:55.045", 1045, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric2",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-28 05:07:51.041", 1046, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 05:17:52.042", 1047, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 05:27:53.043", 1048, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 05:37:54.044", 1049, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 05:57:55.045", 1050, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "2");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags1 2020-08-29 from injector
          */
 
         chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
@@ -373,6 +558,43 @@ public class CompactorIT {
                 }}
                 ,
                 ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric1 tags1 2020-08-29 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 05:10:51.051", 1051, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 07:10:52.052", 1052, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:30:53.053", 1053, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 10:10:54.054", 1054, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 11:10:55.055", 1055, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric1",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 01:10:51.051", 1056, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 02:10:52.052", 1057, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 03:30:53.053", 1058, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 21:10:54.054", 1059, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-28 22:10:55.055", 1060, 1095)
+                ),
+                new HashMap<String, String>() {{
+                    put("dataCenter", "1");
+                    put("room", "1");
+                }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
         );
         chunkInjector.addChunk(chunk);
 
@@ -467,7 +689,7 @@ public class CompactorIT {
         options.put("zkhost", zkHost);
         String collectionName = SolrITHelper.COLLECTION_HISTORIAN;
         options.put("collection", collectionName);
-        options.put("tag_names", "metric_id,min,max,warn,crit");
+        options.put(Options.TAG_NAMES(), "metric_id,min,max,warn,crit");
         // JavaConverters used to convert from java Map to scala immutable Map
         Options sqlOptions = new Options(collectionName, JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
                 Predef.<Tuple2<String, String>>conforms()));
@@ -489,11 +711,11 @@ public class CompactorIT {
         options = new HashMap<String, String>();
         options.put("zkhost", zkHost);
         options.put("collection", collectionName);
-        options.put("tag_names", "metric_id");
+        options.put(Options.TAG_NAMES(), "metric_id");
         // JavaConverters used to convert from java Map to scala immutable Map
         sqlOptions = new Options(collectionName, JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
                 Predef.<Tuple2<String, String>>conforms()));
-        Dataset<Chunk> chunks = (Dataset<Chunk>) solrChunksReader.read(sqlOptions)
+        Dataset<Chunk> chunks = (Dataset<Chunk>)solrChunksReader.read(sqlOptions)
                 .where("metric_id LIKE '08%'");
 
         chunks.show(100, false);
