@@ -690,6 +690,8 @@ we have got :
 ----
 Collection not found: annotation
 ----
+== Data visualisation
+Grafana is working fine.
 
 = Some suggestions
 
@@ -715,5 +717,6 @@ data that we inject threw the request.
 * For more friendly user experience, data historian could have a front-end module that could contain
 injection parts taking many types of data (csv/json/...), taking whole folders containing data and displays results
 depending on which api we used.
-
-
+* Sometimes historian server does not start. Maybe you have to start grafana server before it to get historian server.
+* There is no exemples of how to use grafana.
+* Add exemples of errors and their significations and how solve them.
