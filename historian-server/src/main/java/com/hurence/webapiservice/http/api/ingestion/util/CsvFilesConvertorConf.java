@@ -2,7 +2,9 @@ package com.hurence.webapiservice.http.api.ingestion.util;
 
 import io.vertx.reactivex.core.MultiMap;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -16,6 +18,9 @@ public class CsvFilesConvertorConf {
     private final String quality;
     private String formatDate;
     private String timezoneDate;
+    private int maxNumberOfLignes;
+    private String customName;
+
     private List<String> group_by = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
 
@@ -23,16 +28,19 @@ public class CsvFilesConvertorConf {
     public static final String DEFAULT_NAME_COLUMN_MAPPING = "metric";
     public static final String DEFAULT_VALUE_COLUMN_MAPPING = "value";
     public static final String DEFAULT_TIMESTAMP_COLUMN_MAPPING = "timestamp";
+    public static final int DEFAULT_MAX_NUMBER_OF_LIGNES = 100000;
 
-    public CsvFilesConvertorConf(MultiMap multiMap) {
+    public CsvFilesConvertorConf(MultiMap multiMap) throws IOException {
         if (multiMap.get(MAPPING_TIMESTAMP) == null)
-            this.timestamp = DEFAULT_TIMESTAMP_COLUMN_MAPPING; // change the variable place
+            this.timestamp = DEFAULT_TIMESTAMP_COLUMN_MAPPING;
         else
             this.timestamp = multiMap.get(MAPPING_TIMESTAMP);
-        if (multiMap.get(MAPPING_NAME) == null)
+        if (multiMap.get(MAPPING_NAME) == null && (multiMap.get(CUSTOM_NAME) == null))
             this.name = DEFAULT_NAME_COLUMN_MAPPING;
-        else
+        else if (multiMap.get(MAPPING_NAME) != null && (multiMap.get(CUSTOM_NAME) == null))
             this.name = multiMap.get(MAPPING_NAME);
+        else
+            this.name = null;
         if (multiMap.get(MAPPING_VALUE) == null)
             this.value = DEFAULT_VALUE_COLUMN_MAPPING;
         else
@@ -53,6 +61,14 @@ public class CsvFilesConvertorConf {
             this.timezoneDate = "UTC";
         else
             this.timezoneDate = multiMap.get(TIMEZONE_DATE);
+        if (multiMap.get(MAX_NUMBER_OF_LIGNES) == null)
+            maxNumberOfLignes = DEFAULT_MAX_NUMBER_OF_LIGNES;
+        else
+            maxNumberOfLignes = Integer.parseInt(multiMap.get(MAX_NUMBER_OF_LIGNES));
+        if (multiMap.get(CUSTOM_NAME) != null)
+            customName = multiMap.get(CUSTOM_NAME);
+        if((multiMap.get(MAPPING_NAME) != null) && (multiMap.get(CUSTOM_NAME) != null))
+            throw new IOException("can't use both " + MAPPING_NAME + " and "+ CUSTOM_NAME + " in the attributes");
     }
 
     public String getTimestamp() {
@@ -87,15 +103,37 @@ public class CsvFilesConvertorConf {
         return timezoneDate;
     }
 
-    public List<String> getGroupByList() {
-        return group_by.stream().map(s -> {
-            if (s.startsWith(TAGS+".")) {
-                return s.substring(5);
-            }else if (s.equals(NAME))
-                return name;
-            else
+    public int getMaxNumberOfLignes() {
+        return maxNumberOfLignes;
+    }
+
+    public String getCustomName() {
+        return customName;
+    }
+
+    public LinkedList<String> getGroupByList() {
+        LinkedList<String> groupByList = new LinkedList<>();
+        if (customName == null)
+            groupByList.add(name);
+        group_by.forEach(s -> {
+            if (s.startsWith(TAGS+"."))
+                groupByList.add(s.substring(5));
+            else if (!s.equals(NAME))
                 throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
-        }).collect(Collectors.toList());
+        });
+        return groupByList;
+    }
+
+    public List<String> getGroupByListWithNAME() {
+        List<String> groupByList = new ArrayList<>();
+        groupByList.add(NAME);
+        group_by.forEach(s -> {
+            if (s.startsWith(TAGS+"."))
+                groupByList.add(s.substring(5));
+            else if (!s.equals(NAME))
+                throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
+        });
+        return groupByList;
     }
 
 }

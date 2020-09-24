@@ -13,6 +13,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
+import static com.hurence.historian.modele.HistorianServiceFields.CUSTOM_NAME;
 import static com.hurence.historian.modele.HistorianServiceFields.MAX_LINES_FOR_CSV_FILE;
 import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.toNumber;
 
@@ -31,13 +32,11 @@ public class CsvConvertorUtil {
         String fileName = convertor.file.uploadedFileName();
         MappingIterator<Map> rows = getMappingIteratorFromFile(fileName);
         List<LineWithDateInfo> linesWithDateInfo = ReturnLineWithDateInfoList(rows, csvFilesConvertorConf);
-
-        DataConverter dataConverter = new DataConverter(csvFilesConvertorConf);
-        JsonArray groupedByMetricDataPoints = dataConverter.toGroupedByMetricDataPoints(linesWithDateInfo);
-        if (groupedByMetricDataPoints.size() > MAX_LINES_FOR_CSV_FILE) {
-            throw new IOException(String.valueOf(groupedByMetricDataPoints.size()));
+        if (linesWithDateInfo.size() > csvFilesConvertorConf.getMaxNumberOfLignes()) {
+            throw new IOException(String.valueOf(linesWithDateInfo.size()));
         }
-        convertor.fileInArray = groupedByMetricDataPoints;
+        DataConverter dataConverter = new DataConverter(csvFilesConvertorConf);
+        convertor.fileInArray = dataConverter.toGroupedByMetricDataPoints(linesWithDateInfo);
     }
 
     /**
@@ -98,17 +97,17 @@ public class CsvConvertorUtil {
     private static void verifyAttributes(List<Map> listFromRows, CsvFilesConvertorConf csvFilesConvertorConf) {
         listFromRows.forEach(i ->  {
             Set<String> keySet = i.keySet();
-            if (!keySet.contains(csvFilesConvertorConf.getName()))
-                throw new NoSuchElementException("error in the attributes");
+            if ( (csvFilesConvertorConf.getName() != null) && (!keySet.contains(csvFilesConvertorConf.getName())))
+                throw new NoSuchElementException("error in the attributes : the attribute name :"+ csvFilesConvertorConf.getName()
+                                                + " don't exist in the csv, you acn use the attribute " +CUSTOM_NAME);
             if (!keySet.contains(csvFilesConvertorConf.getTimestamp()))
                 throw new NoSuchElementException("error in the attributes");
             if (!keySet.contains(csvFilesConvertorConf.getValue()))
                 throw new NoSuchElementException("error in the attributes");
-            csvFilesConvertorConf.getTags().forEach(tag -> {
-                if (!keySet.contains(tag)) {
+            /*csvFilesConvertorConf.getTags().forEach(tag -> {
+                if (!keySet.contains(tag))
                     throw new NoSuchElementException("error in the attributes");
-                }
-            });
+            });*/
         });
     }
 

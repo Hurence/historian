@@ -40,8 +40,8 @@ public class IngestionApiUtil {
                 fillingTheNamesOfFailedFiles(errorMessage, convertor, allFilesReport);
                 continue;
             } catch (IOException e) {
-                // the file will be skipped because it is too big (> 5000 lines)
-                String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+ MAX_LINES_FOR_CSV_FILE;
+                // the file will be skipped because it is too big (> the max number of lignes)
+                String errorMessage = "The csv contains " + e.getMessage() + " lines which is more than the max number of line of "+ csvFilesConvertorConf.getMaxNumberOfLignes();
                 fillingTheNamesOfFailedFiles(errorMessage, convertor, allFilesReport);
                 continue;
 
@@ -54,7 +54,7 @@ public class IngestionApiUtil {
     private static void fillingTheNamesOfFailedFiles(String errorMessage, CsvFileConvertor convertor,
                                                      AllFilesReport allFilesReport) {
         JsonObject errorObject = new JsonObject().put(FILE, convertor.file.fileName()).put(CAUSE, errorMessage);
-        allFilesReport.failedFiles.add(errorObject);
+        allFilesReport.filesThatFailedToBeImported.add(errorObject);
     }
 
     /**
