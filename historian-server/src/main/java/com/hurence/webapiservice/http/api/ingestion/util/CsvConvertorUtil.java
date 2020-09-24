@@ -104,10 +104,6 @@ public class CsvConvertorUtil {
                 throw new NoSuchElementException("error in the attributes");
             if (!keySet.contains(csvFilesConvertorConf.getValue()))
                 throw new NoSuchElementException("error in the attributes");
-            /*csvFilesConvertorConf.getTags().forEach(tag -> {
-                if (!keySet.contains(tag))
-                    throw new NoSuchElementException("error in the attributes");
-            });*/
         });
     }
 
