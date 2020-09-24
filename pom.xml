@@ -102,6 +102,7 @@
         <module>historian-resources</module>
         <module>assembly</module>
         <module>historian-tools</module>
+        <module>compactor</module>
     </modules>
 
     <dependencies>

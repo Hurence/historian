@@ -36,7 +36,7 @@ class LoaderTests extends SparkSessionTestWrapper {
     val chunkyfier = new Chunkyfier()
       .setValueCol("value")
       .setTimestampCol("timestamp")
-      .setChunkCol("valueBinaries")
+      .setChunkValueCol("value")
       .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
@@ -65,7 +65,7 @@ class LoaderTests extends SparkSessionTestWrapper {
 
     assertEquals(288, chunktoCheck.getCount)
     assertEquals(1620.0979166666662, chunktoCheck.getAvg)
-    assertEquals(104.87785626299073, chunktoCheck.getStd)
+    assertEquals(104.87785626299073, chunktoCheck.getStdDev)
     assertEquals(1334.8, chunktoCheck.getMin)
     assertEquals(2072.6, chunktoCheck.getMax)
     assertEquals(1503.4, chunktoCheck.getFirst)

@@ -15,7 +15,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -28,6 +27,11 @@ import java.util.*;
  *
  * @see Measure
  */
+import java.util.Map;
+import java.util.SortedSet;
+import java.util.TimeZone;
+import java.util.TreeSet;
+
 @Builder
 @Data
 @AllArgsConstructor
@@ -38,7 +42,7 @@ public class Chunk implements Serializable {
 
     protected SchemaVersion version;
     protected String name;
-    protected byte[] valueBinaries;
+    protected byte[] value;
     protected long start;
     protected long end;
     protected long count;
@@ -48,7 +52,7 @@ public class Chunk implements Serializable {
     protected double sum;
     protected double avg;
     protected double last;
-    protected double std;
+    protected double stdDev;
 
     // agg quality
     @Builder.Default
@@ -66,15 +70,19 @@ public class Chunk implements Serializable {
     protected int year;
     protected int month;
     protected String day;
-    protected String chunkOrigin;
+    protected String origin;
     protected String sax;
     protected boolean trend;
     protected boolean outlier;
     protected String id;
+    protected String metric_key;
 
     protected Map<String, String> tags;
 
 
+    // Naming pattern <Class>Builder of this class will make lombok use this class
+    // as the builder for Chunk. Ssaid differently, an instance of this ChunkBuilder
+    // class will be returned by Chunk.build().
     /**
      * custom builder
      */
@@ -82,6 +90,13 @@ public class Chunk implements Serializable {
 
         /**
          * sets id to an idempotent hash
+         *
+         * @return
+         *
+         * TODO: tried to have this method automatically with lombok but did not work:
+         * Tried with @Builder.ObtainVia(method = "buildId") as annotation for id field
+         * Further lombok documentation for the builder at:
+         * https://www.projectlombok.org/features/Builder
          */
         public ChunkBuilder buildId() {
             StringBuilder newId = new StringBuilder();
@@ -89,9 +104,13 @@ public class Chunk implements Serializable {
             newId.append(name);
             tags.forEach((k, v) -> newId.append(k + v));
 
+            String toHash = name +
+                    start +
+                    origin;
             try {
-                newId.append(BinaryEncodingUtils.encode(valueBinaries));
+                newId.append(BinaryEncodingUtils.encode(value));
 
+                toHash += BinaryEncodingUtils.encode(value) ;
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Error encoding binaries", e);
             }
@@ -100,7 +119,23 @@ public class Chunk implements Serializable {
                     .hashString(newId.toString(), StandardCharsets.UTF_8)
                     .toString();
 
+            metric_key = buildMetricKey();
+
             return this;
+        }
+
+        private String buildMetricKey() {
+
+            StringBuilder idBuilder = new StringBuilder(name);
+            // If there are some tags, add them with their values in an alphabetically sorted way
+            // according to the tag key
+            if (tags.size() > 0) {
+                SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
+                sortedTags.forEach( (tagKey) -> {
+                    idBuilder.append(",").append(tagKey).append("=").append(tags.get(tagKey));
+                });
+            }
+            return idBuilder.toString();
         }
 
         /**
@@ -119,19 +154,16 @@ public class Chunk implements Serializable {
 
     public String getValueAsString() {
         try {
-            return BinaryEncodingUtils.encode(valueBinaries);
+            return BinaryEncodingUtils.encode(value);
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("Error encoding binaries", e);
             throw new IllegalArgumentException(e);
         }
     }
 
-    public byte[] getValueAsBinary() {
-        return valueBinaries;
-    }
 
     public TreeSet<Measure> getValueAsMeasures() throws IOException {
-        return BinaryCompactionUtil.unCompressPoints(valueBinaries, start, end);
+        return BinaryCompactionUtil.unCompressPoints(value, start, end);
     }
 
     public boolean containsTag(String tagName) {

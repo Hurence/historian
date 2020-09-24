@@ -61,7 +61,7 @@ public class MeasuresToChunkVersionEVOA0 implements MeasuresToChunk {
                 .end(timeSerie.getEnd())
                 .name(timeSerie.getName())
                 .start(timeSerie.getStart())
-                .valueBinaries(compressedPoints)
+                .value(compressedPoints)
                 .version(getVersion());
         computeAndSetAggs(builder, timeSerie);
         DateInfo dateInfo = TimeSeriesUtil.calculDateFields(timeSerie.getStart());

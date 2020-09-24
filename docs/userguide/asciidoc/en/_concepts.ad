@@ -35,7 +35,7 @@ case class Chunk(name: String,
      chunk: String,
      count: Long,
      avg: Double,
-     stddev: Double,
+     std_dev: Double,
      min: Double,
      max: Double,
      first: Double,
@@ -69,7 +69,7 @@ In SolR the chunks will be stored according to  the following schema (for the cu
     <field name="chunk_qualities" type="string" multiValued="true" indexed="true" stored="true"/>
     <field name="chunk_sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_start" type="plong" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_stddev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_std_dev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
     <field name="chunk_sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
     <field name="tags" type="text_en" multiValued="true" indexed="true" stored="true"/>
     <field name="chunk_timestamp" type="plong" multiValued="false" indexed="true" stored="true"/>

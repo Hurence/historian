@@ -75,12 +75,12 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
         Chunk.ChunkBuilder builder = Chunk.builder();
         byte[] compressedPoints = BinaryCompactionUtil.serializeTimeseries(timeSerie);
         builder
-                .chunkOrigin(this.chunkOrigin)
+                .origin(this.chunkOrigin)
                 .tags(tags)
                 .end(timeSerie.getEnd())
                 .name(timeSerie.getName())
                 .start(timeSerie.getStart())
-                .valueBinaries(compressedPoints)
+                .value(compressedPoints)
                 .version(getVersion());
 
         computeAndSetAggs(builder, timeSerie);
@@ -153,7 +153,7 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
                     builder.count((long) value);
                     break;
                 case "dev":
-                    builder.std(value);
+                    builder.stdDev(value);
                     break;
             }
         }
