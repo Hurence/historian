@@ -3,6 +3,7 @@ package com.hurence.historian.compactor;
 import com.hurence.historian.compactor.config.Configuration;
 import com.hurence.historian.compactor.config.ConfigurationBuilder;
 import com.hurence.historian.compactor.config.ConfigurationException;
+import com.hurence.historian.spark.sql.Options;
 import com.hurence.historian.spark.sql.reader.ChunksReaderType;
 import com.hurence.historian.spark.sql.reader.ReaderFactory;
 import com.hurence.historian.spark.sql.reader.solr.SolrChunksReader;
@@ -11,7 +12,11 @@ import com.hurence.historian.spark.sql.writer.WriterType;
 import com.hurence.historian.spark.sql.writer.solr.SolrChunksWriter;
 import com.hurence.timeseries.core.ChunkOrigin;
 import com.hurence.timeseries.model.Chunk;
-import org.apache.commons.cli.*;
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -21,13 +26,11 @@ import scala.Predef;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent.*;
 
@@ -229,12 +232,12 @@ public class Compactor implements Runnable {
          * rows 1000
          * request_handler /export
          */
-        String query = "chunk_start:[* TO " + (utcFirstTimestampOfTodayMs()-1L)+ "]" // Chunks from epoch to yesterday (included)
+        String query = CHUNK_START + ":[* TO " + (utcFirstTimestampOfTodayMs()-1L)+ "]" // Chunks from epoch to yesterday (included)
                 + "AND -" + CHUNK_ORIGIN + ":" + ChunkOrigin.COMPACTOR; // Only not yet compacted chunks
         options.put("query", query);
         options.put("fields", METRIC_KEY + "," + CHUNK_DAY); // Return only metric_key and chunk_day fields
         options.put("rows", "1000");
-        // Specify to use the /export handler instead of the /select  so that we don't loose any chunk
+        // Specify to use the /export handler instead of the /select so that we don't loose any chunk
         // (we do not have to specify a max_rows parameter)
         options.put("request_handler", "/export");
 
@@ -244,17 +247,68 @@ public class Compactor implements Runnable {
                 .load();
 
         resultDs.show(100, false);
+        System.out.println("#rows" + resultDs.count());
+
+        resultDs = resultDs.distinct();
+
+        resultDs.show(100, false);
+        System.out.println("#rows" + resultDs.count());
 
         resultDs = resultDs.sort(resultDs.col(METRIC_KEY), resultDs.col(CHUNK_DAY));
 
         resultDs.show(100, false);
+        System.out.println("#rows" + resultDs.count());
+
+        for (Row row : resultDs.collectAsList()) {
+            String metricKey = row.getAs(METRIC_KEY);
+            String day = row.getAs(CHUNK_DAY);
+            reCompact(metricKey, day);
+        }
+
+    }
+
+    /**
+     * Prepare a new options map for solr reading/writing, pre-filled with
+     * connection/collection information and where only query related parameters
+     * are still to be filled
+     */
+    private Map<String, String> newOptions() {
+
+        Map<String, String> options = new HashMap<String, String>();
+        options.put("zkhost", configuration.getSolrZkHost());
+        options.put("collection", configuration.getSolrCollection());
+        return options;
+    }
+
+    void reCompact(String metricKeyStr, String day) {
+
+        logger.debug("Recompacting chunks of day " + day + " for metric " + metricKeyStr);
+
+        Map<String, String> options = newOptions();
+
+        String query = CHUNK_DAY + ":" + day +
+                " AND " + METRIC_KEY + ":" + metricKeyStr;
+        options.put("query", query);
+        options.put("rows", "1000");
+        // Specify to use the /export handler instead of the /select so that we don't loose any chunk
+        // (we do not have to specify a max_rows parameter)
+        options.put("request_handler", "/export");
+
+        // Compute and set the metric name and tags to read from the metric key
+        Chunk.MetricKey metricKey = Chunk.MetricKey.parse(metricKeyStr);
+        Set<String> tags = metricKey.getTagKeys();
+        String metricAndTagsCsv = NAME + "," + tags.stream().collect(Collectors.joining(","));
+        options.put(Options.TAG_NAMES(), metricAndTagsCsv);
+
+        System.out.println("####################################### " + metricAndTagsCsv);
 
         // JavaConverters used to convert from java Map to scala immutable Map
-//        Options readerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
-//                Predef.<Tuple2<String, String>>conforms()));
-//        Dataset<Chunk> chunks = (Dataset<Chunk>) solrChunksReader.read(readerOptions);
-//
-//        chunks.show(100, false);
+        Options readerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
+                Predef.<Tuple2<String, String>>conforms()));
+        Dataset<Chunk> chunks = (Dataset<Chunk>)solrChunksReader.read(readerOptions);
+
+        System.out.println("------------------------------------------ " + day + " for metric " + metricKey);
+        chunks.show(100, false);
     }
 
     /**
@@ -300,7 +354,7 @@ public class Compactor implements Runnable {
 
         // Path to config file
         Option configFileOption = new Option(OPTION_CONFIG_FILE, OPTION_CONFIG_FILE_LONG,
-                true, "Path to the YAML configuration file.");
+                        true, "Path to the YAML configuration file.");
         configFileOption.setRequired(true);
 
         options.addOption(configFileOption);
