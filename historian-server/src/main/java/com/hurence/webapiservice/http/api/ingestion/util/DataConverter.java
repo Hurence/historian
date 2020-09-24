@@ -47,8 +47,8 @@ public class DataConverter {
         return new JsonArray(finalGroupedPoints);
     }
 
-    private List<Object> customGroupingBy(LineWithDateInfo map) {
-        List<Object> groupByListForThisMap = new ArrayList<>();
+    private LinkedList<Object> customGroupingBy(LineWithDateInfo map) {
+        LinkedList<Object> groupByListForThisMap = new LinkedList<>();
         csvFilesConvertorConf.getGroupByList().forEach(i -> groupByListForThisMap.add(map.mapFromOneCsvLine.get(i)));
         groupByListForThisMap.add(map.date);
         return groupByListForThisMap;
@@ -62,7 +62,7 @@ public class DataConverter {
                 tagsList);
     }
 
-    private Map<String, Object> customMap(Map.Entry<List<Object>, List<List<Iterable<? extends Object>>>> entry) {
+    private Map<String, Object> customMap(Map.Entry<LinkedList<Object>, List<List<Iterable<? extends Object>>>> entry) {
         Map<String, Object> fieldsAndThereValues = new LinkedHashMap<>();
         putNameFieldAndTagsFields(fieldsAndThereValues,entry);
         putPointsFields(fieldsAndThereValues, entry);
@@ -77,15 +77,21 @@ public class DataConverter {
      *
      */
     private void putNameFieldAndTagsFields(Map<String, Object> fieldsAndThereValues,
-                                           Map.Entry<List<Object>, List<List<Iterable<? extends Object>>>> entry) {
-        csvFilesConvertorConf.getGroupByList().forEach(i -> {
-            if (i.equals(csvFilesConvertorConf.getName())) {
-                fieldsAndThereValues.put(NAME, entry.getKey().get(csvFilesConvertorConf.getGroupByList().indexOf(i)));
-                Map<String, Object> tags = ((JsonObject) entry.getValue().get(0).get(1)).getMap();
-                tags.values().remove(null);
-                fieldsAndThereValues.put(TAGS, tags);
-            }
-        });
+                                           Map.Entry<LinkedList<Object>, List<List<Iterable<? extends Object>>>> entry) {
+        String name = nameToReturn(entry);
+        fieldsAndThereValues.put(NAME, name);
+        Map<String, Object> tags = ((JsonObject) entry.getValue().get(0).get(1)).getMap();
+        tags.values().remove(null);
+        fieldsAndThereValues.put(TAGS, tags);
+
+    }
+
+    private String nameToReturn(Map.Entry<LinkedList<Object>, List<List<Iterable<? extends Object>>>> entry) {
+
+        if (csvFilesConvertorConf.getCustomName() != null)
+            return csvFilesConvertorConf.getCustomName();
+        else
+            return entry.getKey().get(0).toString();
     }
 
     /**
@@ -96,7 +102,7 @@ public class DataConverter {
      *
      */
     private void putPointsFields(Map<String, Object> fieldsAndThereValues,
-                                           Map.Entry<List<Object>, List<List<Iterable<? extends Object>>>> entry) {
+                                           Map.Entry<LinkedList<Object>, List<List<Iterable<? extends Object>>>> entry) {
         List pointsList = new LinkedList();
         entry.getValue().forEach(i -> pointsList.add(i.get(0)));
         fieldsAndThereValues.put(POINTS, pointsList);
