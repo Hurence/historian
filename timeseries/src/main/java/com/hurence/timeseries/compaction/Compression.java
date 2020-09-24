@@ -102,7 +102,7 @@ public final class Compression {
         try {
             return new GZIPInputStream(new ByteArrayInputStream(compressed));
         } catch (IOException e) {
-            LOGGER.error("Exception occurred while decompressing gzip stream. Returning null.", e);
+            LOGGER.debug("Exception occurred while decompressing gzip stream. Returning null.");
         }
         return null;
     }

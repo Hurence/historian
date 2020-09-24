@@ -72,7 +72,7 @@ public class SaxConverter {
             return new String(saxString);
 
         } catch (net.seninp.jmotif.sax.SAXException e) {
-            logger.error("error while trying to calculate sax string for chunk", e);
+            logger.warn("error while trying to calculate sax string for chunk", e.getMessage());
         }
         return "sax_error";
     }

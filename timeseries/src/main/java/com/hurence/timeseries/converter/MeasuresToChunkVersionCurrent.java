@@ -11,6 +11,7 @@ import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.query.QueryEvaluator;
 import com.hurence.timeseries.query.TypeFunctions;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 
 import java.util.Collections;
 import java.util.List;
@@ -87,7 +88,9 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
         builder
                 .year(dateInfo.year)
                 .month(dateInfo.month)
-                .day(dateInfo.day);
+                .day(dateInfo.day)
+                .buildId();
+
         return builder.build();
     }
 
@@ -102,6 +105,21 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
         String metricString = String.format(METRIC_STRING, sax_alphabet_size, sax_string_length);
         String[] metrics = new String[]{"metric{" + metricString + "}"};
         configMetricsCalcul(metrics);
+
+
+        // set quality stats if needed
+        DescriptiveStatistics qualityStats =  new DescriptiveStatistics();
+        for( float quality : timeSeries.getQualitiesAsArray()){
+            qualityStats.addValue(quality);
+        }
+        if(qualityStats.getN()>0){
+            builder.qualityFirst(timeSeries.getQuality(0));
+            builder.qualitySum((float) qualityStats.getSum());
+            builder.qualityMin((float) qualityStats.getMin());
+            builder.qualityMax((float) qualityStats.getMax());
+            builder.qualityAvg((float) qualityStats.getMean());
+        }
+
 
         functionValueMap.resetValues();
         transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));

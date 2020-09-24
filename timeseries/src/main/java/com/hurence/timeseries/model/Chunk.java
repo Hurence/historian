@@ -51,11 +51,16 @@ public class Chunk implements Serializable {
     protected double std;
 
     // agg quality
-    @Builder.Default protected float qualityFirst = Float.NaN;
-    @Builder.Default protected float qualityMin = Float.NaN;
-    @Builder.Default protected float qualityMax = Float.NaN;
-    @Builder.Default protected float qualitySum = Float.NaN;
-    @Builder.Default protected float qualityAvg = Float.NaN;
+    @Builder.Default
+    protected float qualityFirst = Float.NaN;
+    @Builder.Default
+    protected float qualityMin = Float.NaN;
+    @Builder.Default
+    protected float qualityMax = Float.NaN;
+    @Builder.Default
+    protected float qualitySum = Float.NaN;
+    @Builder.Default
+    protected float qualityAvg = Float.NaN;
 
     // meta
     protected int year;
@@ -79,17 +84,20 @@ public class Chunk implements Serializable {
          * sets id to an idempotent hash
          */
         public ChunkBuilder buildId() {
-            String toHash = name +
-                    start +
-                    chunkOrigin;
+            StringBuilder newId = new StringBuilder();
+
+            newId.append(name);
+            tags.forEach((k, v) -> newId.append(k + v));
+
             try {
-                toHash += BinaryEncodingUtils.encode(valueBinaries);
+                newId.append(BinaryEncodingUtils.encode(valueBinaries));
+
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Error encoding binaries", e);
             }
 
             id = Hashing.sha256()
-                    .hashString(toHash, StandardCharsets.UTF_8)
+                    .hashString(newId.toString(), StandardCharsets.UTF_8)
                     .toString();
 
             return this;
