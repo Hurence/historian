@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.*;
 
 @Builder
 @Data
@@ -126,16 +127,7 @@ public class Chunk implements Serializable {
 
         private String buildMetricKey() {
 
-            StringBuilder idBuilder = new StringBuilder(name);
-            // If there are some tags, add them with their values in an alphabetically sorted way
-            // according to the tag key
-            if (tags.size() > 0) {
-                SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
-                sortedTags.forEach( (tagKey) -> {
-                    idBuilder.append(",").append(tagKey).append("=").append(tags.get(tagKey));
-                });
-            }
-            return idBuilder.toString();
+            return new MetricKey(name, tags).compute();
         }
 
         /**
@@ -150,6 +142,100 @@ public class Chunk implements Serializable {
             return this;
         }
 
+    }
+
+    /**
+     * Facility class to compute and parse metric key
+     */
+    public static class MetricKey {
+
+        private String name;
+        private Map<String, String> tags = new HashMap<String, String>();
+
+        /**
+         * Constructor when no tags
+         * @param name
+         */
+        private MetricKey (String name) {
+            Objects.requireNonNull(name);
+            this.name = name;
+        }
+
+        private MetricKey (String name, Map<String, String> tags) {
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(tags);
+            this.name = name;
+            this.tags = tags;
+        }
+
+        /**
+         * Computes the unique metric key in the form:
+         * <name>[,tagName=tageValue] with tags alphabetically sorted
+         * according to the tag name
+         * @return
+         */
+        public String compute() {
+            StringBuilder idBuilder = new StringBuilder(name);
+            // If there are some tags, add them with their values in an alphabetically sorted way
+            // according to the tag key
+            if (tags.size() > 0) {
+                SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
+                sortedTags.forEach( (tagKey) -> {
+                    idBuilder.append(",").append(tagKey).append("=").append(tags.get(tagKey));
+                });
+            }
+            return idBuilder.toString();
+        }
+
+        @Override
+        public String toString() {
+            return compute();
+        }
+
+        /**
+         * Parses a metric key in the form as defined by the compute method
+         * @param id
+         * @return
+         */
+        public static MetricKey parse(String id) {
+
+            // metricName,tag1=tag1Val,tag2=tag2val
+            String[] tokens = id.split(",");
+            if ( (tokens == null) || (tokens.length == 0)) {
+                throw new IllegalArgumentException("null or empty metric key");
+            }
+            String name = tokens[0];
+            if (tokens.length == 1) {
+                // No tags ( ["metricName"] )
+                return new MetricKey(name);
+            } else
+            {
+                // Some tags: parse them ( ["metricName", "tag1=tag1Val" , "tag2=tag2val"] )
+                Map<String, String> tags = new HashMap<String, String>();
+                for (int i=1 ; i < tokens.length ; i++) {
+                    // "tag1=tag1Val"
+                    String tagAndValues = tokens[i];
+                    String[] tagAndValue = tagAndValues.split("=");
+                    if ( (tagAndValue == null) || (tagAndValue.length != 2) ) {
+                        throw new IllegalArgumentException("tag component has wrong format: " + tagAndValue);
+                    }
+                    tags.put(tagAndValue[0], tagAndValue[1]);
+                }
+                return new MetricKey(name, tags);
+            }
+        }
+
+        public Set<String> getTagKeys() {
+            return tags.keySet();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Map<String, String> getTags() {
+            return tags;
+        }
     }
 
     public String getValueAsString() {
