@@ -177,7 +177,7 @@ public class ImportRequestParser {
 
             JsonObject newTimeserie = getTimeserieWithoutPoints(timeserie);
 
-            parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport, newTimeserie);
+            numberOfFailedPointsForThisName += parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport, newTimeserie);
 
             calculateNumberOfFailedPoints(fileReport, csvFilesConvertorConf, timeserie, numberOfFailedPointsForThisName);
 
@@ -216,12 +216,11 @@ public class ImportRequestParser {
 
     private static LinkedHashMap<String, String> getGroupedByFields (CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie) {
         LinkedHashMap<String, String> groupByMap = new LinkedHashMap<>();
-        csvFilesConvertorConf.getGroup_by().forEach(s -> {
-            if (s.startsWith(TAGS+".")) {
-                groupByMap.put(s.substring(5), timeserie.getJsonObject(TAGS).getString(s.substring(5)));
-            }else if (s.equals(NAME)) {
+        csvFilesConvertorConf.getGroupByListWithNAME().forEach(s -> {
+            if (s.equals(NAME))
                 groupByMap.put(s, timeserie.getString(s));
-            }
+            else
+                groupByMap.put(s, timeserie.getJsonObject(TAGS).getString(s));
         });
         return groupByMap;
     }
@@ -236,7 +235,7 @@ public class ImportRequestParser {
      *
      * @return void
      */
-    private static void parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport, JsonObject newTimeserie) {
+    private static int parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport, JsonObject newTimeserie) {
         JsonArray newPoints = new JsonArray();
         for (Object point : timeserie.getJsonArray(POINTS)) {
             JsonArray pointArray;
@@ -276,5 +275,6 @@ public class ImportRequestParser {
             newTimeserie.put(POINTS, newPoints);
             fileReport.correctPoints.add(newTimeserie);
         }
+        return numberOfFailedPointsForThisName;
     }
 }

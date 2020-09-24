@@ -7,12 +7,12 @@ import java.util.LinkedHashMap;
 public class AllFilesReport {
 
     public JsonArray correctPoints;
-    public JsonArray failedFiles;
+    public JsonArray filesThatFailedToBeImported;
     public LinkedHashMap<LinkedHashMap<String,String>, Integer> numberOfFailedPointsPerMetric;
 
     public AllFilesReport() {
         this.correctPoints = new JsonArray();
-        this.failedFiles = new JsonArray();
+        this.filesThatFailedToBeImported = new JsonArray();
         this.numberOfFailedPointsPerMetric = new LinkedHashMap<>();
     }
 }
