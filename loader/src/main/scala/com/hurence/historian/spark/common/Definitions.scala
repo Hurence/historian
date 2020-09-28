@@ -2,4 +2,62 @@ package com.hurence.historian.spark.common
 
 object Definitions {
   val CHUNK_COLUMN = "value"
+  val SOLR_COLUMN_QUALITY = "quality"
+  val SOLR_COLUMN_TIMESTAMP = "timestamp"
+  val SOLR_COLUMN_TAGS = "tags"
+
+  val SOLR_COLUMN_NAME = "name"
+  val SOLR_COLUMN_DAY = "day"
+  val SOLR_COLUMN_START = "start"
+  val SOLR_COLUMN_END = "end"
+  val SOLR_COLUMN_COUNT = "count"
+  val SOLR_COLUMN_AVG = "avg"
+  val SOLR_COLUMN_STD_DEV = "stdDev"
+  val SOLR_COLUMN_MIN = "min"
+  val SOLR_COLUMN_MAX = "max"
+  val SOLR_COLUMN_FIRST = "first"
+  val SOLR_COLUMN_LAST = "last"
+  val SOLR_COLUMN_SAX = "sax"
+  val SOLR_COLUMN_VALUE = "value"
+  val SOLR_COLUMN_ORIGIN = "origin"
+  val SOLR_COLUMN_QUALITY_MIN = "qualityMin"
+  val SOLR_COLUMN_QUALITY_MAX = "qualityMax"
+  val SOLR_COLUMN_QUALITY_FIRST = "qualityFirst"
+  val SOLR_COLUMN_QUALITY_SUM = "qualitySum"
+  val SOLR_COLUMN_QUALITY_AVG = "qualityAvg"
+  val SOLR_COLUMN_TREND = "trend"
+  val SOLR_COLUMN_OUTLIER = "outlier"
+  val SOLR_COLUMN_VERSION = "version"
+  val SOLR_COLUMN_YEAR = "year"
+  val SOLR_COLUMN_MONTH = "month"
+  val SOLR_COLUMN_SUM = "sum"
+  val SOLR_COLUMN_METRIC_KEY = "metricKey"
+
+
+  val SOLR_COLUMNS = List(
+    SOLR_COLUMN_DAY,
+    SOLR_COLUMN_START,
+    SOLR_COLUMN_END,
+    SOLR_COLUMN_YEAR,
+    SOLR_COLUMN_MONTH,
+    SOLR_COLUMN_COUNT,
+    SOLR_COLUMN_AVG,
+    SOLR_COLUMN_SUM,
+    SOLR_COLUMN_STD_DEV,
+    SOLR_COLUMN_MIN,
+    SOLR_COLUMN_MAX,
+    SOLR_COLUMN_FIRST,
+    SOLR_COLUMN_LAST,
+    SOLR_COLUMN_SAX,
+    SOLR_COLUMN_VALUE,
+    SOLR_COLUMN_ORIGIN,
+    SOLR_COLUMN_QUALITY_MIN,
+    SOLR_COLUMN_QUALITY_MAX,
+    SOLR_COLUMN_QUALITY_FIRST,
+    SOLR_COLUMN_QUALITY_SUM,
+    SOLR_COLUMN_QUALITY_AVG,
+    SOLR_COLUMN_TREND,
+    SOLR_COLUMN_OUTLIER,
+    SOLR_COLUMN_VERSION,
+    SOLR_COLUMN_METRIC_KEY)
 }

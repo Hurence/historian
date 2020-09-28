@@ -34,9 +34,6 @@ class LoaderTests extends SparkSessionTestWrapper {
   def testChunkyfier() = {
 
     val chunkyfier = new Chunkyfier()
-      .setValueCol("value")
-      .setTimestampCol("timestamp")
-      .setChunkValueCol("value")
       .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
@@ -156,54 +153,5 @@ class LoaderTests extends SparkSessionTestWrapper {
 
   }
 
-  // @Test
-  def testChunksV0Guess() = {
-
-
-    //simply recompute sax string's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-    val sample = it4MetricsChunksDS
-      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-      .withColumn("guess", guess($"values"))
-      //.as[ChunkRecordV0]
-      .collect()
-    logger.debug(sample(0).toString)
-    assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample(0)(16))
-  }
-
-  // @Test
-  def testChunksV0Sax_best_guess() = {
-
-
-    //simply recompute sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-
-    val sample1 = it4MetricsChunksDS
-      .where("name = 'ack' AND day = '2019-11-29'")
-      .withColumn("guess", guess($"values"))
-      .withColumn("sax_best_guess", sax_best_guess(lit(0.05), $"values"))
-      .withColumn("sax_best_paa_fixed", sax_best_guess_paa_fixed(lit(0.05), lit(50), $"values"))
-      // .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
-      //.agg(count($"tags.metric_id").as("count_metric"))
-      //.as[ChunkRecordV0]
-      .drop("chunk", "timestamps", "values", "tags")
-    // .collect()
-
-    //assertEquals("adebdcdcddbddddccfdfegfffghigiihhgggifghffcfgfffff", sample1(2)(16))
-
-  }
-
-  //@Test
-  def testChunksV0Sax_anomaly() = {
-
-
-    //simply check for anomalies in the sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-    val sample = it4MetricsChunksDS
-      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-      .withColumn("sax_best_guess", sax_best_guess(lit(0.01), lit(50), $"values"))
-      .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
-      //.as[ChunkRecordV0]
-      .collect()
-    logger.debug(sample(0).toString)
-    assertEquals("[15, 41]", sample(0)(17))
-  }
 
 }

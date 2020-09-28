@@ -68,17 +68,13 @@ object functions {
     */
   val unchunk = udf { (bytes: Array[Byte], start: Long, end: Long) =>
 
-    var decompressed: InputStream = null
-    try {
-      decompressed = Compression.decompressToStream(bytes)
-      ProtoBufTimeSeriesWithQualitySerializer.from(decompressed, start, end)
+
+    BinaryCompactionUtil.unCompressPoints(bytes, start, end)
         .stream()
         .collect(Collectors.toList())
         .asScala
         .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
-    } finally {
-      if (decompressed != null) decompressed.close()
-    }
+
     /*val bytes = BinaryEncodingUtils.decode(chunk)
 
     BinaryCompactionUtil.unCompressPoints(bytes, start, end)
@@ -88,6 +84,10 @@ object functions {
       .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
   */
   }
+
+
+  val toBase64 = udf { (binaryChunk: Array[Byte]) =>   BinaryEncodingUtils.encode(binaryChunk)  }
+  val fromBase64 = udf { (stringChunk: String) =>   BinaryEncodingUtils.decode(stringChunk)  }
 
   /**
     * Encoding function: returns the sax string of the values.

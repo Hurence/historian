@@ -33,6 +33,17 @@ import java.util.TimeZone;
 import java.util.TreeSet;
 import java.util.*;
 
+/**
+ * A Chunk is a compacted set of measures within a time interval.
+ * The value is stored as a protobuf encoded chunk of data. If you expand this value you'll end up with a set of
+ * Measures. The quality is stored within the value itself
+ * Some aggregations and meta-information is stored along this data structure in order to facilitate analytics
+ * without uncompacting the binary value : avg, min, max, stdDev, first, last ...
+ * the minimal parts of a Chunk are      : name, start, end, value
+ * and eventually                        : tags
+ *
+ * @see Measure
+ */
 @Builder
 @Data
 @AllArgsConstructor
@@ -41,7 +52,8 @@ public class Chunk implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chunk.class);
 
-    protected SchemaVersion version;
+    @Builder.Default
+    protected SchemaVersion version = SchemaVersion.VERSION_0;
     protected String name;
     protected byte[] value;
     protected long start;
@@ -76,7 +88,7 @@ public class Chunk implements Serializable {
     protected boolean trend;
     protected boolean outlier;
     protected String id;
-    protected String metric_key;
+    protected String metricKey;
 
     protected Map<String, String> tags;
 
@@ -84,9 +96,6 @@ public class Chunk implements Serializable {
     // Naming pattern <Class>Builder of this class will make lombok use this class
     // as the builder for Chunk. Ssaid differently, an instance of this ChunkBuilder
     // class will be returned by Chunk.build().
-    /**
-     * custom builder
-     */
     public static class ChunkBuilder {
 
         /**
@@ -105,13 +114,8 @@ public class Chunk implements Serializable {
             newId.append(name);
             tags.forEach((k, v) -> newId.append(k + v));
 
-            String toHash = name +
-                    start +
-                    origin;
             try {
                 newId.append(BinaryEncodingUtils.encode(value));
-
-                toHash += BinaryEncodingUtils.encode(value) ;
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Error encoding binaries", e);
             }
@@ -120,13 +124,12 @@ public class Chunk implements Serializable {
                     .hashString(newId.toString(), StandardCharsets.UTF_8)
                     .toString();
 
-            metric_key = buildMetricKey();
+            metricKey = buildMetricKey();
 
             return this;
         }
 
         private String buildMetricKey() {
-
             return new MetricKey(name, tags).compute();
         }
 
@@ -238,6 +241,11 @@ public class Chunk implements Serializable {
         }
     }
 
+    /**
+     * Convert byte[] value field as byte64 String.
+     *
+     * @return the base64 encoded String
+     */
     public String getValueAsString() {
         try {
             return BinaryEncodingUtils.encode(value);
@@ -248,6 +256,12 @@ public class Chunk implements Serializable {
     }
 
 
+    /**
+     * Convert byte[] value field into a chrono-ordered set of Measures
+     *
+     * @return the set of Measures
+     * @throws IOException
+     */
     public TreeSet<Measure> getValueAsMeasures() throws IOException {
         return BinaryCompactionUtil.unCompressPoints(value, start, end);
     }

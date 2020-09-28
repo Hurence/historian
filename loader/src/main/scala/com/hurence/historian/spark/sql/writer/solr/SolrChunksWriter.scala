@@ -31,19 +31,17 @@ class SolrChunksWriter extends Writer[Chunk] {
     else
       options.config
 
-
-    val tagNames = options.config("tag_names")
-      .split(",").toList
+    val tagNames = options.config("tag_names").split(",").toList
     val tagCols = tagNames.map(tag => col("tags")(tag).as(tag))
-    val mainCols = List( "day", "start", "end", "count", "avg", "std_dev", "min", "max", "first", "last", "sax", "value",
-      "origin", "quality_min", "quality_max", "quality_first", "quality_sum", "quality_avg")
-      .map(name => col(name).as(s"chunk_$name")) ::: List("name").map(col)
+    val mainCols = SOLR_COLUMNS.map(name => col(name).as(s"chunk_$name")) ::: List("name").map(col)
 
-
+//TODO harmoniser les id et les encodages + metric_key + normaliser le nommage
+    // support trend and outliers & version
+    // todo manage dateFormatbucket and date interval
     ds
-      .withColumn("value", col(CHUNK_COLUMN))
+    //  .withColumn("value", col(CHUNK_COLUMN))
       .select(mainCols ::: tagCols: _*)
-      .withColumn("id", sha256(col("chunk_value")))
+      .withColumn("chunk_value", toBase64(col("chunk_value")))
       .write
       .format("solr")
       .options(config)

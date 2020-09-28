@@ -23,7 +23,7 @@ public class SolrDocumentBuilder {
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_DAY, chunk.getDay());
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN, chunk.getOrigin());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.ID, chunk.getId());
-        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.METRIC_KEY, chunk.getMetric_key());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.METRIC_KEY, chunk.getMetricKey());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN, chunk.getQualityMin());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX, chunk.getQualityMax());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST, chunk.getQualityFirst());

@@ -51,48 +51,32 @@ final class Chunkyfier(override val uid: String)
 
   def this() = this(Identifiable.randomUID("chunkyfier"))
 
-  /** @group setParam */
-  final val valueCol: Param[String] = new Param[String](this, "valueCol", "column name for value")
 
-  /** @group setParam */
+  val valueCol: Param[String] = new Param[String](this, "valueCol", "column name for value")
   def setValueCol(value: String): this.type = set(valueCol, value)
-  setDefault(valueCol, "value")
+  setDefault(valueCol, SOLR_COLUMN_VALUE)
 
-  /** @group setParam */
-  final val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
-
-  /** @group setParam */
+  val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
   def setQualityCol(value: String): this.type = {
     withQuality = true
     set(qualityCol, value)
   }
-  setDefault(qualityCol, "quality")
+  setDefault(qualityCol, SOLR_COLUMN_QUALITY)
 
-  /** @group setParam */
-  final val origin: Param[String] = new Param[String](this, "origin", "which historian component wrote this chunk")
-
-  /** @group setParam */
+  val origin: Param[String] = new Param[String](this, "origin", "which historian component wrote this chunk")
   def setOrigin(value: String): this.type = set(origin, value)
   setDefault(origin, ChunkOrigin.INJECTOR.toString)
 
-  /** @group setParam */
-  final val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
-
-  /** @group setParam */
+  val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
   def setTimestampCol(value: String): this.type = set(timestampCol, value)
-  setDefault(timestampCol, "timestamp")
+  setDefault(timestampCol, SOLR_COLUMN_TIMESTAMP)
 
-  /** @group setParam */
-  final val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
-
-  /** @group setParam */
+  val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
   def doDropLists(value: Boolean): this.type = set(dropLists, value)
   setDefault(dropLists, true)
 
-  /** @group param */
-  final val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
 
-  /** @group setParam */
+  val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
   def setDateBucketFormat(value: String): this.type = set(dateBucketFormat, value)
   setDefault(dateBucketFormat, "yyyy-MM-dd")
 
@@ -102,117 +86,119 @@ final class Chunkyfier(override val uid: String)
     * @group param
     */
   final val groupByCols: StringArrayParam = new StringArrayParam(this, "groupByCols", "group by column names")
-
-  /** @group setParam */
   def setGroupByCols(value: Array[String]): this.type = set(groupByCols, value)
 
 
   val saxAlphabetSize: Param[Int] = new Param[Int](this, "saxAlphabetSize",
     "the SAX akphabet size.",
     ParamValidators.inRange(0, 20))
-
-  /** @group setParam */
   def setSaxAlphabetSize(value: Int): this.type = set(saxAlphabetSize, value)
   setDefault(saxAlphabetSize, 5)
 
   val saxStringLength: Param[Int] = new Param[Int](this, "saxStringLength",
     "the SAX string length",
     ParamValidators.inRange(0, 10000))
-
-  /** @group setParam */
   def setSaxStringLength(value: Int): this.type = set(saxStringLength, value)
   setDefault(saxStringLength, 20)
 
   val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
     "the chunk max measures count",
     ParamValidators.inRange(0, 100000))
-
-  /** @group setParam */
   def setChunkMaxSize(value: Int): this.type = set(chunkMaxSize, value)
   setDefault(chunkMaxSize, 1440)
 
 
-  /** @group setParam */
   final val chunkValueCol: Param[String] = new Param[String](this, "chunkValueCol", "column name for chunk Value")
-
-  /** @group setParam */
   def setChunkValueCol(value: String): this.type = set(chunkValueCol, value)
-  setDefault(chunkValueCol, "value")
+  setDefault(chunkValueCol, SOLR_COLUMN_VALUE)
+
+  final val tagsCol: Param[String] = new Param[String](this, "tagsCol", "column name for tags")
+  def setTagsCol(value: String): this.type = set(tagsCol, value)
+  setDefault(tagsCol, SOLR_COLUMN_TAGS)
+
+
+  val COLUMN_VALUES = "values"
+  val COLUMN_TIMESTAMPS = "timestamps"
 
   def transform(df: Dataset[_]): DataFrame = {
     implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
 
-    val groupingCols = col("day") :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
+    val groupingCols = col(SOLR_COLUMN_DAY) :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
     val w = Window.partitionBy(groupingCols: _*)
       .orderBy(col($(timestampCol)))
 
     var baseDf = df
-    // If no quality column has in the input df, create one default with 0 as value
+    // If no quality column has in the input df, create one default with NaN as value
     if (!withQuality) {
-      baseDf = baseDf.withColumn("quality", lit(0f))
+      baseDf = baseDf.withColumn(SOLR_COLUMN_QUALITY, lit(Float.NaN))
     }
 
     val groupedDF = baseDf
-      .withColumn("day", toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
-      .withColumn("values", collect_list(col($(valueCol))).over(w))
-      .withColumn("timestamps", collect_list(col($(timestampCol))).over(w))
+      .withColumn(SOLR_COLUMN_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
+      .withColumn(COLUMN_VALUES, collect_list(col($(valueCol))).over(w))
+      .withColumn(COLUMN_TIMESTAMPS, collect_list(col($(timestampCol))).over(w))
       .groupBy(groupingCols: _*)
+      // compute all the stats and aggregtions here
       .agg(
-        last(col("values")).as("values"),
-        last(col("timestamps")).as("timestamps"),
-        first(col("tags")).as("tags"),
-        min(col($(timestampCol))).as("start"),
-        max(col($(timestampCol))).as("end"),
-        count(col($(valueCol))).as("count"),
-        min(col($(valueCol))).as("min"),
-        max(col($(valueCol))).as("max"),
-        first(col($(valueCol))).as("first"),
-        last(col($(valueCol))).as("last"),
-        stddev(col($(valueCol))).as("std_dev"),
-        avg(col($(valueCol))).as("avg"),
-        min(col($(qualityCol))).as("quality_min"),
-        max(col($(qualityCol))).as("quality_max"),
-        first(col($(qualityCol))).as("quality_first"),
-        sum(col($(qualityCol))).as("quality_sum"),
-        avg(col($(qualityCol))).as("quality_avg"))
+        last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
+        last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
+        first(col($(tagsCol))).as(SOLR_COLUMN_TAGS),
+        min(col($(timestampCol))).as(SOLR_COLUMN_START),
+        max(col($(timestampCol))).as(SOLR_COLUMN_END),
+        count(col($(valueCol))).as(SOLR_COLUMN_COUNT),
+        sum(col($(valueCol))).as(SOLR_COLUMN_SUM),
+        min(col($(valueCol))).as(SOLR_COLUMN_MIN),
+        max(col($(valueCol))).as(SOLR_COLUMN_MAX),
+        first(col($(valueCol))).as(SOLR_COLUMN_FIRST),
+        last(col($(valueCol))).as(SOLR_COLUMN_LAST),
+        stddev(col($(valueCol))).as(SOLR_COLUMN_STD_DEV),
+        avg(col($(valueCol))).as(SOLR_COLUMN_AVG),
+        min(col($(qualityCol))).as(SOLR_COLUMN_QUALITY_MIN),
+        max(col($(qualityCol))).as(SOLR_COLUMN_QUALITY_MAX),
+        first(col($(qualityCol))).as(SOLR_COLUMN_QUALITY_FIRST),
+        sum(col($(qualityCol))).as(SOLR_COLUMN_QUALITY_SUM),
+        avg(col($(qualityCol))).as(SOLR_COLUMN_QUALITY_AVG))
 
 
     groupedDF
+      // compute chunk bytes from values & timestamps lists
       .withColumn($(chunkValueCol), chunk(
-        groupedDF.col("name"),
-        groupedDF.col("start"),
-        groupedDF.col("end"),
-        groupedDF.col("timestamps"),
-        groupedDF.col("values")))
-      .withColumn("sax", sax(
+        groupedDF.col(SOLR_COLUMN_NAME),
+        groupedDF.col(SOLR_COLUMN_START),
+        groupedDF.col(SOLR_COLUMN_END),
+        groupedDF.col(COLUMN_TIMESTAMPS),
+        groupedDF.col(COLUMN_VALUES)))
+      // compute SAX string for chunk
+      .withColumn(SOLR_COLUMN_SAX, sax(
         lit($(saxAlphabetSize)),
         lit(0.01),
         lit($(saxStringLength)),
-        groupedDF.col("values")))
-
-      .drop("values", "timestamps")
+        groupedDF.col(COLUMN_VALUES)))
+      // drop temporary values & timestamps columns
+      .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS)
       .map(r => {
 
         Chunk.builder()
-          .name(r.getAs[String]("name"))
-          .start(r.getAs[Long]("start"))
-          .end(r.getAs[Long]("end"))
-          .count(r.getAs[Long]("count"))
-          .avg(r.getAs[Double]("avg"))
-          .stdDev(r.getAs[Double]("std_dev"))
-          .min(r.getAs[Double]("min"))
-          .max(r.getAs[Double]("max"))
+          .name(r.getAs[String](SOLR_COLUMN_NAME))
           .origin($(origin))
-          .first(r.getAs[Double]("first"))
-          .last(r.getAs[Double]("last"))
-          .sax(r.getAs[String]("sax"))
+          .start(r.getAs[Long](SOLR_COLUMN_START))
+          .end(r.getAs[Long](SOLR_COLUMN_END))
+          .count(r.getAs[Long](SOLR_COLUMN_COUNT))
+          .avg(r.getAs[Double](SOLR_COLUMN_AVG))
+          .stdDev(r.getAs[Double](SOLR_COLUMN_STD_DEV))
+          .min(r.getAs[Double](SOLR_COLUMN_MIN))
+          .max(r.getAs[Double](SOLR_COLUMN_MAX))
+          .sum(r.getAs[Double](SOLR_COLUMN_SUM))
+          .first(r.getAs[Double](SOLR_COLUMN_FIRST))
+          .last(r.getAs[Double](SOLR_COLUMN_LAST))
+          .sax(r.getAs[String](SOLR_COLUMN_SAX))
           .value(r.getAs[Array[Byte]]($(chunkValueCol)))
-          .tags(r.getAs[Map[String, String]]("tags").asJava)
-          .qualityMin(r.getAs[Float]("quality_min"))
-          .qualityMax(r.getAs[Float]("quality_max"))
-          .qualityFirst(r.getAs[Float]("quality_first"))
-          .qualitySum(r.getAs[Double]("quality_sum").toFloat)
-          .qualityAvg(r.getAs[Double]("quality_avg").toFloat)
+          .tags(r.getAs[Map[String, String]](SOLR_COLUMN_TAGS).asJava)
+          .qualityMin(r.getAs[Float](SOLR_COLUMN_QUALITY_MIN))
+          .qualityMax(r.getAs[Float](SOLR_COLUMN_QUALITY_MAX))
+          .qualityFirst(r.getAs[Float](SOLR_COLUMN_QUALITY_FIRST))
+          .qualitySum(r.getAs[Double](SOLR_COLUMN_QUALITY_SUM).toFloat)
+          .qualityAvg(r.getAs[Double](SOLR_COLUMN_QUALITY_AVG).toFloat)
           .buildId()
           .computeMetrics()
           .build()
@@ -224,13 +210,13 @@ final class Chunkyfier(override val uid: String)
 
   override def transformSchema(schema: StructType): StructType = {
     // Check that the input type is a string
-    val idx = schema.fieldIndex(CHUNK_COLUMN)
+    val idx = schema.fieldIndex(SOLR_COLUMN_VALUE)
     val field = schema.fields(idx)
     if (field.dataType != ArrayType) {
       throw new Exception(s"Input type ${field.dataType} did not match input type ArrayType")
     }
     // Add the return field
-    schema.add(StructField(CHUNK_COLUMN, StringType, true))
+    schema.add(StructField(SOLR_COLUMN_VALUE, StringType, true))
   }
 
   override def copy(extra: ParamMap): Chunkyfier = {
