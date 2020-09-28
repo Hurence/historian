@@ -2,6 +2,7 @@ package com.hurence.historian.spark.ml
 
 import com.hurence.historian.spark.common.Definitions._
 import com.hurence.historian.spark.sql.functions.{sax, unchunk}
+import com.hurence.timeseries.model.{Chunk, Measure}
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util._
@@ -9,121 +10,78 @@ import org.apache.spark.sql._
 import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev, _}
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
 
-
-/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements.  See the NOTICE file distributed with
- * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
- * (the "License"); you may not use this file except in compliance with
- * the License.  You may obtain a copy of the License at
- *
- *    http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+import scala.collection.JavaConverters._
 
 
 /**
-  * `UnChunkyfier`
+  * UnChunkyfier is a transformer that takes a Dataframe with at least a name/value/start/end/tags columns
+  * and makes Measures from that chunk. all others columns should be dropped
   */
 final class UnChunkyfier(override val uid: String)
   extends Model[UnChunkyfier] with DefaultParamsWritable {
 
   def this() = this(Identifiable.randomUID("unchunkyfier"))
 
+  ////////////////////////////////////////////
+  // Parameters
+  ////////////////////////////////////////////
 
-  /** @group setParam */
-  final val valueCol: Param[String] = new Param[String](this, "valueCol", "column name for value")
-
-  /** @group setParam */
+  val valueCol: Param[String] = new Param[String](this, "valueCol", "input column name for value")
   def setValueCol(value: String): this.type = set(valueCol, value)
-  setDefault(valueCol, "value")
+  setDefault(valueCol, SOLR_COLUMN_VALUE)
 
+  val nameCol: Param[String] = new Param[String](this, "nameCol", "input column name for name")
+  def setNameCol(value: String): this.type = set(nameCol, value)
+  setDefault(nameCol, SOLR_COLUMN_NAME)
 
-  /** @group setParam */
-  final val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
+  val startCol: Param[String] = new Param[String](this, "startCol", "input column name for start")
+  def setStartCol(value: String): this.type = set(startCol, value)
+  setDefault(startCol, SOLR_COLUMN_START)
 
-  /** @group setParam */
-  def setQualityCol(value: String): this.type = set(qualityCol, value)
-  setDefault(qualityCol, "quality")
+  val endCol: Param[String] = new Param[String](this, "endCol", "input column name for end")
+  def setEndCol(value: String): this.type = set(endCol, value)
+  setDefault(endCol, SOLR_COLUMN_END)
 
-  /** @group setParam */
-  final val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
+  val tagsCol: Param[String] = new Param[String](this, "tagsCol", "input column name for tags")
+  def setTagsCol(value: String): this.type = set(tagsCol, value)
+  setDefault(tagsCol, SOLR_COLUMN_TAGS)
 
-  /** @group setParam */
-  def setTimestampCol(value: String): this.type = set(timestampCol, value)
-  setDefault(timestampCol, "timestamp")
-
-  /** @group setParam */
-  final val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
-
-  /** @group setParam */
-  def doDropLists(value: Boolean): this.type = set(dropLists, value)
-  setDefault(dropLists, true)
-
-  /** @group param */
-  final val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
-
-  /** @group setParam */
+  val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
   def setDateBucketFormat(value: String): this.type = set(dateBucketFormat, value)
   setDefault(dateBucketFormat, "yyyy-MM-dd")
 
-  /**
-    * Param for group by column names.
-    *
-    * @group param
-    */
-  final val groupByCols: StringArrayParam = new StringArrayParam(this, "groupByCols", "group by column names")
 
-  /** @group setParam */
-  def setGroupByCols(value: Array[String]): this.type = set(groupByCols, value)
-
-
-  val saxAlphabetSize: Param[Int] = new Param[Int](this, "saxAlphabetSize",
-    "the SAX akphabet size.",
-    ParamValidators.inRange(0, 20))
-
-  /** @group setParam */
-  def setSaxAlphabetSize(value: Int): this.type = set(saxAlphabetSize, value)
-  setDefault(saxAlphabetSize, 5)
-
-  val saxStringLength: Param[Int] = new Param[Int](this, "saxStringLength",
-    "the SAX string length",
-    ParamValidators.inRange(0, 10000))
-
-  /** @group setParam */
-  def setSaxStringLength(value: Int): this.type = set(saxStringLength, value)
-  setDefault(saxStringLength, 20)
-
-  val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
-    "the chunk max measures count",
-    ParamValidators.inRange(0, 100000))
-
-  /** @group setParam */
-  def setChunkMaxSize(value: Int): this.type = set(chunkMaxSize, value)
-  setDefault(chunkMaxSize, 1440)
-
+  ////////////////////////////////////////////
+  // Business
+  ////////////////////////////////////////////
 
   def transform(df: Dataset[_]): DataFrame = {
+    implicit val encoder = Encoders.bean(classOf[Measure])
 
-
-   df.withColumn("measures", unchunk(col($(valueCol)), col("start"), col("end")))
-      .withColumn("point", explode(col("measures")))
+    df.withColumn("measures",
+      unchunk(
+        col($(valueCol)),
+        col($(startCol)),
+        col($(endCol))))
+      .withColumn("measure", explode(col("measures")))
       .select(
-        col("name"),
-        col("point._2").as($(valueCol) ),
-        col("point._1").as($(timestampCol)),
-        col("point._3").as($(qualityCol)),
-        col("point._4").as("day"),
-        col("tags"))
-      .drop( "sax", $(valueCol), "avg", "std_dev", "first", "last","min", "max", "count","measures", "start", "end", "point")
+        col($(nameCol)),
+        col("measure._2").as(SOLR_COLUMN_VALUE),
+        col("measure._1").as(SOLR_COLUMN_TIMESTAMP),
+        col("measure._3").as(SOLR_COLUMN_QUALITY),
+        col("measure._4").as(SOLR_COLUMN_DAY),
+        col($(tagsCol)))
+      .map(r => {
+        Measure.builder()
+          .name(r.getAs[String](SOLR_COLUMN_NAME))
+          .timestamp(r.getAs[Long](SOLR_COLUMN_TIMESTAMP))
+          .value(r.getAs[Double](SOLR_COLUMN_VALUE))
+          .tags(r.getAs[Map[String, String]](SOLR_COLUMN_TAGS).asJava)
+          .quality(r.getAs[Float](SOLR_COLUMN_QUALITY))
+          .compute()
+          .build()
+      }).toDF()
   }
-
 
   override def transformSchema(schema: StructType): StructType = {
     // Check that the input type is a string
