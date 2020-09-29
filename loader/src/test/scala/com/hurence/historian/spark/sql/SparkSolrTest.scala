@@ -43,9 +43,6 @@ class SparkSolrTest extends SparkSolrTests {
 
       // 2. make chunks from measures
       val chunkyfier = new Chunkyfier()
-        .setValueCol("value")
-        .setTimestampCol("timestamp")
-        .setChunkValueCol("chunk")
         .setGroupByCols(Array("name", "tags.metric_id"))
         .setDateBucketFormat("yyyy-MM-dd")
         .setSaxAlphabetSize(7)

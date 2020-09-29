@@ -1,10 +1,10 @@
 package com.hurence.historian.spark.sql.reader.parquet
 
-import com.hurence.historian.spark.common.Definitions._
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
-import com.hurence.timeseries.model.{Chunk}
+import com.hurence.timeseries.model.Chunk
+import com.hurence.timeseries.model.Definitions._
 import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 
 import scala.collection.JavaConverters._
@@ -39,7 +39,7 @@ class ParquetChunksReader extends Reader[Chunk] {
           .qualityFirst(r.getAs[Float]("quality_first"))
           .qualitySum(r.getAs[Float]("quality_sum"))
           .qualityAvg(r.getAs[Float]("quality_avg"))
-          .value(BinaryEncodingUtils.decode(r.getAs[String](CHUNK_COLUMN)))
+          .value(BinaryEncodingUtils.decode(r.getAs[String](SOLR_COLUMN_VALUE)))
           //TODO set as byte[] .value(r.getAs[Array[Byte]]($(chunkCol)))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
           .buildId()
