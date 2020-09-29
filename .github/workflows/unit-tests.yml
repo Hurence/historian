@@ -1,4 +1,4 @@
-name: Java CI
+name: Build and run unit tests 
 
 on: [push]
 
