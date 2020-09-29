@@ -26,7 +26,7 @@
       "chunk_first": 1.2,
       "chunk_last": 2.0,
       "chunk_sum": 3.2,
-      "chunk_stddev": 0.5656854249492381
+      "chunk_std_dev": 0.5656854249492381
     },
     {
       "name": "metric_1",
@@ -48,7 +48,7 @@
       "chunk_first": 3.0,
       "chunk_last": 3.0,
       "chunk_sum": 3.0,
-      "chunk_stddev": "NaN"
+      "chunk_std_dev": "NaN"
     }
   ]
 }

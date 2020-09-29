@@ -5,7 +5,7 @@ import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.model.Chunk;
 
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
+import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -35,7 +35,7 @@ public class TimeSeriesExtracterImplTest {
     private long START_CHUNK_2 = 1477895624869L;
     private long MIDDLE_CHUNK_2 = 1477895624870L;
     private long END_CHUNK_2 = 1477895624871L;
-    private PointsToChunkVersionCurrent chunkGenerator = new PointsToChunkVersionCurrent("test");
+    private MeasuresToChunkVersionCurrent chunkGenerator = new MeasuresToChunkVersionCurrent("test");
 
     Chunk getChunk1() {
         return chunkGenerator.buildChunk("fake", new TreeSet<>(Arrays.asList(

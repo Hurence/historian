@@ -78,7 +78,6 @@ object ChunkyfierExample {
     val chunkyfier = new Chunkyfier()
       .setValueCol("value")
       .setTimestampCol("timestamp")
-      .setChunkCol("chunk")
       .setGroupByCols(Array( "name", "tags.metric_id" ))
       .setDateBucketFormat("yyyy-MM-dd")
       .setChunkMaxSize(1440)
@@ -93,7 +92,7 @@ object ChunkyfierExample {
 
     /*
 +----------+--------+---------+----------------+-------------+-------------+-----+---+---+-----+----+-------------------+------------------+--------------------+---------+
-|       day|    name|metric_id|            tags|        start|          end|count|min|max|first|last|             stddev|               avg|               chunk|      sax|
+|       day|    name|metric_id|            tags|        start|          end|count|min|max|first|last|             std_dev|               avg|               chunk|      sax|
 +----------+--------+---------+----------------+-------------+-------------+-----+---+---+-----+----+-------------------+------------------+--------------------+---------+
 |2020-04-28|metric_a|        2|[metric_id -> 2]|1588088793377|1588091793377|    4|2.1|2.4|  2.1| 2.4|0.12909944487358033|              2.25|H4sIAAAAAAAAAOPi1...|     abcd|
 |2020-04-28|metric_b|        3|[metric_id -> 3]|1588088793377|1588089393377|    2|3.1|3.2|  3.1| 3.2|0.07071067811865482|3.1500000000000004|H4sIAAAAAAAAAOPi1...|sax_error|
@@ -105,7 +104,6 @@ object ChunkyfierExample {
 
 
     val unchunkyfier = new UnChunkyfier()
-      .setChunkCol("chunk")
     unchunkyfier.transform(bucketedData).show()
 
     /*

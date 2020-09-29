@@ -1,12 +1,13 @@
 package com.hurence.historian.spark.sql.reader.csv
 
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.functions.toTimestampUTC
+import com.hurence.historian.spark.sql.functions.{reorderColumns, toTimestampUTC}
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions.{lit, _}
 import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 import org.slf4j.LoggerFactory
+
 import scala.collection.JavaConverters._
 
 class GenericMeasuresReaderV0 extends Reader[Measure] {
@@ -83,7 +84,7 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
     }
 
 
-    dfPlusTime
+   val df2 = dfPlusTime
       .withColumn("year", year(from_unixtime($"timestamp" / 1000L)))
       .withColumn("month", month(from_unixtime($"timestamp" / 1000L)))
       .withColumn("hour", hour(from_unixtime($"timestamp" / 1000L)))
@@ -99,14 +100,17 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
           .value(r.getAs[Double]("value"))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
 
-        if (!hasQuality)
+        if (hasQuality)
           builder.quality(r.getAs[Float]("quality"))
 
         builder.compute().build()
 
       })
-      .as[Measure]
 
+
+
+    reorderColumns(df2.toDF(),Seq("name","value","timestamp", "quality", "day", "tags"))
+      .as[Measure]
   }
 
 }

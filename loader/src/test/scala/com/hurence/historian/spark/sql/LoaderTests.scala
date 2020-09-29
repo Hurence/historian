@@ -23,63 +23,17 @@ class LoaderTests extends SparkSessionTestWrapper {
 
 
   @BeforeAll
-  def init() : Unit= {
+  def init(): Unit = {
     // to lazy load spark if needed
     spark.version
   }
 
 
-  @Test
-  def testMeasureV0() = {
-    implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
-
-    val sample = it4MetricsDS.groupBy($"name", $"tags.metric_id", $"day")
-      .agg(
-        collect_list($"value").as("values"),
-        collect_list($"timestamp").as("timestamps"),
-        count($"value").as("count"),
-        avg($"value").as("avg"),
-        min($"value").as("min"),
-        max($"value").as("max"),
-        first($"value").as("first"),
-        last($"value").as("last"),
-        stddev($"value").as("stddev"),
-        first($"timestamp").as("start"),
-        last($"timestamp").as("end"),
-        first($"tags").as("tags"))
-      .withColumn("chunk", chunk($"name", $"start", $"end", $"timestamps", $"values"))
-      .withColumn("sax", sax(lit(7), lit(0.01), lit(50), $"values"))
-      .select($"name", $"day", $"start", $"end", $"chunk", $"timestamps", $"values", $"count", $"avg", $"stddev", $"min", $"max", $"first", $"last", $"sax", $"tags")
-      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-      //.as[Chunk]
-      .collect()
-
-
-    logger.debug(sample(0).toString);
-  /*  assertEquals(1574982082000L, sample(0).getStart)
-    assertEquals(1575068166000L, sample(0).getEnd)
-    assertEquals("ack", sample(0).getName)
-    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", sample(0).getTag("metric_id"))
-    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", sample(0).getSax)
-    assertEquals("H4sIAAAAAAAAAFWWbUgUURSGdRVMSVKT8oeRQZCW0opCilZbWFA/+qAgoYI+NIwg+hEhBCVlpQa5pe3s7Mzk9gEJCUkUKWWYFhlUSBhUiJQsEWVUpBUk1c4sc569A8LZ43vf+77nnvuRllqwz/72aL609Lx317MKQnr0Kw740lJj4fugHT5/Fv2SnbDE+TZLOBiWsEO3wwT7GwX7g2x+QMgaQpLtCgj2F7ONaBLuckJH6ECbYP8FhKEBwAey15g4LyCAMQD+oIQ1zDaN9M8Buyy/O7JiIF/0P+kZdpVidmEqhf+nJrVbgLFlmoQaRZjQBVsOmRfdPlVAmSrgz3kB9gRZMbS8pC6LDQE0Y9uLrJuaZCMsf5/mCnBANzRXQKzYlOo4w8MYTMbKbRSu02XYVcIKlsAL9iJa5gXFzTgWvlHDV2hI0IWsi57KIOtDehtFuAq2iXUsJlyFyIVgc9GwHGX3kb4bQxYL3XlRDK1nWB7YKb8vzeMtdEEHGZpL3U6qS7Rdd5co1oNY9rMYEQQXAejX6eIOwc4AkI20ywg+TNn7QwK4o7uynKHhkCvLAdajJYPO/MKhsMOU7BpTBDQayn7INxTSOoYPmTBRqjam6gOQY7mkjvVzptLjiwH2MPyNJZoOIW+rxaFmKva7TUXpQoBhg56E6ZEpSzHHRD+ASYNjDDI/gGG1VNWWK8D5b/4lId1riauncUWh/kUImA0giO4qVr2cYQ+plhVXIhgihlL3Y6ZyuG1kTDsGJ8lGKNFPwrdxC2NIdvUlyZZanCIYWwp2jPAEDTUcEoYhZhuzhGFRNJvkDSfKpQVqnCmvYL+K2f9Qywnpm9iOUDs8G9LTVKIQ0k1kK+FvJes1uJMI54OdpSvHyRa1cUcpzouQhBtoxhrCTjbeElNpxsOqq0bsF8J/ISTD5wLIxqsXAVfotVMMq4BsbVyJAJzF9jYOpGHq8pUT0WPY63sr0Z0nE6OvkVdKGGH2tzTPBKJv0V11DBvFymOyfvZVOQwP4J1Gfzf6OxDZTgUKOdHLEDnuGOxMdH+3sKunQkpPPDGUnbqSy6QXS93cCk3IrEb83+iwFJvU25MYf+BugKMM+UGW6ih91cotNMKFnoKgZp5gKfjZSfZMO/uB220/vHHvgFp8NAGYyWyZQfu+rnQdDvD8+sSM93jGrGDGWtbkI++REvrvCC+PmrhnDNlOwjpqP91mS8pxCZM0++f26F9CdLGfyGlVisvv7XYftHjiN2x9ULk9uhwWj0t617G91P15gDI1YGVQt2m/y/7p1ZR3ynLdl5HwHzsmJESPDAAA", sample(0).getValueAsString)
-
-    assertEquals(288, sample(0).getCount)
-    assertEquals(1651.561111111111, sample(0).getAvg)
-    assertEquals(178.49958904923878, sample(0).getStd)
-    assertEquals(68.8, sample(0).getMin)
-    assertEquals(2145.6, sample(0).getMax)
-    assertEquals(1496.6, sample(0).getFirst)
-    assertEquals(1615.4, sample(0).getLast)*/
-  }
 
   @Test
   def testChunkyfier() = {
 
-
     val chunkyfier = new Chunkyfier()
-      .setValueCol("value")
-      .setTimestampCol("timestamp")
-      .setChunkCol("chunk")
       .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
@@ -95,53 +49,26 @@ class LoaderTests extends SparkSessionTestWrapper {
       .collect()
 
 
-    logger.debug(sample(0).toString)
-    assertEquals(1574982082000L, sample(0).getStart)
-    assertEquals(1575068166000L, sample(0).getEnd)
-    assertEquals("ack", sample(0).getName)
-    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", sample(0).getTag("metric_id"))
-    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", sample(0).getSax)
-    assertEquals("H4sIAAAAAAAAAGWWe0gUURTGdzfBWpLWkkow2iBIbMONFlJ6TWFB/dGDgoIKemgYQfRHRBCU9DSD2lJ3Z3Zm2i2DFhISKVJ60BMNKiQKKkRKlogyKnqCUu2M7fkNzYBw9vjd737fuec+/KOKt1nflrjiLyhOaNlvZkwJv7441j9q+OcbVcmGjx9lvzw7nGV/qyS8l5IwqVmhx/p6wX4lWxoTsrqEZFtjgv3JbM/iEm6yQ1vo3UbB/okJQx2At2QvMHEwJoA+AFFVwmpmG0L6h5hVFhugqEr4V3KsvyCQLc4/uzBF4P9hM9m1m4Kx2XEJ4xRhQBNsJWRhdCsIqHALGDwtwA5VmN6g5Sl1KdMFcBzbYWRdjks2ExPsTbsxbMCluFPAcLEp1QGGpzCYh5UrKFyqybAWwjksQRhsM1omqeKmHwufqeFzNHg0IWulpwJkFaQ3UoQWsPWs40zChYicCrYEDfNQdgPpmzFkstDpZjG0jGFBsN+jit8XDOVAOxlaQt0OsUTrNecSDfcglqMsRgbBMwDc1ujipGBHAihC2jkE76bstxMCuKpZsuxhqYRTlg3ci5YAnfmRQ2GDIdnFhgg4rMt+KNVdpLUM7zZgolSNTHUTwETTIrVtnzRcPV4GsIPhL03RtAt5a0wONUPstxkupVMBpnR6Eqb7hizFeAP9AL7pHGOQRQH0UKp1plOA/d/Ss0K61RRXDx1Fof4zEDAOgIruKla9kmF3qJbpKBEMGV3qvt9wHW4rGNOEwW9kM5ToB+Erx8Lokl10VrIRk1MEY+Vg+wgP0lA9CWHoZrY+UximZbMjgimvXFqg+pnyPParmH2QWg4YchN/dHd4EaRHqUQI0pVk58J/imxY504inAx2jCbHyWp34/ZSnCcJCZfTjNWEaTbedEOacbfb1WHsh+A/k5DhEwAU4TWMgPP02hGGzYFsiaNEAE5gey0HUg91+cSJ6NOt9W335uYpxOgL5EUIM8z+iuYZQHQ73VXLsF6sPCAbZV9VwnAL3iH0t6E/icgmKhDiRK9AZL9tMO3N/W5gV39PSE906a6duoDLpBNLbdwK9chch/jf2WH5wQ7v/wfucjgqkK+yVPvoq1PcQs+40PMRdJwnWD5+NpI91sR+4HbbDq/jHVCDj3oAo5mtULXu67k5h3d5fr1nxus8Y+YzYw1r8o73yCz6bw8vj2rHM4ZsmrCW2g81WpIm5ghHxK2f67N/nuxid8lpFcHllyarDxp8uQ27V3XdHq02iy9Hes22XZ77uYMy1WHlnmbRfpH902k9W3inzNOUgOcvC7L81I8MAAA=", sample(0).getValueAsString)
-    assertEquals(288, sample(0).getCount)
-    assertEquals(1651.561111111111, sample(0).getAvg)
-    assertEquals(178.49958904923878, sample(0).getStd)
-    assertEquals(68.8, sample(0).getMin)
-    assertEquals(2145.6, sample(0).getMax)
-    assertEquals(1496.6, sample(0).getFirst)
-    assertEquals(1615.4, sample(0).getLast)
+    checkChunk(sample(0))
   }
 
-  @Test
-  def testChunksV0() = {
+  def checkChunk(chunktoCheck: Chunk) = {
+    assertEquals(1575068466000L, chunktoCheck.getStart)
+    assertEquals(1575154561000L, chunktoCheck.getEnd)
+    assertEquals("ack", chunktoCheck.getName)
+    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", chunktoCheck.getTag("metric_id"))
+    assertEquals("baaabbcbbbbbbcdcedffefgfffffgffdedeefffefebdbacbbb", chunktoCheck.getSax)
+    assertEquals("H4sIAAAAAAAAAGWWe0yNcRjHK1GdFWlsRbPmMtpcSnIZy8lGG5vhD0LDUGzmMncrl2SMv1p1znkvJ2KmDLWpzNjEhqKSyz+kTTZbNresRrSZ933zPp8fzl/PeX7f5/t9Lr/L64lKMHTrdzjg9cQkhNi/zbo3pbMyzvNnpdDvtcw0+/das0GOmRXwpvSdi/PExFrQhNYW61emed2Ye0pMmW3m2b8wB+BozNYE0BgQb4dfsBlgeyGrDAjgiV/UMhEeHBDsdxgSHa+T5GQYSjQxVyK8PyBk9eUSdldRUyTwJiMRjnC25Q1LinK5N5JoOlXXQdgAYB9mDM3apIs5jPSH6GL+hPeYLmY3EmudGTq8p/+aoRN+BNKZARn2BwvYVPMXcAzAO7T0F6UX0MfBYNdR1Wpy2kKB+ZANBdBPo9NhqAdQBMMVJhFNt/rxaiTpdeYzwiX8xMo8zV6Z5K4k+CStHbow7aVF4/T/zkOIwVyZShOJBEl6LqRNuhR4nmY8p5RSZ4IONtZUVZ3V9fZqrDWtAYofhlddvY1OLzllI3nZzz5GcglhBYaYLYaE5WIOB9DLrFoh2+IT4SoAr0wxn5mCTYM3KsgIDHs461yWYkMIkwC1G2LuVqpmKM2YjTTgEd5Scm6A7CRk75llB4mm0oD77PwVMDxXhDFTK8TsAnuG2jqDIjEH7wyaVYO3wBSGRUEBzCd1zbRbuMr9G49iO1W3wV3KDXkd7hsM7S130C2GUA3vT10unnJD3bYD9ycxl/yyvw+a/52qE+SURUN8eKcF7cryXbbHDCadZEpIfAKhS4LSn6sM8WKQwwvZPQA5pgAq8B5jtF305jPdrbUAg5KOh7qxQWK9ZBpGt6fqdkBFqEtgsmu3k0IZYkuVW8XPGSGxA5hfFDLneG118RuU3QjoMIW8wTuFS6UX8REAlkO2GO8DsN2k/1DZriRay7N2UzkGup3zIamcXr4k0R7wH5Fpp3fjkdnDqD/BcIr01xB2n5Ti2U35eHchfJGqC1GbZUq+dcr7gkS3Jt5dAN7BG45ZB+9RqsgE0ERBRXgTUfuoFK9cKhR/FjPDMiOSqkL/fYhGk/FTHroarswW3oFIAMPIbSfeibzMy2hrDp0oZp5jAfTxgE6n7wvh3eZsm0TrWH2VY9WsBPkE+QJvtU+orvGApSIQBdajTJ7PlRf0phPsWOa2Hu8Csm3jMyiXNqWRQyHvzQUkUmheh/IpidmDWp5m3zHfQ62ujHR93zjUxWglO19I0aMiIkNGWh+bDb8B4n7pV0oMAAA=", chunktoCheck.getValueAsString)
 
-    if (logger.isDebugEnabled) {
-      it4MetricsChunksDS.show()
-    }
-
-
-    val sample = it4MetricsChunksDS
-      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-      //.withColumn("sax2", sax(lit(5),lit( 0.05), lit(50), $"values"))
-      .collect()
-
-    logger.debug(sample(0).toString)
-    assertEquals(1574982082000L, sample(0).getStart)
-    assertEquals(1575068166000L, sample(0).getEnd)
-    assertEquals("ack", sample(0).getName)
-    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", sample(0).getTag("metric_id"))
-    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", sample(0).getSax)
-    assertEquals("H4sIAAAAAAAAAFWWbUgUURSGdRVMSVKT8oeRQZCW0opCilZbWFA/+qAgoYI+NIwg+hEhBCVlpQa5pe3s7Mzk9gEJCUkUKWWYFhlUSBhUiJQsEWVUpBUk1c4sc569A8LZ43vf+77nnvuRllqwz/72aL609Lx317MKQnr0Kw740lJj4fugHT5/Fv2SnbDE+TZLOBiWsEO3wwT7GwX7g2x+QMgaQpLtCgj2F7ONaBLuckJH6ECbYP8FhKEBwAey15g4LyCAMQD+oIQ1zDaN9M8Buyy/O7JiIF/0P+kZdpVidmEqhf+nJrVbgLFlmoQaRZjQBVsOmRfdPlVAmSrgz3kB9gRZMbS8pC6LDQE0Y9uLrJuaZCMsf5/mCnBANzRXQKzYlOo4w8MYTMbKbRSu02XYVcIKlsAL9iJa5gXFzTgWvlHDV2hI0IWsi57KIOtDehtFuAq2iXUsJlyFyIVgc9GwHGX3kb4bQxYL3XlRDK1nWB7YKb8vzeMtdEEHGZpL3U6qS7Rdd5co1oNY9rMYEQQXAejX6eIOwc4AkI20ywg+TNn7QwK4o7uynKHhkCvLAdajJYPO/MKhsMOU7BpTBDQayn7INxTSOoYPmTBRqjam6gOQY7mkjvVzptLjiwH2MPyNJZoOIW+rxaFmKva7TUXpQoBhg56E6ZEpSzHHRD+ASYNjDDI/gGG1VNWWK8D5b/4lId1riauncUWh/kUImA0giO4qVr2cYQ+plhVXIhgihlL3Y6ZyuG1kTDsGJ8lGKNFPwrdxC2NIdvUlyZZanCIYWwp2jPAEDTUcEoYhZhuzhGFRNJvkDSfKpQVqnCmvYL+K2f9Qywnpm9iOUDs8G9LTVKIQ0k1kK+FvJes1uJMI54OdpSvHyRa1cUcpzouQhBtoxhrCTjbeElNpxsOqq0bsF8J/ISTD5wLIxqsXAVfotVMMq4BsbVyJAJzF9jYOpGHq8pUT0WPY63sr0Z0nE6OvkVdKGGH2tzTPBKJv0V11DBvFymOyfvZVOQwP4J1Gfzf6OxDZTgUKOdHLEDnuGOxMdH+3sKunQkpPPDGUnbqSy6QXS93cCk3IrEb83+iwFJvU25MYf+BugKMM+UGW6ih91cotNMKFnoKgZp5gKfjZSfZMO/uB220/vHHvgFp8NAGYyWyZQfu+rnQdDvD8+sSM93jGrGDGWtbkI++REvrvCC+PmrhnDNlOwjpqP91mS8pxCZM0++f26F9CdLGfyGlVisvv7XYftHjiN2x9ULk9uhwWj0t617G91P15gDI1YGVQt2m/y/7p1ZR3ynLdl5HwHzsmJESPDAAA", sample(0).getValueAsString)
-
-    assertEquals(288, sample(0).getCount)
-    assertEquals(1651.561111111111, sample(0).getAvg)
-    assertEquals(178.49958904923878, sample(0).getStd)
-    assertEquals(68.8, sample(0).getMin)
-    assertEquals(2145.6, sample(0).getMax)
-    assertEquals(1496.6, sample(0).getFirst)
-    assertEquals(1615.4, sample(0).getLast)
-
-
+    assertEquals(288, chunktoCheck.getCount)
+    assertEquals(1620.0979166666662, chunktoCheck.getAvg)
+    assertEquals(104.87785626299073, chunktoCheck.getStdDev)
+    assertEquals(1334.8, chunktoCheck.getMin)
+    assertEquals(2072.6, chunktoCheck.getMax)
+    assertEquals(1503.4, chunktoCheck.getFirst)
+    assertEquals(1551.6, chunktoCheck.getLast)
   }
+
 
 
   @Test
@@ -187,6 +114,8 @@ class LoaderTests extends SparkSessionTestWrapper {
     val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
 
     val ds = itDataV0Reader.read(options)
+
+    ds.show()
     if (logger.isDebugEnabled) {
       ds.show()
     }
@@ -224,53 +153,5 @@ class LoaderTests extends SparkSessionTestWrapper {
 
   }
 
- // @Test
-  def testChunksV0Guess() = {
-
-
-     //simply recompute sax string's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-    val sample = it4MetricsChunksDS
-      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-      .withColumn("guess", guess( $"values"))
-      //.as[ChunkRecordV0]
-      .collect()
-    logger.debug(sample(0).toString)
-    assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample(0)(16))
-  }
-
- // @Test
-  def testChunksV0Sax_best_guess() = {
-
-
-  //simply recompute sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-
-    val sample1 = it4MetricsChunksDS
-      .where("name = 'ack' AND day = '2019-11-29'")
-      .withColumn("guess", guess( $"values"))
-      .withColumn("sax_best_guess", sax_best_guess( lit(0.05),  $"values"))
-      .withColumn("sax_best_paa_fixed", sax_best_guess_paa_fixed( lit(0.05),lit(50),  $"values"))
-     // .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
-      //.agg(count($"tags.metric_id").as("count_metric"))
-      //.as[ChunkRecordV0]
-      .drop("chunk", "timestamps","values","tags")
-     // .collect()
-
-    //assertEquals("adebdcdcddbddddccfdfegfffghigiihhgggifghffcfgfffff", sample1(2)(16))
-
-  }
-  //@Test
-  def testChunksV0Sax_anomaly() = {
-
-
-             //simply check for anomalies in the sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-            val sample = it4MetricsChunksDS
-              .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-              .withColumn("sax_best_guess", sax_best_guess( lit(0.01),lit(50),  $"values"))
-              .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
-              //.as[ChunkRecordV0]
-              .collect()
-            logger.debug(sample(0).toString)
-            assertEquals("[15, 41]", sample(0)(17))
-  }
 
 }
