@@ -17,6 +17,8 @@ import com.hurence.historian.spark.sql.reader.solr.SolrChunksReader;
 import com.hurence.historian.spark.sql.writer.WriterFactory;
 import com.hurence.historian.spark.sql.writer.WriterType;
 import com.hurence.historian.spark.sql.writer.solr.SolrChunksWriter;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.core.ChunkOrigin;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
@@ -26,6 +28,7 @@ import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrDocumentList;
 import org.apache.solr.common.params.SolrParams;
 import org.apache.spark.sql.*;
@@ -43,10 +46,11 @@ import scala.collection.JavaConverters;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import static com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -70,9 +74,6 @@ public class CompactorIT {
 
     private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
-
-        // TODO: remove when integrated in create collection script
-        SolrITHelper.addFieldToChunkSchema(container, "metric_key");
 
         // Add fields for tags
         SolrITHelper.addFieldToChunkSchema(container, "dataCenter");
@@ -650,7 +651,12 @@ public class CompactorIT {
         printSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
 
         compactor.doCompact();
+
+        System.out.println("After recompaction: ");
+        printUnChunkedSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
         System.exit(1);
+
+        // TODO: test recompaction changing the max number of values per chunk
 
         // 1. load measures from parquet file
         String filePath = new File("../loader/src/test/resources/it-data-4metrics.parquet").getAbsolutePath();
@@ -733,6 +739,51 @@ public class CompactorIT {
 
         System.out.println("Solr contains " + solrDocumentList.size() +
                 " document(s):\n" + JSONUtil.toJSON(solrDocumentList));
+    }
+
+    private static void printUnChunkedSolrJsonDocs(SolrClient solrClient, String collection) {
+
+        SolrDocumentList solrDocumentList = getSolrDocs(solrClient, collection);
+
+        System.out.println("Solr contains " + solrDocumentList.size() +
+                " document(s):");
+
+        SimpleDateFormat sdf = Measure.createUtcDateFormatter("yyyy-MM-dd HH:mm:ss.SSS");
+        StringBuilder stringBuilder = new StringBuilder("\n{");
+
+        for (SolrDocument solrDocument : solrDocumentList) {
+            System.out.println("docsssssssssss:" + solrDocument);
+            for (String field : solrDocument.getFieldNames().stream().sorted().collect(Collectors.toList())) {
+                stringBuilder.append("\n  \"").append(field).append("\": ");
+                Object value = solrDocument.getFieldValue(field);
+                if (field.equals(CHUNK_VALUE)) {
+                    // Uncompress the chunk and display points in a human readable way
+                    byte[] compressedPoints = BinaryEncodingUtils.decode((String)value);
+                    long chunkStart = (Long)solrDocument.getFieldValue(CHUNK_START);
+                    long chunkEnd = (Long)solrDocument.getFieldValue(CHUNK_END);
+                    try {
+                        TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
+                        for (Measure measure : measures) {
+                            double measureValue = measure.getValue();
+                            float quality = measure.getQuality();
+                            String readableTimestamp = sdf.format(new Date(measure.getTimestamp()));
+                            stringBuilder.append("\n    t=").append(readableTimestamp)
+                                    .append(" v=").append(measureValue)
+                                    .append(" q=").append(quality);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        fail(e.getMessage());
+                    }
+                } else
+                {
+                    stringBuilder.append(value);
+                }
+            }
+            stringBuilder.append("\n}");
+        }
+
+        System.out.println(stringBuilder);
     }
 
     private static SolrDocumentList getSolrDocs(SolrClient solrClient, String collection) {
