@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.builder.*;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -17,8 +16,6 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
-import java.util.TimeZone;
-
 
 /**
  * A Measure is a value in time with some tags
@@ -116,7 +113,7 @@ public class Measure implements Serializable, Comparable<Measure> {
      * @param pattern
      * @return
      */
-    private static SimpleDateFormat createUtcDateFormatter(String pattern) {
+    public static SimpleDateFormat createUtcDateFormatter(String pattern) {
         SimpleDateFormat dateFormatter = new SimpleDateFormat(pattern);
         dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"));
         dateFormatter.setLenient(false);

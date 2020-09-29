@@ -85,10 +85,6 @@ object functions {
   */
   }
 
-
-  val toBase64 = udf { (binaryChunk: Array[Byte]) =>   BinaryEncodingUtils.encode(binaryChunk)  }
-  val fromBase64 = udf { (stringChunk: String) =>   BinaryEncodingUtils.decode(stringChunk)  }
-
   /**
     * Encoding function: returns the sax string of the values.
     */

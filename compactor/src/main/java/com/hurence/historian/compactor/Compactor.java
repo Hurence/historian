@@ -391,8 +391,9 @@ public class Compactor implements Runnable {
          */
 
 //        JavaRDD<String> chunksToRecompactIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId());
-        List<String> chunksToRecompactIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId()).collect();
+        List<String> chunksToDeletetIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId()).collect();
 //        List<String> chunksToRecompactIds = new ArrayList<String>();
+        System.out.println("Will have to delete ids: " + chunksToDeletetIds);
 
         /**
          * Unchunkyfy the read chunks
@@ -453,7 +454,7 @@ public class Compactor implements Runnable {
          */
 
         // TODO transactional way? be sure written is done before deleting.....
-        deleteDocuments(chunksToRecompactIds);
+        deleteDocuments(chunksToDeletetIds);
     }
 
     /**
