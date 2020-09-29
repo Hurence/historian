@@ -93,9 +93,6 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
     implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
 
     val chunkyfier = new Chunkyfier()
-      .setValueCol("value")
-      .setTimestampCol("timestamp")
-      .setChunkValueCol("value")
       .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
@@ -103,7 +100,6 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
       .setSaxStringLength(50)
 
     val unchunkyfier = new UnChunkyfier()
-      .setValueCol("value")
 
     // load measures data with parquet
     val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)

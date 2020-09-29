@@ -1,6 +1,5 @@
 package com.hurence.historian.spark.sql.writer.solr
 
-import com.hurence.historian.spark.common.Definitions._
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.writer.Writer
 import org.apache.spark.sql.{Column, Dataset, SparkSession}
@@ -8,6 +7,9 @@ import org.slf4j.LoggerFactory
 import org.apache.spark.sql.functions._
 import com.hurence.historian.spark.sql.functions._
 import com.hurence.timeseries.model.Chunk
+import com.hurence.timeseries.model.Definitions._
+
+import scala.collection.JavaConverters._
 
 /**
   * val options.config = Map(
@@ -25,23 +27,20 @@ class SolrChunksWriter extends Writer[Chunk] {
 
     logger.info(s"start saving new chunks to ${options.config("collection")}")
 
-
-    val config = if (options.config.get("flatten_multivalued").isEmpty)
+    val config = if (!options.config.contains("flatten_multivalued"))
       options.config + ("flatten_multivalued" -> "false")
     else
       options.config
 
-    val tagNames = options.config("tag_names").split(",").toList
-    val tagCols = tagNames.map(tag => col("tags")(tag).as(tag))
-    val mainCols = SOLR_COLUMNS.map(name => col(name).as(s"chunk_$name")) ::: List("name").map(col)
+    val tagCols = options.config("tag_names").split(",").toList
+      .map(tag => col("tags")(tag).as(tag))
+    val mainCols = FIELDS.asScala.toList
+      .map(name => col(name).as(getColumnFromField(name)))
 
-//TODO harmoniser les id et les encodages + metric_key + normaliser le nommage
-    // support trend and outliers & version
     // todo manage dateFormatbucket and date interval
     ds
-    //  .withColumn("value", col(CHUNK_COLUMN))
       .select(mainCols ::: tagCols: _*)
-      .withColumn("chunk_value", toBase64(col("chunk_value")))
+      .withColumn(SOLR_COLUMN_VALUE, toBase64(col(SOLR_COLUMN_VALUE)))
       .write
       .format("solr")
       .options(config)

@@ -1,8 +1,8 @@
 package com.hurence.historian.spark.ml
 
-import com.hurence.historian.spark.common.Definitions._
 import com.hurence.historian.spark.sql.functions.{sax, unchunk}
 import com.hurence.timeseries.model.{Chunk, Measure}
+import com.hurence.timeseries.model.Definitions._
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util._
@@ -28,23 +28,23 @@ final class UnChunkyfier(override val uid: String)
 
   val valueCol: Param[String] = new Param[String](this, "valueCol", "input column name for value")
   def setValueCol(value: String): this.type = set(valueCol, value)
-  setDefault(valueCol, SOLR_COLUMN_VALUE)
+  setDefault(valueCol, FIELD_VALUE)
 
   val nameCol: Param[String] = new Param[String](this, "nameCol", "input column name for name")
   def setNameCol(value: String): this.type = set(nameCol, value)
-  setDefault(nameCol, SOLR_COLUMN_NAME)
+  setDefault(nameCol, FIELD_NAME)
 
   val startCol: Param[String] = new Param[String](this, "startCol", "input column name for start")
   def setStartCol(value: String): this.type = set(startCol, value)
-  setDefault(startCol, SOLR_COLUMN_START)
+  setDefault(startCol, FIELD_START)
 
   val endCol: Param[String] = new Param[String](this, "endCol", "input column name for end")
   def setEndCol(value: String): this.type = set(endCol, value)
-  setDefault(endCol, SOLR_COLUMN_END)
+  setDefault(endCol, FIELD_END)
 
   val tagsCol: Param[String] = new Param[String](this, "tagsCol", "input column name for tags")
   def setTagsCol(value: String): this.type = set(tagsCol, value)
-  setDefault(tagsCol, SOLR_COLUMN_TAGS)
+  setDefault(tagsCol, FIELD_TAGS)
 
   val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
   def setDateBucketFormat(value: String): this.type = set(dateBucketFormat, value)
@@ -66,18 +66,18 @@ final class UnChunkyfier(override val uid: String)
       .withColumn("measure", explode(col("measures")))
       .select(
         col($(nameCol)),
-        col("measure._2").as(SOLR_COLUMN_VALUE),
-        col("measure._1").as(SOLR_COLUMN_TIMESTAMP),
-        col("measure._3").as(SOLR_COLUMN_QUALITY),
-        col("measure._4").as(SOLR_COLUMN_DAY),
+        col("measure._2").as(FIELD_VALUE),
+        col("measure._1").as(FIELD_TIMESTAMP),
+        col("measure._3").as(FIELD_QUALITY),
+        col("measure._4").as(FIELD_DAY),
         col($(tagsCol)))
       .map(r => {
         Measure.builder()
-          .name(r.getAs[String](SOLR_COLUMN_NAME))
-          .timestamp(r.getAs[Long](SOLR_COLUMN_TIMESTAMP))
-          .value(r.getAs[Double](SOLR_COLUMN_VALUE))
-          .tags(r.getAs[Map[String, String]](SOLR_COLUMN_TAGS).asJava)
-          .quality(r.getAs[Float](SOLR_COLUMN_QUALITY))
+          .name(r.getAs[String](FIELD_NAME))
+          .timestamp(r.getAs[Long](FIELD_TIMESTAMP))
+          .value(r.getAs[Double](FIELD_VALUE))
+          .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
+          .quality(r.getAs[Float](FIELD_QUALITY))
           .compute()
           .build()
       }).toDF()
