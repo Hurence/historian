@@ -4,10 +4,11 @@ package com.hurence.historian.compactor.config;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Configuration {
+public class Configuration implements Serializable {
 
     private String solrZkHost = null;
     private String solrCollection = null;

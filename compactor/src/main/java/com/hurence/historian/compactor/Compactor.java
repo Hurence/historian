@@ -3,6 +3,8 @@ package com.hurence.historian.compactor;
 import com.hurence.historian.compactor.config.Configuration;
 import com.hurence.historian.compactor.config.ConfigurationBuilder;
 import com.hurence.historian.compactor.config.ConfigurationException;
+import com.hurence.historian.spark.ml.Chunkyfier;
+import com.hurence.historian.spark.ml.UnChunkyfier;
 import com.hurence.historian.spark.sql.Options;
 import com.hurence.historian.spark.sql.reader.ChunksReaderType;
 import com.hurence.historian.spark.sql.reader.ReaderFactory;
@@ -17,7 +19,12 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.impl.CloudSolrClient;
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
 import org.slf4j.Logger;
@@ -26,6 +33,7 @@ import scala.Predef;
 import scala.Tuple2;
 import scala.collection.JavaConverters;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -42,6 +50,7 @@ public class Compactor implements Runnable {
     private Configuration configuration = null;
     private SolrChunksReader solrChunksReader = null;
     private SolrChunksWriter solrChunksWriter = null;
+    private SolrClient solrClient = null;
     private SparkSession sparkSession = null;
     private ScheduledExecutorService scheduledThreadPool = null;
     // Number of seconds before next compaction algorithm run
@@ -49,6 +58,7 @@ public class Compactor implements Runnable {
     // Should the first compaction algorithm run occur right after start?
     private volatile boolean startNow = true;
     private volatile boolean started = false;
+    private volatile boolean closed = false;
 
     /**
      *
@@ -63,6 +73,10 @@ public class Compactor implements Runnable {
      * Start the periodic run of the compaction
      */
     public synchronized void start() {
+
+        if (closed) {
+            throw new IllegalStateException("Cannot call start on closed compactor");
+        }
 
         if (started) {
             logger.info("Attempt to start compactor while already started, doing nothing");
@@ -97,6 +111,10 @@ public class Compactor implements Runnable {
      */
     public void run() {
 
+        if (closed) {
+            throw new IllegalStateException("Cannot call run on closed compactor");
+        }
+
         doCompact();
     }
 
@@ -104,6 +122,10 @@ public class Compactor implements Runnable {
      * Stops the compactor
      */
     public synchronized void stop() {
+
+        if (closed) {
+            throw new IllegalStateException("Cannot call stop on closed compactor");
+        }
 
         if (!started) {
             logger.info("Attempt to stop compactor while already stopped, doing nothing");
@@ -122,6 +144,18 @@ public class Compactor implements Runnable {
 
         started = false;
         logger.info("Compactor stopped");
+    }
+
+    private void closeSparkEnv() {
+        sparkSession.close();
+    }
+
+    private void closeSolrClient() {
+        try {
+            solrClient.close();
+        } catch (IOException e) {
+            logger.error("Error closing solr client: " + e.getMessage());
+        }
     }
 
     /**
@@ -154,6 +188,7 @@ public class Compactor implements Runnable {
     private void initialize() {
 
         initSparkEnv();
+        initSolrClient();
 
         solrChunksReader = (SolrChunksReader) ReaderFactory.getChunksReader(ChunksReaderType.SOLR());
         solrChunksWriter = (SolrChunksWriter) WriterFactory.getChunksWriter(WriterType.SOLR());
@@ -162,6 +197,27 @@ public class Compactor implements Runnable {
         // with a REST service API to control the compactor...
         setPeriod(configuration.getCompactionSchedulingPeriod());
         setStartNow(configuration.isCompactionSchedulingStartNow());
+    }
+
+
+
+    /**
+     * Make this compactor close all used underlying resources (end of life).
+     * Cannot call start/stop or any other business method on this object after
+     * calling this method. A new Compactor object should be re-created for this.
+     */
+    public synchronized void close() {
+        closeSolrClient();
+        closeSparkEnv();
+        closed = true;
+    }
+
+    private void initSolrClient() {
+
+        List<String> zkHosts = Arrays.asList(configuration.getSolrZkHost());
+        CloudSolrClient.Builder solrClientBuilder =
+                new CloudSolrClient.Builder(zkHosts, Optional.empty());
+        solrClient = solrClientBuilder.build();
     }
 
     public int getPeriod() {
@@ -280,19 +336,36 @@ public class Compactor implements Runnable {
         return options;
     }
 
-    void reCompact(String metricKeyStr, String day) {
+    /**
+     * Recompact chunks of a metric for a day
+     * @param metricKeyStr
+     * @param day
+     */
+    private void reCompact(String metricKeyStr, String day) {
 
-        logger.debug("Recompacting chunks of day " + day + " for metric " + metricKeyStr);
+        logger.debug("Re-compacting chunks of day " + day + " for metric " + metricKeyStr);
+
+        /**
+         * Load all chunks (whether already compacted or not) of the day for the
+         * metric
+         */
 
         Map<String, String> options = newOptions();
 
+        /**
+         * chunk_day:2020-08-28
+         * AND metric_key:metric1,dataCenter=1,room=1
+         */
         String query = CHUNK_DAY + ":" + day +
                 " AND " + METRIC_KEY + ":" + metricKeyStr;
         options.put("query", query);
         options.put("rows", "1000");
+        options.put("max_rows", "1000");
         // Specify to use the /export handler instead of the /select so that we don't loose any chunk
         // (we do not have to specify a max_rows parameter)
-        options.put("request_handler", "/export");
+        // TODO: to use /export, declare all chunk fields as docValues in solr, if not using
+        // /export but /select. What about max_rows value ?
+        //options.put("request_handler", "/export");
 
         // Compute and set the metric name and tags to read from the metric key
         Chunk.MetricKey metricKey = Chunk.MetricKey.parse(metricKeyStr);
@@ -305,10 +378,106 @@ public class Compactor implements Runnable {
         // JavaConverters used to convert from java Map to scala immutable Map
         Options readerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
                 Predef.<Tuple2<String, String>>conforms()));
-        Dataset<Chunk> chunks = (Dataset<Chunk>)solrChunksReader.read(readerOptions);
+        Dataset<Chunk> chunksToRecompact = (Dataset<Chunk>)solrChunksReader.read(readerOptions);
 
-        System.out.println("------------------------------------------ " + day + " for metric " + metricKey);
-        chunks.show(100, false);
+        chunksToRecompact.cache();
+
+        System.out.println("------------------------------------- " + day + " for metric " + metricKey + " " +
+                chunksToRecompact.count() + " chunks:");
+        chunksToRecompact.show(100, false);
+
+        /**
+         * Save ids of the read chunks to recompact
+         */
+
+//        JavaRDD<String> chunksToRecompactIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId());
+        List<String> chunksToRecompactIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId()).collect();
+//        List<String> chunksToRecompactIds = new ArrayList<String>();
+
+        /**
+         * Unchunkyfy the read chunks
+         */
+
+        UnChunkyfier unchunkyfier = new UnChunkyfier();
+        Dataset<Row> metricsToRecompact = unchunkyfier.transform(chunksToRecompact);
+
+        System.out.println("Unchunkyfied metric values count " + metricsToRecompact.count() + ":");
+
+        metricsToRecompact.show(100, false);
+
+        /**
+         * Re-compact those chunks
+         */
+
+        // Compute ["name", "tag1", "tag2"] String array
+        List<String> groupByCols = new ArrayList<String>();
+        groupByCols.add(NAME);
+        groupByCols.addAll(tags.stream().map(tag -> "tags." + tag).collect(Collectors.toList()));
+        String[] groupByColsArray = new String[groupByCols.size()];
+        groupByColsArray = groupByCols.toArray(groupByColsArray);
+        System.out.println("############################# groupByColsArray: " + groupByColsArray);
+
+        Chunkyfier chunkyfier = new Chunkyfier()
+                .setValueCol("value")
+                .setQualityCol("quality")
+                .setOrigin(ChunkOrigin.COMPACTOR.toString())
+                .setTimestampCol("timestamp")
+                .setGroupByCols(groupByColsArray)
+                .setDateBucketFormat("yyyy-MM-dd")
+                .setSaxAlphabetSize(7)
+                .setSaxStringLength(50);
+        Dataset<Row> recompactedChunksRows = chunkyfier.transform(metricsToRecompact);
+
+        System.out.println("Recompacted chunks count " + recompactedChunksRows.count() + ":");
+
+        recompactedChunksRows.show(100, false);
+
+        /**
+         * Write new re-compacted chunks
+         */
+
+        options = newOptions();
+        options.put(Options.TAG_NAMES(), metricAndTagsCsv);
+        // JavaConverters used to convert from java Map to scala immutable Map
+        Options writerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
+                Predef.<Tuple2<String, String>>conforms()));
+
+        Dataset<Chunk> recompactedChunks = recompactedChunksRows
+                .as(Encoders.bean(Chunk.class));
+        solrChunksWriter.write(writerOptions, recompactedChunks);
+
+        // TODO commit written docs? -> may be not needed as solrchunkwriter performs save operation under the hood
+
+        /**
+         * Delete old chunks
+         */
+
+        // TODO transactional way? be sure written is done before deleting.....
+        deleteDocuments(chunksToRecompactIds);
+    }
+
+    /**
+     * Delete documents with the passed ids
+     * @param documentsToDelete
+     */
+    private void deleteDocuments(List<String> documentsToDelete) {
+
+        for (String id : documentsToDelete) {
+
+            System.out.println("Deleting document id " + id);
+
+            try {
+                solrClient.deleteById(configuration.getSolrCollection(), id);
+            } catch (Exception e) {
+                logger.error("Error deleting chunk document with id " + id + ": " + e.getMessage());
+            }
+        }
+
+        try {
+            solrClient.commit(configuration.getSolrCollection(), true, true);
+        } catch (Exception e) {
+            logger.error("Error committing deleted chunks: " + e.getMessage());
+        }
     }
 
     /**
