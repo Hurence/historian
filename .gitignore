@@ -41,7 +41,8 @@ hs_err_pid*
 # maven files
 **/pom.xml.versionsBackup
 
-# generated test files
+# generated files
+timeseries/src/main/generated
 historian-server/src/integration-test/resources/shared-resources
 loader/src/integration-test/resources/shared-resources
 integration-tests/src/main/resources/shared-resources/create-historian-annotation-collection.sh
