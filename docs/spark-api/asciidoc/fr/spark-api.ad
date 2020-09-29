@@ -311,7 +311,7 @@ case class Chunk(name: String,
                  chunk: String,
                  count: Long,
                  avg: Double,
-                 stddev: Double,
+                 std_dev: Double,
                  min: Double,
                  max: Double,
                  first: Double,
@@ -325,7 +325,7 @@ Spark SQL prend en charge la lecture et l'écriture de fichiers Parquet qui pré
 Veuillez consulter la documentation d'apache spark pour les fichiers parquet :
 link:https://spark.apache.org/docs/latest/sql-data-sources-parquet.html[Parquet Files - Spark 3.0.0 Documentation]
 * *SOLR* : On utilise le spark.read pour la lecture des données en spécifiant que le format est [.underline]#solr#. En résultat, les données seront être répartis
-sous cette forme : day, start, end, count, avg, stddev, min, max, first, last, sax, value, chunk, tags
+sous cette forme : day, start, end, count, avg, std_dev, min, max, first, last, sax, value, chunk, tags
 
 EXEMPLE: Dans ce cas on spécifie le reader _MeasuresReaderType_ et nos données sont en format _GENERIC_CSV_ :
 ----

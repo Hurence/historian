@@ -1,21 +1,34 @@
-version: "2.0"
+version: "2"
 
 services:
 
   zookeeper:
     image: wurstmeister/zookeeper
+    networks:
+      - solr_net
 
   solr1:
     image: solr:8.2.0
     command: >
       /bin/bash -c "/opt/solr/bin/solr -c -z zookeeper:2181 -m 1g; tail -f /var/solr/logs/solr.log"
-    links:
+    ports:
+      - "8981:8983"
+    networks:
+      - solr_net
+    depends_on:
       - zookeeper
 
   solr2:
     image: solr:8.2.0
     command: >
-      /bin/bash -c "/opt/solr/bin/solr -c -f -z zookeeper:2181 -m 1g"
-    links:
-      - solr1
+      /bin/bash -c "/opt/solr/bin/solr -c -f -z zookeeper:2181 -m 1g; tail -f /var/solr/logs/solr.log"
+    ports:
+      - "8982:8983"
+    networks:
+      - solr_net
+    depends_on:
       - zookeeper
+      - solr1
+
+networks:
+  solr_net:

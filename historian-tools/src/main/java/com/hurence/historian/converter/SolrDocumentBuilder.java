@@ -21,8 +21,14 @@ public class SolrDocumentBuilder {
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_YEAR, chunk.getYear());
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MONTH, chunk.getMonth());
         doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_DAY, chunk.getDay());
-        doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN, chunk.getChunkOrigin());
+        doc.addField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_ORIGIN, chunk.getOrigin());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.ID, chunk.getId());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.METRIC_KEY, chunk.getMetricKey());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN, chunk.getQualityMin());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX, chunk.getQualityMax());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST, chunk.getQualityFirst());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_SUM, chunk.getQualitySum());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_AVG, chunk.getQualityAvg());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MAX, chunk.getMax());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_MIN, chunk.getMin());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_AVG, chunk.getAvg());
@@ -32,7 +38,7 @@ public class SolrDocumentBuilder {
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_FIRST, chunk.getFirst());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_LAST, chunk.getLast());
         doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_SUM, chunk.getSum());
-        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV, chunk.getStd());
+        doc.setField(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV, chunk.getStdDev());
         return doc;
     }
 

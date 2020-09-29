@@ -69,7 +69,7 @@ public final class TimeSeriesUtil {
     public static Stream<Measure> extractPointsAsStream(long from, long to, List<Chunk> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
-                    byte[] binaryChunk = chunk.getValueAsBinary();
+                    byte[] binaryChunk = chunk.getValue();
                     long chunkStart = chunk.getStart();
                     long chunkEnd = chunk.getEnd();
                     try {

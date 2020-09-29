@@ -1,6 +1,6 @@
 package com.hurence.historian.solr.injector;
 
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
+import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
 
@@ -13,7 +13,7 @@ public class SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersio
 
     private final String metricName;
     private final List<List<Measure>> MeasuresByChunk;
-    private final PointsToChunkVersionCurrent converter = new PointsToChunkVersionCurrent("Version1SolrInjectorOneMetricMultipleChunksSpecificPoints");
+    private final MeasuresToChunkVersionCurrent converter = new MeasuresToChunkVersionCurrent("Version1SolrInjectorOneMetricMultipleChunksSpecificPoints");
 
     public SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersion(String metricName,
                                                                                 List<List<Measure>> MeasuresByChunk) {

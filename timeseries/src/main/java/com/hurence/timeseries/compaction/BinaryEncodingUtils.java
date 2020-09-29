@@ -13,6 +13,7 @@ public class BinaryEncodingUtils {
     }
 
     public static byte[] decode(String content) {
+        assert content != null : "unable to decode null content";
         return Base64.decodeBase64(content);
     }
 }

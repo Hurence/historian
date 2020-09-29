@@ -2,6 +2,7 @@ package com.hurence.timeseries.model;
 
 import com.google.common.hash.Hashing;
 import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.converter.ChunkTruncater;
 import lombok.*;
@@ -14,14 +15,35 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.text.SimpleDateFormat;
 import java.time.ZoneId;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+
+/**
+ * A Chunk is a compressed version of a bulk of Measure.
+ * <p>
+ * The list of values is stored as a protobuf encoded byte array.
+ * there are several pre-computed aggregations to help sampling and
+ * big time scale high grained analytics
+ *
+ * @see Measure
+ */
 import java.util.Map;
+import java.util.SortedSet;
 import java.util.TimeZone;
+import java.util.TreeSet;
+import java.util.*;
 
-
+/**
+ * A Chunk is a compacted set of measures within a time interval.
+ * The value is stored as a protobuf encoded chunk of data. If you expand this value you'll end up with a set of
+ * Measures. The quality is stored within the value itself
+ * Some aggregations and meta-information is stored along this data structure in order to facilitate analytics
+ * without uncompacting the binary value : avg, min, max, stdDev, first, last ...
+ * the minimal parts of a Chunk are      : name, start, end, value
+ * and eventually                        : tags
+ *
+ * @see Measure
+ */
 @Builder
 @Data
 @AllArgsConstructor
@@ -30,9 +52,10 @@ public class Chunk implements Serializable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chunk.class);
 
-    protected SchemaVersion version;
+    @Builder.Default
+    protected SchemaVersion version = SchemaVersion.VERSION_0;
     protected String name;
-    protected byte[] valueBinaries;
+    protected byte[] value;
     protected long start;
     protected long end;
     protected long count;
@@ -42,59 +65,76 @@ public class Chunk implements Serializable {
     protected double sum;
     protected double avg;
     protected double last;
-    protected double std;
+    protected double stdDev;
 
     // agg quality
+    @Builder.Default
     protected float qualityFirst = Float.NaN;
-    protected float qualityMin;
-    protected float qualityMax  = Float.NaN;
-    protected float qualitySum;
-    protected float qualityAvg;
+    @Builder.Default
+    protected float qualityMin = Float.NaN;
+    @Builder.Default
+    protected float qualityMax = Float.NaN;
+    @Builder.Default
+    protected float qualitySum = Float.NaN;
+    @Builder.Default
+    protected float qualityAvg = Float.NaN;
 
     // meta
     protected int year;
     protected int month;
     protected String day;
-    protected String chunkOrigin;
+    protected String origin;
     protected String sax;
     protected boolean trend;
     protected boolean outlier;
     protected String id;
+    protected String metricKey;
 
     protected Map<String, String> tags;
 
 
+    // Naming pattern <Class>Builder of this class will make lombok use this class
+    // as the builder for Chunk. Ssaid differently, an instance of this ChunkBuilder
+    // class will be returned by Chunk.build().
     public static class ChunkBuilder {
-
-
 
         /**
          * sets id to an idempotent hash
          *
          * @return
+         *
+         * TODO: tried to have this method automatically with lombok but did not work:
+         * Tried with @Builder.ObtainVia(method = "buildId") as annotation for id field
+         * Further lombok documentation for the builder at:
+         * https://www.projectlombok.org/features/Builder
          */
         public ChunkBuilder buildId() {
-            String toHash = name +
-                    start +
-                    chunkOrigin;
+            StringBuilder newId = new StringBuilder();
+
+            newId.append(name);
+            tags.forEach((k, v) -> newId.append(k + v));
+
             try {
-                toHash += BinaryEncodingUtils.encode(valueBinaries) ;
+                newId.append(BinaryEncodingUtils.encode(value));
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Error encoding binaries", e);
             }
 
             id = Hashing.sha256()
-                    .hashString(toHash, StandardCharsets.UTF_8)
+                    .hashString(newId.toString(), StandardCharsets.UTF_8)
                     .toString();
+
+            metricKey = buildMetricKey();
 
             return this;
         }
 
+        private String buildMetricKey() {
+            return new MetricKey(name, tags).compute();
+        }
 
         /**
-         * compute the metrics from the valueBinaries field
-         *
-         * @return
+         * compute the metrics from the valueBinaries field so ther's no need to erad them
          */
         public ChunkBuilder computeMetrics() {
             DateTime time = new DateTime(start)
@@ -106,89 +146,143 @@ public class Chunk implements Serializable {
         }
 
     }
-/*
 
+    /**
+     * Facility class to compute and parse metric key
+     */
+    public static class MetricKey {
 
-    protected Chunk(SchemaVersion version, String name,
-                                      byte[] valueBinaries, long start, long end,
-                                      long count, double first, double min,
-                                      double max, double sum, double avg,
-                                      int year, int month, String day,
-                                      Map<String, String> tags,
-                                      String chunkOrigin,
-                                      double last,
-                                      double std,
-                                      String sax,
-                                      boolean trend,
-                                      boolean outlier,
-                                      List<String> compactionRunnings,
-                                      String id,
-                                      float qualityFirst, float qualityMin,
-                                      float qualityMax, float qualitySum, float qualityAvg) {
-        this.version = version;
-        this.name = name;
-        this.valueBinaries = valueBinaries;
-        this.start = start;
-        this.end = end;
-        this.count = count;
-        this.first = first;
-        this.min = min;
-        this.max = max;
-        this.sum = sum;
-        this.avg = avg;
-        this.qualityFirst = qualityFirst;
-        this.qualityMin = qualityMin;
-        this.qualityMax = qualityMax;
-        this.qualitySum = qualitySum;
-        this.qualityAvg = qualityAvg;
-        this.year = year;
-        this.month = month;
-        this.day = day;
-        this.tags = tags;
-        this.chunkOrigin = chunkOrigin;
-        this.last = last;
-        this.std = std;
-        this.sax = sax;
-        this.trend = trend;
-        this.outlier = outlier;
-        this.compactionRunnings = compactionRunnings;
-        if (id == null) {
-            this.id = Chunk.buildId(this);
-        } else {
-            this.id = id;
+        private String name;
+        private Map<String, String> tags = new HashMap<String, String>();
+
+        /**
+         * Constructor when no tags
+         * @param name
+         */
+        private MetricKey (String name) {
+            Objects.requireNonNull(name);
+            this.name = name;
+        }
+
+        private MetricKey (String name, Map<String, String> tags) {
+            Objects.requireNonNull(name);
+            Objects.requireNonNull(tags);
+            this.name = name;
+            this.tags = tags;
+        }
+
+        /**
+         * Computes the unique metric key in the form:
+         * <name>[,tagName=tageValue] with tags alphabetically sorted
+         * according to the tag name
+         * @return
+         */
+        public String compute() {
+            StringBuilder idBuilder = new StringBuilder(name);
+            // If there are some tags, add them with their values in an alphabetically sorted way
+            // according to the tag key
+            if (tags.size() > 0) {
+                SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
+                sortedTags.forEach( (tagKey) -> {
+                    idBuilder.append(",").append(tagKey).append("=").append(tags.get(tagKey));
+                });
+            }
+            return idBuilder.toString();
+        }
+
+        @Override
+        public String toString() {
+            return compute();
+        }
+
+        /**
+         * Parses a metric key in the form as defined by the compute method
+         * @param id
+         * @return
+         */
+        public static MetricKey parse(String id) {
+
+            // metricName,tag1=tag1Val,tag2=tag2val
+            String[] tokens = id.split(",");
+            if ( (tokens == null) || (tokens.length == 0)) {
+                throw new IllegalArgumentException("null or empty metric key");
+            }
+            String name = tokens[0];
+            if (tokens.length == 1) {
+                // No tags ( ["metricName"] )
+                return new MetricKey(name);
+            } else
+            {
+                // Some tags: parse them ( ["metricName", "tag1=tag1Val" , "tag2=tag2val"] )
+                Map<String, String> tags = new HashMap<String, String>();
+                for (int i=1 ; i < tokens.length ; i++) {
+                    // "tag1=tag1Val"
+                    String tagAndValues = tokens[i];
+                    String[] tagAndValue = tagAndValues.split("=");
+                    if ( (tagAndValue == null) || (tagAndValue.length != 2) ) {
+                        throw new IllegalArgumentException("tag component has wrong format: " + tagAndValue);
+                    }
+                    tags.put(tagAndValue[0], tagAndValue[1]);
+                }
+                return new MetricKey(name, tags);
+            }
+        }
+
+        public Set<String> getTagKeys() {
+            return tags.keySet();
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public Map<String, String> getTags() {
+            return tags;
         }
     }
-*/
 
-
-
+    /**
+     * Convert byte[] value field as byte64 String.
+     *
+     * @return the base64 encoded String
+     */
     public String getValueAsString() {
         try {
-            return BinaryEncodingUtils.encode(valueBinaries);
+            return BinaryEncodingUtils.encode(value);
         } catch (UnsupportedEncodingException e) {
             LOGGER.error("Error encoding binaries", e);
             throw new IllegalArgumentException(e);
         }
     }
 
-    public byte[] getValueAsBinary() {
-        return valueBinaries;
+
+    /**
+     * Convert byte[] value field into a chrono-ordered set of Measures
+     *
+     * @return the set of Measures
+     * @throws IOException
+     */
+    public TreeSet<Measure> getValueAsMeasures() throws IOException {
+        return BinaryCompactionUtil.unCompressPoints(value, start, end);
     }
-
-
 
     public boolean containsTag(String tagName) {
         return tags.containsKey(tagName);
     }
-
 
     public String getTag(String tagName) {
         return tags.get(tagName);
     }
 
 
-
-
+    /**
+     * Cut a Chunk into a smaller time range
+     *
+     * @param from
+     * @param to
+     * @return a truncated copy of the Chunk
+     * @see ChunkTruncater
+     */
     public Chunk truncate(long from, long to) {
         try {
             return ChunkTruncater.truncate(this, from, to);

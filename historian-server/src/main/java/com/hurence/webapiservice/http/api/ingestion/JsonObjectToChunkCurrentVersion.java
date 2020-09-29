@@ -2,10 +2,9 @@ package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.historian.converter.SolrDocumentBuilder;
 import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
+import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.model.Chunk;
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.apache.solr.common.SolrInputDocument;
@@ -19,10 +18,10 @@ import java.util.TreeSet;
  */
 public class JsonObjectToChunkCurrentVersion {
 
-    private PointsToChunkVersionCurrent converter;
+    private MeasuresToChunkVersionCurrent converter;
 
     public JsonObjectToChunkCurrentVersion(String chunkOrigin) {
-        this.converter = new PointsToChunkVersionCurrent(chunkOrigin);
+        this.converter = new MeasuresToChunkVersionCurrent(chunkOrigin);
     }
 
 

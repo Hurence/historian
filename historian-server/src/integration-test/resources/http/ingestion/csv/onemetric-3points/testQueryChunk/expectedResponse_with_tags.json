@@ -28,7 +28,7 @@
       "chunk_first": 1.2,
       "chunk_last": 3.0,
       "chunk_sum": 6.2,
-      "chunk_stddev": 0.9018499505645788
+      "chunk_std_dev": 0.9018499505645788
     }
   ]
 }
