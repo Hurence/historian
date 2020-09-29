@@ -10,7 +10,7 @@ import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
 import org.apache.spark.sql.SparkSession
 
 /**
-  * An example for Bucketizer.
+  * An example for Chunkyfier.
   * Run with
   * {{{
   * bin/run-example ml.BucketizerExample

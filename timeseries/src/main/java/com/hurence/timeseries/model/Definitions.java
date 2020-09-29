@@ -83,7 +83,6 @@ public class Definitions {
     public static String getFieldFromColumn(String column) { return fieldsToColumnsMap.get(column);}
     public static String getColumnFromField(String field) { return fieldsToColumnsMap.inverse().get(field);}
 
-
     private static BiMap<String, String> createMap() {
         BiMap<String, String> biMap = HashBiMap.create();
         biMap.put(SOLR_COLUMN_ID, FIELD_ID);

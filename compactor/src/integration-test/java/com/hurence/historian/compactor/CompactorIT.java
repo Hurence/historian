@@ -8,15 +8,6 @@ import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.historian.spark.ml.Chunkyfier;
-import com.hurence.historian.spark.ml.UnChunkyfier;
-import com.hurence.historian.spark.sql.Options;
-import com.hurence.historian.spark.sql.reader.ChunksReaderType;
-import com.hurence.historian.spark.sql.reader.ReaderFactory;
-import com.hurence.historian.spark.sql.reader.solr.SolrChunksReader;
-import com.hurence.historian.spark.sql.writer.WriterFactory;
-import com.hurence.historian.spark.sql.writer.WriterType;
-import com.hurence.historian.spark.sql.writer.solr.SolrChunksWriter;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.core.ChunkOrigin;
@@ -75,7 +66,7 @@ public class CompactorIT {
     private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
 
-        // Add fields for tags
+        // Add fields for tags in test data
         SolrITHelper.addFieldToChunkSchema(container, "dataCenter");
         SolrITHelper.addFieldToChunkSchema(container, "room");
     }
@@ -607,7 +598,6 @@ public class CompactorIT {
      */
     @Test
     public void testCompactor(DockerComposeContainer container, SolrClient solrClient, SparkSession sparkSession) {
-//        public void testCompactor() {
 
         String solrHost = SolrExtension.getSolr1Url(container);
         System.out.println("Solr1 url:" + solrHost);
@@ -626,27 +616,6 @@ public class CompactorIT {
         compactorConfig.setSolrZkHost(zkHost);
         logger.info("Using compactor configuration: " + compactorConfig);
         Compactor compactor = new Compactor(compactorConfig);
-        //compactor.start();
-
-//        sparkSession.read().format("solr");
-
-//        SparkSession sparkSession = SparkSession.builder().config(conf).getOrCreate();
-//        JavaSparkContext jsc = new JavaSparkContext(sparkSession.sparkContext());
-
-//        Map<String, String> options = new HashMap<String, String>();
-//        options.put("zkhost", zkHost);
-//        options.put("collection", SolrITHelper.COLLECTION_HISTORIAN);
-//        options.put("query", queryStr);
-//        options.put(ConfigurationConstants.SOLR_SPLIT_FIELD_PARAM(), "_version_");
-//        options.put(ConfigurationConstants.SOLR_SPLITS_PER_SHARD_PARAM(), "4");
-//        options.put(ConfigurationConstants.SOLR_FIELD_PARAM(), "id,_version_,"+UID_FIELD+","+TS_FIELD+",bytes_s,response_s,verb_s");
-
-        // Use the Solr DataSource to load rows from a Solr collection using a query
-        // highlights include:
-        //   - parallelization of reads from each shard in Solr
-        //   - more parallelization by splitting each shard into ranges
-        //   - results are streamed back from Solr using deep-paging and streaming response
-//        Dataset<Row> chunks = sparkSession.read().format("solr").options(options).load();
 
         printSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
 
@@ -654,83 +623,8 @@ public class CompactorIT {
 
         System.out.println("After recompaction: ");
         printUnChunkedSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
-        System.exit(1);
 
-        // TODO: test recompaction changing the max number of values per chunk
-
-        // 1. load measures from parquet file
-        String filePath = new File("../loader/src/test/resources/it-data-4metrics.parquet").getAbsolutePath();
-
-        Dataset<Row> measures = sparkSession.read()
-                .parquet(filePath)
-                .cache();
-        measures.show();
-
-//        Dataset<Row> measures = null;
-//        String zkHost = null;
-//        SolrClient solrClient = null;
-
-        // 2. make chunks from measures
-        Chunkyfier chunkyfier = new Chunkyfier()
-                .setValueCol("value")
-                .setQualityCol("quality")
-                .setOrigin(ChunkOrigin.COMPACTOR.toString())
-                .setTimestampCol("timestamp")
-                .setGroupByCols(new String[]{"name", "tags.metric_id"})
-                .setDateBucketFormat("yyyy-MM-dd")
-                .setSaxAlphabetSize(7)
-                .setSaxStringLength(50);
-        Dataset<Row> ack08Rows = chunkyfier.transform(measures)
-                .where("name = 'ack' AND avg != 0.0")
-                .repartition(1);
-
-        ack08Rows.show();
-
-        Dataset<Chunk> ack08 = ack08Rows
-                .as(Encoders.bean(Chunk.class));
-
-        // 3. write those chunks to SolR
-        SolrChunksWriter solrChunksWriter = (SolrChunksWriter)WriterFactory.getChunksWriter(WriterType.SOLR());
-        Map<String, String> options = new HashMap<String, String>();
-        options.put("zkhost", zkHost);
-        String collectionName = SolrITHelper.COLLECTION_HISTORIAN;
-        options.put("collection", collectionName);
-        options.put(Options.TAG_NAMES(), "metric_id,min,max,warn,crit");
-        // JavaConverters used to convert from java Map to scala immutable Map
-        Options sqlOptions = new Options(collectionName, JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
-                Predef.<Tuple2<String, String>>conforms()));
-        solrChunksWriter.write(sqlOptions, ack08);
-
-        // 4. Explicit commit to make sure all docs are visible
-        try {
-            solrClient.commit(collectionName, true, true);
-        } catch (SolrServerException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        printSolrJsonDocs(solrClient, collectionName);
-
-        // 5. load back those chunks to verify
-        SolrChunksReader solrChunksReader = (SolrChunksReader)ReaderFactory.getChunksReader(ChunksReaderType.SOLR());
-        options = new HashMap<String, String>();
-        options.put("zkhost", zkHost);
-        options.put("collection", collectionName);
-        options.put(Options.TAG_NAMES(), "metric_id");
-        // JavaConverters used to convert from java Map to scala immutable Map
-        sqlOptions = new Options(collectionName, JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
-                Predef.<Tuple2<String, String>>conforms()));
-        Dataset<Chunk> chunks = (Dataset<Chunk>)solrChunksReader.read(sqlOptions)
-                .where("metric_id LIKE '08%'");
-
-        chunks.show(100, false);
-
-        assertTrue(chunks.count() == 5);
-
-        // Unchunkify and display matching metrics
-        UnChunkyfier unchunkyfier = new UnChunkyfier();
-        unchunkyfier.transform(chunks).show();
+//        assertTrue(chunks.count() == 5);
     }
 
     private static void printSolrJsonDocs(SolrClient solrClient, String collection) {
@@ -752,7 +646,6 @@ public class CompactorIT {
         StringBuilder stringBuilder = new StringBuilder("\n{");
 
         for (SolrDocument solrDocument : solrDocumentList) {
-            System.out.println("docsssssssssss:" + solrDocument);
             for (String field : solrDocument.getFieldNames().stream().sorted().collect(Collectors.toList())) {
                 stringBuilder.append("\n  \"").append(field).append("\": ");
                 Object value = solrDocument.getFieldValue(field);

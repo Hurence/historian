@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.util.*;
 
 /**
  * A Chunk is a compacted set of measures within a time interval.
@@ -53,7 +52,7 @@ public class Chunk implements Serializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(Chunk.class);
 
     @Builder.Default
-    protected SchemaVersion version = SchemaVersion.VERSION_0;
+    protected SchemaVersion version = SchemaVersion.VERSION_1;
     protected String name;
     protected byte[] value;
     protected long start;
@@ -94,7 +93,7 @@ public class Chunk implements Serializable {
 
 
     // Naming pattern <Class>Builder of this class will make lombok use this class
-    // as the builder for Chunk. Ssaid differently, an instance of this ChunkBuilder
+    // as the builder for Chunk. Said differently, an instance of this ChunkBuilder
     // class will be returned by Chunk.build().
     public static class ChunkBuilder {
 

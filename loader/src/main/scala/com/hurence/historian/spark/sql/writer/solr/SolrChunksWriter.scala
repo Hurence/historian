@@ -5,7 +5,6 @@ import com.hurence.historian.spark.sql.writer.Writer
 import org.apache.spark.sql.{Column, Dataset, SparkSession}
 import org.slf4j.LoggerFactory
 import org.apache.spark.sql.functions._
-import com.hurence.historian.spark.sql.functions._
 import com.hurence.timeseries.model.Chunk
 import com.hurence.timeseries.model.Definitions._
 
@@ -40,13 +39,10 @@ class SolrChunksWriter extends Writer[Chunk] {
     // todo manage dateFormatbucket and date interval
     ds
       .select(mainCols ::: tagCols: _*)
-      .withColumn(SOLR_COLUMN_VALUE, toBase64(col(SOLR_COLUMN_VALUE)))
+      .withColumn(SOLR_COLUMN_VALUE, base64(col(SOLR_COLUMN_VALUE)))
       .write
       .format("solr")
       .options(config)
       .save()
-
-
   }
-
 }
