@@ -152,7 +152,7 @@ public class Measure implements Serializable, Comparable<Measure> {
         AtomicBoolean areTagsEquals = new AtomicBoolean(true);
         tags.keySet().forEach(key -> {
             String value = getTag(key);
-            if(value !=null && !value.isEmpty()){
+            if(value !=null && !value.isEmpty() && value.equals("null")){
                 areTagsEquals.set(areTagsEquals.get() && value.equals(measure.getTag(key)));
             }
         });

@@ -22,14 +22,14 @@ class SolrChunksReader extends Reader[Chunk] {
 
     val tagNames: List[Column] = options.config(Options.TAG_NAMES)
       .split(",").toList
-      .map(tag => col(tag))
+      .map(tag => col(tag).as(s"tag_$tag"))
     val mainCols = SOLR_COLUMNS.asScala.toList
       .map(name => col(name).as(getFieldFromColumn(name))) ::: tagNames
 
 
     val tags: List[Column] = options.config("tag_names")
       .split(",").toList
-      .flatMap(tag => List(lit(tag), col(tag)))
+      .flatMap(tag => List(lit(s"tag_$tag"), col(s"tag_$tag")))
 
     spark.read
       .format("solr")

@@ -17,6 +17,7 @@ import org.apache.spark.sql.types._
 import com.hurence.historian.spark.DatasetComparer
 import com.hurence.historian.spark.sql.functions.reorderColumns
 import com.hurence.timeseries.model.Definitions.FIELD_QUALITY_AVG
+import org.apache.solr.client.solrj.SolrQuery
 import org.apache.spark.sql.functions.col
 
 import scala.Seq
@@ -66,6 +67,7 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         .repartition(1)
         .as[Chunk](Encoders.bean(classOf[Chunk]))
 
+      ack08.take(10).foreach(println)
       if (logger.isDebugEnabled) {
         ack08.show()
       }
@@ -83,6 +85,9 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
       val solrCloudClient = SolrSupport.getCachedCloudClient(zkAddressSolr)
       solrCloudClient.commit(collectionName, true, true)
 
+      val q = new SolrQuery("*:*")
+      val response = solrCloudClient.query(collectionName, q)
+     println(response.getResults.get(0).toString)
 
       // 5. load back those chunks to verify
       val reader = ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
