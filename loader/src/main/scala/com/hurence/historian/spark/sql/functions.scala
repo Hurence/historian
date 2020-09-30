@@ -27,7 +27,7 @@ object functions {
 
   val toDateUTC = udf { (epochMilliUTC: Long, dateFormat: String) =>
     val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
-      .withZone(java.time.ZoneId.of("Europe/Paris"))
+      .withZone(java.time.ZoneId.of("UTC"))
 
     try {
       dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC))
