@@ -28,9 +28,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
-import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_NAME;
+import static com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter.TIMESERIE_POINT;
 
 public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceDatasourcePluginApi {
 
@@ -113,7 +116,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     private JsonObject buildGetMetricsParam(SearchRequestParam request) {
         return new JsonObject()
                 .put(HistorianServiceFields.METRIC, request.getStringToUseToFindMetrics())
-                .put(HistorianServiceFields.LIMIT, request.getMaxNumberOfMetricNameToReturn());
+                .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
     /**
@@ -144,7 +147,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         try {
             JsonObject requestBody = context.getBodyAsJson();
 
-            request = new SearchValuesRequestParser(HistorianServiceFields.FIELD, HistorianServiceFields.QUERY, HistorianServiceFields.LIMIT).parseRequest(requestBody);
+            request = new SearchValuesRequestParser(FIELD, QUERY, LIMIT).parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
@@ -173,9 +176,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
 
     private JsonObject buildGetFieldValuesParam(SearchValuesRequestParam request) {
         return new JsonObject()
-                .put(HistorianServiceFields.FIELD, request.getFieldToSearch())
-                .put(HistorianServiceFields.QUERY, request.getQueryToUseInSearch())
-                .put(HistorianServiceFields.LIMIT, request.getMaxNumberOfMetricNameToReturn());
+                .put(FIELD, request.getFieldToSearch())
+                .put(QUERY, request.getQueryToUseInSearch())
+                .put(LIMIT, request.getMaxNumberOfMetricNameToReturn());
     }
 
     @Override
@@ -296,7 +299,7 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         Single<JsonObject> rsp = service.rxGetTimeSeries(getTimeSeriesChunkParams);
         rsp = logThingsIfDebugMode(startRequest, request, rsp);
         rsp.map(timeseries -> {
-                    JsonArray sampledTimeSeries = timeseries.getJsonArray(HistorianServiceFields.TIMESERIES);
+                    JsonArray sampledTimeSeries = timeseries.getJsonArray(TIMESERIES);
                     List<RefIdInfo> refIdList = getRefIdInfos(request);
                     List<JsonObject> timeseriesAsList = sampledTimeSeries.stream().map(timeserieWithoutRefId -> {
                         JsonObject timeserieWithRefIdIfExist = (JsonObject) timeserieWithoutRefId;
@@ -323,17 +326,17 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         if (LOGGER.isDebugEnabled()) {
             rsp = rsp.map(sampledTimeSeriesRsp -> {
                 if (LOGGER.isDebugEnabled()) {
-                    JsonArray timeseries = sampledTimeSeriesRsp.getJsonArray(HistorianServiceFields.TIMESERIES);
+                    JsonArray timeseries = sampledTimeSeriesRsp.getJsonArray(TIMESERIES);
                     timeseries.forEach(metric -> {
                         JsonObject el = (JsonObject) metric;
-                        String metricName = el.getString(TIMESERIE_NAME);
-                        int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
+                        String metricName = el.getString(FIELD_NAME);
+                        int size = el.getJsonArray(TIMESERIE_POINT).size();
                         LOGGER.debug("[REQUEST ID {}] return {} measures for metric {}.",
                                 request.getRequestId(),size, metricName);
                     });
                     LOGGER.debug("[REQUEST ID {}] Sampled a total of {} measures in {} ms.",
                             request.getRequestId(),
-                            sampledTimeSeriesRsp.getLong(HistorianServiceFields.TOTAL_POINTS, 0L),
+                            sampledTimeSeriesRsp.getLong(TOTAL_POINTS, 0L),
                             System.currentTimeMillis() - startRequest);
                 }
                 return sampledTimeSeriesRsp;
@@ -356,11 +359,11 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
             if (metricInfo instanceof JsonObject && ((JsonObject) metricInfo).containsKey(QUERY_PARAM_REF_ID)) {
                 JsonObject metricInfoObject = new JsonObject(metricInfo.toString());
                 Map<String, String> finalTagsForThisMetric = new HashMap<>(request.getTags());
-                if (metricInfoObject.containsKey(HistorianServiceFields.TAGS))
-                    for (Map.Entry<String, Object> tagsEntry : metricInfoObject.getJsonObject(HistorianServiceFields.TAGS).getMap().entrySet()){
+                if (metricInfoObject.containsKey(FIELD_TAGS))
+                    for (Map.Entry<String, Object> tagsEntry : metricInfoObject.getJsonObject(FIELD_TAGS).getMap().entrySet()){
                         finalTagsForThisMetric.put(tagsEntry.getKey() ,tagsEntry.getValue().toString());
                     }
-                refIdList.add(new RefIdInfo(metricInfoObject.getString(HistorianServiceFields.NAME),
+                refIdList.add(new RefIdInfo(metricInfoObject.getString(FIELD_NAME),
                         metricInfoObject.getString(QUERY_PARAM_REF_ID),
                         finalTagsForThisMetric));
             }
@@ -371,18 +374,18 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
     private JsonObject buildGetTimeSeriesRequest(HurenceDatasourcePluginQueryRequestParam request) {
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
-                .put(HistorianServiceFields.FROM, request.getFrom())
-                .put(HistorianServiceFields.TO, request.getTo())
-                .put(HistorianServiceFields.NAMES, request.getMetricNames())
-                .put(HistorianServiceFields.TAGS, request.getTags())
-                .put(HistorianServiceFields.SAMPLING_ALGO, samplingConf.getAlgo())
-                .put(HistorianServiceFields.BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(HistorianServiceFields.MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
-                .put(HistorianServiceFields.AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()))
-                .put(HistorianServiceFields.QUALITY_VALUE, request.getQualityValue())
-                .put(HistorianServiceFields.QUALITY_AGG, request.getQualityAgg().toString())
-                .put(HistorianServiceFields.QUALITY_RETURN, request.getQualityReturn())
-                .put(HistorianServiceFields.USE_QUALITY, request.getUseQuality());
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(NAMES, request.getMetricNames())
+                .put(FIELD_TAGS, request.getTags())
+                .put(SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
+                .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()))
+                .put(QUALITY_VALUE, request.getQualityValue())
+                .put(QUALITY_AGG, request.getQualityAgg().toString())
+                .put(QUALITY_RETURN, request.getQualityReturn())
+                .put(USE_QUALITY, request.getUseQuality());
     }
 
     public final static String LIMIT_JSON_PATH = "/limit";
@@ -458,11 +461,11 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
 
     protected JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
         return new JsonObject()
-                .put(HistorianServiceFields.FROM, request.getFrom())
-                .put(HistorianServiceFields.TO, request.getTo())
-                .put(HistorianServiceFields.TAGS, request.getTags())
-                .put(HistorianServiceFields.LIMIT, request.getMaxAnnotation())
-                .put(HistorianServiceFields.MATCH_ANY, request.getMatchAny())
-                .put(HistorianServiceFields.TYPE, request.getType());
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(FIELD_TAGS, request.getTags())
+                .put(LIMIT, request.getMaxAnnotation())
+                .put(MATCH_ANY, request.getMatchAny())
+                .put(TYPE, request.getType());
     }
 }

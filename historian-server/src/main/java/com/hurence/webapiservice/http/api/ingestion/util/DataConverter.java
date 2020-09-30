@@ -10,10 +10,9 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-
-import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0.NAME;
 import static com.hurence.historian.modele.HistorianServiceFields.POINTS;
-import static com.hurence.historian.modele.HistorianServiceFields.TAGS;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.ingestion.util.TimestampUnit.*;
 
 public class DataConverter {
@@ -79,10 +78,10 @@ public class DataConverter {
     private void putNameFieldAndTagsFields(Map<String, Object> fieldsAndThereValues,
                                            Map.Entry<LinkedList<Object>, List<List<Iterable<? extends Object>>>> entry) {
         String name = nameToReturn(entry);
-        fieldsAndThereValues.put(NAME, name);
+        fieldsAndThereValues.put(FIELD_NAME, name);
         Map<String, Object> tags = ((JsonObject) entry.getValue().get(0).get(1)).getMap();
         tags.values().remove(null);
-        fieldsAndThereValues.put(TAGS, tags);
+        fieldsAndThereValues.put(FIELD_TAGS, tags);
 
     }
 

@@ -6,7 +6,6 @@ import io.vertx.core.json.JsonObject;
 
 public interface TimeSeriesExtracter {
 
-    String TIMESERIE_NAME = HistorianServiceFields.NAME;
     String TIMESERIE_POINT = HistorianServiceFields.DATAPOINTS;
     String TIMESERIE_AGGS = HistorianServiceFields.AGGREGATION;
     String TOTAL_POINTS = HistorianServiceFields.TOTAL_POINTS;

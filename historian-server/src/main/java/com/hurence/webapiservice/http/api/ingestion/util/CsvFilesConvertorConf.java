@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 
 public class CsvFilesConvertorConf {
 
@@ -116,9 +118,9 @@ public class CsvFilesConvertorConf {
         if (customName == null)
             groupByList.add(name);
         group_by.forEach(s -> {
-            if (s.startsWith(TAGS+"."))
+            if (s.startsWith(FIELD_TAGS+"."))
                 groupByList.add(s.substring(5));
-            else if (!s.equals(NAME))
+            else if (!s.equals(FIELD_NAME))
                 throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
         });
         return groupByList;
@@ -126,11 +128,11 @@ public class CsvFilesConvertorConf {
 
     public List<String> getGroupByListWithNAME() {
         List<String> groupByList = new ArrayList<>();
-        groupByList.add(NAME);
+        groupByList.add(FIELD_NAME);
         group_by.forEach(s -> {
-            if (s.startsWith(TAGS+"."))
+            if (s.startsWith(FIELD_TAGS+"."))
                 groupByList.add(s.substring(5));
-            else if (!s.equals(NAME))
+            else if (!s.equals(FIELD_NAME))
                 throw new IllegalArgumentException("You can not group by a column that is not a tag or the name of the metric");
         });
         return groupByList;

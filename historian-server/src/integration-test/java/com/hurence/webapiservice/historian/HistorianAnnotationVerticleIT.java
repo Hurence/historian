@@ -29,6 +29,8 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -114,12 +116,12 @@ public class HistorianAnnotationVerticleIT {
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithTypeEqualsAll (VertxTestContext testContext) throws InterruptedException {
         JsonObject params = new JsonObject ()
-                .put (HistorianServiceFields.FROM, 1581651394000L)
-                .put(HistorianServiceFields.TO, 1581666194000L)
-                .put(HistorianServiceFields.LIMIT, 100)
-                .put(HistorianServiceFields.TAGS, new JsonArray().add("tag1").add("tag2"))
-                .put(HistorianServiceFields.MATCH_ANY, true)
-                .put(HistorianServiceFields.TYPE, AnnotationRequestType.ALL.toString());
+                .put (FROM, 1581651394000L)
+                .put(TO, 1581666194000L)
+                .put(LIMIT, 100)
+                .put(FIELD_TAGS, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY, true)
+                .put(TYPE, AnnotationRequestType.ALL.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
@@ -137,18 +139,18 @@ public class HistorianAnnotationVerticleIT {
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithMatchAnyEqualsTrue (VertxTestContext testContext) throws InterruptedException {
         JsonObject params = new JsonObject ()
-                .put (HistorianServiceFields.FROM, 1581644594000L)
-                .put(HistorianServiceFields.TO, 1581663014000L)
-                .put(HistorianServiceFields.LIMIT, 100)
-                .put(HistorianServiceFields.TAGS, new JsonArray().add("tag1").add("tag2"))
-                .put(HistorianServiceFields.MATCH_ANY, true)
-                .put(HistorianServiceFields.TYPE, AnnotationRequestType.TAGS.toString());
+                .put (FROM, 1581644594000L)
+                .put(TO, 1581663014000L)
+                .put(LIMIT, 100)
+                .put(FIELD_TAGS, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY, true)
+                .put(TYPE, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianServiceFields.TOTAL_HIT);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (4, totalHit);
                         testContext.completeNow ();
@@ -162,18 +164,18 @@ public class HistorianAnnotationVerticleIT {
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithMatchAnyEqualsFalse (VertxTestContext testContext) throws InterruptedException {
         JsonObject params = new JsonObject ()
-                .put (HistorianServiceFields.FROM, 1581644594000L)
-                .put(HistorianServiceFields.TO, 1581663014000L)
-                .put(HistorianServiceFields.LIMIT, 100)
-                .put(HistorianServiceFields.TAGS, new JsonArray().add("tag1").add("tag2"))
-                .put(HistorianServiceFields.MATCH_ANY, false)
-                .put(HistorianServiceFields.TYPE, AnnotationRequestType.TAGS.toString());
+                .put (FROM, 1581644594000L)
+                .put(TO, 1581663014000L)
+                .put(LIMIT, 100)
+                .put(FIELD_TAGS, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY, false)
+                .put(TYPE, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianServiceFields.TOTAL_HIT);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (1, totalHit);
                         testContext.completeNow ();
@@ -185,18 +187,18 @@ public class HistorianAnnotationVerticleIT {
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithLimit (VertxTestContext testContext) throws InterruptedException {
         JsonObject params = new JsonObject ()
-                .put (HistorianServiceFields.FROM, 1581644594000L)
-                .put(HistorianServiceFields.TO, 1581663014000L)
-                .put(HistorianServiceFields.LIMIT, 2)
-                .put(HistorianServiceFields.TAGS, new JsonArray().add("tag1").add("tag2"))
-                .put(HistorianServiceFields.MATCH_ANY, true)
-                .put(HistorianServiceFields.TYPE, AnnotationRequestType.TAGS.toString());
+                .put (FROM, 1581644594000L)
+                .put(TO, 1581663014000L)
+                .put(LIMIT, 2)
+                .put(FIELD_TAGS, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY, true)
+                .put(TYPE, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianServiceFields.TOTAL_HIT);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (2, totalHit);
                         testContext.completeNow ();
@@ -209,16 +211,16 @@ public class HistorianAnnotationVerticleIT {
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
     void testAnnotationWithNoTime (VertxTestContext testContext) throws InterruptedException {
         JsonObject params = new JsonObject ()
-                .put(HistorianServiceFields.LIMIT, 10)
-                .put(HistorianServiceFields.TAGS, new JsonArray().add("tag1").add("tag2"))
-                .put(HistorianServiceFields.MATCH_ANY, true)
-                .put(HistorianServiceFields.TYPE, AnnotationRequestType.TAGS.toString());
+                .put(LIMIT, 10)
+                .put(FIELD_TAGS, new JsonArray().add("tag1").add("tag2"))
+                .put(MATCH_ANY, true)
+                .put(TYPE, AnnotationRequestType.TAGS.toString());
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianServiceFields.TOTAL_HIT);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (5, totalHit);
                         testContext.completeNow ();
@@ -236,7 +238,7 @@ public class HistorianAnnotationVerticleIT {
                 .doOnError (testContext :: failNow)
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
-                        int totalHit = rsp.getInteger(HistorianServiceFields.TOTAL_HIT);
+                        int totalHit = rsp.getInteger(TOTAL_HIT);
                         LOGGER.info("annotations {} ",rsp);
                         assertEquals (7, totalHit);
                         testContext.completeNow ();

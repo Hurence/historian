@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.historian.modele.HistorianServiceFields.METRICS;
+import static com.hurence.historian.modele.HistorianServiceFields.TOTAL;
 import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -107,8 +109,8 @@ public class HistorianSearchVerticleIT {
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (5, rsp.getLong(HistorianServiceFields.TOTAL));
-                        JsonArray docs = rsp.getJsonArray (HistorianServiceFields.METRICS);
+                        assertEquals (5, rsp.getLong(TOTAL));
+                        JsonArray docs = rsp.getJsonArray (METRICS);
                         LOGGER.info("docs {}",docs);
                         assertEquals (5, docs.size ());
                         testContext.completeNow ();
@@ -126,8 +128,8 @@ public class HistorianSearchVerticleIT {
                 .doOnSuccess (rsp -> {
                     testContext.verify (() -> {
                         LOGGER.info("docs {} ",rsp);
-                        assertEquals (7, rsp.getLong(HistorianServiceFields.TOTAL));
-                        JsonArray docs = rsp.getJsonArray (HistorianServiceFields.METRICS);
+                        assertEquals (7, rsp.getLong(TOTAL));
+                        JsonArray docs = rsp.getJsonArray (METRICS);
                         LOGGER.info("docs {}",docs);
                         assertEquals (7, docs.size ());
                         testContext.completeNow ();

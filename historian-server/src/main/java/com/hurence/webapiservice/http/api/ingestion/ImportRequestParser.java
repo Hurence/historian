@@ -9,13 +9,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0.NAME;
 import static com.hurence.historian.modele.HistorianServiceFields.POINTS;
-import static com.hurence.historian.modele.HistorianServiceFields.TAGS;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 
 public class ImportRequestParser {
 
@@ -52,13 +49,13 @@ public class ImportRequestParser {
         CorrectPointsAndErrorMessages correctPointsAndErrorMessages = new CorrectPointsAndErrorMessages();
         for (Object metricsObject : jsonImportRequest) {
             JsonObject timeserie = (JsonObject) metricsObject;
-            if (!(timeserie.containsKey(NAME)))
+            if (!(timeserie.containsKey(FIELD_NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+            if (((timeserie.getValue(FIELD_NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(FIELD_NAME) == "") ) {
                 int numPoints = timeserie.getJsonArray(POINTS).size();
-                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" measures for metric with name "+timeserie.getValue(NAME)+" because this is not a valid name");
+                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" measures for metric with name "+timeserie.getValue(FIELD_NAME)+" because this is not a valid name");
                 continue;
-            } else if (!(timeserie.getValue(NAME) instanceof String)) {
+            } else if (!(timeserie.getValue(FIELD_NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
             } else if (!(timeserie.containsKey(POINTS))) {
                 throw new IllegalArgumentException("field 'measures' is required");
@@ -66,11 +63,11 @@ public class ImportRequestParser {
                 throw new IllegalArgumentException("field 'measures' : " + timeserie.getValue(POINTS) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
-            newTimeserie.put(NAME, timeserie.getString(NAME));
+            newTimeserie.put(FIELD_NAME, timeserie.getString(FIELD_NAME));
             JsonArray newPoints = new JsonArray();
             for (Object point : timeserie.getJsonArray(POINTS)) {
                 JsonArray pointArray;
-                String commonErrorMessage = "Ignored 1 measures for metric with name '" + timeserie.getString(NAME);
+                String commonErrorMessage = "Ignored 1 measures for metric with name '" + timeserie.getString(FIELD_NAME);
                 try {
                     pointArray = (JsonArray) point;
                     pointArray.size();
@@ -161,13 +158,13 @@ public class ImportRequestParser {
             JsonObject timeserie = (JsonObject) timeserieObject;
 
             int numberOfFailedPointsForThisName = 0;
-            if (!(timeserie.containsKey(NAME)))
+            if (!(timeserie.containsKey(FIELD_NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+            if (((timeserie.getValue(FIELD_NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(FIELD_NAME) == "") ) {
                 int numPoints = timeserie.getJsonArray(POINTS).size();
                 numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints;
                 continue;
-            } else if (!(timeserie.getValue(NAME) instanceof String)) {
+            } else if (!(timeserie.getValue(FIELD_NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
             } else if (!(timeserie.containsKey(POINTS))) {
                 throw new IllegalArgumentException("field 'measures' is required");
@@ -217,10 +214,10 @@ public class ImportRequestParser {
     private static LinkedHashMap<String, String> getGroupedByFields (CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie) {
         LinkedHashMap<String, String> groupByMap = new LinkedHashMap<>();
         csvFilesConvertorConf.getGroupByListWithNAME().forEach(s -> {
-            if (s.equals(NAME))
+            if (s.equals(FIELD_NAME))
                 groupByMap.put(s, timeserie.getString(s));
             else
-                groupByMap.put(s, timeserie.getJsonObject(TAGS).getString(s));
+                groupByMap.put(s, timeserie.getJsonObject(FIELD_TAGS).getString(s));
         });
         return groupByMap;
     }
