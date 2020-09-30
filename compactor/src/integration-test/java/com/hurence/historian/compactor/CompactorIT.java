@@ -31,11 +31,7 @@ import org.noggit.JSONUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
-import scala.Predef;
-import scala.Tuple2;
-import scala.collection.JavaConverters;
 
-import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -623,6 +619,8 @@ public class CompactorIT {
 
         System.out.println("After recompaction: ");
         printUnChunkedSolrJsonDocs(solrClient, SolrITHelper.COLLECTION_HISTORIAN);
+
+        compactor.close();
 
 //        assertTrue(chunks.count() == 5);
     }

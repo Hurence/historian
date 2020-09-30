@@ -48,18 +48,17 @@ public class Definitions {
      */
     public static final String SOLR_COLUMN_ID = "id";
     public static final String SOLR_COLUMN_NAME = "name";
-    public static final String SOLR_COLUMN_DAY = "day";
-    public static final String SOLR_COLUMN_YEAR = "year";
-    public static final String SOLR_COLUMN_MONTH = "month";
-    public static final String SOLR_COLUMN_START = "start";
-    public static final String SOLR_COLUMN_END = "end";
+    public static final String SOLR_COLUMN_DAY = "chunk_day";
+    public static final String SOLR_COLUMN_YEAR = "chunk_year";
+    public static final String SOLR_COLUMN_MONTH = "chunk_month";
+    public static final String SOLR_COLUMN_START = "chunk_start";
+    public static final String SOLR_COLUMN_END = "chunk_end";
     public static final String SOLR_COLUMN_METRIC_KEY = "metric_key";
     public static final String SOLR_COLUMN_VALUE = "chunk_value";
-
     public static final String SOLR_COLUMN_COUNT = "chunk_count";
     public static final String SOLR_COLUMN_SUM = "chunk_sum";
     public static final String SOLR_COLUMN_AVG = "chunk_avg";
-    public static final String SOLR_COLUMN_STD_DEV = "chunk_stddev";
+    public static final String SOLR_COLUMN_STD_DEV = "chunk_std_dev";
     public static final String SOLR_COLUMN_MIN = "chunk_min";
     public static final String SOLR_COLUMN_MAX = "chunk_max";
     public static final String SOLR_COLUMN_FIRST = "chunk_first";
@@ -68,7 +67,7 @@ public class Definitions {
     public static final String SOLR_COLUMN_ORIGIN = "chunk_origin";
     public static final String SOLR_COLUMN_TREND = "chunk_trend";
     public static final String SOLR_COLUMN_OUTLIER = "chunk_outlier";
-    public static final String SOLR_COLUMN_VERSION = "chunk_version";
+    public static final String SOLR_COLUMN_VERSION = "version";
 
     public static final String SOLR_COLUMN_QUALITY_MIN = "chunk_quality_min";
     public static final String SOLR_COLUMN_QUALITY_MAX = "chunk_quality_max";
@@ -114,6 +113,4 @@ public class Definitions {
         biMap.put(SOLR_COLUMN_METRIC_KEY, FIELD_METRIC_KEY);
         return biMap;
     }
-
-
 }
