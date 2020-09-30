@@ -104,18 +104,12 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
     // load measures data with parquet
     val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
       .read(Options(this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath, Map()))
+      .where("tags.metric_id LIKE '08%'")
       .as[Measure]
-
-
-    measuresDS.show()
 
     // Chunkify measures
     val chunkifiedDS = chunkyfier.transform(measuresDS)
       .as[Chunk]
-
-    chunkifiedDS.show()
-
-
 
     // test 1 : make sure we got back to original data
     val rechunkifiedDS =  unchunkyfier.transform(chunkifiedDS)

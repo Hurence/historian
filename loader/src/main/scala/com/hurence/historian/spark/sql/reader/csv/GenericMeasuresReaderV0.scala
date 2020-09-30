@@ -84,7 +84,7 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
     }
 
 
-   val df2 = dfPlusTime
+   dfPlusTime
       .withColumn("year", year(from_unixtime($"timestamp" / 1000L)))
       .withColumn("month", month(from_unixtime($"timestamp" / 1000L)))
       .withColumn("hour", hour(from_unixtime($"timestamp" / 1000L)))
@@ -103,13 +103,10 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
         if (hasQuality)
           builder.quality(r.getAs[Float]("quality"))
 
-        builder.compute().build()
+        builder.build()
 
       })
 
-
-
-    reorderColumns(df2.toDF(),Seq("name","value","timestamp", "quality", "day", "tags"))
       .as[Measure]
   }
 

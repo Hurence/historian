@@ -23,7 +23,6 @@ public class ChunkToMeasuresConverter implements ChunkToMeasures {
 
             TreeSet<Measure> measures = ProtoBufTimeSeriesWithQualitySerializer.from(decompressed, chunk.getStart(), chunk.getEnd());
             measures.forEach(m -> {
-                m.setDay(chunk.getDay());
                 m.setName(chunk.getName());
                 m.setTags(chunk.getTags());
             });

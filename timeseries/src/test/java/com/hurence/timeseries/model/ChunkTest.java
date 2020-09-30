@@ -1,15 +1,12 @@
-package com.hurence.timeseries.model.chunk;
+package com.hurence.timeseries.model;
 
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.timeseries.converter.ChunkToMeasures;
 import com.hurence.timeseries.converter.ChunkToMeasuresConverter;
 import com.hurence.timeseries.converter.MeasuresToChunk;
 import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
-import com.hurence.timeseries.model.Chunk;
-import com.hurence.timeseries.model.Measure;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
@@ -17,7 +14,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.ZoneId;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ChunkTest {
 
@@ -154,7 +150,6 @@ public class ChunkTest {
         long newTimestamp = time.getMillis() + (long) (Math.random() * 1000L);
         return Measure.builder()
                 .name(name)
-                .day(day)
                 .value(Math.random())
                 .quality( (float) (Math.random() * 100.0f))
                 .timestamp(newTimestamp)
