@@ -1,7 +1,6 @@
 package com.hurence.historian.spark.ml
 
 import com.hurence.historian.spark.sql.functions.{chunk, sax, toDateUTC}
-import com.hurence.timeseries.compaction.BinaryEncodingUtils
 import com.hurence.timeseries.core.ChunkOrigin
 import com.hurence.timeseries.model.Chunk
 import com.hurence.timeseries.model.Definitions._
