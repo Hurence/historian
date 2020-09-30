@@ -31,7 +31,7 @@ trait SolrCloudTestBuilder extends BeforeAndAfterAll with LazyLogging { this: Su
     val solrXml = new File(this.getClass.getClassLoader.getResource("solr-embedded-conf/solr.xml").getPath)
     val solrXmlContents: String = TestSolrCloudClusterSupport.readSolrXml(solrXml)
 
-    val targetDir = new File("target")
+    val targetDir = new File("loader/target")
     if (!targetDir.isDirectory)
       fail("Project 'target' directory not found at :" + targetDir.getAbsolutePath)
 
