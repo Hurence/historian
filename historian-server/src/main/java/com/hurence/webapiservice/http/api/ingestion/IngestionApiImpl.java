@@ -1,8 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
-import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-
 import com.hurence.webapiservice.http.api.ingestion.util.CsvFilesConvertorConf;
 import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
@@ -12,8 +10,8 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
 import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_ORIGIN;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseJsonImportRequest;
 import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.fillingAllFilesReport;
 import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.parseFiles;
@@ -52,7 +50,7 @@ public class IngestionApiImpl implements IngestionApi {
             return;
         }
         JsonObject pointsToBeInjected = new JsonObject().put(POINTS, correctPointsAndErrorMessages.correctPoints)
-                .put(HistorianServiceFields.ORIGIN, "ingestion-json");
+                .put(SOLR_COLUMN_ORIGIN, "ingestion-json");
 
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
@@ -124,7 +122,7 @@ public class IngestionApiImpl implements IngestionApi {
         }
 
         JsonObject pointsToBeInjected = new JsonObject().put(POINTS, multiCsvFilesConvertor.allFilesReport.correctPoints)
-                .put(CHUNK_ORIGIN, "ingestion-csv");
+                .put(SOLR_COLUMN_ORIGIN, "ingestion-csv");
 
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {

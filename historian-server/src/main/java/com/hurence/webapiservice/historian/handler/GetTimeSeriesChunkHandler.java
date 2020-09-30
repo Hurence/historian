@@ -23,6 +23,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static com.hurence.historian.modele.HistorianServiceFields.TO;
+import static com.hurence.timeseries.model.Definitions.*;
+
 public class GetTimeSeriesChunkHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GetTimeSeriesChunkHandler.class);
@@ -41,7 +44,7 @@ public class GetTimeSeriesChunkHandler {
     public Handler<Promise<JsonObject>> getHandler(JsonObject params) {
         final SolrQuery query = buildTimeSeriesChunkQuery(params);
         //    FILTER
-        buildSolrFilterFromTags(params.getJsonObject(HistorianServiceFields.TAGS))
+        buildSolrFilterFromTags(params.getJsonObject(FIELD_TAGS))
                 .ifPresent(query::addFilterQuery);
         query.setFields();//so we return every fields (this endpoint is currently used only in tests, this is legacy code)
         //  EXECUTE REQUEST
@@ -107,31 +110,31 @@ public class GetTimeSeriesChunkHandler {
 
     private SolrQuery buildTimeSeriesChunkQuery(JsonObject params) {
         StringBuilder queryBuilder = new StringBuilder();
-        if (params.getLong(HistorianServiceFields.TO) != null) {
-            LOGGER.trace("requesting timeseries to {}", params.getLong(HistorianServiceFields.TO));
-            queryBuilder.append(getHistorianFields().CHUNK_START_FIELD).append(":[* TO ").append(params.getLong(HistorianServiceFields.TO)).append("]");
+        if (params.getLong(TO) != null) {
+            LOGGER.trace("requesting timeseries to {}", params.getLong(TO));
+            queryBuilder.append(SOLR_COLUMN_START).append(":[* TO ").append(params.getLong(TO)).append("]");
         }
         if (params.getLong(HistorianServiceFields.FROM) != null) {
             LOGGER.trace("requesting timeseries from {}", params.getLong(HistorianServiceFields.FROM));
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(getHistorianFields().CHUNK_END_FIELD).append(":[").append(params.getLong(HistorianServiceFields.FROM)).append(" TO *]");
+            queryBuilder.append(SOLR_COLUMN_END).append(":[").append(params.getLong(HistorianServiceFields.FROM)).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
         if (queryBuilder.length() != 0)
             query.setQuery(queryBuilder.toString());
         //TODO filter on names AND tags
-        buildSolrFilterFromArray(params.getJsonArray(HistorianServiceFields.NAMES), getHistorianFields().CHUNK_NAME)
+        buildSolrFilterFromArray(params.getJsonArray(HistorianServiceFields.NAMES), SOLR_COLUMN_NAME)
                 .ifPresent(query::addFilterQuery);
 //            FIELDS_TO_FETCH
-        query.setFields(getHistorianFields().CHUNK_START_FIELD,
-                getHistorianFields().CHUNK_END_FIELD,
-                getHistorianFields().CHUNK_COUNT_FIELD,
-                getHistorianFields().CHUNK_NAME);
+        query.setFields(SOLR_COLUMN_START,
+                SOLR_COLUMN_END,
+                SOLR_COLUMN_COUNT,
+                SOLR_COLUMN_NAME);
         //    SORT
-        query.setSort(getHistorianFields().CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(getHistorianFields().CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setSort(SOLR_COLUMN_START, SolrQuery.ORDER.asc);
+        query.addSort(SOLR_COLUMN_END, SolrQuery.ORDER.asc);
         query.setRows(params.getInteger(HistorianServiceFields.MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000));
         return query;
     }

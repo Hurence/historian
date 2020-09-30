@@ -6,8 +6,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_NAME;
-import static com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter.TIMESERIE_TAGS;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 
 public class RefIdInfo {
     private final String name;
@@ -49,8 +49,8 @@ public class RefIdInfo {
     }
 
     public boolean isMetricMatching(JsonObject timeserieWithoutRefIdObject) {
-        String metricName = timeserieWithoutRefIdObject.getString(TIMESERIE_NAME);
-        JsonObject metricTags = timeserieWithoutRefIdObject.getJsonObject(TIMESERIE_TAGS);
+        String metricName = timeserieWithoutRefIdObject.getString(FIELD_NAME);
+        JsonObject metricTags = timeserieWithoutRefIdObject.getJsonObject(FIELD_TAGS);
         Map<String,String> metricTagsMap = new HashMap<>();
         for (Map.Entry<String, Object> metricTagsEntry : metricTags.getMap().entrySet()){
             metricTagsMap.put(metricTagsEntry.getKey() ,metricTagsEntry.getValue().toString());

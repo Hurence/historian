@@ -18,7 +18,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianServiceFields.TIME;
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 
 public class GetAnnotationsHandler {
 
@@ -73,8 +74,8 @@ public class GetAnnotationsHandler {
         }
         //FILTER
         List<String> tags = null;
-        if (params.getJsonArray(HistorianServiceFields.TAGS) != null)
-            tags = params.getJsonArray(HistorianServiceFields.TAGS).getList();
+        if (params.getJsonArray(FIELD_TAGS) != null)
+            tags = params.getJsonArray(FIELD_TAGS).getList();
         StringBuilder stringQuery = new StringBuilder();
         String operator = "";
         SolrQuery query = new SolrQuery();
@@ -92,7 +93,7 @@ public class GetAnnotationsHandler {
                     stringQuery.append(tag).append(operator);
                 }
                 stringQuery.append(tags.get(tags.size()-1));
-                queryBuilder.append(HistorianServiceFields.TAGS).append(":").append("(").append(stringQuery.toString()).append(")");
+                queryBuilder.append(FIELD_TAGS).append(":").append("(").append(stringQuery.toString()).append(")");
                 break;
         }
         if (queryBuilder.length() != 0 ) {
@@ -102,9 +103,9 @@ public class GetAnnotationsHandler {
         query.setRows(params.getInteger(HistorianServiceFields.LIMIT, 1000));
         //    FIELDS_TO_FETCH
         query.setFields(TIME,
-                HistorianServiceFields.TIME_END_REQUEST_FIELD,
-                HistorianServiceFields.TEXT,
-                HistorianServiceFields.TAGS);
+                TIME_END_REQUEST_FIELD,
+                TEXT,
+                FIELD_TAGS);
         query.addSort("score", SolrQuery.ORDER.desc);
         query.addSort(TIME, SolrQuery.ORDER.desc);
         return query;

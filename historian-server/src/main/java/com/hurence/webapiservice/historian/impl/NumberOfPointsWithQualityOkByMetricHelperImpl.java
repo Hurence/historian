@@ -9,6 +9,7 @@ import java.util.List;
 
 import static com.hurence.historian.modele.HistorianServiceFields.QUALITY_CHECK;
 import static com.hurence.solr.util.StreamExprHelper.*;
+import static com.hurence.timeseries.model.Definitions.*;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.findNeededTagsName;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.joinListAsString;
 
@@ -32,10 +33,10 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
     @Override
     public String getStreamExpression() {
         List<String> neededFields = findNeededTagsName(requests);
-        neededFields.add(solrMapping.CHUNK_NAME);
+        neededFields.add(SOLR_COLUMN_NAME);
         List<String> overFields = new ArrayList<>(neededFields);
         overFields.add(QUALITY_CHECK);
-        neededFields.add(solrMapping.CHUNK_COUNT_FIELD);
+        neededFields.add(SOLR_COLUMN_COUNT);
         String overString = joinListAsString(overFields);
         neededFields.add(getAggFieldForFilteringQuality());
         List<String> selectFields = new ArrayList<>(neededFields);
@@ -46,11 +47,11 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
                 query.getQuery(),
                 "\"" + flString + "\"",
                 "\"/export\"",
-                "\"" +solrMapping.CHUNK_NAME + " asc\""
+                "\"" +SOLR_COLUMN_NAME + " asc\""
         );
         String selectedWrapper = createSelect(baseSearchQuery, selectFields);
         List<String> fieldsAggInRoll = new ArrayList<>();
-        fieldsAggInRoll.add("sum(\"" + solrMapping.CHUNK_COUNT_FIELD + ")");
+        fieldsAggInRoll.add("sum(\"" + SOLR_COLUMN_COUNT + ")");
         fieldsAggInRoll.add("count(*)");
         String rollUpExpr = createRollup(selectedWrapper,
                         "\"" + overString +  "\"",
@@ -112,7 +113,7 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
             StringBuilder conditionForOneMetricRequest = new StringBuilder();
             conditionForOneMetricRequest.append("and (");
             conditionForOneMetricRequest.append("eq(");
-            conditionForOneMetricRequest.append(solrMapping.CHUNK_NAME);
+            conditionForOneMetricRequest.append(SOLR_COLUMN_NAME);
             conditionForOneMetricRequest.append(",");
             conditionForOneMetricRequest.append(metricRequest.getName());
             conditionForOneMetricRequest.append("), ");
@@ -128,6 +129,6 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
 
     private String getAggFieldForFilteringQuality() {
         //for the moment we filter every time on QUALITY_AVG
-        return solrMapping.CHUNK_QUALITY_AVG_FIELD;
+        return SOLR_COLUMN_QUALITY_AVG;
     }
 }

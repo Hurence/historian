@@ -12,6 +12,8 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 
 public class TestHistorianApiImpl implements TestHistorianApi {
@@ -50,7 +52,7 @@ public class TestHistorianApiImpl implements TestHistorianApi {
         service
                 .rxGetTimeSeriesChunk(getTimeSeriesChunkParams)
                 .map(chunkResponse -> {
-                    chunkResponse.getJsonArray(HistorianServiceFields.CHUNKS).forEach(chunk -> {
+                    chunkResponse.getJsonArray(CHUNKS).forEach(chunk -> {
                         JsonObject chunkJson = (JsonObject) chunk;
                         chunkJson.remove("_version_");
                     });
@@ -76,13 +78,13 @@ public class TestHistorianApiImpl implements TestHistorianApi {
     private JsonObject buildHistorianRequest(GetTimeSerieRequestParam request) {
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
-                .put(HistorianServiceFields.FROM, request.getFrom())
-                .put(HistorianServiceFields.TO, request.getTo())
-                .put(HistorianServiceFields.NAMES, request.getMetricNames())
-                .put(HistorianServiceFields.TAGS, request.getTags())
-                .put(HistorianServiceFields.SAMPLING_ALGO, samplingConf.getAlgo())
-                .put(HistorianServiceFields.BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(HistorianServiceFields.MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(NAMES, request.getMetricNames())
+                .put(FIELD_TAGS, request.getTags())
+                .put(SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
 }
