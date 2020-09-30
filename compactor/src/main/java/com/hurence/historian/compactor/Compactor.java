@@ -27,6 +27,7 @@ import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.catalyst.plans.physical.IdentityBroadcastMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Predef;
@@ -132,7 +133,7 @@ public class Compactor implements Runnable {
             return;
         }
 
-        logger.info("Stopping compactor...");
+        logger.info("Stopping compactor");
 
         scheduledThreadPool.shutdown();
         try {
@@ -147,12 +148,16 @@ public class Compactor implements Runnable {
     }
 
     private void closeSparkEnv() {
+        logger.info("Closing spark session");
         sparkSession.close();
+        logger.info("Spark session closed");
     }
 
     private void closeSolrClient() {
         try {
+            logger.info("Closing solr client");
             solrClient.close();
+            logger.info("Solr client closed");
         } catch (IOException e) {
             logger.error("Error closing solr client: " + e.getMessage());
         }
@@ -162,6 +167,8 @@ public class Compactor implements Runnable {
      * Initializes the spark session according to the configuration
      */
     private void initSparkEnv() {
+
+        logger.info("Initializing spark session");
 
         SparkSession.Builder sessionBuilder = SparkSession.builder();
 
@@ -180,6 +187,7 @@ public class Compactor implements Runnable {
         }
 
         sparkSession = sessionBuilder.getOrCreate();
+        logger.info("Spark session initialized");
     }
 
     /**
@@ -199,14 +207,13 @@ public class Compactor implements Runnable {
         setStartNow(configuration.isCompactionSchedulingStartNow());
     }
 
-
-
     /**
      * Make this compactor close all used underlying resources (end of life).
      * Cannot call start/stop or any other business method on this object after
      * calling this method. A new Compactor object should be re-created for this.
      */
     public synchronized void close() {
+        logger.info("Closing compactor");
         closeSolrClient();
         closeSparkEnv();
         closed = true;
@@ -214,10 +221,12 @@ public class Compactor implements Runnable {
 
     private void initSolrClient() {
 
+        logger.info("Initializing solr client");
         List<String> zkHosts = Arrays.asList(configuration.getSolrZkHost());
         CloudSolrClient.Builder solrClientBuilder =
                 new CloudSolrClient.Builder(zkHosts, Optional.empty());
         solrClient = solrClientBuilder.build();
+        logger.info("Solr client initialized");
     }
 
     public int getPeriod() {
@@ -370,10 +379,10 @@ public class Compactor implements Runnable {
         // Compute and set the metric name and tags to read from the metric key
         Chunk.MetricKey metricKey = Chunk.MetricKey.parse(metricKeyStr);
         Set<String> tags = metricKey.getTagKeys();
-        String metricAndTagsCsv = NAME + "," + tags.stream().collect(Collectors.joining(","));
-        options.put(Options.TAG_NAMES(), metricAndTagsCsv);
+        String tagsCsv = tags.stream().collect(Collectors.joining(","));
+        options.put(Options.TAG_NAMES(), tagsCsv);
 
-        System.out.println("####################################### " + metricAndTagsCsv);
+        System.out.println("####################################### " + tagsCsv);
 
         // JavaConverters used to convert from java Map to scala immutable Map
         Options readerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
@@ -438,7 +447,7 @@ public class Compactor implements Runnable {
          */
 
         options = newOptions();
-        options.put(Options.TAG_NAMES(), metricAndTagsCsv);
+        options.put(Options.TAG_NAMES(), tagsCsv);
         // JavaConverters used to convert from java Map to scala immutable Map
         Options writerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
                 Predef.<Tuple2<String, String>>conforms()));
