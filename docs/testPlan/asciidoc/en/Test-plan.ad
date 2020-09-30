@@ -341,7 +341,74 @@ and we have got:
 ----
 Error from server at http://127.0.1.1:7574/solr/historian_shard2_replica_n2: ERROR: [doc=70b486aa24150a07929e79e1b9ed25b6c111b55d5f1ebbc101c4b2258653dec8] unknown field 'code_install'curl: (3) URL using bad/illegal format or missing URL
 ----
+==== CSV with tagname
+Our data is 5250 lines of
+----
+metric,timeseries,tagname,value1,value2
+weater,2016-11-15 07:00:00-05	weather-pro-000000,39.9,49.9
+weater,2016-11-15 07:00:00-05,weather-pro-000001,32.4,49.8
+weater,2016-11-15 07:00:00-05,weather-pro-000002,39.8,50.2
+.
+.
+.
+----
+our command :
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@/home/nemsi/hdh_workspace/testing_data/csv/weater.csv' \
+-F mapping.name=metric \
+-F mapping.value=value1 \
+-F mapping.timestamp=timeseries \
+-F mapping.tags=tagname \
+-F group_by=name \
+-F group_by=tags.tagname \
+-F format_date=yyyy-MM-dd HH:mm:ss-SSS \
+-F timezone_date=UTC
+----
 
+we have got:
+----
+Error from server at http://127.0.1.1:7574/solr/historian_shard2_replica_n2: ERROR: [doc=8a328784ece942d6050a7657d913e131d303f8887e333a896f1ee281899251cb] unknown field 'tagname'curl: (3) URL using bad/illegal format or missing URL
+----
+
+==== Injecting 5250 lines of timeseries data as csv file
+Our data is 5250 lines of
+----
+metric,timeseries,tagname,value1,value2
+weater,2016-11-15 07:00:00-05	weather-pro-000000,39.9,49.9
+weater,2016-11-15 07:00:00-05,weather-pro-000001,32.4,49.8
+weater,2016-11-15 07:00:00-05,weather-pro-000002,39.8,50.2
+.
+.
+.
+----
+our command :
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@/home/nemsi/hdh_workspace/testing_data/csv/weater.csv' \
+-F mapping.name=metric \
+-F mapping.value=value1 \
+-F mapping.timestamp=timeseries \
+-F group_by=name \
+-F format_date=yyyy-MM-dd HH:mm:ss-SSS \
+-F timezone_date=UTC
+----
+
+we have got:
+----
+{
+  "tags" : [ ],
+  "grouped_by" : [ "name" ],
+  "report" : [ {
+    "name" : "weater",
+    "number_of_points_injected" : 5249,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 1
+  } ]
+}curl: (3) URL using bad/illegal format or missing URL
+----
 ==== Empty json file
 To inject points to data historian from a request body in json format we used postman.
 We created a new POST request and we tryed to post empty body to this adress:
@@ -717,6 +784,6 @@ data that we inject threw the request.
 * For more friendly user experience, data historian could have a front-end module that could contain
 injection parts taking many types of data (csv/json/...), taking whole folders containing data and displays results
 depending on which api we used.
-* Sometimes historian server does not start. Maybe you have to start grafana server before it to get historian server.
+* Sometimes historian server does not start. Maybe you have to start grafana server and solr nodes before starting historian server.
 * There is no exemples of how to use grafana.
 * Add exemples of errors and their significations and how solve them.
