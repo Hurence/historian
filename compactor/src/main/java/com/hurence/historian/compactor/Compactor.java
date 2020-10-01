@@ -20,14 +20,11 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
-import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.apache.spark.sql.catalyst.plans.physical.IdentityBroadcastMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import scala.Predef;
@@ -311,25 +308,18 @@ public class Compactor implements Runnable {
                 .options(options)
                 .load();
 
-        resultDs.show(100, false);
-        System.out.println("#rows" + resultDs.count());
-
+        // One row per (metric key,day)
         resultDs = resultDs.distinct();
 
-        resultDs.show(100, false);
-        System.out.println("#rows" + resultDs.count());
-
+        // Sort per metric key then day
         resultDs = resultDs.sort(resultDs.col(METRIC_KEY), resultDs.col(CHUNK_DAY));
 
-        resultDs.show(100, false);
-        System.out.println("#rows" + resultDs.count());
-
+        // Recompact each (metric key,day) chunks whether from injector or compactor
         for (Row row : resultDs.collectAsList()) {
             String metricKey = row.getAs(METRIC_KEY);
             String day = row.getAs(CHUNK_DAY);
             reCompact(metricKey, day);
         }
-
     }
 
     /**
@@ -382,8 +372,6 @@ public class Compactor implements Runnable {
         String tagsCsv = tags.stream().collect(Collectors.joining(","));
         options.put(Options.TAG_NAMES(), tagsCsv);
 
-        System.out.println("####################################### " + tagsCsv);
-
         // JavaConverters used to convert from java Map to scala immutable Map
         Options readerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
                 Predef.<Tuple2<String, String>>conforms()));
@@ -391,18 +379,15 @@ public class Compactor implements Runnable {
 
         chunksToRecompact.cache();
 
-        System.out.println("------------------------------------- " + day + " for metric " + metricKey + " " +
-                chunksToRecompact.count() + " chunks:");
-        chunksToRecompact.show(100, false);
+//        System.out.println("------------------------------------- " + day + " for metric " + metricKey + " " +
+//                chunksToRecompact.count() + " chunks:");
+//        chunksToRecompact.show(100, false);
 
         /**
          * Save ids of the read chunks to recompact
          */
-
-//        JavaRDD<String> chunksToRecompactIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId());
         List<String> chunksToDeletetIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId()).collect();
-//        List<String> chunksToRecompactIds = new ArrayList<String>();
-        System.out.println("Will have to delete ids: " + chunksToDeletetIds);
+        //System.out.println("Will have to delete ids: " + chunksToDeletetIds);
 
         /**
          * Unchunkyfy the read chunks
@@ -411,9 +396,8 @@ public class Compactor implements Runnable {
         UnChunkyfier unchunkyfier = new UnChunkyfier();
         Dataset<Row> metricsToRecompact = unchunkyfier.transform(chunksToRecompact);
 
-        System.out.println("Unchunkyfied metric values count " + metricsToRecompact.count() + ":");
-
-        metricsToRecompact.show(100, false);
+//        System.out.println("Unchunkyfied metric values count " + metricsToRecompact.count() + ":");
+//        metricsToRecompact.show(100, false);
 
         /**
          * Re-compact those chunks
@@ -425,7 +409,6 @@ public class Compactor implements Runnable {
         groupByCols.addAll(tags.stream().map(tag -> "tags." + tag).collect(Collectors.toList()));
         String[] groupByColsArray = new String[groupByCols.size()];
         groupByColsArray = groupByCols.toArray(groupByColsArray);
-        System.out.println("############################# groupByColsArray: " + groupByColsArray);
 
         Chunkyfier chunkyfier = new Chunkyfier()
                 .setValueCol("value")
@@ -438,9 +421,8 @@ public class Compactor implements Runnable {
                 .setSaxStringLength(50);
         Dataset<Row> recompactedChunksRows = chunkyfier.transform(metricsToRecompact);
 
-        System.out.println("Recompacted chunks count " + recompactedChunksRows.count() + ":");
-
-        recompactedChunksRows.show(100, false);
+//        System.out.println("Recompacted chunks count " + recompactedChunksRows.count() + ":");
+//        recompactedChunksRows.show(100, false);
 
         /**
          * Write new re-compacted chunks
@@ -473,9 +455,7 @@ public class Compactor implements Runnable {
     private void deleteDocuments(List<String> documentsToDelete) {
 
         for (String id : documentsToDelete) {
-
-            System.out.println("Deleting document id " + id);
-
+//            System.out.println("Deleting document id " + id);
             try {
                 solrClient.deleteById(configuration.getSolrCollection(), id);
             } catch (Exception e) {

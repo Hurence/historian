@@ -6,6 +6,8 @@ import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.converter.ChunkTruncater;
 import lombok.*;
+import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -15,6 +17,7 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.ZoneId;
 import java.util.*;
 
@@ -91,7 +94,6 @@ public class Chunk implements Serializable {
 
     protected Map<String, String> tags;
 
-
     // Naming pattern <Class>Builder of this class will make lombok use this class
     // as the builder for Chunk. Said differently, an instance of this ChunkBuilder
     // class will be returned by Chunk.build().
@@ -109,6 +111,16 @@ public class Chunk implements Serializable {
          */
         public ChunkBuilder buildId() {
             StringBuilder newId = new StringBuilder();
+
+            if (tags == null) {
+                // Workaround to initializer not working with lombok:
+                // If we declare tags like this:
+                //   @Builder.Default
+                //   protected Map<String, String> tags = new HashMap<String, String>();
+                // We get the following compilation error:
+                // java: non-static variable tags cannot be referenced from a static context
+                tags = new HashMap<String, String>();
+            }
 
             newId.append(name);
             tags.forEach((k, v) -> newId.append(k + v));
@@ -144,6 +156,25 @@ public class Chunk implements Serializable {
             return this;
         }
 
+    }
+
+    public String toHumanReadable() {
+        SimpleDateFormat sdf = Measure.createUtcDateFormatter("yyyy-MM-dd HH:mm:ss.SSS");
+        StringBuilder stringBuilder = new StringBuilder("  Human readable value:");
+        try {
+            TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(value, start, end);
+            for (Measure measure : measures) {
+                double measureValue = measure.getValue();
+                float quality = measure.getQuality();
+                String readableTimestamp = sdf.format(new Date(measure.getTimestamp()));
+                stringBuilder.append("\n    t=").append(readableTimestamp)
+                        .append(" v=").append(measureValue)
+                        .append(" q=").append(quality);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return ReflectionToStringBuilder.toString(this, ToStringStyle.MULTI_LINE_STYLE) + stringBuilder;
     }
 
     /**
