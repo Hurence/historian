@@ -388,15 +388,13 @@ public class Compactor implements Runnable {
 
         chunksToRecompact.cache();
 
-        System.out.println("------------------------------------- " + day + " for metric " + metricKey + " " +
-                chunksToRecompact.count() + " chunks:");
-        chunksToRecompact.show(100, false);
+        //System.out.println("Chunks to recompact (" + chunksToRecompact.count() + " chunks):");
+        //chunksToRecompact.show(100, false);
 
         /**
          * Save ids of the read chunks to recompact
          */
         List<String> chunksToDeletetIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId()).collect();
-        //System.out.println("Will have to delete ids: " + chunksToDeletetIds);
 
         /**
          * Unchunkyfy the read chunks
@@ -405,14 +403,14 @@ public class Compactor implements Runnable {
         UnChunkyfier unchunkyfier = new UnChunkyfier();
         Dataset<Row> metricsToRecompact = unchunkyfier.transform(chunksToRecompact);
 
-        System.out.println("Unchunkyfied metric values count " + metricsToRecompact.count() + ":");
-        metricsToRecompact.show(100, false);
+        //System.out.println("Metrics to recompact (" + metricsToRecompact.count() + " metrics):");
+        //metricsToRecompact.show(100, false);
 
         /**
          * Re-compact those chunks
          */
 
-        // Compute ["name", "tag1", "tag2"] String array
+        // Compute ["tag1", "tag2"] String array
         List<String> groupByCols = new ArrayList<String>();
         groupByCols.add(NAME);
         groupByCols.addAll(tags.stream().map(tag -> "tags." + tag).collect(Collectors.toList()));
@@ -430,8 +428,8 @@ public class Compactor implements Runnable {
                 .setSaxStringLength(50);
         Dataset<Row> recompactedChunksRows = chunkyfier.transform(metricsToRecompact);
 
-        System.out.println("Recompacted chunks count " + recompactedChunksRows.count() + ":");
-        recompactedChunksRows.show(100, false);
+        //System.out.println("Recompacted chunks (" + recompactedChunksRows.count() + " chunks):");
+        //recompactedChunksRows.show(100, false);
 
         /**
          * Write new re-compacted chunks
@@ -470,7 +468,7 @@ public class Compactor implements Runnable {
         // same day of both origin=compactor and origin=injector chunks
 
         for (String id : documentsToDelete) {
-            System.out.println("Deleting document id " + id);
+            //System.out.println("Deleting document id " + id);
             try {
                 solrClient.deleteById(configuration.getSolrCollection(), id);
             } catch (Exception e) {
