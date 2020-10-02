@@ -1,0 +1,90 @@
+=== Installation standalone
+
+Cette installation est celle à privilégier si vous êtes nouveau dans l'utilisation du data historian et que vous voulez essentiellement le tester. L'installation n'est pas faite pour la production (ou les noeuds seront redondés) ni pour des larges volumes de données (ce n'est qu'une seule machine). Mais cette installation peut évoluer vers une installation de production si nécessaire.
+
+Note:: Hurence propose de l'accompagnement pour faire évoluer vos installations mono noeuds vers une infrastructure clusterisée de production.
+
+==== Pre-requis pour une installation mono serveur en standalone (pour tester)
+
+Comme expliqué plus haut cette installation est la plus rapide et simple pour installer HDH. Elle est idéale pour un test ou si vous n'avez pas de gros volumes de données.
+
+La configuration minimale du serveur pour une installation de test du data historian est:
+
+- un OS CentOS ou Redhat 7.x ou Ubuntu ou Mac
+- 16 Gigabits de RAM
+- 8 vcores de CPU
+- 250 Giga octets de disque
+- Java 8
+
+==== Installation de l'historian
+
+include::./_installation_historian_part_1.ad[]
+
+Comme nous allons procéder à une installation de test en mode standalone vous pouvez laisser les valeurs par défaut et juste taper sur la touche entrée pour chaque question.
+Pour les questions sur les installations standalone tapez "1". Sauf pour l'installation de spark qui ne nous sera pas utile.
+Le programme va télécharger et installer des versions embarquées de Solr et Grafana.
+
+Voici un exemple de l'installation :
+
+image::screenshot_install_standalone.png[]
+
+include::./_installation_historian_part_2.ad[]
+
+Dans la suite, on appellera le chemin indiqué pour l'installation de l'historian '$HDH_HOME'.
+
+A l'issue de ce script, si vous avez suivi l'exemple, vous aurez :
+
+- Un serveur solr {solr_version} installé dans $HDH_HOME/solr-{solr_version}
+- Le serveur solr a été démarré par le script d'installation. Vous pouvez vérifier cela à l'adresse suivante :
+http://localhost:8983/solr/#/~cloud[solr UI]. Vous pouvez regarder la documentation solr pour
+interagir avec Solr (notamment pour démarrer le cluster et l'éteindre).
+- Un serveur Grafana {grafana_version} installé dans $HDH_HOME/grafana-{grafana_version}
+- Le plugin https://github.com/Hurence/grafana-historian-datasource[datasource Grafana de l'historian]
+a été installé aussi sur ce serveur Grafana. Ce plugin permet la visualisation des time series du data historian dans Grafana.
+Les binaires du plugin sont installé dans $HDH_HOME/grafana-{grafana_version}/data/plugins/grafana-historian-datasource/dist
+- Le serveur Grafana a été lancé par le script. Vous pouvez vérifier à l'adresse suivante :
+http://localhost:3000/[http://localhost:3000/]. Vous pouvez regarder la documentation Grafana pour
+interagir avec Grafana (notamment pour démarrer le serveur et l'éteindre).
+- Le serveur historian installé dans $HDH_HOME/historian-{hdh_version}
+- Un répertoire "$HDH_HOME/data" qui va contenir les time series de l'historian.
+
+Voici la structure de $HDH_HOME à l'issue de l'installation par défaut :
+
+- $HDH_HOME/data : Dossier contenant les données Solr
+
+- $HDH_HOME/solr-{solr_version} : Dossier contenant l'installation de Solr {solr_version}
+
+- $HDH_HOME/solr-{solr_version}/bin/solr : Script permettant de démarrer et arrêter Solr
+
+- $HDH_HOME/historian-{hdh_version}/bin/historian-server.sh : Permet de lancer et arrêter l'api REST de l'historian.
+
+- $HDH_HOME/historian-{hdh_version}/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
+
+- $HDH_HOME/historian-{hdh_version}/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
+
+- $HDH_HOME/historian-{hdh_version}/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l'api rest de l'historian.
+
+- $HDH_HOME/application.log : Le fichier de log du data historian.
+
+- $HDH_HOME/grafana-{grafana_version} : Dossier contenant l'installation de Grafana
+
+- $HDH_HOME/grafana-{grafana_version}/bin/grafana-server : Script permettant de démarrer et arrêter grafana
+
+Si l'installation se passe correctement, tous les services ont été lancés  et le data historian est prêt pour utilisation.
+
+===== Description du fichier de configuration de l'historian
+
+include::./_description_conf_file.ad[]
+
+Le script d'installation (install.sh) génère un fichier de configuration selon les informations renseignées.
+
+===== Description des composants installés par le script d'installation
+
+====== Installation de Apache SolR
+
+Apache SolR est la base de donnée utilisée par l'historian, elle peut être remplacée par un autre moteur de recherche.
+
+Le script d'installation a installé Solr au chemin '$HDH_HOME/solr-{solr_version}' que nous appelleront '$SOLR_HOME'.
+
+Il a également lancé deux cores Solr localement dans le répertoire `$HDH_HOME/data`.
+

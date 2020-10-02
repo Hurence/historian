@@ -1,0 +1,80 @@
+== Concepts
+
+Hurence Data Historian is a free solution to handle massive loads of timeseries data into a search engine (such as Apache SolR).
+The key concepts are simple :
+
+- **Measure** is a point in time with a floating point value identified by a name and some tags (categorical features)
+- **Chunk** is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and eventually some tags
+
+The main purpose of this tool is to help creating, storing and retrieving these chunks of timeseries.
+We use chunking instead of raw storage in order to save some disk space and reduce costs at scale. Also chunking is very usefull to pre-compute some aggregation and to facilitate down-sampling
+
+=== Data model
+
+A Measure point is identified by the following fields
+[source,scala]
+----
+case class Measure(name: String,
+                   value: Double,
+                   timestamp: Long,
+                   year: Int,
+                   month: Int,
+                   day: String,
+                   hour: Int,
+                   tags: Map[String,String])
+----
+
+
+A Chunk is identified by the following fields
+[source,scala]
+----
+case class Chunk(name: String,
+     day:String,
+     start: Long,
+     end: Long,
+     chunk: String,
+     count: Long,
+     avg: Double,
+     std_dev: Double,
+     min: Double,
+     max: Double,
+     first: Double,
+     last: Double,
+     sax: String,
+     tags: Map[String,String])
+----
+
+As you can see from a Measure points to a Chunk of Measures, the `timestamp` field has been replaced by a `start` and `stop` interval and the `value` is now a base64 encoded string named `chunk`.
+
+
+In SolR the chunks will be stored according to  the following schema (for the current version)
+
+[source,xml]
+----
+<schema name="default-config" version="1.6">
+    ...
+    <field name="chunk_avg" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
+    <field name="chunk_count" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_day" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_end" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_first" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_hour" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_last" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_max" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_min" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_month" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="name" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_outlier" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_qualities" type="string" multiValued="true" indexed="true" stored="true"/>
+    <field name="chunk_sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_start" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_std_dev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="tags" type="text_en" multiValued="true" indexed="true" stored="true"/>
+    <field name="chunk_timestamp" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_trend" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_year" type="pint" multiValued="false" indexed="true" stored="true"/>
+</schema>
+----
+

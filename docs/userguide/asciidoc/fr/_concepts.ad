@@ -1,0 +1,79 @@
+== Concepts
+
+Hurence Data Historian est une solution open source pour gérer d'énormes quantités de time series (séries temporelles).
+Il se base sur les moteurs de recherche (comme Apache Solr).
+Les principaux concepts sont les suivants :
+
+- **Measure** C'est un point dans le temps avec une valeur de type "double" identifiée par un nom et des tags (clés valeurs).
+- **Chunk** Est un ensemble continu de Measures dans un intervalle de temps donné, groupées par date, name et éventuellement des tags.
+
+Le but principal de cet outil est d'aider à la création, au stockage et au requêtage de ces chunks de time series.
+Nous utilison le "chunking" à la place du stockage brut des données afin d'économiser de l'espace de stockage et afin d'améliorer les performances pour de grandes volumétries de points. En effet le chunking nous permet de pré-calculer des agrégations pour faciliter le sampling par exemple.
+
+=== Modèle de données
+
+Une Measure est un point dans le temps Identifié par les champs suivants :
+[source,scala]
+----
+case class Measure(name: String,
+                   value: Double,
+                   timestamp: Long,
+                   year: Int,
+                   month: Int,
+                   day: String,
+                   hour: Int,
+                   tags: Map[String,String])
+----
+
+
+Un Chunk est identifié par les champs suivants :
+[source,scala]
+----
+case class Chunk(name: String,
+     day:String,
+     start: Long,
+     end: Long,
+     chunk: String,
+     count: Long,
+     avg: Double,
+     std_dev: Double,
+     min: Double,
+     max: Double,
+     first: Double,
+     last: Double,
+     sax: String,
+     tags: Map[String,String])
+----
+
+Comme vous pouvez le constater lors du passage entre la Measure et le Chunk de Measure, le "timestamp" a été remplacé par "start" et "stop" qui définissent l'intervalle de temps, la valeur est, elle, passée d'un double dans le champs "value" à une string en base64 appelée "chunk". Cette string contient l'ensemble des valeurs du chunk, compressées par un algorithme.
+
+Dans solr les chunks sont stockés avec le schéma suivant :
+
+[source,xml]
+----
+<schema name="default-config" version="1.6">
+    ...
+    <field name="chunk_avg" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
+    <field name="chunk_count" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_day" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_end" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_first" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_hour" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_last" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_max" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_min" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_month" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="name" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_outlier" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_start" type="plong" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_std_dev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_trend" type="boolean" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_year" type="pint" multiValued="false" indexed="true" stored="true"/>
+    <field name="chunk_origin" type="string" multiValued="false" indexed="true" stored="true"/>
+    <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
+</schema>
+----
+

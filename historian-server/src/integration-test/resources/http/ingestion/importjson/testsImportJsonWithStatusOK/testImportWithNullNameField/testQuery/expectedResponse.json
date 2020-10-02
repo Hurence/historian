@@ -1,0 +1,9 @@
+[
+  {
+    "name": "openSpaceSensors.Temperature20",
+    "datapoints": [
+      [43.0, 1477895624866],
+      [8.0, 1477917224866]
+    ],"total_points":2
+  }
+]

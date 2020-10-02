@@ -1,0 +1,9 @@
+{
+  "targets": [
+    {
+      "target": "metric with spaces",
+      "refId": "A",
+      "type": "timeserie"
+    }
+  ]
+}

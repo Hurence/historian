@@ -1,0 +1,5 @@
+{
+  "field": "Economy (GDP per Capita)",
+  "query": ".4",
+  "limit": 20
+}

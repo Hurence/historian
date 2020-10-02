@@ -1,0 +1,24 @@
+== Installation
+
+Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant
+conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes
+volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d'installation n'est pas
+décrite ici par simplification car elle concerne des experts en urbanisation d'infrastructures Big Data.
+
+[IMPORTANT] 
+N'ouvrez pas les ports de votre data historian sur le réseau public, protégez le a minima par un firewall, car cette installation n'est pas sécurisée. Une installation très sécurisée est possible; contactez nous pour plus d'information.
+
+[NOTE]
+Hurence propose de l'accompagnement pour installer le data historian pour des volumétries importantes.
+
+Dans ce guide nous proposons une installation simple et rapide qui est idéale pour tester, développer et stocker de petits volumes de données peu sensibles. Nous ne recommendons pas cette installation en production car pour la production il faut se préparer pour une infrastructure qui deviendra à terme multi noeuds, et aura la nécessaire redondance des données et des mécanismes de fail over. La seconde installation est plus souhaitable si vous planifiez de faire passer à l'échelle ce que vous voulez installer.
+
+* <<install-standalone,Installation standalone>>
+* <<install-production-mono-noeud,Installation de production mono noeud>>.
+
+
+[[install-standalone]]
+include::./_installation_standalone.ad[]
+
+[[install-production-mono-noeud]]
+include::./_installation_production.ad[]

@@ -1,0 +1,2201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.10">
+<meta name="author" content="© Hurence">
+<title>Guide utilisateur</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+/* Uncomment @import statement to use as custom stylesheet */
+/*@import "https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700";*/
+article,aside,details,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}
+audio,video{display:inline-block}
+audio:not([controls]){display:none;height:0}
+html{font-family:sans-serif;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}
+a{background:none}
+a:focus{outline:thin dotted}
+a:active,a:hover{outline:0}
+h1{font-size:2em;margin:.67em 0}
+abbr[title]{border-bottom:1px dotted}
+b,strong{font-weight:bold}
+dfn{font-style:italic}
+hr{-moz-box-sizing:content-box;box-sizing:content-box;height:0}
+mark{background:#ff0;color:#000}
+code,kbd,pre,samp{font-family:monospace;font-size:1em}
+pre{white-space:pre-wrap}
+q{quotes:"\201C" "\201D" "\2018" "\2019"}
+small{font-size:80%}
+sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}
+sup{top:-.5em}
+sub{bottom:-.25em}
+img{border:0}
+svg:not(:root){overflow:hidden}
+figure{margin:0}
+fieldset{border:1px solid silver;margin:0 2px;padding:.35em .625em .75em}
+legend{border:0;padding:0}
+button,input,select,textarea{font-family:inherit;font-size:100%;margin:0}
+button,input{line-height:normal}
+button,select{text-transform:none}
+button,html input[type="button"],input[type="reset"],input[type="submit"]{-webkit-appearance:button;cursor:pointer}
+button[disabled],html input[disabled]{cursor:default}
+input[type="checkbox"],input[type="radio"]{box-sizing:border-box;padding:0}
+button::-moz-focus-inner,input::-moz-focus-inner{border:0;padding:0}
+textarea{overflow:auto;vertical-align:top}
+table{border-collapse:collapse;border-spacing:0}
+*,*::before,*::after{-moz-box-sizing:border-box;-webkit-box-sizing:border-box;box-sizing:border-box}
+html,body{font-size:100%}
+body{background:#fff;color:rgba(0,0,0,.8);padding:0;margin:0;font-family:"Noto Serif","DejaVu Serif",serif;font-weight:400;font-style:normal;line-height:1;position:relative;cursor:auto;tab-size:4;-moz-osx-font-smoothing:grayscale;-webkit-font-smoothing:antialiased}
+a:hover{cursor:pointer}
+img,object,embed{max-width:100%;height:auto}
+object,embed{height:100%}
+img{-ms-interpolation-mode:bicubic}
+.left{float:left!important}
+.right{float:right!important}
+.text-left{text-align:left!important}
+.text-right{text-align:right!important}
+.text-center{text-align:center!important}
+.text-justify{text-align:justify!important}
+.hide{display:none}
+img,object,svg{display:inline-block;vertical-align:middle}
+textarea{height:auto;min-height:50px}
+select{width:100%}
+.center{margin-left:auto;margin-right:auto}
+.stretch{width:100%}
+.subheader,.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{line-height:1.45;color:#7a2518;font-weight:400;margin-top:0;margin-bottom:.25em}
+div,dl,dt,dd,ul,ol,li,h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6,pre,form,p,blockquote,th,td{margin:0;padding:0;direction:ltr}
+a{color:#2156a5;text-decoration:underline;line-height:inherit}
+a:hover,a:focus{color:#1d4b8f}
+a img{border:0}
+p{font-family:inherit;font-weight:400;font-size:1em;line-height:1.6;margin-bottom:1.25em;text-rendering:optimizeLegibility}
+p aside{font-size:.875em;line-height:1.35;font-style:italic}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{font-family:"Open Sans","DejaVu Sans",sans-serif;font-weight:300;font-style:normal;color:#ba3925;text-rendering:optimizeLegibility;margin-top:1em;margin-bottom:.5em;line-height:1.0125em}
+h1 small,h2 small,h3 small,#toctitle small,.sidebarblock>.content>.title small,h4 small,h5 small,h6 small{font-size:60%;color:#e99b8f;line-height:0}
+h1{font-size:2.125em}
+h2{font-size:1.6875em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.375em}
+h4,h5{font-size:1.125em}
+h6{font-size:1em}
+hr{border:solid #dddddf;border-width:1px 0 0;clear:both;margin:1.25em 0 1.1875em;height:0}
+em,i{font-style:italic;line-height:inherit}
+strong,b{font-weight:bold;line-height:inherit}
+small{font-size:60%;line-height:inherit}
+code{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;font-weight:400;color:rgba(0,0,0,.9)}
+ul,ol,dl{font-size:1em;line-height:1.6;margin-bottom:1.25em;list-style-position:outside;font-family:inherit}
+ul,ol{margin-left:1.5em}
+ul li ul,ul li ol{margin-left:1.25em;margin-bottom:0;font-size:1em}
+ul.square li ul,ul.circle li ul,ul.disc li ul{list-style:inherit}
+ul.square{list-style-type:square}
+ul.circle{list-style-type:circle}
+ul.disc{list-style-type:disc}
+ol li ul,ol li ol{margin-left:1.25em;margin-bottom:0}
+dl dt{margin-bottom:.3125em;font-weight:bold}
+dl dd{margin-bottom:1.25em}
+abbr,acronym{text-transform:uppercase;font-size:90%;color:rgba(0,0,0,.8);border-bottom:1px dotted #ddd;cursor:help}
+abbr{text-transform:none}
+blockquote{margin:0 0 1.25em;padding:.5625em 1.25em 0 1.1875em;border-left:1px solid #ddd}
+blockquote cite{display:block;font-size:.9375em;color:rgba(0,0,0,.6)}
+blockquote cite::before{content:"\2014 \0020"}
+blockquote cite a,blockquote cite a:visited{color:rgba(0,0,0,.6)}
+blockquote,blockquote p{line-height:1.6;color:rgba(0,0,0,.85)}
+@media screen and (min-width:768px){h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2}
+h1{font-size:2.75em}
+h2{font-size:2.3125em}
+h3,#toctitle,.sidebarblock>.content>.title{font-size:1.6875em}
+h4{font-size:1.4375em}}
+table{background:#fff;margin-bottom:1.25em;border:solid 1px #dedede}
+table thead,table tfoot{background:#f7f8f7}
+table thead tr th,table thead tr td,table tfoot tr th,table tfoot tr td{padding:.5em .625em .625em;font-size:inherit;color:rgba(0,0,0,.8);text-align:left}
+table tr th,table tr td{padding:.5625em .625em;font-size:inherit;color:rgba(0,0,0,.8)}
+table tr.even,table tr.alt{background:#f8f8f7}
+table thead tr th,table tfoot tr th,table tbody tr td,table tr td,table tfoot tr td{display:table-cell;line-height:1.6}
+h1,h2,h3,#toctitle,.sidebarblock>.content>.title,h4,h5,h6{line-height:1.2;word-spacing:-.05em}
+h1 strong,h2 strong,h3 strong,#toctitle strong,.sidebarblock>.content>.title strong,h4 strong,h5 strong,h6 strong{font-weight:400}
+.clearfix::before,.clearfix::after,.float-group::before,.float-group::after{content:" ";display:table}
+.clearfix::after,.float-group::after{clear:both}
+:not(pre):not([class^=L])>code{font-size:.9375em;font-style:normal!important;letter-spacing:0;padding:.1em .5ex;word-spacing:-.15em;background:#f7f7f8;-webkit-border-radius:4px;border-radius:4px;line-height:1.45;text-rendering:optimizeSpeed;word-wrap:break-word}
+:not(pre)>code.nobreak{word-wrap:normal}
+:not(pre)>code.nowrap{white-space:nowrap}
+pre{color:rgba(0,0,0,.9);font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;line-height:1.45;text-rendering:optimizeSpeed}
+pre code,pre pre{color:inherit;font-size:inherit;line-height:inherit}
+pre>code{display:block}
+pre.nowrap,pre.nowrap pre{white-space:pre;word-wrap:normal}
+em em{font-style:normal}
+strong strong{font-weight:400}
+.keyseq{color:rgba(51,51,51,.8)}
+kbd{font-family:"Droid Sans Mono","DejaVu Sans Mono",monospace;display:inline-block;color:rgba(0,0,0,.8);font-size:.65em;line-height:1.45;background:#f7f7f7;border:1px solid #ccc;-webkit-border-radius:3px;border-radius:3px;-webkit-box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em white inset;box-shadow:0 1px 0 rgba(0,0,0,.2),0 0 0 .1em #fff inset;margin:0 .15em;padding:.2em .5em;vertical-align:middle;position:relative;top:-.1em;white-space:nowrap}
+.keyseq kbd:first-child{margin-left:0}
+.keyseq kbd:last-child{margin-right:0}
+.menuseq,.menuref{color:#000}
+.menuseq b:not(.caret),.menuref{font-weight:inherit}
+.menuseq{word-spacing:-.02em}
+.menuseq b.caret{font-size:1.25em;line-height:.8}
+.menuseq i.caret{font-weight:bold;text-align:center;width:.45em}
+b.button::before,b.button::after{position:relative;top:-1px;font-weight:400}
+b.button::before{content:"[";padding:0 3px 0 2px}
+b.button::after{content:"]";padding:0 2px 0 3px}
+p a>code:hover{color:rgba(0,0,0,.9)}
+#header,#content,#footnotes,#footer{width:100%;margin-left:auto;margin-right:auto;margin-top:0;margin-bottom:0;max-width:62.5em;*zoom:1;position:relative;padding-left:.9375em;padding-right:.9375em}
+#header::before,#header::after,#content::before,#content::after,#footnotes::before,#footnotes::after,#footer::before,#footer::after{content:" ";display:table}
+#header::after,#content::after,#footnotes::after,#footer::after{clear:both}
+#content{margin-top:1.25em}
+#content::before{content:none}
+#header>h1:first-child{color:rgba(0,0,0,.85);margin-top:2.25rem;margin-bottom:0}
+#header>h1:first-child+#toc{margin-top:8px;border-top:1px solid #dddddf}
+#header>h1:only-child,body.toc2 #header>h1:nth-last-child(2){border-bottom:1px solid #dddddf;padding-bottom:8px}
+#header .details{border-bottom:1px solid #dddddf;line-height:1.45;padding-top:.25em;padding-bottom:.25em;padding-left:.25em;color:rgba(0,0,0,.6);display:-ms-flexbox;display:-webkit-flex;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap}
+#header .details span:first-child{margin-left:-.125em}
+#header .details span.email a{color:rgba(0,0,0,.85)}
+#header .details br{display:none}
+#header .details br+span::before{content:"\00a0\2013\00a0"}
+#header .details br+span.author::before{content:"\00a0\22c5\00a0";color:rgba(0,0,0,.85)}
+#header .details br+span#revremark::before{content:"\00a0|\00a0"}
+#header #revnumber{text-transform:capitalize}
+#header #revnumber::after{content:"\00a0"}
+#content>h1:first-child:not([class]){color:rgba(0,0,0,.85);border-bottom:1px solid #dddddf;padding-bottom:8px;margin-top:0;padding-top:1rem;margin-bottom:1.25rem}
+#toc{border-bottom:1px solid #e7e7e9;padding-bottom:.5em}
+#toc>ul{margin-left:.125em}
+#toc ul.sectlevel0>li>a{font-style:italic}
+#toc ul.sectlevel0 ul.sectlevel1{margin:.5em 0}
+#toc ul{font-family:"Open Sans","DejaVu Sans",sans-serif;list-style-type:none}
+#toc li{line-height:1.3334;margin-top:.3334em}
+#toc a{text-decoration:none}
+#toc a:active{text-decoration:underline}
+#toctitle{color:#7a2518;font-size:1.2em}
+@media screen and (min-width:768px){#toctitle{font-size:1.375em}
+body.toc2{padding-left:15em;padding-right:0}
+#toc.toc2{margin-top:0!important;background:#f8f8f7;position:fixed;width:15em;left:0;top:0;border-right:1px solid #e7e7e9;border-top-width:0!important;border-bottom-width:0!important;z-index:1000;padding:1.25em 1em;height:100%;overflow:auto}
+#toc.toc2 #toctitle{margin-top:0;margin-bottom:.8rem;font-size:1.2em}
+#toc.toc2>ul{font-size:.9em;margin-bottom:0}
+#toc.toc2 ul ul{margin-left:0;padding-left:1em}
+#toc.toc2 ul.sectlevel0 ul.sectlevel1{padding-left:0;margin-top:.5em;margin-bottom:.5em}
+body.toc2.toc-right{padding-left:0;padding-right:15em}
+body.toc2.toc-right #toc.toc2{border-right-width:0;border-left:1px solid #e7e7e9;left:auto;right:0}}
+@media screen and (min-width:1280px){body.toc2{padding-left:20em;padding-right:0}
+#toc.toc2{width:20em}
+#toc.toc2 #toctitle{font-size:1.375em}
+#toc.toc2>ul{font-size:.95em}
+#toc.toc2 ul ul{padding-left:1.25em}
+body.toc2.toc-right{padding-left:0;padding-right:20em}}
+#content #toc{border-style:solid;border-width:1px;border-color:#e0e0dc;margin-bottom:1.25em;padding:1.25em;background:#f8f8f7;-webkit-border-radius:4px;border-radius:4px}
+#content #toc>:first-child{margin-top:0}
+#content #toc>:last-child{margin-bottom:0}
+#footer{max-width:100%;background:rgba(0,0,0,.8);padding:1.25em}
+#footer-text{color:rgba(255,255,255,.8);line-height:1.44}
+#content{margin-bottom:.625em}
+.sect1{padding-bottom:.625em}
+@media screen and (min-width:768px){#content{margin-bottom:1.25em}
+.sect1{padding-bottom:1.25em}}
+.sect1:last-child{padding-bottom:0}
+.sect1+.sect1{border-top:1px solid #e7e7e9}
+#content h1>a.anchor,h2>a.anchor,h3>a.anchor,#toctitle>a.anchor,.sidebarblock>.content>.title>a.anchor,h4>a.anchor,h5>a.anchor,h6>a.anchor{position:absolute;z-index:1001;width:1.5ex;margin-left:-1.5ex;display:block;text-decoration:none!important;visibility:hidden;text-align:center;font-weight:400}
+#content h1>a.anchor::before,h2>a.anchor::before,h3>a.anchor::before,#toctitle>a.anchor::before,.sidebarblock>.content>.title>a.anchor::before,h4>a.anchor::before,h5>a.anchor::before,h6>a.anchor::before{content:"\00A7";font-size:.85em;display:block;padding-top:.1em}
+#content h1:hover>a.anchor,#content h1>a.anchor:hover,h2:hover>a.anchor,h2>a.anchor:hover,h3:hover>a.anchor,#toctitle:hover>a.anchor,.sidebarblock>.content>.title:hover>a.anchor,h3>a.anchor:hover,#toctitle>a.anchor:hover,.sidebarblock>.content>.title>a.anchor:hover,h4:hover>a.anchor,h4>a.anchor:hover,h5:hover>a.anchor,h5>a.anchor:hover,h6:hover>a.anchor,h6>a.anchor:hover{visibility:visible}
+#content h1>a.link,h2>a.link,h3>a.link,#toctitle>a.link,.sidebarblock>.content>.title>a.link,h4>a.link,h5>a.link,h6>a.link{color:#ba3925;text-decoration:none}
+#content h1>a.link:hover,h2>a.link:hover,h3>a.link:hover,#toctitle>a.link:hover,.sidebarblock>.content>.title>a.link:hover,h4>a.link:hover,h5>a.link:hover,h6>a.link:hover{color:#a53221}
+details,.audioblock,.imageblock,.literalblock,.listingblock,.stemblock,.videoblock{margin-bottom:1.25em}
+details>summary:first-of-type{cursor:pointer;display:list-item;outline:none;margin-bottom:.75em}
+.admonitionblock td.content>.title,.audioblock>.title,.exampleblock>.title,.imageblock>.title,.listingblock>.title,.literalblock>.title,.stemblock>.title,.openblock>.title,.paragraph>.title,.quoteblock>.title,table.tableblock>.title,.verseblock>.title,.videoblock>.title,.dlist>.title,.olist>.title,.ulist>.title,.qlist>.title,.hdlist>.title{text-rendering:optimizeLegibility;text-align:left;font-family:"Noto Serif","DejaVu Serif",serif;font-size:1rem;font-style:italic}
+table.tableblock.fit-content>caption.title{white-space:nowrap;width:0}
+.paragraph.lead>p,#preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:1.21875em;line-height:1.6;color:rgba(0,0,0,.85)}
+table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font-size:inherit}
+.admonitionblock>table{border-collapse:separate;border:0;background:none;width:100%}
+.admonitionblock>table td.icon{text-align:center;width:80px}
+.admonitionblock>table td.icon img{max-width:none}
+.admonitionblock>table td.icon .title{font-weight:bold;font-family:"Open Sans","DejaVu Sans",sans-serif;text-transform:uppercase}
+.admonitionblock>table td.content{padding-left:1.125em;padding-right:1.25em;border-left:1px solid #dddddf;color:rgba(0,0,0,.6)}
+.admonitionblock>table td.content>:last-child>:last-child{margin-bottom:0}
+.exampleblock>.content{border-style:solid;border-width:1px;border-color:#e6e6e6;margin-bottom:1.25em;padding:1.25em;background:#fff;-webkit-border-radius:4px;border-radius:4px}
+.exampleblock>.content>:first-child{margin-top:0}
+.exampleblock>.content>:last-child{margin-bottom:0}
+.sidebarblock{border-style:solid;border-width:1px;border-color:#dbdbd6;margin-bottom:1.25em;padding:1.25em;background:#f3f3f2;-webkit-border-radius:4px;border-radius:4px}
+.sidebarblock>:first-child{margin-top:0}
+.sidebarblock>:last-child{margin-bottom:0}
+.sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
+.exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
+.literalblock pre,.listingblock>.content>pre{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;overflow-x:auto;padding:1em;font-size:.8125em}
+@media screen and (min-width:768px){.literalblock pre,.listingblock>.content>pre{font-size:.90625em}}
+@media screen and (min-width:1280px){.literalblock pre,.listingblock>.content>pre{font-size:1em}}
+.literalblock pre,.listingblock>.content>pre:not(.highlight),.listingblock>.content>pre[class="highlight"],.listingblock>.content>pre[class^="highlight "]{background:#f7f7f8}
+.literalblock.output pre{color:#f7f7f8;background:rgba(0,0,0,.9)}
+.listingblock>.content{position:relative}
+.listingblock code[data-lang]::before{display:none;content:attr(data-lang);position:absolute;font-size:.75em;top:.425rem;right:.5rem;line-height:1;text-transform:uppercase;color:inherit;opacity:.5}
+.listingblock:hover code[data-lang]::before{display:block}
+.listingblock.terminal pre .command::before{content:attr(data-prompt);padding-right:.5em;color:inherit;opacity:.5}
+.listingblock.terminal pre .command:not([data-prompt])::before{content:"$"}
+.listingblock pre.highlightjs{padding:0}
+.listingblock pre.highlightjs>code{padding:1em;-webkit-border-radius:4px;border-radius:4px}
+.listingblock pre.prettyprint{border-width:0}
+.prettyprint{background:#f7f7f8}
+pre.prettyprint .linenums{line-height:1.45;margin-left:2em}
+pre.prettyprint li{background:none;list-style-type:inherit;padding-left:0}
+pre.prettyprint li code[data-lang]::before{opacity:1}
+pre.prettyprint li:not(:first-child) code[data-lang]::before{display:none}
+table.linenotable{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.linenotable td[class]{color:inherit;vertical-align:top;padding:0;line-height:inherit;white-space:normal}
+table.linenotable td.code{padding-left:.75em}
+table.linenotable td.linenos{border-right:1px solid currentColor;opacity:.35;padding-right:.5em}
+pre.pygments .lineno{border-right:1px solid currentColor;opacity:.35;display:inline-block;margin-right:.75em}
+pre.pygments .lineno::before{content:"";margin-right:-.125em}
+.quoteblock{margin:0 1em 1.25em 1.5em;display:table}
+.quoteblock:not(.excerpt)>.title{margin-left:-1.5em;margin-bottom:.75em}
+.quoteblock blockquote,.quoteblock p{color:rgba(0,0,0,.85);font-size:1.15rem;line-height:1.75;word-spacing:.1em;letter-spacing:0;font-style:italic;text-align:justify}
+.quoteblock blockquote{margin:0;padding:0;border:0}
+.quoteblock blockquote::before{content:"\201c";float:left;font-size:2.75em;font-weight:bold;line-height:.6em;margin-left:-.6em;color:#7a2518;text-shadow:0 1px 2px rgba(0,0,0,.1)}
+.quoteblock blockquote>.paragraph:last-child p{margin-bottom:0}
+.quoteblock .attribution{margin-top:.75em;margin-right:.5ex;text-align:right}
+.verseblock{margin:0 1em 1.25em}
+.verseblock pre{font-family:"Open Sans","DejaVu Sans",sans;font-size:1.15rem;color:rgba(0,0,0,.85);font-weight:300;text-rendering:optimizeLegibility}
+.verseblock pre strong{font-weight:400}
+.verseblock .attribution{margin-top:1.25rem;margin-left:.5ex}
+.quoteblock .attribution,.verseblock .attribution{font-size:.9375em;line-height:1.45;font-style:italic}
+.quoteblock .attribution br,.verseblock .attribution br{display:none}
+.quoteblock .attribution cite,.verseblock .attribution cite{display:block;letter-spacing:-.025em;color:rgba(0,0,0,.6)}
+.quoteblock.abstract blockquote::before,.quoteblock.excerpt blockquote::before,.quoteblock .quoteblock blockquote::before{display:none}
+.quoteblock.abstract blockquote,.quoteblock.abstract p,.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{line-height:1.6;word-spacing:0}
+.quoteblock.abstract{margin:0 1em 1.25em;display:block}
+.quoteblock.abstract>.title{margin:0 0 .375em;font-size:1.15em;text-align:center}
+.quoteblock.excerpt>blockquote,.quoteblock .quoteblock{padding:0 0 .25em 1em;border-left:.25em solid #dddddf}
+.quoteblock.excerpt,.quoteblock .quoteblock{margin-left:0}
+.quoteblock.excerpt blockquote,.quoteblock.excerpt p,.quoteblock .quoteblock blockquote,.quoteblock .quoteblock p{color:inherit;font-size:1.0625rem}
+.quoteblock.excerpt .attribution,.quoteblock .quoteblock .attribution{color:inherit;text-align:left;margin-right:0}
+table.tableblock{max-width:100%;border-collapse:separate}
+p.tableblock:last-child{margin-bottom:0}
+td.tableblock>.content>:last-child{margin-bottom:-1.25em}
+td.tableblock>.content>:last-child.sidebarblock{margin-bottom:0}
+table.tableblock,th.tableblock,td.tableblock{border:0 solid #dedede}
+table.grid-all>thead>tr>.tableblock,table.grid-all>tbody>tr>.tableblock{border-width:0 1px 1px 0}
+table.grid-all>tfoot>tr>.tableblock{border-width:1px 1px 0 0}
+table.grid-cols>*>tr>.tableblock{border-width:0 1px 0 0}
+table.grid-rows>thead>tr>.tableblock,table.grid-rows>tbody>tr>.tableblock{border-width:0 0 1px}
+table.grid-rows>tfoot>tr>.tableblock{border-width:1px 0 0}
+table.grid-all>*>tr>.tableblock:last-child,table.grid-cols>*>tr>.tableblock:last-child{border-right-width:0}
+table.grid-all>tbody>tr:last-child>.tableblock,table.grid-all>thead:last-child>tr>.tableblock,table.grid-rows>tbody>tr:last-child>.tableblock,table.grid-rows>thead:last-child>tr>.tableblock{border-bottom-width:0}
+table.frame-all{border-width:1px}
+table.frame-sides{border-width:0 1px}
+table.frame-topbot,table.frame-ends{border-width:1px 0}
+table.stripes-all tr,table.stripes-odd tr:nth-of-type(odd),table.stripes-even tr:nth-of-type(even),table.stripes-hover tr:hover{background:#f8f8f7}
+th.halign-left,td.halign-left{text-align:left}
+th.halign-right,td.halign-right{text-align:right}
+th.halign-center,td.halign-center{text-align:center}
+th.valign-top,td.valign-top{vertical-align:top}
+th.valign-bottom,td.valign-bottom{vertical-align:bottom}
+th.valign-middle,td.valign-middle{vertical-align:middle}
+table thead th,table tfoot th{font-weight:bold}
+tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
+tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
+p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock{font-size:1em}
+ol{margin-left:1.75em}
+ul li ol{margin-left:1.5em}
+dl dd{margin-left:1.125em}
+dl dd:last-child,dl dd:last-child>:last-child{margin-bottom:0}
+ol>li p,ul>li p,ul dd,ol dd,.olist .olist,.ulist .ulist,.ulist .olist,.olist .ulist{margin-bottom:.625em}
+ul.checklist,ul.none,ol.none,ul.no-bullet,ol.no-bullet,ol.unnumbered,ul.unstyled,ol.unstyled{list-style-type:none}
+ul.no-bullet,ol.no-bullet,ol.unnumbered{margin-left:.625em}
+ul.unstyled,ol.unstyled{margin-left:0}
+ul.checklist{margin-left:.625em}
+ul.checklist li>p:first-child>.fa-square-o:first-child,ul.checklist li>p:first-child>.fa-check-square-o:first-child{width:1.25em;font-size:.8em;position:relative;bottom:.125em}
+ul.checklist li>p:first-child>input[type="checkbox"]:first-child{margin-right:.25em}
+ul.inline{display:-ms-flexbox;display:-webkit-box;display:flex;-ms-flex-flow:row wrap;-webkit-flex-flow:row wrap;flex-flow:row wrap;list-style:none;margin:0 0 .625em -1.25em}
+ul.inline>li{margin-left:1.25em}
+.unstyled dl dt{font-weight:400;font-style:normal}
+ol.arabic{list-style-type:decimal}
+ol.decimal{list-style-type:decimal-leading-zero}
+ol.loweralpha{list-style-type:lower-alpha}
+ol.upperalpha{list-style-type:upper-alpha}
+ol.lowerroman{list-style-type:lower-roman}
+ol.upperroman{list-style-type:upper-roman}
+ol.lowergreek{list-style-type:lower-greek}
+.hdlist>table,.colist>table{border:0;background:none}
+.hdlist>table>tbody>tr,.colist>table>tbody>tr{background:none}
+td.hdlist1,td.hdlist2{vertical-align:top;padding:0 .625em}
+td.hdlist1{font-weight:bold;padding-bottom:1.25em}
+.literalblock+.colist,.listingblock+.colist{margin-top:-.5em}
+.colist td:not([class]):first-child{padding:.4em .75em 0;line-height:1;vertical-align:top}
+.colist td:not([class]):first-child img{max-width:none}
+.colist td:not([class]):last-child{padding:.25em 0}
+.thumb,.th{line-height:0;display:inline-block;border:solid 4px #fff;-webkit-box-shadow:0 0 0 1px #ddd;box-shadow:0 0 0 1px #ddd}
+.imageblock.left{margin:.25em .625em 1.25em 0}
+.imageblock.right{margin:.25em 0 1.25em .625em}
+.imageblock>.title{margin-bottom:0}
+.imageblock.thumb,.imageblock.th{border-width:6px}
+.imageblock.thumb>.title,.imageblock.th>.title{padding:0 .125em}
+.image.left,.image.right{margin-top:.25em;margin-bottom:.25em;display:inline-block;line-height:0}
+.image.left{margin-right:.625em}
+.image.right{margin-left:.625em}
+a.image{text-decoration:none;display:inline-block}
+a.image object{pointer-events:none}
+sup.footnote,sup.footnoteref{font-size:.875em;position:static;vertical-align:super}
+sup.footnote a,sup.footnoteref a{text-decoration:none}
+sup.footnote a:active,sup.footnoteref a:active{text-decoration:underline}
+#footnotes{padding-top:.75em;padding-bottom:.75em;margin-bottom:.625em}
+#footnotes hr{width:20%;min-width:6.25em;margin:-.25em 0 .75em;border-width:1px 0 0}
+#footnotes .footnote{padding:0 .375em 0 .225em;line-height:1.3334;font-size:.875em;margin-left:1.2em;margin-bottom:.2em}
+#footnotes .footnote a:first-of-type{font-weight:bold;text-decoration:none;margin-left:-1.05em}
+#footnotes .footnote:last-of-type{margin-bottom:0}
+#content #footnotes{margin-top:-.625em;margin-bottom:0;padding:.75em 0}
+.gist .file-data>table{border:0;background:#fff;width:100%;margin-bottom:0}
+.gist .file-data>table td.line-data{width:99%}
+div.unbreakable{page-break-inside:avoid}
+.big{font-size:larger}
+.small{font-size:smaller}
+.underline{text-decoration:underline}
+.overline{text-decoration:overline}
+.line-through{text-decoration:line-through}
+.aqua{color:#00bfbf}
+.aqua-background{background:#00fafa}
+.black{color:#000}
+.black-background{background:#000}
+.blue{color:#0000bf}
+.blue-background{background:#0000fa}
+.fuchsia{color:#bf00bf}
+.fuchsia-background{background:#fa00fa}
+.gray{color:#606060}
+.gray-background{background:#7d7d7d}
+.green{color:#006000}
+.green-background{background:#007d00}
+.lime{color:#00bf00}
+.lime-background{background:#00fa00}
+.maroon{color:#600000}
+.maroon-background{background:#7d0000}
+.navy{color:#000060}
+.navy-background{background:#00007d}
+.olive{color:#606000}
+.olive-background{background:#7d7d00}
+.purple{color:#600060}
+.purple-background{background:#7d007d}
+.red{color:#bf0000}
+.red-background{background:#fa0000}
+.silver{color:#909090}
+.silver-background{background:#bcbcbc}
+.teal{color:#006060}
+.teal-background{background:#007d7d}
+.white{color:#bfbfbf}
+.white-background{background:#fafafa}
+.yellow{color:#bfbf00}
+.yellow-background{background:#fafa00}
+span.icon>.fa{cursor:default}
+a span.icon>.fa{cursor:inherit}
+.admonitionblock td.icon [class^="fa icon-"]{font-size:2.5em;text-shadow:1px 1px 2px rgba(0,0,0,.5);cursor:default}
+.admonitionblock td.icon .icon-note::before{content:"\f05a";color:#19407c}
+.admonitionblock td.icon .icon-tip::before{content:"\f0eb";text-shadow:1px 1px 2px rgba(155,155,0,.8);color:#111}
+.admonitionblock td.icon .icon-warning::before{content:"\f071";color:#bf6900}
+.admonitionblock td.icon .icon-caution::before{content:"\f06d";color:#bf3400}
+.admonitionblock td.icon .icon-important::before{content:"\f06a";color:#bf0000}
+.conum[data-value]{display:inline-block;color:#fff!important;background:rgba(0,0,0,.8);-webkit-border-radius:100px;border-radius:100px;text-align:center;font-size:.75em;width:1.67em;height:1.67em;line-height:1.67em;font-family:"Open Sans","DejaVu Sans",sans-serif;font-style:normal;font-weight:bold}
+.conum[data-value] *{color:#fff!important}
+.conum[data-value]+b{display:none}
+.conum[data-value]::after{content:attr(data-value)}
+pre .conum[data-value]{position:relative;top:-.125em}
+b.conum *{color:inherit!important}
+.conum:not([data-value]):empty{display:none}
+dt,th.tableblock,td.content,div.footnote{text-rendering:optimizeLegibility}
+h1,h2,p,td.content,span.alt{letter-spacing:-.01em}
+p strong,td.content strong,div.footnote strong{letter-spacing:-.005em}
+p,blockquote,dt,td.content,span.alt{font-size:1.0625rem}
+p{margin-bottom:1.25rem}
+.sidebarblock p,.sidebarblock dt,.sidebarblock td.content,p.tableblock{font-size:1em}
+.exampleblock>.content{background:#fffef7;border-color:#e0e0dc;-webkit-box-shadow:0 1px 4px #e0e0dc;box-shadow:0 1px 4px #e0e0dc}
+.print-only{display:none!important}
+@page{margin:1.25cm .75cm}
+@media print{*{-webkit-box-shadow:none!important;box-shadow:none!important;text-shadow:none!important}
+html{font-size:80%}
+a{color:inherit!important;text-decoration:underline!important}
+a.bare,a[href^="#"],a[href^="mailto:"]{text-decoration:none!important}
+a[href^="http:"]:not(.bare)::after,a[href^="https:"]:not(.bare)::after{content:"(" attr(href) ")";display:inline-block;font-size:.875em;padding-left:.25em}
+abbr[title]::after{content:" (" attr(title) ")"}
+pre,blockquote,tr,img,object,svg{page-break-inside:avoid}
+thead{display:table-header-group}
+svg{max-width:100%}
+p,blockquote,dt,td.content{font-size:1em;orphans:3;widows:3}
+h2,h3,#toctitle,.sidebarblock>.content>.title{page-break-after:avoid}
+#toc,.sidebarblock,.exampleblock>.content{background:none!important}
+#toc{border-bottom:1px solid #dddddf!important;padding-bottom:0!important}
+body.book #header{text-align:center}
+body.book #header>h1:first-child{border:0!important;margin:2.5em 0 1em}
+body.book #header .details{border:0!important;display:block;padding:0!important}
+body.book #header .details span:first-child{margin-left:0!important}
+body.book #header .details br{display:block}
+body.book #header .details br+span::before{content:none!important}
+body.book #toc{border:0!important;text-align:left!important;padding:0!important;margin:0!important}
+body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-break-before:always}
+.listingblock code[data-lang]::before{display:block}
+#footer{padding:0 .9375em}
+.hide-on-print{display:none!important}
+.print-only{display:block!important}
+.hide-for-print{display:none!important}
+.show-for-print{display:inherit!important}}
+@media print,amzn-kf8{#header>h1:first-child{margin-top:1.25rem}
+.sect1{padding:0!important}
+.sect1+.sect1{border:0}
+#footer{background:none}
+#footer-text{color:rgba(0,0,0,.6);font-size:.9em}}
+@media amzn-kf8{#header,#content,#footnotes,#footer{padding:0}}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body class="book toc2 toc-left">
+<div id="header">
+<h1>Guide utilisateur</h1>
+<div class="details">
+<span id="author" class="author">© Hurence</span><br>
+<span id="email" class="email"><a href="mailto:contact@hurence.com">contact@hurence.com</a></span><br>
+<span id="revnumber">version v1.0,</span>
+<span id="revdate">02.07.2020</span>
+<br><span id="revremark">First book</span>
+</div>
+<div id="toc" class="toc2">
+<div id="toctitle">Table des matières</div>
+<ul class="sectlevel1">
+<li><a href="#introduction">1. Introduction</a></li>
+<li><a href="#concepts">2. Concepts</a>
+<ul class="sectlevel2">
+<li><a href="#modèle-de-données">2.1. Modèle de données</a></li>
+</ul>
+</li>
+<li><a href="#installation">3. Installation</a>
+<ul class="sectlevel2">
+<li><a href="#install-standalone">3.1. Installation standalone</a>
+<ul class="sectlevel3">
+<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester">3.1.1. Pre-requis pour une installation mono serveur en standalone (pour tester)</a></li>
+<li><a href="#installation-de-lhistorian">3.1.2. Installation de l&#8217;historian</a>
+<ul class="sectlevel4">
+<li><a href="#description-du-fichier-de-configuration-de-lhistorian">Description du fichier de configuration de l&#8217;historian</a></li>
+<li><a href="#description-des-composants-installés-par-le-script-dinstallation">Description des composants installés par le script d&#8217;installation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#install-production-mono-noeud">3.2. Installation mono noeud de production</a>
+<ul class="sectlevel3">
+<li><a href="#pre-requis-pour-une-installation-mono-serveur-en-production">3.2.1. Pre-requis pour une installation mono serveur en production</a></li>
+<li><a href="#installation-de-apache-solr-2">3.2.2. Installation de Apache SolR</a></li>
+<li><a href="#install-apache-spark">3.2.3. Install Apache Spark</a></li>
+<li><a href="#installation-de-grafana">3.2.4. Installation de Grafana</a>
+<ul class="sectlevel4">
+<li><a href="#install-production-hurence-datasource-grafana-plugin">Installation Plugin Grafana pour utiliser le data historian Hurence</a></li>
+</ul>
+</li>
+<li><a href="#installation-de-lhistorian-2">3.2.5. Installation de l&#8217;historian</a>
+<ul class="sectlevel4">
+<li><a href="#description-du-fichier-de-configuration-de-lhistorian-2">Description du fichier de configuration de l&#8217;historian</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#redémarrage-du-data-historian">4. Redémarrage du data historian</a>
+<ul class="sectlevel2">
+<li><a href="#restart-solr">4.1. Redémarrer solr</a></li>
+<li><a href="#restart-historian">4.2. Redémarrer l&#8217;historian</a></li>
+<li><a href="#restart-grafana">4.3. Redémarrer Grafana</a></li>
+</ul>
+</li>
+<li><a href="#gestion-des-données">5. Gestion des données</a>
+<ul class="sectlevel2">
+<li><a href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest">5.1. Import de donnée à partir de fichiers csv avec l&#8217;api REST</a></li>
+<li><a href="#requêter-des-données-avec-lapi-rest">5.2. Requêter des données avec l&#8217;api REST</a></li>
+<li><a href="#utiliser-spark-pour-requếter-les-données">5.3. Utiliser Spark pour requếter les données</a></li>
+<li><a href="#linjection-temps-réel-avec-logisland">5.4. L&#8217;injection temps réel avec LogIsland</a></li>
+</ul>
+</li>
+<li><a href="#visualisation-des-données">6. Visualisation des données</a>
+<ul class="sectlevel2">
+<li><a href="#configurer-la-data-source-grafana">6.1. Configurer la data source grafana</a>
+<ul class="sectlevel3">
+<li><a href="#explication-sans-image">6.1.1. Explication sans image</a></li>
+<li><a href="#explication-avec-image">6.1.2. Explication avec image</a></li>
+</ul>
+</li>
+<li><a href="#configurer-vos-dashboard">6.2. Configurer vos dashboard</a></li>
+</ul>
+</li>
+<li><a href="#stopper-et-détruire-les-données">7. Stopper et détruire les données</a>
+<ul class="sectlevel2">
+<li><a href="#stopper-ses-instances-solr">7.1. Stopper ses instances SolR</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="introduction"><a class="anchor" href="#introduction"></a>1. Introduction</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Ce guide aidera l&#8217;utilisateur du data historian dans la compréhension de la plateforme, de son installation,
+de son utilisation. Le data historian ayant été conçu dans l&#8217;optique d&#8217;un déploiement sur une infrastructure Big Data,
+qui sont par nature des environnements complexes à mettre en oeuvre, nous n&#8217;aborderons dans ce guide que les
+déploiements sur une seule machine et de manière progressive. Pour un déploiement sur une infrastructure
+Big Data multi-serveurs et sa sécurisation, il faudra se référer à d&#8217;autres documentations ou contacter Hurence à
+<a href="mailto:contact@hurence.com">contact@hurence.com</a>.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="concepts"><a class="anchor" href="#concepts"></a>2. Concepts</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Hurence Data Historian est une solution open source pour gérer d&#8217;énormes quantités de time series (séries temporelles).
+Il se base sur les moteurs de recherche (comme Apache Solr).
+Les principaux concepts sont les suivants :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><strong>Measure</strong> C&#8217;est un measure dans le temps avec une valeur de type "double" identifiée par un nom et des tags (clés valeurs).</p>
+</li>
+<li>
+<p><strong>Chunk</strong> Est un ensemble continu de Measures dans un intervalle de temps donné, groupées par date, name et éventuellement des tags.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Le but principal de cet outil est d&#8217;aider à la création, au stockage et au requêtage de ces chunks de time series.
+Nous utilison le "chunking" à la place du stockage brut des données afin d&#8217;économiser de l&#8217;espace de stockage et afin d&#8217;améliorer les performances pour de grandes volumétries de measures. En effet le chunking nous permet de pré-calculer des agrégations pour faciliter le sampling par exemple.</p>
+</div>
+<div class="sect2">
+<h3 id="modèle-de-données"><a class="anchor" href="#modèle-de-données"></a>2.1. Modèle de données</h3>
+<div class="paragraph">
+<p>Une Measure est un measure dans le temps Identifié par les champs suivants :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="scala">case class Measure(name: String,
+                   value: Double,
+                   timestamp: Long,
+                   year: Int,
+                   month: Int,
+                   day: String,
+                   hour: Int,
+                   tags: Map[String,String])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Un Chunk est identifié par les champs suivants :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="scala">case class Chunk(name: String,
+     day:String,
+     start: Long,
+     end: Long,
+     chunk: String,
+     count: Long,
+     avg: Double,
+     std_dev: Double,
+     min: Double,
+     max: Double,
+     first: Double,
+     last: Double,
+     sax: String,
+     tags: Map[String,String])</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Comme vous pouvez le constater lors du passage entre la Measure et le Chunk de Measure, le "timestamp" a été remplacé par "start" et "stop" qui définissent l&#8217;intervalle de temps, la valeur est, elle, passée d&#8217;un double dans le champs "value" à une string en base64 appelée "chunk". Cette string contient l&#8217;ensemble des valeurs du chunk, compressées par un algorithme.</p>
+</div>
+<div class="paragraph">
+<p>Dans solr les chunks sont stockés avec le schéma suivant :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;schema</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">default-config</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">version</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">1.6</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
+    ...
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_avg</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_value</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_count</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_day</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_end</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_first</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_hour</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_last</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_max</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_min</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_month</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_outlier</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sax</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ngramtext</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_start</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_std_dev</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sum</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_trend</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_year</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_origin</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">compactions_running</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+<span class="tag">&lt;/schema&gt;</span></code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="installation"><a class="anchor" href="#installation"></a>3. Installation</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cette section décrit une installation simple du data historian sur un seul serveur. Le Data Historian étant
+conçu pour le Big Data, il est possible de réaliser une installation avec des possibilités de stockage en très grandes
+volumétries et avec des performances incomparables sur plusieurs racks de serveurs. Ce type d&#8217;installation n&#8217;est pas
+décrite ici par simplification car elle concerne des experts en urbanisation d&#8217;infrastructures Big Data.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+N&#8217;ouvrez pas les ports de votre data historian sur le réseau public, protégez le a minima par un firewall, car cette installation n&#8217;est pas sécurisée. Une installation très sécurisée est possible; contactez nous pour plus d&#8217;information.
+</td>
+</tr>
+</table>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Hurence propose de l&#8217;accompagnement pour installer le data historian pour des volumétries importantes.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Dans ce guide nous proposons une installation simple et rapide qui est idéale pour tester, développer et stocker de petits volumes de données peu sensibles. Nous ne recommendons pas cette installation en production car pour la production il faut se préparer pour une infrastructure qui deviendra à terme multi noeuds, et aura la nécessaire redondance des données et des mécanismes de fail over. La seconde installation est plus souhaitable si vous planifiez de faire passer à l&#8217;échelle ce que vous voulez installer.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p><a href="#install-standalone">Installation standalone</a></p>
+</li>
+<li>
+<p><a href="#install-production-mono-noeud">Installation de production mono noeud</a>.</p>
+</li>
+</ul>
+</div>
+<div class="sect2">
+<h3 id="install-standalone"><a class="anchor" href="#install-standalone"></a>3.1. Installation standalone</h3>
+<div class="paragraph">
+<p>Cette installation est celle à privilégier si vous êtes nouveau dans l&#8217;utilisation du data historian et que vous voulez essentiellement le tester. L&#8217;installation n&#8217;est pas faite pour la production (ou les noeuds seront redondés) ni pour des larges volumes de données (ce n&#8217;est qu&#8217;une seule machine). Mais cette installation peut évoluer vers une installation de production si nécessaire.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">Note</dt>
+<dd>
+<p>Hurence propose de l&#8217;accompagnement pour faire évoluer vos installations mono noeuds vers une infrastructure clusterisée de production.</p>
+</dd>
+</dl>
+</div>
+<div class="sect3">
+<h4 id="pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-standalone-pour-tester"></a>3.1.1. Pre-requis pour une installation mono serveur en standalone (pour tester)</h4>
+<div class="paragraph">
+<p>Comme expliqué plus haut cette installation est la plus rapide et simple pour installer HDH. Elle est idéale pour un test ou si vous n&#8217;avez pas de gros volumes de données.</p>
+</div>
+<div class="paragraph">
+<p>La configuration minimale du serveur pour une installation de test du data historian est:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>un OS CentOS ou Redhat 7.x ou Ubuntu ou Mac</p>
+</li>
+<li>
+<p>16 Gigabits de RAM</p>
+</li>
+<li>
+<p>8 vcores de CPU</p>
+</li>
+<li>
+<p>250 Giga octets de disque</p>
+</li>
+<li>
+<p>Java 8</p>
+</li>
+</ul>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-lhistorian"><a class="anchor" href="#installation-de-lhistorian"></a>3.1.2. Installation de l&#8217;historian</h4>
+<div class="paragraph">
+<p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
+et les chunks. Téléchargez le script d&#8217;installation de l&#8217;historian pour votre version
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.
+Lancez l&#8217;installation en lançant ce script :</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Solr n&#8217;aime pas pour des questions de sécurité que vous installiez et lanciez en root.
+Utilisez donc un utilisateur qui n&#8217;est ni sudoer ni root (un utilisateur applicatif ou le vôtre) mais vérifiez bien que vous avez les droits en  écriture là où HDH va s&#8217;installer (par défaut /opt/hdh).</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">bash ./install.sh</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>le script install.sh doit être exécutable. Si vous obtenez un problème d&#8217;autorisation au lancement, vérifiez qu&#8217;il a les bonnes propriétés et sinon exécutez cette commande:</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">chmod +x install.sh</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>lors de l&#8217;installation Solr vous met en garde éventuellement sur votre configuration machine en ce qui concerne le nombre de fichiers ouverts qui est généralement réduit à 1024. Si vous voulez une installation robuste pour accueillir de nombreuses données il vous faudra changer ce paramètre avec la commande ulimit (et l&#8217;édition d&#8217;un fichier de configuration dont le nom dépend de votre OS).
+Référez vous à votre documentation système.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Il sera alors demandé à l&#8217;utilisateur plusieurs informations.</p>
+</div>
+<div class="paragraph">
+<p>Comme nous allons procéder à une installation de test en mode standalone vous pouvez laisser les valeurs par défaut et juste taper sur la touche entrée pour chaque question.
+Pour les questions sur les installations standalone tapez "1". Sauf pour l&#8217;installation de spark qui ne nous sera pas utile.
+Le programme va télécharger et installer des versions embarquées de Solr et Grafana.</p>
+</div>
+<div class="paragraph">
+<p>Voici un exemple de l&#8217;installation :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_standalone.png" alt="screenshot install standalone">
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Attention au chemin ou vous installez l&#8217;historian (par défaut /opt/hdh). En effet l&#8217;espace disque doit être
+suffisant pour stocker les binaires, les scripts ainsi que les données de time series que vous allez injecter.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Et voici un aperçu des derniers logs si tout s&#8217;est bien passé lors de l&#8217;installation (verifiez que vous n&#8217;avez pas eu d&#8217;erreur d&#8217;affiché) :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
+</div>
+</div>
+<div class="paragraph">
+<p>Vous pouvez vérifier que votre serveur a bien été lancé avec la commande suivante:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl http://localhost:8080/api/grafana/v0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si ce n&#8217;est pas le cas, allez voir les logs (dans le répertoire d&#8217;installation et le sous répertoire <em>historian-1.3.5</em>, il y a un fichier app.log). En général ce sera un problème de droits pour créer des répertoires: notamment dans /tmp (vérifiez bien vos droits en écriture sur ce répertoire).</p>
+</div>
+<div class="paragraph">
+<p>Pour démarrer ou redémarrer l&#8217;historian (en cas de problème), tapez la commande suivante dans le répertoire d&#8217;installation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">historian-1.3.5/bin/historian-server.sh start
+(or historian-1.3.5/bin/historian-server.sh restart)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Dans la suite, on appellera le chemin indiqué pour l&#8217;installation de l&#8217;historian '$HDH_HOME'.</p>
+</div>
+<div class="paragraph">
+<p>A l&#8217;issue de ce script, si vous avez suivi l&#8217;exemple, vous aurez :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Un serveur solr 8.2.0 installé dans $HDH_HOME/solr-8.2.0</p>
+</li>
+<li>
+<p>Le serveur solr a été démarré par le script d&#8217;installation. Vous pouvez vérifier cela à l&#8217;adresse suivante :
+<a href="http://localhost:8983/solr/#/~cloud">solr UI</a>. Vous pouvez regarder la documentation solr pour
+interagir avec Solr (notamment pour démarrer le cluster et l&#8217;éteindre).</p>
+</li>
+<li>
+<p>Un serveur Grafana 7.0.3 installé dans $HDH_HOME/grafana-7.0.3</p>
+</li>
+<li>
+<p>Le plugin <a href="https://github.com/Hurence/grafana-historian-datasource">datasource Grafana de l&#8217;historian</a>
+a été installé aussi sur ce serveur Grafana. Ce plugin permet la visualisation des time series du data historian dans Grafana.
+Les binaires du plugin sont installé dans $HDH_HOME/grafana-7.0.3/data/plugins/grafana-historian-datasource/dist</p>
+</li>
+<li>
+<p>Le serveur Grafana a été lancé par le script. Vous pouvez vérifier à l&#8217;adresse suivante :
+<a href="http://localhost:3000/">http://localhost:3000/</a>. Vous pouvez regarder la documentation Grafana pour
+interagir avec Grafana (notamment pour démarrer le serveur et l&#8217;éteindre).</p>
+</li>
+<li>
+<p>Le serveur historian installé dans $HDH_HOME/historian-1.3.5</p>
+</li>
+<li>
+<p>Un répertoire "$HDH_HOME/data" qui va contenir les time series de l&#8217;historian.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Voici la structure de $HDH_HOME à l&#8217;issue de l&#8217;installation par défaut :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>$HDH_HOME/data : Dossier contenant les données Solr</p>
+</li>
+<li>
+<p>$HDH_HOME/solr-8.2.0 : Dossier contenant l&#8217;installation de Solr 8.2.0</p>
+</li>
+<li>
+<p>$HDH_HOME/solr-8.2.0/bin/solr : Script permettant de démarrer et arrêter Solr</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.</p>
+</li>
+<li>
+<p>$HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/application.log : Le fichier de log du data historian.</p>
+</li>
+<li>
+<p>$HDH_HOME/grafana-7.0.3 : Dossier contenant l&#8217;installation de Grafana</p>
+</li>
+<li>
+<p>$HDH_HOME/grafana-7.0.3/bin/grafana-server : Script permettant de démarrer et arrêter grafana</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Si l&#8217;installation se passe correctement, tous les services ont été lancés  et le data historian est prêt pour utilisation.</p>
+</div>
+<div class="sect4">
+<h5 id="description-du-fichier-de-configuration-de-lhistorian"><a class="anchor" href="#description-du-fichier-de-configuration-de-lhistorian"></a>Description du fichier de configuration de l&#8217;historian</h5>
+<div class="paragraph">
+<p>Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoires :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">web.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">1</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">2</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">http_server</span><span class="delimiter">&quot;</span></span> : {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">localhost</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span> : <span class="integer">8080</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/hurence-historian</span><span class="delimiter">&quot;</span></span>
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">address</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_point_before_using_pre_agg</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_chunks_before_using_solr_partition</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">api</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">grafana</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">search</span><span class="delimiter">&quot;</span></span> : {
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">default_size</span><span class="delimiter">&quot;</span></span>: <span class="integer">100</span>
+        }
+      }
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">solr</span><span class="delimiter">&quot;</span></span> : {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">use_zookeeper</span><span class="delimiter">&quot;</span></span>: <span class="value">true</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_urls</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">localhost:9983</span><span class="delimiter">&quot;</span></span>],
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_chroot</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">stream_url</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">http://localhost:8983/solr/historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">chunk_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">annotation_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">annotation</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">sleep_milli_between_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">3</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">urls</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">connection_timeout</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">socket_timeout</span><span class="delimiter">&quot;</span></span>: <span class="integer">60000</span>
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>General conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>web.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour répondre aux appels http des clients.
+Un verticle est capable de gérer un grand nombre de requêtes (au moins 1000, voir la documentation de vertx pour plus d&#8217;information).</p>
+</li>
+<li>
+<p>historian.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour le service de l&#8217;historian qui s&#8217;occupe du sampling et des interactions avec le backend. C&#8217;est ce paramètre qui va être clé. Il y a de grandes chances que ce soit
+ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Http server conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>http_server/host : le nom du serveur http à déployer.</p>
+</li>
+<li>
+<p>http_server/port : le port sur lequel est déployé l&#8217;api rest.</p>
+</li>
+<li>
+<p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx. Il est essentiel de bien connaître vertx pour toucher à ce paramètre.</p>
+</li>
+<li>
+<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de measures que l&#8217;historian
+accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
+trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
+</li>
+<li>
+<p>http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l&#8217;import de données achever).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Historian service conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>general conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
+que vous maîtrisez vertx. Doit être identique à la valeur de 'http_server/historian.address'.</p>
+</li>
+<li>
+<p>historian/limit_number_of_point_before_using_pre_agg : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/limit_number_of_chunks_before_using_solr_partition : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métriques à retourner par défaut pour l&#8217;endpoint search.</p>
+</li>
+<li>
+<p>historian/schema_version : La version du schéma a utiliser. (Attention ne pas modifier cette valeur manuellement !)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>solr conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/connection_timeout : Le timeout lors de la connection au serveur Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/socket_timeout : Le timeout pour tous les sockets de lecture avec Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/stream_url : l&#8217;url de la collection solr à utiliser pour l&#8217;api stream de solr. Il est recommandé de
+créer une collection dédiée (avec les ressources suffisantes).</p>
+</li>
+<li>
+<p>historian/solr/chunk_collection : Le nom de la collection ou sont stockées les timeseries.</p>
+</li>
+<li>
+<p>historian/solr/annotation_collection : Le nom de la collection ou sont stockées les annotations.</p>
+</li>
+<li>
+<p>historian/solr/sleep_milli_between_connection_attempt : Le nombre de millisecondes à attendre entre chaque tentatives
+de ping du serveur solr au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/number_of_connection_attempt : Le nombre de tentatives pour tester la connectivité au serveur solr
+au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/use_zookeeper : Si vous utilisez solr cloud (avec un serveur zookeeper ou sans)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>option si utilisation de zookeeper</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/zookeeper_urls : une liste d&#8217;au moins un serveur zookeeper (ex: ["zookeeper1:2181"]).</p>
+</li>
+<li>
+<p>historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigner ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>option si zookeeper n&#8217;est pas utilisé</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/urls : Les urls http pour faire des requêtes à solr. Par exemple ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Le script d&#8217;installation (install.sh) génère un fichier de configuration selon les informations renseignées.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="description-des-composants-installés-par-le-script-dinstallation"><a class="anchor" href="#description-des-composants-installés-par-le-script-dinstallation"></a>Description des composants installés par le script d&#8217;installation</h5>
+<div class="sect5">
+<h6 id="installation-de-apache-solr"><a class="anchor" href="#installation-de-apache-solr"></a>Installation de Apache SolR</h6>
+<div class="paragraph">
+<p>Apache SolR est la base de donnée utilisée par l&#8217;historian, elle peut être remplacée par un autre moteur de recherche.</p>
+</div>
+<div class="paragraph">
+<p>Le script d&#8217;installation a installé Solr au chemin '$HDH_HOME/solr-8.2.0' que nous appelleront '$SOLR_HOME'.</p>
+</div>
+<div class="paragraph">
+<p>Il a également lancé deux cores Solr localement dans le répertoire <code>$HDH_HOME/data</code>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="install-production-mono-noeud"><a class="anchor" href="#install-production-mono-noeud"></a>3.2. Installation mono noeud de production</h3>
+<div class="sect3">
+<h4 id="pre-requis-pour-une-installation-mono-serveur-en-production"><a class="anchor" href="#pre-requis-pour-une-installation-mono-serveur-en-production"></a>3.2.1. Pre-requis pour une installation mono serveur en production</h4>
+<div class="paragraph">
+<p>La configuration minimale du serveur pour une installation mono serveur (en production) du data historian est:</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>un OS CentOS ou Redhat 7.x ou Ubuntu ou Mac</p>
+</li>
+<li>
+<p>32 Gigabits de RAM</p>
+</li>
+<li>
+<p>32 vcores de CPU</p>
+</li>
+<li>
+<p>2 Tera octets de disque</p>
+</li>
+<li>
+<p>Java 8</p>
+</li>
+<li>
+<p>Spark 2.3.4</p>
+</li>
+<li>
+<p>Solr 8.2.0</p>
+</li>
+<li>
+<p>Grafana 7.0.3</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Dans cette section nous avons prévu des petits guides pour vous aider a installer solr 8.2.0, spark 2.3.4 et grafana 7.0.3.
+Mais nous recommandons de vous référer à la documentation officielle de ces outils pour des installations de production.
+Si vous avez déjà des serveurs existants vous pouvez directement passer à cette <a href="#install-production-hurence-datasource-grafana-plugin">section</a></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-apache-solr-2"><a class="anchor" href="#installation-de-apache-solr-2"></a>3.2.2. Installation de Apache SolR</h4>
+<div class="paragraph">
+<p>Apache SolR est la base de donnée utilisée par l&#8217;historian, elle peut être remplacée par un autre moteur de recherche.</p>
+</div>
+<div class="paragraph">
+<p>Vous pouvez télécharger la version 8.2.0 de solr sur le lien suivant : <a href="https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz">solr-8.2.0.tgz</a>
+ou via le <a href="https://lucene.apache.org/solr">site officiel</a>. Nous vous invitons également à suivre la documentation officielle
+pour installer un cluster solr de production.</p>
+</div>
+<div class="paragraph">
+<p>Vérifiez que votre instance solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
+"http://&lt;solrhost&gt;:8983/solr/#/~cloud"</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="install-apache-spark"><a class="anchor" href="#install-apache-spark"></a>3.2.3. Install Apache Spark</h4>
+<div class="paragraph">
+<p>Pour installer spark vous pouvez télécharger cette archive :
+<a href="https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz">spark-2.3.4-bin-without-hadoop.tgz</a></p>
+</div>
+<div class="paragraph">
+<p>Les commandes suivantes vous permettront d&#8217;avoir une installation locale. Sinon veuillez suuivre les indications officiels
+pour un cluster de production.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash"># get Apache Spark 2.3.4 and unpack it
+cd $HDH_HOME
+wget https://archive.apache.org/dist/spark/spark-2.3.4/spark-2.3.4-bin-without-hadoop.tgz
+tar -xvf spark-2.3.4-bin-without-hadoop.tgz
+rm spark-2.3.4-bin-without-hadoop.tgz
+
+# add two additional jars to spark to handle our framework
+wget -O spark-solr-3.6.6-shaded.jar https://search.maven.org/remotecontent?filepath=com/lucidworks/spark/spark-solr/3.6.6/spark-solr-3.6.6-shaded.jar
+mv spark-solr-3.6.6-shaded.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/
+cp $HDH_HOME/historian-1.3.4-SNAPSHOT/lib/loader-1.3.4-SNAPSHOT.jar $HDH_HOME/spark-2.3.4-bin-without-hadoop/jars/</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-grafana"><a class="anchor" href="#installation-de-grafana"></a>3.2.4. Installation de Grafana</h4>
+<div class="paragraph">
+<p>Installez Grafana pour votre plateforme comme décrit ici : <code><a href="https://grafana.com/docs/grafana/latest/installation/requirements/" class="bare">https://grafana.com/docs/grafana/latest/installation/requirements/</a></code>.
+Une fois l&#8217;installation de votre cluster grafana effectuée nous allons passer à l&#8217;installation de notre plugin grafana datasource
+nécessaire pour consulter des dashboard basés sur notre historian.</p>
+</div>
+<div class="paragraph">
+<p>Il est nécessaire d&#8217;avoir au minimum la version 7.0.3 de Grafana.</p>
+</div>
+<div class="sect4">
+<h5 id="install-production-hurence-datasource-grafana-plugin"><a class="anchor" href="#install-production-hurence-datasource-grafana-plugin"></a>Installation Plugin Grafana pour utiliser le data historian Hurence</h5>
+<div class="paragraph">
+<p>Pour consulter les données de l&#8217;historian via des dashboard nous utilisons Grafana. Dans ce but nous avons développé
+nos propres plugins Grafana que nous ferons évoluer avec l&#8217;historian.</p>
+</div>
+<div class="paragraph">
+<p>Pour installer le plugin datasource suivez les <a href="https://github.com/Hurence/grafana-historian-datasource#installation">instruction sur le projet correspondant</a></p>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="installation-de-lhistorian-2"><a class="anchor" href="#installation-de-lhistorian-2"></a>3.2.5. Installation de l&#8217;historian</h4>
+<div class="paragraph">
+<p>Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
+et les chunks. Téléchargez le script d&#8217;installation de l&#8217;historian pour votre version
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.
+Lancez l&#8217;installation en lançant ce script :</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Solr n&#8217;aime pas pour des questions de sécurité que vous installiez et lanciez en root.
+Utilisez donc un utilisateur qui n&#8217;est ni sudoer ni root (un utilisateur applicatif ou le vôtre) mais vérifiez bien que vous avez les droits en  écriture là où HDH va s&#8217;installer (par défaut /opt/hdh).</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">bash ./install.sh</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>le script install.sh doit être exécutable. Si vous obtenez un problème d&#8217;autorisation au lancement, vérifiez qu&#8217;il a les bonnes propriétés et sinon exécutez cette commande:</p>
+</dd>
+</dl>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">chmod +x install.sh</code></pre>
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>lors de l&#8217;installation Solr vous met en garde éventuellement sur votre configuration machine en ce qui concerne le nombre de fichiers ouverts qui est généralement réduit à 1024. Si vous voulez une installation robuste pour accueillir de nombreuses données il vous faudra changer ce paramètre avec la commande ulimit (et l&#8217;édition d&#8217;un fichier de configuration dont le nom dépend de votre OS).
+Référez vous à votre documentation système.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Il sera alors demandé à l&#8217;utilisateur plusieurs informations.</p>
+</div>
+<div class="paragraph">
+<p>Here is an example:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_mono_noeud.png" alt="screenshot install mono noeud">
+</div>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">NOTE</dt>
+<dd>
+<p>Attention au chemin ou vous installez l&#8217;historian (par défaut /opt/hdh). En effet l&#8217;espace disque doit être
+suffisant pour stocker les binaires, les scripts ainsi que les données de time series que vous allez injecter.</p>
+</dd>
+</dl>
+</div>
+<div class="paragraph">
+<p>Et voici un aperçu des derniers logs si tout s&#8217;est bien passé lors de l&#8217;installation (verifiez que vous n&#8217;avez pas eu d&#8217;erreur d&#8217;affiché) :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
+</div>
+</div>
+<div class="paragraph">
+<p>Vous pouvez vérifier que votre serveur a bien été lancé avec la commande suivante:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl http://localhost:8080/api/grafana/v0</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si ce n&#8217;est pas le cas, allez voir les logs (dans le répertoire d&#8217;installation et le sous répertoire <em>historian-1.3.5</em>, il y a un fichier app.log). En général ce sera un problème de droits pour créer des répertoires: notamment dans /tmp (vérifiez bien vos droits en écriture sur ce répertoire).</p>
+</div>
+<div class="paragraph">
+<p>Pour démarrer ou redémarrer l&#8217;historian (en cas de problème), tapez la commande suivante dans le répertoire d&#8217;installation :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">historian-1.3.5/bin/historian-server.sh start
+(or historian-1.3.5/bin/historian-server.sh restart)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Dans la suite, on appellera le chemin indiqué pour l&#8217;installation de l&#8217;historian '$HDH_HOME'.</p>
+</div>
+<div class="paragraph">
+<p>A l&#8217;issue de ce script, vous aurez :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>l&#8217;historian installé au chemin indiqué $HDH_HOME.</p>
+</li>
+<li>
+<p>Le plugin <a href="https://github.com/Hurence/grafana-historian-datasource">datasource grafana de l&#8217;historian</a>
+installé sur le serveur Grafana indiqué lors de l&#8217;installation</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Voici la structure de $HDH_HOME à l&#8217;issue de l&#8217;installation par défaut :
+* $HDH_HOME/historian-1.3.5/bin/historian-server.sh : Permet de lancer et arrêter l&#8217;api REST de l&#8217;historian.
+* $HDH_HOME/historian-1.3.5/conf/log4j.properties : Fichier pour contrôler le niveau des logs en mode production (défaut).
+* $HDH_HOME/historian-1.3.5/conf/log4j-debug.properties : Fichier pour contrôler le niveau des logs en mode debug.
+* $HDH_HOME/historian-1.3.5/conf/historian-server-conf.json : Le fichier de configuration du serveur fournissant l&#8217;api rest de l&#8217;historian.</p>
+</div>
+<div class="paragraph">
+<p>Le script $HDH_HOME/historian-1.3.5/bin/historian-server.sh sert à lancer/arrêter l&#8217;api rest de l&#8217;historian.</p>
+</div>
+<div class="paragraph">
+<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh stop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attention ces commandes n&#8217;affectent ni Grafana ni Solr qui sont des services indépendants.</p>
+</div>
+<div class="sect4">
+<h5 id="description-du-fichier-de-configuration-de-lhistorian-2"><a class="anchor" href="#description-du-fichier-de-configuration-de-lhistorian-2"></a>Description du fichier de configuration de l&#8217;historian</h5>
+<div class="paragraph">
+<p>Voici le fichier de configuration par défaut, il contient toutes les informations possibles, certaines ne sont pas obligatoires :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">web.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">1</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.verticles.instance.number</span><span class="delimiter">&quot;</span></span>: <span class="integer">2</span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">http_server</span><span class="delimiter">&quot;</span></span> : {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">host</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">localhost</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span> : <span class="integer">8080</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/hurence-historian</span><span class="delimiter">&quot;</span></span>
+  },
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">address</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_point_before_using_pre_agg</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_chunks_before_using_solr_partition</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">api</span><span class="delimiter">&quot;</span></span>: {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">grafana</span><span class="delimiter">&quot;</span></span>: {
+        <span class="key"><span class="delimiter">&quot;</span><span class="content">search</span><span class="delimiter">&quot;</span></span> : {
+          <span class="key"><span class="delimiter">&quot;</span><span class="content">default_size</span><span class="delimiter">&quot;</span></span>: <span class="integer">100</span>
+        }
+      }
+    },
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">solr</span><span class="delimiter">&quot;</span></span> : {
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">use_zookeeper</span><span class="delimiter">&quot;</span></span>: <span class="value">true</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_urls</span><span class="delimiter">&quot;</span></span>: [<span class="string"><span class="delimiter">&quot;</span><span class="content">localhost:9983</span><span class="delimiter">&quot;</span></span>],
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">zookeeper_chroot</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">stream_url</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">http://localhost:8983/solr/historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">chunk_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">annotation_collection</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">annotation</span><span class="delimiter">&quot;</span></span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">sleep_milli_between_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_connection_attempt</span><span class="delimiter">&quot;</span></span> : <span class="integer">3</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">urls</span><span class="delimiter">&quot;</span></span> : <span class="value">null</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">connection_timeout</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
+      <span class="key"><span class="delimiter">&quot;</span><span class="content">socket_timeout</span><span class="delimiter">&quot;</span></span>: <span class="integer">60000</span>
+    }
+  }
+}</code></pre>
+</div>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>General conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>web.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour répondre aux appels http des clients.
+Un verticle est capable de gérer un grand nombre de requêtes (au moins 1000, voir la documentation de vertx pour plus d&#8217;information).</p>
+</li>
+<li>
+<p>historian.verticles.instance.number : Le nombre d&#8217;instances de verticles à déployer pour le service de l&#8217;historian qui s&#8217;occupe du sampling et des interactions avec le backend. C&#8217;est ce paramètre qui va être clé. Il y a de grandes chances que ce soit
+ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Http server conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>http_server/host : le nom du serveur http à déployer.</p>
+</li>
+<li>
+<p>http_server/port : le port sur lequel est déployé l&#8217;api rest.</p>
+</li>
+<li>
+<p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx. Il est essentiel de bien connaître vertx pour toucher à ce paramètre.</p>
+</li>
+<li>
+<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de measures que l&#8217;historian
+accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
+trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
+</li>
+<li>
+<p>http_server/upload_directory : Le répertoire ou les fichiers csv seront upload (ils sont effacer une fois l&#8217;import de données achever).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>Historian service conf :</p>
+<div class="ulist">
+<ul>
+<li>
+<p>general conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx et
+que vous maîtrisez vertx. Doit être identique à la valeur de 'http_server/historian.address'.</p>
+</li>
+<li>
+<p>historian/limit_number_of_point_before_using_pre_agg : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/limit_number_of_chunks_before_using_solr_partition : Une option pour optimiser les performances. Attention à ne pas mettre un nombre trop grand.</p>
+</li>
+<li>
+<p>historian/api/grafana/search/default_size : Une option pour modifier le nombre maximum de nom de métriques à retourner par défaut pour l&#8217;endpoint search.</p>
+</li>
+<li>
+<p>historian/schema_version : La version du schéma a utiliser. (Attention ne pas modifier cette valeur manuellement !)</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>solr conf</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/connection_timeout : Le timeout lors de la connection au serveur Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/socket_timeout : Le timeout pour tous les sockets de lecture avec Solr en millisecondes.</p>
+</li>
+<li>
+<p>historian/solr/stream_url : l&#8217;url de la collection solr à utiliser pour l&#8217;api stream de solr. Il est recommandé de
+créer une collection dédiée (avec les ressources suffisantes).</p>
+</li>
+<li>
+<p>historian/solr/chunk_collection : Le nom de la collection ou sont stockées les timeseries.</p>
+</li>
+<li>
+<p>historian/solr/annotation_collection : Le nom de la collection ou sont stockées les annotations.</p>
+</li>
+<li>
+<p>historian/solr/sleep_milli_between_connection_attempt : Le nombre de millisecondes à attendre entre chaque tentatives
+de ping du serveur solr au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/number_of_connection_attempt : Le nombre de tentatives pour tester la connectivité au serveur solr
+au démarrage de l&#8217;historian.</p>
+</li>
+<li>
+<p>historian/solr/use_zookeeper : Si vous utilisez solr cloud (avec un serveur zookeeper ou sans)</p>
+<div class="ulist">
+<ul>
+<li>
+<p>option si utilisation de zookeeper</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/zookeeper_urls : une liste d&#8217;au moins un serveur zookeeper (ex: ["zookeeper1:2181"]).</p>
+</li>
+<li>
+<p>historian/solr/zookeeper_chroot : Le chemin root zookeeper qui contient les données solr. Ne pas renseigner ou utiliser null si il n y a pas de chroot (voir documentation zookeeper).</p>
+</li>
+</ul>
+</div>
+</li>
+<li>
+<p>option si zookeeper n&#8217;est pas utilisé</p>
+<div class="ulist">
+<ul>
+<li>
+<p>historian/solr/urls : Les urls http pour faire des requêtes à solr. Par exemple ["http://server1:8983/solr", "http://server2:8983/solr"].</p>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Generation d&#8217;un fichier de configuration pendant le script d&#8217;installation selon les informations renseignées.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="redémarrage-du-data-historian"><a class="anchor" href="#redémarrage-du-data-historian"></a>4. Redémarrage du data historian</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Il y a un ordre à respecter pour démarrer ou redémarrer le data historian. Il faut dans l&#8217;ordre:</p>
+</div>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p><a href="#restart-solr">Redémarrer Solr</a>. Si il n&#8217;est pas complètement stoppé, stoppez le (voir la section Arrêter Solr).</p>
+</li>
+<li>
+<p><a href="#restart-historian">Redémarrer l&#8217;historian server</a></p>
+</li>
+<li>
+<p><a href="#restart-grafana">Redémarrer Grafana</a></p>
+</li>
+</ol>
+</div>
+<div class="sect2">
+<h3 id="restart-solr"><a class="anchor" href="#restart-solr"></a>4.1. Redémarrer solr</h3>
+<div class="paragraph">
+<p>Si vous avez coupé Solr ou bien si vous avez redémarré votre ordinateur vous pouvez relancer ce Solr avec les commandes suivantes :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">cd $SOLR_HOME
+# démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
+bin/solr start -cloud -s $HDH_HOME/data/solr/node1 -p 8983
+# démarre un second core Solr localement qui va utiliser le serveur zookeeper précédamment créer.
+bin/solr start -cloud -s $HDH_HOME/data/solr/node2/ -p 7574 -z localhost:9983</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Vérifiez que votre instance Solr fonctionne correctement en allant sur l&#8217;interface graphique à l&#8217;adresse suivante :
+<a href="http://localhost:8983/solr/#/~cloud">local solr UI</a></p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="restart-historian"><a class="anchor" href="#restart-historian"></a>4.2. Redémarrer l&#8217;historian</h3>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh start</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Si cela ne marche pas car un PID (un process id) existe et le data historian est supposé up, alors faite un stop, puis refaite un start.</p>
+</div>
+<div class="paragraph">
+<p>Pour arrêter l&#8217;historian taper la commande suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/historian-1.3.5/bin/historian-server.sh stop</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attention ces commandes n&#8217;affectent ni Grafana ni Solr qui sont des services indépendants.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="restart-grafana"><a class="anchor" href="#restart-grafana"></a>4.3. Redémarrer Grafana</h3>
+<div class="paragraph">
+<p>Utilisez restart si c&#8217;est un redémarrage. Si votre grafana ne tourne pas déjà utilisez start.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/grafana-7.0.3/bin/grafana-server start</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="gestion-des-données"><a class="anchor" href="#gestion-des-données"></a>5. Gestion des données</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Vous pouvez consulter notre documentation sur l&#8217;api REST <a href="https://github.com/Hurence/historian/blob/release-1.3.5/docs/generated-docs/pdf/fr/rest-api.pdf">api rest</a> pour connaitre les détails de chaque fonction de l&#8217;API (endpoint).
+Maintenant que nous avons installé l&#8217;historian. Vous pouvez jouer avec des données, il y a plusieurs manières
+d&#8217;interagir avec l&#8217;historian selon votre culture et vos besoins.</p>
+</div>
+<div class="paragraph">
+<p>L&#8217;historian ne contient initialement aucune données. Il existe plusieurs moyens d&#8217;injecter des données (voir le guide sur l&#8217;api rest),
+dans ce guide nous allons utiliser l&#8217;import de données à partir de fichiers csv.</p>
+</div>
+<div class="sect2">
+<h3 id="import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"><a class="anchor" href="#import-de-donnée-à-partir-de-fichiers-csv-avec-lapi-rest"></a>5.1. Import de donnée à partir de fichiers csv avec l&#8217;api REST</h3>
+<div class="paragraph">
+<p>Cette section va nous apprendre à injecter un fichier CSV dans l&#8217;historian. Le folder <strong>samples</strong> du data historian contient des exemples. Nous allons injecter les données du sous folder <strong>happiness</strong> ; quelques fichiers qui donnent le score de "happiness" des pays chaque année.</p>
+</div>
+<div class="paragraph">
+<p>Excecutez la commande suivante (dans ce qui suit remplacez $HDH_HOME par votre répertoire d&#8217;installation et éventuellement l&#8217;adresse de votre serveur historian si vous n&#8217;avez pas effectué une installation locale ):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@$HDH_HOME/historian-1.3.5/samples/happiness/2015.csv' \
+-F mapping.value="Happiness Score" \
+-F mapping.timestamp=Timestamp \
+-F mapping.tags=Country \
+-F group_by=name \
+-F group_by=tags.Country \
+-F format_date='yyyy-MM-dd HH:mm:ss'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>et bien sûr vous pouvez appliquer la même requête à tous les fichiers de 2016 à 2020. Cela vous fait un petit jeu de données sur lequel nous allons pouvoir apprendre à faire des choses.</p>
+</div>
+<div class="paragraph">
+<p>Ces query devraient retourner une réponse de ce type :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span> : [ <span class="string"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> ],
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">grouped_by</span><span class="delimiter">&quot;</span></span> : [ <span class="string"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>, <span class="string"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> ],
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">report</span><span class="delimiter">&quot;</span></span> : [ {
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">Switzerland</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_points_injected</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_point_failed</span><span class="delimiter">&quot;</span></span> : <span class="integer">0</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_chunk_created</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>
+  },
+  <span class="error">.</span><span class="error">.</span><span class="error">.</span>,{
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">Togo</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_points_injected</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_point_failed</span><span class="delimiter">&quot;</span></span> : <span class="integer">0</span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">number_of_chunk_created</span><span class="delimiter">&quot;</span></span> : <span class="integer">1</span>
+  }]
+}</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="requêter-des-données-avec-lapi-rest"><a class="anchor" href="#requêter-des-données-avec-lapi-rest"></a>5.2. Requêter des données avec l&#8217;api REST</h3>
+<div class="paragraph">
+<p>Une manière de voir si vous données ont bien été injectées est de les requêter. Essayons de voir
+la progression du bonheur (métrique happiness) en France sur les années 2015 à 2020. Et essayons de l&#8217;obtenir en Json.</p>
+</div>
+<div class="paragraph">
+<p>Déjà regardons simplement si il existe des métriques happiness dans l&#8217;historian avec la requête suivante:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST \
+http://localhost:8080/api/grafana/v0/query -d '{
+  &quot;names&quot;: [&quot;happiness&quot;]
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette query retourne une réponse de ce type :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[{
+   <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+   <span class="key"><span class="delimiter">&quot;</span><span class="content">datapoints</span><span class="delimiter">&quot;</span></span>:[[<span class="float">7.587</span>,<span class="integer">1420070400000</span>],<span class="error">.</span><span class="error">.</span><span class="error">.</span>,[<span class="float">2.566900015</span>,<span class="integer">1577836800000</span>]]
+}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>En filtrant sur le tag Country (= France) nous devrions avoir les enregistrements de la France uniquement.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl --header 'Content-Type: application/json' -X POST \
+http://localhost:8080/api/grafana/v0/query -d '{
+  &quot;names&quot;: [&quot;happiness&quot;],
+  &quot;tags&quot;: {
+     &quot;Country&quot;: &quot;France&quot;
+  }
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette query retourne la réponse suivante :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span>:{<span class="key"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">France</span><span class="delimiter">&quot;</span></span>},
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">datapoints</span><span class="delimiter">&quot;</span></span>:[
+    [<span class="float">6.575</span>,<span class="integer">1420070400000</span>],
+    [<span class="float">6.478</span>,<span class="integer">1451606400000</span>],
+    [<span class="float">6.44199991226196</span>,<span class="integer">1483228800000</span>],
+    [<span class="float">6.489</span>,<span class="integer">1514764800000</span>],
+    [<span class="float">6.592</span>,<span class="integer">1546300800000</span>],
+    [<span class="float">6.663799763</span>,<span class="integer">1577836800000</span>]
+   ]
+}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obtenir l&#8217;ensemble des noms de métriques.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl --X POST 'http://localhost:8080/api/grafana/v0/search' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  &quot;name&quot;: &quot;ha&quot;,
+  &quot;limit&quot;: 100
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici on précise que l&#8217;on désire avoir toutes les noms de métrique contenant la string "ha" mais de n&#8217;en retrouner qu&#8217;un maximum de 100.
+Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tout les noms de métrique.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obtenir l&#8217;ensemble des tags présent dans l&#8217;historian.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST 'http://localhost:8080/api/grafana/v0/search/tags'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette query retourne la liste des tags présent en json :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">Country</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obtenir l&#8217;ensemble des valeurs d&#8217;un tag.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST 'http://localhost:8080/api/grafana/v0/search/values' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+  &quot;field&quot;: &quot;Country&quot;,
+  &quot;query&quot;: &quot;F&quot;,
+  &quot;limit&quot;: 100
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Ici on précise que l&#8217;on désire avoir toutes les valeurs existante pour le tag "Country" contenant la string "F" mais de n&#8217;en retrouner qu&#8217;un maximum de 100.
+Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tous les noms de métrique.</p>
+</div>
+<div class="paragraph">
+<p>Cette query retourne cette liste :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">Burkina Faso</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Finland</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">France</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Attention la requête est sensible aux majuscules. La même requête avec un "f" minuscule retournera en effet :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[<span class="string"><span class="delimiter">&quot;</span><span class="content">Afghanistan</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Central African Republic</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Hong Kong S.A.R. of China</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">South Africa</span><span class="delimiter">&quot;</span></span>,<span class="string"><span class="delimiter">&quot;</span><span class="content">Taiwan Province of China</span><span class="delimiter">&quot;</span></span>]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Obtenir des mesures en spécifiant :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Un intervalle de temps</p>
+</li>
+<li>
+<p>La métrique dont on chercher les données est "happiness"</p>
+</li>
+<li>
+<p>On veut au maximum 10 measures</p>
+</li>
+<li>
+<p>Si il y a besoin d&#8217;effectuer un sampling nous voulons utiliser un algorithme à base de bucket et en prenant la plus petite valeur à chaque fois.</p>
+</li>
+</ul>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">curl -X POST 'http://localhost:8080/api/grafana/v0/query' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    &quot;from&quot;: &quot;2015-01-01T00:00:00.000Z&quot;,
+    &quot;to&quot;: &quot;2016-01-01T00:00:00.000Z&quot;,
+    &quot;names&quot;: [&quot;happiness&quot;],
+    &quot;max_data_points&quot;: 10,
+    &quot;sampling&quot;:{
+       &quot;algorithm&quot;: &quot;MIN&quot;,
+       &quot;bucket_size&quot; : 100
+    }
+}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Cette query retourne cette réponse :</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="json">[{
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span>:<span class="string"><span class="delimiter">&quot;</span><span class="content">happiness</span><span class="delimiter">&quot;</span></span>,
+  <span class="key"><span class="delimiter">&quot;</span><span class="content">datapoints</span><span class="delimiter">&quot;</span></span>:[
+    [<span class="float">4.867</span>,<span class="integer">1420070400000</span>],
+    [<span class="float">2.839</span>,<span class="integer">1420070400000</span>],
+    [<span class="float">3.36</span>,<span class="integer">1451606400000</span>],
+    [<span class="float">2.905</span>,<span class="integer">1451606400000</span>]
+   ]
+}]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Nous obtenons bien moins de 10 measures. Attention comme nous n&#8217;avons pas précisé de tags les valeurs de tous les pays sont mélangés !</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">note</dt>
+<dd>
+<p>Il n y a ici que 4 measures de retournés alors que nous avons spécifié un maximum de 10 measures. Cela n&#8217;est pas optimum car il
+y a plus de 10 measures en tout ! En effet nous devrions ici avoir 10 measures. Ce problème sera fixé lors de la prochaine release. En attendant
+n&#8217;hésitez pas à augmenter la valeur de "max_data_points" si cela devait vous arriver.</p>
+</dd>
+<dt class="hdlist1">warn</dt>
+<dd>
+<p>Attention cependant a ne pas demander trop de measures ! En effet si vous voulez exporter la totalité des measures cette endpoint n&#8217;est
+pas l&#8217;outil adéquat. D&#8217;ailleurs si le nombre indiqué est supérieur à 2147483647 la requête ne fonctionnera pas. Dans une futur release
+le maximum pour cette variable sera revue à la baisse.</p>
+</dd>
+</dl>
+</div>
+</div>
+<div class="sect2">
+<h3 id="utiliser-spark-pour-requếter-les-données"><a class="anchor" href="#utiliser-spark-pour-requếter-les-données"></a>5.3. Utiliser Spark pour requếter les données</h3>
+<div class="paragraph">
+<p>Apache Spark est une plateforme open source pour traiter de grandes quantités de données en parallèle sur un cluster de machines.</p>
+</div>
+<div class="paragraph">
+<p>Hurence Data Historian est très intégré avec Spark de telle sorte que vous puissiez gérer des intéractions avec les données (en entrées pour en injecter ou en requêtage pour les obtenir sur des critères), et ceci avec une API Spark simple.</p>
+</div>
+<div class="paragraph">
+<p>Les commandes suivantes vous montrent comment prendre un dataset en CSV depuis HDFS (le système de fichiers de Hadoop) ou depuis un système de fichier local, et le charger dans HDH.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="bash">$HDH_HOME/spark-2.3.4-bin-hadoop2.7/bin/spark-shell --jars assembly/target/historian-1.3.5-SNAPSHOT/historian-1.3.5-SNAPSHOT//lib/loader-1.3.5-SNAPSHOT.jar,assembly/target/historian-1.3.5-SNAPSHOT/historian-1.3.5-SNAPSHOT/lib/spark-solr-3.6.6-shaded.jar</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="CodeRay highlight"><code data-lang="scala">import com.hurence.historian.modele.ChunkRecordV0
+import com.hurence.historian.spark.ml.Chunkyfier
+import com.hurence.historian.spark.sql
+import com.hurence.historian.spark.sql.functions._
+import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import com.lucidworks.spark.util.SolrSupport
+import org.apache.commons.cli.{DefaultParser, Option, Options}
+import org.apache.spark.sql.SparkSession
+import org.slf4j.LoggerFactory
+
+ val filePath = &quot;/Users/tom/Documents/workspace/historian/loader/src/test/resources/it-data-4metrics.csv.gz&quot;
+ val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val measuresDS = reader.read(sql.Options(
+      filePath,
+      Map(
+        &quot;inferSchema&quot; -&gt; &quot;true&quot;,
+        &quot;delimiter&quot; -&gt; &quot;,&quot;,
+        &quot;header&quot; -&gt; &quot;true&quot;,
+        &quot;nameField&quot; -&gt; &quot;metric_name&quot;,
+        &quot;timestampField&quot; -&gt; &quot;timestamp&quot;,
+        &quot;timestampDateFormat&quot; -&gt; &quot;s&quot;,
+        &quot;valueField&quot; -&gt; &quot;value&quot;,
+        &quot;tagsFields&quot; -&gt; &quot;metric_id,warn,crit&quot;
+      )))
+
+
+
+val chunkyfier = new Chunkyfier().setGroupByCols(Array(  &quot;name&quot;, &quot;tags.metric_id&quot;))
+val chunksDS = chunkyfier.transform(measuresDS).as[ChunkRecordV0]
+
+
+val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
+    writer.write(sql.Options(&quot;historian&quot;, Map(
+      &quot;zkhost&quot; -&gt; &quot;localhost:9983&quot;,
+      &quot;collection&quot; -&gt; &quot;historian&quot;,
+      &quot;tag_names&quot; -&gt; &quot;metric_id,warn,crit&quot;
+    )), chunksDS)</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="linjection-temps-réel-avec-logisland"><a class="anchor" href="#linjection-temps-réel-avec-logisland"></a>5.4. L&#8217;injection temps réel avec LogIsland</h3>
+<div class="paragraph">
+<p>Le logiciel Open Source de Hurence permettant de faire du stream processing (donc du traitement temps réel de données) permet bien sûr d&#8217;injecter des données "à la volée", notamment celles que vous aurez pu "pousser" dans un bus de message Mqtt ou Kafka.</p>
+</div>
+<div class="paragraph">
+<p>Hurence Data Historian est donc capable de traiter des données de capteurs et de les stocker et grapher en temps réel.</p>
+</div>
+<div class="paragraph">
+<p>Pour mettre en place une chaîne d&#8217;injection temps réel, le mieux est de contacter Hurence pour un petit accompagnement car cela devient du vrai Big Data temps réel.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="visualisation-des-données"><a class="anchor" href="#visualisation-des-données"></a>6. Visualisation des données</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>HDH fournit donc un plugin Grafana pour visualiser les données sous formes de graphes.</p>
+</div>
+<div class="paragraph">
+<p>La manipulation des données depuis les data sources de votre data historian se fait comme pour les autres sources. Vous fournissez votre requête, un intervalle de temps si nécessaire, et un algorithme de sampling si vous requêtez sur une grande quantité de measures (pour que la courbe soit bien lisible).</p>
+</div>
+<div class="sect2">
+<h3 id="configurer-la-data-source-grafana"><a class="anchor" href="#configurer-la-data-source-grafana"></a>6.1. Configurer la data source grafana</h3>
+<div class="paragraph">
+<p>En général vous voudez visualiser vos données plutôt que de les requêter. Allez sur <a href="http://localhost:3000">l&#8217;URL de grafana</a>. Vous pouvez vous logger en tant que user: admin et pwd: admin (Vous pouvez passer l&#8217;écran suivant).</p>
+</div>
+<div class="paragraph">
+<p>Vous avez une page d&#8217;accueil que nous pouvez lire puis faire disparaître.
+Afin de pouvoir consulter les données du data historian :</p>
+</div>
+<div class="sect3">
+<h4 id="explication-sans-image"><a class="anchor" href="#explication-sans-image"></a>6.1.1. Explication sans image</h4>
+<div class="olist arabic">
+<ol class="arabic">
+<li>
+<p>Vous allez clicker sur le bouton de Configuration à gauche puis sur "Data Sources".</p>
+</li>
+<li>
+<p>Clickez sur le bouton "Add data source".</p>
+</li>
+<li>
+<p>Aller à la fin et clickez sur celle qui s&#8217;appelle "Hurence-Historian" ou bien filtrer dans la barre de recherche pour la faire apparaître.</p>
+</li>
+<li>
+<p>Mettez dans la case "URL" l&#8217;URL de votre historian server (l&#8217;installation par défaut est <a href="http://localhost:8080/api/grafana/v0/" class="bare">http://localhost:8080/api/grafana/v0/</a>)</p>
+</li>
+<li>
+<p>Clickez "Save and Test"</p>
+</li>
+<li>
+<p>Vous devez avoir un message vert vous disant que votre data source est chargée et bien configuré (joignable).</p>
+</li>
+</ol>
+</div>
+</div>
+<div class="sect3">
+<h4 id="explication-avec-image"><a class="anchor" href="#explication-avec-image"></a>6.1.2. Explication avec image</h4>
+<div class="paragraph">
+<p>Allez dans le menu des datasources :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_ui_datasource.png" alt="go to datasource page">
+</div>
+</div>
+<div class="paragraph">
+<p>Cherchez la datasource "Hurence-Historian" et sélectionnez la.
+Il y a juste a renseigner l&#8217;URL <a href="http://localhost:8080/api/grafana/v0/" class="bare">http://localhost:8080/api/grafana/v0/</a> dans le cas de l&#8217;installation standalone.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/datasource_historian_setup.png" alt="datasource setup">
+</div>
+</div>
+<div class="paragraph">
+<p>Testez la connectivité en cliquant sur "Save &amp; Test" button at the bottom of the page.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="configurer-vos-dashboard"><a class="anchor" href="#configurer-vos-dashboard"></a>6.2. Configurer vos dashboard</h3>
+<div class="paragraph">
+<p>Pour créér des dashboards il faut aller sur l&#8217;interface graphique de grafana <a href="http://localhost:3000">l&#8217;URL de grafana</a> (localhost étant à remplacer par un nom de machine si vous n&#8217;êtes pas en installation standalone).</p>
+</div>
+<div class="paragraph">
+<p>Ensuite créez un nouveau dashboard.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_ui_create_dashboard.png" alt="go to new dashboard page">
+</div>
+</div>
+<div class="paragraph">
+<p>Ajoutez les graphes que vous voulez, un petit exemple ci-dessous :</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Nous avons sélectionné la métrique "happiness" (préalablement injecté).</p>
+</li>
+<li>
+<p>La time range choisis est de "2014-12-18 21:08:01" à "2020-01-13 14:48:41".</p>
+</li>
+</ul>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_all_happiness.png" alt="exemple of query config">
+</div>
+</div>
+<div class="paragraph">
+<p>Pour configurer la time range :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_all_happiness_timerange.png" alt="exemple of query config">
+</div>
+</div>
+<div class="paragraph">
+<p>TODO remarque sur la visu</p>
+</div>
+<div class="paragraph">
+<p>Si on filtre sur le tag "Country" avec la valeur France par exemple on obtient :</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_france_happiness.png" alt="exemple of query config">
+</div>
+</div>
+<div class="paragraph">
+<p>Pour cela il faut cliquer sur "Add new tag filter". Puis sélectionner la valeur "Country" comme "Tag name".
+Enfin cliquer sur "Tag value" et commencer à taper le nom du pays désirer puis sélectionner "France" lorsque celui-ci apparaît.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="/home/gregoire/gitlab/historian/docs/resources/images/grafana_dashboard_add_tag.png" alt="exemple of query config">
+</div>
+</div>
+<div class="paragraph">
+<p>TODO général note</p>
+</div>
+<div class="paragraph">
+<p>Une "query" (requête) consiste à renseigner un nom de métrique, et des paires de tag name/tag value ainsi que des options pour l&#8217;algorithme de sampling.</p>
+</div>
+<div class="dlist">
+<dl>
+<dt class="hdlist1">note</dt>
+<dd>
+<p>les options de sampling de la première requête sont utilisées pour toutes les autres.</p>
+</dd>
+<dt class="hdlist1">note</dt>
+<dd>
+<p>si vous n&#8217;avez pas de données d&#8217;injectées, suivez le tutorial pour injecter des données.</p>
+</dd>
+<dt class="hdlist1">note</dt>
+<dd>
+<p>si vous n&#8217;avez pas ajouté de tag name à l&#8217;installation vous ne pourrez pas utiliser de tags. Il est toujours possible de rajouter des tags manuellement après installation en rajoutant un champ dans le schéma.</p>
+</dd>
+</dl>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="stopper-et-détruire-les-données"><a class="anchor" href="#stopper-et-détruire-les-données"></a>7. Stopper et détruire les données</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Cette section vous apprend à stopper les services et à détruire si nécessaire les données (après avoir testé vous voudrez alimenter avec vos données réelles).</p>
+</div>
+<div class="sect2">
+<h3 id="stopper-ses-instances-solr"><a class="anchor" href="#stopper-ses-instances-solr"></a>7.1. Stopper ses instances SolR</h3>
+<div class="paragraph">
+<p>Cette section vous apprend à stopper les intances SolR. Attention cette commande va éteindre Solr (cela pourrait impacter d&#8217;autres service utilisant Solr).</p>
+</div>
+<div class="literalblock">
+<div class="content">
+<pre>cd $SOLR_HOME
+bin/solr stop -all</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version v1.0<br>
+Last updated 2020-09-10 16:49:58 +0200
+</div>
+</div>
+<style>
+/* Stylesheet for CodeRay to match GitHub theme | MIT License | http://foundation.zurb.com */
+pre.CodeRay{background:#f7f7f8}
+.CodeRay .line-numbers{border-right:1px solid currentColor;opacity:.35;padding:0 .5em 0 0}
+.CodeRay span.line-numbers{display:inline-block;margin-right:.75em}
+.CodeRay .line-numbers strong{color:#000}
+table.CodeRay{border-collapse:separate;border:0;margin-bottom:0;background:none}
+table.CodeRay td{vertical-align:top;line-height:inherit}
+table.CodeRay td.line-numbers{text-align:right}
+table.CodeRay td.code{padding:0 0 0 .75em}
+.CodeRay .debug{color:#fff !important;background:#000080 !important}
+.CodeRay .annotation{color:#007}
+.CodeRay .attribute-name{color:#000080}
+.CodeRay .attribute-value{color:#700}
+.CodeRay .binary{color:#509}
+.CodeRay .comment{color:#998;font-style:italic}
+.CodeRay .char{color:#04d}
+.CodeRay .char .content{color:#04d}
+.CodeRay .char .delimiter{color:#039}
+.CodeRay .class{color:#458;font-weight:bold}
+.CodeRay .complex{color:#a08}
+.CodeRay .constant,.CodeRay .predefined-constant{color:#008080}
+.CodeRay .color{color:#099}
+.CodeRay .class-variable{color:#369}
+.CodeRay .decorator{color:#b0b}
+.CodeRay .definition{color:#099}
+.CodeRay .delimiter{color:#000}
+.CodeRay .doc{color:#970}
+.CodeRay .doctype{color:#34b}
+.CodeRay .doc-string{color:#d42}
+.CodeRay .escape{color:#666}
+.CodeRay .entity{color:#800}
+.CodeRay .error{color:#808}
+.CodeRay .exception{color:inherit}
+.CodeRay .filename{color:#099}
+.CodeRay .function{color:#900;font-weight:bold}
+.CodeRay .global-variable{color:#008080}
+.CodeRay .hex{color:#058}
+.CodeRay .integer,.CodeRay .float{color:#099}
+.CodeRay .include{color:#555}
+.CodeRay .inline{color:#000}
+.CodeRay .inline .inline{background:#ccc}
+.CodeRay .inline .inline .inline{background:#bbb}
+.CodeRay .inline .inline-delimiter{color:#d14}
+.CodeRay .inline-delimiter{color:#d14}
+.CodeRay .important{color:#555;font-weight:bold}
+.CodeRay .interpreted{color:#b2b}
+.CodeRay .instance-variable{color:#008080}
+.CodeRay .label{color:#970}
+.CodeRay .local-variable{color:#963}
+.CodeRay .octal{color:#40e}
+.CodeRay .predefined{color:#369}
+.CodeRay .preprocessor{color:#579}
+.CodeRay .pseudo-class{color:#555}
+.CodeRay .directive{font-weight:bold}
+.CodeRay .type{font-weight:bold}
+.CodeRay .predefined-type{color:inherit}
+.CodeRay .reserved,.CodeRay .keyword {color:#000;font-weight:bold}
+.CodeRay .key{color:#808}
+.CodeRay .key .delimiter{color:#606}
+.CodeRay .key .char{color:#80f}
+.CodeRay .value{color:#088}
+.CodeRay .regexp .delimiter{color:#808}
+.CodeRay .regexp .content{color:#808}
+.CodeRay .regexp .modifier{color:#808}
+.CodeRay .regexp .char{color:#d14}
+.CodeRay .regexp .function{color:#404;font-weight:bold}
+.CodeRay .string{color:#d20}
+.CodeRay .string .string .string{background:#ffd0d0}
+.CodeRay .string .content{color:#d14}
+.CodeRay .string .char{color:#d14}
+.CodeRay .string .delimiter{color:#d14}
+.CodeRay .shell{color:#d14}
+.CodeRay .shell .delimiter{color:#d14}
+.CodeRay .symbol{color:#990073}
+.CodeRay .symbol .content{color:#a60}
+.CodeRay .symbol .delimiter{color:#630}
+.CodeRay .tag{color:#008080}
+.CodeRay .tag-special{color:#d70}
+.CodeRay .variable{color:#036}
+.CodeRay .insert{background:#afa}
+.CodeRay .delete{background:#faa}
+.CodeRay .change{color:#aaf;background:#007}
+.CodeRay .head{color:#f8f;background:#505}
+.CodeRay .insert .insert{color:#080}
+.CodeRay .delete .delete{color:#800}
+.CodeRay .change .change{color:#66f}
+.CodeRay .head .head{color:#f4f}
+</style>
+</body>
+</html>

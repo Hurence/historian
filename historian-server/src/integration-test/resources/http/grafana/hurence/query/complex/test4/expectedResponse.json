@@ -1,0 +1,38 @@
+[
+  {
+    "name":"temp_a",
+    "tags" : {
+      "usine": "usine_1"
+    },
+    "datapoints":[
+      [2.0,2],
+      [3.0,3],
+      [4.0,4],
+      [3.0,5],
+      [5.0,7]
+    ],
+    "total_points":5
+  },
+  {
+    "name":"temp_a",
+    "tags" : {
+      "sensor": "sensor_2"
+    },
+    "datapoints":[
+      [3.0,5]
+    ],
+    "total_points":1
+  },
+  {
+    "name":"temp_a",
+    "tags" : {
+      "sensor": "sensor_1"
+    },
+    "datapoints":[
+      [2.0,2],
+      [3.0,3],
+      [4.0,4]
+    ],
+    "total_points":3
+  }
+]

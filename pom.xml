@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    Copyright (C) 2016 Hurence (bailet.thomas@gmail.com)
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+            http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<!--suppress ALL -->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <name>Logisland Project Parent</name>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.hurence.historian</groupId>
+    <artifactId>historian</artifactId>
+    <version>1.3.6-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <description>Historian in a time series graphic tool
+    </description>
+    <url>https://github.com/Hurence/historian</url>
+    <organization>
+        <name>Hurence - Big Data Experts.</name>
+        <url>http://hurence.com</url>
+    </organization>
+    <developers>
+        <developer>
+            <name>Thomas Bailet</name>
+            <email>bailet.thomas@gmail.com</email>
+            <organization>Hurence</organization>
+            <organizationUrl>http://www.hurence.com</organizationUrl>
+        </developer>
+    </developers>
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0</url>
+        </license>
+    </licenses>
+    <prerequisites>
+        <maven>${maven.min-version}</maven>
+    </prerequisites>
+    <issueManagement>
+        <system>GIT</system>
+        <url>https://github.com/Hurence/historian/issues</url>
+    </issueManagement>
+
+    <properties>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        <maven.min-version>3.1.0</maven.min-version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <!--        logs-->
+        <org.slf4j.version>1.7.16</org.slf4j.version>
+        <org.log4j.version>1.2.16</org.log4j.version>
+
+        <logisland.version>1.2.0</logisland.version>
+        <jackson.version>2.9.10</jackson.version>
+        <!--        scala-->
+        <scala.version>2.11.12</scala.version>
+        <scala.binary.version>2.11</scala.binary.version>
+
+        <!--JVM option-->
+        <PermGen>64m</PermGen>
+        <MaxPermGen>512m</MaxPermGen>
+        <!--        solr-->
+        <solr.version>8.2.0</solr.version>
+        <!--        spark-->
+        <spark.version>2.3.2</spark.version>
+        <spark.solr>3.6.6</spark.solr>
+        <!--        junit-->
+        <junit.version>4.12</junit.version>
+        <junit-platform.version>1.2.0</junit-platform.version>
+        <junit.jupiter.version>5.5.2</junit.jupiter.version>
+        <!--        vertx-->
+        <vertx.version>3.8.1</vertx.version>
+        <vertx-swagger-router.version>1.5.0</vertx-swagger-router.version>
+        <!--        docker-->
+        <test.containers>1.12.2</test.containers>
+        <!-- others -->
+        <logisland.shade.packageName>shade.logisland</logisland.shade.packageName>
+        <shade-plugin.version>2.4.3</shade-plugin.version>
+    </properties>
+    <modules>
+        <module>loader</module>
+        <module>historian-server</module>
+        <module>timeseries</module>
+        <module>logisland-timeseries</module>
+        <module>integration-tests</module>
+        <module>historian-resources</module>
+        <module>assembly</module>
+        <module>historian-tools</module>
+        <module>compactor</module>
+    </modules>
+
+    <dependencies>
+        <!-- test dependencies -->
+        <!--    To use junit4 framework -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--    To use junit5 framework -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--   Engine that can run junit3 junit4 and junit5 tests ! -->
+        <dependency>
+            <groupId>org.junit.vintage</groupId>
+            <artifactId>junit-vintage-engine</artifactId>
+            <version>${junit.jupiter.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!--log dependencies, enable to use log4j.properties files to conf log level in tests.
+        Need to exclude all other implementation of slf4j that would be embedded as transitive dependencies.
+        Indeed some module maintainer wrongly add slf4j implem as compiled dependency  in their pom !
+        Track them down thanks to mvn dependency:tree command
+        -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${org.slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${org.slf4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>${org.log4j.version}</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>3.0.0</version>
+                    <configuration>
+                        <filesets>
+                            <fileset>
+                                <directory>${project.basedir}/src/main/generated</directory>
+                            </fileset>
+                        </filesets>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.5.1</version>
+                    <configuration>
+                        <source>1.8</source>
+                        <target>1.8</target>
+                        <useIncrementalCompilation>false</useIncrementalCompilation>
+                        <generatedSourcesDirectory>${project.basedir}/src/main/generated</generatedSourcesDirectory>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>1.4.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <bannedDependencies>
+                                    <excludes>
+<!--                                        implementation binding-->
+                                        <exclude>org.slf4j:slf4j-jdk14</exclude>
+                                        <exclude>org.slf4j:slf4j-nop</exclude>
+                                        <exclude>org.slf4j:slf4j-simple</exclude>
+                                        <exclude>org.slf4j:slf4j-jcl</exclude>
+                                        <exclude>org.slf4j:logback-classic</exclude>
+<!--                                        <exclude>org.apache.logging.log4j:slf4j-simple</exclude>-->
+<!--                                        <exclude>org.apache.logging.log4j:log4j-slf4j-impl</exclude>-->
+<!--                                        cannot use log4j over slf4j as we use log4j implementation for slf4j-->
+                                        <exclude>org.slf4j:log4j-over-slf4j</exclude>
+                                    </excludes>
+                                </bannedDependencies>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.22.2</version>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <!-- Profile for Integration tests run mechanism and separation from unit tests. Inspired from this page:
+            https://www.baeldung.com/maven-integration-test
+            If you need additional stuff like resources for the integration tests, please this page to know how to do it.
+            To run integration tests, run: mvn -Pintegration-tests clean verify -->
+            <id>integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin> <!-- Failsafe plugin is maven plugin for integration tests -->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <version>2.22.2</version>
+                        <configuration>
+                            <!-- Force *IT.java naming pattern. Otherwise it would allow to have someone create a
+                            *Test.java test in the integration tests and it would also be executed by the surefire plugin
+                            in unit tests phase (test phase) and this would fail as by definition integration tests
+                            require additional resources (for instance docker container) that would not be launched.
+                             The surefire plugin de facto ignores *IT.java files as they are integration tests. We just
+                             want here to also use a separate folder from unit tests for integration tests using the
+                             build-helper-maven-plugin plugin -->
+                            <includes>
+                                <include>**/*IT.java</include>
+                            </includes>
+                            <!--                    <forkMode>always</forkMode>-->
+                            <systemPropertyVariables>
+<!--                                <log4j.configuration>file:${project.basedir}/log4j-silent.properties</log4j.configuration>-->
+                            </systemPropertyVariables>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin> <!-- Declare a separate source directory from unit tests one for integration tests -->
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-integration-test-source</id>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/integration-test/java</source>
+                                        <source>src/integration-test/scala</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>add-integration-test-resource</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>add-test-resource</goal>
+                                </goals>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/integration-test/resources</directory>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <!-- Profile for building Integration tests source (in order to run it with IDE)-->
+            <id>build-integration-tests</id>
+            <build>
+                <plugins>
+                    <plugin> <!-- Declare a separate source directory from unit tests one for integration tests -->
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>add-integration-test-source</id>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>add-test-source</goal>
+                                </goals>
+                                <configuration>
+                                    <sources>
+                                        <source>src/integration-test/java</source>
+                                        <source>src/integration-test/scala</source>
+                                    </sources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>add-integration-test-resource</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>add-test-resource</goal>
+                                </goals>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/integration-test/resources</directory>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
+
+

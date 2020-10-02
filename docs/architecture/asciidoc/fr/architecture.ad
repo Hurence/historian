@@ -1,0 +1,14 @@
+= Architecture
+:subtitle: Data Historian 1.0
+:doctype: book
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
+:author: (C)Hurence
+:email: contact@hurence.com
+:revnumber: v1.0
+:revdate: 18.02.2020
+:revremark: First draft
+
+Cette section décrit l'architecture du projet historian.
+
+include::./_description_modules.ad[]
+

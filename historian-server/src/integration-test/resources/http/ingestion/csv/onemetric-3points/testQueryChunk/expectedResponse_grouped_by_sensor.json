@@ -1,0 +1,58 @@
+{
+  "query": {
+    "metrics": [
+      "metric_1"
+    ]
+  },
+  "total": 2,
+  "chunks": [
+    {
+      "name": "metric_1",
+      "chunk_start": 1,
+      "chunk_end": 2,
+      "chunk_count": 2,
+      "code_install": "code_1",
+      "sensor": "sensor_1",
+      "chunk_value": "H4sIAAAAAAAAAOPi1DQGg8/2XNwCjJoMEOAgwAAAFbWNaRoAAAA=",
+      "chunk_year": 1970,
+      "chunk_month": 1,
+      "chunk_day": "1970-01-01",
+      "chunk_origin": "ingestion-csv",
+      "id": "fa17b9ce897fa595060fb90e7da5ef6649afb6fb5ea492cca50db4cb11271cc9",
+      "chunk_max": 2.0,
+      "chunk_min": 1.2,
+      "chunk_avg": 1.6,
+      "chunk_sax": "ab",
+      "chunk_trend": true,
+      "chunk_outlier": false,
+      "chunk_first": 1.2,
+      "chunk_last": 2.0,
+      "chunk_sum": 3.2,
+      "chunk_std_dev": 0.5656854249492381
+    },
+    {
+      "name": "metric_1",
+      "chunk_start": 3,
+      "chunk_end": 3,
+      "chunk_count": 1,
+      "code_install": "code_1",
+      "sensor": "sensor_2",
+      "chunk_value": "H4sIAAAAAAAAAOPiFmDQZAADDgcBBgDq5d5JDwAAAA==",
+      "chunk_year": 1970,
+      "chunk_month": 1,
+      "chunk_day": "1970-01-01",
+      "chunk_origin": "ingestion-csv",
+      "id": "857d3dee68fda09bfde54bad08641daa6375ceb38eaaef18e66c05044b8aa048",
+      "chunk_max": 3.0,
+      "chunk_min": 3.0,
+      "chunk_avg": 3.0,
+      "chunk_sax": "a",
+      "chunk_trend": false,
+      "chunk_outlier": false,
+      "chunk_first": 3.0,
+      "chunk_last": 3.0,
+      "chunk_sum": 3.0,
+      "chunk_std_dev": "NaN"
+    }
+  ]
+}

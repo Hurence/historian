@@ -1,0 +1,4 @@
+metric,timestamp,value,quality
+metric_1, 1489273661, 1.2 ,1.4
+metric_1, 1489123561, 2 ,1.4
+metric_1, 1489078461, 3 ,1.4
