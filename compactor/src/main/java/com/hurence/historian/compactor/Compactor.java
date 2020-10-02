@@ -392,9 +392,27 @@ public class Compactor implements Runnable {
         //chunksToRecompact.show(100, false);
 
         /**
-         * Save ids of the read chunks to recompact
+         * Save ids of the read chunks to recompact to delete them at the end
          */
-        List<String> chunksToDeletetIds = chunksToRecompact.toJavaRDD().map(chunk -> chunk.getId()).collect();
+
+        List<ChunkToDelete> chunksToDeletetIds = chunksToRecompact.toJavaRDD().map(chunk -> {
+            String id = chunk.getId();
+            String origin = chunk.getOrigin();
+            return new ChunkToDelete(id, origin);
+        }).collect();
+
+        // Spread chunks to delete in 2 lists:
+        // - chunks that come from compactor
+        // - others
+        List<String> compactorChunksToDeleteIds = new ArrayList<String>();
+        List<String> nonCompactorChunksToDeleteIds = new ArrayList<String>();
+        chunksToDeletetIds.forEach(chunkToDelete -> {
+            if (chunkToDelete.origin.equals(ChunkOrigin.COMPACTOR.toString())) {
+                compactorChunksToDeleteIds.add(chunkToDelete.getId());
+            } else {
+                nonCompactorChunksToDeleteIds.add(chunkToDelete.getId());
+            }
+        });
 
         /**
          * Unchunkyfy the read chunks
@@ -445,14 +463,36 @@ public class Compactor implements Runnable {
                 .as(Encoders.bean(Chunk.class));
         solrChunksWriter.write(writerOptions, recompactedChunks);
 
-        // TODO commit written docs? -> may be not needed as solrchunkwriter performs save operation under the hood
-
         /**
          * Delete old chunks
          */
 
-        // TODO transactional way? be sure written is done before deleting.....
-        deleteDocuments(chunksToDeletetIds);
+        deleteOldChunks(compactorChunksToDeleteIds, nonCompactorChunksToDeleteIds);
+    }
+
+    /**
+     * Deletes passed chunks
+     * @param compactorChunksToDeleteIds
+     * @param nonCompactorChunksToDeleteIds
+     */
+    private void deleteOldChunks(List<String> compactorChunksToDeleteIds,
+                                 List<String>  nonCompactorChunksToDeleteIds) {
+
+        // Delete first all origin=compactor chunks then origin=injector chunks
+        // so that at least one origin=injector chunk is still there if deletion
+        // fails in the middle of the processing of even before deleting old
+        // chunks and in the middle of the process of writing new recompacted chunks.
+        // That way, the next run of algo will detect still present
+        // origin=injector chunks which will re-engage full recompaction for the
+        // same day of both origin=compactor and origin=injector chunks. This will
+        // retrieve old potential 'zombie' chunks and recompact them.
+        // Note: this implies that the chunkyfier mechanism is able to handle 2
+        // chunks with same point (timestamp,value) and combine them with only one.
+
+        logger.debug("Deleting old chunks from compactor");
+        deleteDocuments(compactorChunksToDeleteIds);
+        logger.debug("Deleting old chunks not from compactor");
+        deleteDocuments(nonCompactorChunksToDeleteIds);
     }
 
     /**
@@ -461,14 +501,10 @@ public class Compactor implements Runnable {
      */
     private void deleteDocuments(List<String> documentsToDelete) {
 
-        // TODO delete first all origin=compactor chunks then origin=injector chunks
-        // so that at least one origin=injector chunks is still there if deletion
-        // fails in the middle that way the next run of algo will detect still present
-        // origin=injector chunks which will re-engage ull recompaction for the
-        // same day of both origin=compactor and origin=injector chunks
+        logger.debug("Will delete " + documentsToDelete.size() + " documents");
 
         for (String id : documentsToDelete) {
-            //System.out.println("Deleting document id " + id);
+            logger.debug("Deleting document id " + id);
             try {
                 solrClient.deleteById(configuration.getSolrCollection(), id);
             } catch (Exception e) {
@@ -477,6 +513,7 @@ public class Compactor implements Runnable {
         }
 
         try {
+            logger.debug("Committing documents deletion");
             solrClient.commit(configuration.getSolrCollection(), true, true);
         } catch (Exception e) {
             logger.error("Error committing deleted chunks: " + e.getMessage());
