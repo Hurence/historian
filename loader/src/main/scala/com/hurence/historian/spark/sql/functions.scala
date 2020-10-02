@@ -48,14 +48,19 @@ object functions {
   /**
     * Encoding function: returns the base64 encoding as a Chronix chunk.
     */
-  val chunk = udf { (name: String, start: Long, end: Long, timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
+  val chunk = udf { (name: String,
+                     start: Long,
+                     end: Long,
+                     timestamps: mutable.WrappedArray[Long],
+                     values: mutable.WrappedArray[Double],
+                     qualities: mutable.WrappedArray[Float]) =>
 
-    // @TODO move this into timeseries modules and do the same for Chronix functions call
     val builder = new MetricTimeSeries.Builder(name)
       .start(start)
       .end(end)
 
-    (timestamps zip values).map { case (t, v) => builder.point(t, v) }
+   // (timestamps zip values).map { case (t, v) => builder.point(t, v) }
+    (timestamps,values, qualities).zipped.map { case (t, v, q) => builder.point(t, v, q) }
 
     BinaryCompactionUtil.serializeTimeseries(builder.build())
     // BinaryEncodingUtils.encode(bytes)
