@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.ml
 
-import com.hurence.historian.spark.sql.functions.{sax, unchunk}
-import com.hurence.timeseries.model.{Chunk, Measure}
+import com.hurence.historian.spark.sql.functions.{unchunk}
+import com.hurence.timeseries.model.{Measure}
 import com.hurence.timeseries.model.Definitions._
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._

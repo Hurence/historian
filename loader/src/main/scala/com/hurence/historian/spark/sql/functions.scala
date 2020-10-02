@@ -1,15 +1,12 @@
 package com.hurence.historian.spark.sql
 
-import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 
 import com.google.common.hash.Hashing
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesWithQualitySerializer
-import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils, Compression}
-import com.hurence.timeseries.model.Measure
+import com.hurence.timeseries.compaction.{BinaryCompactionUtil}
 import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
@@ -17,7 +14,6 @@ import org.apache.spark.sql.functions.{col, udf}
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.control.NonFatal
-
 
 object functions {
 
@@ -96,18 +92,18 @@ object functions {
   val sax = udf {
     (alphabetSize: Int, nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
 
+      // Paa size cannot be longer than timeserie length
+      val finalPaaSize = Math.min(paaSize, values.length)
 
       val saxConverter = new SaxConverter.Builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
-        .paaSize(paaSize)
+        .paaSize(finalPaaSize)
         .build()
 
       val list = values.map(Double.box).asJava
 
-
       saxConverter.getSaxStringFromValues(list)
-
   }
 
 

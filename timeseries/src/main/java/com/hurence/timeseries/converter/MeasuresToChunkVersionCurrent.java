@@ -120,7 +120,6 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
             builder.qualityAvg((float) qualityStats.getMean());
         }
 
-
         functionValueMap.resetValues();
         transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
         analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));

@@ -135,7 +135,7 @@ final class Chunkyfier(override val uid: String)
       .withColumn(COLUMN_TIMESTAMPS, collect_list(col($(timestampCol))).over(w))
       .withColumn(COLUMN_QUALITIES, collect_list(col($(qualityCol))).over(w))
       .groupBy(groupingCols: _*)
-      // compute all the stats and aggregtions here
+      // compute all the stats and aggregations here
       .agg(
         last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
         last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
@@ -172,8 +172,8 @@ final class Chunkyfier(override val uid: String)
         lit(0.01),
         lit($(saxStringLength)),
         groupedDF.col(COLUMN_VALUES)))
-      // drop temporary values & timestamps columns
-      .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS)
+      // drop temporary values timestamps and qualities columns
+      .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS, COLUMN_QUALITIES)
       .map(r => {
 
         val tags = r.getAs[Map[String, String]](FIELD_TAGS).map( t => (t._1, if(t._2 != null) t._2 else "null" ))
@@ -224,4 +224,3 @@ final class Chunkyfier(override val uid: String)
     s"Chunkyfier: uid=$uid"
   }
 }
-
