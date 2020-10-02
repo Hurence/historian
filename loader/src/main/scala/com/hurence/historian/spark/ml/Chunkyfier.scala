@@ -46,8 +46,6 @@ import scala.collection.JavaConverters._
 final class Chunkyfier(override val uid: String)
   extends Model[Chunkyfier] with DefaultParamsWritable {
 
-  var withQuality: Boolean = false
-
   def this() = this(Identifiable.randomUID("chunkyfier"))
 
 
@@ -57,7 +55,6 @@ final class Chunkyfier(override val uid: String)
 
   val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
   def setQualityCol(value: String): this.type = {
-    withQuality = true
     set(qualityCol, value)
   }
   setDefault(qualityCol, FIELD_QUALITY)
@@ -118,6 +115,7 @@ final class Chunkyfier(override val uid: String)
 
   val COLUMN_VALUES = "values"
   val COLUMN_TIMESTAMPS = "timestamps"
+  val COLUMN_QUALITIES = "qualities"
 
   def transform(df: Dataset[_]): DataFrame = {
     implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
@@ -128,7 +126,7 @@ final class Chunkyfier(override val uid: String)
 
     var baseDf = df
     // If no quality column has in the input df, create one default with NaN as value
-    if (!withQuality) {
+    if (!baseDf.schema.fieldNames.contains($(qualityCol))) {
       baseDf = baseDf.withColumn(FIELD_QUALITY, lit(Float.NaN))
     }
 
@@ -136,11 +134,13 @@ final class Chunkyfier(override val uid: String)
       .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
       .withColumn(COLUMN_VALUES, collect_list(col($(valueCol))).over(w))
       .withColumn(COLUMN_TIMESTAMPS, collect_list(col($(timestampCol))).over(w))
+      .withColumn(COLUMN_QUALITIES, collect_list(col($(qualityCol))).over(w))
       .groupBy(groupingCols: _*)
       // compute all the stats and aggregtions here
       .agg(
         last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
         last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
+        last(col(COLUMN_QUALITIES)).as(COLUMN_QUALITIES),
         first(col($(tagsCol))).as(FIELD_TAGS),
         min(col($(timestampCol))).as(FIELD_START),
         max(col($(timestampCol))).as(FIELD_END),
@@ -158,7 +158,6 @@ final class Chunkyfier(override val uid: String)
         sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
         avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
 
-
     groupedDF
       // compute chunk bytes from values & timestamps lists
       .withColumn($(chunkValueCol), chunk(
@@ -166,7 +165,8 @@ final class Chunkyfier(override val uid: String)
         groupedDF.col(FIELD_START),
         groupedDF.col(FIELD_END),
         groupedDF.col(COLUMN_TIMESTAMPS),
-        groupedDF.col(COLUMN_VALUES)))
+        groupedDF.col(COLUMN_VALUES),
+        groupedDF.col(COLUMN_QUALITIES)))
       // compute SAX string for chunk
       .withColumn(FIELD_SAX, sax(
         lit($(saxAlphabetSize)),
@@ -203,9 +203,7 @@ final class Chunkyfier(override val uid: String)
           .buildId()
           .computeMetrics()
           .build()
-      })
-      .toDF()
-
+      }).toDF()
   }
 
   override def transformSchema(schema: StructType): StructType = {
