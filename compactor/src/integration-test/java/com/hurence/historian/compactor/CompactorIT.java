@@ -827,27 +827,27 @@ public class CompactorIT {
         logger.info("Using compactor configuration: " + compactorConfig);
         Compactor compactor = new Compactor(compactorConfig);
 
-        System.out.println("Before recompaction: ");
-        printSolrJsonDocs(solrClient, chunksCollection);
+//        System.out.println("Before recompaction: ");
+//        printSolrJsonDocs(solrClient, chunksCollection);
 
         compactor.doCompact();
 
-        System.out.println("After recompaction: ");
-        printUnChunkedSolrJsonDocs(solrClient, chunksCollection);
+//        System.out.println("After recompaction: ");
+//        printUnChunkedSolrJsonDocs(solrClient, chunksCollection);
 
         compactor.close();
 
         Map<String, Chunk> actualChunks = getSolrChunks(solrClient, chunksCollection);
 
-        for (Chunk actualChunk : actualChunks.values()) {
-            System.out.println("Actual chunk:\n" + actualChunk.toHumanReadable());
-        }
+//        for (Chunk actualChunk : actualChunks.values()) {
+//            System.out.println("Actual chunk:\n" + actualChunk.toHumanReadable());
+//        }
 
         Map<String, Chunk> expectedChunks = expectedRecompactedChunks();
 
-        for (Chunk expectedChunk : expectedChunks.values()) {
-            System.out.println("Expected chunk:\n" + expectedChunk.toHumanReadable());
-        }
+//        for (Chunk expectedChunk : expectedChunks.values()) {
+//            System.out.println("Expected chunk:\n" + expectedChunk.toHumanReadable());
+//        }
 
         compareChunks(expectedChunks, actualChunks);
     }
