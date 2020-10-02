@@ -63,6 +63,7 @@ class SolrChunksReader extends Reader[Chunk] {
       .map(r => {
         Chunk.builder()
           .name(r.getAs[String](FIELD_NAME))
+          .origin(r.getAs[String](FIELD_ORIGIN))
           .start(r.getAs[Long](FIELD_START))
           .end(r.getAs[Long](FIELD_END))
           .count(r.getAs[Long](FIELD_COUNT))
@@ -70,6 +71,7 @@ class SolrChunksReader extends Reader[Chunk] {
           .stdDev(r.getAs[Double](FIELD_STD_DEV))
           .min(r.getAs[Double](FIELD_MIN))
           .max(r.getAs[Double](FIELD_MAX))
+          .sum(r.getAs[Double](FIELD_SUM))
           .first(r.getAs[Double](FIELD_FIRST))
           .last(r.getAs[Double](FIELD_LAST))
           .sax(r.getAs[String](FIELD_SAX))
@@ -79,7 +81,6 @@ class SolrChunksReader extends Reader[Chunk] {
           .qualitySum(r.getAs[Float](FIELD_QUALITY_SUM))
           .qualityAvg(r.getAs[Float](FIELD_QUALITY_AVG))
           .value(r.getAs[Array[Byte]](FIELD_VALUE))
-          .origin(r.getAs[String](FIELD_ORIGIN))
           .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
           .buildId()
           .computeMetrics()
