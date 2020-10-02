@@ -79,6 +79,7 @@ class SolrChunksReader extends Reader[Chunk] {
           .qualitySum(r.getAs[Float](FIELD_QUALITY_SUM))
           .qualityAvg(r.getAs[Float](FIELD_QUALITY_AVG))
           .value(r.getAs[Array[Byte]](FIELD_VALUE))
+          .origin(r.getAs[String](FIELD_ORIGIN))
           .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
           .buildId()
           .computeMetrics()
