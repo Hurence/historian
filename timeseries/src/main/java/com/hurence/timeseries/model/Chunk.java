@@ -122,20 +122,19 @@ public class Chunk implements Serializable {
                 tags = new HashMap<String, String>();
             }
 
-            newId.append(name);
-            tags.forEach((k, v) -> newId.append(k + v));
+            metricKey = buildMetricKey(); // Compute and store metric key
 
+            newId.append(metricKey);
             try {
                 newId.append(BinaryEncodingUtils.encode(value));
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Error encoding binaries", e);
             }
 
+            // Id is hash of metric key + measures
             id = Hashing.sha256()
                     .hashString(newId.toString(), StandardCharsets.UTF_8)
                     .toString();
-
-            metricKey = buildMetricKey();
 
             return this;
         }
