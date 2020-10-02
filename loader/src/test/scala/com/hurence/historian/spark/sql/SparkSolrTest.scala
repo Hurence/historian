@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.hurence.historian.{SolrCloudUtilForTests, SolrUtils}
 import com.hurence.test.framework.SparkSolrTests
@@ -14,8 +14,16 @@ import io.vertx.core.json.JsonArray
 import org.apache.spark.sql.SaveMode.Overwrite
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
+import com.hurence.historian.spark.DatasetComparer
+import com.hurence.historian.spark.sql.functions.reorderColumns
+import com.hurence.timeseries.model.Definitions.FIELD_QUALITY_AVG
+import org.apache.solr.client.solrj.SolrQuery
+import org.apache.spark.sql.functions.col
 
-class SparkSolrTest extends SparkSolrTests {
+import scala.Seq
+
+
+class SparkSolrTest extends SparkSolrTests with DatasetComparer {
 
   test("Solr version") {
     val solrVersion = SolrSupport.getSolrVersion(zkAddressSolr)
@@ -36,10 +44,16 @@ class SparkSolrTest extends SparkSolrTests {
     SolrCloudUtilForTests.buildChunkCollection(collectionName, null, 1, cloudClient)
     try {
       // 1. load measures from parquet file
-      val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
-      val measures = sparkSession.read
-        .parquet(filePath)
+
+      val measures = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
+        .read(Options(this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath, Map()))
+        .where("name = 'ack' AND tags.metric_id LIKE '08%'")
+        .as[Measure](Encoders.bean(classOf[Measure]))
         .cache()
+
+      if (logger.isDebugEnabled) {
+        measures.show()
+      }
 
       // 2. make chunks from measures
       val chunkyfier = new Chunkyfier()
@@ -50,13 +64,13 @@ class SparkSolrTest extends SparkSolrTests {
 
 
       val ack08 = chunkyfier.transform(measures)
-        .where("name = 'ack' AND avg != 0.0")
         .repartition(1)
         .as[Chunk](Encoders.bean(classOf[Chunk]))
 
-    //  if (logger.isDebugEnabled) {
+      ack08.take(10).foreach(println)
+      if (logger.isDebugEnabled) {
         ack08.show()
-     // }
+      }
 
       // 3. write those chunks to SolR
       val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
@@ -70,28 +84,36 @@ class SparkSolrTest extends SparkSolrTests {
       // 4. Explicit commit to make sure all docs are visible
       val solrCloudClient = SolrSupport.getCachedCloudClient(zkAddressSolr)
       solrCloudClient.commit(collectionName, true, true)
-      val chunksFromSolr : JsonArray = SolrUtils.getDocsAsJsonObjectInCollection(cloudClient, collectionName)
 
+      val q = new SolrQuery("*:*")
+      val response = solrCloudClient.query(collectionName, q)
+     println(response.getResults.get(0).toString)
 
       // 5. load back those chunks to verify
       val reader = ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
       val solrDF = reader.read(sql.Options(collectionName, Map(
         "zkhost" -> zkAddressSolr,
         "collection" -> collectionName,
-        "tag_names" -> "metric_id"
+        "tag_names" -> "metric_id,min,max,warn,crit"
       )))
-        .where("metric_id LIKE '08%'")
         .as[Chunk](Encoders.bean(classOf[Chunk]))
-    //  if (logger.isDebugEnabled) {
+      if (logger.isDebugEnabled) {
         solrDF.show()
-    //  }
+      }
+
 
       val unchunkyfier = new UnChunkyfier()
 
       val measuresBack = unchunkyfier.transform(solrDF)
         .as[Measure](Encoders.bean(classOf[Measure]))
 
-      measuresBack.show()
+      if (logger.isDebugEnabled) {
+        measuresBack.show()
+      }
+
+      assertSmallDatasetEquality(
+        measures.sort("timestamp"),
+        measuresBack.sort("timestamp"))
 
       assert(solrDF.count == 5)
       /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
@@ -100,7 +122,7 @@ class SparkSolrTest extends SparkSolrTests {
         val firstRow = solrDF.head.toSeq                        // query for all columns
         assert(firstRow.size === 5)
         firstRow.foreach(col => assert(col != null))            // no missing values*/
-      SolrCloudUtilForTests.dumpSolrCollection(collectionName,500, cloudClient)
+      SolrCloudUtilForTests.dumpSolrCollection(collectionName, 500, cloudClient)
     } finally {
 
       SolrCloudUtilForTests.deleteCollection(collectionName, cloudClient)

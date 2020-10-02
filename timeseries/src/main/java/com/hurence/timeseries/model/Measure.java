@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.commons.lang3.builder.*;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 
@@ -16,6 +17,7 @@ import java.util.Date;
 import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * A Measure is a value in time with some tags
@@ -37,7 +39,16 @@ public class Measure implements Serializable, Comparable<Measure> {
     private double value;
     @Builder.Default private float quality = DEFAULT_QUALITY;
     protected Map<String, String> tags;
-    protected String day;
+
+
+
+    public boolean containsTag(String tagName) {
+        return tags.containsKey(tagName);
+    }
+
+    public String getTag(String tagName) {
+        return tags.get(tagName);
+    }
 
 
     public static Measure fromValueAndQuality(long timestamp, double value, float quality) {
@@ -45,7 +56,6 @@ public class Measure implements Serializable, Comparable<Measure> {
                 .timestamp(timestamp)
                 .value(value)
                 .quality(quality)
-                .compute()
                 .build();
     }
 
@@ -54,7 +64,6 @@ public class Measure implements Serializable, Comparable<Measure> {
                 .timestamp(timestamp)
                 .value(value)
                 .quality(Float.NaN)
-                .compute()
                 .build();
     }
 
@@ -120,20 +129,10 @@ public class Measure implements Serializable, Comparable<Measure> {
         return dateFormatter;
     }
 
-    /**
-     * Custom builder methods
-     */
-    public static class MeasureBuilder {
-
-        public MeasureBuilder compute() {
-
-            DateTime time = new DateTime(timestamp)
-                    .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
-            day = time.toString("yyyy-MM-dd");
-
-
-            return this;
-        }
+    public String getDay(){
+        DateTime time = new DateTime(timestamp)
+                .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
+       return time.toString("yyyy-MM-dd");
     }
 
 
@@ -149,17 +148,27 @@ public class Measure implements Serializable, Comparable<Measure> {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Measure measure = (Measure) o;
-        return timestamp == measure.timestamp &&
+
+        AtomicBoolean areTagsEquals = new AtomicBoolean(true);
+        tags.keySet().forEach(key -> {
+            String value = getTag(key);
+            if(value !=null && !value.isEmpty() && value.equals("null")){
+                areTagsEquals.set(areTagsEquals.get() && value.equals(measure.getTag(key)));
+            }
+        });
+
+        boolean equality=  timestamp == measure.timestamp &&
                 Double.compare(measure.value, value) == 0 &&
                 Float.compare(measure.quality, quality) == 0 &&
                 Objects.equals(name, measure.name) &&
-                Objects.equals(tags, measure.tags) &&
-                Objects.equals(day, measure.day);
+                areTagsEquals.get();
+
+        return equality;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, timestamp, value, quality, tags, day);
+        return Objects.hash(name, timestamp, value, quality, tags);
     }
 
     @Override
