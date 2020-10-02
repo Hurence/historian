@@ -116,13 +116,13 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
       .as[Measure]
 
     rechunkifiedDS.show()
-/*
+
     assertSmallDatasetEquality(
-      measuresDS,
-      rechunkifiedDS
+      measuresDS.sort("timestamp"),
+      rechunkifiedDS.sort("timestamp")
     )
 
-
+/*
     val chunksDS = ReaderFactory.getChunksReader(ChunksReaderType.PARQUET)
       .read(Options(this.getClass.getClassLoader.getResource("it-data-4metrics-chunk.parquet").getPath, Map()))
       .as[Chunk](Encoders.bean(classOf[Chunk]))
