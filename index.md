@@ -1,38 +1,22 @@
 
 ## Welcome to Hurence Data Historian
 
-You can use the [editor on GitHub](https://github.com/Hurence/historian/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Hurence has developed an open source Data Historian. It is Big Data and can archive your time series (sensor data) without volume limitation with the performance of a simple to operate Big Data infrastructure and features worthy of historical data historians, and much more ...
 
-### Markdown
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
 
-```markdown
-Syntax highlighted code block
+# Features
+Here is a non exhaustive list of features
 
-# Header 1
-## Header 2
-### Header 3
+- **Search engine on time-stamped data** : Searching over time is a key feature of a data historian. We have therefore chosen to build our data historian on the Big Data SolR search engine, but have taken care to be able to support other engines such as Elasticsearch or OpenDistro.
 
-- Bulleted
-- List
+- **Searching for data with words like on Google** : With our symbolic data encoding (SAX) feature, it is possible to search for data on "words" as you would on Google. Letters are automatically associated with values and sequences of values form words that can be queried.
 
-1. Numbered
-2. List
+- **Anomaly detection and alerting** : SAX encoding enables the detection of anomaly patterns in an innovative way.
 
-**Bold** and _Italic_ and `Code` text
+- **Sampling integrated into visualization** : Viewing all of the points over a long period is possible thanks to sampling algorithms. They preserve the visual aspect of curves very well.
 
-[Link](url) and ![Image](src)
-```
+- **Simple single node installation** : A move to a multi-node Big Data scale and secure data
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/Hurence/historian/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+- **Native cross-data center scalability & synchronization** : We use the native ability of SolR Cloud to scale horizontally by adding servers in “cluster” mode of machines. SolR also gives us the ability to synchronize clusters between data centers.
