@@ -279,6 +279,8 @@ public class Compactor implements Runnable {
         options.put("collection", configuration.getSolrCollection());
 
         /**
+         * Get old documents whose chunk origin is not compactor, starting from yesterday
+         *
          * Prepare query that gets documents (and operator):
          * - from epoch since yesterday (included)
          * - with origin not from compactor (chunks not already compacted and thus needing to be)
@@ -308,13 +310,20 @@ public class Compactor implements Runnable {
                 .options(options)
                 .load();
 
+        /**
+         * Sort by metric key then day
+         */
+
         // One row per (metric key,day)
         resultDs = resultDs.distinct();
 
         // Sort per metric key then day
         resultDs = resultDs.sort(resultDs.col(METRIC_KEY), resultDs.col(CHUNK_DAY));
 
-        // Recompact each (metric key,day) chunks whether from injector or compactor
+        /**
+         * Re-compact each (metric key,day) chunks whether from injector or compactor
+         */
+
         for (Row row : resultDs.collectAsList()) {
             String metricKey = row.getAs(METRIC_KEY);
             String day = row.getAs(CHUNK_DAY);
@@ -379,9 +388,9 @@ public class Compactor implements Runnable {
 
         chunksToRecompact.cache();
 
-//        System.out.println("------------------------------------- " + day + " for metric " + metricKey + " " +
-//                chunksToRecompact.count() + " chunks:");
-//        chunksToRecompact.show(100, false);
+        System.out.println("------------------------------------- " + day + " for metric " + metricKey + " " +
+                chunksToRecompact.count() + " chunks:");
+        chunksToRecompact.show(100, false);
 
         /**
          * Save ids of the read chunks to recompact
@@ -396,8 +405,8 @@ public class Compactor implements Runnable {
         UnChunkyfier unchunkyfier = new UnChunkyfier();
         Dataset<Row> metricsToRecompact = unchunkyfier.transform(chunksToRecompact);
 
-//        System.out.println("Unchunkyfied metric values count " + metricsToRecompact.count() + ":");
-//        metricsToRecompact.show(100, false);
+        System.out.println("Unchunkyfied metric values count " + metricsToRecompact.count() + ":");
+        metricsToRecompact.show(100, false);
 
         /**
          * Re-compact those chunks
@@ -421,8 +430,8 @@ public class Compactor implements Runnable {
                 .setSaxStringLength(50);
         Dataset<Row> recompactedChunksRows = chunkyfier.transform(metricsToRecompact);
 
-//        System.out.println("Recompacted chunks count " + recompactedChunksRows.count() + ":");
-//        recompactedChunksRows.show(100, false);
+        System.out.println("Recompacted chunks count " + recompactedChunksRows.count() + ":");
+        recompactedChunksRows.show(100, false);
 
         /**
          * Write new re-compacted chunks
@@ -454,8 +463,14 @@ public class Compactor implements Runnable {
      */
     private void deleteDocuments(List<String> documentsToDelete) {
 
+        // TODO delete first all origin=compactor chunks then origin=injector chunks
+        // so that at least one origin=injector chunks is still there if deletion
+        // fails in the middle that way the next run of algo will detect still present
+        // origin=injector chunks which will re-engage ull recompaction for the
+        // same day of both origin=compactor and origin=injector chunks
+
         for (String id : documentsToDelete) {
-//            System.out.println("Deleting document id " + id);
+            System.out.println("Deleting document id " + id);
             try {
                 solrClient.deleteById(configuration.getSolrCollection(), id);
             } catch (Exception e) {

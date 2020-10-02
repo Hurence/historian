@@ -26,7 +26,7 @@ class ITDataCSVMeasuresReaderV0 extends Reader[Measure] {
     import spark.implicits._
     implicit val measureEncoder = Encoders.bean(classOf[Measure])
 
-   val df = spark.read
+  spark.read
       .format("csv")
       .options(options.config)
       .load(options.path)
@@ -48,15 +48,10 @@ class ITDataCSVMeasuresReaderV0 extends Reader[Measure] {
         .timestamp(r.getAs[Long]("timestamp"))
         .value(r.getAs[Double]("value"))
         .tags(r.getAs[Map[String, String]]("tags").asJava)
-        .compute()
         .build()
       )
-      .repartition($"day")
+//      .repartition($"day")
       .sortWithinPartitions(asc("name"), asc("timestamp"))
-
-
-
-    reorderColumns(df.toDF(),Seq("name","value","timestamp", "quality", "day", "tags"))
       .as[Measure]
   }
 

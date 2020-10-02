@@ -78,7 +78,6 @@ final class UnChunkyfier(override val uid: String)
           .value(r.getAs[Double](FIELD_VALUE))
           .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
           .quality(r.getAs[Float](FIELD_QUALITY))
-          .compute()
           .build()
       }).toDF()
   }

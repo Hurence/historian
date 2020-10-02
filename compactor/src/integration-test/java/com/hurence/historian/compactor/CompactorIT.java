@@ -803,7 +803,7 @@ public class CompactorIT {
     }
 
     /**
-     *
+     * Test compactor scenario
      */
     @Test
     public void testCompactor(DockerComposeContainer container, SolrClient solrClient, SparkSession sparkSession) {
@@ -837,10 +837,10 @@ public class CompactorIT {
 
         compactor.close();
 
-        Map<String, Chunk> finalChunks = getSolrChunks(solrClient, chunksCollection);
+        Map<String, Chunk> actualChunks = getSolrChunks(solrClient, chunksCollection);
 
-        for (Chunk finalChunk : finalChunks.values()) {
-            System.out.println("Final chunk:\n" + finalChunk.toHumanReadable());
+        for (Chunk actualChunk : actualChunks.values()) {
+            System.out.println("Actual chunk:\n" + actualChunk.toHumanReadable());
         }
 
         Map<String, Chunk> expectedChunks = expectedRecompactedChunks();
@@ -849,6 +849,6 @@ public class CompactorIT {
             System.out.println("Expected chunk:\n" + expectedChunk.toHumanReadable());
         }
 
-        compareChunks(expectedChunks, finalChunks);
+        compareChunks(expectedChunks, actualChunks);
     }
 }

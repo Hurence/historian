@@ -32,7 +32,7 @@ class SolrChunksWriter extends Writer[Chunk] {
       options.config
 
     val tagCols = options.config("tag_names").split(",").toList
-      .map(tag => col("tags")(tag).as(tag))
+      .map(tag => col(FIELD_TAGS)(tag).as(tag))
     val mainCols = FIELDS.asScala.toList
       .map(name => col(name).as(getColumnFromField(name)))
 

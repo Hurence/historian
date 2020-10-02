@@ -21,18 +21,15 @@ class ParquetMeasuresReader extends Reader[Measure] {
 
 
 
-    val df = spark.read
+    spark.read
       .parquet(options.path)
       .map(r => Measure.builder()
         .name(r.getAs[String]("name"))
         .timestamp(r.getAs[Long]("timestamp"))
         .value(r.getAs[Double]("value"))
         .tags(r.getAs[Map[String, String]]("tags").asJava)
-        .compute()
         .build()
       )
-
-    reorderColumns(df.toDF(),Seq("name","value","timestamp", "quality", "day", "tags"))
       .as[Measure]
   }
 }

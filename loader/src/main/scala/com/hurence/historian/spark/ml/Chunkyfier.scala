@@ -176,6 +176,8 @@ final class Chunkyfier(override val uid: String)
       .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS)
       .map(r => {
 
+        val tags = r.getAs[Map[String, String]](FIELD_TAGS).map( t => (t._1, if(t._2 != null) t._2 else "null" ))
+
         Chunk.builder()
           .name(r.getAs[String](FIELD_NAME))
           .origin($(origin))
@@ -191,7 +193,7 @@ final class Chunkyfier(override val uid: String)
           .last(r.getAs[Double](FIELD_LAST))
           .sax(r.getAs[String](FIELD_SAX))
           .value(r.getAs[Array[Byte]]($(chunkValueCol)))
-          .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
+          .tags(tags.asJava)
           .qualityMin(r.getAs[Float](FIELD_QUALITY_MIN))
           .qualityMax(r.getAs[Float](FIELD_QUALITY_MAX))
           .qualityFirst(r.getAs[Float](FIELD_QUALITY_FIRST))
