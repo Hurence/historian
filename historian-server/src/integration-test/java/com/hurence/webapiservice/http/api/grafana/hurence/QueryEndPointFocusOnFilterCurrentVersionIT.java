@@ -103,7 +103,7 @@ public class QueryEndPointFocusOnFilterCurrentVersionIT {
         assertHelper = new AssertResponseGivenRequestHelper(webClient, HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT);
         JsonObject historianConf = new JsonObject()
                 .put(CONFIG_SCHEMA_VERSION,
-                        SchemaVersion.VERSION_0.toString());
+                        SchemaVersion.VERSION_1.toString());
         HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },

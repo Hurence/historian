@@ -122,6 +122,9 @@ create_schema() {
         "VERSION_0")
             create_schema_universal
             ;;
+        "VERSION_1")
+            create_schema_universal
+            ;;
         *)
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"
             exit 0

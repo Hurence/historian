@@ -13,10 +13,8 @@ import io.vertx.junit5.Timeout;
 import io.vertx.junit5.VertxExtension;
 import io.vertx.junit5.VertxTestContext;
 import org.apache.solr.client.solrj.SolrClient;
-import org.apache.solr.client.solrj.SolrRequest;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.solr.client.solrj.request.CollectionAdminRequest;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -29,9 +27,9 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.historian.modele.HistorianAnnotationCollectionFields.ID;
 import static com.hurence.historian.modele.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
-import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})
@@ -56,47 +54,47 @@ public class HistorianAnnotationVerticleIT {
         LOGGER.info("Indexing some documents in {} collection", COLLECTION);
 
         final SolrInputDocument doc = new SolrInputDocument();
-        doc.addField("id", "doc");
-        doc.addField("time", 1581648194070L);
-        doc.addField("text", "annotation 1");
-        doc.addField("tags", new JsonArray().add("tag1").add("tag2"));
-        final UpdateResponse updateResponse = client.add(COLLECTION, doc);
+        doc.addField(ID, "doc");
+        doc.addField(TIME, 1581648194070L);
+        doc.addField(TEXT, "annotation 1");
+        doc.addField(TAGS, new JsonArray().add("tag1").add("tag2"));
+        client.add(COLLECTION, doc);
         final SolrInputDocument doc1 = new SolrInputDocument();
-        doc1.addField("id", "doc1");
-        doc1.addField("time", 1581651794070L);
-        doc1.addField("text", "annotation 2");
-        doc1.addField("tags", new JsonArray().add("tag3").add("tag2"));
-        final UpdateResponse updateResponse1 = client.add(COLLECTION, doc1);
+        doc1.addField(ID, "doc1");
+        doc1.addField(TIME, 1581651794070L);
+        doc1.addField(TEXT, "annotation 2");
+        doc1.addField(TAGS, new JsonArray().add("tag3").add("tag2"));
+        client.add(COLLECTION, doc1);
         final SolrInputDocument doc2 = new SolrInputDocument();
-        doc2.addField("id", "doc2");
-        doc2.addField("time", 1581655394070L);
-        doc2.addField("text", "annotation 3");
-        doc2.addField("tags", new JsonArray().add("tag1").add("tag3"));
-        final UpdateResponse updateResponse2 = client.add(COLLECTION, doc2);
+        doc2.addField(ID, "doc2");
+        doc2.addField(TIME, 1581655394070L);
+        doc2.addField(TEXT, "annotation 3");
+        doc2.addField(TAGS, new JsonArray().add("tag1").add("tag3"));
+        client.add(COLLECTION, doc2);
         final SolrInputDocument doc3 = new SolrInputDocument();
-        doc3.addField("id", "doc3");
-        doc3.addField("time", 1581658994070L);
-        doc3.addField("text", "annotation 4");
-        doc3.addField("tags", new JsonArray().add("tag4").add("tag2"));
-        final UpdateResponse updateResponse3 = client.add(COLLECTION, doc3);
+        doc3.addField(ID, "doc3");
+        doc3.addField(TIME, 1581658994070L);
+        doc3.addField(TEXT, "annotation 4");
+        doc3.addField(TAGS, new JsonArray().add("tag4").add("tag2"));
+        client.add(COLLECTION, doc3);
         final SolrInputDocument doc4 = new SolrInputDocument();
-        doc4.addField("id", "doc4");
-        doc4.addField("time", 1581662594070L);
-        doc4.addField("text", "annotattion 5");
-        doc4.addField("tags", new JsonArray().add("tag3").add("tag4"));
-        final UpdateResponse updateResponse4 = client.add(COLLECTION, doc4);
+        doc4.addField(ID, "doc4");
+        doc4.addField(TIME, 1581662594070L);
+        doc4.addField(TEXT, "annotattion 5");
+        doc4.addField(TAGS, new JsonArray().add("tag3").add("tag4"));
+        client.add(COLLECTION, doc4);
         final SolrInputDocument doc5 = new SolrInputDocument();
-        doc5.addField("id", "doc5");
-        doc5.addField("time", 1581666194070L);
-        doc5.addField("text", "annotation 6");
-        doc5.addField("tags", new JsonArray().add("tag3").add("tag5"));
-        final UpdateResponse updateResponse5 = client.add(COLLECTION, doc5);
+        doc5.addField(ID, "doc5");
+        doc5.addField(TIME, 1581666194070L);
+        doc5.addField(TEXT, "annotation 6");
+        doc5.addField(TAGS, new JsonArray().add("tag3").add("tag5"));
+        client.add(COLLECTION, doc5);
         final SolrInputDocument doc6 = new SolrInputDocument();
-        doc6.addField("id", "doc6");
-        doc6.addField("time", 1581669794070L);
-        doc6.addField("text", "annotattion 7");
-        doc6.addField("tags", new JsonArray().add("tag2").add("tag3"));
-        final UpdateResponse updateResponse6 = client.add(COLLECTION, doc6);
+        doc6.addField(ID, "doc6");
+        doc6.addField(TIME, 1581669794070L);
+        doc6.addField(TEXT, "annotattion 7");
+        doc6.addField(TAGS, new JsonArray().add("tag2").add("tag3"));
+        client.add(COLLECTION, doc6);
         client.commit(COLLECTION);
 
         LOGGER.info("Indexed some documents in {} collection", COLLECTION);
@@ -105,7 +103,7 @@ public class HistorianAnnotationVerticleIT {
     @AfterAll
     static void finish(SolrClient client, Vertx vertx, VertxTestContext context) throws IOException, SolrServerException {
         LOGGER.debug("deleting collection {}", COLLECTION);
-        final SolrRequest deleteRequest = CollectionAdminRequest.deleteCollection(COLLECTION);
+        final CollectionAdminRequest.Delete deleteRequest = CollectionAdminRequest.deleteCollection(COLLECTION);
         client.request(deleteRequest);
         LOGGER.debug("closing vertx");
         vertx.close(context.completing());
@@ -114,7 +112,7 @@ public class HistorianAnnotationVerticleIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    void testAnnotationWithTypeEqualsAll (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithTypeEqualsAll (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
                 .put (FROM, 1581651394000L)
                 .put(TO, 1581666194000L)
@@ -137,7 +135,7 @@ public class HistorianAnnotationVerticleIT {
     }
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
-    void testAnnotationWithMatchAnyEqualsTrue (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithMatchAnyEqualsTrue (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
                 .put (FROM, 1581644594000L)
                 .put(TO, 1581663014000L)
@@ -162,7 +160,7 @@ public class HistorianAnnotationVerticleIT {
 
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
-    void testAnnotationWithMatchAnyEqualsFalse (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithMatchAnyEqualsFalse (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
                 .put (FROM, 1581644594000L)
                 .put(TO, 1581663014000L)
@@ -185,7 +183,7 @@ public class HistorianAnnotationVerticleIT {
     }
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
-    void testAnnotationWithLimit (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithLimit (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
                 .put (FROM, 1581644594000L)
                 .put(TO, 1581663014000L)
@@ -209,7 +207,7 @@ public class HistorianAnnotationVerticleIT {
 
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
-    void testAnnotationWithNoTime (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithNoTime (VertxTestContext testContext) {
         JsonObject params = new JsonObject ()
                 .put(LIMIT, 10)
                 .put(FIELD_TAGS, new JsonArray().add("tag1").add("tag2"))
@@ -231,7 +229,7 @@ public class HistorianAnnotationVerticleIT {
 
     @Test
     @Timeout (value = 5, timeUnit = TimeUnit.SECONDS)
-    void testAnnotationWithEmptyQuery (VertxTestContext testContext) throws InterruptedException {
+    void testAnnotationWithEmptyQuery (VertxTestContext testContext) {
         JsonObject params = new JsonObject ("{}");
         LOGGER.debug("params json is : {} ", params);
         historian.rxGetAnnotations (params)
