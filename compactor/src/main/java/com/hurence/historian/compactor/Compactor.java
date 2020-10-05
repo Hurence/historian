@@ -378,8 +378,11 @@ public class Compactor implements Runnable {
         // Compute and set the metric name and tags to read from the metric key
         Chunk.MetricKey metricKey = Chunk.MetricKey.parse(metricKeyStr);
         Set<String> tags = metricKey.getTagKeys();
-        String tagsCsv = tags.stream().collect(Collectors.joining(","));
-        options.put(Options.TAG_NAMES(), tagsCsv);
+        String tagsCsv = null;
+        if (tags.size() > 0) {
+            tagsCsv = tags.stream().collect(Collectors.joining(","));
+            options.put(Options.TAG_NAMES(), tagsCsv);
+        }
 
         // JavaConverters used to convert from java Map to scala immutable Map
         Options readerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
@@ -428,7 +431,7 @@ public class Compactor implements Runnable {
          * Re-compact those chunks
          */
 
-        // Compute ["tag1", "tag2"] String array
+        // Compute ["name", "tags.tag1", "tags.tag2"] String array
         List<String> groupByCols = new ArrayList<String>();
         groupByCols.add(NAME);
         groupByCols.addAll(tags.stream().map(tag -> "tags." + tag).collect(Collectors.toList()));
@@ -454,7 +457,9 @@ public class Compactor implements Runnable {
          */
 
         options = newOptions();
-        options.put(Options.TAG_NAMES(), tagsCsv);
+        if (tags.size() > 0) {
+            options.put(Options.TAG_NAMES(), tagsCsv);
+        }
         // JavaConverters used to convert from java Map to scala immutable Map
         Options writerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
                 Predef.<Tuple2<String, String>>conforms()));
