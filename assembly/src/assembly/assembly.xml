@@ -19,6 +19,7 @@
             <includes>
                 <include>com.hurence.historian:loader</include>
                 <include>com.hurence.historian:logisland-timeseries</include>
+                <include>com.hurence.historian:compactor</include>
             </includes>
             <binaries>
                 <directoryMode>0770</directoryMode>
