@@ -461,8 +461,8 @@ public class Compactor implements Runnable {
             options.put(Options.TAG_NAMES(), tagsCsv);
         }
         // JavaConverters used to convert from java Map to scala immutable Map
-        Options writerOptions = new Options(configuration.getSolrCollection(), JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(
-                Predef.<Tuple2<String, String>>conforms()));
+        Options writerOptions = new Options(configuration.getSolrCollection(),
+                JavaConverters.mapAsScalaMapConverter(options).asScala().toMap(Predef.<Tuple2<String, String>>conforms()));
 
         Dataset<Chunk> recompactedChunks = recompactedChunksRows
                 .as(Encoders.bean(Chunk.class));
