@@ -5,7 +5,7 @@ import com.hurence.historian.modele.SchemaVersion;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class ChunkSchemaVersion1 extends ChunkSchemaVersion0 implements Schema{
+public class ChunkSchemaVersion1 implements Schema{
 
     private static final Collection<SolrField> fields = Arrays.asList(
             new SolrField.Builder()
@@ -92,7 +92,10 @@ public class ChunkSchemaVersion1 extends ChunkSchemaVersion0 implements Schema{
                     .withType("pfloat").build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionCurrent.METRIC_KEY)
-                    .withType("string").build()
+                    .withType("string").build(),
+            new SolrField.Builder()
+                    .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_HOUR)
+                    .withType("pint").build()
     );
 
     @Override

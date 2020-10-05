@@ -49,7 +49,7 @@ public class SearchValuesEndPointIT {
     private static WebClient webClient;
 
     @BeforeAll
-    public static void initSolrAnderticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
+    public static void initSolrAndVerticles(SolrClient client, DockerComposeContainer container, Vertx vertx, VertxTestContext context) throws InterruptedException, IOException, SolrServerException {
         initSolr(container);
         injectChunksIntoSolr(client);
         Completable verticlesDeployed = initVerticles(container, vertx, context);

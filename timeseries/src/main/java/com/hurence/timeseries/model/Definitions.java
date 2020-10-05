@@ -69,6 +69,7 @@ public class Definitions {
     public static final String SOLR_COLUMN_TREND = "chunk_trend";
     public static final String SOLR_COLUMN_OUTLIER = "chunk_outlier";
     public static final String SOLR_COLUMN_VERSION = "chunk_version";
+    public static final String SOLR_COLUMN_HOUR = "chunk_hour";
 
     public static final String SOLR_COLUMN_QUALITY_MIN = "chunk_quality_min";
     public static final String SOLR_COLUMN_QUALITY_MAX = "chunk_quality_max";

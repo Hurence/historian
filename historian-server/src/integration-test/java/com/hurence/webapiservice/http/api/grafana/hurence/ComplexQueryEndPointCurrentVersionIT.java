@@ -128,7 +128,7 @@ public class ComplexQueryEndPointCurrentVersionIT {
         SolrITHelper.addFieldToChunkSchema(container, "sensor");
         JsonObject historianConf = new JsonObject()
                 .put(CONFIG_SCHEMA_VERSION,
-                        SchemaVersion.VERSION_0.toString());
+                        SchemaVersion.VERSION_1.toString());
         return HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).ignoreElement();
     }
 
