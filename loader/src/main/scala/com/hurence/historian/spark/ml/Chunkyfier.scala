@@ -1,6 +1,7 @@
 package com.hurence.historian.spark.ml
 
-import com.hurence.historian.spark.sql.functions.{chunk, sax, toDateUTC}
+import com.hurence.historian.spark.sql.functions.{analysis, chunk, sax, toDateUTC}
+import com.hurence.timeseries.analysis.TimeseriesAnalysis
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
 import com.hurence.timeseries.core.ChunkOrigin
 import com.hurence.timeseries.model.Chunk
@@ -144,14 +145,14 @@ final class Chunkyfier(override val uid: String)
         first(col($(tagsCol))).as(FIELD_TAGS),
         min(col($(timestampCol))).as(FIELD_START),
         max(col($(timestampCol))).as(FIELD_END),
-        count(col($(valueCol))).as(FIELD_COUNT),
-        sum(col($(valueCol))).as(FIELD_SUM),
-        min(col($(valueCol))).as(FIELD_MIN),
-        max(col($(valueCol))).as(FIELD_MAX),
+        /* count(col($(valueCol))).as(FIELD_COUNT),
+          sum(col($(valueCol))).as(FIELD_SUM),
+          min(col($(valueCol))).as(FIELD_MIN),
+          max(col($(valueCol))).as(FIELD_MAX),
         first(col($(valueCol))).as(FIELD_FIRST),
         last(col($(valueCol))).as(FIELD_LAST),
-        stddev(col($(valueCol))).as(FIELD_STD_DEV),
-        avg(col($(valueCol))).as(FIELD_AVG),
+       stddev(col($(valueCol))).as(FIELD_STD_DEV),
+        avg(col($(valueCol))).as(FIELD_AVG),*/
         min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
         max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
         first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
@@ -159,6 +160,10 @@ final class Chunkyfier(override val uid: String)
         avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
 
     groupedDF
+      // compute analysis from values & timestamps lists
+      .withColumn("analysis", analysis(
+        groupedDF.col(COLUMN_TIMESTAMPS),
+        groupedDF.col(COLUMN_VALUES)))
       // compute chunk bytes from values & timestamps lists
       .withColumn($(chunkValueCol), chunk(
         groupedDF.col(FIELD_NAME),
@@ -175,6 +180,7 @@ final class Chunkyfier(override val uid: String)
         groupedDF.col(COLUMN_VALUES)))
       // drop temporary values & timestamps columns
       .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS)
+      .select("*","analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev","analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
       .map(r => {
 
         val tags = r.getAs[Map[String, String]](FIELD_TAGS).map( t => (t._1, if(t._2 != null) t._2 else "null" ))
@@ -200,6 +206,8 @@ final class Chunkyfier(override val uid: String)
           .qualityFirst(r.getAs[Float](FIELD_QUALITY_FIRST))
           .qualitySum(r.getAs[Double](FIELD_QUALITY_SUM).toFloat)
           .qualityAvg(r.getAs[Double](FIELD_QUALITY_AVG).toFloat)
+          .trend(r.getAs[Boolean](FIELD_TREND))
+          .outlier(r.getAs[Boolean](FIELD_OUTLIER))
           .buildId()
           .computeMetrics()
           .build()

@@ -7,11 +7,12 @@ import java.util.stream.Collectors
 import com.google.common.hash.Hashing
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
+import com.hurence.timeseries.analysis.{TimeseriesAnalysis, TimeseriesAnalyzer}
 import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesWithQualitySerializer
 import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils, Compression}
 import com.hurence.timeseries.model.Measure
 import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Encoders}
 import org.apache.spark.sql.functions.{col, udf}
 
 import scala.collection.JavaConverters._
@@ -59,8 +60,8 @@ object functions {
       .start(start)
       .end(end)
 
-   // (timestamps zip values).map { case (t, v) => builder.point(t, v) }
-    (timestamps,values, qualities).zipped.map { case (t, v, q) => builder.point(t, v, q) }
+    // (timestamps zip values).map { case (t, v) => builder.point(t, v) }
+    (timestamps, values, qualities).zipped.map { case (t, v, q) => builder.point(t, v, q) }
 
     BinaryCompactionUtil.serializeTimeseries(builder.build())
     // BinaryEncodingUtils.encode(bytes)
@@ -75,10 +76,10 @@ object functions {
 
 
     BinaryCompactionUtil.unCompressPoints(bytes, start, end)
-        .stream()
-        .collect(Collectors.toList())
-        .asScala
-        .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
+      .stream()
+      .collect(Collectors.toList())
+      .asScala
+      .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
 
     /*val bytes = BinaryEncodingUtils.decode(chunk)
 
@@ -91,8 +92,9 @@ object functions {
   }
 
 
-  val toBase64 = udf { (binaryChunk: Array[Byte]) =>   BinaryEncodingUtils.encode(binaryChunk)  }
-  val fromBase64 = udf { (stringChunk: String) =>   BinaryEncodingUtils.decode(stringChunk)  }
+  val toBase64 = udf { (binaryChunk: Array[Byte]) => BinaryEncodingUtils.encode(binaryChunk) }
+  val fromBase64 = udf { (stringChunk: String) => BinaryEncodingUtils.decode(stringChunk) }
+
 
   /**
     * Encoding function: returns the sax string of the values.
@@ -114,6 +116,32 @@ object functions {
 
   }
 
+
+  case class Analysis(min: Double, max: Double, avg: Double, stdDev: Double, sum: Double, trend: Boolean, outlier: Boolean, count: Long, first: Double, last: Double)
+
+  /**
+    * Encoding function: returns the sax string of the values.
+    */
+  val analysis = udf {
+    (timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
+
+
+      val analyzer = TimeseriesAnalyzer.builder().build()
+      val timestampsList = timestamps.map(Long.box).asJava
+      val valuesList = values.map(Double.box).asJava
+      val analysis = analyzer.run(timestampsList, valuesList)
+
+      Analysis(analysis.getMin,
+        analysis.getMax,
+        analysis.getMean,
+        analysis.getStdDev,
+        analysis.getSum,
+        analysis.isHasTrend,
+        analysis.isHasOutlier,
+        analysis.getCount,
+        analysis.getFirst,
+        analysis.getLast)
+  }
 
   /**
     * Best guess function: returns the best guess parameters.
@@ -191,7 +219,7 @@ object functions {
     *
     * The `actualDF` will have the `greeting` column first, then the `team` column then the `cats` column.
     */
-  def reorderColumns(df:DataFrame, colNames: Seq[String]): DataFrame = {
+  def reorderColumns(df: DataFrame, colNames: Seq[String]): DataFrame = {
     val cols = colNames.map(col(_))
     df.select(cols: _*)
   }
