@@ -5,7 +5,6 @@ import com.hurence.historian.compactor.config.ConfigurationBuilder;
 import com.hurence.historian.compactor.config.ConfigurationException;
 import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
-import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.core.ChunkOrigin;
@@ -18,6 +17,7 @@ import org.apache.solr.client.solrj.SolrServerException;
 import org.apache.spark.sql.*;
 
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
@@ -43,12 +43,18 @@ public class CompactorIT {
     private static Logger logger = LoggerFactory.getLogger(CompactorIT.class);
 
     @BeforeAll
-    public static void beforeAll(SolrClient client, DockerComposeContainer container) throws InterruptedException, IOException, SolrServerException {
+    public static void beforeAll(DockerComposeContainer container) throws InterruptedException, IOException, SolrServerException {
         initSolr(container);
-        injectChunksIntoSolr(client);
+    }
+
+    @BeforeEach
+    public void beforeEach(SolrClient client) {
+        clearCollection(client, SolrITHelper.COLLECTION_HISTORIAN);
     }
 
     private static void initSolr(DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
+
+        // Create collection with schema
         SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.VERSION_1);
 
         // Add fields for tags in test data
@@ -56,13 +62,9 @@ public class CompactorIT {
         SolrITHelper.addFieldToChunkSchema(container, "room");
     }
 
-    public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
+    public static void injectChunksForTestCompactor(SolrClient client) {
         logger.info("Indexing some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN);
-        buildInjector().injectChunks(client);
-        logger.info("Indexed some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN);
-    }
 
-    public static SolrInjector buildInjector() throws IOException {
         GeneralInjectorCurrentVersion chunkInjector = new GeneralInjectorCurrentVersion();
 
         /**
@@ -575,10 +577,16 @@ public class CompactorIT {
         );
         chunkInjector.addChunk(chunk);
 
-        return chunkInjector;
+        try {
+            chunkInjector.injectChunks(client);
+        } catch (Exception e) {
+            fail("Error injecting chunks into Solr: " + e.getMessage());
+        }
+
+        logger.info("Indexed some documents in {} collection", SolrITHelper.COLLECTION_HISTORIAN);
     }
 
-    private static Map<String, Chunk> expectedRecompactedChunks() {
+    private static Map<String, Chunk> expectedRecompactedChunksForTestCompactor() {
 
         Map<String, Chunk> expectedChunks = new HashMap<String, Chunk>();
 
@@ -808,6 +816,8 @@ public class CompactorIT {
     @Test
     public void testCompactor(DockerComposeContainer container, SolrClient solrClient, SparkSession sparkSession) {
 
+        injectChunksForTestCompactor(solrClient);
+
         String chunksCollection = SolrITHelper.COLLECTION_HISTORIAN;
         String solrHost = SolrExtension.getSolr1Url(container);
         System.out.println("Solr1 url:" + solrHost);
@@ -843,7 +853,7 @@ public class CompactorIT {
 //            System.out.println("Actual chunk:\n" + actualChunk.toHumanReadable());
 //        }
 
-        Map<String, Chunk> expectedChunks = expectedRecompactedChunks();
+        Map<String, Chunk> expectedChunks = expectedRecompactedChunksForTestCompactor();
 
 //        for (Chunk expectedChunk : expectedChunks.values()) {
 //            System.out.println("Expected chunk:\n" + expectedChunk.toHumanReadable());

@@ -309,4 +309,16 @@ public class SolrITHelper {
             assertEquals(expectedChunk, actualChunk, "Actual chunk id " + chunkId + " not equal to expected one");
         }
     }
+
+    public static void clearCollection(SolrClient client, String collection) {
+
+        LOGGER.info("Clearing data of collection: " + collection);
+
+        try {
+            client.deleteByQuery(collection, "*:*");
+            client.commit(collection, true, true);
+        } catch (Exception e) {
+            fail("Could not delete documents of collection " + collection + ": " + e.getMessage());
+        }
+    }
 }
