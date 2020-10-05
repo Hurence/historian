@@ -1,5 +1,5 @@
 solr:
-  zkHost: localhost # Will be overwritten in integration test with the runtime docker url
+  zkHost: <set me>
   collection: historian
 spark:
   # Any entry under the spark entry is expected to match the spark application configuration

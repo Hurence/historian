@@ -18,6 +18,18 @@
         <historian.jvm.permgen.mb>128</historian.jvm.permgen.mb>
         <historian.run.as/>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>loader</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.hurence.historian</groupId>
+            <artifactId>compactor</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
     <build>
         <plugins>
             <plugin>
