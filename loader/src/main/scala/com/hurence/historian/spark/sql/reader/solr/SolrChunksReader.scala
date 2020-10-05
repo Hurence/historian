@@ -25,7 +25,7 @@ class SolrChunksReader extends Reader[Chunk] {
       .map(name => col(name).as(getFieldFromColumn(name))) ::: tagNames
 
 
-    val tags: List[Column] = options.config("tag_names")
+    val tags: List[Column] = options.config(Options.TAG_NAMES)
       .split(",").toList
       .flatMap(tag => List(lit(s"$tag"), col(s"tag_$tag")))
 
@@ -80,6 +80,8 @@ class SolrChunksReader extends Reader[Chunk] {
           .qualityFirst(r.getAs[Float](FIELD_QUALITY_FIRST))
           .qualitySum(r.getAs[Float](FIELD_QUALITY_SUM))
           .qualityAvg(r.getAs[Float](FIELD_QUALITY_AVG))
+          .trend(r.getAs[Boolean](FIELD_TREND))
+          .outlier(r.getAs[Boolean](FIELD_OUTLIER))
           .value(r.getAs[Array[Byte]](FIELD_VALUE))
           .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
           .buildId()
