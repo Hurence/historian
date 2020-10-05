@@ -105,7 +105,6 @@ object functions {
   val analysis = udf {
     (timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
 
-
       val analyzer = TimeseriesAnalyzer.builder().build()
       val timestampsList = timestamps.map(Long.box).asJava
       val valuesList = values.map(Double.box).asJava
