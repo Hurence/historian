@@ -577,6 +577,146 @@ public class CompactorIT {
         );
         chunkInjector.addChunk(chunk);
 
+        /**
+         * metric0 no tags 2020-08-27 from injector
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 06:08:41.001", 61, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 07:08:41.001", 62, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 08:08:41.001", 63, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 09:08:41.001", 64, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 10:08:41.001", 65, 91)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 01:08:41.001", 66, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 02:08:41.001", 67, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 03:08:41.001", 68, 91)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:08:41.001", 69, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 13:08:41.001", 70, 92)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric0 no tags 2020-08-27 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 05:10:51.051", 1061, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 07:10:52.052", 1062, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 08:30:53.053", 1063, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 10:10:54.054", 1064, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 11:10:55.055", 1065, 1095)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 01:10:51.051", 1066, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 02:10:52.052", 1067, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 03:30:53.053", 1068, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 21:10:54.054", 1069, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 22:10:55.055", 1070, 1095)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric0 no tags 2020-08-29 from injector
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 06:02:57.001", 71, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 07:02:57.001", 72, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:02:57.001", 73, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 09:02:57.001", 74, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 10:02:57.001", 75, 91)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 01:02:57.001", 76, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 02:02:57.001", 77, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 03:02:57.001", 78, 91)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 12:02:57.001", 79, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 13:02:57.001", 80, 92)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.INJECTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
+        /**
+         * metric0 no tags 2020-08-29 from compactor
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 05:11:51.051", 1071, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 07:11:52.052", 1072, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:31:53.053", 1073, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 10:11:54.054", 1074, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 11:11:55.055", 1075, 1095)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 01:11:51.051", 1076, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 02:11:52.052", 1077, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 03:31:53.053", 1078, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 21:11:54.054", 1079, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 22:11:55.055", 1080, 1095)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        chunkInjector.addChunk(chunk);
+
         try {
             chunkInjector.injectChunks(client);
         } catch (Exception e) {
@@ -802,6 +942,72 @@ public class CompactorIT {
                     put("dataCenter", "1");
                     put("room", "1");
                 }}
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        expectedChunks.put(chunk.getId(), chunk);
+
+        /**
+         * metric0 no tags 2020-08-27
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-27 01:08:41.001", 66, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 01:10:51.051", 1066, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 02:08:41.001", 67, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 02:10:52.052", 1067, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 03:08:41.001", 68, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 03:30:53.053", 1068, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 05:10:51.051", 1061, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 06:08:41.001", 61, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 07:08:41.001", 62, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 07:10:52.052", 1062, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 08:08:41.001", 63, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 08:30:53.053", 1063, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 09:08:41.001", 64, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 10:08:41.001", 65, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 10:10:54.054", 1064, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 11:10:55.055", 1065, 1095),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 12:08:41.001", 69, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 13:08:41.001", 70, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 21:10:54.054", 1069, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-27 22:10:55.055", 1070, 1095)
+                ),
+                new HashMap<String, String>()
+                ,
+                ChunkOrigin.COMPACTOR.toString()
+        );
+        expectedChunks.put(chunk.getId(), chunk);
+
+        /**
+         * metric0 no tags 2020-08-29
+         */
+
+        chunk = ChunkBuilderHelper.fromPointsAndTags("metric0",
+                Arrays.asList(
+                        Measure.fromValueAndQualityWithDate("2020-08-29 01:02:57.001", 76, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 01:11:51.051", 1076, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 02:02:57.001", 77, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 02:11:52.052", 1077, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 03:02:57.001", 78, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 03:31:53.053", 1078, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 05:11:51.051", 1071, 1091),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 06:02:57.001", 71, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 07:02:57.001", 72, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 07:11:52.052", 1072, 1092),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:02:57.001", 73, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 08:31:53.053", 1073, 1093),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 09:02:57.001", 74, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 10:02:57.001", 75, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 10:11:54.054", 1074, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 11:11:55.055", 1075, 1095),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 12:02:57.001", 79, 91),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 13:02:57.001", 80, 92),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 21:11:54.054", 1079, 1094),
+                        Measure.fromValueAndQualityWithDate("2020-08-29 22:11:55.055", 1080, 1095)
+                ),
+                new HashMap<String, String>()
                 ,
                 ChunkOrigin.COMPACTOR.toString()
         );
