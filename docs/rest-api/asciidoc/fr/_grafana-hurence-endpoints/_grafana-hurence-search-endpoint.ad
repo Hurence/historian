@@ -1,0 +1,53 @@
+[[grafana-hurence-datasource-search]]
+===== POST {grafana-hurence-search-endpoint}
+
+====== Description Générale
+
+Permet de chercher les différentes métriques disponibles.
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possibles | valeur par défaut
+
+|/name
+|String
+|Une partie du nom de la métrique recherché.
+|Non
+|
+|Par défault toutes les métriques sont retournés
+
+|/limit
+|Int
+|Le nombre maximum de noms de métriques à retourner.
+|Non
+|
+|100 (paramétrable)
+
+|===
+
+NOTE: Le corps de la requête est optionnel.
+
+
+====== Exemple
+
+Requête :
+
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "name": "te",
+  "limit": 5
+}'
+----
+
+Réponse :
+
+[source,json]
+----
+["temp","temp_2","temp_no_points"]
+----

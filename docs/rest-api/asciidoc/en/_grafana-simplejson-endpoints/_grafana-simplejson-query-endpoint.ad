@@ -1,0 +1,127 @@
+[[grafana-simplejson-query]]
+===== POST /api/grafana/simplejson/query
+
+Used to search for points for the desired metrics. Various parameters are available.
+
+Example of a request:
+
+[source,json]
+----
+{
+    "panelId": 1,
+    "range": {
+        "from": "2016-10-31T06:33:44.866Z",
+        "to": "2016-10-31T12:33:44.866Z",
+        "raw": {
+            "from": "now-6h",
+            "to": "now"
+        }
+    },
+    "rangeRaw": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "interval": "30s",
+    "intervalMs": 30000,
+    "targets": [
+        { "target": "upper_50", "refId": "A", "type": "timeserie" },
+        { "target": "upper_75", "refId": "B", "type": "timeserie" }
+    ],
+    "adhocFilters": [{
+        "key": "City",
+        "operator": "=",
+        "value": "Berlin"
+    }],
+    "format": "json",
+    "maxDataPoints": 550
+}
+----
+
+Example of a minimal request:
+
+[source,json]
+----
+{
+    "targets": [
+      { "target": "upper_50" }
+    ]
+}
+----
+
+.Parameters for the request
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/targets
+|array
+|Allows you to enter the metrics for which you want to obtain points.
+|Yes
+|
+|
+
+|/targets/target
+|String
+|The name of a metric for which we want to obtain points.
+|Yes (at least one metric must be listed)
+|
+|
+
+|/range/from
+|String
+|The start date to search for points. Only points with a
+date greater than or equal to this date.
+|No
+|Must represent a date in the following format (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|January 1, 1970 (UTC)
+
+|/range/to
+|String
+|The end date to search for points. Only points with a
+date less than or equal to this date.
+|No
+|Must represent a date in the following format (UTC): *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|The default is infinity
+
+|/maxDataPoints
+|long
+|The maximum number of points desired for each metric (Indeed the goal is to draw points on a graph). If necessary the points will be sampled with a default sampling algorithm.
+|No
+|positive
+|1000
+
+|/adhocFilters
+|String
+|Used by Grafana
+|No
+|
+|
+|===
+
+
+NOTE: The remaining parameters are parameters that are sent by Grafana
+but which are not currently used.
+
+Example of a response
+
+[source,json]
+----
+[
+  {
+    "target":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "target":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----
+
+

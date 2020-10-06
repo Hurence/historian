@@ -1,0 +1,169 @@
+[[import-json]]
+===== POST {import-json-endpoint}
+
+====== General description
+
+Allows you to inject points into the historian from a request body in json format.
+The format of the expected request is a request with Content-Type: application / json;
+
+The body of the expected request is a list of objects. Each object must be composed of the following attributes:
+
+
+.Properties of the JSON objects
+[cols="10,10,70,10"]
+|===
+| json path | type | description | mandatory
+
+|/name
+|String
+|The name of the metric for which we are going to inject the points.
+|Yes
+
+|/points
+|Array d'array
+|Points for creating a chunk with the metric name assigned to 'name'. The points are to be completed in the form
+[[timestsamp<long>, value<double>],..,[timestsamp<long>, value<double>]].
+|Yes
+
+|===
+
+====== Examples
+
+Example of a request:
+
+[source,json]
+----
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
+]
+----
+
+Example of a minimal request:
+
+[source,json]
+----
+[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0]
+        ]
+    }
+]
+----
+
+Example of a command curl and its response :
+
+Request :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[
+    {
+        "name": "temp",
+        "points": [
+            [100, 1.0],
+            [200, 1.2]
+        ]
+    },
+   {
+        "name": "temp_2",
+        "points": [
+           [100, 1.7],
+           [200, 1.9]
+        ]
+   }
+]'
+----
+
+[source,json]
+----
+{
+    "status": "OK",
+    "message": "Injected 4 points of 2 metrics in 2 chunks"
+}
+----
+
+====== Errors
+
+======= No valid points
+
+status : BAD REQUEST
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[
+    {
+        "name": "temp",
+        "points": []
+    }
+]'
+----
+
+[source,json]
+----
+{
+  "error" : "There is no valid points"
+}
+----
+
+======= empty request body
+
+status : BAD REQUEST
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[]'
+----
+
+[source,json]
+----
+{
+    "error" : "Empty request body"
+}
+----
+
+======= field point is required
+
+status : BAD REQUEST
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[
+    {
+        "name": "temp"
+    }
+]'
+----
+
+[source,json]
+----
+{
+    "error" : "field 'points' is required"
+}
+----

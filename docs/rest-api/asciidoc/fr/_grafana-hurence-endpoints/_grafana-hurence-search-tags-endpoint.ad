@@ -1,0 +1,35 @@
+[[grafana-hurence-datasource-search-tags]]
+===== POST {grafana-hurence-search-tags-endpoint}
+
+====== Description Générale
+
+Permet de trouver les noms de tags existants dans l'historian.
+
+====== Exemple
+
+Requête :
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-tags-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{}'
+----
+
+ou bien
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-tags-endpoint}
+----
+
+Réponse :
+
+[source,json]
+----
+["Country","usIne"]
+----
+
+Les valeurs dans "text" sont les valeurs utilisables comme clé dans l'endpoint tag-values.

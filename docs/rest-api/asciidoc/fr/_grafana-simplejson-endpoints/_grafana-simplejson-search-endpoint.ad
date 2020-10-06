@@ -1,0 +1,35 @@
+[[grafana-simplejson-search]]
+===== POST /api/grafana/simplejson/search
+
+
+Permet de chercher les différentes métriques disponibles.
+
+Exemple de requête :
+
+[source,json]
+----
+{ "target": "upper_50" }
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possibles | valeur par défaut
+
+|/target
+|String
+|Une partie du nom de la métrique recherchée.
+|Non
+|
+|
+|===
+
+NOTE: Le corps de la requête est optionnel.
+
+Exemple de réponse :
+
+[source,json]
+----
+["upper_25","upper_50","upper_75","upper_90","upper_95"]
+----
+

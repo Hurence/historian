@@ -19,8 +19,8 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
   private static Logger LOGGER = LoggerFactory.getLogger(WebApiServiceMainVerticle.class);
 
   //conf fields
-  private static final String CONFIG_HTTP_SERVER_ROOT = "http_server";
-  private static final String CONFIG_HISTORIAN_ROOT = "historian";
+  public static final String CONFIG_HTTP_SERVER_ROOT = "http_server";
+  public static final String CONFIG_HISTORIAN_ROOT = "historian";
   public static final String CONFIG_INSTANCE_NUMBER_WEB = "web.verticles.instance.number";
   public static final String CONFIG_INSTANCE_NUMBER_HISTORIAN = "historian.verticles.instance.number";
 

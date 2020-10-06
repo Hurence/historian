@@ -1,10 +1,19 @@
 #!/usr/bin/env bash
 
-print_usage() {
-  cat <<EOF
-    install.sh
 
-    by Hurence, 09/01/2019
+print_usage(){
+    cat << EOF
+
+bash historian-server.sh [options]
+
+[options]:
+
+    -l|--local-test <path_to_historian_dir> => Install the historian with local builded historian tgz file (for dev purpose).
+    -h|--help => Print this message.
+
+by Hurence, 09/09/2020
+
+The script install the historian server.
 
 EOF
 }
@@ -75,6 +84,7 @@ setup_all_variables() {
     HDH_HOME_WITHOUT_START_TILT="${HDH_HOME:1}"
     HDH_HOME="$(echo ~)$HDH_HOME_WITHOUT_START_TILT"
   fi
+  echo "Will install historian in ${HDH_HOME}"
   MSG="Do you want us to install an embedded solr (version 8.2.0 required)? (otherwise you need to have one that can be used from this machine) [Yes] "
   ask_and_set_boolean_variable "USING_EMBEDDED_SOLR" "$MSG"
   if [[ $USING_EMBEDDED_SOLR  = false ]]; then
@@ -202,8 +212,8 @@ ask_and_update_array() {
           _array+=("$tag_name")
         fi
       done
-      echo "Tags :"
-      join_by , "${_array[@]}"
+      echo "Tags : [$(join_by , "${_array[@]}")]"
+
       CREATE=true
       ;;
 
@@ -260,10 +270,14 @@ add_tag_names_to_chunk_collection() {
 
 download_and_extract_historian_into_hdh_home() {
   #Historian download & extract
-  wget https://github.com/Hurence/historian/releases/download/v1.3.5/historian-1.3.5-bin.tgz  
-  mkdir -p "$HDH_HOME" && tar -xf historian-*-bin.tgz -C "$HDH_HOME"
-
-  rm historian-*-bin.tgz
+  if [[ $DEBUG_MODE = true ]]
+  then
+    mkdir -p "$HDH_HOME" && tar -xf ${LOCAL_HISTORIAN_TGZ} -C "$HDH_HOME"
+  else
+    wget "${URL_HISTORIAN_TGZ_RELEASE}"
+    mkdir -p "$HDH_HOME" && tar -xf ${HISTORIAN_TGZ_NAME} -C "$HDH_HOME"
+    rm "${HISTORIAN_TGZ_NAME}"
+  fi
   echo "installed historian into $HDH_HOME"
 }
 
@@ -356,7 +370,7 @@ generate_historian_server_conf() {
       "max_data_points_maximum_allowed" : 50000
     },
     "historian": {
-      "schema_version": "VERSION_0",
+      "schema_version": "VERSION_1",
       "address" : "historian",
       "limit_number_of_point_before_using_pre_agg" : 50000,
       "limit_number_of_chunks_before_using_solr_partition" : 50000,
@@ -417,7 +431,44 @@ create_home_directory() {
   fi
 }
 
+
+
+# Parse method is not used for now but we put one exemple here if we want to add arguments
+parse_args() {
+    POSITIONAL=()
+    while [[ $# -gt 0 ]]
+    do
+        key="$1"
+        case $key in
+            -l|--local-test)
+                export DEBUG_MODE=true
+                export LOCAL_HISTORIAN_TGZ="$2"
+                shift # past argument
+            ;;
+            -h|--help)
+                print_usage
+                exit 0
+            ;;
+            *)  # unknown option
+                POSITIONAL+=("$1") # save it in an array for later
+                shift # past argument
+            ;;
+        esac
+    done
+
+    if [[ $DEBUG_MODE = true ]]
+    then
+      echo "parsing command line args"
+      echo "DEBUG_MODE is set to '${DEBUG_MODE}'";
+      echo "LOCAL_HISTORIAN_TGZ is set to '${LOCAL_HISTORIAN_TGZ}'";
+    fi
+
+    set -- "${POSITIONAL[@]}" # restore positional parameters
+}
+
+
 main() {
+  parse_args "$@"
   if [[ "$OSTYPE" == "linux-gnu"* ]]; then
       echo "Os detected is linux : $OSTYPE"
       check_wget_or_install_with_apt_get
@@ -476,8 +527,11 @@ main() {
   exit 0
 }
 
-
 declare -r DEFAULT_HOST_PORT_SOLR="localhost:8983/solr"
-declare -r HISTORIAN_DIR_NAME="historian-1.3.5"
+declare -r HISTORIAN_VERSION="1.3.6-SNAPSHOT"
+declare -r HISTORIAN_DIR_NAME="historian-${HISTORIAN_VERSION}"
+declare -r HISTORIAN_TGZ_NAME="${HISTORIAN_DIR_NAME}-bin.tgz"
+declare -r URL_HISTORIAN_TGZ_RELEASE="https://github.com/Hurence/historian/releases/download/v${HISTORIAN_VERSION}/${HISTORIAN_TGZ_NAME}"
 
 main "$@"
+

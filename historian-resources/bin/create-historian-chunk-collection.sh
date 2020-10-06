@@ -14,7 +14,7 @@ declare SOLR_FIELD_TYPE="text_general"
 declare REPLICATION_FACTOR=1
 declare NUM_SHARDS=2
 declare DRY_RUN=false
-declare MODEL_VERSION="VERSION_0"
+declare MODEL_VERSION="VERSION_1"
 declare SOLR_UPDATE_QUERY=""
 declare UPDATE_MODE="create-collection"
 
