@@ -1,33 +1,35 @@
 [[grafana-hurence-datasource-search-tags]]
 ===== POST {grafana-hurence-search-tags-endpoint}
 
-====== Description Général
+====== Description Générale
 
-Permet de connaître les clés utilisables dans l'endpoint _tag_values_.
+Permet de trouver les noms de tags existants dans l'historian.
 
 ====== Exemple
 
-Exemple de requête :
+Requête :
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-tags-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{}'
+----
+
+ou bien
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-tags-endpoint}
+----
+
+Réponse :
 
 [source,json]
 ----
-{}
-----
-
-Exemple de réponse :
-
-[source,json]
-----
-[
-    {
-        "type": "string",
-        "text": "Algo"
-    },
-    {
-        "type": "int",
-        "text": "Bucket size"
-    }
-]
+["Country","usIne"]
 ----
 
 Les valeurs dans "text" sont les valeurs utilisables comme clé dans l'endpoint tag-values.

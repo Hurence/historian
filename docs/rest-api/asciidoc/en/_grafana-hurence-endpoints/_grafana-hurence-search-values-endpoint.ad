@@ -23,14 +23,14 @@ Allows you to search for the different values for the indicated key.
 |Part of the name of the key you are looking for.
 |Yes
 |
-|
+|No filter
 
 |/limit
 |Int
 |The maximum number of metric names to return.
 |No
 |
-|
+|100
 
 |===
 
@@ -38,21 +38,23 @@ NOTE: The query and limit parameters of the query are optional.
 
 ====== Example
 
-Request:
+Request :
 
-[source,json]
+[source,curl,subs="attributes"]
 ----
-{
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-values-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
   "field": "name",
-  "query": "up",
+  "query": "no",
   "limit": 5
-}
+}'
 ----
 
-
-Response:
+Response :
 
 [source,json]
 ----
-["upper_25","upper_50","upper_75","upper_90","upper_95"]
+["temp_no_points"]
 ----

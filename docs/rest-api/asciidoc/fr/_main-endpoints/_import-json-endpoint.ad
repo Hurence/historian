@@ -1,7 +1,7 @@
 [[import-json]]
 ===== POST {import-json-endpoint}
 
-====== Description Général
+====== Description Générale
 
 Permet d'injecter des points dans l'historian à partir d'un corps de requête au format json.
 Le format de la requête attendue est une requête avec Content-Type: application/json;

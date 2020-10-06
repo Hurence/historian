@@ -1,7 +1,7 @@
 [[grafana-hurence-datasource-query]]
 ===== POST {grafana-hurence-query-endpoint}
 
-====== Description Général
+====== Description Générale
 
 Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponible.
 

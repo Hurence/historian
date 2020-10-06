@@ -1,7 +1,7 @@
 [[export-csv]]
 ===== POST {export-csv-endpoint}
 
-====== Description Général
+====== Description Générale
 
 Permet de rechercher des points et les exporter en csv pour les métriques désirées.
 

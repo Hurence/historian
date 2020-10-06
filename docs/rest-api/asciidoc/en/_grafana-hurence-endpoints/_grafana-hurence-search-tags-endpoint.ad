@@ -3,31 +3,33 @@
 
 ====== General description
 
-Used to find out the keys that can be used in the _tag_values_ endpoint.
+Used to find out the tags name used in historian.
 
 ====== Example
 
-Request:
+Request :
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-tags-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{}'
+----
+
+or
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-tags-endpoint}
+----
+
+Response :
 
 [source,json]
 ----
-{}
+["Country","usIne"]
 ----
 
-Response:
-
-[source,json]
-----
-[
-    {
-        "type": "string",
-        "text": "Algo"
-    },
-    {
-        "type": "int",
-        "text": "Bucket size"
-    }
-]
-----
-
-The values in "text" are the values that can be used as a key in the endpoint tag-values.
+Les valeurs dans "text" sont les valeurs utilisables comme clé dans l'endpoint tag-values.

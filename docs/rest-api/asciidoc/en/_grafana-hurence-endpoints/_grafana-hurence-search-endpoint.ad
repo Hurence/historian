@@ -16,14 +16,14 @@ Lets you search for the different metrics available.
 |Part of the name of the metric you are looking for.
 |No
 |
-|
+|All metric by default
 
 |/limit
 |Int
 |The maximum number of metric names to return.
 |No
 |
-|
+|100 (configurable)
 
 |===
 
@@ -32,19 +32,22 @@ NOTE: The body of the request is optional.
 
 ====== Example
 
-Request:
+Request :
 
-[source,json]
+[source,curl,subs="attributes"]
 ----
-{
-  "name": "upper_50",
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "name": "te",
   "limit": 5
-}
+}'
 ----
 
-Response:
+Response :
 
 [source,json]
 ----
-["upper_25","upper_50","upper_75","upper_90","upper_95"]
+["temp","temp_2","temp_no_points"]
 ----

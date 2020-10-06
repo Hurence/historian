@@ -27,6 +27,10 @@ public class SearchValuesRequestParser {
         SearchValuesRequestParam.Builder builder = new SearchValuesRequestParam.Builder();
         String fieldToSearch = parseField(requestBody);
         String queryToUseInSearch = parseQuery(requestBody);
+        if (fieldToSearch == null) throw new IllegalArgumentException(
+                String.format("Request should contain a '%s' property",
+                        field)
+        );
         builder.withField(fieldToSearch);
         builder.withQuery(queryToUseInSearch);
         Integer maxNumberOfMetricNameToReturn = parseMaxNumberOfMetricToReturn(requestBody);;
