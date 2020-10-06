@@ -1,7 +1,11 @@
 [[grafana-hurence-datasource-search-tags]]
-===== POST /api/grafana/v0/tag-keys
+===== POST {grafana-hurence-search-tags-endpoint}
+
+====== Description Général
 
 Permet de connaître les clés utilisables dans l'endpoint _tag_values_.
+
+====== Exemple
 
 Exemple de requête :
 

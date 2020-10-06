@@ -4,4 +4,4 @@ Les api ci-dessous sont utilisées pour interagir avec Grafana en utilisant cert
 
 include::./_grafana-hurence-api.ad[]
 
-include::./_grafana-simplejson-api.ad[]
+//include::./_grafana-simplejson-api.ad[]

@@ -1,64 +1,10 @@
 [[grafana-hurence-datasource-query]]
-===== POST /api/grafana/v0/query
+===== POST {grafana-hurence-query-endpoint}
 
+====== Description Général
 
 Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponible.
 
-Exemple de requête :
-
-[source,json]
-----
-{
-  "from": "2016-10-31T06:33:44.866Z",
-  "to": "2020-10-31T12:33:44.866Z",
-  "names": ["metric_1"],
-  "format": "json",
-  "max_data_points": 30,
-  "tags": {
-      "sensor" : "sensor_1"
-  },
-  "sampling":{
-     "algorithm": "MIN",
-     "bucket_size" : 100
-  }
-}
-----
-
-Exemple de requête minimale :
-
-[source,json]
-----
-[
-    {
-        "name": "metric_1",
-        "datapoints": [
-            [
-                622,
-                1477895624866
-            ],
-            [
-                -3,
-                1477916224866
-            ],
-            [
-                365,
-                1477917224866
-            ]
-        ]
-    }
-]
-----
-
-
-{
-"tags": {
-"sensor" : "sensor_1"
-},
-"sampling":{
-"algorithm": "MIN",
-"bucket_size" : 100
-}
-}
 
 .Paramètres de la requête
 [cols="13,10,40,7,20,10"]
@@ -130,24 +76,107 @@ sous la forme d'une map de clés / valeurs.
 |===
 
 
-Exemple de réponse
+====== Exemple
+
+======= Exemple Minimal
+
+Exemple de requête :
+
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-query-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "names": ["temp"]
+}'
+----
+
+Attention cette requête demande TOUT les points pour la métrique "temp".
+
+Exemple de réponse :
 
 [source,json]
 ----
 [
   {
-    "name":"upper_75",
+    "name":"temp",
     "datapoints":[
-      [622,1450754160000],
-      [365,1450754220000]
-    ]
-  },
-  {
-    "name":"upper_90",
-    "datapoints":[
-      [861,1450754160000],
-      [767,1450754220000]
-    ]
+      [1.0,100],
+      [1.2,200]
+    ],
+    "total_points":2
   }
 ]
 ----
+
+======= Exemple avec sampling, agrégations, qualité dans une plage de temps
+
+Exemple de requête :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST http://localhost:8080{grafana-hurence-query-endpoint} -H 'Content-Type: application/json' \
+-d '{
+    "from": "1969-10-31T06:33:44.866Z",
+    "to": "2030-10-31T12:33:44.866Z",
+    "names": ["temp"],
+    "max_data_points": 30,
+    "sampling":{
+        "algorithm": "MIN",
+        "bucket_size" : 100
+    },
+    "aggregations" : ["MIN", "MAX"],
+    "return_with_quality": true
+}'
+----
+
+Exemple de réponse :
+
+[source,json]
+----
+[
+  {
+    "name":"temp",
+    "datapoints":[
+      [1.0,100,1.0]
+    ],
+    "total_points":1,
+    "aggregation":{
+      "MIN":1.0,
+      "MAX":1.2
+    }
+  }
+]
+----
+
+======= Exemple avec tag et qualité
+
+Exemple de requête :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+  http://localhost:8080{grafana-hurence-query-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "names": ["temp"],
+  "max_data_points": 30,
+  "tags":{
+     "Country": "France"
+  },
+  "aggregations" : ["MIN", "MAX"],
+  "quality":{
+     "quality_value": 0.9,
+     "quality_agg" : "MIN"
+  },
+  "return_with_quality": true
+}'
+----
+
+Exemple de réponse :
+
+TODO does not work at the moment problème avec la section quality =>
+
+http://localhost:8983/solr/historian:'rollup(select(search(historian, q=chunk_start:[* TO 9223372036854775807] AND chunk_end:[0 TO *], fl="name,chunk_count,chunk_quality_avg", qt="/export", sort="name asc"), name,chunk_count,chunk_quality_avg,and (eq(name,temp), gteq(chunk_quality_avg,1.0)) as is_quality_ok), over="name,is_quality_ok", sum("chunk_count), count(*))' is not a proper expression clause

@@ -1,16 +1,20 @@
 [[grafana-hurence-datasource-search-tags]]
-===== POST /api/grafana/v0/tag-keys
+===== POST {grafana-hurence-search-tags-endpoint}
+
+====== General description
 
 Used to find out the keys that can be used in the _tag_values_ endpoint.
 
-Example of a request:
+====== Example
+
+Request:
 
 [source,json]
 ----
 {}
 ----
 
-Example of a response:
+Response:
 
 [source,json]
 ----

@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.api.grafana;
 
 
 import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.util.ErrorMsgHelper;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.models.RefIdInfo;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
@@ -13,6 +14,7 @@ import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePlugin
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchValuesRequestParser;
 import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
+import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
 import io.reactivex.Single;
@@ -88,9 +90,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
         final JsonObject getMetricsParam = buildGetMetricsParam(request);
@@ -148,9 +150,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
         final JsonObject getFieldValuesParam = buildGetFieldValuesParam(request);
@@ -286,9 +288,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
 
@@ -434,9 +436,9 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
 

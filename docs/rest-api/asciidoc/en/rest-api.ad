@@ -48,21 +48,21 @@ Get the name of the metrics stored in the historian.
 Get the different tag names in historian.
   * POST <<grafana-hurence-datasource-search-values,_{grafana-hurence-search-values-endpoint}_>>:
 Get the values for specified field (the field can be a tag name).
-  * POST <<grafana-hurence-datasource-annotations,_{grafana-hurence-annotations-endpoint}_>>:
-Get the annotations stored in the historian.
-* [DEPRECATED] GET <<grafana-simplejson-root,_{grafana-simplejson-endpoint}_>>:
-The API to interact with Grafana using the "SimpleJson" datasource plugin.
-note::The 'tag-keys' and 'tag-values' endpoints are only useful for Grafana.
-  * POST <<grafana-simplejson-query,_{grafana-simplejson-query-endpoint}_>>:
-Used to obtain historian points from a query.
-  * POST <<grafana-simplejson-search,_{grafana-simplejson-search-endpoint}_>>:
-Get names of historian metrics.
-  * POST <<grafana-simplejson-annotations,_{grafana-simplejson-annotations-endpoint}_>>:
-Used to obtain the annotations stored in the historian.
-  * POST <<grafana-simplejson-tag-keys,_{grafana-simplejson-tag-keys-endpoint}_>>:
-Get the keys available to use the endpoint '_/api/grafana/simplejson/tag-values_'.
-  * POST <<grafana-simplejson-tag-values,_{grafana-simplejson-tag-values-endpoint}_>>:
-Get the possible values for the specified key.
+//  * POST <<grafana-hurence-datasource-annotations,_{grafana-hurence-annotations-endpoint}_>>:
+//Get the annotations stored in the historian.
+//* [DEPRECATED] GET <<grafana-simplejson-root,_{grafana-simplejson-endpoint}_>>:
+//The API to interact with Grafana using the "SimpleJson" datasource plugin.
+//note::The 'tag-keys' and 'tag-values' endpoints are only useful for Grafana.
+//  * POST <<grafana-simplejson-query,_{grafana-simplejson-query-endpoint}_>>:
+//Used to obtain historian points from a query.
+//  * POST <<grafana-simplejson-search,_{grafana-simplejson-search-endpoint}_>>:
+//Get names of historian metrics.
+//  * POST <<grafana-simplejson-annotations,_{grafana-simplejson-annotations-endpoint}_>>:
+//Used to obtain the annotations stored in the historian.
+//  * POST <<grafana-simplejson-tag-keys,_{grafana-simplejson-tag-keys-endpoint}_>>:
+//Get the keys available to use the endpoint '_/api/grafana/simplejson/tag-values_'.
+//  * POST <<grafana-simplejson-tag-values,_{grafana-simplejson-tag-values-endpoint}_>>:
+//Get the possible values for the specified key.
 
 
 == Detailed descriptions of the API endpoints

@@ -5,7 +5,7 @@ include::./_grafana-simplejson-endpoints/_grafana-simplejson-query-endpoint.ad[]
 include::./_grafana-simplejson-endpoints/_grafana-simplejson-search-endpoint.ad[]
 include::./_grafana-simplejson-endpoints/_grafana-simplejson-tag-keys-endpoint.ad[]
 include::./_grafana-simplejson-endpoints/_grafana-simplejson-tag-values-endpoint.ad[]
-include::./_grafana-simplejson-endpoints/_grafana-simplejson-annotations-endpoint.ad[]
+//include::./_grafana-simplejson-endpoints/_grafana-simplejson-annotations-endpoint.ad[]
 
 
 

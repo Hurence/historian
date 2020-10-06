@@ -1,4 +1,4 @@
 [[grafana-hurence-datasource-root]]
-===== GET /api/grafana/v0
+===== GET {grafana-hurence-endpoint}
 
 Cet endpoint renvoie une réponse 200 'OK' si l'historian fonctionne correctement.

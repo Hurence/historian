@@ -1,20 +1,10 @@
-
 [[grafana-hurence-datasource-search-values]]
-===== POST /api/grafana/v0/search/values
+===== POST {grafana-hurence-search-values-endpoint}
 
+====== General description
 
 Allows you to search for the different values for the indicated key.
 
-Example of a request:
-
-[source,json]
-----
-{
-  "field": "name",
-  "query": "up",
-  "limit": 5
-}
-----
 
 .Parameters of the request
 [cols="13,10,40,7,20,10"]
@@ -46,7 +36,21 @@ Example of a request:
 
 NOTE: The query and limit parameters of the query are optional.
 
-Example of a response:
+====== Example
+
+Request:
+
+[source,json]
+----
+{
+  "field": "name",
+  "query": "up",
+  "limit": 5
+}
+----
+
+
+Response:
 
 [source,json]
 ----

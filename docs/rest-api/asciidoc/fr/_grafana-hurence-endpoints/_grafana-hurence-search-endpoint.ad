@@ -1,18 +1,9 @@
 [[grafana-hurence-datasource-search]]
-===== POST /api/grafana/v0/search
+===== POST {grafana-hurence-search-endpoint}
 
+====== Description Général
 
 Permet de chercher les différentes métriques disponibles.
-
-Exemple de requête :
-
-[source,json]
-----
-{
-  "name": "upper_50",
-  "limit": 5
-}
-----
 
 .Paramètres de la requête
 [cols="13,10,40,7,20,10"]
@@ -37,7 +28,19 @@ Exemple de requête :
 
 NOTE: Le corps de la requête est optionnel.
 
-Exemple de réponse :
+====== Exemple
+
+Request :
+
+[source,json]
+----
+{
+  "name": "upper_50",
+  "limit": 5
+}
+----
+
+Response :
 
 [source,json]
 ----
