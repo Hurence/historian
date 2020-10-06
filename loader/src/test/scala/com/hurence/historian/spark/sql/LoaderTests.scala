@@ -55,6 +55,42 @@ class LoaderTests extends SparkSessionTestWrapper {
     checkChunk(sample(0))
   }
 
+  @Test
+  def testChunkyfierNoTags() = {
+
+    val chunkyfier = new Chunkyfier()
+      .setGroupByCols(Array("name"))
+      .setDateBucketFormat("yyyy-MM-dd")
+      .doDropLists(false)
+      .setSaxAlphabetSize(7)
+      .setSaxStringLength(50)
+
+
+    val it4MetricsDSNoTags = it4MetricsDS
+      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+      .drop("tags")
+      .drop("quality")
+
+    // Transform original data into its bucket index.
+    val sample = chunkyfier.transform(it4MetricsDSNoTags)
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
+      .collect()
+
+
+    val chunktoCheck = sample(0)
+
+    assertEquals(1574982082000L, chunktoCheck.getStart)
+    assertEquals(1575068166000L, chunktoCheck.getEnd)
+    assertEquals("ack", chunktoCheck.getName)
+    assertEquals(0, chunktoCheck.getTags.size())
+    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", chunktoCheck.getSax)
+    assertEquals(68.8, chunktoCheck.getMin)
+    assertEquals(2145.6, chunktoCheck.getMax)
+    assertEquals(1496.6, chunktoCheck.getFirst)
+    assertEquals(1615.4, chunktoCheck.getLast)
+
+  }
+
   def checkChunk(chunktoCheck: Chunk) = {
     assertEquals(1575068466000L, chunktoCheck.getStart)
     assertEquals(1575154561000L, chunktoCheck.getEnd)
@@ -129,7 +165,6 @@ class LoaderTests extends SparkSessionTestWrapper {
 
     val ds = itDataV0Reader.read(options)
 
-    ds.show()
     if (logger.isDebugEnabled) {
       ds.show()
     }
