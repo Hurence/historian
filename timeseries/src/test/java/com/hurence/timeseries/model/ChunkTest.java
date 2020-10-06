@@ -222,8 +222,7 @@ public class ChunkTest {
         TreeSet<Measure> inputMeasures = new TreeSet<>();
         for(int i=0; i<100; i++)
             inputMeasures.add(randomMeasure(name, tags, Float.NaN));
-        for(int i=0; i<100; i++)
-            inputMeasures.add(randomMeasure(name, tags));
+
         // convert them as a Chunk
         MeasuresToChunk converter = new MeasuresToChunkVersionCurrent("test");
         Chunk chunk = converter.buildChunk(name, inputMeasures, tags);
