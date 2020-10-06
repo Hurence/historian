@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.http.api.grafana;
 
 
-import com.hurence.historian.modele.solr.SolrFieldMapping;
 import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.util.ErrorMsgHelper;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
@@ -12,6 +12,7 @@ import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.SearchRequestParser;
 import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
+import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
@@ -53,7 +54,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
 
     /**
      *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value HistorianServiceFields#NAME}' value in historian.
+     *  In our case we will return each different '{@value HistorianServiceFields#METRIC}' value in historian.
      * @param context
      *
      * Expected request exemple :
@@ -82,9 +83,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
         final JsonObject getMetricsParam = buildGetMetricsParam(request);
@@ -112,7 +113,7 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
 
     /**
      *  used by the find metric options on the query tab in panels.
-     *  In our case we will return each different '{@value HistorianServiceFields#NAME}' value in historian.
+     *  In our case we will return each different '{@value HistorianServiceFields#METRIC}' value in historian.
      * @param context
      *
      * Expected request exemple :
@@ -188,9 +189,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
 
@@ -307,9 +308,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
         } catch (Exception ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
 
@@ -378,9 +379,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
         } catch (IllegalArgumentException ex) {
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
         final JsonArray response;
@@ -399,9 +400,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
             default:
                 LOGGER.warn("there is no tag with this key !");
                 context.response().setStatusCode(NOT_FOUND);
-                context.response().setStatusMessage("there is no tag with this key !");
+                context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
                 context.response().putHeader("Content-Type", "application/json");
-                context.response().end();
+                context.response().end("there is no tag with this key !");
                 return;
         }
         context.response().setStatusCode(200);

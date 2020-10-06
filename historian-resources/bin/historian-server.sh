@@ -2,12 +2,16 @@
 
 
 
-DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
-ROOT_DIR="$DIR/.."
+TMP="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+declare -r SCRIPT_DIR="$TMP"
+ROOT_DIR="$TMP/.."
 PID=$ROOT_DIR/app.pid
 LOG=$ROOT_DIR/app.log
 ERROR=$ROOT_DIR/app-error.log
 DEBUG_MODE=false
+
+cd "$SCRIPT_DIR" || exit
+source historian.properties
 
 USR=user
 
@@ -59,7 +63,7 @@ parse_args() {
     then
       echo "parsing command line args"
       echo "DEBUG_MODE is set to '${DEBUG_MODE}'";
-      echo "DIR is $DIR"
+      echo "SCRIPT_DIR is $SCRIPT_DIR"
       echo "ROOT_DIR is $ROOT_DIR"
     fi
 
@@ -97,7 +101,7 @@ start_historian() {
     COMMAND+=("-Dlog4j.configuration=file:$ROOT_DIR/conf/log4j.properties")
     COMMAND+=("-Dlog4j.configurationFile=file:$ROOT_DIR/conf/log4j.properties")
   fi
-  COMMAND+=(-jar "$ROOT_DIR/lib/historian-server-1.3.5-fat.jar" --conf "$ROOT_DIR/conf/historian-server-conf.json")
+  COMMAND+=(-jar "$ROOT_DIR/lib/historian-server-${HISTORIAN_VERSION}-fat.jar" --conf "$ROOT_DIR/conf/historian-server-conf.json")
   if [[ $DEBUG_MODE = true ]]
   then
     echo "run below command"

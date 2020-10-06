@@ -1,0 +1,7 @@
+=== Interactions avec Grafana
+
+Les api ci-dessous sont utilisées pour interagir avec Grafana en utilisant certaines datasources (une notion de Grafana).
+
+include::./_grafana-hurence-api.ad[]
+
+//include::./_grafana-simplejson-api.ad[]
