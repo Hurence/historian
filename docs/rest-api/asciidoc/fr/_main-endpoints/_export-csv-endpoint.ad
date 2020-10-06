@@ -9,7 +9,7 @@ Ce endpoint utilise la même requête que l'endpoint <<grafana-hurence-datasourc
 
 ====== Exemples
 
-====== Exemple avec tous les paramètres
+======= Exemple avec tous les paramètres
 
 Requête :
 
@@ -30,7 +30,7 @@ curl -X POST \
   "tags":{
      "Country": "France"
   },
-  "aggregations" : "TODO",
+  "aggregations" : ["MIN", "MAX"],
   "quality":{
      "quality_value": "MIN",
      "quality_agg" : 100

@@ -1,7 +1,7 @@
 [[import-csv]]
-==== POST {import-csv-endpoint}
+===== POST {import-csv-endpoint}
 
-===== General description
+====== General description
 
 This request allows to inject data points from CSV files.
 The format of the http request must be Content-Type: multipart/form-data;
@@ -118,9 +118,9 @@ Otherwise the other accepted values are the column names added as a tag.
 
 |===
 
-===== Examples
+====== Examples
 
-===== Example 1
+======= Example 1
 
 Example of a minimal curl command :
 
@@ -159,7 +159,7 @@ Here the answer :
 }
 ----
 
-===== Example 2
+======= Example 2
 
 Example of a curl command :
 
@@ -220,7 +220,7 @@ Here the answer :
 }
 ----
 
-===== Example 3
+======= Example 3
 
 Example of a curl command :
 

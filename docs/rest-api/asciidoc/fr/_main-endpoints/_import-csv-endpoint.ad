@@ -123,7 +123,7 @@ Sinon les autres valeurs acceptées sont les noms de colonnes ajoutées comme ta
 
 ===== Exemples
 
-===== Exemple 1
+====== Exemple 1
 
 Exemple de commande curl minimal :
 
@@ -162,7 +162,7 @@ La réponse est la suivante :
 }
 ----
 
-===== Exemple 2
+====== Exemple 2
 
 Exemple de commande curl :
 
@@ -223,7 +223,7 @@ La réponse est la suivante :
 }
 ----
 
-===== Exemple 3
+====== Exemple 3
 
 
 

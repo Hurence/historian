@@ -6,42 +6,6 @@
 Permet d'injecter des points dans l'historian à partir d'un corps de requête au format json.
 Le format de la requête attendue est une requête avec Content-Type: application/json;
 
-Exemple de requête :
-
-[source,json]
-----
-[
-    {
-        "name": "temp",
-        "points": [
-            [100, 1.0],
-            [200, 1.2]
-        ]
-    },
-   {
-        "name": "temp_2",
-        "points": [
-           [100, 1.7],
-           [200, 1.9]
-        ]
-   }
-]
-----
-
-Exemple de requête minimal :
-
-[source,json]
-----
-[
-    {
-        "name": "temp",
-        "points": [
-            [100, 1.0]
-        ]
-    }
-]
-----
-
 Le corps de la requête attendue est une liste json d'objets. Chaque objet doit être composé des attributs suivants :
 
 

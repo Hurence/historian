@@ -1,7 +1,7 @@
 [[import-json]]
-==== POST {import-json-endpoint}
+===== POST {import-json-endpoint}
 
-===== General description
+====== General description
 
 Allows you to inject points into the historian from a request body in json format.
 The format of the expected request is a request with Content-Type: application / json;
@@ -27,7 +27,7 @@ The body of the expected request is a list of objects. Each object must be compo
 
 |===
 
-===== Examples
+====== Examples
 
 Example of a request:
 

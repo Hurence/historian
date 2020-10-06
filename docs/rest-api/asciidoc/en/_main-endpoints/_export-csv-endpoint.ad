@@ -1,14 +1,44 @@
 [[export-csv]]
-==== POST {export-csv-endpoint}
+===== POST {export-csv-endpoint}
 
-===== General description
+====== General description
 
 Allows you to search for points and export them to csv for the desired metrics.
 
 This endpoint uses the same request as the <<grafana-hurence-datasource-query,_{grafana-hurence-query-endpoint}_>> but it gives the response in csv.
 
 
-===== Examples
+====== Examples
+
+======= Example avec tous les paramètres
+
+Request :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+  http://localhost:8080{export-csv-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "from": "2016-10-31T06:33:44.866Z",
+  "to": "2020-10-31T12:33:44.866Z",
+  "names": ["temp"],
+  "max_data_points": 30,
+  "sampling":{
+     "algorithm": "MIN",
+     "bucket_size" : 100
+  },
+  "tags":{
+     "Country": "France"
+  },
+  "aggregations" : ["MIN", "MAX"],
+  "quality":{
+     "quality_value": "MIN",
+     "quality_agg" : 100
+  },
+  return_with_quality: true
+}'
+----
 
 Example of a response :
 
