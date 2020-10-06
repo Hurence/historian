@@ -157,7 +157,7 @@ public class Chunk implements Serializable {
 
     }
 
-    public String toHumanReadable() {
+    public String toHumanReadable(boolean withTimestamps) {
         SimpleDateFormat sdf = Measure.createUtcDateFormatter("yyyy-MM-dd HH:mm:ss.SSS");
         StringBuilder stringBuilder = new StringBuilder(" Human readable value:");
         try {
@@ -165,8 +165,13 @@ public class Chunk implements Serializable {
             for (Measure measure : measures) {
                 double measureValue = measure.getValue();
                 float quality = measure.getQuality();
-                String readableTimestamp = sdf.format(new Date(measure.getTimestamp()));
-                stringBuilder.append("\n    t=").append(readableTimestamp)
+                long timestamp = measure.getTimestamp();
+                String readableTimestamp = sdf.format(new Date(timestamp));
+                stringBuilder.append("\n    t=").append(readableTimestamp);
+                if (withTimestamps) {
+                    stringBuilder.append(" (" + timestamp +")");
+                }
+                stringBuilder
                         .append(" v=").append(measureValue)
                         .append(" q=").append(quality);
             }
