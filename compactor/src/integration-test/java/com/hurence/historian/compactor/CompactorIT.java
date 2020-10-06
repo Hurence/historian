@@ -1062,7 +1062,7 @@ public class CompactorIT {
         Map<String, Chunk> expectedChunks = expectedRecompactedChunksForTestCompactor();
 
 //        for (Chunk expectedChunk : expectedChunks.values()) {
-//            System.out.println("Expected chunk:\n" + expectedChunk.toHumanReadable());
+//            System.out.println("Expected chunk:\n" + expectedChunk.toHumanReadable(false));
 //        }
 
         compareChunks(expectedChunks, actualChunks);
