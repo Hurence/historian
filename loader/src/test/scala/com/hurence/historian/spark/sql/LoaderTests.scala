@@ -72,7 +72,7 @@ class LoaderTests extends SparkSessionTestWrapper {
     assertEquals(1551.6, chunktoCheck.getLast)
     assertEquals(466588.19999999984, chunktoCheck.getSum)
     assertTrue(chunktoCheck.isOutlier);
-    assertFalse(chunktoCheck.isTrend)
+    assertTrue(chunktoCheck.isTrend)
     assertEquals(2019, chunktoCheck.getYear)
     assertEquals(11, chunktoCheck.getMonth)
 

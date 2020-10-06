@@ -103,7 +103,7 @@ object functions {
     (alphabetSize: Int, nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
 
 
-      val saxConverter = new SaxConverter.Builder()
+      val saxConverter = SaxConverter.builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
         .paaSize(paaSize)
@@ -112,7 +112,7 @@ object functions {
       val list = values.map(Double.box).asJava
 
 
-      saxConverter.getSaxStringFromValues(list)
+      saxConverter.run(list)
 
   }
 
@@ -169,13 +169,13 @@ object functions {
       val paaSize = best_guess(1).toString.toInt
       val alphabetSize = best_guess(2).toString.toInt
 
-      val saxConverter = new SaxConverter.Builder()
+      val saxConverter = SaxConverter.builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
         .paaSize(paaSize)
         .build()
 
-      saxConverter.getSaxStringFromValues(list)
+      saxConverter.run(list)
 
   }
   val sax_best_guess_paa_fixed = udf {
@@ -186,13 +186,13 @@ object functions {
       //val paaSize =best_guess(1).toString.toInt
       val alphabetSize = best_guess(2).toString.toInt
 
-      val saxConverter = new SaxConverter.Builder()
+      val saxConverter = SaxConverter.builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
         .paaSize(paaSize)
         .build()
 
-      saxConverter.getSaxStringFromValues(list)
+      saxConverter.run(list)
 
   }
 
