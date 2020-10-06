@@ -150,12 +150,14 @@ public class Measure implements Serializable, Comparable<Measure> {
         Measure measure = (Measure) o;
 
         AtomicBoolean areTagsEquals = new AtomicBoolean(true);
-        tags.keySet().forEach(key -> {
-            String value = getTag(key);
-            if(value !=null && !value.isEmpty() && value.equals("null")){
-                areTagsEquals.set(areTagsEquals.get() && value.equals(measure.getTag(key)));
-            }
-        });
+        if(tags != null) {
+            tags.keySet().forEach(key -> {
+                String value = getTag(key);
+                if (value != null && !value.isEmpty() && value.equals("null")) {
+                    areTagsEquals.set(areTagsEquals.get() && value.equals(measure.getTag(key)));
+                }
+            });
+        }
 
         boolean equality=  timestamp == measure.timestamp &&
                 Double.compare(measure.value, value) == 0 &&
