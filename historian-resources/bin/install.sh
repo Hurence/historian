@@ -84,6 +84,7 @@ setup_all_variables() {
     HDH_HOME_WITHOUT_START_TILT="${HDH_HOME:1}"
     HDH_HOME="$(echo ~)$HDH_HOME_WITHOUT_START_TILT"
   fi
+  echo "Will install historian in ${HDH_HOME}"
   MSG="Do you want us to install an embedded solr (version 8.2.0 required)? (otherwise you need to have one that can be used from this machine) [Yes] "
   ask_and_set_boolean_variable "USING_EMBEDDED_SOLR" "$MSG"
   if [[ $USING_EMBEDDED_SOLR  = false ]]; then
