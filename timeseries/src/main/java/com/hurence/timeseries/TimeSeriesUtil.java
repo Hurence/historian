@@ -16,9 +16,9 @@
 package com.hurence.timeseries;
 
 
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.model.Measure;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -66,10 +66,10 @@ public final class TimeSeriesUtil {
     }
 
 
-    public static Stream<Point> extractPointsAsStream(long from, long to, List<ChunkVersionCurrent> chunks) {
+    public static Stream<Measure> extractPointsAsStream(long from, long to, List<Chunk> chunks) {
         return chunks.stream()
                 .flatMap(chunk -> {
-                    byte[] binaryChunk = chunk.getValueAsBinary();
+                    byte[] binaryChunk = chunk.getValue();
                     long chunkStart = chunk.getStart();
                     long chunkEnd = chunk.getEnd();
                     try {

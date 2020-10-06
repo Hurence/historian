@@ -548,7 +548,7 @@ Les principaux concepts sont les suivants :</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Measure</strong> C&#8217;est un point dans le temps avec une valeur de type "double" identifiée par un nom et des tags (clés valeurs).</p>
+<p><strong>Measure</strong> C&#8217;est un measure dans le temps avec une valeur de type "double" identifiée par un nom et des tags (clés valeurs).</p>
 </li>
 <li>
 <p><strong>Chunk</strong> Est un ensemble continu de Measures dans un intervalle de temps donné, groupées par date, name et éventuellement des tags.</p>
@@ -557,12 +557,12 @@ Les principaux concepts sont les suivants :</p>
 </div>
 <div class="paragraph">
 <p>Le but principal de cet outil est d&#8217;aider à la création, au stockage et au requêtage de ces chunks de time series.
-Nous utilison le "chunking" à la place du stockage brut des données afin d&#8217;économiser de l&#8217;espace de stockage et afin d&#8217;améliorer les performances pour de grandes volumétries de points. En effet le chunking nous permet de pré-calculer des agrégations pour faciliter le sampling par exemple.</p>
+Nous utilison le "chunking" à la place du stockage brut des données afin d&#8217;économiser de l&#8217;espace de stockage et afin d&#8217;améliorer les performances pour de grandes volumétries de measures. En effet le chunking nous permet de pré-calculer des agrégations pour faciliter le sampling par exemple.</p>
 </div>
 <div class="sect2">
 <h3 id="modèle-de-données"><a class="anchor" href="#modèle-de-données"></a>2.1. Modèle de données</h3>
 <div class="paragraph">
-<p>Une Measure est un point dans le temps Identifié par les champs suivants :</p>
+<p>Une Measure est un measure dans le temps Identifié par les champs suivants :</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -588,7 +588,7 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d&#82
      chunk: String,
      count: Long,
      avg: Double,
-     stddev: Double,
+     std_dev: Double,
      min: Double,
      max: Double,
      first: Double,
@@ -622,7 +622,7 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d&#82
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_outlier</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sax</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ngramtext</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_start</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_stddev</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_std_dev</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sum</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_trend</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
     <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_year</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
@@ -973,7 +973,7 @@ ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.<
 <p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx. Il est essentiel de bien connaître vertx pour toucher à ce paramètre.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
+<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de measures que l&#8217;historian
 accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
 trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
 </li>
@@ -1407,7 +1407,7 @@ ce paramètre qu&#8217;il faille augmenter en cas de problème de performances.<
 <p>http_server/historian.address : le nom du service historian vertx déployé. Ne pas modifier sauf si vous hébergez d&#8217;autres services vertx. Il est essentiel de bien connaître vertx pour toucher à ce paramètre.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de points que l&#8217;historian
+<p>http_server/max_data_points_allowed_for_ExportCsv : Ici vous pouvez modifier le maximum de measures que l&#8217;historian
 accepte de retourner lorsqu&#8217;un client utilise l&#8217;api rest d&#8217;export dans le format csv. Attention de ne pas choisir un maximum
 trop grand car il faut que cela tienne en mémoire. Si vous avez besoin d&#8217;un gros export il vous faudra utiliser un outil comme spark pour réaliser l&#8217;export.</p>
 </li>
@@ -1798,7 +1798,7 @@ Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tous l
 <p>La métrique dont on chercher les données est "happiness"</p>
 </li>
 <li>
-<p>On veut au maximum 10 points</p>
+<p>On veut au maximum 10 measures</p>
 </li>
 <li>
 <p>Si il y a besoin d&#8217;effectuer un sampling nous voulons utiliser un algorithme à base de bucket et en prenant la plus petite valeur à chaque fois.</p>
@@ -1838,19 +1838,19 @@ Si l&#8217;on ne renseigne pas le champ "name" alors la requête retourne tous l
 </div>
 </div>
 <div class="paragraph">
-<p>Nous obtenons bien moins de 10 points. Attention comme nous n&#8217;avons pas précisé de tags les valeurs de tous les pays sont mélangés !</p>
+<p>Nous obtenons bien moins de 10 measures. Attention comme nous n&#8217;avons pas précisé de tags les valeurs de tous les pays sont mélangés !</p>
 </div>
 <div class="dlist">
 <dl>
 <dt class="hdlist1">note</dt>
 <dd>
-<p>Il n y a ici que 4 points de retournés alors que nous avons spécifié un maximum de 10 points. Cela n&#8217;est pas optimum car il
-y a plus de 10 points en tout ! En effet nous devrions ici avoir 10 points. Ce problème sera fixé lors de la prochaine release. En attendant
+<p>Il n y a ici que 4 measures de retournés alors que nous avons spécifié un maximum de 10 measures. Cela n&#8217;est pas optimum car il
+y a plus de 10 measures en tout ! En effet nous devrions ici avoir 10 measures. Ce problème sera fixé lors de la prochaine release. En attendant
 n&#8217;hésitez pas à augmenter la valeur de "max_data_points" si cela devait vous arriver.</p>
 </dd>
 <dt class="hdlist1">warn</dt>
 <dd>
-<p>Attention cependant a ne pas demander trop de points ! En effet si vous voulez exporter la totalité des points cette endpoint n&#8217;est
+<p>Attention cependant a ne pas demander trop de measures ! En effet si vous voulez exporter la totalité des measures cette endpoint n&#8217;est
 pas l&#8217;outil adéquat. D&#8217;ailleurs si le nombre indiqué est supérieur à 2147483647 la requête ne fonctionnera pas. Dans une futur release
 le maximum pour cette variable sera revue à la baisse.</p>
 </dd>
@@ -1937,7 +1937,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 <p>HDH fournit donc un plugin Grafana pour visualiser les données sous formes de graphes.</p>
 </div>
 <div class="paragraph">
-<p>La manipulation des données depuis les data sources de votre data historian se fait comme pour les autres sources. Vous fournissez votre requête, un intervalle de temps si nécessaire, et un algorithme de sampling si vous requêtez sur une grande quantité de points (pour que la courbe soit bien lisible).</p>
+<p>La manipulation des données depuis les data sources de votre data historian se fait comme pour les autres sources. Vous fournissez votre requête, un intervalle de temps si nécessaire, et un algorithme de sampling si vous requêtez sur une grande quantité de measures (pour que la courbe soit bien lisible).</p>
 </div>
 <div class="sect2">
 <h3 id="configurer-la-data-source-grafana"><a class="anchor" href="#configurer-la-data-source-grafana"></a>6.1. Configurer la data source grafana</h3>

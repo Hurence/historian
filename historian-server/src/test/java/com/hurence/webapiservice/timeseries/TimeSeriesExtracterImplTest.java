@@ -1,9 +1,11 @@
 package com.hurence.webapiservice.timeseries;
 
-import com.hurence.timeseries.converter.PointsToChunkVersionCurrent;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
-import com.hurence.timeseries.modele.points.PointImpl;
+
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.Chunk;
+
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.webapiservice.modele.AGG;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracter;
@@ -33,30 +35,30 @@ public class TimeSeriesExtracterImplTest {
     private long START_CHUNK_2 = 1477895624869L;
     private long MIDDLE_CHUNK_2 = 1477895624870L;
     private long END_CHUNK_2 = 1477895624871L;
-    private PointsToChunkVersionCurrent chunkGenerator = new PointsToChunkVersionCurrent("test");
+    private MeasuresToChunkVersionCurrent chunkGenerator = new MeasuresToChunkVersionCurrent("test");
 
-    ChunkVersionCurrent getChunk1() {
+    Chunk getChunk1() {
         return chunkGenerator.buildChunk("fake", new TreeSet<>(Arrays.asList(
-                new PointImpl(START_CHUNK_1, 1),
-                new PointImpl(MIDDLE_CHUNK_1, 2),
-                new PointImpl(END_CHUNK_1, 3)
+                Measure.fromValue(START_CHUNK_1, 1),
+                Measure.fromValue(MIDDLE_CHUNK_1, 2),
+                Measure.fromValue(END_CHUNK_1, 3)
         )));
     }
 
 
-    ChunkVersionCurrent getChunk2() {
+    Chunk getChunk2() {
         return chunkGenerator.buildChunk("fake", new TreeSet<>(Arrays.asList(
-                new PointImpl( START_CHUNK_2, 4),
-                new PointImpl( MIDDLE_CHUNK_2, 5),
-                new PointImpl( END_CHUNK_2, 6)
+                Measure.fromValue( START_CHUNK_2, 4),
+                Measure.fromValue( MIDDLE_CHUNK_2, 5),
+                Measure.fromValue( END_CHUNK_2, 6)
         )));
     }
 
-    ChunkVersionCurrent getConflictingChunk() {
+    Chunk getConflictingChunk() {
         return chunkGenerator.buildChunk("fake", new TreeSet<>(Arrays.asList(
-                new PointImpl( MIDDLE_CHUNK_1, 4),
-                new PointImpl( START_CHUNK_2, 5),
-                new PointImpl( MIDDLE_CHUNK_2, 6)
+                Measure.fromValue( MIDDLE_CHUNK_1, 4),
+                Measure.fromValue( START_CHUNK_2, 5),
+                Measure.fromValue( MIDDLE_CHUNK_2, 6)
         )));
     }
 

@@ -108,7 +108,7 @@ object ChunkCompactorJob extends Serializable {
       .longOpt("chunks-size")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default ${ChunkCompactorJob.DEFAULT_CHUNK_SIZE}")
+      .desc(s"num measures in a chunk, default ${ChunkCompactorJob.DEFAULT_CHUNK_SIZE}")
       .build()
     )
 
@@ -124,7 +124,7 @@ object ChunkCompactorJob extends Serializable {
       .longOpt("sax-string-length")
       .hasArg(true)
       .optionalArg(true)
-      .desc(s"num points in a chunk, default ${ChunkCompactorJob.DEFAULT_SAX_STRING_LENGTH}")
+      .desc(s"num measures in a chunk, default ${ChunkCompactorJob.DEFAULT_SAX_STRING_LENGTH}")
       .build()
     )
 

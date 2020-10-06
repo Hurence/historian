@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.model.Chunk;
 import com.hurence.webapiservice.http.api.grafana.util.QualityConfig;
 
 import java.util.Map;
@@ -57,7 +56,7 @@ public class MetricRequest {
      * @param chunk
      * @return true if chunk is corresponding to metric query.
      */
-    public boolean isChunkMatching(ChunkVersionCurrent chunk) {
+    public boolean isChunkMatching(Chunk chunk) {
         final String chunkName = chunk.getName();
         if (!getName().equals(chunkName)) {
             return false;

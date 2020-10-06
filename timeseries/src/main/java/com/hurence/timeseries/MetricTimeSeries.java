@@ -16,11 +16,11 @@
 package com.hurence.timeseries;
 
 
-import com.hurence.timeseries.modele.list.DoubleList;
-import com.hurence.timeseries.modele.list.LongList;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
 
+import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.model.list.DoubleList;
+import com.hurence.timeseries.model.list.FloatList;
+import com.hurence.timeseries.model.list.LongList;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -49,6 +49,7 @@ public final class MetricTimeSeries implements Serializable {
 
     private LongList timestamps;
     private DoubleList values;
+    private FloatList qualities;
 
     private Map<String, Object> attributes = new HashMap<>();
     private long end;
@@ -65,6 +66,7 @@ public final class MetricTimeSeries implements Serializable {
     private MetricTimeSeries() {
         timestamps = new LongList(500);
         values = new DoubleList(500);
+        qualities = new FloatList( 500);
     }
 
     /**
@@ -115,6 +117,23 @@ public final class MetricTimeSeries implements Serializable {
     }
 
     /**
+     * @return a copy of the qualities
+     */
+    public FloatList getQualities() {
+        return qualities.copy();
+    }
+
+    /**
+     * In some cases if one just want to access all values,
+     * that method is faster than {@see getValues} due to no {@see DoubleList} initialization.
+     *
+     * @return a copy of the values as array
+     */
+    public float[] getQualitiesAsArray() {
+        return qualities.toArray();
+    }
+
+    /**
      * Gets the data point at the index i
      *
      * @param i the index position of the value
@@ -122,6 +141,16 @@ public final class MetricTimeSeries implements Serializable {
      */
     public double getValue(int i) {
         return values.get(i);
+    }
+
+    /**
+     * Gets the data quality at the index i
+     *
+     * @param i the index position of the quality
+     * @return the quality
+     */
+    public float getQuality(int i) {
+        return qualities.get(i);
     }
 
     /**
@@ -142,14 +171,17 @@ public final class MetricTimeSeries implements Serializable {
 
             LongList sortedTimes = new LongList(timestamps.size());
             DoubleList sortedValues = new DoubleList(values.size());
+            FloatList sortedQualities = new FloatList(qualities.size());
 
-            points().sorted(Comparator.comparingLong(Point::getTimestamp)).forEachOrdered(p -> {
+            points().sorted(Comparator.comparingLong(Measure::getTimestamp)).forEachOrdered(p -> {
                 sortedTimes.add(p.getTimestamp());
                 sortedValues.add(p.getValue());
+                sortedQualities.add(p.getQuality());
             });
 
             timestamps = sortedTimes;
             values = sortedValues;
+            qualities = sortedQualities;
 
             needsSort = false;
         }
@@ -160,13 +192,18 @@ public final class MetricTimeSeries implements Serializable {
      *
      * @return the points as stream (creating new points)
      */
-    public Stream<Point> points() {
+    public Stream<Measure> points() {
         if (timestamps.isEmpty()) {
             return Stream.empty();
         }
         return IntStream
             .range(0, Math.min(timestamps.size(), values.size()))
-            .mapToObj(i -> new PointImpl(timestamps.get(i), values.get(i)));
+            .mapToObj(i -> {
+                if(i < qualities.size())
+                    return Measure.fromValueAndQuality(timestamps.get(i), values.get(i), qualities.get(i));
+                else
+                    return Measure.fromValue(timestamps.get(i), values.get(i));
+            });
     }
 
     /**
@@ -178,6 +215,21 @@ public final class MetricTimeSeries implements Serializable {
     private void setAll(LongList timestamps, DoubleList values) {
         this.timestamps = timestamps;
         this.values = values;
+
+        needsSort = true;
+    }
+
+    /**
+     * Sets the timestamps and values as data
+     *
+     * @param timestamps - the timestamps
+     * @param values     - the values
+     * @param qualities  - the qualities
+     */
+    private void setAll(LongList timestamps, DoubleList values, FloatList qualities) {
+        this.timestamps = timestamps;
+        this.values = values;
+        this.qualities = qualities;
 
         needsSort = true;
     }
@@ -206,6 +258,18 @@ public final class MetricTimeSeries implements Serializable {
     }
 
     /**
+     * @param timestamps the timestamps as long[]
+     * @param values     the values as double[]
+     */
+    public final void addAll(long[] timestamps, double[] values, float[] qualities) {
+        this.timestamps.addAll(timestamps);
+        this.values.addAll(values);
+        this.qualities.addAll(qualities);
+
+        needsSort = true;
+    }
+
+    /**
      * Adds a single timestamp and value
      *
      * @param timestamp the timestamp
@@ -214,6 +278,21 @@ public final class MetricTimeSeries implements Serializable {
     public final void add(long timestamp, double value) {
         this.timestamps.add(timestamp);
         this.values.add(value);
+
+        needsSort = true;
+    }
+
+    /**
+     * Adds a single timestamp, value and quality
+     *
+     * @param timestamp the timestamp
+     * @param value     the value
+     * @param quality   the quality
+     */
+    public final void add(long timestamp, double value, float quality) {
+        this.timestamps.add(timestamp);
+        this.values.add(value);
+        this.qualities.add(quality);
 
         needsSort = true;
     }
@@ -377,6 +456,21 @@ public final class MetricTimeSeries implements Serializable {
         }
 
         /**
+         * Sets the time series data
+         *
+         * @param timestamps the time stamps
+         * @param values     the values
+         * @param qualities  the qualities
+         * @return the builder
+         */
+        public Builder points(LongList timestamps, DoubleList values, FloatList qualities) {
+            if (timestamps != null && values != null && qualities != null) {
+                metricTimeSeries.setAll(timestamps, values, qualities);
+            }
+            return this;
+        }
+
+        /**
          * Adds the given single data point to the time series
          *
          * @param timestamp the timestamp of the value
@@ -386,6 +480,21 @@ public final class MetricTimeSeries implements Serializable {
         public Builder point(long timestamp, double value) {
             metricTimeSeries.timestamps.add(timestamp);
             metricTimeSeries.values.add(value);
+            return this;
+        }
+
+        /**
+         * Adds the given single data point to the time series
+         *
+         * @param timestamp the timestamp of the value
+         * @param value     the belonging value
+         * @param quality   the belonging quality
+         * @return the builder
+         */
+        public Builder point(long timestamp, double value, float quality) {
+            metricTimeSeries.timestamps.add(timestamp);
+            metricTimeSeries.values.add(value);
+            metricTimeSeries.qualities.add(quality);
             return this;
         }
 

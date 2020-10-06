@@ -75,7 +75,7 @@
   <fieldType name="pints" class="solr.IntPointField" docValues="true" multiValued="true"/>
   <fieldType name="plong" class="solr.LongPointField" docValues="true"/>
   <fieldType name="plongs" class="solr.LongPointField" docValues="true" multiValued="true"/>
-  <fieldType name="point" class="solr.PointType" subFieldSuffix="_d" dimension="2"/>
+  <fieldType name="measure" class="solr.PointType" subFieldSuffix="_d" dimension="2"/>
   <fieldType name="random" class="solr.RandomSortField" indexed="true"/>
   <fieldType name="string" class="solr.StrField" sortMissingLast="true" docValues="true"/>
   <fieldType name="strings" class="solr.StrField" sortMissingLast="true" docValues="true" multiValued="true"/>
@@ -130,7 +130,7 @@
   <field name="chunk_size" type="pint"/>
   <field name="chunk_size_bytes" type="pint"/>
   <field name="chunk_start" type="plong"/>
-  <field name="chunk_stddev" type="pdouble"/>
+  <field name="chunk_std_dev" type="pdouble"/>
   <field name="chunk_sum" type="pdouble"/>
   <field name="chunk_trend" type="boolean"/>
   <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
@@ -147,7 +147,7 @@
 <dynamicField name="attr_*" type="text_general" multiValued="true" indexed="true" stored="true"/>
 <dynamicField name="*_txt" type="text_general" indexed="true" stored="true"/>
  <dynamicField name="*_t" type="text_general" multiValued="false" indexed="true" stored="true"/>
-  <dynamicField name="*_point" type="point" indexed="true" stored="true"/>
+  <dynamicField name="*_point" type="measure" indexed="true" stored="true"/>
   <dynamicField name="*_srpt" type="location_rpt" indexed="true" stored="true"/>
   <dynamicField name="*_str" type="strings" docValues="true" indexed="false" stored="false" useDocValuesAsStored="false"/>
   <dynamicField name="*_dts" type="pdate" multiValued="true" indexed="true" stored="true"/>

@@ -1,289 +1,206 @@
-//package com.hurence.historian.spark.sql
-//
-//import com.hurence.historian.spark.SparkSessionTestWrapper
-//import com.hurence.historian.spark.ml.Chunkyfier
-//import com.hurence.historian.spark.sql.functions.{anomalie_test, chunk, guess, sax, sax_best_guess, sax_best_guess_paa_fixed}
-//import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
-//import com.hurence.timeseries.modele.chunk.{ChunkVersion0, ChunkVersion0Impl}
-//import org.apache.spark.sql.Encoders
-//import org.apache.spark.sql.functions._
-//import org.junit.jupiter.api.Assertions.assertEquals
-//import org.junit.jupiter.api.TestInstance.Lifecycle
-//import org.junit.jupiter.api.{BeforeAll, Test, TestInstance}
-//import org.slf4j.{Logger, LoggerFactory}
-//
-//
-//@TestInstance(Lifecycle.PER_CLASS)
-//class LoaderTests extends SparkSessionTestWrapper {
-//
-//  import spark.implicits._
-//
-//  private val logger = LoggerFactory.getLogger(classOf[LoaderTests])
-//
-//
-//  @BeforeAll
-//  def init() : Unit= {
-//    // to lazy load spark if needed
-//    spark.version
-//  }
-//
-//
-//  @Test
-//  def testMeasureV0() = {
-//
-//    val sample = it4MetricsDS.groupBy($"name", $"tags.metric_id", $"day")
-//      .agg(
-//        collect_list($"value").as("values"),
-//        collect_list($"timestamp").as("timestamps"),
-//        count($"value").as("count"),
-//        avg($"value").as("avg"),
-//        min($"value").as("min"),
-//        max($"value").as("max"),
-//        first($"value").as("first"),
-//        last($"value").as("last"),
-//        stddev($"value").as("stddev"),
-//        first($"timestamp").as("start"),
-//        last($"timestamp").as("end"),
-//        first($"tags").as("tags"))
-//      .withColumn("chunk", chunk($"name", $"start", $"end", $"timestamps", $"values"))
-//      .withColumn("sax", sax(lit(7), lit(0.01), lit(50), $"values"))
-//      .select($"name", $"day", $"start", $"end", $"chunk", $"timestamps", $"values", $"count", $"avg", $"stddev", $"min", $"max", $"first", $"last", $"sax", $"tags")
-//      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-//      .as[ChunkVersion0Impl](Encoders.bean(classOf[ChunkVersion0Impl]))
-//      .collect()
-//
-//
-//    logger.debug(sample(0).toString);
-//    assertEquals(1574982082000L, sample(0).getStart)
-//    assertEquals(1575068166000L, sample(0).getEnd)
-//    assertEquals("ack", sample(0).getName)
-//    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", sample(0).getTag("metric_id"))
-//    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", sample(0).getSax)
-//    assertEquals("H4sIAAAAAAAAAFWWbUgUURSGdRVMSVKT8oeRQZCW0opCilZbWFA/+qAgoYI+NIwg+hEhBCVlpQa5pe3s7Mzk9gEJCUkUKWWYFhlUSBhUiJQsEWVUpBUk1c4sc569A8LZ43vf+77nnvuRllqwz/72aL609Lx317MKQnr0Kw740lJj4fugHT5/Fv2SnbDE+TZLOBiWsEO3wwT7GwX7g2x+QMgaQpLtCgj2F7ONaBLuckJH6ECbYP8FhKEBwAey15g4LyCAMQD+oIQ1zDaN9M8Buyy/O7JiIF/0P+kZdpVidmEqhf+nJrVbgLFlmoQaRZjQBVsOmRfdPlVAmSrgz3kB9gRZMbS8pC6LDQE0Y9uLrJuaZCMsf5/mCnBANzRXQKzYlOo4w8MYTMbKbRSu02XYVcIKlsAL9iJa5gXFzTgWvlHDV2hI0IWsi57KIOtDehtFuAq2iXUsJlyFyIVgc9GwHGX3kb4bQxYL3XlRDK1nWB7YKb8vzeMtdEEHGZpL3U6qS7Rdd5co1oNY9rMYEQQXAejX6eIOwc4AkI20ywg+TNn7QwK4o7uynKHhkCvLAdajJYPO/MKhsMOU7BpTBDQayn7INxTSOoYPmTBRqjam6gOQY7mkjvVzptLjiwH2MPyNJZoOIW+rxaFmKva7TUXpQoBhg56E6ZEpSzHHRD+ASYNjDDI/gGG1VNWWK8D5b/4lId1riauncUWh/kUImA0giO4qVr2cYQ+plhVXIhgihlL3Y6ZyuG1kTDsGJ8lGKNFPwrdxC2NIdvUlyZZanCIYWwp2jPAEDTUcEoYhZhuzhGFRNJvkDSfKpQVqnCmvYL+K2f9Qywnpm9iOUDs8G9LTVKIQ0k1kK+FvJes1uJMI54OdpSvHyRa1cUcpzouQhBtoxhrCTjbeElNpxsOqq0bsF8J/ISTD5wLIxqsXAVfotVMMq4BsbVyJAJzF9jYOpGHq8pUT0WPY63sr0Z0nE6OvkVdKGGH2tzTPBKJv0V11DBvFymOyfvZVOQwP4J1Gfzf6OxDZTgUKOdHLEDnuGOxMdH+3sKunQkpPPDGUnbqSy6QXS93cCk3IrEb83+iwFJvU25MYf+BugKMM+UGW6ih91cotNMKFnoKgZp5gKfjZSfZMO/uB220/vHHvgFp8NAGYyWyZQfu+rnQdDvD8+sSM93jGrGDGWtbkI++REvrvCC+PmrhnDNlOwjpqP91mS8pxCZM0++f26F9CdLGfyGlVisvv7XYftHjiN2x9ULk9uhwWj0t617G91P15gDI1YGVQt2m/y/7p1ZR3ynLdl5HwHzsmJESPDAAA", sample(0).getValueAsString)
-//
-//    assertEquals(288, sample(0).getCount)
-//    assertEquals(1651.561111111111, sample(0).getAvg)
-//    assertEquals(178.49958904923878, sample(0).getStddev)
-//    assertEquals(68.8, sample(0).getMin)
-//    assertEquals(2145.6, sample(0).getMax)
-//    assertEquals(1496.6, sample(0).getFirst)
-//    assertEquals(1615.4, sample(0).getLast)
-//  }
-//
-//  @Test
-//  def testChunkyfier() = {
-//
-//
-//    val chunkyfier = new Chunkyfier()
-//      .setValueCol("value")
-//      .setTimestampCol("timestamp")
-//      .setChunkCol("chunk")
-//      .setGroupByCols(Array("name", "tags.metric_id"))
-//      .setDateBucketFormat("yyyy-MM-dd")
-//      .doDropLists(false)
-//      .setSaxAlphabetSize(7)
-//      .setSaxStringLength(50)
-//
-//
-//    // Transform original data into its bucket index.
-//    val sample = chunkyfier.transform(it4MetricsDS)
-//      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-//      .as[ChunkVersion0Impl](Encoders.bean(classOf[ChunkVersion0Impl]))
-//      .collect()
-//
-//
-//    logger.debug(sample(0).toString)
-//    assertEquals(1574982082000L, sample(0).getStart)
-//    assertEquals(1575068166000L, sample(0).getEnd)
-//    assertEquals("ack", sample(0).getName)
-//    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", sample(0).getTag("metric_id"))
-//    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", sample(0).getSax)
-//    assertEquals("H4sIAAAAAAAAAFWWbUgUURSGdRVMSVKT8oeRQZCW0opCilZbWFA/+qAgoYI+NIwg+hEhBCVlpQa5pe3s7Mzk9gEJCUkUKWWYFhlUSBhUiJQsEWVUpBUk1c4sc569A8LZ43vf+77nnvuRllqwz/72aL609Lx317MKQnr0Kw740lJj4fugHT5/Fv2SnbDE+TZLOBiWsEO3wwT7GwX7g2x+QMgaQpLtCgj2F7ONaBLuckJH6ECbYP8FhKEBwAey15g4LyCAMQD+oIQ1zDaN9M8Buyy/O7JiIF/0P+kZdpVidmEqhf+nJrVbgLFlmoQaRZjQBVsOmRfdPlVAmSrgz3kB9gRZMbS8pC6LDQE0Y9uLrJuaZCMsf5/mCnBANzRXQKzYlOo4w8MYTMbKbRSu02XYVcIKlsAL9iJa5gXFzTgWvlHDV2hI0IWsi57KIOtDehtFuAq2iXUsJlyFyIVgc9GwHGX3kb4bQxYL3XlRDK1nWB7YKb8vzeMtdEEHGZpL3U6qS7Rdd5co1oNY9rMYEQQXAejX6eIOwc4AkI20ywg+TNn7QwK4o7uynKHhkCvLAdajJYPO/MKhsMOU7BpTBDQayn7INxTSOoYPmTBRqjam6gOQY7mkjvVzptLjiwH2MPyNJZoOIW+rxaFmKva7TUXpQoBhg56E6ZEpSzHHRD+ASYNjDDI/gGG1VNWWK8D5b/4lId1riauncUWh/kUImA0giO4qVr2cYQ+plhVXIhgihlL3Y6ZyuG1kTDsGJ8lGKNFPwrdxC2NIdvUlyZZanCIYWwp2jPAEDTUcEoYhZhuzhGFRNJvkDSfKpQVqnCmvYL+K2f9Qywnpm9iOUDs8G9LTVKIQ0k1kK+FvJes1uJMI54OdpSvHyRa1cUcpzouQhBtoxhrCTjbeElNpxsOqq0bsF8J/ISTD5wLIxqsXAVfotVMMq4BsbVyJAJzF9jYOpGHq8pUT0WPY63sr0Z0nE6OvkVdKGGH2tzTPBKJv0V11DBvFymOyfvZVOQwP4J1Gfzf6OxDZTgUKOdHLEDnuGOxMdH+3sKunQkpPPDGUnbqSy6QXS93cCk3IrEb83+iwFJvU25MYf+BugKMM+UGW6ih91cotNMKFnoKgZp5gKfjZSfZMO/uB220/vHHvgFp8NAGYyWyZQfu+rnQdDvD8+sSM93jGrGDGWtbkI++REvrvCC+PmrhnDNlOwjpqP91mS8pxCZM0++f26F9CdLGfyGlVisvv7XYftHjiN2x9ULk9uhwWj0t617G91P15gDI1YGVQt2m/y/7p1ZR3ynLdl5HwHzsmJESPDAAA", sample(0).getValueAsString)
-//
-//    assertEquals(288, sample(0).getCount)
-//    assertEquals(1651.561111111111, sample(0).getAvg)
-//    assertEquals(178.49958904923878, sample(0).getStddev)
-//    assertEquals(68.8, sample(0).getMin)
-//    assertEquals(2145.6, sample(0).getMax)
-//    assertEquals(1496.6, sample(0).getFirst)
-//    assertEquals(1615.4, sample(0).getLast)
-//  }
-//
-//  @Test
-//  def testChunksV0() = {
-//
-//    if (logger.isDebugEnabled) {
-//      it4MetricsChunksDS.show()
-//    }
-//
-//
-//    val sample = it4MetricsChunksDS
-//      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-//      //.withColumn("sax2", sax(lit(5),lit( 0.05), lit(50), $"values"))
-//      .collect()
-//
-//    logger.debug(sample(0).toString)
-//    assertEquals(1574982082000L, sample(0).getStart)
-//    assertEquals(1575068166000L, sample(0).getEnd)
-//    assertEquals("ack", sample(0).getName)
-//    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", sample(0).getTag("metric_id"))
-//    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", sample(0).getSax)
-//    assertEquals("H4sIAAAAAAAAAFWWbUgUURSGdRVMSVKT8oeRQZCW0opCilZbWFA/+qAgoYI+NIwg+hEhBCVlpQa5pe3s7Mzk9gEJCUkUKWWYFhlUSBhUiJQsEWVUpBUk1c4sc569A8LZ43vf+77nnvuRllqwz/72aL609Lx317MKQnr0Kw740lJj4fugHT5/Fv2SnbDE+TZLOBiWsEO3wwT7GwX7g2x+QMgaQpLtCgj2F7ONaBLuckJH6ECbYP8FhKEBwAey15g4LyCAMQD+oIQ1zDaN9M8Buyy/O7JiIF/0P+kZdpVidmEqhf+nJrVbgLFlmoQaRZjQBVsOmRfdPlVAmSrgz3kB9gRZMbS8pC6LDQE0Y9uLrJuaZCMsf5/mCnBANzRXQKzYlOo4w8MYTMbKbRSu02XYVcIKlsAL9iJa5gXFzTgWvlHDV2hI0IWsi57KIOtDehtFuAq2iXUsJlyFyIVgc9GwHGX3kb4bQxYL3XlRDK1nWB7YKb8vzeMtdEEHGZpL3U6qS7Rdd5co1oNY9rMYEQQXAejX6eIOwc4AkI20ywg+TNn7QwK4o7uynKHhkCvLAdajJYPO/MKhsMOU7BpTBDQayn7INxTSOoYPmTBRqjam6gOQY7mkjvVzptLjiwH2MPyNJZoOIW+rxaFmKva7TUXpQoBhg56E6ZEpSzHHRD+ASYNjDDI/gGG1VNWWK8D5b/4lId1riauncUWh/kUImA0giO4qVr2cYQ+plhVXIhgihlL3Y6ZyuG1kTDsGJ8lGKNFPwrdxC2NIdvUlyZZanCIYWwp2jPAEDTUcEoYhZhuzhGFRNJvkDSfKpQVqnCmvYL+K2f9Qywnpm9iOUDs8G9LTVKIQ0k1kK+FvJes1uJMI54OdpSvHyRa1cUcpzouQhBtoxhrCTjbeElNpxsOqq0bsF8J/ISTD5wLIxqsXAVfotVMMq4BsbVyJAJzF9jYOpGHq8pUT0WPY63sr0Z0nE6OvkVdKGGH2tzTPBKJv0V11DBvFymOyfvZVOQwP4J1Gfzf6OxDZTgUKOdHLEDnuGOxMdH+3sKunQkpPPDGUnbqSy6QXS93cCk3IrEb83+iwFJvU25MYf+BugKMM+UGW6ih91cotNMKFnoKgZp5gKfjZSfZMO/uB220/vHHvgFp8NAGYyWyZQfu+rnQdDvD8+sSM93jGrGDGWtbkI++REvrvCC+PmrhnDNlOwjpqP91mS8pxCZM0++f26F9CdLGfyGlVisvv7XYftHjiN2x9ULk9uhwWj0t617G91P15gDI1YGVQt2m/y/7p1ZR3ynLdl5HwHzsmJESPDAAA", sample(0).getValueAsString)
-//
-//    assertEquals(288, sample(0).getCount)
-//    assertEquals(1651.561111111111, sample(0).getAvg)
-//    assertEquals(178.49958904923878, sample(0).getStddev)
-//    assertEquals(68.8, sample(0).getMin)
-//    assertEquals(2145.6, sample(0).getMax)
-//    assertEquals(1496.6, sample(0).getFirst)
-//    assertEquals(1615.4, sample(0).getLast)
-//
-//
-//  }
-//
-//  @Test
-//  def testChunksV0Sax() = {
-//
-//
-//    // simply recompute sax string ith new parameters
-//    val sample = it4MetricsChunksDS
-//      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-//      .withColumn("sax", sax(lit(5), lit(0.05), lit(50), $"values"))
-//      .as[ChunkVersion0Impl](Encoders.bean(classOf[ChunkVersion0Impl]))
-//      .collect()
-//
-//    assertEquals("acabaaabbbbbbaaccdddeeeedeedeeddddddddddcdbbbbabbb", sample(0).getSax)
-//
-//
-//  }
-//
-//
-//  @Test
-//  def testLoaderCSV() = {
-//
-//    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
-//    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
-//    val options = Options(
-//      filePath,
-//      Map(
-//        "inferSchema" -> "true",
-//        "delimiter" -> ",",
-//        "header" -> "true",
-//        "nameField" -> "metric_name",
-//        "timestampField" -> "timestamp",
-//        "timestampDateFormat" -> "s",
-//        "valueField" -> "value",
-//        "tagsFields" -> "metric_id,warn,crit"
-//      ))
-//
-//    val ds = reader.read(options)
-//
-//    if (logger.isDebugEnabled) {
-//      ds.show()
-//    }
-//
-//  }
-//
-//
-//  @Test
-//  def testLoadITDataCSVV0() = {
-//
-//    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
-//    val options = Options(
-//      filePath,
-//      Map(
-//        "inferSchema" -> "true",
-//        "delimiter" -> ",",
-//        "header" -> "true",
-//        "dateFormat" -> ""
-//      ))
-//    val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
-//
-//    val ds = itDataV0Reader.read(options)
-//    if (logger.isDebugEnabled) {
-//      ds.show()
-//    }
-//  }
-//
-//  @Test
-//  def testLoadITDataParquetV0() = {
-//
-//    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
-//    val options = Options(filePath, Map())
-//    val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
-//
-//    val ds = itDataV0Reader.read(options)
-//
-//    if (logger.isDebugEnabled) {
-//      ds.printSchema()
-//      ds.show()
-//    }
-//
-//  }
-//
-//
-//  @Test
-//  def testLoadITDataChunksParquetV0() = {
-//
-//    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics-chunk.parquet").getPath
-//    val options = Options(filePath, Map())
-//    val reader = ReaderFactory.getChunksReader(ChunksReaderType.PARQUET)
-//    val ds = reader.read(options)
-//
-//    if (logger.isDebugEnabled) {
-//      ds.printSchema()
-//      ds.show()
-//    }
-//
-//  }
-//
-// // @Test
-//  def testChunksV0Guess() = {
-//
-//
-//     //simply recompute sax string's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-//    val sample = it4MetricsChunksDS
-//      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-//      .withColumn("guess", guess( $"values"))
-//      //.as[ChunkRecordV0]
-//      .collect()
-//    logger.debug(sample(0).toString)
-//    assertEquals("[20, 3, 2, 1.0649860288788477, 249, 15, 249, 274, 4, 0.9722222222222222, 249, 0.26666666666666666, 12]", sample(0)(16))
-//  }
-//
-// // @Test
-//  def testChunksV0Sax_best_guess() = {
-//
-//
-//  //simply recompute sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-//
-//    val sample1 = it4MetricsChunksDS
-//      .where("name = 'ack' AND day = '2019-11-29'")
-//      .withColumn("guess", guess( $"values"))
-//      .withColumn("sax_best_guess", sax_best_guess( lit(0.05),  $"values"))
-//      .withColumn("sax_best_paa_fixed", sax_best_guess_paa_fixed( lit(0.05),lit(50),  $"values"))
-//     // .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
-//      //.agg(count($"tags.metric_id").as("count_metric"))
-//      //.as[ChunkRecordV0]
-//      .drop("chunk", "timestamps","values","tags")
-//     // .collect()
-//
-//    //assertEquals("adebdcdcddbddddccfdfegfffghigiihhgggifghffcfgfffff", sample1(2)(16))
-//
-//  }
-//  //@Test
-//  def testChunksV0Sax_anomaly() = {
-//
-//
-//             //simply check for anomalies in the sax string with it's new parameters, for name = ack and day =2019-11-29 we have 32.metric_id
-//            val sample = it4MetricsChunksDS
-//              .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
-//              .withColumn("sax_best_guess", sax_best_guess( lit(0.01),lit(50),  $"values"))
-//              .withColumn("anomaly_test", anomalie_test($"sax_best_guess"))
-//              //.as[ChunkRecordV0]
-//              .collect()
-//            logger.debug(sample(0).toString)
-//            assertEquals("[15, 41]", sample(0)(17))
-//  }
-//
-//}
+package com.hurence.historian.spark.sql
+
+import com.hurence.historian.spark.SparkSessionTestWrapper
+import com.hurence.historian.spark.ml.Chunkyfier
+import com.hurence.historian.spark.sql.functions.{anomalie_test, chunk, guess, sax, sax_best_guess, sax_best_guess_paa_fixed}
+import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
+import com.hurence.timeseries.compaction.BinaryEncodingUtils
+import com.hurence.timeseries.model.Chunk
+import org.apache.spark.sql.Encoders
+import org.apache.spark.sql.functions._
+import org.junit.jupiter.api.Assertions.{assertEquals, assertFalse, assertTrue}
+import org.junit.jupiter.api.TestInstance.Lifecycle
+import org.junit.jupiter.api.{BeforeAll, Test, TestInstance}
+import org.slf4j.{Logger, LoggerFactory}
+
+import scala.collection.JavaConverters._
+
+@TestInstance(Lifecycle.PER_CLASS)
+class LoaderTests extends SparkSessionTestWrapper {
+
+  import spark.implicits._
+
+  private val logger = LoggerFactory.getLogger(classOf[LoaderTests])
+
+
+  @BeforeAll
+  def init(): Unit = {
+    // to lazy load spark if needed
+    spark.version
+  }
+
+
+
+  @Test
+  def testChunkyfier() = {
+
+    val chunkyfier = new Chunkyfier()
+      .setGroupByCols(Array("name", "tags.metric_id"))
+      .setDateBucketFormat("yyyy-MM-dd")
+      .doDropLists(false)
+      .setSaxAlphabetSize(7)
+      .setSaxStringLength(50)
+
+    if (logger.isDebugEnabled) {
+      it4MetricsDS.show()
+    }
+
+    // Transform original data into its bucket index.
+    val sample = chunkyfier.transform(it4MetricsDS)
+      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
+      .collect()
+
+
+    checkChunk(sample(0))
+  }
+
+  @Test
+  def testChunkyfierNoTags() = {
+
+    val chunkyfier = new Chunkyfier()
+      .setGroupByCols(Array("name"))
+      .setDateBucketFormat("yyyy-MM-dd")
+      .doDropLists(false)
+      .setSaxAlphabetSize(7)
+      .setSaxStringLength(50)
+
+
+    val it4MetricsDSNoTags = it4MetricsDS
+      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+      .drop("tags")
+      .drop("quality")
+
+    // Transform original data into its bucket index.
+    val sample = chunkyfier.transform(it4MetricsDSNoTags)
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
+      .collect()
+
+
+    val chunktoCheck = sample(0)
+
+    assertEquals(1574982082000L, chunktoCheck.getStart)
+    assertEquals(1575068166000L, chunktoCheck.getEnd)
+    assertEquals("ack", chunktoCheck.getName)
+    assertEquals(0, chunktoCheck.getTags.size())
+    assertEquals("acbbbbacbcccbbaddeffgfffffgfgffeeeeeefeedebcbcbbcc", chunktoCheck.getSax)
+    assertEquals(68.8, chunktoCheck.getMin)
+    assertEquals(2145.6, chunktoCheck.getMax)
+    assertEquals(1496.6, chunktoCheck.getFirst)
+    assertEquals(1615.4, chunktoCheck.getLast)
+
+  }
+
+  def checkChunk(chunktoCheck: Chunk) = {
+    assertEquals(1575068466000L, chunktoCheck.getStart)
+    assertEquals(1575154561000L, chunktoCheck.getEnd)
+    assertEquals("ack", chunktoCheck.getName)
+    assertEquals("08f9583b-6999-4835-af7d-cf2f82ddcd5d", chunktoCheck.getTag("metric_id"))
+    assertEquals("baaabbcbbbbbbcdcedffefgfffffgffdedeefffefebdbacbbb", chunktoCheck.getSax)
+    assertEquals("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", chunktoCheck.getValueAsString)
+
+    assertEquals(288, chunktoCheck.getCount)
+    assertEquals(1620.0979166666666, chunktoCheck.getAvg)
+    assertEquals(104.8778562629908, chunktoCheck.getStdDev)
+    assertEquals(1334.8, chunktoCheck.getMin)
+    assertEquals(2072.6, chunktoCheck.getMax)
+    assertEquals(1503.4, chunktoCheck.getFirst)
+    assertEquals(1551.6, chunktoCheck.getLast)
+    assertEquals(466588.19999999984, chunktoCheck.getSum)
+    assertTrue(chunktoCheck.isOutlier);
+    assertTrue(chunktoCheck.isTrend)
+    assertEquals(2019, chunktoCheck.getYear)
+    assertEquals(11, chunktoCheck.getMonth)
+
+    /**assertEquals(1504.4000244140625, chunktoCheck.getQualityFirst)
+    assertEquals(1335.8, chunktoCheck.getQualityMin)
+    assertEquals(2073.6, chunktoCheck.getQualityMax)
+    assertEquals(466876.2, chunktoCheck.getQualitySum)*/
+
+  }
+
+
+
+  @Test
+  def testLoaderCSV() = {
+
+    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
+    val options = Options(
+      filePath,
+      Map(
+        "inferSchema" -> "true",
+        "delimiter" -> ",",
+        "header" -> "true",
+        "nameField" -> "metric_name",
+        "timestampField" -> "timestamp",
+        "qualityField" -> "",
+        "timestampDateFormat" -> "s",
+        "valueField" -> "value",
+        "tagsFields" -> "metric_id,warn,crit"
+      ))
+
+    val ds = reader.read(options)
+
+    if (logger.isDebugEnabled) {
+      ds.show()
+    }
+
+  }
+
+
+  @Test
+  def testLoadITDataCSVV0() = {
+
+    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.csv.gz").getPath
+    val options = Options(
+      filePath,
+      Map(
+        "inferSchema" -> "true",
+        "delimiter" -> ",",
+        "header" -> "true",
+        "dateFormat" -> ""
+      ))
+    val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
+
+    val ds = itDataV0Reader.read(options)
+
+    if (logger.isDebugEnabled) {
+      ds.show()
+    }
+  }
+
+  @Test
+  def testLoadITDataParquetV0() = {
+
+    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
+    val options = Options(filePath, Map())
+    val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
+
+    val ds = itDataV0Reader.read(options)
+
+    if (logger.isDebugEnabled) {
+      ds.printSchema()
+      ds.show()
+    }
+
+  }
+
+
+  @Test
+  def testLoadITDataChunksParquetV0() = {
+
+    val filePath = this.getClass.getClassLoader.getResource("it-data-4metrics-chunk.parquet").getPath
+    val options = Options(filePath, Map())
+    val reader = ReaderFactory.getChunksReader(ChunksReaderType.PARQUET)
+    val ds = reader.read(options)
+
+    if (logger.isDebugEnabled) {
+      ds.printSchema()
+      ds.show()
+    }
+
+  }
+
+
+}

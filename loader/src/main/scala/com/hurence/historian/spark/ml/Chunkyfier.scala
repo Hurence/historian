@@ -1,7 +1,11 @@
 package com.hurence.historian.spark.ml
 
-
-import com.hurence.historian.spark.sql.functions.{chunk, sax, toDateUTC}
+import com.hurence.historian.spark.sql.functions.{analysis, chunk, sax, toDateUTC}
+import com.hurence.timeseries.analysis.TimeseriesAnalysis
+import com.hurence.timeseries.compaction.BinaryEncodingUtils
+import com.hurence.timeseries.core.ChunkOrigin
+import com.hurence.timeseries.model.Chunk
+import com.hurence.timeseries.model.Definitions._
 import org.apache.spark.ml.Model
 import org.apache.spark.ml.param._
 import org.apache.spark.ml.util._
@@ -11,6 +15,8 @@ import org.apache.spark.sql.functions._
 import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev}
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
 
+import scala.collection.JavaConverters._
+import scala.collection.immutable.HashMap
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -44,41 +50,44 @@ final class Chunkyfier(override val uid: String)
 
   def this() = this(Identifiable.randomUID("chunkyfier"))
 
-  /** @group setParam */
-  final val valueCol: Param[String] = new Param[String](this, "valueCol", "column name for value")
 
-  /** @group setParam */
+  val valueCol: Param[String] = new Param[String](this, "valueCol", "column name for value")
+
   def setValueCol(value: String): this.type = set(valueCol, value)
-  setDefault(valueCol, "value")
 
+  setDefault(valueCol, FIELD_VALUE)
 
-  /** @group setParam */
-  final val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
+  val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
 
-  /** @group setParam */
+  def setQualityCol(value: String): this.type = {
+    set(qualityCol, value)
+  }
+
+  setDefault(qualityCol, FIELD_QUALITY)
+
+  val origin: Param[String] = new Param[String](this, "origin", "which historian component wrote this chunk")
+
+  def setOrigin(value: String): this.type = set(origin, value)
+
+  setDefault(origin, ChunkOrigin.INJECTOR.toString)
+
+  val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
+
   def setTimestampCol(value: String): this.type = set(timestampCol, value)
-  setDefault(timestampCol, "timestamp")
 
+  setDefault(timestampCol, FIELD_TIMESTAMP)
 
-  /** @group setParam */
-  final val chunkCol: Param[String] = new Param[String](this, "chunkCol", "column name for encoded chunk")
+  val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
 
-  /** @group setParam */
-  def setChunkCol(value: String): this.type = set(chunkCol, value)
-  setDefault(chunkCol, "chunk")
-
-  /** @group setParam */
-  final val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
-
-  /** @group setParam */
   def doDropLists(value: Boolean): this.type = set(dropLists, value)
+
   setDefault(dropLists, true)
 
-  /** @group param */
-  final val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
 
-  /** @group setParam */
+  val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
+
   def setDateBucketFormat(value: String): this.type = set(dateBucketFormat, value)
+
   setDefault(dateBucketFormat, "yyyy-MM-dd")
 
   /**
@@ -88,7 +97,6 @@ final class Chunkyfier(override val uid: String)
     */
   final val groupByCols: StringArrayParam = new StringArrayParam(this, "groupByCols", "group by column names")
 
-  /** @group setParam */
   def setGroupByCols(value: Array[String]): this.type = set(groupByCols, value)
 
 
@@ -96,106 +104,165 @@ final class Chunkyfier(override val uid: String)
     "the SAX akphabet size.",
     ParamValidators.inRange(0, 20))
 
-  /** @group setParam */
   def setSaxAlphabetSize(value: Int): this.type = set(saxAlphabetSize, value)
+
   setDefault(saxAlphabetSize, 5)
 
   val saxStringLength: Param[Int] = new Param[Int](this, "saxStringLength",
     "the SAX string length",
     ParamValidators.inRange(0, 10000))
 
-  /** @group setParam */
   def setSaxStringLength(value: Int): this.type = set(saxStringLength, value)
+
   setDefault(saxStringLength, 20)
 
   val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
-    "the chunk max points count",
+    "the chunk max measures count",
     ParamValidators.inRange(0, 100000))
 
-  /** @group setParam */
   def setChunkMaxSize(value: Int): this.type = set(chunkMaxSize, value)
+
   setDefault(chunkMaxSize, 1440)
 
 
-  def transform(df: Dataset[_]): DataFrame = {
+  final val chunkValueCol: Param[String] = new Param[String](this, "chunkValueCol", "column name for chunk Value")
 
-    val grougingCols = col("day") :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
-    val w = Window.partitionBy(grougingCols: _*)
+  def setChunkValueCol(value: String): this.type = set(chunkValueCol, value)
+
+  setDefault(chunkValueCol, FIELD_VALUE)
+
+  final val tagsCol: Param[String] = new Param[String](this, "tagsCol", "column name for tags")
+
+  def setTagsCol(value: String): this.type = set(tagsCol, value)
+
+  setDefault(tagsCol, FIELD_TAGS)
+
+
+  val COLUMN_VALUES = "values"
+  val COLUMN_TIMESTAMPS = "timestamps"
+  val COLUMN_QUALITIES = "qualities"
+
+  def transform(df: Dataset[_]): DataFrame = {
+    implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
+
+    val groupingCols = col(FIELD_DAY) :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
+    val w = Window.partitionBy(groupingCols: _*)
       .orderBy(col($(timestampCol)))
 
-    val groupedDF = df
-      .withColumn("day", toDateUTC(  col($(timestampCol)) , lit($(dateBucketFormat))))
-      .withColumn("values", collect_list(col($(valueCol))).over(w))
-      .withColumn("timestamps", collect_list(col($(timestampCol))).over(w))
-      .groupBy(grougingCols: _*)
-      .agg(
-        last(col("values")).as("values"),
-        last(col("timestamps")).as("timestamps"),
-        first(col("tags")).as("tags"),
-        min(col($(timestampCol))).as("start"),
-        max(col($(timestampCol))).as("end"),
-        count(col($(valueCol))).as("count"),
-        min(col($(valueCol))).as("min"),
-        max(col($(valueCol))).as("max"),
-        first(col($(valueCol))).as("first"),
-        last(col($(valueCol))).as("last"),
-        stddev(col($(valueCol))).as("stddev"),
-        avg(col($(valueCol))).as("avg"))
+    var baseDf = df
+    // If no quality column has in the input df, create one default with NaN as value
+    if (!baseDf.schema.fieldNames.contains($(qualityCol))) {
+      baseDf = baseDf.withColumn(FIELD_QUALITY, lit(Float.NaN))
+    }
 
+    // If no quality column has in the input df, create one default with NaN as value
+    val noTags = if (!baseDf.schema.fieldNames.contains($(tagsCol))) {
+      true
+    } else false
 
-    /*  val groupedDF = df
-        .groupBy(grougingCols: _*)
-        .agg(
-          min(df.col("timestamp")).as("start"),
-          max(df.col("timestamp")).as("end"),
-          collect_list(df.col("value")).as("values"),
-          collect_list(df.col("timestamp")).as("timestamps"),
-          count(df.col("value")).as("count"),
-          min(df.col("value")).as("min"),
-          max(df.col("value")).as("max"),
-          first(df.col("value")).as("first"),
-          last(df.col("value")).as("last"),
-          stddev(df.col("value")).as("stddev"),
-          avg(df.col("value")).as("avg"),
-          first(df.col("tags")).as("tags"))
- */
+    val groupedBy = baseDf
+      .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
+      .withColumn(COLUMN_VALUES, collect_list(col($(valueCol))).over(w))
+      .withColumn(COLUMN_TIMESTAMPS, collect_list(col($(timestampCol))).over(w))
+      .withColumn(COLUMN_QUALITIES, collect_list(col($(qualityCol))).over(w))
+      .groupBy(groupingCols: _*)
 
+    val groupedDF = if (noTags) {
+      // compute all the stats and aggregtions here
+      groupedBy.agg(
+        last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
+        last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
+        last(col(COLUMN_QUALITIES)).as(COLUMN_QUALITIES),
+        min(col($(timestampCol))).as(FIELD_START),
+        max(col($(timestampCol))).as(FIELD_END),
+        min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
+        max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
+        first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
+        sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
+        avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
+    } else {
+      groupedBy.agg(
+        last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
+        last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
+        last(col(COLUMN_QUALITIES)).as(COLUMN_QUALITIES),
+        first(col($(tagsCol))).as(FIELD_TAGS),
+        min(col($(timestampCol))).as(FIELD_START),
+        max(col($(timestampCol))).as(FIELD_END),
+        min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
+        max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
+        first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
+        sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
+        avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
+    }
 
-    // .map(r => (r._1, r._2.sortWith((l1, l2) => l1._1 < l2._1).grouped(1440).toList))
-
-    val chunkDF = groupedDF
-      .withColumn($(chunkCol), chunk(
-        groupedDF.col("name"),
-        groupedDF.col("start"),
-        groupedDF.col("end"),
-        groupedDF.col("timestamps"),
-        groupedDF.col("values")))
-      .withColumn("sax", sax(
+    groupedDF
+      // compute analysis from values & timestamps lists
+      .withColumn("analysis", analysis(
+        groupedDF.col(COLUMN_TIMESTAMPS),
+        groupedDF.col(COLUMN_VALUES)))
+      // compute chunk bytes from values & timestamps lists
+      .withColumn($(chunkValueCol), chunk(
+        groupedDF.col(FIELD_NAME),
+        groupedDF.col(FIELD_START),
+        groupedDF.col(FIELD_END),
+        groupedDF.col(COLUMN_TIMESTAMPS),
+        groupedDF.col(COLUMN_VALUES),
+        groupedDF.col(COLUMN_QUALITIES)))
+      // compute SAX string for chunk
+      .withColumn(FIELD_SAX, sax(
         lit($(saxAlphabetSize)),
         lit(0.01),
         lit($(saxStringLength)),
-        groupedDF.col("values")))
+        groupedDF.col(COLUMN_VALUES)))
+      // drop temporary values & timestamps columns
+      .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS)
+      .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev", "analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
+      .map(r => {
 
-    if ($(dropLists)) {
-      log.debug("droping columns values and timestamps")
-      chunkDF.drop("values", "timestamps")
-    } else {
-      chunkDF
-    }
+        val tags = if (noTags) {
+          Map[String, String]()
+        } else {
+          r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
+        }
 
-
+        Chunk.builder()
+          .name(r.getAs[String](FIELD_NAME))
+          .origin($(origin))
+          .start(r.getAs[Long](FIELD_START))
+          .end(r.getAs[Long](FIELD_END))
+          .count(r.getAs[Long](FIELD_COUNT))
+          .avg(r.getAs[Double](FIELD_AVG))
+          .stdDev(r.getAs[Double](FIELD_STD_DEV))
+          .min(r.getAs[Double](FIELD_MIN))
+          .max(r.getAs[Double](FIELD_MAX))
+          .sum(r.getAs[Double](FIELD_SUM))
+          .first(r.getAs[Double](FIELD_FIRST))
+          .last(r.getAs[Double](FIELD_LAST))
+          .sax(r.getAs[String](FIELD_SAX))
+          .value(r.getAs[Array[Byte]]($(chunkValueCol)))
+          .tags(tags.asJava)
+          .qualityMin(r.getAs[Float](FIELD_QUALITY_MIN))
+          .qualityMax(r.getAs[Float](FIELD_QUALITY_MAX))
+          .qualityFirst(r.getAs[Float](FIELD_QUALITY_FIRST))
+          .qualitySum(r.getAs[Double](FIELD_QUALITY_SUM).toFloat)
+          .qualityAvg(r.getAs[Double](FIELD_QUALITY_AVG).toFloat)
+          .trend(r.getAs[Boolean](FIELD_TREND))
+          .outlier(r.getAs[Boolean](FIELD_OUTLIER))
+          .buildId()
+          .computeMetrics()
+          .build()
+      }).toDF()
   }
-
 
   override def transformSchema(schema: StructType): StructType = {
     // Check that the input type is a string
-    val idx = schema.fieldIndex(chunkCol.name)
+    val idx = schema.fieldIndex(FIELD_VALUE)
     val field = schema.fields(idx)
     if (field.dataType != ArrayType) {
       throw new Exception(s"Input type ${field.dataType} did not match input type ArrayType")
     }
     // Add the return field
-    schema.add(StructField(chunkCol.name, StringType, true))
+    schema.add(StructField(FIELD_VALUE, StringType, true))
   }
 
   override def copy(extra: ParamMap): Chunkyfier = {

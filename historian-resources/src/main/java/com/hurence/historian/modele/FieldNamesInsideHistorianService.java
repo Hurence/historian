@@ -30,7 +30,7 @@ public class FieldNamesInsideHistorianService {
     public static String CHUNK_MONTH = "chunk_month";
     public static String CHUNK_DAY = "chunk_day";
     public static String CHUNK_HOUR = "chunk_hour";
-    public static String CHUNK_STDDEV = "chunk_stddev";
+    public static String CHUNK_STDDEV = "chunk_std_dev";
 
     public static String CHUNK_QUALITY_SUM_FIELD = HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_SUM;
     public static String CHUNK_QUALITY_FIRST_FIELD = HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST;

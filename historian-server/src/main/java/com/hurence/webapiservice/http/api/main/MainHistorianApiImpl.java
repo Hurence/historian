@@ -65,11 +65,11 @@ public class MainHistorianApiImpl implements MainHistorianApi {
 
         int maxDataPoints = request.getMaxDataPoints();
         if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
-            LOGGER.debug("error max data points too large");
+            LOGGER.debug("error max data measures too large");
             context.response().setStatusCode(PAYLOAD_TOO_LARGE);
             context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end("max data points is bigger than allowed");
+            context.response().end("max data measures is bigger than allowed");
             return;
         }
 
@@ -85,10 +85,10 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                             JsonObject el = (JsonObject) metric;
                             String metricName = el.getString(MultiTimeSeriesExtracter.TIMESERIE_NAME);
                             int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
-                            LOGGER.debug("[REQUEST ID {}] return {} points for metric {}.",
+                            LOGGER.debug("[REQUEST ID {}] return {} measures for metric {}.",
                                     request.getRequestId(),size, metricName);
                         });
-                        LOGGER.debug("[REQUEST ID {}] Sampled a total of {} points in {} ms.",
+                        LOGGER.debug("[REQUEST ID {}] Sampled a total of {} measures in {} ms.",
                                 request.getRequestId(),
                                 sampledTimeSeries.getLong(HistorianServiceFields.TOTAL_POINTS, 0L),
                                 System.currentTimeMillis() - startRequest);

@@ -16,8 +16,8 @@
 package com.hurence.timeseries.functions.math;
 
 
-import com.hurence.timeseries.modele.list.DoubleList;
-import com.hurence.timeseries.modele.list.LongList;
+import com.hurence.timeseries.model.list.DoubleList;
+import com.hurence.timeseries.model.list.LongList;
 
 /**
  * Simple linear regression to calculate the slope

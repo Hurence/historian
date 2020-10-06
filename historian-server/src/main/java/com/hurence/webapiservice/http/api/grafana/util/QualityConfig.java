@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
 import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
-import com.hurence.timeseries.modele.chunk.ChunkVersionCurrent;
+import com.hurence.timeseries.model.Chunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,14 +45,14 @@ public class QualityConfig {
         return Objects.hash(quality, qualityAgg);
     }
 
-    public boolean matchChunk(ChunkVersionCurrent chunk) {
+    public boolean matchChunk(Chunk chunk) {
         Float qualityChunk = getQualityOfChunk(chunk);
         if(qualityChunk == null)
             return true;
         return (this.quality <= qualityChunk);
     }
 
-    private Float getQualityOfChunk(ChunkVersionCurrent chunk) {
+    private Float getQualityOfChunk(Chunk chunk) {
         switch (qualityAgg) {
             case AVG:
                 return Double.valueOf(chunk.getQualityAvg()).floatValue();

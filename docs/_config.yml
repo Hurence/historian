@@ -1,0 +1,8 @@
+theme: jekyll-theme-leap-day
+title: Hurence Data Historian
+description: big data timeseries storage and analytics
+show_downloads: "true"
+google_analytics: [Your Google Analytics tracking ID]
+github:
+  zip_url: http://example.com/download.zip
+  hurence_url:  http://www.hurence.com

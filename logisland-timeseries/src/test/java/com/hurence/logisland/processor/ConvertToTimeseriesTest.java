@@ -20,8 +20,8 @@ import com.hurence.logisland.record.*;
 import com.hurence.logisland.util.runner.MockRecord;
 import com.hurence.logisland.util.runner.TestRunner;
 import com.hurence.logisland.util.runner.TestRunners;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.timeseries.modele.points.Point;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -122,16 +122,16 @@ public class ConvertToTimeseriesTest {
         out.assertFieldEquals(FieldDictionary.RECORD_TYPE, "timeseries");
         out.assertFieldTypeEquals(TimeSeriesRecord.CHUNK_VALUE, FieldType.BYTES);
         out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE, 2000);
-        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8063);
+        out.assertFieldEquals(TimeSeriesRecord.CHUNK_SIZE_BYTES, 8066);
 
         out.assertRecordSizeEquals(7);
 
         byte[] binaryTimeseries = out.getField(TimeSeriesRecord.CHUNK_VALUE).asBytes();
 
         try {
-            TreeSet<Point> points = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
+            TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(binaryTimeseries, 1000000, 1001999);
 
-            assertEquals(points.size(), recordsCount);
+            assertEquals(measures.size(), recordsCount);
         } catch (IOException e) {
             e.printStackTrace();
         }

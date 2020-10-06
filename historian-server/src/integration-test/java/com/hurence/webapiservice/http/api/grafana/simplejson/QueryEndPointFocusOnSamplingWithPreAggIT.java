@@ -5,8 +5,7 @@ import com.hurence.historian.solr.injector.AbstractSolrInjectorChunkCurrentVersi
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
-import com.hurence.timeseries.modele.points.Point;
-import com.hurence.timeseries.modele.points.PointImpl;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
@@ -65,46 +64,46 @@ public class QueryEndPointFocusOnSamplingWithPreAggIT extends AbstractQueryEndPo
     }
 
     public static SolrInjector buildInjector() {
-        List<List<Point>> pointsByChunk10Chunks = Arrays.asList(
+        List<List<Measure>> pointsByChunk10Chunks = Arrays.asList(
                 Arrays.asList(
-                        new PointImpl( 1L, 1.0),
-                        new PointImpl( 2L, 1.0)
+                        Measure.fromValue( 1L, 1.0),
+                        Measure.fromValue( 2L, 1.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 3L, 2.0),
-                        new PointImpl( 4L, 2.0)
+                        Measure.fromValue( 3L, 2.0),
+                        Measure.fromValue( 4L, 2.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 5L, 3.0),
-                        new PointImpl( 6L, 3.0)
+                        Measure.fromValue( 5L, 3.0),
+                        Measure.fromValue( 6L, 3.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 7L, 4.0),
-                        new PointImpl( 8L, 4.0)
+                        Measure.fromValue( 7L, 4.0),
+                        Measure.fromValue( 8L, 4.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 9L, 5.0),
-                        new PointImpl( 10L, 5.0)
+                        Measure.fromValue( 9L, 5.0),
+                        Measure.fromValue( 10L, 5.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 11L, 6.0),
-                        new PointImpl( 12L, 6.0)
+                        Measure.fromValue( 11L, 6.0),
+                        Measure.fromValue( 12L, 6.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 13L, 7.0),
-                        new PointImpl( 14L, 7.0)
+                        Measure.fromValue( 13L, 7.0),
+                        Measure.fromValue( 14L, 7.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 15L, 8.0),
-                        new PointImpl( 16L, 8.0)
+                        Measure.fromValue( 15L, 8.0),
+                        Measure.fromValue( 16L, 8.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 17L, 9.0),
-                        new PointImpl( 18L, 9.0)
+                        Measure.fromValue( 17L, 9.0),
+                        Measure.fromValue( 18L, 9.0)
                 ),
                 Arrays.asList(
-                        new PointImpl( 19L, 10.0),
-                        new PointImpl( 20L, 10.0)
+                        Measure.fromValue( 19L, 10.0),
+                        Measure.fromValue( 20L, 10.0)
                 )
         );
         AbstractSolrInjectorChunkCurrentVersion injector10chunk = new SolrInjectorOneMetricMultipleChunksSpecificPointsChunkCurrentVersion(

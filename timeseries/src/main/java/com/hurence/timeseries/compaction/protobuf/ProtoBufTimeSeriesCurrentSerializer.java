@@ -17,7 +17,7 @@ package com.hurence.timeseries.compaction.protobuf;
 
 
 import com.hurence.timeseries.compaction.Compression;
-import com.hurence.timeseries.modele.points.Point;
+import com.hurence.timeseries.model.Measure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +50,7 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param timeSeriesStart   the start of the time series
      * @param timeSeriesEnd     the end of the time series
      */
-    public static TreeSet<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, byte[] chunkOfPoints) throws IOException, IllegalArgumentException {
+    public static TreeSet<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd, byte[] chunkOfPoints) throws IOException, IllegalArgumentException {
         return from(decompressedBytes, timeSeriesStart, timeSeriesEnd, timeSeriesStart, timeSeriesEnd, chunkOfPoints);
     }
     /**
@@ -64,7 +64,7 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param from              including points from
      * @param to                including points to
      */
-    public static TreeSet<Point> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd
+    public static TreeSet<Measure> from(final InputStream decompressedBytes, long timeSeriesStart, long timeSeriesEnd
             , long from, long to, byte[] chunkOfPoints) throws IOException, IllegalArgumentException {
         try {
             return ProtoBufTimeSeriesWithQualitySerializer.from(decompressedBytes, timeSeriesStart, timeSeriesEnd, from, to);
@@ -83,7 +83,7 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(List<Point> metricDataPoints) {
+    public static byte[] to(List<Measure> metricDataPoints) {
         return to(metricDataPoints, 0);
     }
 
@@ -93,7 +93,7 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(Iterator<Point> metricDataPoints) {
+    public static byte[] to(Iterator<Measure> metricDataPoints) {
         return to(metricDataPoints, 0);
     }
 
@@ -104,7 +104,7 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(final List<Point> metricDataPoints, long ddcThreshold) {
+    public static byte[] to(final List<Measure> metricDataPoints, long ddcThreshold) {
         return to(metricDataPoints.iterator(), ddcThreshold);
     }
 
@@ -114,7 +114,7 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(final Iterator<Point> metricDataPoints, long ddcThreshold) {
+    public static byte[] to(final Iterator<Measure> metricDataPoints, long ddcThreshold) {
         return to(metricDataPoints, DEFAULT_QUALITY_EQUALS, ddcThreshold);
     }
 
@@ -124,7 +124,7 @@ public final class ProtoBufTimeSeriesCurrentSerializer {
      * @param metricDataPoints - the list with points (expected te be already sorted !)
      * @return the serialized points as byte[]
      */
-    public static byte[] to(final Iterator<Point> metricDataPoints, float diffAcceptedForQuality, long ddcThreshold) {
+    public static byte[] to(final Iterator<Measure> metricDataPoints, float diffAcceptedForQuality, long ddcThreshold) {
         return ProtoBufTimeSeriesWithQualitySerializer.to(metricDataPoints, diffAcceptedForQuality, ddcThreshold);
     }
 

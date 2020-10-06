@@ -11,14 +11,14 @@ require some other logisland module, if it fails try this :
 mvn -pl :logisland-gateway-historian -am clean install -DskipTests
 ```
 
-#Run server on local
+## Run server on local
 
 run :
 ```shell script
 n
 ```
 
-#Run server with docker-compose
+## Run server with docker-compose
 
 in logisland-quickstart project you can run a pipeline that injects data into solr.
 You have access to solr UI, a grafana with a predefined historian dashboard.
@@ -39,25 +39,25 @@ Go to the historian dashboard and see your data ! We added three variables so th
 the sampling algorithm to use, the bucket size or filter on a tag. Currently tags are just the name of the metric but we could
 imagine tagging several different metric names with a same tag. For exemple 'temp' for metrics 'temp_a' and 'temp_b'.
 
-By default no sampling is used if there is not too many point to draw. Otherwise we calculate the bucket size depending on
-the total number of points that is being queried with the average algorithm. At the moment only basic algorithms are available.
+By default no sampling is used if there is not too many measure to draw. Otherwise we calculate the bucket size depending on
+the total number of measures that is being queried with the average algorithm. At the moment only basic algorithms are available.
 
-#Run server on cluster
+## Run server on cluster
 
 TODO
 ```shell script
 java -jar <jar_path> -cluster -conf <conf_path>
 ```
 
-#RUN TEST
+## RUN TEST
 
-## In terminal
+### In terminal
 
 ```shell script
 mvn clean install -Pintegration-tests
 ``` 
 
-## with your IDE
+### with your IDE
 
 mark the folder ./src/integration-test/java as source test code in your IDE.
 mark the folder ./src/integration-test/resources as resources test in your IDE.
@@ -69,7 +69,7 @@ mvn clean install -Pbuild-integration-tests
 
 to build integration tests source class ! Then you can run the test in your IDE.
 
-# Configuration
+## Configuration
 
 You have an exemple in ./resources/config.json
 
@@ -158,11 +158,11 @@ If tou are working with the old schema please specify **"schema_version": "VERSI
 by default it is using the last stable schema. At the moment there is only two different types of schemas.
 
 
-# CONTRIBUTE
+## CONTRIBUTE
 
 Please read DEVELOPMENT.md
 
-#TROUBLESHOOT
+## TROUBLESHOOT
 
 When code generator fails. It may be because of hidden char ? This is really irritating.
 I fought with javadoc... Sometimes I could not succeed into making it working.
