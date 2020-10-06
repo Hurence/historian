@@ -21,6 +21,8 @@ import org.apache.commons.lang3.builder.ToStringBuilder;
 
 import java.io.Serializable;
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
 
@@ -195,6 +197,25 @@ public class FloatList implements Serializable {
      */
     public float[] toArray() {
         return Arrays.copyOf(floats, size);
+    }
+
+
+    /**
+     * Returns a List containing all of the elements in this list
+     * in proper sequence (from first to last element).
+     * <p>
+     * <p>The returned array will be "safe" in that no references to it are
+     * maintained by this list.  (In other words, this method must allocate
+     * a new array).  The caller is thus free to modify the returned array.
+     * <p>
+     * <p>This method acts as bridge between array-based and collection-based
+     * APIs.
+     *
+     * @return an array containing all of the elements in this list in
+     * proper sequence
+     */
+    public List<Double> toList() {
+        return toStream().boxed().collect(Collectors.toList());
     }
 
     public DoubleStream toStream() {

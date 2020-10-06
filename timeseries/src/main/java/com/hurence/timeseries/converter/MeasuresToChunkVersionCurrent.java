@@ -4,14 +4,12 @@ import com.hurence.historian.modele.SchemaVersion;
 import com.hurence.timeseries.DateInfo;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.TimeSeriesUtil;
+import com.hurence.timeseries.analysis.TimeseriesAnalysis;
+import com.hurence.timeseries.analysis.TimeseriesAnalyzer;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.timeseries.functions.*;
-import com.hurence.timeseries.metric.MetricType;
 import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.model.Chunk;
-import com.hurence.timeseries.query.QueryEvaluator;
-import com.hurence.timeseries.query.TypeFunctions;
-import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import com.hurence.timeseries.sax.SaxConverter;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,13 +21,7 @@ import java.util.TreeSet;
  */
 public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
 
-    private List<ChronixTransformation> transformations;
-    private List<ChronixAggregation> aggregations;
-    private List<ChronixAnalysis> analyses;
-    private List<ChronixEncoding> encodings;
-    private FunctionValueMap functionValueMap;
     private String chunkOrigin;
-    private static final String METRIC_STRING = "first;last;min;max;sum;avg;count;dev;trend;outlier;sax:%s,0.01,%s";
 
     public MeasuresToChunkVersionCurrent(String chunkOrigin) {
         this.chunkOrigin = chunkOrigin;
@@ -59,15 +51,6 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
         return buildChunk(name, measures, Collections.emptyMap());
     }
 
-    private void configMetricsCalcul(String[] metrics) {
-        // init metric functions
-        TypeFunctions functions = QueryEvaluator.extractFunctions(metrics);
-        transformations = functions.getTypeFunctions(new MetricType()).getTransformations();
-        aggregations = functions.getTypeFunctions(new MetricType()).getAggregations();
-        analyses = functions.getTypeFunctions(new MetricType()).getAnalyses();
-        encodings = functions.getTypeFunctions(new MetricType()).getEncodings();
-        functionValueMap = new FunctionValueMap(aggregations.size(), analyses.size(), transformations.size(), encodings.size());
-    }
 
     private Chunk convertIntoChunk(MetricTimeSeries timeSerie, Map<String, String> tags) {
 
@@ -102,81 +85,58 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
     private void computeAndSetAggs(Chunk.ChunkBuilder builder, MetricTimeSeries timeSeries) {
         Integer sax_alphabet_size = Math.max(Math.min(timeSeries.size(), 7), 2);
         Integer sax_string_length = Math.min(timeSeries.size(), 100);
-        String metricString = String.format(METRIC_STRING, sax_alphabet_size, sax_string_length);
-        String[] metrics = new String[]{"metric{" + metricString + "}"};
-        configMetricsCalcul(metrics);
+
+        timeSeries.sort();
+        final List<Double> values = timeSeries.getValues().toList();
+        final List<Double> qualities = timeSeries.getQualities().toList();
+        final List<Long> timestamps = timeSeries.getTimestamps().toList();
 
 
         // set quality stats if needed
-        DescriptiveStatistics qualityStats =  new DescriptiveStatistics();
-        for( float quality : timeSeries.getQualitiesAsArray()){
-            qualityStats.addValue(quality);
-        }
-        if(qualityStats.getN()>0){
+        TimeseriesAnalysis qualitiesAnalysis = TimeseriesAnalyzer.builder()
+                .computeOutlier(false)
+                .computeStats(true)
+                .computeTrend(false)
+                .build()
+                .run(timestamps, qualities);
+
+        if (qualitiesAnalysis.getCount() > 0) {
             builder.qualityFirst(timeSeries.getQuality(0));
-            builder.qualitySum((float) qualityStats.getSum());
-            builder.qualityMin((float) qualityStats.getMin());
-            builder.qualityMax((float) qualityStats.getMax());
-            builder.qualityAvg((float) qualityStats.getMean());
+            builder.qualitySum((float) qualitiesAnalysis.getSum());
+            builder.qualityMin((float) qualitiesAnalysis.getMin());
+            builder.qualityMax((float) qualitiesAnalysis.getMax());
+            builder.qualityAvg((float) qualitiesAnalysis.getMean());
         }
 
-        functionValueMap.resetValues();
-        transformations.forEach(transfo -> transfo.execute(timeSeries, functionValueMap));
-        analyses.forEach(analyse -> analyse.execute(timeSeries, functionValueMap));
-        aggregations.forEach(aggregation -> aggregation.execute(timeSeries, functionValueMap));
-        encodings.forEach(encoding -> encoding.execute(timeSeries, functionValueMap));
+        // compute stats for values
+        TimeseriesAnalysis valuesAnalysis = TimeseriesAnalyzer.builder()
+                .computeOutlier(true)
+                .computeStats(true)
+                .computeTrend(true)
+                .build()
+                .run(timestamps, values);
 
-        for (int i = 0; i < functionValueMap.sizeOfAggregations(); i++) {
-            String name = functionValueMap.getAggregation(i).getQueryName();
-            double value = functionValueMap.getAggregationValue(i);
-            switch (name) {
-                case "first":
-                    builder.first(value);
-                    break;
-                case "last":
-                    builder.last(value);
-                    break;
-                case "min":
-                    builder.min(value);
-                    break;
-                case "max":
-                    builder.max(value);
-                    break;
-                case "sum":
-                    builder.sum(value);
-                    break;
-                case "avg":
-                    builder.avg(value);
-                    break;
-                case "count":
-                    builder.count((long) value);
-                    break;
-                case "dev":
-                    builder.stdDev(value);
-                    break;
-            }
-        }
-        for (int i = 0; i < functionValueMap.sizeOfAnalyses(); i++) {
-            String name = functionValueMap.getAnalysis(i).getQueryName();
-            boolean value = functionValueMap.getAnalysisValue(i);
-            switch (name) {
-                case "trend":
-                    builder.trend(value);
-                    break;
-                case "outlier":
-                    builder.outlier(value);
-                    break;
-            }
-        }
-        for (int i = 0; i < functionValueMap.sizeOfEncodings(); i++) {
-            String name = functionValueMap.getEncoding(i).getQueryName();
-            String value = functionValueMap.getEncodingValue(i);
-            switch (name) {
-                case "sax":
-                    builder.sax(value);
-                    break;
-            }
-        }
+
+        builder.first(valuesAnalysis.getFirst());
+        builder.last(valuesAnalysis.getLast());
+        builder.min(valuesAnalysis.getMin());
+        builder.max(valuesAnalysis.getMax());
+        builder.sum(valuesAnalysis.getSum());
+        builder.avg(valuesAnalysis.getMean());
+        builder.count(valuesAnalysis.getCount());
+        builder.stdDev(valuesAnalysis.getStdDev());
+        builder.trend(valuesAnalysis.isHasTrend());
+        builder.outlier(valuesAnalysis.isHasOutlier());
+
+
+        // finish with sax
+        SaxConverter converter = SaxConverter.builder()
+                .alphabetSize(sax_alphabet_size)
+                .paaSize(sax_string_length)
+                .build();
+
+        String sax = converter.run(values);
+        builder.sax(sax);
     }
 
 
