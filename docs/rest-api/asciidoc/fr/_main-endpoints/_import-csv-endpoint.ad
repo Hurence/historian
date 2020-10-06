@@ -121,9 +121,9 @@ Sinon les autres valeurs acceptées sont les noms de colonnes ajoutées comme ta
 |===
 
 
-===== Exemples
+====== Exemples
 
-====== Exemple 1
+======= Exemple 1
 
 Exemple de commande curl minimal :
 
@@ -162,7 +162,7 @@ La réponse est la suivante :
 }
 ----
 
-====== Exemple 2
+======= Exemple 2
 
 Exemple de commande curl :
 
@@ -223,11 +223,7 @@ La réponse est la suivante :
 }
 ----
 
-====== Exemple 3
-
-
-
-
+======= Exemple 3
 
 avec la requête suivante :
 
@@ -294,3 +290,53 @@ Si un même fichier est injecter plusieurs fois avec les même paramètres alors
 écrase les chunks du premier. Il n y a donc pas de doublons.
 
 Rappel:: Un chunk est créer par métrique et par la valeurs des tags sélection mais aussi pour chaque changement de jour !
+
+======= Exemple avec un fichier vide
+
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/empty.csv' \
+----
+
+[source,json]
+----
+{
+    "errors" : [
+        {
+            "file" : "empty.csv",
+            "cause" : "The csv contains Empty header line: can not bind data\n at [Source: UNKNOWN; line: 1, column: -1] lines which is more than the max number of line of 5000"
+        }
+    ]
+}
+----
+
+======= Exemple avec un fichier ayant juste un header
+
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/header.csv' \
+----
+
+[source,json]
+----
+{
+    "errors" : [
+        {
+            "file" : "header.csv",
+            "cause" : "Empty request body"
+        }
+    ]
+}
+----
+
+====== Troubleshoot
+
+Si le fichier spécifier dans la commande curl n'existe pas, vous devriez avoir une réponse comme celle-la :
+
+[source,bash]
+----
+Warning: setting file path/de/mon/csv/file.csv  failed!
+curl: (26) read function returned funny value
+----

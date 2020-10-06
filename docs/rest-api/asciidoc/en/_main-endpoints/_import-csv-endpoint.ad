@@ -285,3 +285,54 @@ Note::  We notice that we uses twice the same file with the same parameters. If 
 then the chunks will be created only one time. There will have no duplicate in this case.
 
 Reminder:: A chunk is created for every metric name, tags that has been chosen and for every day !
+
+
+======= Example with an empty file
+
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/empty.csv' \
+----
+
+[source,json]
+----
+{
+    "errors" : [
+        {
+            "file" : "empty.csv",
+            "cause" : "The csv contains Empty header line: can not bind data\n at [Source: UNKNOWN; line: 1, column: -1] lines which is more than the max number of line of 5000"
+        }
+    ]
+}
+----
+
+======= Example with a file containig just the header
+
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/header.csv' \
+----
+
+[source,json]
+----
+{
+    "errors" : [
+        {
+            "file" : "header.csv",
+            "cause" : "Empty request body"
+        }
+    ]
+}
+----
+
+====== Troubleshoot
+
+If the file specified in the curl command does not exist, you should have this kind of answers :
+
+[source,bash]
+----
+Warning: setting file path/de/mon/csv/file.csv  failed!
+curl: (26) read function returned funny value
+----

@@ -98,3 +98,71 @@ curl -X POST \
     "message": "Injected 4 points of 2 metrics in 2 chunks"
 }
 ----
+
+====== Errors
+
+======= No valid points
+
+status : BAD REQUEST
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[
+    {
+        "name": "temp",
+        "points": []
+    }
+]'
+----
+
+[source,json]
+----
+{
+  "error" : "There is no valid points"
+}
+----
+
+======= empty request body
+
+status : BAD REQUEST
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[]'
+----
+
+[source,json]
+----
+{
+    "error" : "Empty request body"
+}
+----
+
+======= field point is required
+
+status : BAD REQUEST
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{import-json-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '[
+    {
+        "name": "temp"
+    }
+]'
+----
+
+[source,json]
+----
+{
+    "error" : "field 'points' is required"
+}
+----
