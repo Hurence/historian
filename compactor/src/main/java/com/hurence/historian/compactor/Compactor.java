@@ -473,6 +473,13 @@ public class Compactor implements Runnable {
          */
 
         deleteOldChunks(compactorChunksToDeleteIds, nonCompactorChunksToDeleteIds);
+
+        recompactedChunks.unpersist();
+        recompactedChunksRows.unpersist();
+        metricsToRecompact.unpersist();
+        chunksToRecompact.unpersist();
+        compactorChunksToDeleteIds.clear();
+        nonCompactorChunksToDeleteIds.clear();
     }
 
     /**

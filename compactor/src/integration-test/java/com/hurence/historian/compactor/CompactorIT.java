@@ -762,7 +762,7 @@ public class CompactorIT {
                     put("room", "1");
                 }}
                 ,
-                ChunkOrigin.INJECTOR.toString()
+                ChunkOrigin.COMPACTOR.toString()
         );
         expectedChunks.put(chunk.getId(), chunk);
 
@@ -799,7 +799,7 @@ public class CompactorIT {
                     put("room", "1");
                 }}
                 ,
-                ChunkOrigin.INJECTOR.toString()
+                ChunkOrigin.COMPACTOR.toString()
         );
         expectedChunks.put(chunk.getId(), chunk);
 

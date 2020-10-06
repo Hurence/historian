@@ -86,7 +86,7 @@ object functions {
       // Paa size cannot be longer than timeserie length
       val finalPaaSize = Math.min(paaSize, values.length)
 
-      val saxConverter = new SaxConverter.Builder()
+      val saxConverter = SaxConverter.builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
         .paaSize(finalPaaSize)
@@ -94,7 +94,7 @@ object functions {
 
       val list = values.map(Double.box).asJava
 
-      saxConverter.getSaxStringFromValues(list)
+      saxConverter.run(list)
   }
 
   case class Analysis(min: Double, max: Double, avg: Double, stdDev: Double, sum: Double, trend: Boolean, outlier: Boolean, count: Long, first: Double, last: Double)
@@ -148,13 +148,13 @@ object functions {
       val paaSize = best_guess(1).toString.toInt
       val alphabetSize = best_guess(2).toString.toInt
 
-      val saxConverter = new SaxConverter.Builder()
+      val saxConverter = SaxConverter.builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
         .paaSize(paaSize)
         .build()
 
-      saxConverter.getSaxStringFromValues(list)
+      saxConverter.run(list)
 
   }
   val sax_best_guess_paa_fixed = udf {
@@ -165,13 +165,13 @@ object functions {
       //val paaSize =best_guess(1).toString.toInt
       val alphabetSize = best_guess(2).toString.toInt
 
-      val saxConverter = new SaxConverter.Builder()
+      val saxConverter = SaxConverter.builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
         .paaSize(paaSize)
         .build()
 
-      saxConverter.getSaxStringFromValues(list)
+      saxConverter.run(list)
 
   }
 
