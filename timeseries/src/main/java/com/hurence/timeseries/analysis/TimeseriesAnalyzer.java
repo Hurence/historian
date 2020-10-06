@@ -43,7 +43,7 @@ public class TimeseriesAnalyzer {
         if (computeTrend) {
             SimpleRegression regression = new SimpleRegression();
             for (int i = 0; i < timestamps.size(); i++) {
-                regression.addData(timestamps.get(0), values.get(0));
+                regression.addData(timestamps.get(i), values.get(i));
             }
             builder.hasTrend(regression.getSlope() > 0);
         }
