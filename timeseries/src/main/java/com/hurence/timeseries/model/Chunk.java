@@ -159,7 +159,8 @@ public class Chunk implements Serializable {
 
     public String toHumanReadable(boolean withTimestamps) {
         SimpleDateFormat sdf = Measure.createUtcDateFormatter("yyyy-MM-dd HH:mm:ss.SSS");
-        StringBuilder stringBuilder = new StringBuilder(" Human readable value:");
+        StringBuilder stringBuilder = new StringBuilder(" Value as string: " + getValueAsString());
+        stringBuilder.append("\n  Human readable value:");
         try {
             TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(value, start, end);
             for (Measure measure : measures) {
