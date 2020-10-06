@@ -101,9 +101,7 @@ public class Chunk implements Serializable {
         /**
          * sets id to an idempotent hash
          *
-         * @return
-         *
-         * TODO: tried to have this method automatically with lombok but did not work:
+         * @return TODO: tried to have this method automatically with lombok but did not work:
          * Tried with @Builder.ObtainVia(method = "buildId") as annotation for id field
          * Further lombok documentation for the builder at:
          * https://www.projectlombok.org/features/Builder
@@ -112,7 +110,8 @@ public class Chunk implements Serializable {
             StringBuilder newId = new StringBuilder();
 
             newId.append(name);
-            tags.forEach((k, v) -> newId.append(k + v));
+            if (tags != null)
+                tags.forEach((k, v) -> newId.append(k + v));
 
             try {
                 newId.append(BinaryEncodingUtils.encode(value));
@@ -157,16 +156,17 @@ public class Chunk implements Serializable {
 
         /**
          * Constructor when no tags
+         *
          * @param name
          */
-        private MetricKey (String name) {
+        private MetricKey(String name) {
             Objects.requireNonNull(name);
             this.name = name;
         }
 
-        private MetricKey (String name, Map<String, String> tags) {
+        private MetricKey(String name, Map<String, String> tags) {
             Objects.requireNonNull(name);
-            Objects.requireNonNull(tags);
+           // Objects.requireNonNull(tags);
             this.name = name;
             this.tags = tags;
         }
@@ -175,15 +175,16 @@ public class Chunk implements Serializable {
          * Computes the unique metric key in the form:
          * <name>[,tagName=tageValue] with tags alphabetically sorted
          * according to the tag name
+         *
          * @return
          */
         public String compute() {
             StringBuilder idBuilder = new StringBuilder(name);
             // If there are some tags, add them with their values in an alphabetically sorted way
             // according to the tag key
-            if (tags.size() > 0) {
+            if (tags != null && tags.size() > 0) {
                 SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
-                sortedTags.forEach( (tagKey) -> {
+                sortedTags.forEach((tagKey) -> {
                     idBuilder.append(",").append(tagKey).append("=").append(tags.get(tagKey));
                 });
             }
@@ -197,6 +198,7 @@ public class Chunk implements Serializable {
 
         /**
          * Parses a metric key in the form as defined by the compute method
+         *
          * @param id
          * @return
          */
@@ -204,22 +206,21 @@ public class Chunk implements Serializable {
 
             // metricName,tag1=tag1Val,tag2=tag2val
             String[] tokens = id.split(",");
-            if ( (tokens == null) || (tokens.length == 0)) {
+            if ((tokens == null) || (tokens.length == 0)) {
                 throw new IllegalArgumentException("null or empty metric key");
             }
             String name = tokens[0];
             if (tokens.length == 1) {
                 // No tags ( ["metricName"] )
                 return new MetricKey(name);
-            } else
-            {
+            } else {
                 // Some tags: parse them ( ["metricName", "tag1=tag1Val" , "tag2=tag2val"] )
                 Map<String, String> tags = new HashMap<String, String>();
-                for (int i=1 ; i < tokens.length ; i++) {
+                for (int i = 1; i < tokens.length; i++) {
                     // "tag1=tag1Val"
                     String tagAndValues = tokens[i];
                     String[] tagAndValue = tagAndValues.split("=");
-                    if ( (tagAndValue == null) || (tagAndValue.length != 2) ) {
+                    if ((tagAndValue == null) || (tagAndValue.length != 2)) {
                         throw new IllegalArgumentException("tag component has wrong format: " + tagAndValue);
                     }
                     tags.put(tagAndValue[0], tagAndValue[1]);

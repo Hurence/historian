@@ -7,6 +7,7 @@ import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.apache.commons.math3.stat.regression.SimpleRegression;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Value
 @Builder
@@ -26,7 +27,8 @@ public class TimeseriesAnalyzer {
 
         TimeseriesAnalysis.TimeseriesAnalysisBuilder builder = TimeseriesAnalysis.builder();
         DescriptiveStatistics stats = new DescriptiveStatistics();
-        values.forEach(stats::addValue);
+        List<Double> nonNanValues = values.stream().filter(v -> !v.isNaN()).collect(Collectors.toList());
+        nonNanValues.forEach(stats::addValue);
 
         if (computeStats) {
             builder.mean(stats.getMean())
@@ -34,6 +36,7 @@ public class TimeseriesAnalyzer {
                     .last(values.size() == 0 ? Double.NaN : values.get(values.size() - 1))
                     .min(stats.getMin())
                     .max(stats.getMax())
+                    .variance(stats.getVariance())
                     .stdDev(stats.getStandardDeviation())
                     .sum(stats.getSum())
                     .kurtosis(stats.getKurtosis())
@@ -43,7 +46,9 @@ public class TimeseriesAnalyzer {
         if (computeTrend) {
             SimpleRegression regression = new SimpleRegression();
             for (int i = 0; i < timestamps.size(); i++) {
-                regression.addData(timestamps.get(i), values.get(i));
+
+                if (!values.get(i).isNaN())
+                    regression.addData(timestamps.get(i), values.get(i));
             }
             builder.hasTrend(regression.getSlope() > 0);
         }
@@ -57,7 +62,7 @@ public class TimeseriesAnalyzer {
             // Calculate the threshold
             double threshold = (q3 - q1) * 1.5 + q3;
             // filter the values, if one outlier is found, we can return
-            for (double point : values) {
+            for (double point : nonNanValues) {
                 if (point > threshold) {
                     builder.hasOutlier(true);
                     break;

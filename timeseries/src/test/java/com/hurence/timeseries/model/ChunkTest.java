@@ -142,16 +142,23 @@ public class ChunkTest {
     }
 
 
-    Measure randomMeasure(String name, Map<String,String> tags) {
+    Measure randomMeasure(String name, Map<String, String> tags) {
+        float newQuality = (float) (Math.random() * 100.0f);
+        return randomMeasure(name,tags,newQuality);
+    }
+
+
+    Measure randomMeasure(String name, Map<String, String> tags, float fixedQuality) {
         DateTime time = new DateTime(1977,3,2,2,13)
                 .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
         String day = time.toString("yyyy-MM-dd");
 
         long newTimestamp = time.getMillis() + (long) (Math.random() * 1000L);
+
         return Measure.builder()
                 .name(name)
                 .value(Math.random())
-                .quality( (float) (Math.random() * 100.0f))
+                .quality( fixedQuality)
                 .timestamp(newTimestamp)
                 .tags(tags)
                 .build();
@@ -169,6 +176,54 @@ public class ChunkTest {
         for(int i=0; i<100; i++)
             inputMeasures.add(randomMeasure(name, tags));
 
+        // convert them as a Chunk
+        MeasuresToChunk converter = new MeasuresToChunkVersionCurrent("test");
+        Chunk chunk = converter.buildChunk(name, inputMeasures, tags);
+
+        // convert back to measures
+        ChunkToMeasures chunkToMeasures = new ChunkToMeasuresConverter();
+        TreeSet<Measure> outputMeasures = chunkToMeasures.buildMeasures(chunk);
+
+        // check if this is the same
+        Assertions.assertEquals(new ArrayList<>(inputMeasures), new ArrayList<>(outputMeasures));
+    }
+
+    @Test
+    public void testNoTags() {
+        // build a bunch of random measures
+        String name = "cpu";
+
+        TreeSet<Measure> inputMeasures = new TreeSet<>();
+        for(int i=0; i<20; i++)
+            inputMeasures.add(randomMeasure(name, null));
+
+        for(int i=0; i<20; i++)
+            inputMeasures.add(randomMeasure(name, new HashMap<>()));
+
+        // convert them as a Chunk
+        MeasuresToChunk converter = new MeasuresToChunkVersionCurrent("test");
+        Chunk chunk = converter.buildChunk(name, inputMeasures, null);
+
+        // convert back to measures
+        ChunkToMeasures chunkToMeasures = new ChunkToMeasuresConverter();
+        TreeSet<Measure> outputMeasures = chunkToMeasures.buildMeasures(chunk);
+
+        // check if this is the same
+        Assertions.assertEquals(new ArrayList<>(inputMeasures), new ArrayList<>(outputMeasures));
+    }
+
+    @Test
+    public void testNoQuality() {
+        String name = "cpu";
+        Map<String, String> tags = new HashMap<String, String>() {{
+            put("couNtry", "France");
+            put("usine", "usine 2 ;;Alpha go");
+        }};
+        TreeSet<Measure> inputMeasures = new TreeSet<>();
+        for(int i=0; i<100; i++)
+            inputMeasures.add(randomMeasure(name, tags, Float.NaN));
+        for(int i=0; i<100; i++)
+            inputMeasures.add(randomMeasure(name, tags));
         // convert them as a Chunk
         MeasuresToChunk converter = new MeasuresToChunkVersionCurrent("test");
         Chunk chunk = converter.buildChunk(name, inputMeasures, tags);
