@@ -1,11 +1,11 @@
 package com.hurence.timeseries.converter;
 
 
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent;
 import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.model.solr.Schema;
 import com.hurence.historian.model.solr.SolrField;
 import com.hurence.timeseries.model.Chunk;
-import com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
