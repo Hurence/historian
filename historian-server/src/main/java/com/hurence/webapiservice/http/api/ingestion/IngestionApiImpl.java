@@ -39,7 +39,7 @@ public class IngestionApiImpl implements IngestionApi {
             JsonObject errorObject = new JsonObject().put(HistorianServiceFields.ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage("BAD REQUEST");
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
             context.response().end(errorObject.encodePrettily());
             return;

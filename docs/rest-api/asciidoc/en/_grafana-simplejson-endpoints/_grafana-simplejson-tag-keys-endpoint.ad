@@ -1,0 +1,73 @@
+[[grafana-simplejson-tag-keys]]
+===== POST /api/grafana/simplejson/tag-keys
+
+Used to find out the keys that can be used in the _tag_values_ endpoint.
+
+Example of a request:
+
+[source,json]
+----
+{}
+----
+
+Example of a response:
+
+[source,json]
+----
+[
+    {"type":"string","text":"City"},
+    {"type":"string","text":"Country"}
+]
+----
+
+The values in "text" are the values usable as a key in the endpoint tag-values.
+
+.Parameters for the request
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/range/from
+|String
+|The start date to search for annotations. Only annotations with a
+date greater than or equal to this date.
+|No
+|Must represent a date in the following format (UTC): * yyyy-MM-dd'T'HH: mm: ss.SSS *
+|January 1, 1970 (UTC)
+
+|/range/to
+|String
+|The end date to search for annotations. Only annotations with a date less than or equal to this date.
+|No
+|Must represent a date in the following format (UTC): * yyyy-MM-dd'T'HH: mm: ss.SSS *
+|The default is infinity
+
+|/limit
+|Integer
+|The maximum number of annotations to return
+|No
+|positive integer
+|100
+
+|/tags
+|Liste de string
+|The name of the tags to filter the annotations. The behavior depends on the value of the _ / type_ field
+|No
+|
+|[] (empty array)
+
+|/matchAny
+|Boolean
+|If the _type_ field is worth _TAGS_. If _true_ the annotations must have at least one of the tags in the _tags_ field, otherwise the annotations must contain all the tags.
+|No
+|
+|true
+
+|/type
+|String
+|The type of request. If the value is "ALL", all annotations in the time range will be returned.
+If the type is "TAGS", the annotations must also contain tags (either all or at least one depending on the value of _matchAny_).
+|No
+|one value from [ALL, TAGS]
+|ALL
+|===

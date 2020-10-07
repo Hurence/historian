@@ -1,0 +1,176 @@
+[[grafana-hurence-datasource-query]]
+===== POST {grafana-hurence-query-endpoint}
+
+====== General description
+
+Used to search for points for the desired metrics. Various parameters are available.
+
+
+.Parameters for the request
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/names
+|array
+|Allows you to enter the metrics for which you want to obtain points.
+|Yes
+|
+|
+
+|from
+|String
+|The start date to search for points. Only points with a date greater than or equal to this date.
+|No
+|Must represent a date in the following format (UTC): * yyyy-MM-dd'T'HH: mm: ss.SSS *
+|January 1, 1970 (UTC)
+
+|to
+|String
+|The end date to search for points. Only points with a date less than or equal to this date.
+|No
+|Must represent a date in the following format (UTC): * yyyy-MM-dd'T'HH: mm: ss.SSS *
+|The default is infinity
+
+|/max_data_points
+|long
+|The maximum number of points desired for each metric (Indeed the goal is to draw points on a graph). If necessary the points will be sampled with a default sampling algorithm.
+|No
+|positive
+|1000
+
+|/sampling
+|String
+|An object which will contain the information of the parameters to be used for the sampling of the points if the number of points to return is greater than the maximum number of points requested.
+|No
+|
+|
+
+|/sampling/algorithm
+|String
+|L'algorithme à utiliser pour l'échantillonnage
+|No
+|les valeurs possibles sont ["NONE", "AVERAGE", "FIRST", "MIN", "MAX"]
+|AVERAGE (la moyenne des points pour chaque bucket, le timestamp utilisé est celui du premier point du bucket)
+
+|/sampling/bucket_size
+|Int
+|The size of the buckets desired to sample the data. Please note this size can be changed by the server if this is incompatible with the maximum number of points returned desired.
+|No
+|
+|Automatically computed by the server in order to obtain at most the maximum number of points.
+
+|/tags
+|String
+|Allows you to obtain only the points of the chunks which contain the filled tags. The tags must be indicated in the form of a key / value map.
+|No
+|
+|no tags.
+
+|===
+
+
+====== Example
+
+======= Minimal Example
+
+Request :
+
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-query-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "names": ["temp"]
+}'
+----
+
+warn:: This request ask for ALL data for the metric "temp".
+
+Response :
+
+[source,json]
+----
+[
+  {
+    "name":"temp",
+    "datapoints":[
+      [1.0,100],
+      [1.2,200]
+    ],
+    "total_points":2
+  }
+]
+----
+
+======= Example with sampling, aggregations, quality in a specific time range.
+
+Request :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST http://localhost:8080{grafana-hurence-query-endpoint} -H 'Content-Type: application/json' \
+-d '{
+    "from": "1969-10-31T06:33:44.866Z",
+    "to": "2030-10-31T12:33:44.866Z",
+    "names": ["temp"],
+    "max_data_points": 30,
+    "sampling":{
+        "algorithm": "MIN",
+        "bucket_size" : 100
+    },
+    "aggregations" : ["MIN", "MAX"],
+    "return_with_quality": true
+}'
+----
+
+Response :
+
+[source,json]
+----
+[
+  {
+    "name":"temp",
+    "datapoints":[
+      [1.0,100,1.0]
+    ],
+    "total_points":1,
+    "aggregation":{
+      "MIN":1.0,
+      "MAX":1.2
+    }
+  }
+]
+----
+
+======= Example with tag and quality
+
+Request :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+  http://localhost:8080{grafana-hurence-query-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "names": ["temp"],
+  "max_data_points": 30,
+  "tags":{
+     "Country": "France"
+  },
+  "aggregations" : ["MIN", "MAX"],
+  "quality":{
+     "quality_value": 0.9,
+     "quality_agg" : "MIN"
+  },
+  "return_with_quality": true
+}'
+----
+
+Response :
+
+TODO does not work at the moment problème avec la section quality =>
+
+http://localhost:8983/solr/historian:'rollup(select(search(historian, q=chunk_start:[* TO 9223372036854775807] AND chunk_end:[0 TO *], fl="name,chunk_count,chunk_quality_avg", qt="/export", sort="name asc"), name,chunk_count,chunk_quality_avg,and (eq(name,temp), gteq(chunk_quality_avg,1.0)) as is_quality_ok), over="name,is_quality_ok", sum("chunk_count), count(*))' is not a proper expression clause

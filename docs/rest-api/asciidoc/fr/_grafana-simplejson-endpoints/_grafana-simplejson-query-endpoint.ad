@@ -1,0 +1,127 @@
+[[grafana-simplejson-query]]
+===== POST /api/grafana/simplejson/query
+
+
+Permet de rechercher des points pour les métriques désirées. Divers paramètres sont disponibles.
+
+Exemple de requête :
+
+[source,json]
+----
+{
+    "panelId": 1,
+    "range": {
+        "from": "2016-10-31T06:33:44.866Z",
+        "to": "2016-10-31T12:33:44.866Z",
+        "raw": {
+            "from": "now-6h",
+            "to": "now"
+        }
+    },
+    "rangeRaw": {
+        "from": "now-6h",
+        "to": "now"
+    },
+    "interval": "30s",
+    "intervalMs": 30000,
+    "targets": [
+        { "target": "upper_50", "refId": "A", "type": "timeserie" },
+        { "target": "upper_75", "refId": "B", "type": "timeserie" }
+    ],
+    "adhocFilters": [{
+        "key": "City",
+        "operator": "=",
+        "value": "Berlin"
+    }],
+    "format": "json",
+    "maxDataPoints": 550
+}
+----
+
+Exemple de requête minimal :
+
+[source,json]
+----
+{
+    "targets": [
+      { "target": "upper_50" }
+    ]
+}
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possible | valeur par défaut
+
+|/targets
+|array
+|Permet de renseigner les métriques pour lesquelles on souhaite obtenir des points.
+|Oui
+|
+|
+
+|/targets/target
+|String
+|Le nom d'une métrique pour laquelle on souhaite obtenir des points.
+|Oui (au moins une métrique doit être renseignée)
+|
+|
+
+|/range/from
+|String
+|La date de début pour rechercher les points. Il ne sera retourné que les points avec une
+date supérieure ou égale à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
+
+|/range/to
+|String
+|La date de fin pour rechercher les points. Il ne sera retourné que les points avec une
+date inférieure ou égale à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
+
+|/maxDataPoints
+|long
+|Le nombre maximum de point désirés pour chaque métrique (En effet le but est de tracer des points sur un graphe).
+Si nécessaire les points seront échantillonnés avec un algorithme de sampling par défaut.
+|Non
+|positif
+|1000
+
+|/adhocFilters
+|String
+|Utilisé par grafana
+|Non
+|
+|
+|===
+
+
+NOTE: Le reste des paramètres sont des paramètres qui sont envoyés par grafana
+mais qui ne sont pas exploités pour le moment.
+
+Exemple de réponse
+
+[source,json]
+----
+[
+  {
+    "target":"upper_75",
+    "datapoints":[
+      [622,1450754160000],
+      [365,1450754220000]
+    ]
+  },
+  {
+    "target":"upper_90",
+    "datapoints":[
+      [861,1450754160000],
+      [767,1450754220000]
+    ]
+  }
+]
+----

@@ -1,0 +1,4 @@
+[[grafana-simplejson-root]]
+===== GET /api/grafana/simplejson
+
+Cet endpoint renvoie une réponse 200 'OK' si l'historian fonctionne correctement.

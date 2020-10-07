@@ -1,0 +1,60 @@
+[[grafana-hurence-datasource-search-values]]
+===== POST {grafana-hurence-search-values-endpoint}
+
+====== Description Générale
+
+Permet de chercher les différentes valeurs pour la clé indiquée.
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possibles | valeur par défaut
+
+|/field
+|String
+|la clé recherchée.
+|Oui
+|
+|
+
+|/query
+|String
+|Une partie du nom de la clé recherchée.
+|Oui
+|
+|Pas de filtre par défaut
+
+|/limit
+|Int
+|Le nombre maximum de noms de métriques à retourner.
+|Non
+|
+|100
+
+|===
+
+NOTE: Le paramètres query et limit de la requête sont optionnels.
+
+
+====== Exemple
+
+Requête :
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-values-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "field": "name",
+  "query": "no",
+  "limit": 5
+}'
+----
+
+Réponse :
+
+[source,json]
+----
+["temp_no_points"]
+----

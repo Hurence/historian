@@ -1,0 +1,60 @@
+[[grafana-hurence-datasource-search-values]]
+===== POST {grafana-hurence-search-values-endpoint}
+
+====== General description
+
+Allows you to search for the different values for the indicated key.
+
+
+.Parameters of the request
+[cols="13,10,40,7,20,10"]
+|===
+| json path  | type | description | mandatory | possible values | default value
+
+|/field
+|String
+|the searched key.
+|Yes
+|
+|
+
+|/query
+|String
+|Part of the name of the key you are looking for.
+|Yes
+|
+|No filter
+
+|/limit
+|Int
+|The maximum number of metric names to return.
+|No
+|
+|100
+
+|===
+
+NOTE: The query and limit parameters of the query are optional.
+
+====== Example
+
+Request :
+
+[source,curl,subs="attributes"]
+----
+curl -v -X POST \
+  http://localhost:8080{grafana-hurence-search-values-endpoint} \
+  -H 'Content-Type: application/json' \
+  -d '{
+  "field": "name",
+  "query": "no",
+  "limit": 5
+}'
+----
+
+Response :
+
+[source,json]
+----
+["temp_no_points"]
+----

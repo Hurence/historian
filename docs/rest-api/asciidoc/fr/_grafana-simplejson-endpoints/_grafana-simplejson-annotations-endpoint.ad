@@ -1,0 +1,89 @@
+[[grafana-simplejson-annotations]]
+===== POST /api/grafana/simplejson/annotations
+
+Permet de chercher les annotations.
+
+Exemple de requête :
+
+[source,json]
+----
+{
+  "range": {
+    "from": "2020-2-14T01:43:14.070Z",
+    "to": "2020-2-14T06:50:14.070Z"
+  },
+  "limit" : 100,
+  "tags": ["tag1", "tag2"],
+  "matchAny": false,
+  "type": "tags"
+}
+----
+
+Exemple de réponse actuelle
+
+[source,json]
+----
+[
+  {
+    "annotation": "annotation",
+    "time": "time",
+    "title": "title",
+    "tags": "tags",
+    "text": "text"
+  }
+]
+----
+
+.Paramètres de la requête
+[cols="13,10,40,7,20,10"]
+|===
+| json path | type | description | requis | valeurs possibles | valeur par défaut
+
+|/range/from
+|String
+|La date de début pour rechercher les annotations. Il ne sera retourné que les annotations avec une
+date supérieure ou égale à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|Le 1 Janvier 1960 (UTC)
+
+|/range/to
+|String
+|La date de fin pour rechercher les annotations. Il ne sera retourné que les annotations avec une
+date inférieure ou égale à cette date.
+|Non
+|Doit réprésenter une date au format suivant (UTC) : *yyyy-MM-dd'T'HH:mm:ss.SSS*
+|La valeur par défaut est l'infini
+
+|/limit
+|Integer
+|Le nombre maximum d'annotations à renvoyer
+|Non
+|entier positif
+|100
+
+|/tags
+|Liste de string
+|Le nom des tags pour filtrer les annotations. Le comportement dépend de la valeur du champs _/type_
+|Non
+|
+|[] (empty array)
+
+|/matchAny
+|Boolean
+|Si le champs _type_ vaut _TAGS_. Si _true_ les annotations doivent avoir au moins un des tags du champs _tags_
+sinon les annotations doivent contenir tous les tags.
+|Non
+|
+|true
+
+|/type
+|String
+|Le type de requête. Si la valeur est "ALL", toutes les annotations dans l'interval de temps seront renvoyées.
+Si le type est "TAGS", les annotations devront en plus contenir des tags (soit tous soit au moins un selon
+la valeur de _matchAny_.
+|Non
+|une valeur parmis [ALL, TAGS]
+|ALL
+|===
+
