@@ -1,0 +1,3 @@
+{
+  "errors": "can't use both mapping.name and custom.name in the attributes"
+}
