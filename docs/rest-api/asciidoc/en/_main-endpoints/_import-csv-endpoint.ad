@@ -1,0 +1,338 @@
+[[import-csv]]
+===== POST {import-csv-endpoint}
+
+====== General description
+
+This request allows to inject data points from CSV files.
+The format of the http request must be Content-Type: multipart/form-data;
+
+.Request parameters
+[cols="10,7,39,7,30,7"]
+|===
+| attribute | multivalued | description | mandatory | possible values | default value
+
+|my_csv_file
+|Yes
+|the path of the csv files to import. Please note that each file is imported individually independently.
+In other words, listing several files or making a request per file is equivalent. The settings of the request
+are common to all the files listed in the request. The files must contain a header.
+|Yes
+|
+|
+
+|mapping.name
+|No
+|the name of the column that corresponds to "name". It is the main identifier of a metric.
+|No
+|must be a column name from the header of the attached csv files.
+|"metric"
+
+|mapping.value
+|No
+|the name of the column that corresponds to "value". It is the point value.
+The values in this column must be numeric values.
+|No
+|must be a column name from the header of the attached csv files.
+|"value"
+
+|mapping.timestamp
+|No
+|The name of the header column which corresponds to "timestamp". It is the date of the point.
+By default this column must contain an epoch timestamp in milliseconds (see <<import-csv-format_date,format_date>>)
+|No
+|must be a column name from the header of the attached csv files.
+|"timestamp"
+
+|mapping.quality
+|No
+|The name of the header column which corresponds to "quality". It is the quality of the point
+(quality is currently not stored in the historian - next release will provide quality)
+|No
+|must be a column name from the header of the attached csv files.
+|"quality"
+
+|mapping.tags
+|Yes
+|The names of the header columns to be considered as a tag. Tags are concepts that describe the metric in addition to its
+name ("name" column). All columns not entered in the mapping will be ignored during the injection.
+|No
+|must be a column name from the header of the attached csv files.
+|
+
+[[import-csv-format_date]]
+|format_date
+|No
+|The expected format for the values in the "timestamp" column.
+|No
+|Must be a value in: [MILLISECONDS_EPOCH,SECONDS_EPOCH,MICROSECONDS_EPOCH,NANOSECONDS_EPOCH]
+NANOSECONDS_EPOCH :  the value must be the number of nanoseconds since January 1, 1970 UTC.
+MICROSECONDS_EPOCH : the value must be the number of microseconds since January 1, 1970 UTC.
+MILLISECONDS_EPOCH : the value must be the number of milliseconds since January 1, 1970 UTC.
+SECONDS_EPOCH : the value must be the number of seconds since January 1, 1970 UTC.
+Or another value, in this case this value must be a valid date format, for example "yyyy-mm-dd".
+|"MILLISECONDS_EPOCH"
+
+|timezone_date
+|No
+|the timezone for the dates in the csv.
+|No
+|must be a valid timezone.
+|"UTC"
+
+|group_by
+|Yes
+|This parameter is very important! If it is misused it is possible to corrupt already existing data.
+List all the fields that will be used to build the chunks here. By default we group the points
+in chunk only according to their name. However, it is also possible to group according to the value of
+some tags. Be aware that this will impact the way the data will be retrieved later.
+For example if we inject data by grouping by "name" and the tag "factory". Then we can request the values
+for each factory by filtering on the correct value of the factory tag (see the API to request the points). Only if
+thereafter someone injects other data without grouping by the tag "factory" then the data will find themselves mixed.
+|No
+|Accepted values are "name" (whatever the mapping, use "name" and not the name of the column in the csv).
+Otherwise the other accepted values are the column names added as a tag.
+|"name"
+
+|===
+
+* If there is a problem with the request we receive a 400 BAD_REQUEST response.
+
+* If everything went well we receive a 201 CREATED response:
+
+.Response description
+[cols="13,10,40"]
+|===
+| json path | type | description
+
+|tags
+|array
+|the tags entered in the request.
+
+|grouped_by
+|array
+|the fields that are used for the group by (completed in the request).
+
+|report
+|json object
+|a report on the chunks that were injected.
+
+|===
+
+====== Examples
+
+======= Example 1
+
+Example of a minimal curl command :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/file.csv'
+----
+
+Content of the csv file used :
+
+[source,csv]
+----
+metric,timestamp,value
+metric_1, 1, 1.2
+metric_1, 2, 2
+metric_1, 3, 3
+----
+
+Here the answer :
+
+[source,json]
+----
+{
+    "tags" : [ ],
+    "grouped_by" : [ "name" ],
+    "report" : [
+        {
+            "name" : "metric_1",
+            "number_of_points_injected" : 3,
+            "number_of_point_failed" : 0,
+            "number_of_chunk_created" : 1
+        }
+    ]
+}
+----
+
+======= Example 2
+
+Example of a curl command :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/file.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-dd-MM HH:mm:ss.SSS \
+-F timezone_date=UTC
+----
+
+Content of the csv file used :
+
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-01-01 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+
+Here the answer :
+
+[source,json]
+----
+{
+    "tags" : [ "sensor", "code_install" ],
+    "grouped_by" : [ "name", "sensor" ],
+    "report" : [ {
+        "name" : "metric_1",
+        "sensor" : "sensor_1",
+        "number_of_points_injected" : 2,
+        "number_of_point_failed" : 0,
+        "number_of_chunk_created" : 1
+    }, {
+        "name" : "metric_1",
+        "sensor" : "sensor_2",
+        "number_of_points_injected" : 1,
+        "number_of_point_failed" : 0,
+        "number_of_chunk_created" : 1
+    }, {
+        "name" : "metric_2",
+        "sensor" : "sensor_2",
+        "number_of_points_injected" : 1,
+        "number_of_point_failed" : 0,
+        "number_of_chunk_created" : 1
+    }]
+}
+----
+
+======= Example 3
+
+Example of a curl command :
+
+[source,curl,subs="attributes"]
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@/path/de/mon/csv/file.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-dd-MM HH:mm:ss.SSS \
+-F timezone_date=UTC
+----
+
+Content of the csv file used :
+
+[source,yml]
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-01-01 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+
+Here the answer :
+
+[source,json]
+----
+{
+  "tags" : [ "sensor", "code_install" ],
+  "grouped_by" : [ "name", "sensor" ],
+  "report" : [ {
+    "name" : "metric_1",
+    "sensor" : "sensor_1",
+    "number_of_points_injected" : 4,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 2
+  }, {
+    "name" : "metric_1",
+    "sensor" : "sensor_2",
+    "number_of_points_injected" : 2,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 2
+  }, {
+    "name" : "metric_2",
+    "sensor" : "sensor_2",
+    "number_of_points_injected" : 2,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 2
+  } ]
+}
+----
+Note::  We notice that we uses twice the same file with the same parameters. If a file is injected several time with the same setup
+then the chunks will be created only one time. There will have no duplicate in this case.
+
+Reminder:: A chunk is created for every metric name, tags that has been chosen and for every day !
+
+
+======= Example with an empty file
+
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/empty.csv' \
+----
+
+[source,json]
+----
+{
+    "errors" : [
+        {
+            "file" : "empty.csv",
+            "cause" : "The csv contains Empty header line: can not bind data\n at [Source: UNKNOWN; line: 1, column: -1] lines which is more than the max number of line of 5000"
+        }
+    ]
+}
+----
+
+======= Example with a file containig just the header
+
+----
+curl -X POST \
+http://localhost:8080{import-csv-endpoint} \
+-F 'my_csv_file=@/path/de/mon/csv/header.csv' \
+----
+
+[source,json]
+----
+{
+    "errors" : [
+        {
+            "file" : "header.csv",
+            "cause" : "Empty request body"
+        }
+    ]
+}
+----
+
+====== Troubleshoot
+
+If the file specified in the curl command does not exist, you should have this kind of answers :
+
+[source,bash]
+----
+Warning: setting file path/de/mon/csv/file.csv  failed!
+curl: (26) read function returned funny value
+----

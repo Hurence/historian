@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.util.ErrorMsgHelper;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.models.ResponseAsList;
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
+import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.MultiTimeSeriesExtracter;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
@@ -38,7 +40,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
     public void root(RoutingContext context) {
         context.response()
                 .setStatusCode(200)
-                .end("Historian grafana api is Working fine");
+                .end("Historian api is Working fine");
     }
 
     @Override
@@ -55,9 +57,9 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         } catch (Exception ex) {
             LOGGER.debug("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(ex.getMessage());
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
             return;
         }
 
@@ -65,9 +67,9 @@ public class MainHistorianApiImpl implements MainHistorianApi {
         if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
             LOGGER.debug("error max data measures too large");
             context.response().setStatusCode(PAYLOAD_TOO_LARGE);
-            context.response().setStatusMessage("max data measures is bigger than allowed");
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end();
+            context.response().end("max data measures is bigger than allowed");
             return;
         }
 
@@ -123,7 +125,6 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                     context.response().end(timeseries);
                 }).subscribe();
     }
-
 
     private JsonObject buildGetTimeSeriesRequest(QueryRequestParam request) {
         SamplingConf samplingConf = request.getSamplingConf();

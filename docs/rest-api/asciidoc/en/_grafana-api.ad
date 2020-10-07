@@ -1,0 +1,7 @@
+=== Interactions with Grafana
+
+The APIs below are used to interact with Grafana using certain data sources (a concept of Grafana). Depending on which plugin version you use(SimpleJson or the more recent Historian one), you will have to use the corresponding API.
+
+include::./_grafana-hurence-api.ad[]
+
+include::./_grafana-simplejson-api.ad[]
