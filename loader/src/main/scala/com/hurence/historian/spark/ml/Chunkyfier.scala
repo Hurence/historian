@@ -49,30 +49,42 @@ final class Chunkyfier(override val uid: String)
 
 
   val valueCol: Param[String] = new Param[String](this, "valueCol", "column name for value")
+
   def setValueCol(value: String): this.type = set(valueCol, value)
+
   setDefault(valueCol, FIELD_VALUE)
 
   val qualityCol: Param[String] = new Param[String](this, "qualityCol", "column name for quality")
+
   def setQualityCol(value: String): this.type = {
     set(qualityCol, value)
   }
+
   setDefault(qualityCol, FIELD_QUALITY)
 
   val origin: Param[String] = new Param[String](this, "origin", "which historian component wrote this chunk")
+
   def setOrigin(value: String): this.type = set(origin, value)
+
   setDefault(origin, ChunkOrigin.INJECTOR.toString)
 
   val timestampCol: Param[String] = new Param[String](this, "timestampCol", "column name for timestamp")
+
   def setTimestampCol(value: String): this.type = set(timestampCol, value)
+
   setDefault(timestampCol, FIELD_TIMESTAMP)
 
   val dropLists: Param[Boolean] = new Param[Boolean](this, "dropLists", "do we drop the values and timestamps columns")
+
   def doDropLists(value: Boolean): this.type = set(dropLists, value)
+
   setDefault(dropLists, true)
 
 
   val dateBucketFormat: Param[String] = new Param[String](this, "dateBucketFormat", "date bucket format as java string date")
+
   def setDateBucketFormat(value: String): this.type = set(dateBucketFormat, value)
+
   setDefault(dateBucketFormat, "yyyy-MM-dd")
 
   /**
@@ -81,34 +93,45 @@ final class Chunkyfier(override val uid: String)
     * @group param
     */
   final val groupByCols: StringArrayParam = new StringArrayParam(this, "groupByCols", "group by column names")
+
   def setGroupByCols(value: Array[String]): this.type = set(groupByCols, value)
 
 
   val saxAlphabetSize: Param[Int] = new Param[Int](this, "saxAlphabetSize",
     "the SAX akphabet size.",
     ParamValidators.inRange(0, 20))
+
   def setSaxAlphabetSize(value: Int): this.type = set(saxAlphabetSize, value)
+
   setDefault(saxAlphabetSize, 5)
 
   val saxStringLength: Param[Int] = new Param[Int](this, "saxStringLength",
     "the SAX string length",
     ParamValidators.inRange(0, 10000))
+
   def setSaxStringLength(value: Int): this.type = set(saxStringLength, value)
+
   setDefault(saxStringLength, 20)
 
   val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
     "the chunk max measures count",
     ParamValidators.inRange(0, 100000))
+
   def setChunkMaxSize(value: Int): this.type = set(chunkMaxSize, value)
+
   setDefault(chunkMaxSize, 1440)
 
 
   final val chunkValueCol: Param[String] = new Param[String](this, "chunkValueCol", "column name for chunk Value")
+
   def setChunkValueCol(value: String): this.type = set(chunkValueCol, value)
+
   setDefault(chunkValueCol, FIELD_VALUE)
 
   final val tagsCol: Param[String] = new Param[String](this, "tagsCol", "column name for tags")
+
   def setTagsCol(value: String): this.type = set(tagsCol, value)
+
   setDefault(tagsCol, FIELD_TAGS)
 
 
@@ -124,19 +147,37 @@ final class Chunkyfier(override val uid: String)
       .orderBy(col($(timestampCol)))
 
     var baseDf = df
-    // If no quality column has in the input df, create one default with NaN as value
+    // If no quality column in the input df, create one default with NaN as value
     if (!baseDf.schema.fieldNames.contains($(qualityCol))) {
       baseDf = baseDf.withColumn(FIELD_QUALITY, lit(Float.NaN))
     }
 
-    val groupedDF = baseDf
+    val noTags = if (!baseDf.schema.fieldNames.contains($(tagsCol))) {
+      true
+    } else false
+
+    val groupedBy = baseDf
       .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
       .withColumn(COLUMN_VALUES, collect_list(col($(valueCol))).over(w))
       .withColumn(COLUMN_TIMESTAMPS, collect_list(col($(timestampCol))).over(w))
       .withColumn(COLUMN_QUALITIES, collect_list(col($(qualityCol))).over(w))
       .groupBy(groupingCols: _*)
+
+    val groupedDF = if (noTags) {
       // compute all the stats and aggregations here
-      .agg(
+      groupedBy.agg(
+        last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
+        last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
+        last(col(COLUMN_QUALITIES)).as(COLUMN_QUALITIES),
+        min(col($(timestampCol))).as(FIELD_START),
+        max(col($(timestampCol))).as(FIELD_END),
+        min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
+        max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
+        first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
+        sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
+        avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
+    } else {
+      groupedBy.agg(
         last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
         last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
         last(col(COLUMN_QUALITIES)).as(COLUMN_QUALITIES),
@@ -148,6 +189,7 @@ final class Chunkyfier(override val uid: String)
         first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
         sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
         avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
+    }
 
     groupedDF
       // compute analysis from values & timestamps lists
@@ -170,10 +212,14 @@ final class Chunkyfier(override val uid: String)
         groupedDF.col(COLUMN_VALUES)))
       // drop temporary values timestamps and qualities columns
       .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS, COLUMN_QUALITIES)
-      .select("*","analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev","analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
+      .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev","analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
       .map(r => {
 
-        val tags = r.getAs[Map[String, String]](FIELD_TAGS).map( t => (t._1, if(t._2 != null) t._2 else "null" ))
+        val tags = if (noTags) {
+          Map[String, String]()
+        } else {
+          r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
+        }
 
         Chunk.builder()
           .name(r.getAs[String](FIELD_NAME))
