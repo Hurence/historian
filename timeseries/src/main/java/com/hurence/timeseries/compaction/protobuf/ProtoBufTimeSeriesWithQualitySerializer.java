@@ -34,7 +34,7 @@ public final class ProtoBufTimeSeriesWithQualitySerializer {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(   ProtoBufTimeSeriesWithQualitySerializer.class);
 
-    private static final float DEFAULT_QUALITY_EQUALS = 0.1f;
+    private static final float DEFAULT_QUALITY_EQUALS = 0.0f;
     /**
      * Private constructor
      */

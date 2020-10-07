@@ -139,7 +139,7 @@ public class ChunkFromJsonObjectVersionCurrent extends Chunk {
 
     @Override
     public SchemaVersion getVersion() {
-        return SchemaVersion.VERSION_0;
+        return SchemaVersion.getCurrentVersion();
     }
 
     @Override

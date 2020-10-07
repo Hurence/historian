@@ -11,6 +11,9 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
+
 public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
 
     private static Logger LOGGER = LoggerFactory.getLogger(MultiTimeSeriesExtracterImpl.class);
@@ -83,9 +86,9 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
                 .filter(entry -> !entry.getValue().getTimeSeries().isEmpty())
                 .map(entry -> {
                     JsonObject timeSerie = new JsonObject();
-                    timeSerie.put(TIMESERIE_NAME, entry.getKey().getName());
+                    timeSerie.put(FIELD_NAME, entry.getKey().getName());
                     if (!entry.getKey().getTags().isEmpty())
-                        timeSerie.put(TIMESERIE_TAGS, entry.getKey().getTags());
+                        timeSerie.put(FIELD_TAGS, entry.getKey().getTags());
                     timeSerie.mergeIn(entry.getValue().getTimeSeries());
                     return timeSerie;
                 })
