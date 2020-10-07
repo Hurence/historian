@@ -10,6 +10,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 
 
 public class IngestionFinalResponseUtil {
@@ -32,7 +34,7 @@ public class IngestionFinalResponseUtil {
         JsonObject finalResponse = new JsonObject();
 
         if (!report.isEmpty())
-            finalResponse.put(TAGS, new JsonArray(csvFilesConvertorConf.getTags()))
+            finalResponse.put(FIELD_TAGS, new JsonArray(csvFilesConvertorConf.getTags()))
                     .put(GROUPED_BY_IN_RESPONSE, new JsonArray(csvFilesConvertorConf.getGroupByListWithNAME()))
                     .put(REPORT, report);
 
@@ -87,10 +89,10 @@ public class IngestionFinalResponseUtil {
                                                                      List<HashMap<String, String>> groupedByFieldsForEveryChunk ) {
         for (Object timeserieObject : timeseriesPoints) {
             JsonObject timeserie = (JsonObject) timeserieObject;
-            JsonObject tagsObject = timeserie.getJsonObject(TAGS);
+            JsonObject tagsObject = timeserie.getJsonObject(FIELD_TAGS);
             HashMap<String, String> groupedByFieldsForThisChunk = new LinkedHashMap<>();
             groupedByFields.forEach(f -> {
-                if (f.toString().equals(NAME))
+                if (f.toString().equals(FIELD_NAME))
                     groupedByFieldsForThisChunk.put(f.toString(),timeserie.getString(f.toString()));
                 else
                     groupedByFieldsForThisChunk.put(f.toString(),tagsObject.getString(f.toString()));
@@ -182,8 +184,8 @@ public class IngestionFinalResponseUtil {
             String valA = "";
             String valB = "";
 
-            valA = (String) a.get(NAME);
-            valB = (String) b.get(NAME);
+            valA = (String) a.get(FIELD_NAME);
+            valB = (String) b.get(FIELD_NAME);
 
             return valA.compareTo(valB);
         });

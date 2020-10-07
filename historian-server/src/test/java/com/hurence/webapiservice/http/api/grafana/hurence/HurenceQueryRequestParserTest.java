@@ -19,6 +19,8 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.stream.IntStream;
 
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.grafana.GrafanaHurenceDatasourcePluginApiImpl.*;
 import static com.hurence.webapiservice.modele.AGG.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -254,12 +256,12 @@ public class HurenceQueryRequestParserTest {
     @Test
     public void testParsingNamesWithComplexTypes() {
         JsonArray names = new JsonArray(Arrays.asList("temp_b",
-                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_a")
-                        .put(HistorianServiceFields.TAGS, new JsonObject()
+                new JsonObject().put(FIELD_NAME, "temp_a")
+                        .put(FIELD_TAGS, new JsonObject()
                                 .put("sensor", "sensor_1")
                         ),
-                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_a")
-                        .put(HistorianServiceFields.TAGS, new JsonObject()
+                new JsonObject().put(FIELD_NAME, "temp_a")
+                        .put(FIELD_TAGS, new JsonObject()
                                 .put("sensor", "sensor_2")
                         )
         ));
@@ -287,8 +289,8 @@ public class HurenceQueryRequestParserTest {
     @Test
     public void testBugWithObjectContainingOnlyName() {
         JsonArray names = new JsonArray(Arrays.asList("temp_b",
-                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_a"),
-                new JsonObject().put(HurenceDatasourcePluginQueryRequestParser.NAME, "temp_b")
+                new JsonObject().put(FIELD_NAME, "temp_a"),
+                new JsonObject().put(FIELD_NAME, "temp_b")
         ));
         JsonObject requestBody = new JsonObject();
         JsonPointer.from(NAMES_JSON_PATH)

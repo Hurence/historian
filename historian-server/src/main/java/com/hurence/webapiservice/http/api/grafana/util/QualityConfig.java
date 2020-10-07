@@ -7,6 +7,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 
+import static com.hurence.timeseries.model.Definitions.*;
+
 
 public class QualityConfig {
 
@@ -72,13 +74,13 @@ public class QualityConfig {
     public String getChunkQualityFieldForSampling() {
         switch (qualityAgg) {
             case AVG:
-                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_AVG;
+                return SOLR_COLUMN_QUALITY_AVG;
             case MIN:
-                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MIN;
+                return SOLR_COLUMN_QUALITY_MIN;
             case MAX:
-                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_MAX;
+                return SOLR_COLUMN_QUALITY_MAX;
             case FIRST:
-                return HistorianChunkCollectionFieldsVersionCurrent.CHUNK_QUALITY_FIRST;
+                return SOLR_COLUMN_QUALITY_FIRST;
             case NONE:
                 return null;
             default:

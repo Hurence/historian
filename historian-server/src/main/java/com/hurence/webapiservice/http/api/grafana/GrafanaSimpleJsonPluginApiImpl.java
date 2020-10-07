@@ -25,6 +25,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.NOT_FOUND;
 
@@ -200,18 +203,18 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
         service
                 .rxGetTimeSeries(getTimeSeriesChunkParams)
                 .map(sampledTimeSeries -> {
-                    JsonArray timeseries = sampledTimeSeries.getJsonArray(HistorianServiceFields.TIMESERIES);
+                    JsonArray timeseries = sampledTimeSeries.getJsonArray(TIMESERIES);
                     if (LOGGER.isDebugEnabled()) {
                         timeseries.forEach(metric -> {
                             JsonObject el = (JsonObject) metric;
-                            String metricName = el.getString(MultiTimeSeriesExtracter.TIMESERIE_NAME);
+                            String metricName = el.getString(FIELD_NAME);
                             int size = el.getJsonArray(TimeSeriesExtracterImpl.TIMESERIE_POINT).size();
                             LOGGER.debug("[REQUEST ID {}] return {} measures for metric {}.",
                                     request.getRequestId(),size, metricName);
                         });
                         LOGGER.debug("[REQUEST ID {}] Sampled a total of {} measures in {} ms.",
                                 request.getRequestId(),
-                                sampledTimeSeries.getLong(HistorianServiceFields.TOTAL_POINTS, 0L),
+                                sampledTimeSeries.getLong(TOTAL_POINTS, 0L),
                                 System.currentTimeMillis() - startRequest);
                     }
                     return timeseries;
@@ -219,9 +222,9 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
                 .map(timeseries -> {
                     timeseries.forEach(timeserie -> {
                         JsonObject timeserieJson = (JsonObject) timeserie;
-                        timeserieJson.put(TARGET, timeserieJson.getValue(HistorianServiceFields.NAME));
-                        timeserieJson.remove(HistorianServiceFields.NAME);
-                        timeserieJson.remove(HistorianServiceFields.TOTAL_POINTS);
+                        timeserieJson.put(TARGET, timeserieJson.getValue(FIELD_NAME));
+                        timeserieJson.remove(FIELD_NAME);
+                        timeserieJson.remove(TOTAL_POINTS);
                     });
                     return timeseries;
                 })
@@ -242,13 +245,13 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
     private JsonObject buildHistorianRequest(QueryRequestParam request) {
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
-                .put(HistorianServiceFields.FROM, request.getFrom())
-                .put(HistorianServiceFields.TO, request.getTo())
-                .put(HistorianServiceFields.NAMES, request.getMetricNames())
-                .put(HistorianServiceFields.TAGS, request.getTags())
-                .put(HistorianServiceFields.SAMPLING_ALGO, samplingConf.getAlgo())
-                .put(HistorianServiceFields.BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(HistorianServiceFields.MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(NAMES, request.getMetricNames())
+                .put(FIELD_TAGS, request.getTags())
+                .put(SAMPLING_ALGO, samplingConf.getAlgo())
+                .put(BUCKET_SIZE, samplingConf.getBucketSize())
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
     }
 
 
@@ -345,12 +348,12 @@ public class GrafanaSimpleJsonPluginApiImpl implements GrafanaSimpleJsonPluginAp
 
     protected JsonObject buildHistorianAnnotationRequest(AnnotationRequest request) {
         return new JsonObject()
-                .put(HistorianServiceFields.FROM, request.getFrom())
-                .put(HistorianServiceFields.TO, request.getTo())
-                .put(HistorianServiceFields.TAGS, request.getTags())
-                .put(HistorianServiceFields.LIMIT, request.getMaxAnnotation())
-                .put(HistorianServiceFields.MATCH_ANY, request.getMatchAny())
-                .put(HistorianServiceFields.TYPE, request.getType());
+                .put(FROM, request.getFrom())
+                .put(TO, request.getTo())
+                .put(FIELD_TAGS, request.getTags())
+                .put(LIMIT, request.getMaxAnnotation())
+                .put(MATCH_ANY, request.getMatchAny())
+                .put(TYPE, request.getType());
     }
 
     /**

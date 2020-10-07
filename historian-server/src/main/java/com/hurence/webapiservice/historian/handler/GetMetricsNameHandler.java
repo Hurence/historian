@@ -20,6 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianServiceFields.METRICS;
+import static com.hurence.historian.modele.HistorianServiceFields.TOTAL;
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
 
 public class GetMetricsNameHandler {
 
@@ -39,9 +41,9 @@ public class GetMetricsNameHandler {
     public Handler<Promise<JsonObject>> getHandler(JsonObject params) {
 
         String name = params.getString(HistorianServiceFields.METRIC);
-        String queryString =  getHistorianFields().CHUNK_NAME +":*";
+        String queryString =  FIELD_NAME +":*";
         if (name!=null && !name.isEmpty()) {
-            queryString =  getHistorianFields().CHUNK_NAME + ":*" + name + "*";
+            queryString =  FIELD_NAME + ":*" + name + "*";
         }
         SolrQuery query = new SolrQuery(queryString);
         query.setFilterQueries(queryString);
@@ -52,16 +54,16 @@ public class GetMetricsNameHandler {
 //        query.setFacetPrefix("per");
         query.setFacetLimit(max);
         query.setFacetMinCount(1);//number of doc matching the query is at least 1
-        query.addFacetField( getHistorianFields().CHUNK_NAME);
+        query.addFacetField(FIELD_NAME);
         //  EXECUTE REQUEST
         return p -> {
             try {
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
-                FacetField facetField = response.getFacetField( getHistorianFields().CHUNK_NAME);
+                FacetField facetField = response.getFacetField(FIELD_NAME);
                 List<FacetField.Count> facetFieldsCount = facetField.getValues();
                 if (facetFieldsCount.size() == 0) {
                     p.complete(new JsonObject()
-                            .put(HistorianServiceFields.TOTAL, 0)
+                            .put(TOTAL, 0)
                             .put(METRICS, new JsonArray())
                     );
                     return;
@@ -72,7 +74,7 @@ public class GetMetricsNameHandler {
                         .collect(Collectors.toList())
                 );
                 p.complete(new JsonObject()
-                        .put(HistorianServiceFields.TOTAL, facetField.getValueCount())
+                        .put(TOTAL, facetField.getValueCount())
                         .put(METRICS, metrics)
                 );
             } catch (IOException | SolrServerException e) {
