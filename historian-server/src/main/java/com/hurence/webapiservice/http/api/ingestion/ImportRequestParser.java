@@ -1,10 +1,9 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
-import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.webapiservice.http.api.ingestion.util.CsvFileConvertor;
+import com.hurence.webapiservice.http.api.ingestion.util.CsvFilesConvertorConf;
+import com.hurence.webapiservice.http.api.ingestion.util.FileReport;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.core.MultiMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,6 +12,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0.NAME;
+import static com.hurence.historian.modele.HistorianServiceFields.POINTS;
+import static com.hurence.historian.modele.HistorianServiceFields.TAGS;
 
 public class ImportRequestParser {
 
@@ -49,25 +52,25 @@ public class ImportRequestParser {
         CorrectPointsAndErrorMessages correctPointsAndErrorMessages = new CorrectPointsAndErrorMessages();
         for (Object metricsObject : jsonImportRequest) {
             JsonObject timeserie = (JsonObject) metricsObject;
-            if (!(timeserie.containsKey(HistorianServiceFields.NAME)))
+            if (!(timeserie.containsKey(NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(HistorianServiceFields.NAME) == null) && (timeserie.getValue(HistorianServiceFields.POINTS) != null)) || (timeserie.getValue(HistorianServiceFields.NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(HistorianServiceFields.POINTS).size();
-                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" measures for metric with name "+timeserie.getValue(HistorianServiceFields.NAME)+" because this is not a valid name");
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS).size();
+                correctPointsAndErrorMessages.errorMessages.add("Ignored "+ numPoints +" measures for metric with name "+timeserie.getValue(NAME)+" because this is not a valid name");
                 continue;
-            } else if (!(timeserie.getValue(HistorianServiceFields.NAME) instanceof String)) {
+            } else if (!(timeserie.getValue(NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(HistorianServiceFields.POINTS))) {
+            } else if (!(timeserie.containsKey(POINTS))) {
                 throw new IllegalArgumentException("field 'measures' is required");
-            } else if  ((!(timeserie.getValue(HistorianServiceFields.POINTS) instanceof JsonArray)) || (timeserie.getValue(HistorianServiceFields.POINTS)==null)) {
-                throw new IllegalArgumentException("field 'measures' : " + timeserie.getValue(HistorianServiceFields.POINTS) + " is not an array");
+            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
+                throw new IllegalArgumentException("field 'measures' : " + timeserie.getValue(POINTS) + " is not an array");
             }
             JsonObject newTimeserie = new JsonObject();
-            newTimeserie.put(HistorianServiceFields.NAME, timeserie.getString(HistorianServiceFields.NAME));
+            newTimeserie.put(NAME, timeserie.getString(NAME));
             JsonArray newPoints = new JsonArray();
-            for (Object point : timeserie.getJsonArray(HistorianServiceFields.POINTS)) {
+            for (Object point : timeserie.getJsonArray(POINTS)) {
                 JsonArray pointArray;
-                String commonErrorMessage = "Ignored 1 measures for metric with name '" + timeserie.getString(HistorianServiceFields.NAME);
+                String commonErrorMessage = "Ignored 1 measures for metric with name '" + timeserie.getString(NAME);
                 try {
                     pointArray = (JsonArray) point;
                     pointArray.size();
@@ -101,7 +104,7 @@ public class ImportRequestParser {
                 newPoints.add(pointArray);
             }
             if(!newPoints.isEmpty()) {
-                newTimeserie.put(HistorianServiceFields.POINTS, newPoints);
+                newTimeserie.put(POINTS, newPoints);
                 correctPointsAndErrorMessages.correctPoints.add(newTimeserie);
             }
         }
@@ -119,100 +122,159 @@ public class ImportRequestParser {
             this.errorMessages = new ArrayList<>();
         }
     }
-    public CsvFileConvertor.CorrectPointsAndFailedPoints parseCsvImportRequest(JsonArray metricsParam, MultiMap multiMap) throws IllegalArgumentException {
-        if (null == metricsParam) {
+    /**
+     * @param fileInArray              JsonArray
+     * @param csvFilesConvertorConf    CsvFilesConvertorConf
+     * @param fileReport               FileReport
+     *
+     * parse the json and fill the fileReport:
+     *                      - fill the correctPoints
+     *                      - fill the numberOfFailedPointsPerMetric
+     *
+     * @return void
+     */
+    public static FileReport parseCsvImportRequest(JsonArray fileInArray, CsvFilesConvertorConf csvFilesConvertorConf, FileReport fileReport) {
+        if (null == fileInArray) {
             throw new NullPointerException("Null request body");
-        }else if (metricsParam.isEmpty()) {
+        }else if (fileInArray.isEmpty()) {
             throw new IllegalArgumentException("Empty request body");
         }
-        CsvFileConvertor.CorrectPointsAndFailedPoints correctPointsAndFailedPoints = new CsvFileConvertor.CorrectPointsAndFailedPoints();
-        for (Object metricsObject : metricsParam) {
-            JsonObject timeserie = (JsonObject) metricsObject;
+
+        parseEachObjectInTheArray(fileInArray, fileReport, csvFilesConvertorConf);
+
+        if (fileReport.correctPoints.isEmpty())
+            throw new IllegalArgumentException("There is no valid points");
+        return fileReport;
+    }
+
+    /**
+     * @param fileInArray              JsonArray
+     * @param fileReport               FileReport
+     * @param csvFilesConvertorConf    CsvFilesConvertorConf
+     *
+     * parse every object in fileInArray
+     *
+     * @return void
+     */
+    private static void parseEachObjectInTheArray(JsonArray fileInArray, FileReport fileReport, CsvFilesConvertorConf csvFilesConvertorConf) {
+        for (Object timeserieObject : fileInArray) {
+            JsonObject timeserie = (JsonObject) timeserieObject;
+
             int numberOfFailedPointsForThisName = 0;
-            if (!(timeserie.containsKey(HistorianServiceFields.NAME)))
+            if (!(timeserie.containsKey(NAME)))
                 throw new IllegalArgumentException("Missing a name for at least one metric");
-            if (((timeserie.getValue(HistorianServiceFields.NAME) == null) && (timeserie.getValue(HistorianServiceFields.POINTS) != null)) || (timeserie.getValue(HistorianServiceFields.NAME) == "") ) {
-                int numPoints = timeserie.getJsonArray(HistorianServiceFields.POINTS).size();
-                numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints; // TODO see this
+            if (((timeserie.getValue(NAME) == null) && (timeserie.getValue(POINTS) != null)) || (timeserie.getValue(NAME) == "") ) {
+                int numPoints = timeserie.getJsonArray(POINTS).size();
+                numberOfFailedPointsForThisName = numberOfFailedPointsForThisName + numPoints;
                 continue;
-            } else if (!(timeserie.getValue(HistorianServiceFields.NAME) instanceof String)) {
+            } else if (!(timeserie.getValue(NAME) instanceof String)) {
                 throw new IllegalArgumentException("A name is not a string for at least one metric");
-            } else if (!(timeserie.containsKey(HistorianServiceFields.POINTS))) {
+            } else if (!(timeserie.containsKey(POINTS))) {
                 throw new IllegalArgumentException("field 'measures' is required");
-            } else if  ((!(timeserie.getValue(HistorianServiceFields.POINTS) instanceof JsonArray)) || (timeserie.getValue(HistorianServiceFields.POINTS)==null)) {
-                throw new IllegalArgumentException("field 'measures' : " + timeserie.getValue(HistorianServiceFields.POINTS) + " is not an array");
-            }
-            JsonObject newTimeserie = new JsonObject();
-            Set<String> fieldsNamesWithoutPoints = timeserie.fieldNames();
-            fieldsNamesWithoutPoints.forEach(i -> {
-                if (!i.equals(HistorianServiceFields.POINTS))
-                    newTimeserie.put(i, timeserie.getValue(i));
-            });
-            JsonArray newPoints = new JsonArray();
-            for (Object point : timeserie.getJsonArray(HistorianServiceFields.POINTS)) {
-                JsonArray pointArray;
-                try {
-                    pointArray = (JsonArray) point;
-                    pointArray.size();
-                } catch (Exception ex) {
-                    numberOfFailedPointsForThisName++;
-                    continue;
-                }
-                if (pointArray.size() == 0){
-                    numberOfFailedPointsForThisName++;
-                    continue;
-                } else if (pointArray.size() != 2)
-                    throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
-                try {
-                    if (pointArray.getLong(0) == null) {
-                        numberOfFailedPointsForThisName++;
-                        continue;
-                    }
-                } catch (Exception e) {
-                    numberOfFailedPointsForThisName++;
-                    continue;
-                }
-                try {
-                    if ((pointArray.getDouble(1) == null)) {
-                        numberOfFailedPointsForThisName++;
-                        continue;
-                    }
-                } catch (Exception e) {
-                    numberOfFailedPointsForThisName++;
-                    continue;
-                }
-                newPoints.add(pointArray);
-            }
-            if(!newPoints.isEmpty()) {
-                newTimeserie.put(HistorianServiceFields.POINTS, newPoints);
-                correctPointsAndFailedPoints.correctPoints.add(newTimeserie);
-            }
-            int currentNumberOfFailedPoints;
-            LinkedHashMap groupByMap = new LinkedHashMap();
-            if (multiMap != null) {
-                List<String> groupByList = multiMap.getAll(HistorianServiceFields.GROUP_BY).stream().map(s -> {
-                    if (s.startsWith(HistorianServiceFields.TAGS+".")) {
-                        groupByMap.put(s.substring(5), timeserie.getJsonObject(HistorianServiceFields.TAGS).getString(s.substring(5)));
-                        return timeserie.getJsonObject(HistorianServiceFields.TAGS).getString(s.substring(5));
-                    }else if (s.equals(HistorianServiceFields.NAME)) {
-                        groupByMap.put(s, timeserie.getString(s));
-                        return timeserie.getString(s);
-                    } else return null ;
-                }).collect(Collectors.toList());
-                groupByList.remove(null);
-            } else {
-            groupByMap.put(HistorianServiceFields.NAME, timeserie.getString(HistorianServiceFields.NAME));
-            }
-            if (correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.containsKey(groupByMap)) {
-                currentNumberOfFailedPoints = (int) correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.get(groupByMap);
-                correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.put(groupByMap, currentNumberOfFailedPoints+numberOfFailedPointsForThisName);
-            }else {
-                correctPointsAndFailedPoints.numberOfFailedPointsPerMetric.put(groupByMap, numberOfFailedPointsForThisName);
+            } else if  ((!(timeserie.getValue(POINTS) instanceof JsonArray)) || (timeserie.getValue(POINTS)==null)) {
+                throw new IllegalArgumentException("field 'measures' : " + timeserie.getValue(POINTS) + " is not an array");
             }
 
+            JsonObject newTimeserie = getTimeserieWithoutPoints(timeserie);
+
+            numberOfFailedPointsForThisName += parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport, newTimeserie);
+
+            calculateNumberOfFailedPoints(fileReport, csvFilesConvertorConf, timeserie, numberOfFailedPointsForThisName);
+
         }
-        if (correctPointsAndFailedPoints.correctPoints.isEmpty())
-            throw new IllegalArgumentException("There is no valid measures");
-        return correctPointsAndFailedPoints;
+    }
+
+    /**
+     * @param fileReport                         FileReport
+     * @param csvFilesConvertorConf              CsvFilesConvertorConf
+     * @param timeserie                          JsonObject
+     * @param numberOfFailedPointsForThisName    int
+     *
+     * calculate the number of failed points per metric
+     *
+     * @return void
+     */
+    private static void calculateNumberOfFailedPoints(FileReport fileReport, CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie, int numberOfFailedPointsForThisName) {
+        int currentNumberOfFailedPoints;
+        LinkedHashMap<String, String> groupByMap = getGroupedByFields(csvFilesConvertorConf, timeserie);
+        if (fileReport.numberOfFailedPointsPerMetric.containsKey(groupByMap)) {
+            currentNumberOfFailedPoints = fileReport.numberOfFailedPointsPerMetric.get(groupByMap);
+            fileReport.numberOfFailedPointsPerMetric.put(groupByMap, currentNumberOfFailedPoints+numberOfFailedPointsForThisName);
+        }else {
+            fileReport.numberOfFailedPointsPerMetric.put(groupByMap, numberOfFailedPointsForThisName);
+        }
+    }
+
+    private static JsonObject getTimeserieWithoutPoints (JsonObject timeserie) {
+        JsonObject newTimeserie = new JsonObject();
+        timeserie.fieldNames().forEach(i -> {
+            if (!i.equals(POINTS))
+                newTimeserie.put(i, timeserie.getValue(i));
+        });
+        return newTimeserie;
+    }
+
+    private static LinkedHashMap<String, String> getGroupedByFields (CsvFilesConvertorConf csvFilesConvertorConf, JsonObject timeserie) {
+        LinkedHashMap<String, String> groupByMap = new LinkedHashMap<>();
+        csvFilesConvertorConf.getGroupByListWithNAME().forEach(s -> {
+            if (s.equals(NAME))
+                groupByMap.put(s, timeserie.getString(s));
+            else
+                groupByMap.put(s, timeserie.getJsonObject(TAGS).getString(s));
+        });
+        return groupByMap;
+    }
+
+    /**
+     * @param timeserie                         JsonObject
+     * @param numberOfFailedPointsForThisName   int
+     * @param fileReport                        FileReport
+     * @param newTimeserie                      JsonObject
+     *
+     * parse every point in the object
+     *
+     * @return void
+     */
+    private static int parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport, JsonObject newTimeserie) {
+        JsonArray newPoints = new JsonArray();
+        for (Object point : timeserie.getJsonArray(POINTS)) {
+            JsonArray pointArray;
+            try {
+                pointArray = (JsonArray) point;
+                pointArray.size();
+            } catch (Exception ex) {
+                numberOfFailedPointsForThisName++;
+                continue;
+            }
+            if (pointArray.size() == 0){
+                numberOfFailedPointsForThisName++;
+                continue;
+            } else if (pointArray.size() != 2)
+                throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
+            try {
+                if (pointArray.getLong(0) == null) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+            } catch (Exception e) {
+                numberOfFailedPointsForThisName++;
+                continue;
+            }
+            try {
+                if ((pointArray.getDouble(1) == null)) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+            } catch (Exception e) {
+                numberOfFailedPointsForThisName++;
+                continue;
+            }
+            newPoints.add(pointArray);
+        }
+        if(!newPoints.isEmpty()) {
+            newTimeserie.put(POINTS, newPoints);
+            fileReport.correctPoints.add(newTimeserie);
+        }
+        return numberOfFailedPointsForThisName;
     }
 }
