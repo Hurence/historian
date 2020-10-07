@@ -18,6 +18,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_COUNT;
+import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_ORIGIN;
+
 public class AddTimeSeriesHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(AddTimeSeriesHandler.class);
@@ -36,7 +39,7 @@ public class AddTimeSeriesHandler {
     public Handler<Promise<JsonObject>> getHandler(JsonObject timeseriesObject) {
         return p -> {
             try {
-                final String chunkOrigin = timeseriesObject.getString(HistorianServiceFields.ORIGIN, "ingestion-json");
+                final String chunkOrigin = timeseriesObject.getString(SOLR_COLUMN_ORIGIN, "ingestion-json");
                 JsonArray timeseriesPoints = timeseriesObject.getJsonArray(HistorianServiceFields.POINTS);
                 JsonObject response = new JsonObject();
                 Collection<SolrInputDocument> documents = new ArrayList<>();
@@ -49,7 +52,7 @@ public class AddTimeSeriesHandler {
                     document = chunkTimeSerie(timeserie, chunkOrigin);
                     documents.add(document);
                     LOGGER.trace("Adding document :\n {}", document);
-                    long totalNumPointsInChunk = (long) document.getFieldValue(getHistorianFields().CHUNK_COUNT_FIELD);
+                    long totalNumPointsInChunk = (long) document.getFieldValue(SOLR_COLUMN_COUNT);
                     numChunk++;
                     numPoints = numPoints + totalNumPointsInChunk;
                 }

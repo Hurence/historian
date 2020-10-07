@@ -5,7 +5,7 @@
   "format": "json",
   "max_data_points": 4,
   "sampling":{
-    "algorithm": "AVG"
+    "algorithm": "AVERAGE"
   },
   "quality" :  {
     "quality_value" : 0.75,

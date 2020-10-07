@@ -8,6 +8,7 @@ public class HistorianChunkCollectionFieldsVersionCurrent {
     public static String ID = "id";
     public static String VERSION = "version";
     public static String METRIC_KEY = "metric_key";
+    public static String COMPACTIONS_RUNNING = "compactions_running";
     public static String CHUNK_VALUE = "chunk_value";
     public static String CHUNK_START = "chunk_start";
     public static String CHUNK_MAX = "chunk_max";
@@ -32,5 +33,4 @@ public class HistorianChunkCollectionFieldsVersionCurrent {
     public static String CHUNK_QUALITY_MAX = "chunk_quality_max";
     public static String CHUNK_QUALITY_SUM = "chunk_quality_sum";
     public static String CHUNK_QUALITY_FIRST = "chunk_quality_first";
-    // TODO see what other quality aggregs to add
 }

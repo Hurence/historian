@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
-import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.webapiservice.http.api.ingestion.util.CsvFilesConvertorConf;
 import com.hurence.webapiservice.http.api.ingestion.util.MultiCsvFilesConvertor;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import io.vertx.core.json.JsonArray;
@@ -10,8 +10,13 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_ORIGIN;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseJsonImportRequest;
-import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.*;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.fillingAllFilesReport;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.parseFiles;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionFinalResponseUtil.constructFinalResponseCsv;
+import static com.hurence.webapiservice.http.api.ingestion.util.IngestionFinalResponseUtil.constructFinalResponseJson;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.CREATED;
 
@@ -36,7 +41,7 @@ public class IngestionApiImpl implements IngestionApi {
             JsonArray jsonImportRequest = context.getBodyAsJsonArray();
             correctPointsAndErrorMessages = parseJsonImportRequest(jsonImportRequest);
         }catch (Exception ex) {
-            JsonObject errorObject = new JsonObject().put(HistorianServiceFields.ERRORS_RESPONSE_FIELD, ex.getMessage());
+            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
             context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
@@ -44,8 +49,8 @@ public class IngestionApiImpl implements IngestionApi {
             context.response().end(errorObject.encodePrettily());
             return;
         }
-        JsonObject pointsToBeInjected = new JsonObject().put(HistorianServiceFields.POINTS, correctPointsAndErrorMessages.correctPoints)
-                .put(HistorianServiceFields.ORIGIN, "ingestion-json");
+        JsonObject pointsToBeInjected = new JsonObject().put(POINTS, correctPointsAndErrorMessages.correctPoints)
+                .put(SOLR_COLUMN_ORIGIN, "ingestion-json");
 
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
@@ -72,12 +77,34 @@ public class IngestionApiImpl implements IngestionApi {
     public void importCsv(RoutingContext context) {
         LOGGER.trace("received request at importCsv: {}", context.request());
 
+        CsvFilesConvertorConf csvFilesConvertorConf;
         MultiCsvFilesConvertor multiCsvFilesConvertor = new MultiCsvFilesConvertor(context);
 
         try {
-            constructCsvFileConvertors(multiCsvFilesConvertor);
+            csvFilesConvertorConf = new CsvFilesConvertorConf(context.request().formAttributes());
         } catch (Exception ex) {
-            JsonObject errorObject = new JsonObject().put(HistorianServiceFields.ERRORS_RESPONSE_FIELD, ex.getMessage());
+            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
+            LOGGER.error("error parsing attributes", ex);
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end(String.valueOf(errorObject));
+            return;
+        }
+
+        if (multiCsvFilesConvertor.uploads.isEmpty()) {
+            context.response().setStatusCode(BAD_REQUEST);
+            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
+            context.response().putHeader("Content-Type", "application/json");
+            context.response().end(new JsonObject().put(ERRORS_RESPONSE_FIELD, "Request is not containing any files").encodePrettily());
+            return;
+        }
+
+        try {
+            parseFiles(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport, csvFilesConvertorConf);
+            fillingAllFilesReport(multiCsvFilesConvertor.csvFileConvertors, multiCsvFilesConvertor.allFilesReport);
+        } catch (Exception ex) {
+            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
             LOGGER.error("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
             context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
@@ -86,16 +113,16 @@ public class IngestionApiImpl implements IngestionApi {
             return;
         }
 
-        JsonObject finalResponse = constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap);
-        if (multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints.isEmpty()) {
+        if (multiCsvFilesConvertor.allFilesReport.correctPoints.isEmpty()) {
             context.response().setStatusCode(BAD_REQUEST);
             context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
             context.response().putHeader("Content-Type", "application/json");
-            context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles, multiCsvFilesConvertor.multiMap).encodePrettily());
+            context.response().end(new JsonObject().put(ERRORS, multiCsvFilesConvertor.allFilesReport.filesThatFailedToBeImported).encodePrettily());
             return;
         }
-        JsonObject pointsToBeInjected = new JsonObject().put(HistorianServiceFields.POINTS, multiCsvFilesConvertor.correctPointsAndFailedPointsOfAllFiles.correctPoints)
-                .put(HistorianServiceFields.ORIGIN, "ingestion-csv");
+
+        JsonObject pointsToBeInjected = new JsonObject().put(POINTS, multiCsvFilesConvertor.allFilesReport.correctPoints)
+                .put(SOLR_COLUMN_ORIGIN, "ingestion-csv");
 
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
@@ -107,8 +134,8 @@ public class IngestionApiImpl implements IngestionApi {
                 .doOnSuccess(response -> {
                     context.response().setStatusCode(CREATED);
                     context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(finalResponse.encodePrettily());
-                }).subscribe();
+                    context.response().end(constructFinalResponseCsv(multiCsvFilesConvertor.allFilesReport, csvFilesConvertorConf).encodePrettily());
 
+                }).subscribe();
     }
 }
