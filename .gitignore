@@ -41,6 +41,9 @@ hs_err_pid*
 # maven files
 **/pom.xml.versionsBackup
 
+# copied resources
+integration-tests/src/main/resources/shared-resources/historian.properties
+
 # generated files
 timeseries/src/main/generated
 historian-server/src/integration-test/resources/shared-resources
