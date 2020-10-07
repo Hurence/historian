@@ -7,6 +7,8 @@ import io.vertx.core.json.JsonObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+
 public class ResponseAsList {
 
     public List<SubResponse> responseList;
@@ -18,7 +20,7 @@ public class ResponseAsList {
             JsonArray datapoints = json.getJsonArray(HistorianServiceFields.DATAPOINTS);
             for (Object datapoint : datapoints) {
                 JsonArray line = new JsonArray();
-                line.add(json.getString(HistorianServiceFields.NAME));
+                line.add(json.getString(FIELD_NAME));
                 for (Object point : (JsonArray) datapoint) {
                     line.add(point);
                 }

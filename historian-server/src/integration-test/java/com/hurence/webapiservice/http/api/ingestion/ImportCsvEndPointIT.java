@@ -37,6 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.historian.modele.HistorianServiceFields.CUSTOM_NAME;
+import static com.hurence.historian.modele.HistorianServiceFields.MAX_NUMBER_OF_LIGNES;
 import static com.hurence.webapiservice.http.HttpServerVerticle.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.*;
 
@@ -232,7 +234,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
-                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
+                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH)
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
@@ -258,7 +260,7 @@ public class ImportCsvEndPointIT {
     }
 
     @Test
-//    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testCsvFileImportGroupByWithSensorTag(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_tags.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
@@ -423,7 +425,7 @@ public class ImportCsvEndPointIT {
     }
 
     @Test
-//    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testCsvFileImportWithATagDate(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_date_tag.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
@@ -494,6 +496,7 @@ public class ImportCsvEndPointIT {
     public void testCsvFileImportFileTooBig(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/csv_5001_lines.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAX_NUMBER_OF_LIGNES, "5000")
                 .textFileUpload("my_csv_file", "csv_5001_lines.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
@@ -512,6 +515,7 @@ public class ImportCsvEndPointIT {
         String pathCsvFileTooBig = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/csv_5001_lines.csv").getFile();
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAX_NUMBER_OF_LIGNES, "5000")
                 .textFileUpload("csv_5001_lines", "csv_5001_lines.csv", pathCsvFileTooBig, "text/csv")
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
@@ -727,6 +731,91 @@ public class ImportCsvEndPointIT {
                 new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
                         multipartForm,
                         "/http/ingestion/csv/bug/testParsingFile_10072020_novalid_points_should_give_a_reason/expectedResponse.json",
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithMaxNumberOfLignes(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_failed_points.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "timestamp")
+                .attribute(MAPPING_NAME, "metric")
+                .attribute(MAPPING_VALUE, "value")
+                .attribute(MAPPING_QUALITY, "quality")
+                .attribute(MAPPING_TAGS, "sensor")
+                .attribute(MAPPING_TAGS, "code_install")
+                .attribute(FORMAT_DATE, "yyyy-D-m HH:mm:ss.SSS")
+                .attribute(MAX_NUMBER_OF_LIGNES, "11")
+                .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_too_big_1.json",
+                        BAD_REQUEST, StatusMessages.BAD_REQUEST,
+                        BodyCodec.jsonObject(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithCustomConstantMetricName(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/csv-exemple.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "timestamp")
+                .attribute(CUSTOM_NAME, "my_super_metric")
+                .attribute(MAPPING_VALUE, "value_2")
+                .attribute(MAPPING_QUALITY, "quality")
+                .attribute(MAPPING_TAGS, "sensor")
+                .attribute(MAPPING_TAGS, "code_install")
+                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "tags.sensor")
+                .attribute(FORMAT_DATE, "yyyy-D-m HH:mm:ss.SSS")
+                .attribute(TIMEZONE_DATE, "UTC")
+                .textFileUpload("csv-exemple.csv", "csv-exemple.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/csv-exemple-expectedResponse-1.json",
+                        CREATED, StatusMessages.CREATED,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/csv-exemple-request-1.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/csv-exemple-expectedResponse-1.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithBothNameAndCustomName(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/csv-exemple.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_TIMESTAMP, "timestamp")
+                .attribute(MAPPING_NAME, "metric_name_2")
+                .attribute(CUSTOM_NAME, "my_super_metric")
+                .attribute(MAPPING_VALUE, "value_2")
+                .attribute(MAPPING_QUALITY, "quality")
+                .attribute(MAPPING_TAGS, "sensor")
+                .attribute(MAPPING_TAGS, "code_install")
+                .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
+                .attribute(GROUP_BY, "tags.sensor")
+                .attribute(FORMAT_DATE, "yyyy-D-m HH:mm:ss.SSS")
+                .attribute(TIMEZONE_DATE, "UTC")
+                .textFileUpload("csv-exemple.csv", "csv-exemple.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse_both_names.json",
                         BAD_REQUEST, StatusMessages.BAD_REQUEST,
                         BodyCodec.jsonObject(), vertx)
         );

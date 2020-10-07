@@ -8,6 +8,8 @@ import org.apache.solr.client.solrj.SolrQuery;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_COUNT;
+import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_NAME;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.findNeededTagsName;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.joinListAsString;
 
@@ -40,15 +42,15 @@ public class NumberOfAllPointsByMetricHelperImpl implements NumberOfPointsByMetr
             }
         }
         List<String> neededFields = findNeededTagsName(requests);
-        neededFields.add(solrMapping.CHUNK_NAME);
+        neededFields.add(SOLR_COLUMN_NAME);
         List<String> overFields = new ArrayList<>(neededFields);
         String overString = joinListAsString(overFields);
-        neededFields.add(solrMapping.CHUNK_COUNT_FIELD);
+        neededFields.add(SOLR_COLUMN_COUNT);
         String flString = joinListAsString(neededFields);
         exprBuilder.append(",fl=\"").append(flString).append("\"")
-                .append(",qt=\"/export\", sort=\"").append(solrMapping.CHUNK_NAME).append(" asc\")")
+                .append(",qt=\"/export\", sort=\"").append(SOLR_COLUMN_NAME).append(" asc\")")
                 .append(",over=\"").append(overString).append("\"")
-                .append(", sum(").append(solrMapping.CHUNK_COUNT_FIELD).append("), count(*))");
+                .append(", sum(").append(SOLR_COLUMN_COUNT).append("), count(*))");
         return exprBuilder.toString();
     }
 

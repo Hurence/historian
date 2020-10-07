@@ -37,6 +37,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.*;
 
 public class GetTimeSeriesHandler {
 
@@ -92,13 +93,13 @@ public class GetTimeSeriesHandler {
         StringBuilder queryBuilder = new StringBuilder();
         if (request.getTo() != null) {
             LOGGER.trace("requesting timeseries to {}", request.getTo());
-            queryBuilder.append(getHistorianFields().CHUNK_START_FIELD).append(":[* TO ").append(request.getTo()).append("]");
+            queryBuilder.append(SOLR_COLUMN_START).append(":[* TO ").append(request.getTo()).append("]");
         }
         if (request.getFrom()  != null) {
             LOGGER.trace("requesting timeseries from {}", request.getFrom());
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
-            queryBuilder.append(getHistorianFields().CHUNK_END_FIELD).append(":[").append(request.getFrom()).append(" TO *]");
+            queryBuilder.append(SOLR_COLUMN_END).append(":[").append(request.getFrom()).append(" TO *]");
         }
         //
         SolrQuery query = new SolrQuery("*:*");
@@ -108,17 +109,17 @@ public class GetTimeSeriesHandler {
         //FILTER
         buildFilters(request, query, false);
         //    FIELDS_TO_FETCH
-        query.setFields(getHistorianFields().CHUNK_START_FIELD,
-                getHistorianFields().CHUNK_END_FIELD,
-                getHistorianFields().CHUNK_COUNT_FIELD,
-                getHistorianFields().CHUNK_NAME);
+        query.setFields(SOLR_COLUMN_START,
+                SOLR_COLUMN_END,
+                SOLR_COLUMN_COUNT,
+                SOLR_COLUMN_NAME);
         addQualityFields(query, request);
         addAllTagsAsFields(request.getMetricRequestsWithFinalTagsAndFinalQualities(), query);
 
         addFieldsThatWillBeNeededByAggregations(request.getAggs(), query);
         //    SORT
-        query.setSort(getHistorianFields().CHUNK_START_FIELD, SolrQuery.ORDER.asc);
-        query.addSort(getHistorianFields().CHUNK_END_FIELD, SolrQuery.ORDER.asc);
+        query.setSort(SOLR_COLUMN_START, SolrQuery.ORDER.asc);
+        query.addSort(SOLR_COLUMN_END, SolrQuery.ORDER.asc);
         query.setRows(request.getMaxTotalChunkToRetrieve());
 
         return query;
@@ -195,12 +196,12 @@ public class GetTimeSeriesHandler {
             StringBuilder queryForEachMetricBuilder = new StringBuilder();
             List<String> tagsFilter = getTagsAsPair(metricRequest);
             if(!tagsFilter.isEmpty())
-                queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", getHistorianFields().CHUNK_NAME +":\""+metricRequest.getName()+"\" AND ", "")));
+                queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", SOLR_COLUMN_NAME +":\""+metricRequest.getName()+"\" AND ", "")));
             else
-                queryForEachMetricBuilder.append(getHistorianFields().CHUNK_NAME + ":\""+metricRequest.getName()+"\"");
+                queryForEachMetricBuilder.append(SOLR_COLUMN_NAME + ":\""+metricRequest.getName()+"\"");
             if (useQuality) {
                 Float qualityValue = metricRequest.getQuality().getQualityValue();
-                String qualityField = getHistorianFields().CHUNK_QUALITY_AVG_FIELD;//at the moment always use AVG to filter
+                String qualityField = SOLR_COLUMN_QUALITY_AVG;//at the moment always use AVG to filter
                 queryForEachMetricBuilder.append(" AND ").append(qualityField).append(":[").append(qualityValue).append(" TO *]"); // TODO isn't TO 1 better ?
             }
             finalStringList.add(queryForEachMetricBuilder.toString());
@@ -221,19 +222,19 @@ public class GetTimeSeriesHandler {
         aggregationList.forEach(agg -> {
             switch (agg) {
                 case AVG:
-                    query.addField(getHistorianFields().CHUNK_AVG_FIELD);
+                    query.addField(SOLR_COLUMN_AVG);
                     break;
                 case SUM:
-                    query.addField(getHistorianFields().CHUNK_SUM_FIELD);
+                    query.addField(SOLR_COLUMN_SUM);
                     break;
                 case MIN:
-                    query.addField(getHistorianFields().CHUNK_MIN_FIELD);
+                    query.addField(SOLR_COLUMN_MIN);
                     break;
                 case MAX:
-                    query.addField(getHistorianFields().CHUNK_MAX_FIELD);
+                    query.addField(SOLR_COLUMN_MAX);
                     break;
                 case COUNT:
-                    query.addField(getHistorianFields().CHUNK_COUNT_FIELD);
+                    query.addField(SOLR_COLUMN_COUNT);
                     break;
                 default:
                     throw new IllegalStateException("Unsupported aggregation: " + agg);
@@ -263,11 +264,11 @@ public class GetTimeSeriesHandler {
                             tuple.getLong("count(*)")
                     );
                     metricsInfo.increaseNumberOfPointsForMetricRequest(request,
-                            tuple.getLong("sum(" + getHistorianFields().CHUNK_COUNT_FIELD + ")")
+                            tuple.getLong("sum(" + SOLR_COLUMN_COUNT + ")")
                     );
                     if (useQuality && tuple.getBool(HistorianServiceFields.QUALITY_CHECK)) {
                         metricsInfo.increaseNumberOfChunksWithQualityOkForMetricRequest(request, tuple.getLong("count(*)"));
-                        metricsInfo.increaseNumberOfPointsWithQualityOkForMetricRequest(request, tuple.getLong("sum(" + getHistorianFields().CHUNK_COUNT_FIELD + ")"));
+                        metricsInfo.increaseNumberOfPointsWithQualityOkForMetricRequest(request, tuple.getLong("sum(" + SOLR_COLUMN_COUNT + ")"));
                     }
                 }
             }
@@ -326,7 +327,7 @@ public class GetTimeSeriesHandler {
      * @return
      */
     private boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
-        if (!request.getName().equals(tuple.fields.get(getHistorianFields().CHUNK_NAME))){
+        if (!request.getName().equals(tuple.fields.get(SOLR_COLUMN_NAME))){
             return false;
         } else {
             for (Map.Entry<String, String> entry : request.getTags().entrySet()) {
@@ -345,7 +346,7 @@ public class GetTimeSeriesHandler {
         //Now CHUNK_VALUE_FIELD may potentially be needed by all mode. In case we must recompute chunks !
         //Indeed if user query data from t1 to t3 and chunk contains data from t2 and t4 we must recompute the chunk
         //by removing data after t3 !
-        query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
+        query.addField(SOLR_COLUMN_VALUE);
         if (isQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 1");
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
@@ -452,16 +453,16 @@ public class GetTimeSeriesHandler {
                 case NONE:
                     break;
                 case FIRST:
-                    query.addField(getHistorianFields().CHUNK_QUALITY_FIRST_FIELD);
+                    query.addField(SOLR_COLUMN_QUALITY_FIRST);
                     break;
                 case AVERAGE:
-                    query.addField(getHistorianFields().CHUNK_QUALITY_AVG_FIELD);
+                    query.addField(SOLR_COLUMN_QUALITY_AVG);
                     break;
                 case MIN:
-                    query.addField(getHistorianFields().CHUNK_QUALITY_MIN_FIELD);
+                    query.addField(SOLR_COLUMN_QUALITY_MIN);
                     break;
                 case MAX:
-                    query.addField(getHistorianFields().CHUNK_QUALITY_MAX_FIELD);
+                    query.addField(SOLR_COLUMN_QUALITY_MAX);
                     break;
                 default:
                     throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
@@ -474,19 +475,19 @@ public class GetTimeSeriesHandler {
         samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
-                    query.addField(getHistorianFields().CHUNK_VALUE_FIELD);
+                    query.addField(SOLR_COLUMN_VALUE);
                     break;
                 case FIRST:
-                    query.addField(getHistorianFields().CHUNK_FIRST_VALUE_FIELD);
+                    query.addField(SOLR_COLUMN_FIRST);
                     break;
                 case AVERAGE:
-                    query.addField(getHistorianFields().CHUNK_SUM_FIELD);
+                    query.addField(SOLR_COLUMN_SUM);
                     break;
                 case MIN:
-                    query.addField(getHistorianFields().CHUNK_MIN_FIELD);
+                    query.addField(SOLR_COLUMN_MIN);
                     break;
                 case MAX:
-                    query.addField(getHistorianFields().CHUNK_MAX_FIELD);
+                    query.addField(SOLR_COLUMN_MAX);
                     break;
                 case MODE_MEDIAN:
                 case LTTB:
@@ -570,8 +571,8 @@ public class GetTimeSeriesHandler {
 
     private JsonObject buildTimeSeriesResponse(MultiTimeSeriesExtracter timeSeriesExtracter) {
         return new JsonObject()
-                .put(HistorianServiceFields.TOTAL_POINTS, timeSeriesExtracter.pointCount())
-                .put(HistorianServiceFields.TIMESERIES, timeSeriesExtracter.getTimeSeries());
+                .put(TOTAL_POINTS, timeSeriesExtracter.pointCount())
+                .put(TIMESERIES, timeSeriesExtracter.getTimeSeries());
     }
 
     private ChunkStream queryStream(SolrQuery query) {
@@ -608,7 +609,7 @@ public class GetTimeSeriesHandler {
         }
 
         public List<AGG> getAggs() {
-            return params.getJsonArray(HistorianServiceFields.AGGREGATION, new JsonArray())
+            return params.getJsonArray(AGGREGATION, new JsonArray())
                     .stream()
                     .map(String::valueOf)
                     .map(AGG::valueOf)
@@ -618,11 +619,11 @@ public class GetTimeSeriesHandler {
         public boolean getUseQuality() { return params.getBoolean(USE_QUALITY, false);}
 
         public Long getTo() {
-            return params.getLong(HistorianServiceFields.TO);
+            return params.getLong(TO);
         }
 
         public Long getFrom() {
-            return params.getLong(HistorianServiceFields.FROM);
+            return params.getLong(FROM);
         }
 
         public boolean getQualityReturn() {
@@ -630,12 +631,12 @@ public class GetTimeSeriesHandler {
         }
 
         public Integer getMaxTotalChunkToRetrieve() {
-            return params.getInteger(HistorianServiceFields.MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
+            return params.getInteger(MAX_TOTAL_CHUNKS_TO_RETRIEVE, 50000);
         }
 
         public Map<String, String> getRootTags() {
             Map<String,String> tagsMap = new HashMap<>();
-            params.getJsonObject(HistorianServiceFields.TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+            params.getJsonObject(FIELD_TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
             return tagsMap;
         }
 
@@ -649,12 +650,12 @@ public class GetTimeSeriesHandler {
             return params.getJsonArray(NAMES).stream().map(i -> {
                 try {
                     JsonObject metricObject = new JsonObject(i.toString());
-                    String name = metricObject.getString(NAME);
+                    String name = metricObject.getString(SOLR_COLUMN_NAME);
                     Float qualityValue = metricObject.getFloat(QUALITY_VALUE, getRootQuality().getQualityValue());
                     String qualityAgg = getRootQuality().getQualityAgg().toString();
                     Map<String,String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
-                    metricObject.getJsonObject(TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+                    metricObject.getJsonObject(FIELD_TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
                     QualityConfig qualityConfig = new QualityConfig(qualityValue, qualityAgg);
                     return new MetricRequest(name, tagsMap, qualityConfig);
                 }catch (Exception ex) {
@@ -676,15 +677,15 @@ public class GetTimeSeriesHandler {
         }
 
         public int getMaxPoint() {
-            return params.getInteger(HistorianServiceFields.MAX_POINT_BY_METRIC);
+            return params.getInteger(MAX_POINT_BY_METRIC);
         }
 
         public int getBucketSize() {
-            return params.getInteger(HistorianServiceFields.BUCKET_SIZE);
+            return params.getInteger(BUCKET_SIZE);
         }
 
         public SamplingAlgorithm getSamplingAlgo() {
-            return SamplingAlgorithm.valueOf(params.getString(HistorianServiceFields.SAMPLING_ALGO));
+            return SamplingAlgorithm.valueOf(params.getString(SAMPLING_ALGO));
         }
     }
 }
