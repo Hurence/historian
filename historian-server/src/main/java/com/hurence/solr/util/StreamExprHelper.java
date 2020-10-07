@@ -31,10 +31,17 @@ public class StreamExprHelper {
 
     public static String createSearch(String collection,
                                       String qSection,
+                                      String[] fqSection,
                                       String flSection,
                                       String qtSection,
                                       String sortSection) {
-        return "search(" + collection + ", q=" + qSection +
+        String fq = "";
+        if (fqSection != null) {
+            for (String filterQuery : fqSection) {
+                fq = filterQuery;
+            }
+        }
+        return "search(" + collection + ", q=" + qSection + ", fq=" + fq +
                 ", fl=" + flSection + ", qt=" + qtSection + ", sort=" + sortSection +")";
     }
 }
