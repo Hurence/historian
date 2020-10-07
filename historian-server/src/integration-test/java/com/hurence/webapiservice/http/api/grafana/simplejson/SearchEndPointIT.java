@@ -82,7 +82,7 @@ public class SearchEndPointIT {
         client.add(COLLECTION, doc7);
         client.commit(COLLECTION);
         LOGGER.info("Indexed some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
-        JsonObject historianConf = builfHistorianConf();
+        JsonObject historianConf = buildHistorianConf();
         HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, historianConf).subscribe(id -> {
                     context.completeNow();
                 },
@@ -90,9 +90,9 @@ public class SearchEndPointIT {
     }
 
     @NotNull
-    private static JsonObject builfHistorianConf() {
+    private static JsonObject buildHistorianConf() {
         JsonObject historianConf = new JsonObject();
-        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_0);
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.getCurrentVersion());
         return historianConf;
     }
 
@@ -111,7 +111,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithQueryAndNoLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, buildHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,
@@ -123,7 +123,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithQueryAndLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, buildHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
@@ -135,7 +135,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithEmptyQueryAndNoLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, buildHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
@@ -147,7 +147,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testWithEmptyQueryAndLimit(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, buildHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithDeafaultSize(vertx, testContext,
@@ -160,7 +160,7 @@ public class SearchEndPointIT {
     @Test
     @Timeout(value = 10, timeUnit = TimeUnit.SECONDS)
     public void testNoMatch(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
-        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, builfHistorianConf())
+        HttpWithHistorianSolrITHelper.deployHttpAndCustomHistorianVerticle(container, vertx, buildHistorianConf())
                 .doOnError(testContext::failNow)
                 .subscribe(t -> {
                     assertRequestGiveObjectResponseFromFileWithNoOrder(vertx, testContext,

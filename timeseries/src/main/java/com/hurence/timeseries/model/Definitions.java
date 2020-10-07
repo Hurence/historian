@@ -47,6 +47,7 @@ public class Definitions {
      * Definitions of solr column names
      */
     public static final String SOLR_COLUMN_ID = "id";
+    public static final String SOLR_COLUMN_VERSION = "version";
     public static final String SOLR_COLUMN_NAME = "name";
     public static final String SOLR_COLUMN_DAY = "chunk_day";
     public static final String SOLR_COLUMN_YEAR = "chunk_year";
@@ -67,8 +68,6 @@ public class Definitions {
     public static final String SOLR_COLUMN_ORIGIN = "chunk_origin";
     public static final String SOLR_COLUMN_TREND = "chunk_trend";
     public static final String SOLR_COLUMN_OUTLIER = "chunk_outlier";
-    public static final String SOLR_COLUMN_VERSION = "version";
-
     public static final String SOLR_COLUMN_QUALITY_MIN = "chunk_quality_min";
     public static final String SOLR_COLUMN_QUALITY_MAX = "chunk_quality_max";
     public static final String SOLR_COLUMN_QUALITY_FIRST = "chunk_quality_first";
