@@ -1,7 +1,5 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
-import com.hurence.historian.modele.solr.SolrFieldMapping;
-import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;

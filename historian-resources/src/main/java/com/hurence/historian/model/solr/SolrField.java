@@ -1,4 +1,4 @@
-package com.hurence.historian.modele.solr;
+package com.hurence.historian.model.solr;
 
 public class SolrField {
     private final String name;

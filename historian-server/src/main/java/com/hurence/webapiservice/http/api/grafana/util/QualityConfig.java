@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.http.api.grafana.util;
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

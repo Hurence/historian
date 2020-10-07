@@ -2,7 +2,7 @@ package com.hurence.historian
 
 import java.io.File
 
-import com.hurence.historian.modele.SchemaVersion
+import com.hurence.historian.model.SchemaVersion
 import com.hurence.historian.solr.util.SolrITHelper
 import com.hurence.solr.{LazyLogging, SolrCloudUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrClient

@@ -1,10 +1,10 @@
-package com.hurence.historian.modele.solr;
+package com.hurence.historian.model.solr;
 
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0;
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersion0;
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent;
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionEVOA0;
+import com.hurence.historian.model.SchemaVersion;
 
 /**
  * This represent the mapping of fields in solr depending on the schema version.

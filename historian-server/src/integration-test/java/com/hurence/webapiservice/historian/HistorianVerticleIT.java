@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.HistorianServiceFields;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.timeseries.model.Chunk;
@@ -35,8 +35,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent.ID;
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent.ID;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.*;
 import static org.junit.jupiter.api.Assertions.*;
 

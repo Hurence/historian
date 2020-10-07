@@ -1,6 +1,5 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
-import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianServiceFields.QUALITY_VALUE;
+import static com.hurence.historian.model.HistorianServiceFields.QUALITY_VALUE;
 import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil.*;

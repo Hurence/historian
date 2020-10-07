@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.HistorianServiceFields;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
@@ -27,8 +27,8 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianAnnotationCollectionFields.ID;
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianAnnotationCollectionFields.ID;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

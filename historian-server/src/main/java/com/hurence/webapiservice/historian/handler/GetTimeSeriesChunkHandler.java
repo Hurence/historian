@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianConf;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
-import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.model.HistorianConf;
+import com.hurence.historian.model.solr.SolrFieldMapping;
+import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianServiceFields.TO;
+import static com.hurence.historian.model.HistorianServiceFields.TO;
 import static com.hurence.timeseries.model.Definitions.*;
 
 public class GetTimeSeriesChunkHandler {

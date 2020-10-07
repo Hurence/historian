@@ -16,7 +16,6 @@ import io.vertx.reactivex.core.file.FileSystem;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
-import org.apache.solr.client.solrj.response.UpdateResponse;
 import org.apache.solr.common.SolrInputDocument;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,7 +30,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianAnnotationCollectionFields.*;
+import static com.hurence.historian.model.HistorianAnnotationCollectionFields.*;
 import static com.hurence.webapiservice.util.HistorianSolrITHelper.COLLECTION_ANNOTATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

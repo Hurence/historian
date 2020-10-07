@@ -1,18 +1,16 @@
 package com.hurence.webapiservice.http.api.test;
 
-import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieJsonRequestParser;
 import com.hurence.webapiservice.http.api.main.GetTimeSerieRequestParam;
 import com.hurence.webapiservice.modele.SamplingConf;
 
-import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.BAD_REQUEST;
 

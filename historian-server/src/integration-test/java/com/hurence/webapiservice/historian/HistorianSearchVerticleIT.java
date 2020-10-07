@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.HistorianServiceFields;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
@@ -27,8 +27,8 @@ import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianServiceFields.METRICS;
-import static com.hurence.historian.modele.HistorianServiceFields.TOTAL;
+import static com.hurence.historian.model.HistorianServiceFields.METRICS;
+import static com.hurence.historian.model.HistorianServiceFields.TOTAL;
 import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_ID;
 import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_NAME;
 import static org.junit.jupiter.api.Assertions.assertEquals;

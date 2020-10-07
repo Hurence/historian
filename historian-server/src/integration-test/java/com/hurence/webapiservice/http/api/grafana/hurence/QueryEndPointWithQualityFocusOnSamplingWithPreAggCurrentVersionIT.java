@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.injector.*;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.model.Measure;

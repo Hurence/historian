@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.compactor
 
-import com.hurence.historian.modele.SchemaVersion
-import com.hurence.historian.modele.solr.SolrFieldMapping
+import com.hurence.historian.model.SchemaVersion
+import com.hurence.historian.model.solr.SolrFieldMapping
 import com.hurence.historian.spark.compactor.job.CompactorJobReport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.spark.sql.SparkSession

@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
 import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
 import io.vertx.core.Handler;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 
 public class GetAnnotationsHandler {

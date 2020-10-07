@@ -1,7 +1,7 @@
-package com.hurence.historian.modele;
+package com.hurence.historian.model;
 
-import com.hurence.historian.modele.solr.Schema;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.model.solr.Schema;
+import com.hurence.historian.model.solr.SolrFieldMapping;
 
 public interface HistorianConf {
 

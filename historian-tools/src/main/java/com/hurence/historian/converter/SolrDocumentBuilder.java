@@ -2,7 +2,6 @@ package com.hurence.historian.converter;
 
 
 import com.hurence.timeseries.model.Chunk;
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionCurrent;
 import org.apache.solr.common.SolrInputDocument;
 
 import static com.hurence.timeseries.model.Definitions.*;

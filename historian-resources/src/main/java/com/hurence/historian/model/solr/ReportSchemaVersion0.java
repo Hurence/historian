@@ -1,9 +1,7 @@
-package com.hurence.historian.modele.solr;
+package com.hurence.historian.model.solr;
 
-import com.hurence.historian.modele.HistorianReportCollectionFieldsVersion0;
-import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.modele.solr.Schema;
-import com.hurence.historian.modele.solr.SolrField;
+import com.hurence.historian.model.HistorianReportCollectionFieldsVersion0;
+import com.hurence.historian.model.SchemaVersion;
 
 import java.util.Arrays;
 import java.util.Collection;

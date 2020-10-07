@@ -1,7 +1,7 @@
 package com.hurence.timeseries.model;
 
 import com.google.common.hash.Hashing;
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.converter.ChunkTruncater;
@@ -31,7 +31,6 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
-import java.util.*;
 
 /**
  * A Chunk is a compacted set of measures within a time interval.

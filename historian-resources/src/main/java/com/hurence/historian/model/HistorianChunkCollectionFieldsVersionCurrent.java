@@ -1,20 +1,12 @@
-package com.hurence.historian.modele;
+package com.hurence.historian.model;
 
-
-/**
- * Static class to put field names used by HistorianService.
- */
-/*
- Does not move those fields inside HistorianService for any reason !
- Indeed it is hard to refactor HistorianService as there is many other generated classes from HistorianService.
- THe source code generated from HistorianService copy paste static variables... So When you refactor them it is not
- taking in account by your code referencing auto generated source code.
- */
-public class HistorianChunkCollectionFieldsVersion0 {
-    private HistorianChunkCollectionFieldsVersion0() {}
+public class HistorianChunkCollectionFieldsVersionCurrent {
+    public HistorianChunkCollectionFieldsVersionCurrent() {
+    }
 
     public static String NAME = "name";
     public static String ID = "id";
+    public static String METRIC_KEY = "metric_key";
     public static String COMPACTIONS_RUNNING = "compactions_running";
     public static String CHUNK_VALUE = "chunk_value";
     public static String CHUNK_START = "chunk_start";
@@ -33,7 +25,11 @@ public class HistorianChunkCollectionFieldsVersion0 {
     public static String CHUNK_YEAR = "chunk_year";
     public static String CHUNK_MONTH = "chunk_month";
     public static String CHUNK_DAY = "chunk_day";
-    public static String CHUNK_STDDEV = "chunk_stddev";
+    public static String CHUNK_HOUR = "chunk_hour";
+    public static String CHUNK_STDDEV = "chunk_std_dev";
+    public static String CHUNK_QUALITY_AVG = "chunk_quality_avg";
+    public static String CHUNK_QUALITY_MIN = "chunk_quality_min";
+    public static String CHUNK_QUALITY_MAX = "chunk_quality_max";
+    public static String CHUNK_QUALITY_SUM = "chunk_quality_sum";
+    public static String CHUNK_QUALITY_FIRST = "chunk_quality_first";
 }
-
-
