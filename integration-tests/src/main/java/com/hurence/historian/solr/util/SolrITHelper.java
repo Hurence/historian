@@ -1,8 +1,8 @@
 package com.hurence.historian.solr.util;
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
-import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.modele.solr.HistorianCollections;
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionEVOA0;
+import com.hurence.historian.model.SchemaVersion;
+import com.hurence.historian.model.solr.HistorianCollections;
 import com.hurence.unit5.extensions.SolrExtension;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;

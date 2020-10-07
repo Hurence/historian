@@ -1,6 +1,6 @@
-package com.hurence.historian.modele.solr;
+package com.hurence.historian.model.solr;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 
 import java.util.Collection;
 

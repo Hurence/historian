@@ -3,7 +3,7 @@ package com.hurence.historian.compactor;
 import com.hurence.historian.compactor.config.Configuration;
 import com.hurence.historian.compactor.config.ConfigurationBuilder;
 import com.hurence.historian.compactor.config.ConfigurationException;
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;

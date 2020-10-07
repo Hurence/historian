@@ -1,6 +1,6 @@
-package com.hurence.historian.modele.stream.impl;
+package com.hurence.historian.model.stream.impl;
 
-import com.hurence.historian.modele.stream.ChunkStream;
+import com.hurence.historian.model.stream.ChunkStream;
 import com.hurence.timeseries.model.Chunk;
 import io.vertx.core.json.JsonObject;
 

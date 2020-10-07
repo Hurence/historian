@@ -1,15 +1,5 @@
 package com.hurence.timeseries.model;
 
-import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.timeseries.converter.ChunkToMeasures;
-import com.hurence.timeseries.converter.ChunkToMeasuresConverter;
-import com.hurence.timeseries.converter.MeasuresToChunk;
-import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
-import com.hurence.timeseries.model.Chunk;
-import com.hurence.timeseries.model.Measure;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.*;

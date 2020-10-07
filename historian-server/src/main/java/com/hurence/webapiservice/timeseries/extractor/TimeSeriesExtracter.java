@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.timeseries.extractor;
 
-import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.timeseries.model.Chunk;
 import io.vertx.core.json.JsonObject;
 

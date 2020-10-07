@@ -1,4 +1,4 @@
-package com.hurence.historian.modele.stream.impl;
+package com.hurence.historian.model.stream.impl;
 
 
 import com.hurence.timeseries.converter.ChunkFromJsonObjectVersionCurrent;

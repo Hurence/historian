@@ -1,6 +1,6 @@
 package com.hurence.timeseries.model;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.timeseries.converter.ChunkToMeasures;
 import com.hurence.timeseries.converter.ChunkToMeasuresConverter;
 import com.hurence.timeseries.converter.MeasuresToChunk;

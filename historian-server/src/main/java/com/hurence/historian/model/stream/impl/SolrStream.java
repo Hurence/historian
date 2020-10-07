@@ -1,6 +1,6 @@
-package com.hurence.historian.modele.stream.impl;
+package com.hurence.historian.model.stream.impl;
 
-import com.hurence.historian.modele.stream.Stream;
+import com.hurence.historian.model.stream.Stream;
 import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
 

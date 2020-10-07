@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
 import com.hurence.historian.converter.SolrDocumentBuilder;
-import com.hurence.historian.modele.HistorianServiceFields;
 import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.model.Chunk;
@@ -13,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 
-import static com.hurence.historian.modele.HistorianServiceFields.POINTS;
+import static com.hurence.historian.model.HistorianServiceFields.POINTS;
 import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 

@@ -6,9 +6,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 

@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana;
 
 
-import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.historian.util.ErrorMsgHelper;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.models.RefIdInfo;
@@ -16,7 +16,6 @@ import com.hurence.webapiservice.http.api.grafana.parser.SearchValuesRequestPars
 import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.modele.SamplingConf;
-import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -30,7 +29,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
 import static com.hurence.webapiservice.http.api.main.modele.QueryFields.QUERY_PARAM_REF_ID;

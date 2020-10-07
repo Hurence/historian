@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
@@ -28,7 +28,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.locationtech.spatial4j.shape.impl.PointImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;

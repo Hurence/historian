@@ -1,4 +1,4 @@
-package com.hurence.historian.modele.stream;
+package com.hurence.historian.model.stream;
 
 import io.vertx.core.json.JsonObject;
 

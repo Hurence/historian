@@ -1,10 +1,9 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
-import com.hurence.util.HistorianVerticleConfHelper;
 import com.hurence.util.RequestResponseConf;
 import com.hurence.util.RequestResponseConfI;
 import com.hurence.webapiservice.util.HttpITHelper;
@@ -17,7 +16,6 @@ import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
 import io.vertx.reactivex.ext.web.client.WebClient;
 import io.vertx.reactivex.ext.web.codec.BodyCodec;
-import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;

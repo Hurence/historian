@@ -1,6 +1,6 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersion0
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersion0
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Measure

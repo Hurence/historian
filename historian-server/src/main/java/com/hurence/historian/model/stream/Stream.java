@@ -1,4 +1,4 @@
-package com.hurence.historian.modele.stream;
+package com.hurence.historian.model.stream;
 
 import java.io.Closeable;
 import java.io.IOException;
