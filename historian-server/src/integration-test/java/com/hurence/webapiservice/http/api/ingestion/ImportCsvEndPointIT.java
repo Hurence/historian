@@ -425,7 +425,7 @@ public class ImportCsvEndPointIT {
     }
 
     @Test
-//    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testCsvFileImportWithATagDate(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_date_tag.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()

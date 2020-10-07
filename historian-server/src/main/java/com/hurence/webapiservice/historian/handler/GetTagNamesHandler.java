@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
+
 public class GetTagNamesHandler {
 
     private static Logger LOGGER = LoggerFactory.getLogger(GetTagNamesHandler.class);
@@ -45,7 +47,7 @@ public class GetTagNamesHandler {
             try {
                 SchemaResponse response = request.process(solrHistorianConf.client, solrHistorianConf.chunkCollection);
                 List<String> tags = response.getSchemaRepresentation().getFields().stream()
-                        .map(fieldMap -> (String) fieldMap.get(getHistorianFields().CHUNK_NAME)).collect(Collectors.toList());
+                        .map(fieldMap -> (String) fieldMap.get(FIELD_NAME)).collect(Collectors.toList());
                 Collection<String> schemaFields = Schema.getChunkSchema(solrHistorianConf.schemaVersion).getFields()
                         .stream().map(SolrField::getName)
                         .collect(Collectors.toList());

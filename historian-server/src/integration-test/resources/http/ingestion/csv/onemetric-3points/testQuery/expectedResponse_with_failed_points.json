@@ -10,8 +10,8 @@
   {
     "name":"metric_2",
     "datapoints":[
-      [4.0,4],
-      [2.0,4]
+      [2.0,4],
+      [4.0,4]
     ],"total_points":2
   },
   {

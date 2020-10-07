@@ -85,18 +85,18 @@ public class QueryEndPointWithQualityCurrentVersionIT {
                         ),//mixed1
                         Arrays.asList(
                                 Measure.fromValueAndQuality( 1477895624866L, 861, 0.8f),
-                                Measure.fromValue( 1477917224866L, 767),
+                                Measure.fromValueAndQuality( 1477917224866L, 767, 1f),
                                 Measure.fromValueAndQuality( 1477927624866L, 57, 0.7f),     //avg = 0.81
                                 Measure.fromValueAndQuality( 1477931224866L, 125, 0.6f),
                                 Measure.fromValueAndQuality( 1477945624866L, 710, 0.8f),
-                                Measure.fromValue( 1477985224866L, 7)
+                                Measure.fromValueAndQuality( 1477985224866L, 7, 1f)
                         ),//mixed2
                         Arrays.asList(
-                                Measure.fromValue( 1477895624866L, 622),
+                                Measure.fromValueAndQuality( 1477895624866L, 622, 1f),
                                 Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
                                 Measure.fromValueAndQuality( 1477917224866L, 365, 0.7f),
                                 Measure.fromValueAndQuality( 1477924624866L, 568, 0.6f),     // avg = 0.65
-                                Measure.fromValue( 1477948224866L, 14),
+                                Measure.fromValueAndQuality( 1477948224866L, 14, 1f),
                                 Measure.fromValueAndQuality( 1477957224866L, 86, 0.2f)
                         ),//non_mixed
                         Arrays.asList(

@@ -100,7 +100,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
         GeneralInjectorCurrentVersion chunkInjector = new GeneralInjectorCurrentVersion();
         Chunk chunk1 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=29/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00164-260ef8f2-b75d-44f4-8f47-b86fbc0fdea6.c000.csv\"],\n" +
-                "            \"chunk_size\":1424,\n" +
+                "            \"chunk_count\":1424,\n" +
                 "                \"chunk_outlier\":[true],\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"week\":29,\n" +
@@ -130,7 +130,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672691581459628032}");
         Chunk chunk2 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=28/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00163-957b46b5-e466-4cf2-92cf-0e20046d1664.c000.csv\"],\n" +
-                "            \"chunk_size\":1435,\n" +
+                "            \"chunk_count\":1435,\n" +
                 "                \"chunk_outlier\":[false],\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"week\":28,\n" +
@@ -160,7 +160,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672686983128809472}");
         Chunk chunk3 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=29/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00163-e780b99a-aabd-43d7-88d3-e4403bd4703f.c000.csv\"],\n" +
-                "            \"chunk_size\":1438,\n" +
+                "            \"chunk_count\":1438,\n" +
                 "                \"chunk_outlier\":[false],\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"week\":29,\n" +
@@ -190,7 +190,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672691582837456896}");
         Chunk chunk4 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=29/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00161-4555e8fa-5871-46fb-8ab4-676c5b609f63.c000.csv\"],\n" +
-                "            \"chunk_size\":1439,\n" +
+                "            \"chunk_count\":1439,\n" +
                 "                \"chunk_outlier\":[false],\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"chunk_week\":29,\n" +
@@ -220,7 +220,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672691582829068289}");
         Chunk chunk5 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=29/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00164-b31485f8-1c2a-476b-8409-28b7fb1106ab.c000.csv\"],\n" +
-                "            \"chunk_size\":1438,\n" +
+                "            \"chunk_count\":1438,\n" +
                 "                \"chunk_outlier\":false,\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"chunk_week\":29,\n" +
@@ -250,7 +250,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672691582838505472}");
         Chunk chunk6 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=28/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00165-c539d0e9-47c7-4fb2-97bd-7a77fe7516c5.c000.csv\"],\n" +
-                "            \"chunk_size\":1440,\n" +
+                "            \"chunk_count\":1440,\n" +
                 "                \"chunk_outlier\":false,\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"chunk_week\":28,\n" +
@@ -280,7 +280,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672691321332039680}");
         Chunk chunk7 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=28/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00165-c539d0e9-47c7-4fb2-97bd-7a77fe7516c5.c000.csv\"],\n" +
-                "            \"chunk_size\":225,\n" +
+                "            \"chunk_count\":225,\n" +
                 "                \"chunk_outlier\":false,\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"chunk_week\":28,\n" +
@@ -310,7 +310,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672691321343574016}");
         Chunk chunk8 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=28/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00164-969c8e57-3991-47c2-8555-5ece3d20aec6.c000.csv\"],\n" +
-                "            \"chunk_size\":1440,\n" +
+                "            \"chunk_count\":1440,\n" +
                 "                \"chunk_outlier\":[false],\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"chunk_week\":28,\n" +
@@ -340,7 +340,7 @@ public class QueryEndPointShouldNotReturnMorePointThanMaxDataPointsCurrentVersio
                 "                \"_version_\":1672691321364545536}");
         Chunk chunk9 = ChunkBuilderHelper.fromJson("{\n" +
                 "            \"file_path\":[\"hdfs://ifpen/user/hurence/evoa/historian/year=2020/month=7/week=28/code_install=U879/name=U879.FQ244D_PV.F_CV/part-00164-969c8e57-3991-47c2-8555-5ece3d20aec6.c000.csv\"],\n" +
-                "            \"chunk_size\":30,\n" +
+                "            \"chunk_count\":30,\n" +
                 "                \"chunk_outlier\":false,\n" +
                 "            \"code_install\":\"U879\",\n" +
                 "                \"chunk_week\":28,\n" +

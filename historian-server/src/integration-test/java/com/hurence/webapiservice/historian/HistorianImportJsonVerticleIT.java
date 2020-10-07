@@ -25,6 +25,8 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.timeseries.model.Definitions.*;
 import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -64,41 +66,41 @@ public class HistorianImportJsonVerticleIT {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
         JsonArray params = new JsonArray().add(new JsonObject()
-                .put(HistorianServiceFields.NAME, "openSpaceSensors.Temperature000")
-                .put(HistorianServiceFields.POINTS,
+                .put(FIELD_NAME, "openSpaceSensors.Temperature000")
+                .put(POINTS,
                         new JsonArray()
                                 .add(new JsonArray().add(time1).add(2.0))
                                 .add(new JsonArray().add(time2).add(4.0))));
-        JsonObject paramsObject = new JsonObject().put(HistorianServiceFields.POINTS, params).put(HistorianServiceFields.ORIGIN, "ingestion-json");
+        JsonObject paramsObject = new JsonObject().put(POINTS, params).put(SOLR_COLUMN_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject expectedResponse = new JsonObject().put(HistorianServiceFields.TOTAL_ADDED_POINTS, 2).put(HistorianServiceFields.TOTAL_ADDED_CHUNKS, 1);
+                        JsonObject expectedResponse = new JsonObject().put(TOTAL_ADDED_POINTS, 2).put(TOTAL_ADDED_CHUNKS, 1);
                         assertEquals(rsp, expectedResponse);
                     });
                 })
                 .doAfterSuccess(t -> {
                     JsonObject params1 = new JsonObject("{\""+ HistorianServiceFields.FROM+"\":1477895614866," +
-                            "\""+ HistorianServiceFields.TO+"\": 1477916925845," +
-                            "\""+ HistorianServiceFields.NAMES+"\":[\"openSpaceSensors.Temperature000\"]," +
-                            "\""+ HistorianServiceFields.TAGS+"\":{}," +
-                            "\""+ HistorianServiceFields.SAMPLING_ALGO+"\":\"AVERAGE\"," +
-                            "\""+ HistorianServiceFields.BUCKET_SIZE+"\":1," +
-                            "\""+ HistorianServiceFields.MAX_POINT_BY_METRIC+"\":844" +
+                            "\""+ TO+"\": 1477916925845," +
+                            "\""+ NAMES+"\":[\"openSpaceSensors.Temperature000\"]," +
+                            "\""+ FIELD_TAGS+"\":{}," +
+                            "\""+ SAMPLING_ALGO+"\":\"AVERAGE\"," +
+                            "\""+ BUCKET_SIZE+"\":1," +
+                            "\""+ MAX_POINT_BY_METRIC+"\":844" +
                             "}");
                     historian.rxGetTimeSeries(params1)
                             .doOnError(testContext::failNow)
                             .doOnSuccess(rsp -> {
                                 testContext.verify(() -> {
                                     LOGGER.info("responses : {}", rsp);
-                                    long totalPoints = rsp.getLong(HistorianServiceFields.TOTAL_POINTS);
+                                    long totalPoints = rsp.getLong(TOTAL_POINTS);
                                     assertEquals(2, totalPoints);
-                                    JsonArray docs = rsp.getJsonArray(HistorianServiceFields.TIMESERIES);
+                                    JsonArray docs = rsp.getJsonArray(TIMESERIES);
                                     assertEquals(1, docs.size());
                                     JsonObject doc1 = docs.getJsonObject(0);
-                                    assertEquals("openSpaceSensors.Temperature000", doc1.getString(HistorianServiceFields.NAME));
-                                    JsonArray datapoints1 = doc1.getJsonArray(HistorianServiceFields.DATAPOINTS);
+                                    assertEquals("openSpaceSensors.Temperature000", doc1.getString(FIELD_NAME));
+                                    JsonArray datapoints1 = doc1.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[2.0,1477895624866],[4.0,1477916224866]]"), datapoints1);
                                     testContext.completeNow();
                                 });
@@ -116,68 +118,68 @@ public class HistorianImportJsonVerticleIT {
         long time3 = 1477895724888L;
         long time4 = 1477916924845L;
         JsonArray params = new JsonArray()
-                .add(new JsonObject().put(HistorianServiceFields.NAME, "openSpaceSensors.Temperature111")
-                        .put(HistorianServiceFields.POINTS, new JsonArray()
+                .add(new JsonObject().put(FIELD_NAME, "openSpaceSensors.Temperature111")
+                        .put(POINTS, new JsonArray()
                                 .add(new JsonArray().add(time1).add(2.0))
                                 .add(new JsonArray().add(time2).add(4.0))))
-                .add(new JsonObject().put(HistorianServiceFields.NAME, "openSpaceSensors.Temperature222")
-                        .put(HistorianServiceFields.POINTS, new JsonArray()
+                .add(new JsonObject().put(FIELD_NAME, "openSpaceSensors.Temperature222")
+                        .put(POINTS, new JsonArray()
                                 .add(new JsonArray().add(time1).add(3.1))
                                 .add(new JsonArray().add(time2).add(8.8))))
-                .add(new JsonObject().put(HistorianServiceFields.NAME, "openSpaceSensors.Temperature333")
-                        .put(HistorianServiceFields.POINTS, new JsonArray()
+                .add(new JsonObject().put(FIELD_NAME, "openSpaceSensors.Temperature333")
+                        .put(POINTS, new JsonArray()
                                 .add(new JsonArray().add(time3).add(4.1))
                                 .add(new JsonArray().add(time4).add(6.5))))
-                .add(new JsonObject().put(HistorianServiceFields.NAME, "openSpaceSensors.Temperature444")
-                        .put(HistorianServiceFields.POINTS, new JsonArray()
+                .add(new JsonObject().put(FIELD_NAME, "openSpaceSensors.Temperature444")
+                        .put(POINTS, new JsonArray()
                                 .add(new JsonArray().add(time3).add(0.0))
                                 .add(new JsonArray().add(time4).add(9.1))));
         JsonObject paramsObject = new JsonObject()
-                .put(HistorianServiceFields.POINTS, params)
-                .put(HistorianServiceFields.ORIGIN, "ingestion-json");
+                .put(POINTS, params)
+                .put(SOLR_COLUMN_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject expectedResponse = new JsonObject().put(HistorianServiceFields.TOTAL_ADDED_POINTS, 8).put(HistorianServiceFields.TOTAL_ADDED_CHUNKS, 4);
+                        JsonObject expectedResponse = new JsonObject().put(TOTAL_ADDED_POINTS, 8).put(TOTAL_ADDED_CHUNKS, 4);
                         assertEquals(rsp, expectedResponse);
                     });
                 })
                 .doAfterSuccess(t -> {
-                    JsonObject params1 = new JsonObject("{\""+ HistorianServiceFields.FROM+"\":1477895614866," +
-                            "\""+ HistorianServiceFields.TO+"\": 1477916925845," +
-                            "\""+ HistorianServiceFields.NAMES+"\":[\"openSpaceSensors.Temperature111\",\"openSpaceSensors.Temperature222\"," +
+                    JsonObject params1 = new JsonObject("{\""+ FROM+"\":1477895614866," +
+                            "\""+ TO+"\": 1477916925845," +
+                            "\""+ NAMES+"\":[\"openSpaceSensors.Temperature111\",\"openSpaceSensors.Temperature222\"," +
                             "\"openSpaceSensors.Temperature333\"," +
                             "\"openSpaceSensors.Temperature444\"]," +
-                            "\""+ HistorianServiceFields.TAGS+"\":{}," +
-                            "\""+ HistorianServiceFields.SAMPLING_ALGO+"\":\"AVERAGE\"," +
-                            "\""+ HistorianServiceFields.BUCKET_SIZE+"\":1," +
-                            "\""+ HistorianServiceFields.MAX_POINT_BY_METRIC+"\":844" +
+                            "\""+ FIELD_TAGS+"\":{}," +
+                            "\""+ SAMPLING_ALGO+"\":\"AVERAGE\"," +
+                            "\""+ BUCKET_SIZE+"\":1," +
+                            "\""+ MAX_POINT_BY_METRIC+"\":844" +
                             "}");
                     historian.rxGetTimeSeries(params1)
                             .doOnError(testContext::failNow)
                             .doOnSuccess(rsp -> {
                                 testContext.verify(() -> {
                                     LOGGER.info("responses : {}", rsp);
-                                    long totalPoints = rsp.getLong(HistorianServiceFields.TOTAL_POINTS);
+                                    long totalPoints = rsp.getLong(TOTAL_POINTS);
                                     assertEquals(8, totalPoints);
-                                    JsonArray docs = rsp.getJsonArray(HistorianServiceFields.TIMESERIES);
+                                    JsonArray docs = rsp.getJsonArray(TIMESERIES);
                                     assertEquals(4, docs.size());
                                     JsonObject doc1 = docs.getJsonObject(0);
-                                    assertEquals("openSpaceSensors.Temperature111", doc1.getString(HistorianServiceFields.NAME));
-                                    JsonArray datapoints1 = doc1.getJsonArray(HistorianServiceFields.DATAPOINTS);
+                                    assertEquals("openSpaceSensors.Temperature111", doc1.getString(FIELD_NAME));
+                                    JsonArray datapoints1 = doc1.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[2.0,1477895624866],[4.0,1477916224866]]"), datapoints1);
                                     JsonObject doc2 = docs.getJsonObject(1);
-                                    assertEquals("openSpaceSensors.Temperature222", doc2.getString(HistorianServiceFields.NAME));
-                                    JsonArray datapoints2 = doc2.getJsonArray(HistorianServiceFields.DATAPOINTS);
+                                    assertEquals("openSpaceSensors.Temperature222", doc2.getString(FIELD_NAME));
+                                    JsonArray datapoints2 = doc2.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[3.1,1477895624866],[8.8,1477916224866]]"), datapoints2);
                                     JsonObject doc3 = docs.getJsonObject(2);
-                                    assertEquals("openSpaceSensors.Temperature333", doc3.getString(HistorianServiceFields.NAME));
-                                    JsonArray datapoints3 = doc3.getJsonArray(HistorianServiceFields.DATAPOINTS);
+                                    assertEquals("openSpaceSensors.Temperature333", doc3.getString(FIELD_NAME));
+                                    JsonArray datapoints3 = doc3.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[4.1,1477895724888],[6.5,1477916924845]]"), datapoints3);
                                     JsonObject doc4 = docs.getJsonObject(3);
-                                    assertEquals("openSpaceSensors.Temperature444", doc4.getString(HistorianServiceFields.NAME));
-                                    JsonArray datapoints4 = doc4.getJsonArray(HistorianServiceFields.DATAPOINTS);
+                                    assertEquals("openSpaceSensors.Temperature444", doc4.getString(FIELD_NAME));
+                                    JsonArray datapoints4 = doc4.getJsonArray(DATAPOINTS);
                                     assertEquals(new JsonArray("[[0.0,1477895724888],[9.1,1477916924845]]"), datapoints4);
                                     testContext.completeNow();
                                 });
@@ -193,22 +195,22 @@ public class HistorianImportJsonVerticleIT {
         long time1 = 1477895624866L;
         long time2 = 1477916224866L;
         JsonArray params = new JsonArray()
-                .add(new JsonObject().put(HistorianServiceFields.NAME, "openSpaceSensors.Temperature555")
-                        .put(HistorianServiceFields.POINTS, new JsonArray()
+                .add(new JsonObject().put(FIELD_NAME, "openSpaceSensors.Temperature555")
+                        .put(POINTS, new JsonArray()
                                 .add(new JsonArray().add(time1).add(2.0))
                                 .add(new JsonArray().add(time2).add(4.0))))
-        .add(new JsonObject().put(HistorianServiceFields.NAME, "openSpaceSensors.Temperature666")
-                .put(HistorianServiceFields.POINTS, new JsonArray()
+        .add(new JsonObject().put(FIELD_NAME, "openSpaceSensors.Temperature666")
+                .put(POINTS, new JsonArray()
                         .add(new JsonArray().add(time1).add(3.1))
                         .add(new JsonArray().add(time2).add(8.8))));
         JsonObject paramsObject = new JsonObject()
-                .put(HistorianServiceFields.POINTS, params)
-                .put(HistorianServiceFields.ORIGIN, "ingestion-json");
+                .put(POINTS, params)
+                .put(SOLR_COLUMN_ORIGIN, "ingestion-json");
         historian.rxAddTimeSeries(paramsObject)
                 .doOnError(testContext::failNow)
                 .doOnSuccess(rsp -> {
                     testContext.verify(() -> {
-                        JsonObject expectedResponse = new JsonObject().put(HistorianServiceFields.TOTAL_ADDED_POINTS, 4).put(HistorianServiceFields.TOTAL_ADDED_CHUNKS, 2);
+                        JsonObject expectedResponse = new JsonObject().put(TOTAL_ADDED_POINTS, 4).put(TOTAL_ADDED_CHUNKS, 2);
                         assertEquals(rsp, expectedResponse);
                         testContext.completeNow();
                     });
