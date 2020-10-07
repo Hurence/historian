@@ -45,13 +45,14 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
         String baseSearchQuery =  createSearch(
                 chunkCollection,
                 query.getQuery(),
+                query.getFilterQueries(),
                 "\"" + flString + "\"",
                 "\"/export\"",
                 "\"" +SOLR_COLUMN_NAME + " asc\""
         );
         String selectedWrapper = createSelect(baseSearchQuery, selectFields);
         List<String> fieldsAggInRoll = new ArrayList<>();
-        fieldsAggInRoll.add("sum(\"" + SOLR_COLUMN_COUNT + ")");
+        fieldsAggInRoll.add("sum(" + SOLR_COLUMN_COUNT + ")");
         fieldsAggInRoll.add("count(*)");
         String rollUpExpr = createRollup(selectedWrapper,
                         "\"" + overString +  "\"",
