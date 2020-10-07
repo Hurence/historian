@@ -1,8 +1,10 @@
 package com.hurence.historian.spark.sql.reader.solr
 
 import com.hurence.historian.spark.sql.Options
+import com.hurence.historian.spark.sql.Options.TAG_NAMES
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Chunk
+import com.hurence.timeseries.model.Chunk.ChunkBuilder
 import com.hurence.timeseries.model.Definitions._
 import org.apache.spark.sql.functions.{col, lit, map, unbase64}
 import org.apache.spark.sql.types.{FloatType, IntegerType}
@@ -18,18 +20,28 @@ class SolrChunksReader extends Reader[Chunk] {
 
     implicit val encoder = Encoders.bean(classOf[Chunk])
 
-    val tagNames: List[Column] = options.config(Options.TAG_NAMES)
-      .split(",").toList
-      .map(tag => col(tag).as(s"tag_$tag"))
+    var someTags : Boolean = true
+    val tagNames: List[Column] = if (options.config.contains(TAG_NAMES)) {
+      options.config(TAG_NAMES)
+        .split(",").toList
+        .map(tag => col(tag).as(s"tag_$tag"))
+    } else {
+      // No tags specified
+      someTags = false
+      List[Column]()
+    }
     val mainCols = SOLR_COLUMNS.asScala.toList
       .map(name => col(name).as(getFieldFromColumn(name))) ::: tagNames
 
+    var tags : List[Column] = List[Column]()
 
-    val tags: List[Column] = options.config(Options.TAG_NAMES)
-      .split(",").toList
-      .flatMap(tag => List(lit(s"$tag"), col(s"tag_$tag")))
+    if (someTags) {
+      tags = options.config(TAG_NAMES)
+        .split(",").toList
+        .flatMap(tag => List(lit(s"$tag"), col(s"tag_$tag")))
+    }
 
-    spark.read
+    var chunksDf = spark.read
       .format("solr")
       .options(options.config)
       .load()
@@ -59,9 +71,14 @@ class SolrChunksReader extends Reader[Chunk] {
       .withColumn(FIELD_QUALITY_SUM, col(FIELD_QUALITY_SUM).cast(FloatType))
       .withColumn(FIELD_YEAR, col(FIELD_YEAR).cast(IntegerType))
       .withColumn(FIELD_MONTH, col(FIELD_MONTH).cast(IntegerType))
-      .withColumn(FIELD_TAGS, map(tags: _*))
-      .map(r => {
-        Chunk.builder()
+
+    if (someTags) {
+      chunksDf = chunksDf
+        .withColumn(FIELD_TAGS, map(tags: _*))
+    }
+
+    chunksDf.map(r => {
+        val builder : ChunkBuilder = Chunk.builder()
           .name(r.getAs[String](FIELD_NAME))
           .origin(r.getAs[String](FIELD_ORIGIN))
           .start(r.getAs[Long](FIELD_START))
@@ -83,8 +100,12 @@ class SolrChunksReader extends Reader[Chunk] {
           .trend(r.getAs[Boolean](FIELD_TREND))
           .outlier(r.getAs[Boolean](FIELD_OUTLIER))
           .value(r.getAs[Array[Byte]](FIELD_VALUE))
-          .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
-          .buildId()
+
+        if (someTags) {
+          builder.tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
+        }
+
+        builder.buildId()
           .computeMetrics()
           .build()
       })

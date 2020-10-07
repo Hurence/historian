@@ -1056,7 +1056,7 @@ public class CompactorIT {
         Map<String, Chunk> actualChunks = getSolrChunks(solrClient, chunksCollection);
 
 //        for (Chunk actualChunk : actualChunks.values()) {
-//            System.out.println("Actual chunk:\n" + actualChunk.toHumanReadable());
+//            System.out.println("Actual chunk:\n" + actualChunk.toHumanReadable(false));
 //        }
 
         Map<String, Chunk> expectedChunks = expectedRecompactedChunksForTestCompactor();
