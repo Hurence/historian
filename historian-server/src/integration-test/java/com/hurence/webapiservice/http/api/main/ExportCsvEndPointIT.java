@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
+import static com.hurence.webapiservice.http.api.modele.StatusMessages.BAD_REQUEST;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
@@ -158,7 +159,8 @@ public class ExportCsvEndPointIT {
                 .sendBuffer(requestBuffer, testContext.succeeding(rsp -> {
                     testContext.verify(() -> {
                         assertEquals(413, rsp.statusCode());
-                        assertEquals("max data measures is bigger than allowed", rsp.statusMessage());
+                        assertEquals(BAD_REQUEST, rsp.statusMessage());
+                        assertEquals("max data measures is bigger than allowed", rsp.bodyAsString());
                         testContext.completeNow();
                     });
                 }));
