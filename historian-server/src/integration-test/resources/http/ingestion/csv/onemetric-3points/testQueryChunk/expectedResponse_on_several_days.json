@@ -21,7 +21,7 @@
       "chunk_quality_min":"NaN",
       "chunk_quality_max":"NaN",
       "chunk_quality_first":"NaN",
-      "chunk_quality_sum":"NaN",
+      "chunk_quality_sum":0.0,
       "chunk_quality_avg":"NaN",
       "chunk_max": 2.0,
       "chunk_min": 1.2,
@@ -60,7 +60,7 @@
       "chunk_first": 3.0,
       "chunk_last": 3.0,
       "chunk_sum": 3.0,
-      "chunk_std_dev": "NaN"
+      "chunk_std_dev": 0.0
     }
   ]
 }
