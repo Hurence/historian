@@ -26,6 +26,7 @@ public class HistorianChunkCollectionFieldsVersionCurrent {
     public static String CHUNK_MONTH = "chunk_month";
     public static String CHUNK_DAY = "chunk_day";
     public static String CHUNK_HOUR = "chunk_hour";
+    public static String CHUNK_VERSION = "chunk_version";
     public static String CHUNK_STDDEV = "chunk_std_dev";
     public static String CHUNK_QUALITY_AVG = "chunk_quality_avg";
     public static String CHUNK_QUALITY_MIN = "chunk_quality_min";
