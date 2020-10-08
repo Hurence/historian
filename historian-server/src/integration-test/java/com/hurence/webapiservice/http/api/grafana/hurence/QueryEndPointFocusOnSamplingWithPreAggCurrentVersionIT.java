@@ -1,3 +1,4 @@
+/*
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
 import com.hurence.historian.model.SchemaVersion;
@@ -138,3 +139,4 @@ public class QueryEndPointFocusOnSamplingWithPreAggCurrentVersionIT extends Abst
     }
 
 }
+*/
