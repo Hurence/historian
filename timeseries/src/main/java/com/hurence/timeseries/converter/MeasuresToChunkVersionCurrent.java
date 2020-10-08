@@ -1,6 +1,6 @@
 package com.hurence.timeseries.converter;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.timeseries.DateInfo;
 import com.hurence.timeseries.MetricTimeSeries;
 import com.hurence.timeseries.TimeSeriesUtil;

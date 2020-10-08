@@ -1,9 +1,9 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianConf;
-import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
-import com.hurence.historian.modele.stream.ChunkStream;
+import com.hurence.historian.model.HistorianConf;
+import com.hurence.historian.model.HistorianServiceFields;
+import com.hurence.historian.model.solr.SolrFieldMapping;
+import com.hurence.historian.model.stream.ChunkStream;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 
@@ -36,7 +36,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.*;
 
 public class GetTimeSeriesHandler {

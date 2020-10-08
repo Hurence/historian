@@ -38,7 +38,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import static com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent.*;
+import static com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent.*;
 
 public class Compactor implements Runnable {
 

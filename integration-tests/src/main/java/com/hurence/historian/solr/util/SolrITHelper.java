@@ -1,12 +1,13 @@
 package com.hurence.historian.solr.util;
 
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
-import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.modele.solr.HistorianCollections;
+import static com.hurence.timeseries.model.Definitions.*;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionEVOA0;
+import com.hurence.historian.model.SchemaVersion;
+import com.hurence.historian.model.solr.HistorianCollections;
 import com.hurence.unit5.extensions.SolrExtension;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -31,7 +32,6 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.converter.SolrDocumentReader.fromSolrDocument;
-import static com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class SolrITHelper {
@@ -262,11 +262,11 @@ public class SolrITHelper {
             for (String field : solrDocument.getFieldNames().stream().sorted().collect(Collectors.toList())) {
                 stringBuilder.append("\n  \"").append(field).append("\": ");
                 Object value = solrDocument.getFieldValue(field);
-                if (field.equals(CHUNK_VALUE)) {
+                if (field.equals(SOLR_COLUMN_VALUE)) {
                     // Uncompress the chunk and display points in a human readable way
                     byte[] compressedPoints = BinaryEncodingUtils.decode((String)value);
-                    long chunkStart = (Long)solrDocument.getFieldValue(CHUNK_START);
-                    long chunkEnd = (Long)solrDocument.getFieldValue(CHUNK_END);
+                    long chunkStart = (Long)solrDocument.getFieldValue(SOLR_COLUMN_START);
+                    long chunkEnd = (Long)solrDocument.getFieldValue(SOLR_COLUMN_END);
                     try {
                         TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
                         for (Measure measure : measures) {

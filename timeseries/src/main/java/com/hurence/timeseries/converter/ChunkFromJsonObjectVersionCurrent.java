@@ -1,19 +1,17 @@
 package com.hurence.timeseries.converter;
 
 
-import com.hurence.historian.modele.SchemaVersion;
-import com.hurence.historian.modele.solr.Schema;
-import com.hurence.historian.modele.solr.SolrField;
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent;
+import com.hurence.historian.model.SchemaVersion;
+import com.hurence.historian.model.solr.Schema;
+import com.hurence.historian.model.solr.SolrField;
 import com.hurence.timeseries.model.Chunk;
-import com.hurence.timeseries.model.HistorianChunkCollectionFieldsVersionCurrent;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -134,7 +132,7 @@ public class ChunkFromJsonObjectVersionCurrent extends Chunk {
 
     @Override
     public double getStdDev() {
-        return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV);
+        return chunk.getDouble(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STD_DEV);
     }
 
     @Override

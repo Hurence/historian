@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.historian.impl;
 
-import com.hurence.historian.modele.HistorianConf;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.model.solr.SolrFieldMapping;
 import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
 import org.apache.solr.client.solrj.SolrQuery;
 

@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.models;
 
-import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.model.HistorianServiceFields;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 

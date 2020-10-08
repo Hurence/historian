@@ -3,7 +3,6 @@ package com.hurence.webapiservice.http.api.ingestion.util;
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import io.vertx.core.json.JsonArray;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -13,8 +12,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static com.hurence.historian.modele.HistorianServiceFields.CUSTOM_NAME;
-import static com.hurence.historian.modele.HistorianServiceFields.MAX_LINES_FOR_CSV_FILE;
+import static com.hurence.historian.model.HistorianServiceFields.CUSTOM_NAME;
 import static com.hurence.webapiservice.http.api.ingestion.util.DataConverter.toNumber;
 
 public class CsvConvertorUtil {

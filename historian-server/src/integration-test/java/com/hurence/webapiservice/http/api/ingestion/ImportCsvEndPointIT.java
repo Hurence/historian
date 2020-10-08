@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.ingestion;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.util.AssertResponseGivenRequestHelper;
@@ -37,8 +37,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianServiceFields.CUSTOM_NAME;
-import static com.hurence.historian.modele.HistorianServiceFields.MAX_NUMBER_OF_LIGNES;
+import static com.hurence.historian.model.HistorianServiceFields.CUSTOM_NAME;
+import static com.hurence.historian.model.HistorianServiceFields.MAX_NUMBER_OF_LIGNES;
 import static com.hurence.webapiservice.http.HttpServerVerticle.*;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.*;
 
