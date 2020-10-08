@@ -7,10 +7,13 @@ import com.hurence.timeseries.TimeSeriesUtil;
 import com.hurence.timeseries.analysis.TimeseriesAnalysis;
 import com.hurence.timeseries.analysis.TimeseriesAnalyzer;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
-import com.hurence.timeseries.model.Measure;
+import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesCurrentSerializer;
 import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.sax.SaxConverter;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -50,6 +53,16 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
     @Override
     public Chunk buildChunk(String name,
                             TreeSet<? extends Measure> measures) {
+        return buildChunk(name, measures, Collections.emptyMap());
+    }
+
+    public Chunk buildChunkFromCompressedPoints(String name,
+                            byte[] compressedPoints, long chunkStart, long chunkEnd) throws IOException {
+
+        TreeSet<? extends Measure> measures = ProtoBufTimeSeriesCurrentSerializer.from(new ByteArrayInputStream(compressedPoints),
+                chunkStart, chunkEnd,
+                compressedPoints);
+
         return buildChunk(name, measures, Collections.emptyMap());
     }
 
