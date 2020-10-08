@@ -17,8 +17,8 @@
 
             <!-- Now, select which projects to include in this module-set. -->
             <includes>
-                <include>com.hurence.historian:loader</include>
-                <include>com.hurence.historian:logisland-timeseries</include>
+                <include>com.hurence.historian:historian-spark</include>
+                <include>com.hurence.historian:timeseries</include>
             </includes>
             <binaries>
                 <directoryMode>0770</directoryMode>
