@@ -22,7 +22,7 @@ public class SolrDocumentBuilder {
         doc.addField(SOLR_COLUMN_DAY, chunk.getDay());
         doc.addField(SOLR_COLUMN_ORIGIN, chunk.getOrigin());
         doc.setField(SOLR_COLUMN_ID, chunk.getId());
-        doc.setField(SOLR_COLUMN_VERSION, chunk.getId());
+        doc.setField(SOLR_COLUMN_VERSION, chunk.getVersion());
         doc.setField(SOLR_COLUMN_METRIC_KEY, chunk.getMetricKey());
         doc.setField(SOLR_COLUMN_QUALITY_MIN, chunk.getQualityMin());
         doc.setField(SOLR_COLUMN_QUALITY_MAX, chunk.getQualityMax());
