@@ -25,6 +25,13 @@ public class MetricRequest {
         return tags;
     }
 
+    public String getTagsAsString() {
+        if (!tags.isEmpty())
+            return tags.toString();
+        else
+            return "";
+    }
+
     public QualityConfig getQuality() { return quality; }
 
     @Override
