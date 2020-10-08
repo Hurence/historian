@@ -34,6 +34,7 @@ import java.util.Map;
 import java.util.SortedSet;
 import java.util.TimeZone;
 import java.util.TreeSet;
+import java.util.regex.Pattern;
 
 /**
  * A Chunk is a compacted set of measures within a time interval.
@@ -190,8 +191,8 @@ public class Chunk implements Serializable {
      */
     public static class MetricKey {
 
-        public static final char TOKEN_SEPARATOR_CHAR = ',';
-        public static final char TAG_KEY_VALUE_SEPARATOR_CHAR = '=';
+        public static final char TOKEN_SEPARATOR_CHAR = '|';
+        public static final char TAG_KEY_VALUE_SEPARATOR_CHAR = '$';
 
         private static final String TOKEN_SEPARATOR = TOKEN_SEPARATOR_CHAR + "";
         private static final String TAG_KEY_VALUE_SEPARATOR = TAG_KEY_VALUE_SEPARATOR_CHAR + "";
@@ -266,8 +267,9 @@ public class Chunk implements Serializable {
             if ((id == null) || (id.length() == 0)) {
                 throw new IllegalArgumentException("null or empty metric key");
             }
+
             // metricName|tag1=tag1Val|tag2=tag2val
-            String[] tokens = id.split(TOKEN_SEPARATOR);
+            String[] tokens = id.split(Pattern.quote(TOKEN_SEPARATOR));
             String name = tokens[0];
             if (tokens.length == 1) {
                 // No tags ( ["metricName"] )
@@ -278,7 +280,7 @@ public class Chunk implements Serializable {
                 for (int i = 1; i < tokens.length; i++) {
                     // "tag1=tag1Val"
                     String tagAndValues = tokens[i];
-                    String[] tagAndValue = tagAndValues.split(TAG_KEY_VALUE_SEPARATOR);
+                    String[] tagAndValue = tagAndValues.split(Pattern.quote(TAG_KEY_VALUE_SEPARATOR));
                     if ((tagAndValue == null) || (tagAndValue.length != 2)) {
                         StringBuilder stringBuilder = new StringBuilder();
                         if (tagAndValue != null) {
