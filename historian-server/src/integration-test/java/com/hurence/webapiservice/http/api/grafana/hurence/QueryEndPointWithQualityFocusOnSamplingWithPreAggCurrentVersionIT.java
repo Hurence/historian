@@ -234,7 +234,7 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggCurrentVersionIT {
     /*
         TEST testQualityAlgoFiltering => testFilteringQualityWithAvg
      */
-    @Test
+/*    @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQualityAlgoFilteringAvgAndSamplingAvg(Vertx vertx, VertxTestContext testContext) {
         assertRequestGiveResponseFromFile(vertx, testContext,
@@ -263,9 +263,9 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggCurrentVersionIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithAvg/samplingMin/request.json",
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithAvg/samplingMin/expectedResponse.json");
     }
-    /*
+    *//*
        TEST testQualityAlgoFiltering => testFilteringQualityWithFirst
-    */
+    *//*
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQualityAlgoFilteringFirstAndSamplingAvg(Vertx vertx, VertxTestContext testContext) {
@@ -295,9 +295,9 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggCurrentVersionIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithFirst/samplingMin/request.json",
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithFirst/samplingMin/expectedResponse.json");
     }
-    /*
+    *//*
        TEST testQualityAlgoFiltering => testFilteringQualityWithMax
-    */
+    *//*
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQualityAlgoFilteringMaxAndSamplingAvg(Vertx vertx, VertxTestContext testContext) {
@@ -327,9 +327,9 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggCurrentVersionIT {
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithMax/samplingMin/request.json",
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithMax/samplingMin/expectedResponse.json");
     }
-    /*
+    *//*
        TEST testQualityAlgoFiltering => testFilteringQualityWithMin
-    */
+    *//*
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testQualityAlgoFilteringMinAndSamplingAvg(Vertx vertx, VertxTestContext testContext) {
@@ -358,7 +358,7 @@ public class QueryEndPointWithQualityFocusOnSamplingWithPreAggCurrentVersionIT {
         assertRequestGiveResponseFromFile(vertx, testContext,
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithMin/samplingMin/request.json",
                 "/http/grafana/hurence/query/testWithQualityWithPreAggSampling/testQualityAlgoFiltering/testFilteringQualityWithMin/samplingMin/expectedResponse.json");
-    }
+    }*/
 
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
