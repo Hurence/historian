@@ -6,6 +6,7 @@ import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
 import io.vertx.core.json.JsonObject;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
@@ -64,6 +65,11 @@ public class ChunkBuilderHelper {
     public static Chunk fromJson(String json) {
         JsonObject jsonObject = new JsonObject(json);
         return new ChunkFromJsonObjectVersionCurrent(jsonObject);
+    }
+
+    public static Chunk fromCompressedPoints(String metricName, byte[] compressedPoints, long chunkStart, long chunkEnd) throws IOException {
+        MeasuresToChunkVersionCurrent converter = new MeasuresToChunkVersionCurrent("test");
+        return converter.buildChunkFromCompressedPoints(metricName, compressedPoints, chunkStart, chunkEnd);
     }
 
 }
