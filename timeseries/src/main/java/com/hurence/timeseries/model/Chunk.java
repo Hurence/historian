@@ -142,7 +142,7 @@ public class Chunk implements Serializable {
         }
 
         /**
-         * compute the metrics from the valueBinaries field so ther's no need to erad them
+         * compute the metrics from the valueBinaries field so there's no need to read them
          */
         public ChunkBuilder computeMetrics() {
             DateTime time = new DateTime(start)
@@ -155,6 +155,11 @@ public class Chunk implements Serializable {
 
     }
 
+    /**
+     * Get human readable Chunk including uncompressed readable measure values
+     * @param withTimestamps Display timestamp next to human readable dates or not
+     * @return
+     */
     public String toHumanReadable(boolean withTimestamps) {
         SimpleDateFormat sdf = Measure.createUtcDateFormatter("yyyy-MM-dd HH:mm:ss.SSS");
         StringBuilder stringBuilder = new StringBuilder(" Value as string: " + getValueAsString());
@@ -185,6 +190,12 @@ public class Chunk implements Serializable {
      */
     public static class MetricKey {
 
+        public static final char TOKEN_SEPARATOR_CHAR = ',';
+        public static final char TAG_KEY_VALUE_SEPARATOR_CHAR = '=';
+
+        private static final String TOKEN_SEPARATOR = TOKEN_SEPARATOR_CHAR + "";
+        private static final String TAG_KEY_VALUE_SEPARATOR = TAG_KEY_VALUE_SEPARATOR_CHAR + "";
+
         private String name;
         private Map<String, String> tags = new HashMap<String, String>();
 
@@ -207,7 +218,7 @@ public class Chunk implements Serializable {
 
         /**
          * Computes the unique metric key in the form:
-         * <name>[,tagName=tageValue] with tags alphabetically sorted
+         * <name>[|tagName=tageValue] with tags alphabetically sorted
          * according to the tag name
          *
          * @return
@@ -219,7 +230,7 @@ public class Chunk implements Serializable {
             if (tags != null && tags.size() > 0) {
                 SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
                 sortedTags.forEach((tagKey) -> {
-                    idBuilder.append(",").append(tagKey).append("=").append(tags.get(tagKey));
+                    idBuilder.append(TOKEN_SEPARATOR).append(tagKey).append(TAG_KEY_VALUE_SEPARATOR).append(tags.get(tagKey));
                 });
             }
             return idBuilder.toString();
@@ -230,6 +241,20 @@ public class Chunk implements Serializable {
             return compute();
         }
 
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            MetricKey metricKey = (MetricKey) o;
+            return name.equals(metricKey.name) &&
+                    tags.equals(metricKey.tags);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, tags);
+        }
+
         /**
          * Parses a metric key in the form as defined by the compute method
          *
@@ -238,11 +263,11 @@ public class Chunk implements Serializable {
          */
         public static MetricKey parse(String id) {
 
-            // metricName,tag1=tag1Val,tag2=tag2val
-            String[] tokens = id.split(",");
-            if ((tokens == null) || (tokens.length == 0)) {
+            if ((id == null) || (id.length() == 0)) {
                 throw new IllegalArgumentException("null or empty metric key");
             }
+            // metricName|tag1=tag1Val|tag2=tag2val
+            String[] tokens = id.split(TOKEN_SEPARATOR);
             String name = tokens[0];
             if (tokens.length == 1) {
                 // No tags ( ["metricName"] )
@@ -253,9 +278,17 @@ public class Chunk implements Serializable {
                 for (int i = 1; i < tokens.length; i++) {
                     // "tag1=tag1Val"
                     String tagAndValues = tokens[i];
-                    String[] tagAndValue = tagAndValues.split("=");
+                    String[] tagAndValue = tagAndValues.split(TAG_KEY_VALUE_SEPARATOR);
                     if ((tagAndValue == null) || (tagAndValue.length != 2)) {
-                        throw new IllegalArgumentException("tag component has wrong format: " + tagAndValue);
+                        StringBuilder stringBuilder = new StringBuilder();
+                        if (tagAndValue != null) {
+                            for (String token : tagAndValue) {
+                                stringBuilder.append(" " + token);
+                            }
+                        } else {
+                            stringBuilder.append(" null");
+                        }
+                        throw new IllegalArgumentException("tag component has wrong format:" + stringBuilder);
                     }
                     tags.put(tagAndValue[0], tagAndValue[1]);
                 }
