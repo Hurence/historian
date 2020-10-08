@@ -9,7 +9,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseCsvImportRequest;
 import static com.hurence.webapiservice.http.api.ingestion.util.CsvConvertorUtil.ConvertCsvFileToJson;
 

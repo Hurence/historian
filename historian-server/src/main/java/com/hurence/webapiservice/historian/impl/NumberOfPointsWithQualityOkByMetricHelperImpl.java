@@ -1,13 +1,13 @@
 package com.hurence.webapiservice.historian.impl;
 
-import com.hurence.historian.modele.solr.SolrFieldMapping;
+import com.hurence.historian.model.solr.SolrFieldMapping;
 import com.hurence.webapiservice.timeseries.extractor.MetricRequest;
 import org.apache.solr.client.solrj.SolrQuery;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.historian.modele.HistorianServiceFields.QUALITY_CHECK;
+import static com.hurence.historian.model.HistorianServiceFields.QUALITY_CHECK;
 import static com.hurence.solr.util.StreamExprHelper.*;
 import static com.hurence.timeseries.model.Definitions.*;
 import static com.hurence.webapiservice.historian.handler.GetTimeSeriesHandler.findNeededTagsName;

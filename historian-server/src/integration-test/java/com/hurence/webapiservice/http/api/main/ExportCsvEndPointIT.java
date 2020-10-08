@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.main;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
 import com.hurence.historian.solr.injector.SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion;
 import com.hurence.timeseries.model.Measure;

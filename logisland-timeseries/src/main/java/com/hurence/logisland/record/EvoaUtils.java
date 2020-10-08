@@ -1,9 +1,8 @@
 package com.hurence.logisland.record;
 
 import com.google.common.hash.Hashing;
-import com.hurence.historian.modele.HistorianChunkCollectionFieldsVersionEVOA0;
-import com.hurence.historian.modele.solr.SolrFieldMapping;
-import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionEVOA0;
+import com.hurence.historian.model.HistorianServiceFields;
 
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;

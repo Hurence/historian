@@ -1,8 +1,7 @@
 package com.hurence.util;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.webapiservice.historian.HistorianVerticle;
-import com.hurence.webapiservice.http.HttpServerVerticle;
 import io.vertx.core.json.JsonObject;
 
 public class HistorianVerticleConfHelper {

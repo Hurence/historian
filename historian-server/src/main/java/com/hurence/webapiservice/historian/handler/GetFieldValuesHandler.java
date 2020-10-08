@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.historian.handler;
 
-import com.hurence.historian.modele.HistorianServiceFields;
+import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;

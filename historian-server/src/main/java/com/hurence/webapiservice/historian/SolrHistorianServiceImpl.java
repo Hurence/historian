@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianConf;
-import com.hurence.historian.modele.solr.Schema;
+import com.hurence.historian.model.HistorianConf;
+import com.hurence.historian.model.solr.Schema;
 import com.hurence.webapiservice.historian.handler.*;
 import io.vertx.core.*;
 import io.vertx.core.json.JsonArray;

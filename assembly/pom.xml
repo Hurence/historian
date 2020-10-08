@@ -21,7 +21,7 @@
     <dependencies>
         <dependency>
             <groupId>com.hurence.historian</groupId>
-            <artifactId>loader</artifactId>
+            <artifactId>historian-spark</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

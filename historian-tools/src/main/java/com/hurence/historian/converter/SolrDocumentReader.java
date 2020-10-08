@@ -1,6 +1,6 @@
 package com.hurence.historian.converter;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Definitions;

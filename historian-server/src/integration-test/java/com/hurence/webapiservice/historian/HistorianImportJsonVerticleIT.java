@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian;
 
-import com.hurence.historian.modele.HistorianServiceFields;
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.HistorianServiceFields;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
@@ -25,9 +25,8 @@ import org.testcontainers.containers.DockerComposeContainer;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
-import static com.hurence.historian.modele.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.*;
-import static com.hurence.webapiservice.historian.HistorianVerticle.CONFIG_SCHEMA_VERSION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith({VertxExtension.class, SolrExtension.class})

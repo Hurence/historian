@@ -17,7 +17,7 @@
 
 package com.hurence.webapiservice.util;
 
-import com.hurence.historian.modele.SchemaVersion;
+import com.hurence.historian.model.SchemaVersion;
 import com.hurence.unit5.extensions.SolrExtension;
 import com.hurence.webapiservice.http.HttpServerVerticle;
 import io.reactivex.Single;
