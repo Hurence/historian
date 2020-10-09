@@ -17,10 +17,6 @@ public class ChunkSchemaVersion1 implements Schema{
                     .withType("string")
                     .withRequired(true).build(),
             new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionCurrent.COMPACTIONS_RUNNING)
-                    .withType("string")
-                    .withMultivalued(true).build(),
-            new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_VALUE)
                     .withType("string")
                     .withIndexed(false).build(),
@@ -95,10 +91,7 @@ public class ChunkSchemaVersion1 implements Schema{
                     .withType("string").build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_HOUR)
-                    .withType("pint").build(),
-            new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_VERSION)
-                    .withType("string").build()
+                    .withType("pint").build()
     );
 
     @Override
