@@ -115,7 +115,7 @@ public class HistorianVerticleIT {
         assertEquals("default-config", schemaRepresentation.getName());
         assertEquals(1.6, schemaRepresentation.getVersion(), 0.001f);
         assertEquals(ID, schemaRepresentation.getUniqueKey());
-        assertEquals(33, schemaRepresentation.getFields().size());
+        assertEquals(32, schemaRepresentation.getFields().size());
         assertEquals(69, schemaRepresentation.getDynamicFields().size());
         assertEquals(68, schemaRepresentation.getFieldTypes().size());
         assertEquals(0, schemaRepresentation.getCopyFields().size());
@@ -147,7 +147,7 @@ public class HistorianVerticleIT {
                         assertTrue(doc1.containsKey(SOLR_COLUMN_TREND));
                         assertTrue(doc1.containsKey(SOLR_COLUMN_SUM));
                         assertTrue(doc1.containsKey(SOLR_COLUMN_FIRST));
-                        assertEquals(27, doc1.size());
+                        assertEquals(28, doc1.size());
                         assertEquals("c598923bb1aa77c6bec68bf64146633339fe22a7c85dcf0a9a49386ff38b4d8e", doc1.getString(ID));
                         assertEquals(1L, doc1.getLong(SOLR_COLUMN_START));
                         assertEquals(4L, doc1.getLong(SOLR_COLUMN_END));
