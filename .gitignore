@@ -43,11 +43,12 @@ hs_err_pid*
 
 # copied resources
 integration-tests/src/main/resources/shared-resources/historian.properties
+historian-spark/src/integration-test/resources/shared-resources/historian-compactor.sh
 
 # generated files
 timeseries/src/main/generated
 historian-server/src/integration-test/resources/shared-resources
-loader/src/integration-test/resources/shared-resources
+historian-spark/src/integration-test/resources/shared-resources
 integration-tests/src/main/resources/shared-resources/create-historian-annotation-collection.sh
 integration-tests/src/main/resources/shared-resources/create-historian-chunk-collection.sh
 integration-tests/src/main/resources/shared-resources/create-historian-collection.sh
@@ -59,5 +60,5 @@ integration-tests/src/main/resources/shared-resources/remove_collection_and_conf
 integration-tests/src/main/resources/shared-resources/solr-util.sh
 integration-tests/src/main/resources/shared-resources/test_historian_api_release.sh
 integration-tests/src/main/resources/shared-resources/uninstall.sh
-loader/dependency-tree-before
-loader/dependency-tree-now
+historian-spark/dependency-tree-before
+historian-spark/dependency-tree-now

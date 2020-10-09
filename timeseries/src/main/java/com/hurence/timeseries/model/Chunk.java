@@ -268,17 +268,17 @@ public class Chunk implements Serializable {
                 throw new IllegalArgumentException("null or empty metric key");
             }
 
-            // metricName|tag1=tag1Val|tag2=tag2val
+            // metricName|tag1$tag1Val|tag2$tag2val
             String[] tokens = id.split(Pattern.quote(TOKEN_SEPARATOR));
             String name = tokens[0];
             if (tokens.length == 1) {
                 // No tags ( ["metricName"] )
                 return new MetricKey(name);
             } else {
-                // Some tags: parse them ( ["metricName", "tag1=tag1Val" , "tag2=tag2val"] )
+                // Some tags: parse them ( ["metricName", "tag1$tag1Val" , "tag2$tag2val"] )
                 Map<String, String> tags = new HashMap<String, String>();
                 for (int i = 1; i < tokens.length; i++) {
-                    // "tag1=tag1Val"
+                    // "tag1$tag1Val"
                     String tagAndValues = tokens[i];
                     String[] tagAndValue = tagAndValues.split(Pattern.quote(TAG_KEY_VALUE_SEPARATOR));
                     if ((tagAndValue == null) || (tagAndValue.length != 2)) {
