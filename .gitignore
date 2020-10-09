@@ -46,7 +46,7 @@ integration-tests/src/main/resources/shared-resources/historian.properties
 historian-spark/src/integration-test/resources/shared-resources/historian-compactor.sh
 
 # generated files
-timeseries/src/main/generated
+historian-timeseries/src/main/generated
 historian-server/src/integration-test/resources/shared-resources
 historian-spark/src/integration-test/resources/shared-resources
 integration-tests/src/main/resources/shared-resources/create-historian-annotation-collection.sh
