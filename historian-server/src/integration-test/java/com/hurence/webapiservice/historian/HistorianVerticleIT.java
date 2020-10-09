@@ -115,7 +115,7 @@ public class HistorianVerticleIT {
         assertEquals("default-config", schemaRepresentation.getName());
         assertEquals(1.6, schemaRepresentation.getVersion(), 0.001f);
         assertEquals(ID, schemaRepresentation.getUniqueKey());
-        assertEquals(32, schemaRepresentation.getFields().size());
+        assertEquals(33, schemaRepresentation.getFields().size());
         assertEquals(69, schemaRepresentation.getDynamicFields().size());
         assertEquals(68, schemaRepresentation.getFieldTypes().size());
         assertEquals(0, schemaRepresentation.getCopyFields().size());
