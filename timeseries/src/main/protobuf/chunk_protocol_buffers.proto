@@ -50,8 +50,8 @@ message Chunk {
     optional uint64 start = 5;  // UTC timestamp for start time of the chunk (in ms)
     optional uint64 end = 6;   // UTC timestamp for end time of the chunk (in ms)
 
-    map<string, double> aggs = 7; // map for precomputed aggs if available
-    map<string, string> tags = 8; // map for precomputed aggs if available
+    //map<string, double> aggs = 7; // map for precomputed aggs if available
+    //optional map<string, string> tags = 8; // map for precomputed aggs if available
 }
 
 message Quality {
