@@ -4,11 +4,13 @@ import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import com.hurence.timeseries.model.Chunk
+import com.hurence.timeseries.model.Chunk.MetricKey.TOKEN_SEPARATOR_CHAR
+import com.hurence.timeseries.model.Chunk.MetricKey.TAG_KEY_VALUE_SEPARATOR_CHAR;
 import org.apache.spark.sql.Encoders
 import org.junit.jupiter.api.Assertions.{assertEquals, assertFalse, assertTrue}
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.{BeforeAll, Test, TestInstance}
-import org.slf4j.{LoggerFactory}
+import org.slf4j.LoggerFactory
 
 @TestInstance(Lifecycle.PER_CLASS)
 class LoaderTests extends SparkSessionTestWrapper {
@@ -100,8 +102,13 @@ class LoaderTests extends SparkSessionTestWrapper {
 
   def checkChunk(chunktoCheck: Chunk) = {
 
-    assertEquals("5a12980e719f0657b80897a84c93b6e7c87aaeebabfd1eca189cd288aa50f5ef", chunktoCheck.getId);
-    assertEquals("ack,crit=null,max=null,metric_id=08f9583b-6999-4835-af7d-cf2f82ddcd5d,min=null,warn=null", chunktoCheck.getMetricKey);
+    assertEquals("a51873f9e3f34e39d7fccdc80408dae82cbd054c6f2cafb8c0656c008bdae344", chunktoCheck.getId);
+    assertEquals("ack" + TOKEN_SEPARATOR_CHAR +
+      "crit" + TAG_KEY_VALUE_SEPARATOR_CHAR + "null" + TOKEN_SEPARATOR_CHAR +
+      "max" + TAG_KEY_VALUE_SEPARATOR_CHAR + "null" + TOKEN_SEPARATOR_CHAR +
+      "metric_id" + TAG_KEY_VALUE_SEPARATOR_CHAR + "08f9583b-6999-4835-af7d-cf2f82ddcd5d" + TOKEN_SEPARATOR_CHAR +
+      "min" + TAG_KEY_VALUE_SEPARATOR_CHAR + "null" + TOKEN_SEPARATOR_CHAR +
+      "warn" + TAG_KEY_VALUE_SEPARATOR_CHAR + "null", chunktoCheck.getMetricKey);
 
     assertEquals(1574985682000L, chunktoCheck.getStart)
     assertEquals(1575071765000L, chunktoCheck.getEnd)
