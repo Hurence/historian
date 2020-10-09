@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# TODO
+# TODO port this script to run compactor (currently a copy paste from historian server run script)
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 ROOT_DIR="$DIR/.."
