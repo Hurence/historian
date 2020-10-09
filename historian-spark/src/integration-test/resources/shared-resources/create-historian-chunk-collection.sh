@@ -224,7 +224,8 @@ create_schema() {
             ;;
           "VERSION_1")
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"name\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
-            SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"compactions_running\", \"type\":\"string\", \"indexed\":true, \"multiValued\":true, \"stored\" : true }"
+            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "version" "string"
+            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "metric_key" "string"
             add_field_not_indexed_to_variable "SOLR_UPDATE_QUERY" "chunk_value" "string"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_start" "plong"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_end" "plong"
@@ -249,8 +250,6 @@ create_schema() {
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_max" "pfloat"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_sum" "pfloat"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_quality_first" "pfloat"
-            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "metric_key" "string"
-            add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_version" "string"
             ;;
         *)
             echo -e "${RED}Unsupported historian version ${MODEL_VERSION}, exiting...${NOCOLOR}"
@@ -263,7 +262,6 @@ create_schema() {
     curl -X POST -H 'Content-type:application/json' "http://${SOLR_HOST}/${SOLR_COLLECTION}/schema" --data-binary "{ ${SOLR_UPDATE_QUERY} }"
 
 }
-
 
 ####################################################################
 main() {

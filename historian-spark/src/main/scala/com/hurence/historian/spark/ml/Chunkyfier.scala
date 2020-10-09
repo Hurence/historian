@@ -1,8 +1,6 @@
 package com.hurence.historian.spark.ml
 
 import com.hurence.historian.spark.sql.functions.{analysis, chunk, sax, toDateUTC}
-import com.hurence.timeseries.analysis.TimeseriesAnalysis
-import com.hurence.timeseries.compaction.BinaryEncodingUtils
 import com.hurence.timeseries.core.ChunkOrigin
 import com.hurence.timeseries.model.Chunk
 import com.hurence.timeseries.model.Definitions._
@@ -16,7 +14,6 @@ import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, li
 import org.apache.spark.sql.types.{ArrayType, StringType, StructField, StructType}
 
 import scala.collection.JavaConverters._
-import scala.collection.immutable.HashMap
 
 /*
  * Licensed to the Apache Software Foundation (ASF) under one or more
@@ -150,12 +147,11 @@ final class Chunkyfier(override val uid: String)
       .orderBy(col($(timestampCol)))
 
     var baseDf = df
-    // If no quality column has in the input df, create one default with NaN as value
+    // If no quality column in the input df, create one default with NaN as value
     if (!baseDf.schema.fieldNames.contains($(qualityCol))) {
       baseDf = baseDf.withColumn(FIELD_QUALITY, lit(Float.NaN))
     }
 
-    // If no quality column has in the input df, create one default with NaN as value
     val noTags = if (!baseDf.schema.fieldNames.contains($(tagsCol))) {
       true
     } else false
@@ -168,7 +164,7 @@ final class Chunkyfier(override val uid: String)
       .groupBy(groupingCols: _*)
 
     val groupedDF = if (noTags) {
-      // compute all the stats and aggregtions here
+      // compute all the stats and aggregations here
       groupedBy.agg(
         last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
         last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
@@ -214,9 +210,9 @@ final class Chunkyfier(override val uid: String)
         lit(0.01),
         lit($(saxStringLength)),
         groupedDF.col(COLUMN_VALUES)))
-      // drop temporary values & timestamps columns
-      .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS)
-      .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev", "analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
+      // drop temporary values timestamps and qualities columns
+      .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS, COLUMN_QUALITIES)
+      .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev","analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
       .map(r => {
 
         val tags = if (noTags) {
@@ -239,8 +235,6 @@ final class Chunkyfier(override val uid: String)
           .first(r.getAs[Double](FIELD_FIRST))
           .last(r.getAs[Double](FIELD_LAST))
           .sax(r.getAs[String](FIELD_SAX))
-          .value(r.getAs[Array[Byte]]($(chunkValueCol)))
-          .tags(tags.asJava)
           .qualityMin(r.getAs[Float](FIELD_QUALITY_MIN))
           .qualityMax(r.getAs[Float](FIELD_QUALITY_MAX))
           .qualityFirst(r.getAs[Float](FIELD_QUALITY_FIRST))
@@ -248,6 +242,8 @@ final class Chunkyfier(override val uid: String)
           .qualityAvg(r.getAs[Double](FIELD_QUALITY_AVG).toFloat)
           .trend(r.getAs[Boolean](FIELD_TREND))
           .outlier(r.getAs[Boolean](FIELD_OUTLIER))
+          .value(r.getAs[Array[Byte]]($(chunkValueCol)))
+          .tags(tags.asJava)
           .buildId()
           .computeMetrics()
           .build()
@@ -273,4 +269,3 @@ final class Chunkyfier(override val uid: String)
     s"Chunkyfier: uid=$uid"
   }
 }
-

@@ -1,12 +1,23 @@
 package com.hurence.historian.solr.util;
 
+import static com.hurence.timeseries.model.Definitions.*;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.compaction.BinaryEncodingUtils;
+import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionEVOA0;
 import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.model.solr.HistorianCollections;
 import com.hurence.unit5.extensions.SolrExtension;
 import org.apache.solr.client.solrj.SolrClient;
+import org.apache.solr.client.solrj.SolrQuery;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.params.SolrParams;
 import org.jetbrains.annotations.NotNull;
+import org.noggit.JSONUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.DockerComposeContainer;
@@ -16,9 +27,12 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.hurence.historian.converter.SolrDocumentReader.fromSolrDocument;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SolrITHelper {
 
@@ -176,4 +190,135 @@ public class SolrITHelper {
         waitProcessFinishedAndPrintResult(process);
     }
 
+    /**
+     * Read Chunks stored in Solr as a map of chunk id -> chunk
+     * @param solrClient
+     * @param collection
+     * @return
+     */
+    public static Map<String, Chunk> getSolrChunks(SolrClient solrClient, String collection) {
+
+        Map<String, Chunk> chunks = new HashMap<String, Chunk>();
+
+        SolrDocumentList solrDocumentList = getSolrDocs(solrClient, collection);
+
+        for (SolrDocument solrDocument : solrDocumentList) {
+            Chunk chunk = fromSolrDocument(solrDocument);
+            chunks.put(chunk.getId(), chunk);
+        }
+
+        return chunks;
+    }
+
+    /**
+     * Get solr docs of a collection
+     * @param solrClient
+     * @param collection
+     * @return
+     */
+    public static SolrDocumentList getSolrDocs(SolrClient solrClient, String collection) {
+        SolrParams solrQuery = new SolrQuery("*:*").setRows(1000);
+        QueryResponse queryResponse = null;
+        try {
+            queryResponse = solrClient.query(collection, solrQuery);
+        } catch (SolrServerException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return queryResponse.getResults();
+    }
+
+    /**
+     * Prints solr docs of a collection
+     * @param solrClient
+     * @param collection
+     */
+    public static void printSolrJsonDocs(SolrClient solrClient, String collection) {
+
+        SolrDocumentList solrDocumentList = getSolrDocs(solrClient, collection);
+
+        System.out.println("Solr contains " + solrDocumentList.size() +
+                " document(s):\n" + JSONUtil.toJSON(solrDocumentList));
+    }
+
+    /**
+     * Prints solr chunks docs of a collection, uncompressing measures in a human readable way
+     * @param solrClient
+     * @param collection
+     */
+    public static void printUnChunkedSolrJsonDocs(SolrClient solrClient, String collection) {
+
+        SolrDocumentList solrDocumentList = getSolrDocs(solrClient, collection);
+
+        System.out.println("Solr contains " + solrDocumentList.size() +
+                " document(s):");
+
+        SimpleDateFormat sdf = Measure.createUtcDateFormatter("yyyy-MM-dd HH:mm:ss.SSS");
+        StringBuilder stringBuilder = new StringBuilder("\n{");
+
+        for (SolrDocument solrDocument : solrDocumentList) {
+            for (String field : solrDocument.getFieldNames().stream().sorted().collect(Collectors.toList())) {
+                stringBuilder.append("\n  \"").append(field).append("\": ");
+                Object value = solrDocument.getFieldValue(field);
+                if (field.equals(SOLR_COLUMN_VALUE)) {
+                    // Uncompress the chunk and display points in a human readable way
+                    byte[] compressedPoints = BinaryEncodingUtils.decode((String)value);
+                    long chunkStart = (Long)solrDocument.getFieldValue(SOLR_COLUMN_START);
+                    long chunkEnd = (Long)solrDocument.getFieldValue(SOLR_COLUMN_END);
+                    try {
+                        TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
+                        for (Measure measure : measures) {
+                            double measureValue = measure.getValue();
+                            float quality = measure.getQuality();
+                            String readableTimestamp = sdf.format(new Date(measure.getTimestamp()));
+                            stringBuilder.append("\n    t=").append(readableTimestamp)
+                                    .append(" v=").append(measureValue)
+                                    .append(" q=").append(quality);
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        fail(e.getMessage());
+                    }
+                } else
+                {
+                    stringBuilder.append(value);
+                }
+            }
+            stringBuilder.append("\n}");
+        }
+
+        System.out.println(stringBuilder);
+    }
+
+    /**
+     * Checks 2 sets of chunks are equal
+     * @param expectedChunks
+     * @param actualChunks
+     */
+    public static void compareChunks(Map<String, Chunk> expectedChunks, Map<String, Chunk> actualChunks) {
+
+        assertEquals(expectedChunks.size(), actualChunks.size(), "Not the same number of chunks");
+
+        for (String chunkId : expectedChunks.keySet()) {
+            Chunk expectedChunk = expectedChunks.get(chunkId);
+            Chunk actualChunk = actualChunks.get(chunkId);
+            assertNotNull(actualChunk, "Missing chunk id " + chunkId +
+                    " in actual chunks: " + actualChunks.values());
+            assertEquals(expectedChunk, actualChunk, "Actual chunk id " + chunkId + " not equal to expected one");
+        }
+    }
+
+    public static void clearCollection(SolrClient client, String collection) {
+
+        LOGGER.info("Clearing data of collection: " + collection);
+
+        try {
+            client.deleteByQuery(collection, "*:*");
+            client.commit(collection, true, true);
+        } catch (Exception e) {
+            fail("Could not delete documents of collection " + collection + ": " + e.getMessage());
+        }
+    }
 }

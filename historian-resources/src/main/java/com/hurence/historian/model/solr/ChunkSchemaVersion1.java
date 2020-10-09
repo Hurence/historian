@@ -61,7 +61,7 @@ public class ChunkSchemaVersion1 implements Schema{
                     .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_LAST)
                     .withType("pdouble").build(),
             new SolrField.Builder()
-                    .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STDDEV)
+                    .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_STD_DEV)
                     .withType("pdouble").build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_SUM)

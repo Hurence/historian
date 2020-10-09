@@ -6,6 +6,7 @@ public class HistorianChunkCollectionFieldsVersionCurrent {
 
     public static String NAME = "name";
     public static String ID = "id";
+    public static String VERSION = "version";
     public static String METRIC_KEY = "metric_key";
     public static String COMPACTIONS_RUNNING = "compactions_running";
     public static String CHUNK_VALUE = "chunk_value";
@@ -27,7 +28,7 @@ public class HistorianChunkCollectionFieldsVersionCurrent {
     public static String CHUNK_DAY = "chunk_day";
     public static String CHUNK_HOUR = "chunk_hour";
     public static String CHUNK_VERSION = "chunk_version";
-    public static String CHUNK_STDDEV = "chunk_std_dev";
+    public static String CHUNK_STD_DEV = "chunk_std_dev";
     public static String CHUNK_QUALITY_AVG = "chunk_quality_avg";
     public static String CHUNK_QUALITY_MIN = "chunk_quality_min";
     public static String CHUNK_QUALITY_MAX = "chunk_quality_max";
