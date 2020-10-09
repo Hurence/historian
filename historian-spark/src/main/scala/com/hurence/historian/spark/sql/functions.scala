@@ -1,24 +1,20 @@
 package com.hurence.historian.spark.sql
 
-import java.io.InputStream
 import java.nio.charset.StandardCharsets
 import java.util.stream.Collectors
 
 import com.google.common.hash.Hashing
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.analysis.{TimeseriesAnalysis, TimeseriesAnalyzer}
-import com.hurence.timeseries.compaction.protobuf.ProtoBufTimeSeriesWithQualitySerializer
-import com.hurence.timeseries.compaction.{BinaryCompactionUtil, BinaryEncodingUtils, Compression}
-import com.hurence.timeseries.model.Measure
+import com.hurence.timeseries.analysis.{TimeseriesAnalyzer}
+import com.hurence.timeseries.compaction.{BinaryCompactionUtil}
 import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
-import org.apache.spark.sql.{DataFrame, Encoders}
+import org.apache.spark.sql.{DataFrame}
 import org.apache.spark.sql.functions.{col, udf}
 
 import scala.collection.JavaConverters._
 import scala.collection.mutable
 import scala.util.control.NonFatal
-
 
 object functions {
 
@@ -28,7 +24,7 @@ object functions {
 
   val toDateUTC = udf { (epochMilliUTC: Long, dateFormat: String) =>
     val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
-      .withZone(java.time.ZoneId.of("Europe/Paris"))
+      .withZone(java.time.ZoneId.of("UTC"))
 
     try {
       dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC))
@@ -74,27 +70,12 @@ object functions {
     */
   val unchunk = udf { (bytes: Array[Byte], start: Long, end: Long) =>
 
-
     BinaryCompactionUtil.unCompressPoints(bytes, start, end)
       .stream()
       .collect(Collectors.toList())
       .asScala
       .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
-
-    /*val bytes = BinaryEncodingUtils.decode(chunk)
-
-    BinaryCompactionUtil.unCompressPoints(bytes, start, end)
-      .stream()
-      .collect(Collectors.toList())
-      .asScala
-      .map(p => (p.getTimestamp, p.getValue, p.getQuality, p.getDay))
-  */
   }
-
-
-  val toBase64 = udf { (binaryChunk: Array[Byte]) => BinaryEncodingUtils.encode(binaryChunk) }
-  val fromBase64 = udf { (stringChunk: String) => BinaryEncodingUtils.decode(stringChunk) }
-
 
   /**
     * Encoding function: returns the sax string of the values.
@@ -102,20 +83,19 @@ object functions {
   val sax = udf {
     (alphabetSize: Int, nThreshold: Float, paaSize: Int, values: mutable.WrappedArray[Double]) =>
 
+      // Paa size cannot be longer than timeserie length
+      val finalPaaSize = Math.min(paaSize, values.length)
 
       val saxConverter = SaxConverter.builder()
         .alphabetSize(alphabetSize)
         .nThreshold(nThreshold)
-        .paaSize(paaSize)
+        .paaSize(finalPaaSize)
         .build()
 
       val list = values.map(Double.box).asJava
 
-
       saxConverter.run(list)
-
   }
-
 
   case class Analysis(min: Double, max: Double, avg: Double, stdDev: Double, sum: Double, trend: Boolean, outlier: Boolean, count: Long, first: Double, last: Double)
 
@@ -124,7 +104,6 @@ object functions {
     */
   val analysis = udf {
     (timestamps: mutable.WrappedArray[Long], values: mutable.WrappedArray[Double]) =>
-
 
       val analyzer = TimeseriesAnalyzer.builder().build()
       val timestampsList = timestamps.map(Long.box).asJava

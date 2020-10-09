@@ -188,7 +188,6 @@ public class GetTimeSeriesHandler {
      *
      */
     //TODO
-//<<<<<<< HEAD
     private List<String> buildFilterForEachMetric(List<MetricRequest> metricRequests,
                                                   boolean useQuality) {
         List<String> finalStringList = new ArrayList<>();

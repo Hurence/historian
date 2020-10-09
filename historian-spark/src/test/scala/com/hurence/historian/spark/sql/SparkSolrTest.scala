@@ -38,7 +38,6 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
 
   test("Measures and chunks") {
 
-
     val spark = SparkSession.getActiveSession.get
     val collectionName = "testHistorian-" + UUID.randomUUID().toString
     SolrCloudUtilForTests.buildChunkCollection(collectionName, null, 1, cloudClient)
@@ -61,7 +60,6 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         .setDateBucketFormat("yyyy-MM-dd")
         .setSaxAlphabetSize(7)
         .setSaxStringLength(50)
-
 
       val ack08 = chunkyfier.transform(measures)
         .repartition(1)
@@ -100,11 +98,16 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         solrDF.show()
       }
 
+      solrDF.printSchema()
+      solrDF.show(100, false)
 
       val unchunkyfier = new UnChunkyfier()
 
       val measuresBack = unchunkyfier.transform(solrDF)
         .as[Measure](Encoders.bean(classOf[Measure]))
+
+      measuresBack.printSchema()
+      measuresBack.show(100, false)
 
       if (logger.isDebugEnabled) {
         measuresBack.show()
@@ -114,7 +117,7 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         measures.sort("timestamp"),
         measuresBack.sort("timestamp"))
 
-      assert(solrDF.count == 5)
+      assert(solrDF.count == 6)
       /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
         val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
         assert(oneColFirstRow != null)
@@ -123,11 +126,9 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         firstRow.foreach(col => assert(col != null))            // no missing values*/
       SolrCloudUtilForTests.dumpSolrCollection(collectionName, 500, cloudClient)
     } finally {
-
       SolrCloudUtilForTests.deleteCollection(collectionName, cloudClient)
     }
   }
-
 
   test("vary queried columns") {
     val collectionName = "testQuerying-" + UUID.randomUUID().toString
