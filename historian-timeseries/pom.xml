@@ -10,7 +10,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>timeseries</artifactId>
+    <artifactId>historian-timeseries</artifactId>
 
     <packaging>jar</packaging>
     <properties>
