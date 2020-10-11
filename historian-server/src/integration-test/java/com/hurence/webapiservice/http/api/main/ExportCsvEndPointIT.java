@@ -132,7 +132,7 @@ public class ExportCsvEndPointIT {
         HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
-                            "/http/grafana/simplejson/query/extract-algo/test1/request.json",
+                            "/http/grafana/hurence/query/test1/request.json",
                             "/http/grafana/simplejson/query/extract-algo/test1/expectedResponse.csv");
                     return t;
                 }).subscribe();
@@ -147,7 +147,7 @@ public class ExportCsvEndPointIT {
         HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
-                            "/http/grafana/simplejson/query/extract-algo/test1/request.json");
+                            "/http/grafana/hurence/query/test1/request.json");
                     return t;
                 }).subscribe();
     }
