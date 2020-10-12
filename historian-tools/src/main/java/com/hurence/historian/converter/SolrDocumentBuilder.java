@@ -1,13 +1,11 @@
 package com.hurence.historian.converter;
 
-
 import com.hurence.timeseries.model.Chunk;
 import org.apache.solr.common.SolrInputDocument;
 
 import static com.hurence.timeseries.model.Definitions.*;
 
 public class SolrDocumentBuilder {
-
 
     public static SolrInputDocument fromChunk(Chunk chunk) {
         final SolrInputDocument doc = new SolrInputDocument();
@@ -24,6 +22,7 @@ public class SolrDocumentBuilder {
         doc.addField(SOLR_COLUMN_DAY, chunk.getDay());
         doc.addField(SOLR_COLUMN_ORIGIN, chunk.getOrigin());
         doc.setField(SOLR_COLUMN_ID, chunk.getId());
+        doc.setField(SOLR_COLUMN_VERSION, chunk.getVersion());
         doc.setField(SOLR_COLUMN_METRIC_KEY, chunk.getMetricKey());
         doc.setField(SOLR_COLUMN_QUALITY_MIN, chunk.getQualityMin());
         doc.setField(SOLR_COLUMN_QUALITY_MAX, chunk.getQualityMax());
@@ -42,5 +41,4 @@ public class SolrDocumentBuilder {
         doc.setField(SOLR_COLUMN_STD_DEV, chunk.getStdDev());
         return doc;
     }
-
 }

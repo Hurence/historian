@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.sql.reader.csv
 
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.functions.{reorderColumns, toTimestampUTC}
+import com.hurence.historian.spark.sql.functions.{toTimestampUTC}
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions.{lit, _}

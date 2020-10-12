@@ -18,12 +18,13 @@
       "chunk_month": 1,
       "chunk_day": "1970-01-01",
       "chunk_origin": "ingestion-csv",
-      "id": "dbdaa1f29756f46324fb0f2f64f8bde3e0a48aa300910525485439e6e0236ac0",
-      "metric_key":"metric_1,code_install=code_1,sensor=sensor_1",
+      "id": "706d6a98003b9923f3b256c5584167417139b5173eb6555270282bfed97b152e",
+      "version":"org.apache.solr.common.SolrInputField:version=VERSION_1",
+      "metric_key":"metric_1|code_install$code_1|sensor$sensor_1",
       "chunk_quality_min":"NaN",
       "chunk_quality_max":"NaN",
       "chunk_quality_first":"NaN",
-      "chunk_quality_sum":"NaN",
+      "chunk_quality_sum":0.0,
       "chunk_quality_avg":"NaN",
       "chunk_max": 2.0,
       "chunk_min": 1.2,
@@ -48,8 +49,9 @@
       "chunk_month": 1,
       "chunk_day": "1970-01-01",
       "chunk_origin": "ingestion-csv",
-      "id": "41debef7523aa11fe8613e8223ba95b542686e1352a5833f1a1e705d5ed38a85",
-      "metric_key":"metric_1,code_install=code_1,sensor=sensor_2",
+      "id": "e2e1a57bd8800f1e95fad9c5e730c5a53c5f1571f2fb429164ad42a926507334",
+      "version":"org.apache.solr.common.SolrInputField:version=VERSION_1",
+      "metric_key":"metric_1|code_install$code_1|sensor$sensor_2",
       "chunk_quality_min":"NaN",
       "chunk_quality_max":"NaN",
       "chunk_quality_first":"NaN",
@@ -64,7 +66,7 @@
       "chunk_first": 3.0,
       "chunk_last": 3.0,
       "chunk_sum": 3.0,
-      "chunk_std_dev": "NaN"
+      "chunk_std_dev": 0.0
     }
   ]
 }

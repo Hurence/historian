@@ -6,7 +6,9 @@ import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import com.hurence.historian.util.ErrorMsgHelper;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.models.ResponseAsList;
+import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
+import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.modele.SamplingConf;
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
@@ -44,17 +47,37 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .end("Historian api is Working fine");
     }
 
+
+    public final static String FROM_JSON_PATH = "/from";
+    public final static String TO_JSON_PATH = "/to";
+    public final static String NAMES_JSON_PATH = "/names";
+    public final static String MAX_DATA_POINTS_JSON_PATH = "/max_data_points";
+    public final static String FORMAT_JSON_PATH = "/format";
+    public final static String TAGS_JSON_PATH = "/tags";
+    public final static String SAMPLING_ALGO_JSON_PATH = "/sampling/algorithm";
+    public final static String BUCKET_SIZE_JSON_PATH = "/sampling/bucket_size";
+    public final static String REQUEST_ID_JSON_PATH = "/request_id";
+    public final static String AGGREGATION_JSON_PATH = "/aggregations";
+    public final static String QUALITY_JSON_PATH = "/quality";
+    public final static String QUALITY_RETURN_JSON_PATH = "/return_with_quality";
+    public final static String QUALITY_VALUE_JSON_PATH = QUALITY_JSON_PATH+"/quality_value";
+    public final static String QUALITY_AGG_JSON_PATH = QUALITY_JSON_PATH+"/quality_agg";
+
     @Override
     public void export(RoutingContext context) {
         final long startRequest = System.currentTimeMillis();
-        final QueryRequestParam request;
+        final HurenceDatasourcePluginQueryRequestParam request;
         try {
             final JsonObject requestBody = context.getBodyAsJson();
             /*
                 When declaring QueryRequestParser as a static variable, There is a problem parsing parallel requests
                 at initialization (did not successfully reproduced this in a unit test).//TODO
              */
-            request = new QueryRequestParser().parseRequest(requestBody);
+            request = new HurenceDatasourcePluginQueryRequestParser(FROM_JSON_PATH,
+                    TO_JSON_PATH,NAMES_JSON_PATH, MAX_DATA_POINTS_JSON_PATH,FORMAT_JSON_PATH,
+                    TAGS_JSON_PATH,SAMPLING_ALGO_JSON_PATH,BUCKET_SIZE_JSON_PATH, REQUEST_ID_JSON_PATH,
+                    AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH)
+                    .parseRequest(requestBody);
         } catch (Exception ex) {
             LOGGER.debug("error parsing request", ex);
             context.response().setStatusCode(BAD_REQUEST);
@@ -64,7 +87,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
             return;
         }
 
-        int maxDataPoints = request.getMaxDataPoints();
+        int maxDataPoints = request.getSamplingConf().getMaxPoint();
         if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
             LOGGER.debug("error max data measures too large");
             context.response().setStatusCode(PAYLOAD_TOO_LARGE);
@@ -127,7 +150,7 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 }).subscribe();
     }
 
-    private JsonObject buildGetTimeSeriesRequest(QueryRequestParam request) {
+    private JsonObject buildGetTimeSeriesRequest(HurenceDatasourcePluginQueryRequestParam request) {
         SamplingConf samplingConf = request.getSamplingConf();
         return new JsonObject()
                 .put(FROM, request.getFrom())
@@ -136,6 +159,11 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                 .put(FIELD_TAGS, request.getTags())
                 .put(SAMPLING_ALGO, samplingConf.getAlgo())
                 .put(BUCKET_SIZE, samplingConf.getBucketSize())
-                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint());
+                .put(MAX_POINT_BY_METRIC, samplingConf.getMaxPoint())
+                .put(AGGREGATION, request.getAggs().stream().map(String::valueOf).collect(Collectors.toList()))
+                .put(QUALITY_VALUE, request.getQualityValue())
+                .put(QUALITY_AGG, request.getQualityAgg().toString())
+                .put(QUALITY_RETURN, request.getQualityReturn())
+                .put(USE_QUALITY, request.getUseQuality());
     }
 }

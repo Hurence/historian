@@ -82,7 +82,7 @@ public class MultiTimeSeriesExtracterImpl implements MultiTimeSeriesExtracter {
     @Override
     public JsonArray getTimeSeries() {
         List<JsonObject> timeseries = extractorByMetricRequest.entrySet().stream()
-                .sorted(Map.Entry.comparingByKey(Comparator.comparing(MetricRequest::getName)))
+                .sorted(Map.Entry.comparingByKey(Comparator.comparing(MetricRequest::getName).thenComparing(MetricRequest::getTagsAsString)))
                 .filter(entry -> !entry.getValue().getTimeSeries().isEmpty())
                 .map(entry -> {
                     JsonObject timeSerie = new JsonObject();

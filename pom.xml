@@ -94,15 +94,15 @@
         <shade-plugin.version>2.4.3</shade-plugin.version>
     </properties>
     <modules>
-        <module>timeseries</module>
-        <module>historian-spark</module>
+        <module>historian-timeseries</module>
         <module>historian-server</module>
+        <module>historian-spark</module>
+        <module>historian-resources</module>
+        <module>historian-tools</module>
+        <module>historian-compactor</module>
         <module>logisland-timeseries</module>
         <module>integration-tests</module>
-        <module>historian-resources</module>
         <module>assembly</module>
-        <module>historian-tools</module>
-        <module>compactor</module>
     </modules>
 
     <dependencies>
