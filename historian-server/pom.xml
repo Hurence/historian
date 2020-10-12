@@ -259,8 +259,7 @@
                 </configuration>
             </plugin>
             <!--
-
-            we need to copy a resource from integration-tests so that solr can properly be initialized.
+            We need to copy a resource from integration-tests so that solr can properly be initialized.
             This way solr configuration in centralized in integration-tests module. Any module that needs
             the historian solr for test should add this plugin to his pom.
             -->
