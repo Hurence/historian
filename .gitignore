@@ -44,6 +44,7 @@ hs_err_pid*
 # copied resources
 integration-tests/src/main/resources/shared-resources/historian.properties
 historian-spark/src/integration-test/resources/shared-resources/historian-compactor.sh
+historian-compactor/src/integration-test/resources/shared-resources
 
 # generated files
 historian-timeseries/src/main/generated

@@ -18,7 +18,7 @@
       "chunk_day": "1970-01-01",
       "chunk_origin": "ingestion-csv",
       "id": "e431b3f70f6c9f9dc2ccab592232561f9ba2bb7724f4a17b7e0be9d982b6fe82",
-      "version":"org.apache.solr.common.SolrInputField:version=VERSION_1",
+      "version":"VERSION_1",
       "metric_key":"metric_1|date$14-01-99",
       "chunk_quality_min":"NaN",
       "chunk_quality_max":"NaN",
