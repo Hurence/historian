@@ -147,7 +147,7 @@ public class HistorianVerticleIT {
                         assertTrue(doc1.containsKey(SOLR_COLUMN_TREND));
                         assertTrue(doc1.containsKey(SOLR_COLUMN_SUM));
                         assertTrue(doc1.containsKey(SOLR_COLUMN_FIRST));
-                        assertEquals(27, doc1.size());
+                        assertEquals(28, doc1.size());
                         assertEquals("c598923bb1aa77c6bec68bf64146633339fe22a7c85dcf0a9a49386ff38b4d8e", doc1.getString(ID));
                         assertEquals(1L, doc1.getLong(SOLR_COLUMN_START));
                         assertEquals(4L, doc1.getLong(SOLR_COLUMN_END));

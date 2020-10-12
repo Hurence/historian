@@ -10,6 +10,7 @@ import com.hurence.webapiservice.http.HttpServerVerticle;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import com.hurence.webapiservice.util.HttpITHelper;
 import com.hurence.webapiservice.util.HttpWithHistorianSolrITHelper;
+import io.reactivex.Completable;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.junit5.Timeout;
@@ -32,9 +33,11 @@ import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -98,9 +101,15 @@ public class SearchEndPointIT {
 
 
     @AfterEach
-    public void afterEach(Vertx vertx) {
-        vertx.deploymentIDs().forEach(vertx::undeploy);
-
+    public void afterEach(Vertx vertx, VertxTestContext context) {
+        List<Completable> undeployements = vertx.deploymentIDs().stream()
+                .map(vertx::rxUndeploy)
+                .collect(Collectors.toList());
+        Completable all = Completable.merge(undeployements);
+        all.subscribe(
+                () -> { context.completeNow(); },
+                e -> { context.failNow(e); }
+        );
     }
 
     @AfterAll

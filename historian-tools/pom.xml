@@ -20,7 +20,7 @@
         </dependency>
         <dependency>
             <groupId>com.hurence.historian</groupId>
-            <artifactId>timeseries</artifactId>
+            <artifactId>historian-timeseries</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
