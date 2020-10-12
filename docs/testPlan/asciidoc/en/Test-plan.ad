@@ -1,0 +1,789 @@
+= TEST PLAN
+:subtitle: Data Historian 1.3.5
+:doctype: book
+:title-logo-image: image:logo.png[pdfwidth=3.5in,align=center]
+:author: © Hurence
+:email: contact@hurence.com
+:revnumber: v1.0
+:revdate: 04.07.2020
+:revremark: First book
+:toc:
+:toclevels: 4
+
+== Introduction
+
+In this Test plan we will test data historian, a free solution to handle massive loads of timeseries data into a search
+engine (such as Apache SolR).a free solution to handle massive loads of timeseries data into a search
+engine (such as Apache SolR).
+
+== Objectives and tasks
+=== Installation test
+=== Standalone installation
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+
+|Data historian 1.3.5 install
+|we check the command "curl http://localhost:8080/api/grafana/v0"
+
+
+|Historian grafana api is Working fine
+|pass
+
+|===
+
+When I started the installation using the command bash
+[source,bash]
+----
+./install.sh
+----
+
+choosing the default parameters, I have got as a result
+[source,bash]
+----
+mkdir: cannot create directory ‘/opt/hdh’: Permission denied
+could not create /opt/hdh folder ! returned 1
+----
+
+so I created a directory hdh_workspace, and I specified this directory as the installation directory.
+We ha ve to set our new directory as HDH_HOME, for exemple:
+
+[source,bash]
+-----
+export HDH_HOME=/home/myPc/hdh_workspace
+-----
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+
+|Data historian start
+|run the command "./historian-server.sh start" in
+the installation folder "historian-1.3.5/bin/"
+
+
+|Already started. PID: [14562]
+|pass
+
+|===
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+
+|Data historian stop
+|run the command  "./historian-server.sh stop" in
+the installation folder "historian-1.3.5/bin/"
+
+|
+ ==== Stop
+Stopped.
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Try 'grep --help' for more information.
+
+All killed...
+
+
+|pass
+
+|===
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+
+|Data historian restart
+|run the command "./historian-server.sh restart" in
+the installation folder "historian-1.3.5/bin/"
+
+|
+ ==== Stop
+
+Stopped.
+Usage: grep [OPTION]... PATTERNS [FILE]...
+Try 'grep --help' for more information.
+
+All killed...
+
+Sleeping...
+
+ ==== Start
+
+Started.
+
+
+|pass
+
+|===
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+
+|Solr installation
+|check solr ui by going to "http://localhost:8983/solr/#/~cloud"
+|Solr user interface running
+|pass
+|===
+
+After the installation we have to create SOLR_HOME environment variable :
+[source,bash]
+----
+export SOLR_HOME=/home/myPc/hdh_workspace/solr-8.2.0
+----
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+|solr restart
+|run the commands
+"cd $SOLR_HOME
+# start a Solr core locally as well as a standalone zookeeper server.
+bin/solr start -cloud -s $HDH_HOME/data/solr/node1 -p 8983
+# start a second Solr core locally which will use the zookeeper server previously
+created.
+bin/solr start -cloud -s $HDH_HOME/data/solr/node2 -p 7574 -z localhost:9983"
+|solr instance has the two nodes working
+|pass
+|===
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+|grafana installation
+|check solr user interface by going to this address "http://localhost:3000"
+|grafana login web page
+|pass
+|===
+
+[cols="10,10,20,10"]
+|===
+| action | input |  output | pass/fail
+|grafana restart
+|run the command "$HDH_HOME/grafana-7.0.3/bin/grafana-server start"
+|Grafana login web page at the address "http://localhost:3000"
+|pass
+|===
+
+
+
+== Rest API test
+=== POST
+
+==== Empty CSV file
+
+we create an empty csv file.
+
+the command we run :
+[source,bash]
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/empty.csv'
+----
+
+we get :
+[source,bash]
+----
+{
+  "errors" : [ {
+    "file" : "empty.csv",
+    "cause" : "The csv contains Empty header line: can not bind data\n at [Source: (com.fasterxml.jackson.dataformat.csv.impl.UTF8Reader); line: 1, column: 1] lines which is more than the max number of line of 5000"
+  } ]
+----
+
+
+==== Minimal csv file input
+our data stored in a csv file:
+
+[source,bash]
+----
+metric,timestamp,value
+metric_1, 1, 1.2
+metric_1, 2, 2
+metric_1, 3, 3
+----
+
+the command we run :
+[source,bash]
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv'
+----
+
+we get :
+[source,bash]
+----
+{
+  "tags" : [ ],
+
+  "grouped_by" : [ "name" ],
+  "report" : [ {
+    "name" : "metric_1",
+    "number_of_points_injected" : 3,
+
+    "number_of_point_failed" : 0,
+
+    "number_of_chunk_created" : 1
+
+  } ]
+----
+==== Two files
+our data stored into two csv files:
+first csv file
+----
+metric,timestamp,value
+metric_1, 1, 1.2
+metric_1, 2, 2
+metric_1, 3, 3
+----
+Second csv file
+----
+metric,timestamp,value
+Metric_2,5,4.3
+Metric_2,6,5.6
+Metric_2,7,3.6
+----
+we run :
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F 'my_csv_file2=@path/de/mon/csv/file2.csv'
+
+
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@/home/nemsi/hdh_workspace/testing_data/csv/file1.csv' \
+-F 'my_csv_file2=@/home/nemsi/hdh_workspace/testing_data/csv/otherCsv.csv'
+
+
+----
+
+we have got:
+----
+{
+  "tags" : [ ],
+  "grouped_by" : [ "name" ],
+  "report" : [ {
+    "name" : "Metric_2",
+    "number_of_points_injected" : 3,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 1
+  }, {
+    "name" : "metric_1",
+    "number_of_points_injected" : 3,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 1
+  } ]
+}
+----
+
+we run :
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/*.csv' \
+----
+
+We have got:
+----
+curl: (26) Failed to open/read local data from file/application
+----
+
+
+==== Other type of csv files
+our data stored in a csv file:
+
+
+----
+metric_name_2,timestamp,value_2,quality,sensor,code_install
+metric_1, 1970-01-01 00:00:00.001, 1.2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.002, 2 ,1.4,sensor_1,code_1
+metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
+metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
+----
+
+The command we run without to specify any option:
+
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+----
+
+We have got :
+[source,bash]
+----
+{"error":null}
+----
+
+the command we run specifying the options:
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@path/de/mon/csv/file.csv' \
+-F mapping.name=metric_name_2 \
+-F mapping.value=value_2 \
+-F mapping.timestamp=timestamp \
+-F mapping.quality=quality \
+-F mapping.tags=sensor \
+-F mapping.tags=code_install \
+-F group_by=name \
+-F group_by=tags.sensor \
+-F format_date=yyyy-dd-MM HH:mm:ss.SSS \
+-F timezone_date=UTC
+----
+
+and we have got:
+----
+Error from server at http://127.0.1.1:7574/solr/historian_shard2_replica_n2: ERROR: [doc=70b486aa24150a07929e79e1b9ed25b6c111b55d5f1ebbc101c4b2258653dec8] unknown field 'code_install'curl: (3) URL using bad/illegal format or missing URL
+----
+==== CSV with tagname
+Our data is 5250 lines of
+----
+metric,timeseries,tagname,value1,value2
+weater,2016-11-15 07:00:00-05	weather-pro-000000,39.9,49.9
+weater,2016-11-15 07:00:00-05,weather-pro-000001,32.4,49.8
+weater,2016-11-15 07:00:00-05,weather-pro-000002,39.8,50.2
+.
+.
+.
+----
+our command :
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@/home/nemsi/hdh_workspace/testing_data/csv/weater.csv' \
+-F mapping.name=metric \
+-F mapping.value=value1 \
+-F mapping.timestamp=timeseries \
+-F mapping.tags=tagname \
+-F group_by=name \
+-F group_by=tags.tagname \
+-F format_date=yyyy-MM-dd HH:mm:ss-SSS \
+-F timezone_date=UTC
+----
+
+we have got:
+----
+Error from server at http://127.0.1.1:7574/solr/historian_shard2_replica_n2: ERROR: [doc=8a328784ece942d6050a7657d913e131d303f8887e333a896f1ee281899251cb] unknown field 'tagname'curl: (3) URL using bad/illegal format or missing URL
+----
+
+==== Injecting 5250 lines of timeseries data as csv file
+Our data is 5250 lines of
+----
+metric,timeseries,tagname,value1,value2
+weater,2016-11-15 07:00:00-05	weather-pro-000000,39.9,49.9
+weater,2016-11-15 07:00:00-05,weather-pro-000001,32.4,49.8
+weater,2016-11-15 07:00:00-05,weather-pro-000002,39.8,50.2
+.
+.
+.
+----
+our command :
+----
+curl -X POST \
+http://localhost:8080/api/historian/v0/import/csv \
+-F 'my_csv_file=@/home/nemsi/hdh_workspace/testing_data/csv/weater.csv' \
+-F mapping.name=metric \
+-F mapping.value=value1 \
+-F mapping.timestamp=timeseries \
+-F group_by=name \
+-F format_date=yyyy-MM-dd HH:mm:ss-SSS \
+-F timezone_date=UTC
+----
+
+we have got:
+----
+{
+  "tags" : [ ],
+  "grouped_by" : [ "name" ],
+  "report" : [ {
+    "name" : "weater",
+    "number_of_points_injected" : 5249,
+    "number_of_point_failed" : 0,
+    "number_of_chunk_created" : 1
+  } ]
+}curl: (3) URL using bad/illegal format or missing URL
+----
+==== Empty json file
+To inject points to data historian from a request body in json format we used postman.
+We created a new POST request and we tryed to post empty body to this adress:
+
+http://localhost:8080/api/historian/v0/import/json
+
+we have got :
+----
+http://localhost:8080/api/historian/v0/import/json
+----
+
+
+
+==== Post one point
+Our request body:
+
+----
+[
+{
+"name": "temp",
+"points": [
+[100, 1.0]
+]
+}
+]
+----
+as a return we have got:
+----
+{
+    "status": "OK",
+    "message": "Injected 1 points of 1 metrics in 1 chunks"
+}
+----
+
+==== Post two points
+Our request body:
+----
+[
+{
+"name": "temp",
+"points": [
+[100, 1.0],
+[200, 1.2]
+]
+},
+{
+"name": "temp_2",
+"points": [
+[100, 1.7],
+[200, 1.9]
+]
+}
+]
+----
+
+We have got as a result:
+----
+{
+    "status": "OK",
+    "message": "Injected 4 points of 2 metrics in 2 chunks"
+}
+----
+
+==== POST api/historian/v0/export/csv
+We tried at this address:
+http://localhost:8080/api/historian/v0/export/csv :
+----
+{}
+----
+
+we received as a result:
+
+----
+Internal Server Error
+----
+
+
+
+==== POST /api/grafana/simplejson/query
+
+We tried at this address:
+http://localhost:8080/api/grafana/simplejson/query :
+
+Request exemple
+----
+{ "target": "temp" }
+----
+
+We have got this result:
+----
+[
+    {
+        "datapoints": [
+            [
+                1.0,
+                100
+            ],
+            [
+                1.0,
+                100
+            ],
+            [
+                1.2,
+                200
+            ]
+        ],
+        "target": "temp"
+    }
+]
+----
+
+other exemple where we specify the targets and max data points:
+
+----
+{
+"maxDataPoints" : 2,
+"targets": [
+{ "target": "metric_1" }
+]
+}
+----
+
+We have got :
+
+----
+[
+    {
+        "datapoints": [
+            [
+                1.6,
+                1
+            ],
+            [
+                3.0,
+                3
+            ]
+        ],
+        "target": "metric_1"
+    }
+]
+----
+
+trying some fields hat does not exist, we have got:
+----
+[]
+----
+==== GET /api/grafana/v0
+We tried at this address:
+http://localhost:8080/api/grafana/v0 :
+----
+{}
+----
+we have got:
+----
+Historian grafana api is Working fine
+----
+
+==== POST /api/grafana/v0/query
+We tried at this address:
+http://localhost:8080/api/grafana/v0/query :
+----
+{
+"names": ["metric_1"],
+"format": "json",
+}
+----
+we have got:
+----
+Internal Server Error
+----
+
+==== POST /api/grafana/v0/search
+We tried at this address:
+http://localhost:8080/api/grafana/v0/search :
+----
+{
+    "name": "m"
+}
+----
+we have got:
+----
+[
+    "temp",
+    "metric_1",
+    "temp_2"
+]
+----
+
+==== POST /api/grafana/v0/tag-keys
+We tried at this address:
+http://localhost:8080/api/grafana/v0/tag-keys :
+----
+{}
+----
+
+we have got:
+----
+<html>
+
+<body>
+	<h1>Resource not found</h1>
+</body>
+
+</html>
+----
+
+==== POST /api/grafana/v0/search/values
+
+We tried at this address:
+http://localhost:8080/api/grafana/v0/values :
+----
+{
+"field": "name",
+"query": "up",
+"limit": 5
+}
+----
+we have got :
+----
+[]
+----
+
+==== POST /api/grafana/v0/annotations
+We tried at this address:
+http://localhost:8080/api/grafana/v0/annotations :
+----
+{
+"from": "2020-2-14T01:43:14.070Z",
+"to": "2020-2-14T06:50:14.070Z",
+"limit" : 100,
+"tags": ["tag1", "tag2"],
+"matchAny": false,
+"type": "tags"
+}
+----
+
+we have got:
+----
+Collection not found: annotation
+----
+
+
+
+==== POST /api/grafana/simplejson/search
+
+We tried at this address:
+http://localhost:8080/api/grafana/simplejson/search :
+
+As a result for empty request we have got:
+----
+Internal Server Error
+----
+
+we tried to search form metric names containing the letter "m" by the use of this json body:
+----
+{ "target": "m" }
+----
+we have got:
+
+----
+[
+    "temp",
+    "metric_1",
+    "temp_2"
+]
+----
+
+trying the string "temp":
+----
+{ "target": "temp" }
+----
+
+we have got:
+----
+[
+    "temp",
+    "temp_2"
+]
+----
+
+trying a metric that does not exist we have got as a result:
+
+----
+[]
+----
+
+
+we tried to get from this address: http://localhost:8080/api/grafana/v0
+
+and we have got as a result :
+----
+Historian grafana api is Working fine
+----
+==== GET /api/grafana/simplejson
+we tried to get from this address: http://localhost:8080/api/grafana/simplejson
+
+and we have got as a result :
+----
+Historian grafana api is Working fine
+----
+
+==== POST /api/grafana/simplejson/tag-keys
+we tried at this address  http://localhost:8080/api/grafana/simplejson/tag-keys :
+----
+{}
+----
+we have got :
+----
+[
+    {
+        "type": "string",
+        "text": "Algo"
+    },
+    {
+        "type": "int",
+        "text": "Bucket size"
+    }
+]
+----
+
+==== POST /api/grafana/simplejson/tag-values
+we tried at this address  http://localhost:8080/api/grafana/simplejson/tag-values :
+----
+{"key": "temp"}
+----
+we have got : nothing
+----
+----
+
+==== POST /api/grafana/simplejson/annotations
+we tried at this address  http://localhost:8080/api/grafana/simplejson/annotations :
+----
+{
+"range": {
+"from": "2020-2-14T01:43:14.070Z",
+"to": "2020-2-14T06:50:14.070Z"
+},
+"limit" : 100,
+"tags": ["tag1", "tag2"],
+"matchAny": false,
+"type": "tags"
+}
+----
+
+we have got :
+----
+Collection not found: annotation
+----
+== Data visualisation
+Grafana is working fine.
+
+= Some suggestions
+
+* A command to create the environment variables such as $HDH_HOME and $SOLR_HOME and maintain their existence
+even at the restart of the machine.
+* A shell script to stop and restart data historian, solr and grafana at the same time.
+* A shell script to verify that the data historian, solr, and  grafana are working fine at the same time
+like a sort of message.
+* For the REST APIs, it would be much simpler to add a sample (for exemple: a csv file) that could
+fit all the test cases of the api and their parameters.
+* Make sure if that the user did use the sample we gave him, he must get the same results
+as the documentation if he tests the APIs.
+* Explain to the user the difference between Hurence-Historian plugin and SimpleJson plugin.
+* Explain to the user what are the main fields that every csv/json file must have to get a better injection.
+* REST APIs documentation must contain every API: input, request (curl request or postman) and output for every
+API and it used request parameters.
+* It would be better to explain how to install Postman and how to use it to test data historian REST API.
+* For import CSV, it would be better to add a feature that could help input raw/text data not just files,
+or even a folder that contains many csv files and if this feature does exist, giving exemple on how to use it in the doc.
+* For import json it would be better to explain how to add a json file, or a folder containing many json files not just
+data that we inject threw the request.
+* It would be better to explain the difference between export data and query.
+* For more friendly user experience, data historian could have a front-end module that could contain
+injection parts taking many types of data (csv/json/...), taking whole folders containing data and displays results
+depending on which api we used.
+* Sometimes historian server does not start. Maybe you have to start grafana server and solr nodes before starting historian server.
+* There is no exemples of how to use grafana.
+* Add exemples of errors and their significations and how solve them.
