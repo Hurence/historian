@@ -242,45 +242,53 @@ import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
 import org.apache.spark.sql._
 import com.hurence.historian.spark.sql.functions._
-import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.commons.cli.{DefaultParser, Option, Options}
 import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 
- val filePath = "/Users/tom/Documents/workspace/historian/historian-spark/src/test/resources/it-data-4metrics.csv.gz"
- val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
-    val measuresDS = reader.read(sql.Options(
-      filePath,
-      Map(
-        "inferSchema" -> "true",
-        "delimiter" -> ",",
-        "header" -> "true",
-        "nameField" -> "metric_name",
-        "timestampField" -> "timestamp",
-        "timestampDateFormat" -> "s",
-        "valueField" -> "value",
-        "tagsFields" -> "metric_id,warn,crit"
-      )))
+val filePath = "/Users/tom/Documents/workspace/historian/historian-spark/src/test/resources/it-data-4metrics.csv.gz"
+val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+val measuresDS = reader.read(sql.Options(
+  filePath,
+  Map(
+    "inferSchema" -> "true",
+    "delimiter" -> ",",
+    "header" -> "true",
+    "nameField" -> "metric_name",
+    "timestampField" -> "timestamp",
+    "timestampDateFormat" -> "s",
+    "valueField" -> "value",
+    "tagsFields" -> "metric_id,warn,crit"
+  )))
 
 
 
-val chunkyfier = new Chunkyfier().setGroupByCols(Array(  "name", "tags.metric_id"))
+val chunkyfier = new Chunkyfier().setGroupByCols(Array(  "name", "tags.metric_id")).setSaxStringLength(50)
 val chunksDS = chunkyfier.transform(measuresDS).as[Chunk](Encoders.bean(classOf[Chunk]))
 
 
 val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
-    writer.write(sql.Options("historian", Map(
-      "zkhost" -> "localhost:9983",
-      "collection" -> "historian",
-      "tag_names" -> "metric_id,warn,crit"
-    )), chunksDS)
+writer.write(sql.Options("historian", Map(
+  "zkhost" -> "localhost:9983",
+  "collection" -> "historian",
+  "tag_names" -> "metric_id,warn,crit"
+)), chunksDS)
 
 
 // 4. Explicit commit to make sure all docs are visible
-      val solrCloudClient = SolrSupport.getCachedCloudClient("localhost:9983")
-      solrCloudClient.commit("historian", true, true)
+val solrCloudClient = SolrSupport.getCachedCloudClient("localhost:9983")
+solrCloudClient.commit("historian", true, true)
+
+
+     val reader = ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
+    val solrDF = reader.read(sql.Options("historian", Map(
+        "zkhost" -> "localhost:9983",
+        "collection" -> "historian",
+        "tag_names" -> "metric_id,warn,crit"
+    ))).as[Chunk](Encoders.bean(classOf[Chunk]))
 ----
 
 === L'injection temps réel avec LogIsland
