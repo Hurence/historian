@@ -111,7 +111,7 @@ final class Chunkyfier(override val uid: String)
 
   def setSaxStringLength(value: Int): this.type = set(saxStringLength, value)
 
-  setDefault(saxStringLength, 50)
+  setDefault(saxStringLength, 20)
 
   val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
     "the chunk max measures count",
