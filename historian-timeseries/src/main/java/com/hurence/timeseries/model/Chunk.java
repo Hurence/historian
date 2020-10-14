@@ -2,12 +2,14 @@ package com.hurence.timeseries.model;
 
 import com.google.common.hash.Hashing;
 import com.hurence.historian.model.SchemaVersion;
+import com.hurence.timeseries.analysis.clustering.ChunkClusterable;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
 import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.converter.ChunkTruncater;
 import lombok.*;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.commons.math3.ml.clustering.Clusterable;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -51,7 +53,7 @@ import java.util.regex.Pattern;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Chunk implements Serializable {
+public class Chunk implements Serializable, ChunkClusterable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Chunk.class);
 
@@ -94,6 +96,18 @@ public class Chunk implements Serializable {
     protected String metricKey;
 
     protected Map<String, String> tags;
+
+    @Override
+    public double[] getPoint() {
+        assert sax != null;
+        double[] saxAsDoubles = new double[sax.length()];
+
+        for (int i = 0; i < sax.length(); i++) {
+            saxAsDoubles[i] = (Character.getNumericValue(sax.charAt(i)) - 10.0) ;/// 7.0;
+        }
+
+        return saxAsDoubles;
+    }
 
     // Naming pattern <Class>Builder of this class will make lombok use this class
     // as the builder for Chunk. Said differently, an instance of this ChunkBuilder
@@ -158,6 +172,7 @@ public class Chunk implements Serializable {
 
     /**
      * Get human readable Chunk including uncompressed readable measure values
+     *
      * @param withTimestamps Display timestamp next to human readable dates or not
      * @return
      */
@@ -174,7 +189,7 @@ public class Chunk implements Serializable {
                 String readableTimestamp = sdf.format(new Date(timestamp));
                 stringBuilder.append("\n    t=").append(readableTimestamp);
                 if (withTimestamps) {
-                    stringBuilder.append(" (" + timestamp +")");
+                    stringBuilder.append(" (" + timestamp + ")");
                 }
                 stringBuilder
                         .append(" v=").append(measureValue)
@@ -212,7 +227,7 @@ public class Chunk implements Serializable {
 
         private MetricKey(String name, Map<String, String> tags) {
             Objects.requireNonNull(name);
-           // Objects.requireNonNull(tags);
+            // Objects.requireNonNull(tags);
             this.name = name;
             this.tags = tags;
         }

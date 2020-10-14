@@ -138,8 +138,8 @@ add_ngramtext_type_to_collection() {
          "indexAnalyzer" : {
             "tokenizer":{
                "class":"solr.NGramTokenizerFactory",
-               "minGramSize":"2",
-               "maxGramSize":"10"  },
+               "minGramSize":"5",
+               "maxGramSize":"20"  },
             "filters":[{
                "class":"solr.LowerCaseFilterFactory" }]
           },
@@ -152,6 +152,52 @@ add_ngramtext_type_to_collection() {
           }
         }'
 }
+
+
+add_mlt_request_handler() {
+  curl -X POST -H 'Content-type:application/json'  --data-binary '
+    "add-requesthandler": {
+        "name": "/mlt",
+        "class": "solr.MoreLikeThisHandler",
+        "defaults":{
+          "mlt.match.include":true,
+          "mlt.fl":"chunk_sax",
+          "mlt.minwl":"10",
+          "mlt.mindf":"2",
+          "mlt.mintf":"1"},
+    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config"
+}
+
+add_clustering_request_handler() {
+  curl -X POST -H 'Content-type:application/json'  --data-binary '
+    "update-searchcomponent": {
+        "name": "clustering",
+        "class": "solr.clustering.ClusteringComponent",
+        "engine":{
+          "name":"lingo",
+          "carrot.algorithm":"org.carrot2.clustering.kmeans.BisectingKMeansClusteringAlgorithm"
+        },
+    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config"
+
+    curl -X POST -H 'Content-type:application/json'  --data-binary '
+    "add-requesthandler": {
+        "name": "/clustering",
+        "class": "solr.SearchHandler",
+        "defaults":{
+          "clustering":true,
+          "clustering.results":true,
+          "carrot.url":id,
+          "carrot.title":"name",
+          "carrot.snippet":"chunk_sax",
+          "rows":100,
+          "fl":"*,score"},
+        "components": ["clustering"]
+    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config"
+
+}
+
+#export SOLR_HOST=localhost:8983/solr
+#export SOLR_COLLECTION=historian
 
 create_schema() {
 
@@ -272,6 +318,8 @@ main() {
             create_collection "${SOLR_HOST}" "${SOLR_COLLECTION}"
             add_ngramtext_type_to_collection
             create_schema
+            add_mlt_request_handler
+            add_clustering_request_handler
             ;;
         "add-field")
             echo -e "${GREEN}Add field ${SOLR_FIELD_NAME} of type ${SOLR_FIELD_TYPE} to collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
