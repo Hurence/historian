@@ -139,7 +139,7 @@ add_ngramtext_type_to_collection() {
             "tokenizer":{
                "class":"solr.NGramTokenizerFactory",
                "minGramSize":"5",
-               "maxGramSize":"20"  },
+               "maxGramSize":"24"  },
             "filters":[{
                "class":"solr.LowerCaseFilterFactory" }]
           },

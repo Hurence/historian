@@ -6,9 +6,9 @@ import com.hurence.timeseries.analysis.clustering.measures.LevenshteinDistanceMe
 import com.hurence.timeseries.model.Chunk;
 import lombok.Builder;
 import lombok.Data;
-import org.apache.commons.math3.ml.clustering.CentroidCluster;
-import org.apache.commons.math3.ml.clustering.Clusterable;
-import org.apache.commons.math3.ml.clustering.KMeansPlusPlusClusterer;
+import org.apache.commons.math3.ml.clustering.*;
+import org.apache.commons.math3.ml.distance.CanberraDistance;
+import org.apache.commons.math3.ml.distance.ChebyshevDistance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,13 +38,11 @@ public class KMeansChunksClustering implements ChunksClustering {
     @Override
     public List<ChunkClusterable> cluster(List<ChunkClusterable> chunks) {
 
-        logger.info("starting sax clustering with Jaccard Distance");
+
         KMeansPlusPlusClusterer<ChunkClusterable> clusterer =
-                new KMeansPlusPlusClusterer<>(k, maxIterations);//, new LevenshteinDistanceMeasure());
+                new KMeansPlusPlusClusterer<>(k, maxIterations, new ChebyshevDistance());
 
         List<CentroidCluster<ChunkClusterable>> clusterResults = clusterer.cluster(chunks);
-        logger.info("done sax clustering");
-
 
         AtomicInteger i = new AtomicInteger();
         clusterResults.forEach(chunkCentroidCluster -> {

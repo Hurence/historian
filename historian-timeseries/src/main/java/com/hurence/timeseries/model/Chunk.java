@@ -10,6 +10,7 @@ import lombok.*;
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.commons.math3.ml.clustering.Clusterable;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.slf4j.Logger;
@@ -97,7 +98,7 @@ public class Chunk implements Serializable, ChunkClusterable {
 
     protected Map<String, String> tags;
 
-    @Override
+  /*  @Override
     public double[] getPoint() {
         assert sax != null;
         double[] saxAsDoubles = new double[sax.length()];
@@ -106,6 +107,43 @@ public class Chunk implements Serializable, ChunkClusterable {
             saxAsDoubles[i] = (Character.getNumericValue(sax.charAt(i)) - 10.0) ;/// 7.0;
         }
 
+        return saxAsDoubles;
+    }*/
+
+    @Override
+    public double[] getPoint() {
+        assert sax != null;
+
+        double[] saxAsDoubles = new double[sax.length()+3];
+
+        for (int i = 0; i < sax.length(); i++) {
+            saxAsDoubles[3+i] = (Character.getNumericValue(sax.charAt(i)) - 10.0);
+        }
+
+        char previousChar = sax.charAt(0);
+        int numConsecutiveEqualsValues = 0;
+
+        for (int i = 0; i < sax.length(); i++) {
+            char currentChar = sax.charAt(i);
+
+            // stability
+            if (previousChar - currentChar == 0) {
+                saxAsDoubles[0]++;
+                numConsecutiveEqualsValues++;
+            }else
+                numConsecutiveEqualsValues =0;
+
+            // consecutiveness
+            if(numConsecutiveEqualsValues>=2){
+                saxAsDoubles[1]++;
+            }
+
+            previousChar = currentChar;
+
+
+        }
+
+        saxAsDoubles[2] = avg;
         return saxAsDoubles;
     }
 
