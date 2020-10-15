@@ -6,18 +6,19 @@ import com.hurence.timeseries.analysis.clustering.KMeansChunksClustering;
 import com.hurence.timeseries.converter.MeasuresToChunk;
 import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.ChunkWrapper;
 import com.hurence.timeseries.model.Measure;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ChunksClustererTest {
 
@@ -131,19 +132,111 @@ public class ChunksClustererTest {
             chunks.add(randomChunk(name, tags3, 1440, Mode.TREND_UP));
         for (int i = 0; i < 10; i++)
             chunks.add(randomChunk(name, tags4, 1440, Mode.SQUARE));
-        for (int i = 0; i < 10; i++)
-            chunks.add(randomChunk(name, tags5, 1440, Mode.NOISE));
-
-
+    /*    for (int i = 0; i < 10; i++)
+            chunks.add(randomChunk(name, tags5, 1440, Mode.NOISE));*/
 
 
         ChunksClustering clustering = KMeansChunksClustering.builder()
-                .k(5).maxIterations(10)
+                .k(5).maxIterations(100)
                 .distance(KMeansChunksClustering.Distance.DEFAULT)
                 .build();
 
-        clustering.cluster(chunks);
+        List<ChunkClusterable> chunkWrappers = chunks.stream()
+                .map(c -> new ChunkWrapper(c.getId(), c.getSax(), c.getTags()))
+                .collect(Collectors.toList());
 
-        chunks.forEach(c -> logger.info(c.getSax() + " --- " + c.getTags().toString()));
+
+        AtomicInteger testPassCount = new AtomicInteger(4 * 1000);
+        for (int i = 0; i < 100; i++) {
+            clustering.cluster(chunks);
+            AtomicReference<String> saxClusterForDChunk = new AtomicReference<>();
+            Map<String, Integer> countByCluster = new HashMap<>();
+
+            clustering.cluster(chunkWrappers);
+
+            chunkWrappers.forEach(c -> {
+             //   logger.info(c.getSax() + " --- " + c.getTags().toString());
+                int prevValue = countByCluster.getOrDefault(c.getTags().get("sax_cluster"), 0);
+                countByCluster.put(c.getTags().get("sax_cluster"), prevValue + 1);
+            });
+
+            countByCluster.values().forEach(v -> {
+                if(v != 10)
+                    testPassCount.addAndGet(-v);
+            });
+        }
+
+
+        double perentPass = testPassCount.get() / 40.0;
+        logger.info("clustering prediction ratio for typed random chunks : " + perentPass + "%");
+        Assert.assertTrue(perentPass >= 95);
     }
+
+
+    @Test
+    public void tesAcrossDays() {
+
+        List<ChunkClusterable> chunks = Arrays.asList(
+                new ChunkClusterable[]{
+                        new ChunkWrapper("a",
+                                "abbbabdddddddddbbbcc",
+                                new HashMap<String, String>() {{
+                                    put("chunk_day", "2019-11-25");
+                                }}),
+                        new ChunkWrapper("b",
+                                "ccbbbbdeddedddccbaaa",
+                                new HashMap<String, String>() {{
+                                    put("chunk_day", "2019-11-26");
+                                }}),
+                        new ChunkWrapper("c",
+                                "cbcbbcddddddddddccca",
+                                new HashMap<String, String>() {{
+                                    put("chunk_day", "2019-11-27");
+                                }}),
+                        new ChunkWrapper("d",
+                                "bbbbbbbdeecccccccccc",
+                                new HashMap<String, String>() {{
+                                    put("chunk_day", "2019-11-28");
+                                }}),
+                        new ChunkWrapper("e",
+                                "aabbacdeeeeddddcbbba",
+                                new HashMap<String, String>() {{
+                                    put("chunk_day", "2019-11-29");
+                                }}),
+                        new ChunkWrapper("f",
+                                "abbabcddeeedcdddbbbb",
+                                new HashMap<String, String>() {{
+                                    put("chunk_day", "2019-11-30");
+                                }})
+
+                }
+        );
+
+        ChunksClustering clustering = KMeansChunksClustering.builder()
+                .k(4).maxIterations(100)
+                .distance(KMeansChunksClustering.Distance.DEFAULT)
+                .build();
+
+        // run 10000 times to see big scale prediction ratio
+        int testPassCount = 0;
+        for (int i = 0; i < 10000; i++) {
+            clustering.cluster(chunks);
+            AtomicReference<String> saxClusterForDChunk = new AtomicReference<>();
+            Map<String, Integer> countByCluster = new HashMap<>();
+            chunks.forEach(c -> {
+                int prevValue = countByCluster.getOrDefault(c.getTags().get("sax_cluster"), 0);
+                countByCluster.put(c.getTags().get("sax_cluster"), prevValue + 1);
+                if (c.getId().equals("d"))
+                    saxClusterForDChunk.set(c.getTags().get("sax_cluster"));
+            });
+
+            if (countByCluster.get(saxClusterForDChunk.get()) == 1) {
+                testPassCount++;
+            }
+
+        }
+        logger.info("clustering prediction ratio for known sax strings : " + testPassCount / 100 + "%");
+        Assert.assertTrue(testPassCount / 100 >= 95);
+    }
+
 }

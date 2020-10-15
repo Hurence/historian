@@ -1,15 +1,12 @@
 package com.hurence.webapiservice.http.api.analytics;
 
-import com.google.gson.stream.JsonReader;
 import com.hurence.historian.util.ErrorMsgHelper;
 import com.hurence.timeseries.analysis.clustering.ChunkClusterable;
 import com.hurence.timeseries.analysis.clustering.ChunksClustering;
 import com.hurence.timeseries.analysis.clustering.KMeansChunksClustering;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
-import com.hurence.webapiservice.http.api.analytics.model.ChunkWrapper;
+import com.hurence.timeseries.model.ChunkWrapper;
 import com.hurence.webapiservice.http.api.analytics.model.ClusteringRequest;
-import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
-import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginAnnotationRequestParser;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import io.vertx.core.json.JsonArray;
@@ -18,11 +15,9 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.solr.common.util.JsonRecordReader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -32,12 +27,17 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.hurence.historian.model.FieldNamesInsideHistorianService.CHUNK_SAX;
-import static com.hurence.historian.model.HistorianServiceFields.POINTS;
-import static com.hurence.historian.model.HistorianServiceFields.TIMESERIES;
-import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_ORIGIN;
-import static com.hurence.webapiservice.http.api.ingestion.util.IngestionFinalResponseUtil.constructFinalResponseCsv;
 import static com.hurence.webapiservice.http.api.modele.StatusCodes.*;
 
+
+/**
+ *
+ * {
+ *     "names": ["messages"],
+ *     "day": "2019-11-28",
+ *     "k": 5
+ * }
+ */
 public class AnalyticsApiImpl implements AnalyticsApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IngestionApiImpl.class);
@@ -85,8 +85,6 @@ public class AnalyticsApiImpl implements AnalyticsApi {
         }
 
 
-
-
         service.rxGetTimeSeriesChunk(request.toParams())
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
@@ -108,18 +106,17 @@ public class AnalyticsApiImpl implements AnalyticsApi {
                                 JsonObject el = (JsonObject) metric;
 
 
-
                                 Map<String, String> tags = new HashMap<String, String>() {{
                                     put("name", el.getString("name"));
                                     put("metric_id", el.getString("metric_id"));
                                     put("avg", String.valueOf(el.getDouble("chunk_avg")));
                                 }};
 
-                                if(el.getDouble("chunk_avg") != 0 && el.getString(CHUNK_SAX).length() ==20)
-                                return new ChunkWrapper(
-                                        el.getString("id"),
-                                        el.getString(CHUNK_SAX),
-                                        tags);
+                                if (el.getDouble("chunk_avg") != 0 && el.getString(CHUNK_SAX).length() == 20)
+                                    return new ChunkWrapper(
+                                            el.getString("id"),
+                                            el.getString(CHUNK_SAX),
+                                            tags);
                                 else
                                     return null;
                             })
@@ -129,18 +126,36 @@ public class AnalyticsApiImpl implements AnalyticsApi {
 
                     clustering.cluster(chunkWrappers);
 
-                    JsonArray results = new JsonArray();
-                    chunkWrappers.forEach( chunkClusterable -> {
+                    JsonArray clusters = new JsonArray();
+                    Map<String, JsonObject> clustersJson = new HashMap<>();
+
+                    chunkWrappers.forEach(chunkClusterable -> {
+                        String clusterId = chunkClusterable.getTags().get("sax_cluster");
+
+                        if(!clustersJson.containsKey(clusterId)){
+                            clustersJson.put(clusterId,
+                                    new JsonObject()
+                                            .put("sax_cluster", clusterId)
+                                            .put("chunks", new JsonArray()));
+                        }
+                        JsonObject  saxCluster = clustersJson.get(clusterId);
+
+
+
                         JsonObject o = new JsonObject()
                                 .put("id", chunkClusterable.getId())
                                 .put("chunk_sax", chunkClusterable.getSax())
-                                .put( "tags", chunkClusterable.getTags());
-                        results.add(o);
+                                .put("tags", chunkClusterable.getTags());
+                        saxCluster.getJsonArray("chunks").add(o);
                     });
+                    clustersJson.values().forEach(clusters::add);
 
                     JsonObject finalResponse = new JsonObject()
-                            .put("results", results)
-                            .put("clustering.algo", "kmeans");
+                            .put("clusters", clusters)
+                            .put("clustering.algo", "kmeans")
+                            .put("k", request.getK())
+                            .put("day", request.getDay())
+                            .put("maxIterations", request.getMaxIterations());
 
                     context.response().setStatusCode(OK);
                     context.response().putHeader("Content-Type", "application/json");

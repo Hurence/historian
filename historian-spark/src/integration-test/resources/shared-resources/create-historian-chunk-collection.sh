@@ -139,7 +139,7 @@ add_ngramtext_type_to_collection() {
             "tokenizer":{
                "class":"solr.NGramTokenizerFactory",
                "minGramSize":"5",
-               "maxGramSize":"20"  },
+               "maxGramSize":"24"  },
             "filters":[{
                "class":"solr.LowerCaseFilterFactory" }]
           },
@@ -170,7 +170,7 @@ add_mlt_request_handler() {
 
 add_clustering_request_handler() {
   curl -X POST -H 'Content-type:application/json'  --data-binary '
-    "update-searchcomponent": {
+    "add-searchcomponent": {
         "name": "clustering",
         "class": "solr.clustering.ClusteringComponent",
         "engine":{
