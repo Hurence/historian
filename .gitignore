@@ -42,12 +42,7 @@ hs_err_pid*
 **/pom.xml.versionsBackup
 
 # copied resources
-integration-tests/src/main/resources/shared-resources/historian.properties
-historian-spark/src/integration-test/resources/shared-resources/historian-compactor.sh
 historian-compactor/src/integration-test/resources/shared-resources
-
-# generated files
-historian-timeseries/src/main/generated
 historian-server/src/integration-test/resources/shared-resources
 historian-spark/src/integration-test/resources/shared-resources
 integration-tests/src/main/resources/shared-resources/create-historian-annotation-collection.sh
@@ -61,5 +56,8 @@ integration-tests/src/main/resources/shared-resources/remove_collection_and_conf
 integration-tests/src/main/resources/shared-resources/solr-util.sh
 integration-tests/src/main/resources/shared-resources/test_historian_api_release.sh
 integration-tests/src/main/resources/shared-resources/uninstall.sh
+
+# generated files
+historian-timeseries/src/main/generated
 historian-spark/dependency-tree-before
 historian-spark/dependency-tree-now
