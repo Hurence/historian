@@ -14,12 +14,12 @@ Please see our documentation [here](DEVELOPMENT.md)
 
 
 
-## migration IFPEN
+## migration
 todo list
 
 - benchmark comparatif influx
 - valorisation SAX
-- revoir la mécanique d'injection IFPEN
+- revoir la mécanique d'injection
 - revoir le setup de l'install
 - reprise historique
 - partitionning hdfs
