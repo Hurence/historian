@@ -3,6 +3,7 @@
 ################################
 # GLOBAL VARIABLES
 ################################
+source historian.properties
 
 # color setup
 NOCOLOR='\033[0m'
@@ -35,15 +36,29 @@ delete_collection() {
 #crate specified collection
 #param1 the solr url (ie localhost:8983/solr)
 #param2 the name of the collection to delete
+#return code 0 if it succeeded
+#return code 1 if it failed creating the index
+#return code 2 if it failed disable autoCreateFields
 create_collection() {
   local solr_host="$1"
   local collection_name="$2"
   echo -e "${GREEN}will create collection ${collection_name} on ${solr_host} with ${NUM_SHARDS} shard and ${REPLICATION_FACTOR} replicas ${NOCOLOR}"
-  curl "http://${solr_host}/admin/collections?action=CREATE&name=${collection_name}&numShards=${NUM_SHARDS}&replicationFactor=${REPLICATION_FACTOR}"
+  response_to_creation=$(curl "http://${solr_host}/admin/collections?action=CREATE&name=${collection_name}&numShards=${NUM_SHARDS}&replicationFactor=${REPLICATION_FACTOR}")
+
+  echo "TEST_SOLR_CURL_OK is ${TEST_SOLR_CURL_OK}"
+  if [[ ! $response_to_creation == *${TEST_SOLR_CURL_OK}* ]];then
+    echo -e "${RED}It seems that creation of collection ${collection_name} on ${solr_host} failed !"
+    return 1;
+  fi
   echo "waiting 5' for changes propagation"
   sleep 5
-  curl -X POST -H 'Content-type:application/json' -d "{\"set-user-property\": {\"update.autoCreateFields\":\"false\"}}}" "http://${solr_host}/${collection_name}/config"
+  response_to_disabling_autoCreateFields=$(curl -X POST -H 'Content-type:application/json' -d "{\"set-user-property\": {\"update.autoCreateFields\":\"false\"}}}" "http://${solr_host}/${collection_name}/config")
+  if [[ ! $response_to_disabling_autoCreateFields == *${TEST_SOLR_CURL_OK}* ]];then
+    echo -e "${RED}It seems that disabling autoCreateFields for collection ${collection_name} on ${solr_host} failed !"
+    return 2;
+  fi
   sleep 1
+  return 0;
 }
 
 #append specfieid string to variable
