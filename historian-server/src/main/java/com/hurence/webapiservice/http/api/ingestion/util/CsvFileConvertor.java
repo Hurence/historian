@@ -16,7 +16,7 @@ public class CsvFileConvertor {
     public JsonArray fileInArray;
     public FileReport fileReport;
 
-    CsvFileConvertor (FileUpload file) {
+    public CsvFileConvertor (FileUpload file) {
         this.file = file;
         this.fileReport = new FileReport();
     }
