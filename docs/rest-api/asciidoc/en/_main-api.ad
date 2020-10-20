@@ -11,3 +11,7 @@ include::./_main-endpoints/_import-json-endpoint.ad[]
 === Data Export
 
 include::./_main-endpoints/_export-csv-endpoint.ad[]
+
+==== Timeseries analytics
+
+include::./_main-endpoints/_analytics-endpoint.ad[]

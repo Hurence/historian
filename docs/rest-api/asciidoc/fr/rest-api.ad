@@ -13,6 +13,8 @@
 :import-csv-endpoint: {main-endpoint}/import/csv
 :import-json-endpoint: {main-endpoint}/import/json
 :export-csv-endpoint: {main-endpoint}/export/csv
+:analytics-endpoint: {main-endpoint}/analytics
+:analytics-clustering-endpoint: {analytics-endpoint}/clustering
 :grafana-hurence-endpoint: /api/grafana/v0
 :grafana-hurence-query-endpoint: {grafana-hurence-endpoint}/query
 :grafana-hurence-search-endpoint: {grafana-hurence-endpoint}/search
