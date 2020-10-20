@@ -10,11 +10,19 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
+import java.util.stream.Collectors;
 
 public class ChunkBuilderHelper {
 
 
     private ChunkBuilderHelper() {
+    }
+
+    public static List<Chunk> fromGroupOfMeasures(String metric_name, List<List<Measure>> pointsByChunk) {
+        return pointsByChunk.stream()
+                .map(points -> {
+                    return ChunkBuilderHelper.fromPoints(metric_name, points);
+                }).collect(Collectors.toList());
     }
 
     public static Chunk fromPoints(String metricName, List<Measure> points) {

@@ -45,6 +45,7 @@ public class SolrITHelper {
     public static String COLLECTION_REPORT = HistorianCollections.DEFAULT_COLLECTION_REPORT;
     public static File SHARED_RESSOURCE_FILE = new File(SolrITHelper.class.getResource("/shared-resources").getFile());
     public static String MODIFY_COLLECTION_SCRIPT_PATH = "./modify-collection-schema.sh";
+    public static String ADD_CUSTOM_CONF_CHUNK_COLLECTION_SCRIPT_PATH = "./add-one-time-config-historian-chunk-collection.sh";
     public static String CREATE_CHUNK_COLLECTION_SCRIPT_PATH = "./create-historian-chunk-collection.sh";
     public static String CREATE_REPORT_COLLECTION_SCRIPT_PATH = "./create-historian-report-collection.sh";
     public static String CREATE_ANNOTATION_COLLECTION_SCRIPT_PATH = "./create-historian-annotation-collection.sh";
@@ -169,9 +170,27 @@ public class SolrITHelper {
         createChunkCollection(collectionName, solrUrl, modelVersion.toString());
     }
 
-    public static void createChunkCollection(String collectionName, String solrUrl, String modelVersion) throws IOException, InterruptedException, SolrServerException {
+    public static void createChunkCollectionWithoutCustomConfig(String collectionName, String solrUrl, SchemaVersion modelVersion) throws IOException, InterruptedException, SolrServerException {
+        Process process = getChunkCollectionCreationProcessBuilder(collectionName, solrUrl, modelVersion.toString()).start();
+        waitProcessFinishedAndPrintResult(process);
+    }
+
+    public static void createChunkCollection(String collectionName, String solrUrl, String modelVersion) throws IOException, InterruptedException {
         Process process = getChunkCollectionCreationProcessBuilder(collectionName, solrUrl, modelVersion).start();
         waitProcessFinishedAndPrintResult(process);
+        addCustomConfig(collectionName, solrUrl);
+    }
+
+    private static void addCustomConfig(String collectionName, String solrUrl) throws IOException, InterruptedException {
+        Process process = getChunkCollectionCustomConfigProcessBuilder(collectionName, solrUrl).start();
+        waitProcessFinishedAndPrintResult(process);
+    }
+
+    private static ProcessBuilder getChunkCollectionCustomConfigProcessBuilder(String collectionName, String solrUrl) {
+        return new ProcessBuilder("bash", ADD_CUSTOM_CONF_CHUNK_COLLECTION_SCRIPT_PATH,
+                "--solr-host", solrUrl + "/solr",
+                "--solr-collection", collectionName)
+                .directory(SHARED_RESSOURCE_FILE);
     }
 
     @Deprecated

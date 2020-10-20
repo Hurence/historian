@@ -1,9 +1,9 @@
-/*
 package com.hurence.webapiservice.http.api.grafana.hurence;
 
 import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.injector.GeneralInjectorCurrentVersion;
 import com.hurence.historian.solr.injector.SolrInjector;
+import com.hurence.historian.solr.util.ChunkBuilderHelper;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
@@ -134,9 +134,8 @@ public class QueryEndPointFocusOnSamplingWithPreAggCurrentVersionIT extends Abst
         return injector;
     }
 
-    private static List<Chunk> buildChunks(String metric_10_chunk, List<List<Measure>> pointsByChunk10Chunks) {
-        return null;
+    private static List<Chunk> buildChunks(String metric_name, List<List<Measure>> pointsByChunk) {
+        return ChunkBuilderHelper.fromGroupOfMeasures(metric_name, pointsByChunk);
     }
 
 }
-*/

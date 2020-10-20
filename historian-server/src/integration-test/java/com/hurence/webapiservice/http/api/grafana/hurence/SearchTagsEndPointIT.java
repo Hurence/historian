@@ -70,15 +70,17 @@ public class SearchTagsEndPointIT {
 
     @BeforeEach
     public void deleteCollection(SolrClient client) throws IOException, SolrServerException {
+        LOGGER.info("Deleting Historian collection START");
         final CollectionAdminRequest.Delete deleteCollectionRequest =
                 CollectionAdminRequest.deleteCollection(SolrITHelper.COLLECTION_HISTORIAN);
-        Assert.assertTrue(deleteCollectionRequest.process(client).isSuccess());
+        Assert.assertTrue(deleteCollectionRequest.process(client, SolrITHelper.COLLECTION_HISTORIAN).isSuccess());
+        LOGGER.info("Deleting Historian collection END");
     }
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSearchTagsNames(Vertx vertx, VertxTestContext testContext, DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
+        SolrITHelper.createChunkCollectionWithoutCustomConfig(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
         SolrITHelper.addFieldToChunkSchema(container, "usine");
         SolrITHelper.addFieldToChunkSchema(container, "sensor");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
@@ -95,7 +97,7 @@ public class SearchTagsEndPointIT {
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
     public void testSearchTagsNamesWithNoTags(Vertx vertx, VertxTestContext testContext,  DockerComposeContainer container) throws InterruptedException, SolrServerException, IOException {
-        SolrITHelper.createChunkCollection(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
+        SolrITHelper.createChunkCollectionWithoutCustomConfig(SolrITHelper.COLLECTION_HISTORIAN, SolrExtension.getSolr1Url(container), SchemaVersion.getCurrentVersion());
         List<RequestResponseConfI<?>> confs = Arrays.asList(
                 new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_SEARCH_TAGS_API_ENDPOINT,
                         "/http/grafana/hurence/searchTags/testSearchTagsNamesWithNoTags/request.json",
