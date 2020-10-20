@@ -177,7 +177,7 @@ add_mlt_request_handler() {
 
 add_clustering_request_handler() {
   response_add_clustering_update_searchcomponent=$(curl -X POST -H 'Content-type:application/json'  --data-binary '
-    "update-searchcomponent": {
+    "add-searchcomponent": {
         "name": "clustering",
         "class": "solr.clustering.ClusteringComponent",
         "engine":{

@@ -8,19 +8,19 @@ This project is composed of several module :
 * logisland-timeseries : TODO
 * timeseries : TODO
 
-# Historian server
+## Historian server
 
 The historian server is implemented using vertx. 
 It serves an API that the grafana-historian-datasource needs to interact with grafana.
 So those two modules are tightly coupled by the Rest api.
 
-# grafana-historian-datasource
+### grafana-historian-datasource
 
 This is implemented using javascript. We recommend you to directly develop this plugin in its own
  [repo](https://github.com/Hurence/grafana-historian-datasource).
 You develop this plugin, implement unit tests as indicated in the project. Once you have push your changes in the datasource project.
 
-## install plugin in grafana
+### install plugin in grafana
 
 You just need to copy the ./dist folder of the plugin into the plugin folder of your grafana instances. Look at your
 grafana.ini file, by default the path is ./data/plugins/
@@ -54,6 +54,10 @@ Run the following command in the root directory of historian source checkout.
     git clone git@github.com:Hurence/historian.git
     cd historian
     mvn clean install -DskipTests -Pbuild-integration-tests
+    
+ To run integration tests
+ 
+    mvn install -Pintegration-tests
     
 # Release process
 
