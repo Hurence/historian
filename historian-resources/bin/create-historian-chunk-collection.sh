@@ -2,6 +2,9 @@
 
 declare -r SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$SCRIPT_DIR"
+
+SCRIPT_NAME=$(basename "$0")
+source historian.properties
 source solr-util.sh
 
 ################################
@@ -155,7 +158,7 @@ add_ngramtext_type_to_collection() {
 
 
 add_mlt_request_handler() {
-  curl -X POST -H 'Content-type:application/json'  --data-binary '
+  response_to_add_mlt_request_handler=$(curl -X POST -H 'Content-type:application/json'  --data-binary '
     "add-requesthandler": {
         "name": "/mlt",
         "class": "solr.MoreLikeThisHandler",
@@ -165,11 +168,15 @@ add_mlt_request_handler() {
           "mlt.minwl":"10",
           "mlt.mindf":"2",
           "mlt.mintf":"1"},
-    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config"
+    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config")
+  if [[ ! $response_to_add_mlt_request_handler == *${TEST_SOLR_CURL_OK}* ]];then
+    echo -e "${RED}It seems that add_mlt_request_handler for ${SOLR_COLLECTION} on ${SOLR_HOST} failed !"
+    return 1;
+  fi
 }
 
 add_clustering_request_handler() {
-  curl -X POST -H 'Content-type:application/json'  --data-binary '
+  response_add_clustering_update_searchcomponent=$(curl -X POST -H 'Content-type:application/json'  --data-binary '
     "add-searchcomponent": {
         "name": "clustering",
         "class": "solr.clustering.ClusteringComponent",
@@ -177,23 +184,29 @@ add_clustering_request_handler() {
           "name":"lingo",
           "carrot.algorithm":"org.carrot2.clustering.kmeans.BisectingKMeansClusteringAlgorithm"
         },
-    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config"
-
-    curl -X POST -H 'Content-type:application/json'  --data-binary '
-    "add-requesthandler": {
-        "name": "/clustering",
-        "class": "solr.SearchHandler",
-        "defaults":{
-          "clustering":true,
-          "clustering.results":true,
-          "carrot.url":id,
-          "carrot.title":"name",
-          "carrot.snippet":"chunk_sax",
-          "rows":100,
-          "fl":"*,score"},
-        "components": ["clustering"]
-    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config"
-
+    }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config")
+  if [[ ! $response_add_clustering_update_searchcomponent == *${TEST_SOLR_CURL_OK}* ]];then
+    echo -e "${RED}It seems that creation update-searchcomponent for clustering for ${SOLR_COLLECTION} on ${SOLR_HOST} failed !"
+    return 1;
+  fi
+  response_add_clustering_request_handler=$(curl -X POST -H 'Content-type:application/json'  --data-binary '
+  "add-requesthandler": {
+      "name": "/clustering",
+      "class": "solr.SearchHandler",
+      "defaults":{
+        "clustering":true,
+        "clustering.results":true,
+        "carrot.url":id,
+        "carrot.title":"name",
+        "carrot.snippet":"chunk_sax",
+        "rows":100,
+        "fl":"*,score"},
+      "components": ["clustering"]
+  }' "http://${SOLR_HOST}/${SOLR_COLLECTION}/config")
+  if [[ ! $response_add_clustering_request_handler == *${TEST_SOLR_CURL_OK}* ]];then
+    echo -e "${RED}It seems that add_ing lustering request handler for ${SOLR_COLLECTION} on ${SOLR_HOST} failed !"
+    return 1;
+  fi
 }
 
 #export SOLR_HOST=localhost:8983/solr
@@ -305,8 +318,11 @@ create_schema() {
 
 
     echo "{ ${SOLR_UPDATE_QUERY} }"
-    curl -X POST -H 'Content-type:application/json' "http://${SOLR_HOST}/${SOLR_COLLECTION}/schema" --data-binary "{ ${SOLR_UPDATE_QUERY} }"
-
+    response_to_schema_creation=$(curl -X POST -H 'Content-type:application/json' "http://${SOLR_HOST}/${SOLR_COLLECTION}/schema" --data-binary "{ ${SOLR_UPDATE_QUERY} }")
+    if [[ ! $response_to_schema_creation == *${TEST_SOLR_CURL_OK}* ]];then
+      echo -e "${RED}It seems that creation of schema for ${SOLR_COLLECTION} on ${SOLR_HOST} failed !${NOCOLOR}"
+      return 1;
+    fi
 }
 
 ####################################################################
@@ -314,12 +330,32 @@ main() {
     parse_args "$@"
     case ${UPDATE_MODE} in
         "create-collection")
-            echo -e "${GREEN}Creating collection for ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
-            create_collection "${SOLR_HOST}" "${SOLR_COLLECTION}"
+            echo -e "${YELLOW}Creating chunk collection for ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+            if ! create_collection "${SOLR_HOST}" "${SOLR_COLLECTION}";then
+              echo "${RED}create_collection failed${NOCOLOR}"
+#              exit 1;#failed
+            fi
+            echo -e "${YELLOW}adding ngramtext type for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
             add_ngramtext_type_to_collection
-            create_schema
-            add_mlt_request_handler
-            add_clustering_request_handler
+            echo -e "${YELLOW}adding schema fields for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+            if ! create_schema;then
+              echo -e "${RED}create_schema failed${NOCOLOR}"
+#              exit 1;#failed
+            fi
+            #TODO either delete this comment (if we use instead add-one-time-config-historian-chunk-collection.sh)
+            #TODO Either delete add-one-time-config-historian-chunk-collection.sh and uncomment those.
+#            echo -e "${YELLOW}adding mlt request handler for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+#            if ! add_mlt_request_handler;then
+#              echo -e "${RED}add_mlt_request_handler failed${NOCOLOR}"
+##              exit 1;#failed
+#            fi
+#
+#            echo -e "${YELLOW}adding clustering request handler for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+#            if ! add_clustering_request_handler;then
+#              echo -e "${RED}add_clustering_request_handler failed${NOCOLOR}"
+##              exit 1;#failed
+#            fi
+            echo -e "${GREEN}End of chunk collection creation ${NOCOLOR}"
             ;;
         "add-field")
             echo -e "${GREEN}Add field ${SOLR_FIELD_NAME} of type ${SOLR_FIELD_TYPE} to collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
@@ -331,7 +367,7 @@ main() {
             exit 0
             ;;
     esac
-
+    echo -e "${GREEN}End of script ${SCRIPT_NAME} ${NOCOLOR}"
 }
 
 
