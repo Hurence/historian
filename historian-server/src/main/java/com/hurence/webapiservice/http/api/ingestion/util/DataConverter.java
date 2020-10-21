@@ -57,7 +57,8 @@ public class DataConverter {
         JsonObject tagsList = new JsonObject();
         csvFilesConvertorConf.getTags().forEach(t -> tagsList.put(t, map.mapFromOneCsvLine.get(t)));
         return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getTimestamp()), csvFilesConvertorConf),
-                toDouble(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getValue()))),
+                toDouble(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getValue())),
+                toFloat(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getQuality()))),
                 tagsList);
     }
 
@@ -180,7 +181,20 @@ public class DataConverter {
      */
     private Object toDouble(Object value) {
         try {
-            return Double.parseDouble(Objects.toString(value, "0").replaceAll("\\s+",""));
+            return Double.parseDouble(Objects.toString(value).replaceAll("\\s+",""));
+        }catch (Exception e) {
+            return value;
+        }
+    }
+    /**
+     * @param value      Object
+     *
+     * get the value as Float if possible.
+     *
+     */
+    private Object toFloat(Object value) {
+        try {
+            return Float.parseFloat(Objects.toString(value).replaceAll("\\s+",""));
         }catch (Exception e) {
             return value;
         }
