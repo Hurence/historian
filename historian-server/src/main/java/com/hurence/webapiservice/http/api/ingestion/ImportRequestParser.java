@@ -246,8 +246,8 @@ public class ImportRequestParser {
             if (pointArray.size() == 0){
                 numberOfFailedPointsForThisName++;
                 continue;
-            } else if (pointArray.size() != 2)
-                throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
+            } else if (pointArray.size() != 3)
+                throw new IllegalArgumentException("Points should be of the form [timestamp, value, quality]");
             try {
                 if (pointArray.getLong(0) == null) {
                     numberOfFailedPointsForThisName++;
@@ -258,7 +258,16 @@ public class ImportRequestParser {
                 continue;
             }
             try {
-                if ((pointArray.getDouble(1) == null)) {
+                if (pointArray.getDouble(1) == null) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
+            } catch (Exception e) {
+                numberOfFailedPointsForThisName++;
+                continue;
+            }
+            try {
+                if ((pointArray.getFloat(2) == null) || pointArray.getFloat(2) < 0 || pointArray.getFloat(2) > 1) {
                     numberOfFailedPointsForThisName++;
                     continue;
                 }
