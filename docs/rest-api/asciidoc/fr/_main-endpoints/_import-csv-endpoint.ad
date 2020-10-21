@@ -123,9 +123,9 @@ Sinon les autres valeurs acceptées sont les noms de colonnes ajoutées comme ta
 
 ====== Exemples
 
-======= Exemple 1
+.Exemple 1
 
-Exemple de commande curl minimal :
+Exemple de commande curl avec un fichier csv minimal.(disponible dans {samples-minimal-path}/minimal.csv) :
 
 [source,curl,subs="attributes"]
 ----
@@ -162,9 +162,9 @@ La réponse est la suivante :
 }
 ----
 
-======= Exemple 2
+.Exemple 2
 
-Exemple de commande curl :
+Exemple de commande curl (csv disponible dans {samples-minimal-path}/exemple2.csv) :
 
 [source,curl,subs="attributes"]
 ----
@@ -194,7 +194,20 @@ metric_1, 1970-01-01 00:00:00.003, 3 ,1.4,sensor_2,code_1
 metric_2, 1970-01-01 00:00:00.004, 4 ,1.5,sensor_2,code_1
 ----
 
-La réponse est la suivante :
+Dnas le cas ou les tags ne seraient pas enregistré dans l'historian vous pourriez recevoir une erreur comme celle-ci :
+
+[source,json]
+----
+{
+    "Error Message": "",
+    "Exception Class": "io.vertx.serviceproxy.ServiceException",
+    "Exception Message": "Error from server at http://192.168.32.3:8983/solr/historian_shard2_replica_n2: ERROR: [doc=e2e1a57bd8800f1e95fad9c5e730c5a53c5f1571f2fb429164ad42a926507334] unknown field 'code_install'"
+}
+----
+
+Il faut donc rajouter le champs indiqué dans le schéma de la collection.
+
+Sinon la réponse est la suivante :
 
 [source,json]
 ----
@@ -223,7 +236,7 @@ La réponse est la suivante :
 }
 ----
 
-======= Exemple 3
+.Exemple 3
 
 avec la requête suivante :
 
@@ -291,7 +304,7 @@ Si un même fichier est injecter plusieurs fois avec les même paramètres alors
 
 Rappel:: Un chunk est créer par métrique et par la valeurs des tags sélection mais aussi pour chaque changement de jour !
 
-======= Exemple avec un fichier vide
+.Exemple avec un fichier vide
 
 ----
 curl -X POST \
@@ -311,7 +324,7 @@ http://localhost:8080{import-csv-endpoint} \
 }
 ----
 
-======= Exemple avec un fichier ayant juste un header
+.Exemple avec un fichier ayant juste un header
 
 ----
 curl -X POST \
