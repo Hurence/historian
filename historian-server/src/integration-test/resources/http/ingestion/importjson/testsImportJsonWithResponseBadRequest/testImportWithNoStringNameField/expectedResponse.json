@@ -1,1 +1,5 @@
-{"error" : "A name is not a string for at least one metric"}
+{
+  "Error Message": "Error parsing request",
+  "Exception Class": "java.lang.IllegalArgumentException",
+  "Exception Message": "A name is not a string for at least one metric"
+}

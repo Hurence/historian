@@ -1,1 +1,5 @@
-{"error" : "There is no valid measures"}
+{
+  "Error Message": "Error parsing request",
+  "Exception Class": "java.lang.IllegalArgumentException",
+  "Exception Message": "There is no valid measures"
+}
