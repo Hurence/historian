@@ -23,6 +23,12 @@ object FileLoader {
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 24
   val DEFAULT_GROUP_BY_COLS = SOLR_COLUMN_NAME
+  val DEFAULT_TIMESTAMP_FIELD = "timestamp"
+  val DEFAULT_NAME_FIELD = "name"
+  val DEFAULT_VALUE_FIELD = "value"
+  val DEFAULT_QUALITY_FIELD = ""
+  val DEFAULT_TIMESTAMP_FORMAT = "s"
+  val DEFAULT_CSV_COLUMN_DELIMITER = ","
 
   def buildOption(opt:String, longOpt:String, hasArg:Boolean, optionalArg:Boolean, description:String) = {
     val option = new Option(opt,longOpt,hasArg,description)
@@ -40,7 +46,13 @@ object FileLoader {
                                saxStringLength: Int,
                                useKerberos: Boolean,
                                tagNames: String,
-                               groupByCols: String)
+                               groupByCols: String,
+                               timestampField:String,
+                               nameField:String,
+                               valueField: String,
+                               qualityField: String,
+                               timestampFormat: String,
+                               columnDelimiter: String)
 
 
   def parseCommandLine(args: Array[String]): FileLoaderOptions = {
@@ -88,6 +100,24 @@ object FileLoader {
     options.addOption(
       buildOption("groupBy","groupby-cols",true,true,s"the column names that form the group by key as a csv string, default to $DEFAULT_GROUP_BY_COLS")
     )
+    options.addOption(
+      buildOption("ts","timestamp-field",true,true,s"the column name that handles the timestamp, default to $DEFAULT_TIMESTAMP_FIELD")
+    )
+    options.addOption(
+      buildOption("name","name-field",true,true,s"the column name that handles the metric name, default to $DEFAULT_NAME_FIELD")
+    )
+    options.addOption(
+      buildOption("value","value-field",true,true,s"the column name that handles the metric value, default to $DEFAULT_VALUE_FIELD")
+    )
+    options.addOption(
+      buildOption("tf","timestamp-format",true,true,s"the format of timestamp conversion, can be java date pattern or s or ms, default to $DEFAULT_TIMESTAMP_FORMAT")
+    )
+    options.addOption(
+      buildOption("cd","column-delimiter",true,true,s"the char delimiter for a column, default to $DEFAULT_CSV_COLUMN_DELIMITER")
+    )
+    options.addOption(
+      buildOption("quality","quality-field",true,true,s"the column name that handles the metric quality, default to $DEFAULT_QUALITY_FIELD")
+    )
 
     // parse the command line arguments
     val line = parser.parse(options, args)
@@ -102,6 +132,13 @@ object FileLoader {
     val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else DEFAULT_SAX_STRING_LENGTH
     val tagNames = if (line.hasOption("tags")) line.getOptionValue("tags")  else ""
     val groupByCols = if (line.hasOption("groupBy")) line.getOptionValue("groupBy") else DEFAULT_GROUP_BY_COLS
+    val timestampField = if (line.hasOption("ts")) line.getOptionValue("ts") else DEFAULT_TIMESTAMP_FIELD
+    val nameField = if (line.hasOption("name")) line.getOptionValue("name") else DEFAULT_NAME_FIELD
+    val valueField = if (line.hasOption("value")) line.getOptionValue("value") else DEFAULT_VALUE_FIELD
+    val qualityField = if (line.hasOption("quality")) line.getOptionValue("quality") else DEFAULT_QUALITY_FIELD
+    val timestampFormat = if (line.hasOption("tf")) line.getOptionValue("tf") else DEFAULT_TIMESTAMP_FORMAT
+    val columnDelimiter = if (line.hasOption("cd")) line.getOptionValue("cd") else DEFAULT_CSV_COLUMN_DELIMITER
+
 
     // build the option handler
     val opts = FileLoaderOptions(sparkMaster,
@@ -114,7 +151,13 @@ object FileLoader {
       saxStringLength,
       useKerberos,
       tagNames,
-      groupByCols
+      groupByCols,
+      timestampField,
+      nameField,
+      valueField,
+      qualityField,
+      timestampFormat,
+      columnDelimiter
     )
 
     logger.info(s"Command line options : $opts")
@@ -123,8 +166,21 @@ object FileLoader {
 
   private val logger = LoggerFactory.getLogger(classOf[FileLoader])
 
+
+
   /**
     *
+    *
+    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' \
+    *   --class com.hurence.historian.spark.loader.FileLoader \
+    *   --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  \
+    *   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar \
+    *   -csv historian-spark/src/test/resources/chemistry/dataHistorian-ISNTS35-N-20200301*.csv \
+    *   -groupBy name -zk localhost:9983 -col historian2 -name tagname -cd ";" \
+    *   -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss"
+    *
+    *
+    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' --class com.hurence.historian.spark.loader.FileLoader --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar -csv historian-spark/src/test/resources/it-data-4metrics.csv.gz -tags metric_id -groupBy name,tags.metric_id -zk localhost:9983 -name metric_name
     *
     * @param args
     */
@@ -145,12 +201,13 @@ object FileLoader {
       options.csvFilePath.get,
       Map(
         "inferSchema" -> "true",
-        "delimiter" -> ",",
+        "delimiter" -> options.columnDelimiter,
         "header" -> "true",
-        "nameField" -> "metric_name",
-        "timestampField" -> "timestamp",
-        "timestampDateFormat" -> "s",
-        "valueField" -> "value",
+        "nameField" -> options.nameField,
+        "timestampField" -> options.timestampField,
+        "timestampDateFormat" -> options.timestampFormat,
+        "valueField" -> options.valueField,
+        "qualityField" -> options.qualityField,
         "tagsFields" -> options.tagNames
       )))
 
@@ -168,7 +225,7 @@ object FileLoader {
       chunksDF.show()
 
     val chunksDS = chunksDF.as[Chunk](Encoders.bean(classOf[Chunk]))
-      .repartition(8)
+   //   .repartition(8)
 
 
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)

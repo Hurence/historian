@@ -14,11 +14,7 @@ import com.hurence.historian.spark.sql.writer.WriterType;
 import com.hurence.historian.spark.sql.writer.solr.SolrChunksWriter;
 import com.hurence.timeseries.core.ChunkOrigin;
 import com.hurence.timeseries.model.Chunk;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
+import org.apache.commons.cli.*;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.spark.sql.Dataset;
@@ -570,7 +566,7 @@ public class Compactor implements Runnable {
         final String OPTION_CONFIG_FILE_LONG = "config-file";
 
         // Handling arguments
-        CommandLineParser parser = new DefaultParser();
+        CommandLineParser parser = new GnuParser();
         org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
 
         // Path to config file

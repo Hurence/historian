@@ -66,7 +66,7 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
       .options(options.config)
       .load(options.path)
       .select(mainCols: _*)
-      .withColumn("timestamp", $"timestamp" * 1L)
+   //   .withColumn("timestamp", $"timestamp" * 1L)
       .withColumn("tags", map(tagsMapping: _*))
 
     //
@@ -82,6 +82,7 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
       logger.info(s"getting date from date string with format $timestampDateFormat")
       df.withColumn("timestamp", toTimestampUTC(col("timestamp"), lit(timestampDateFormat)))
     }
+
 
 
    dfPlusTime
@@ -101,7 +102,7 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
           .tags(r.getAs[Map[String, String]]("tags").asJava)
 
         if (hasQuality)
-          builder.quality(r.getAs[Float]("quality"))
+          builder.quality(r.getAs[Double]("quality").toFloat)
         else
           builder.quality(java.lang.Float.NaN)
 
