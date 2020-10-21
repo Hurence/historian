@@ -97,10 +97,12 @@ public class CsvConvertorUtil {
             Set<String> keySet = i.keySet();
             if ( (csvFilesConvertorConf.getName() != null) && (!keySet.contains(csvFilesConvertorConf.getName())))
                 throw new NoSuchElementException("error in the attributes : the attribute name :"+ csvFilesConvertorConf.getName()
-                                                + " don't exist in the csv, you acn use the attribute " +CUSTOM_NAME);
+                                                + " don't exist in the csv, you can use the attribute " +CUSTOM_NAME);
             if (!keySet.contains(csvFilesConvertorConf.getTimestamp()))
                 throw new NoSuchElementException("error in the attributes");
             if (!keySet.contains(csvFilesConvertorConf.getValue()))
+                throw new NoSuchElementException("error in the attributes");
+            if (!keySet.contains(csvFilesConvertorConf.getQuality()))
                 throw new NoSuchElementException("error in the attributes");
         });
     }
