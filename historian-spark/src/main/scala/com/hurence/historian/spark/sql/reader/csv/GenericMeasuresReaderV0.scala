@@ -102,6 +102,8 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
 
         if (hasQuality)
           builder.quality(r.getAs[Float]("quality"))
+        else
+          builder.quality(java.lang.Float.NaN)
 
         builder.build()
 

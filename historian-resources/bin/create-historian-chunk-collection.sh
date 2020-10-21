@@ -335,26 +335,28 @@ main() {
               echo "${RED}create_collection failed${NOCOLOR}"
 #              exit 1;#failed
             fi
+
             echo -e "${YELLOW}adding ngramtext type for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
             add_ngramtext_type_to_collection
+
             echo -e "${YELLOW}adding schema fields for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
             if ! create_schema;then
               echo -e "${RED}create_schema failed${NOCOLOR}"
 #              exit 1;#failed
             fi
-            #TODO either delete this comment (if we use instead add-one-time-config-historian-chunk-collection.sh)
-            #TODO Either delete add-one-time-config-historian-chunk-collection.sh and uncomment those.
-#            echo -e "${YELLOW}adding mlt request handler for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
-#            if ! add_mlt_request_handler;then
-#              echo -e "${RED}add_mlt_request_handler failed${NOCOLOR}"
-##              exit 1;#failed
-#            fi
-#
-#            echo -e "${YELLOW}adding clustering request handler for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
-#            if ! add_clustering_request_handler;then
-#              echo -e "${RED}add_clustering_request_handler failed${NOCOLOR}"
-##              exit 1;#failed
-#            fi
+
+            echo -e "${YELLOW}adding mlt request handler for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+            if ! add_mlt_request_handler;then
+              echo -e "${RED}add_mlt_request_handler failed${NOCOLOR}"
+#              exit 1;#failed
+            fi
+
+            echo -e "${YELLOW}adding clustering request handler for collection ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
+            if ! add_clustering_request_handler;then
+              echo -e "${RED}add_clustering_request_handler failed${NOCOLOR}"
+#              exit 1;#failed
+            fi
+
             echo -e "${GREEN}End of chunk collection creation ${NOCOLOR}"
             ;;
         "add-field")
