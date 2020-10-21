@@ -160,7 +160,9 @@ public class ExportCsvEndPointIT {
                     testContext.verify(() -> {
                         assertEquals(413, rsp.statusCode());
                         assertEquals(BAD_REQUEST, rsp.statusMessage());
-                        assertEquals("max data measures is bigger than allowed", rsp.bodyAsString());
+                        assertEquals(new JsonObject("{\n" +
+                                "  \"Error Message\" : \"max data measures is bigger than allowed\"\n" +
+                                "}"), rsp.bodyAsJsonObject());
                         testContext.completeNow();
                     });
                 }));

@@ -16,6 +16,8 @@ import com.hurence.webapiservice.http.api.grafana.parser.SearchValuesRequestPars
 import com.hurence.webapiservice.http.api.modele.AnnotationRequest;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.modele.SamplingConf;
+import com.hurence.webapiservice.util.VertxErrorAnswerDescription;
+import com.hurence.webapiservice.util.VertxHttpErrorMsgHelper;
 import io.reactivex.Single;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -90,11 +92,15 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
              */
             request = new SearchRequestParser("name", "limit").parseRequest(requestBody);
         } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
+            LOGGER.info("Error parsing request :", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
         final JsonObject getMetricsParam = buildGetMetricsParam(request);
@@ -102,9 +108,12 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         service.rxGetMetricsName(getMetricsParam)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(ex.getMessage());
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error :")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(metricResponse -> {
                     JsonArray array = metricResponse.getJsonArray(HistorianServiceFields.METRICS);
@@ -150,11 +159,15 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
 
             request = new SearchValuesRequestParser(FIELD, QUERY, LIMIT).parseRequest(requestBody);
         } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
+            LOGGER.info("Error parsing request :", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
         final JsonObject getFieldValuesParam = buildGetFieldValuesParam(request);
@@ -162,9 +175,12 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         service.rxGetFieldValues(getFieldValuesParam)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(ex.getMessage());
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error :")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(valuesResponse -> {
                     JsonArray array = valuesResponse.getJsonArray(HistorianServiceFields.RESPONSE_VALUES);
@@ -187,9 +203,12 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
         service.rxGetTagNames()
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(ex.getMessage());
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error :")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(tagsList -> {
                     context.response().setStatusCode(200);
@@ -288,11 +307,15 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 throw new IllegalArgumentException(String.format("maximum allowed for %s is %s", MAX_DATA_POINTS_JSON_PATH, this.maxDataPointsAllowed));
             }
         } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
+            LOGGER.info("Error parsing request :", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
 
@@ -312,9 +335,12 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 })
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(ex.getMessage());
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error :")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(timeseries -> {
                     context.response().setStatusCode(200);
@@ -436,11 +462,15 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                     FROM_JSON_PATH, TO_JSON_PATH, TAGS_JSON_PATH, TYPE_JSON_PATH, LIMIT_JSON_PATH, MATCH_ANY_JSON_PATH
             ).parseRequest(requestBody);
         } catch (Exception ex) {
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
+            LOGGER.info("Error parsing request :", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
 
@@ -450,9 +480,12 @@ public class GrafanaHurenceDatasourcePluginApiImpl implements GrafanaHurenceData
                 .rxGetAnnotations(getAnnotationParams)
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(ex.getMessage());
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error :")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(annotations -> {
                     context.response().setStatusCode(200);

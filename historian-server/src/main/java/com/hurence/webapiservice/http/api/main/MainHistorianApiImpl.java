@@ -3,16 +3,17 @@ package com.hurence.webapiservice.http.api.main;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
 import com.fasterxml.jackson.dataformat.csv.CsvSchema;
-import com.hurence.historian.util.ErrorMsgHelper;
-import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.historian.models.ResponseAsList;
+import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
-import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.HurenceDatasourcePluginQueryRequestParser;
-import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
+import com.hurence.webapiservice.http.api.modele.ContentType;
+import com.hurence.webapiservice.http.api.modele.Headers;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
 import com.hurence.webapiservice.modele.SamplingConf;
 import com.hurence.webapiservice.timeseries.extractor.TimeSeriesExtracterImpl;
+import com.hurence.webapiservice.util.VertxErrorAnswerDescription;
+import com.hurence.webapiservice.util.VertxHttpErrorMsgHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -79,21 +80,28 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                     AGGREGATION_JSON_PATH, QUALITY_VALUE_JSON_PATH, QUALITY_AGG_JSON_PATH, QUALITY_RETURN_JSON_PATH)
                     .parseRequest(requestBody);
         } catch (Exception ex) {
-            LOGGER.debug("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(ErrorMsgHelper.createMsgError("Error parsing request !", ex));
+            LOGGER.info("error parsing request", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request !")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
 
         int maxDataPoints = request.getSamplingConf().getMaxPoint();
         if (maxDataPointsAllowedForExportCsv < maxDataPoints ) {
-            LOGGER.debug("error max data measures too large");
-            context.response().setStatusCode(PAYLOAD_TOO_LARGE);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end("max data measures is bigger than allowed");
+            LOGGER.info("error max data measures too large");
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("max data measures is bigger than allowed")
+                    .statusCode(PAYLOAD_TOO_LARGE)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
 
@@ -129,23 +137,22 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                             .build();
                     CsvMapper csvMapper = new CsvMapper();
                     csvMapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN,true);
-                    /*File file = new File("src/main/resources/results.csv");
-                    csvMapper.writerFor(ArrayList.class)
-                            .with(schema.withUseHeader(true))
-                            .writeValue(file, list);*/
                     String csv = csvMapper.writerFor(ArrayList.class)
                             .with(schema.withUseHeader(true)).writeValueAsString(list);
                     return csv;
                 })
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "text/csv");
-                    context.response().end(ex.getMessage());
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error : ")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(timeseries -> {
                     context.response().setStatusCode(200);
-                    context.response().putHeader("Content-Type", "text/csv");
+                    context.response().putHeader(Headers.contentType, ContentType.TEXT_CSV.contentType);
                     context.response().end(timeseries);
                 }).subscribe();
     }
