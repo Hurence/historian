@@ -1,1 +1,5 @@
-{"error" : "field 'measures' : string is not an array"}
+{
+  "Error Message": "Error parsing request",
+  "Exception Class": "java.lang.IllegalArgumentException",
+  "Exception Message": "field 'measures' : string is not an array"
+}
