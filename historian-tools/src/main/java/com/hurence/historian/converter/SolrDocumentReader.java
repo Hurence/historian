@@ -5,6 +5,8 @@ import com.hurence.timeseries.compaction.BinaryEncodingUtils;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Definitions;
 import org.apache.solr.common.SolrDocument;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -13,6 +15,7 @@ import java.util.stream.Collectors;
 import static com.hurence.timeseries.model.Definitions.*;
 
 public class SolrDocumentReader {
+    private static Logger LOGGER = LoggerFactory.getLogger(SolrDocumentReader.class);
 
     public static Chunk fromSolrDocument(SolrDocument solrDocument) {
 
@@ -60,12 +63,12 @@ public class SolrDocumentReader {
                     try {
                         method = builderClass.getMethod(chunkField, valueClass); // i.e builder.day(value)
                     } catch (NoSuchMethodException e) {
-                        e.printStackTrace();
+                        LOGGER.error("error looking for method " + chunkField, e);
                     }
                     try {
                         method.invoke(builder, value);
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        LOGGER.error("error calling while method " + method, e);
                     }
                 }
             } else if (field.equals("_version_")) {
