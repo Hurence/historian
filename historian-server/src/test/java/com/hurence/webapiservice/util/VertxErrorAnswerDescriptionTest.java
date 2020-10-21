@@ -18,9 +18,11 @@ public class VertxErrorAnswerDescriptionTest {
         VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder().build();
         Assert.assertEquals(StatusCodes.INTERNAL_SERVER_ERROR, error.getStatusCode());
         Assert.assertEquals(StatusMessages.INTERNAL_SERVER_ERROR, error.getStatusMsg());
-        Assert.assertNull(error.getContentType());
+        Assert.assertNull(error.getRoutingContext());
+        Assert.assertNull(error.getThrowable());
+        Assert.assertEquals(ContentType.APPLICATION_JSON, error.getContentType());
+        Assert.assertEquals("", error.getErrorMsg());
     }
-
 
     @Test
     public void test2() {
