@@ -4,7 +4,11 @@ import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.ingestion.util.AllFilesReport;
 import com.hurence.webapiservice.http.api.ingestion.util.CsvFileConvertor;
 import com.hurence.webapiservice.http.api.ingestion.util.CsvFilesConvertorConf;
+import com.hurence.webapiservice.http.api.modele.ContentType;
+import com.hurence.webapiservice.http.api.modele.Headers;
 import com.hurence.webapiservice.http.api.modele.StatusMessages;
+import com.hurence.webapiservice.util.VertxErrorAnswerDescription;
+import com.hurence.webapiservice.util.VertxHttpErrorMsgHelper;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
@@ -14,7 +18,8 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.hurence.historian.model.HistorianServiceFields.*;
+import static com.hurence.historian.model.HistorianServiceFields.ERRORS;
+import static com.hurence.historian.model.HistorianServiceFields.POINTS;
 import static com.hurence.timeseries.model.Definitions.SOLR_COLUMN_ORIGIN;
 import static com.hurence.webapiservice.http.api.ingestion.ImportRequestParser.parseJsonImportRequest;
 import static com.hurence.webapiservice.http.api.ingestion.util.IngestionApiUtil.fillingAllFilesReport;
@@ -45,12 +50,15 @@ public class IngestionApiImpl implements IngestionApi {
             JsonArray jsonImportRequest = context.getBodyAsJsonArray();
             correctPointsAndErrorMessages = parseJsonImportRequest(jsonImportRequest);
         }catch (Exception ex) {
-            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(errorObject.encodePrettily());
+            LOGGER.info("Error parsing request :", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
         JsonObject pointsToBeInjected = new JsonObject().put(POINTS, correctPointsAndErrorMessages.correctPoints)
@@ -58,16 +66,20 @@ public class IngestionApiImpl implements IngestionApi {
 
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
-                    LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "text/plain");
-                    context.response().end(ex.getMessage());
+                    LOGGER.error("Unexpected error :", ex);
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(response -> {
-                    context.response().setStatusCode(CREATED);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponseJson(response, correctPointsAndErrorMessages).encodePrettily());
-                    LOGGER.info("response : {}", response);
+                    context.response().setStatusCode(CREATED)
+                            .setStatusMessage(StatusMessages.CREATED)
+                            .putHeader(Headers.contentType, ContentType.APPLICATION_JSON.contentType)
+                            .end(constructFinalResponseJson(response, correctPointsAndErrorMessages).encodePrettily());
+                    LOGGER.debug("response : {}", response);
                 }).subscribe();
     }
 
@@ -85,20 +97,27 @@ public class IngestionApiImpl implements IngestionApi {
         try {
             csvFilesConvertorConf = new CsvFilesConvertorConf(context.request().formAttributes());
         } catch (Exception ex) {
-            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
-            LOGGER.error("error parsing attributes", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(String.valueOf(errorObject));
+            LOGGER.info("Error parsing request :", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
         //throw 400 if no files
         if (context.fileUploads().isEmpty()) {
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(new JsonObject().put(ERRORS_RESPONSE_FIELD, "Request is not containing any files").encodePrettily());
+            LOGGER.info("Request is not containing any files");
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Request is not containing any files")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
 
@@ -114,20 +133,24 @@ public class IngestionApiImpl implements IngestionApi {
             parseFiles(csvFileConvertors, allFilesReport, csvFilesConvertorConf);
             fillingAllFilesReport(csvFileConvertors, allFilesReport);
         } catch (Exception ex) {
-            JsonObject errorObject = new JsonObject().put(ERRORS_RESPONSE_FIELD, ex.getMessage());
-            LOGGER.error("error parsing request", ex);
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(String.valueOf(errorObject));
+            LOGGER.info("Error parsing request !", ex);
+            VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                    .errorMsg("Error parsing request !")
+                    .statusCode(BAD_REQUEST)
+                    .statusMsg(StatusMessages.BAD_REQUEST)
+                    .throwable(ex)
+                    .routingContext(context)
+                    .build();
+            VertxHttpErrorMsgHelper.answerWithError(error);
             return;
         }
 
         if (allFilesReport.correctPoints.isEmpty()) {
-            context.response().setStatusCode(BAD_REQUEST);
-            context.response().setStatusMessage(StatusMessages.BAD_REQUEST);
-            context.response().putHeader("Content-Type", "application/json");
-            context.response().end(new JsonObject().put(ERRORS, allFilesReport.filesThatFailedToBeImported).encodePrettily());
+            LOGGER.info("No valid points available !");
+            context.response().setStatusCode(BAD_REQUEST)
+                    .setStatusMessage(StatusMessages.BAD_REQUEST)
+                    .putHeader(Headers.contentType, ContentType.APPLICATION_JSON.contentType)
+                    .end(new JsonObject().put(ERRORS, allFilesReport.filesThatFailedToBeImported).encodePrettily());
             return;
         }
 
@@ -136,16 +159,18 @@ public class IngestionApiImpl implements IngestionApi {
 
         service.rxAddTimeSeries(pointsToBeInjected)
                 .doOnError(ex -> {
-                    LOGGER.error("Unexpected error : ", ex);
-                    context.response().setStatusCode(500);
-                    context.response().putHeader("Content-Type", "text/plain");
-                    context.response().end(ex.getMessage());
+                    LOGGER.error("Unexpected error in importCsv(RoutingContext)", ex);
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
                 })
                 .doOnSuccess(response -> {
-                    context.response().setStatusCode(CREATED);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(constructFinalResponseCsv(allFilesReport, csvFilesConvertorConf).encodePrettily());
-
+                    context.response().setStatusCode(CREATED)
+                            .setStatusMessage(StatusMessages.CREATED)
+                            .putHeader(Headers.contentType, ContentType.APPLICATION_JSON.contentType)
+                            .end(constructFinalResponseCsv(allFilesReport, csvFilesConvertorConf).encodePrettily());
                 }).subscribe();
     }
 }

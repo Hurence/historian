@@ -1,3 +1,5 @@
 {
-  "error": "You can not group by a column that is not a tag or the name of the metric"
+  "Error Message": "Error parsing request !",
+  "Exception Class": "java.lang.IllegalArgumentException",
+  "Exception Message": "You can not group by a column that is not a tag or the name of the metric"
 }
