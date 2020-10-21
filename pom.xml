@@ -78,7 +78,7 @@
         <!--        solr-->
         <solr.version>8.2.0</solr.version>
         <!--        spark-->
-        <spark.version>2.3.4</spark.version>
+        <spark.version>2.3.2</spark.version>
         <spark.solr>3.6.6</spark.solr>
         <!--        junit-->
         <junit.version>4.12</junit.version>

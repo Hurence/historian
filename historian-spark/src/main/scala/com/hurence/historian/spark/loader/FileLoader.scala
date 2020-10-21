@@ -1,35 +1,36 @@
 package com.hurence.historian.spark.loader
 
+import com.hurence.timeseries.model.Definitions._
+import com.hurence.timeseries.model.{Chunk, Measure}
 import com.hurence.historian.spark.ml.Chunkyfier
 import com.hurence.historian.spark.sql
+import org.apache.spark.sql._
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
-import com.hurence.timeseries.model.Chunk
 import com.lucidworks.spark.util.SolrSupport
-import org.apache.commons.cli.{DefaultParser, Option, Options}
-import org.apache.spark.sql.{Encoders, SparkSession}
+import org.apache.commons.cli.{CommandLine, CommandLineParser, GnuParser, Option, Options}
+import org.apache.spark.sql.SparkSession
 import org.slf4j.LoggerFactory
 
 
-
-
-class DataLoaderV2 extends Serializable {
-
-  private val logger = LoggerFactory.getLogger(classOf[DataLoaderV2])
-
-
-
+class FileLoader extends Serializable {
+  private val logger = LoggerFactory.getLogger(classOf[FileLoader])
 }
 
-object DataLoaderV2 {
-
+object FileLoader {
 
   val DEFAULT_CHUNK_SIZE = 1440
   val DEFAULT_SAX_ALPHABET_SIZE = 7
-  val DEFAULT_SAX_STRING_LENGTH = 100
+  val DEFAULT_SAX_STRING_LENGTH = 24
+  val DEFAULT_GROUP_BY_COLS = SOLR_COLUMN_NAME
 
+  def buildOption(opt:String, longOpt:String, hasArg:Boolean, optionalArg:Boolean, description:String) = {
+    val option = new Option(opt,longOpt,hasArg,description)
+    option.setOptionalArg(optionalArg)
+    option
+  }
 
-  case class DataLoaderOptions(master: String,
+  case class FileLoaderOptions(master: String,
                                zkHosts: String,
                                collectionName: String,
                                csvFilePath: scala.Option[String],
@@ -37,12 +38,13 @@ object DataLoaderV2 {
                                chunkSize: Int,
                                saxAlphabetSize: Int,
                                saxStringLength: Int,
-                               useKerberos: Boolean)
+                               useKerberos: Boolean,
+                               tagNames: String,
+                               groupByCols: String)
 
 
-  def parseCommandLine(args: Array[String]): DataLoaderOptions = {
-
-    val parser = new DefaultParser
+  def parseCommandLine(args: Array[String]): FileLoaderOptions = {
+    val parser = new GnuParser()
     val options = new Options
 
 
@@ -51,77 +53,40 @@ object DataLoaderV2 {
     options.addOption(help)
 
     options.addOption(
-      Option.builder("ms")
-        .longOpt("spark-master")
-        .hasArg(true)
-        .desc("spark master")
-        .build()
+      buildOption("ms","spark-master", true,false,"spark master")
     )
-
-    options.addOption(Option.builder("zk")
-      .longOpt("zookeeper-quorum")
-      .hasArg(true)
-      .desc(s"the zookeeper quorum for solr collection")
-      .build()
+    options.addOption(
+      buildOption("zk","zookeeper-quorum",true,false,s"the zookeeper quorum for solr collection")
     )
-    options.addOption(Option.builder("col")
-      .longOpt("collection-name")
-      .hasArg(true)
-      .desc(s"Solr collection name, default historian")
-      .build()
+    options.addOption(
+      buildOption("col","collection-name",true,false,s"Solr collection name, default historian")
     )
-
-    options.addOption(Option.builder("csv")
-      .longOpt("csv-file-path")
-      .hasArg(true)
-      .desc(s"File path mask, can be anything like /a/B/c/*/*pr*/*.csv")
-      .build()
+    options.addOption(
+      buildOption("csv","csv-file-path",true,true, s"File path mask, can be anything like /a/B/c/*/*pr*/*.csv")
     )
-
-    options.addOption(Option.builder("pq")
-      .longOpt("parquet-file-path")
-      .hasArg(true)
-      .desc(s"File path mask, can be anything like /a/B/c/*/*pr*/*.parquet")
-      .build()
+    options.addOption(
+      buildOption("pq","parquet-file-path",true,true,s"File path mask, can be anything like /a/B/c/*/*pr*/*.parquet")
     )
-
-    options.addOption(Option.builder("cs")
-      .longOpt("chunks-size")
-      .hasArg(true)
-      .optionalArg(true)
-      .desc(s"num measures in a chunk, default $DEFAULT_CHUNK_SIZE")
-      .build()
+    options.addOption(
+      buildOption("cs","chunks-size",true,true, s"num measures in a chunk, default $DEFAULT_CHUNK_SIZE")
     )
-
-    options.addOption(Option.builder("sas")
-      .longOpt("sax-alphabet-size")
-      .hasArg(true)
-      .optionalArg(true)
-      .desc(s"size of alphabet, default $DEFAULT_SAX_ALPHABET_SIZE")
-      .build()
+    options.addOption(
+      buildOption("sas","sax-alphabet-size",true,true,s"size of alphabet, default $DEFAULT_SAX_ALPHABET_SIZE")
     )
-
-    options.addOption(Option.builder("ssl")
-      .longOpt("sax-string-length")
-      .hasArg(true)
-      .optionalArg(true)
-      .desc(s"num measures in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
-      .build()
+    options.addOption(
+      buildOption("ssl","sax-string-length",true,true,s"num measures in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
     )
-
-    options.addOption(Option.builder("kb")
-      .longOpt("kerberos")
-      .optionalArg(true)
-      .desc("do we use kerberos ?, default false")
-      .build()
+    options.addOption(
+      buildOption("kb","kerberos",true ,true,"do we use kerberos ?, default false")
     )
-
-    options.addOption(Option.builder("date")
-      .longOpt("recompaction-date")
-      .hasArg(true)
-      .optionalArg(true)
-      .desc("the day date to recompact in the form of yyyy-MM-dd")
-      .build()
+    options.addOption(
+      buildOption("date","recompaction-date",true,true,"the day date to recompact in the form of yyyy-MM-dd")
+    )
+    options.addOption(
+      buildOption("tags","tags-names",true,false,"the columns to read as tags as a csv string")
+    )
+    options.addOption(
+      buildOption("groupBy","groupby-cols",true,true,s"the column names that form the group by key as a csv string, default to $DEFAULT_GROUP_BY_COLS")
     )
 
     // parse the command line arguments
@@ -135,9 +100,11 @@ object DataLoaderV2 {
     val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else DEFAULT_CHUNK_SIZE
     val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else DEFAULT_SAX_ALPHABET_SIZE
     val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else DEFAULT_SAX_STRING_LENGTH
+    val tagNames = if (line.hasOption("tags")) line.getOptionValue("tags")  else ""
+    val groupByCols = if (line.hasOption("groupBy")) line.getOptionValue("groupBy") else DEFAULT_GROUP_BY_COLS
 
     // build the option handler
-    val opts = DataLoaderOptions(sparkMaster,
+    val opts = FileLoaderOptions(sparkMaster,
       zkHosts,
       collectionName,
       csvFilePath,
@@ -145,13 +112,16 @@ object DataLoaderV2 {
       chunksSize,
       alphabetSize,
       saxStringLength,
-      useKerberos)
+      useKerberos,
+      tagNames,
+      groupByCols
+    )
 
     logger.info(s"Command line options : $opts")
     opts
   }
 
-  private val logger = LoggerFactory.getLogger(classOf[DataLoaderV2])
+  private val logger = LoggerFactory.getLogger(classOf[FileLoader])
 
   /**
     *
@@ -161,12 +131,11 @@ object DataLoaderV2 {
   def main(args: Array[String]): Unit = {
 
     // get arguments
-   // val options = dataLoader.parseCommandLine(args)
-    val options = DataLoaderOptions("local[*]", "zookeeper:9983", "historian", Some("/Users/tom/Documents/workspace/historian/loader/src/test/resources/it-data-4metrics.csv.gz"), None, 1440, 7, 20, useKerberos = false)
+    val options = FileLoader.parseCommandLine(args)
 
     // setup spark session
     val spark = SparkSession.builder
-      .appName("DataLoaderV2")
+      .appName("FileLoader")
       .master(options.master)
       .getOrCreate()
 
@@ -182,35 +151,38 @@ object DataLoaderV2 {
         "timestampField" -> "timestamp",
         "timestampDateFormat" -> "s",
         "valueField" -> "value",
-        "tagsFields" -> "metric_id,warn,crit"
+        "tagsFields" -> options.tagNames
       )))
 
+    measuresDS.show()
 
     val chunkyfier = new Chunkyfier()
-      .setGroupByCols(Array(  "name", "tags.metric_id"))
+      .setGroupByCols( options.groupByCols.split(","))
       .setDateBucketFormat("yyyy-MM-dd")
-      .doDropLists(false)
       .setSaxAlphabetSize(options.saxAlphabetSize)
       .setSaxStringLength(options.saxStringLength)
 
 
-    val chunksDS = chunkyfier.transform(measuresDS)
-      .as[Chunk](Encoders.bean(classOf[Chunk]))
-      .repartition(1)
+    val chunksDF = chunkyfier.transform(measuresDS)
+
+      chunksDF.show()
+
+    val chunksDS = chunksDF.as[Chunk](Encoders.bean(classOf[Chunk]))
+      .repartition(8)
 
 
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
     writer.write(sql.Options(options.collectionName, Map(
       "zkhost" -> options.zkHosts,
       "collection" -> options.collectionName,
-      "tag_names" -> "metric_id,warn,crit"
+      "tag_names" -> options.tagNames
     )), chunksDS)
 
 
     // Explicit commit to make sure all docs are visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val response = solrCloudClient.commit(options.collectionName, true, true)
-    logger.info(s"done saving new chunks : ${response.toString}")
+    logger.info(s"done saving new chunks : ${response.toString} to collection ${options.collectionName}")
 
     spark.close()
   }
