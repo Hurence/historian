@@ -3,7 +3,8 @@
     "name": "metric_2",
     "datapoints": [
       [1.2, 1, 0.4],
-      [2.0, 2, 0.4]
-    ],"total_points":2
+      [2.0, 2, "NaN"],
+      [3.0, 3, "NaN"]
+    ],"total_points":3
   }
 ]
