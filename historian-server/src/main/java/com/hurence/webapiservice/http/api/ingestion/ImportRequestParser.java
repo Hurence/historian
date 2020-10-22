@@ -174,7 +174,8 @@ public class ImportRequestParser {
 
             JsonObject newTimeserie = getTimeserieWithoutPoints(timeserie);
 
-            numberOfFailedPointsForThisName += parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport, newTimeserie);
+            numberOfFailedPointsForThisName += parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport,
+                                                            newTimeserie, csvFilesConvertorConf);
 
             calculateNumberOfFailedPoints(fileReport, csvFilesConvertorConf, timeserie, numberOfFailedPointsForThisName);
 
@@ -232,7 +233,8 @@ public class ImportRequestParser {
      *
      * @return void
      */
-    private static int parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport, JsonObject newTimeserie) {
+    private static int parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport,
+                                                                        JsonObject newTimeserie, CsvFilesConvertorConf csvFilesConvertorConf) {
         JsonArray newPoints = new JsonArray();
         for (Object point : timeserie.getJsonArray(POINTS)) {
             JsonArray pointArray;
@@ -246,7 +248,9 @@ public class ImportRequestParser {
             if (pointArray.size() == 0){
                 numberOfFailedPointsForThisName++;
                 continue;
-            } else if (pointArray.size() != 2)
+            } else if (csvFilesConvertorConf.getQuality() != null && pointArray.size() != 3) {
+                throw new IllegalArgumentException("Points should be of the form [timestamp, value, quality]");
+            } else if (csvFilesConvertorConf.getQuality() == null && pointArray.size() != 2)
                 throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
             try {
                 if (pointArray.getLong(0) == null) {
@@ -265,6 +269,17 @@ public class ImportRequestParser {
             } catch (Exception e) {
                 numberOfFailedPointsForThisName++;
                 continue;
+            }
+            if (csvFilesConvertorConf.getQuality() != null) {
+                try {
+                    if ((pointArray.getFloat(2) == null) || pointArray.getFloat(2) < 0f || pointArray.getFloat(2) > 1f) {
+                        numberOfFailedPointsForThisName++;
+                        continue;
+                    }
+                } catch (Exception e) {
+                    numberOfFailedPointsForThisName++;
+                    continue;
+                }
             }
             newPoints.add(pointArray);
         }
