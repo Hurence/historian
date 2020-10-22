@@ -16,7 +16,7 @@ public class CsvFilesConvertorConf {
     private final String timestamp;
     private final String name;
     private final String value;
-    private final String quality;
+    private String quality;
     private String formatDate;
     private String timezoneDate;
     private int maxNumberOfLignes;
@@ -25,7 +25,6 @@ public class CsvFilesConvertorConf {
     private List<String> group_by = new ArrayList<>();
     private List<String> tags = new ArrayList<>();
 
-    public static final String DEFAULT_QUALITY_COLUMN_MAPPING = "quality";
     public static final String DEFAULT_NAME_COLUMN_MAPPING = "metric";
     public static final String DEFAULT_VALUE_COLUMN_MAPPING = "value";
     public static final String DEFAULT_TIMESTAMP_COLUMN_MAPPING = "timestamp";
@@ -46,9 +45,7 @@ public class CsvFilesConvertorConf {
             this.value = DEFAULT_VALUE_COLUMN_MAPPING;
         else
             this.value = multiMap.get(MAPPING_VALUE);
-        if (multiMap.get(MAPPING_QUALITY) == null)   // TODO here if we take csv without quality i should let quality null
-            this.quality = DEFAULT_QUALITY_COLUMN_MAPPING;
-        else
+        if (multiMap.get(MAPPING_QUALITY) != null)
             this.quality = multiMap.get(MAPPING_QUALITY);
         if (multiMap.get(FORMAT_DATE) != null)
             this.formatDate = multiMap.get(FORMAT_DATE);

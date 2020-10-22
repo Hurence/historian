@@ -56,10 +56,7 @@ public class DataConverter {
     private List<Iterable<? extends Object>> customMapping (LineWithDateInfo map) {
         JsonObject tagsList = new JsonObject();
         csvFilesConvertorConf.getTags().forEach(t -> tagsList.put(t, map.mapFromOneCsvLine.get(t)));
-        return Arrays.asList(Arrays.asList(toNumber(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getTimestamp()), csvFilesConvertorConf),
-                toDouble(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getValue())),
-                toFloat(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getQuality()))),
-                tagsList);
+        return Arrays.asList(getMeasureElements(map), tagsList);
     }
 
     private Map<String, Object> customMap(Map.Entry<LinkedList<Object>, List<List<Iterable<? extends Object>>>> entry) {
@@ -67,6 +64,15 @@ public class DataConverter {
         putNameFieldAndTagsFields(fieldsAndThereValues,entry);
         putPointsFields(fieldsAndThereValues, entry);
         return fieldsAndThereValues;
+    }
+
+    private List<Object> getMeasureElements(LineWithDateInfo map) {
+        if (csvFilesConvertorConf.getQuality() == null)
+            return Arrays.asList(toNumber(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getTimestamp()), csvFilesConvertorConf),
+                    toDouble(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getValue())));
+        return Arrays.asList(toNumber(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getTimestamp()), csvFilesConvertorConf),
+                toDouble(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getValue())),
+                toFloat(map.mapFromOneCsvLine.get(csvFilesConvertorConf.getQuality())));
     }
 
     /**
