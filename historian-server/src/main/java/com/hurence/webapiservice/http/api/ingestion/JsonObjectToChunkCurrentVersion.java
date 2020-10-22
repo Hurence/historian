@@ -56,7 +56,12 @@ public class JsonObjectToChunkCurrentVersion {
             JsonArray jsonPoint = (JsonArray) point;
             long timestamps = jsonPoint.getLong(0);
             double value = jsonPoint.getDouble(1);
-            measures.add( Measure.fromValue(timestamps, value));
+            try{
+                Float quality = jsonPoint.getFloat(2);
+                measures.add( Measure.fromValueAndQuality(timestamps, value, quality));
+            }catch (Exception ex) {
+                measures.add( Measure.fromValue(timestamps, value));
+            }
         }
         return measures;
     }
