@@ -1,13 +1,13 @@
 [
   {
-    "name": "openSpaceSensors.Temperature9",
+    "name": "metricWithoutQuality",
     "points": [
-      [1477917224866, 8.0, 5, 7],
+      [1477895624866, 2.0],
       [1477916224866, 4.0]
     ]
   },
   {
-    "name": "openSpaceSensors.Temperature10",
+    "name": "metricWithoutQuality2",
     "points": [
       [1477917224866, 8.0],
       [1477895624866, 43.0]
