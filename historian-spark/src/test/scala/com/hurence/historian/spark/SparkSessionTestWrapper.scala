@@ -7,6 +7,7 @@ import java.util.{Map, TimeZone}
 
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.{Encoders, SparkSession}
+import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, DateTimeParser}
 import org.joda.time.{DateTime, DateTimeZone}
 
 /**
@@ -44,10 +45,18 @@ trait SparkSessionTestWrapper {
                     tags: util.Map[String, String],
                     lowerValueBound:Double,
                     upperValueBound:Double,
+                    withinDay: String = "",
                     withQuality: Boolean = true): Measure = {
-    val time: DateTime = new DateTime(1977, 3, 2, 2, 13)
-      .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))))
-    val newTimestamp: Long = time.getMillis + (Math.random * 1000L).toLong
+
+    val newTimestamp = if(withinDay.isEmpty) {
+      val time = new DateTime(1977, 3, 2, 2, 13)
+      time.getMillis + (Math.random * 1000L).toLong
+    }else{
+      val dtf = DateTimeFormat.forPattern("yyyy-MM-dd")
+      val time = dtf.parseDateTime(withinDay)
+      val timePlusOneDay = time.plusDays(1)
+       (time.getMillis  + (timePlusOneDay.getMillis - time.getMillis) * Math.random  ).toLong
+    }
     val newValue = Math.random * (upperValueBound - lowerValueBound) + lowerValueBound
     val newQuality = if(withQuality) Math.random.toFloat else Float.NaN
 

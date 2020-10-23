@@ -29,9 +29,11 @@ object FileLoader {
   val DEFAULT_QUALITY_FIELD = ""
   val DEFAULT_TIMESTAMP_FORMAT = "s"
   val DEFAULT_CSV_COLUMN_DELIMITER = ","
+  val DEFAULT_ORIGIN = "file_loader"
+  val DEFAULT_DATE_BUCKET_FORMAT = "yyyy-MM-dd"
 
-  def buildOption(opt:String, longOpt:String, hasArg:Boolean, optionalArg:Boolean, description:String) = {
-    val option = new Option(opt,longOpt,hasArg,description)
+  def buildOption(opt: String, longOpt: String, hasArg: Boolean, optionalArg: Boolean, description: String) = {
+    val option = new Option(opt, longOpt, hasArg, description)
     option.setOptionalArg(optionalArg)
     option
   }
@@ -47,12 +49,14 @@ object FileLoader {
                                useKerberos: Boolean,
                                tagNames: String,
                                groupByCols: String,
-                               timestampField:String,
-                               nameField:String,
+                               timestampField: String,
+                               nameField: String,
                                valueField: String,
                                qualityField: String,
                                timestampFormat: String,
-                               columnDelimiter: String)
+                               columnDelimiter: String,
+                               origin: String,
+                               dateBucketFormat: String)
 
 
   def parseCommandLine(args: Array[String]): FileLoaderOptions = {
@@ -65,58 +69,64 @@ object FileLoader {
     options.addOption(help)
 
     options.addOption(
-      buildOption("ms","spark-master", true,false,"spark master")
+      buildOption("ms", "spark-master", true, false, "spark master")
     )
     options.addOption(
-      buildOption("zk","zookeeper-quorum",true,false,s"the zookeeper quorum for solr collection")
+      buildOption("zk", "zookeeper-quorum", true, false, s"the zookeeper quorum for solr collection")
     )
     options.addOption(
-      buildOption("col","collection-name",true,false,s"Solr collection name, default historian")
+      buildOption("col", "collection-name", true, false, s"Solr collection name, default historian")
     )
     options.addOption(
-      buildOption("csv","csv-file-path",true,true, s"File path mask, can be anything like /a/B/c/*/*pr*/*.csv")
+      buildOption("csv", "csv-file-path", true, true, s"File path mask, can be anything like /a/B/c/*/*pr*/*.csv")
     )
     options.addOption(
-      buildOption("pq","parquet-file-path",true,true,s"File path mask, can be anything like /a/B/c/*/*pr*/*.parquet")
+      buildOption("pq", "parquet-file-path", true, true, s"File path mask, can be anything like /a/B/c/*/*pr*/*.parquet")
     )
     options.addOption(
-      buildOption("cs","chunks-size",true,true, s"num measures in a chunk, default $DEFAULT_CHUNK_SIZE")
+      buildOption("cs", "chunks-size", true, true, s"num measures in a chunk, default $DEFAULT_CHUNK_SIZE")
     )
     options.addOption(
-      buildOption("sas","sax-alphabet-size",true,true,s"size of alphabet, default $DEFAULT_SAX_ALPHABET_SIZE")
+      buildOption("sas", "sax-alphabet-size", true, true, s"size of alphabet, default $DEFAULT_SAX_ALPHABET_SIZE")
     )
     options.addOption(
-      buildOption("ssl","sax-string-length",true,true,s"num measures in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
+      buildOption("ssl", "sax-string-length", true, true, s"num measures in a chunk, default $DEFAULT_SAX_STRING_LENGTH")
     )
     options.addOption(
-      buildOption("kb","kerberos",true ,true,"do we use kerberos ?, default false")
+      buildOption("kb", "kerberos", true, true, "do we use kerberos ?, default false")
     )
     options.addOption(
-      buildOption("date","recompaction-date",true,true,"the day date to recompact in the form of yyyy-MM-dd")
+      buildOption("date", "recompaction-date", true, true, "the day date to recompact in the form of yyyy-MM-dd")
     )
     options.addOption(
-      buildOption("tags","tags-names",true,false,"the columns to read as tags as a csv string")
+      buildOption("tags", "tags-names", true, false, "the columns to read as tags as a csv string")
     )
     options.addOption(
-      buildOption("groupBy","groupby-cols",true,true,s"the column names that form the group by key as a csv string, default to $DEFAULT_GROUP_BY_COLS")
+      buildOption("groupBy", "groupby-cols", true, true, s"the column names that form the group by key as a csv string, default to $DEFAULT_GROUP_BY_COLS")
     )
     options.addOption(
-      buildOption("ts","timestamp-field",true,true,s"the column name that handles the timestamp, default to $DEFAULT_TIMESTAMP_FIELD")
+      buildOption("ts", "timestamp-field", true, true, s"the column name that handles the timestamp, default to $DEFAULT_TIMESTAMP_FIELD")
     )
     options.addOption(
-      buildOption("name","name-field",true,true,s"the column name that handles the metric name, default to $DEFAULT_NAME_FIELD")
+      buildOption("name", "name-field", true, true, s"the column name that handles the metric name, default to $DEFAULT_NAME_FIELD")
     )
     options.addOption(
-      buildOption("value","value-field",true,true,s"the column name that handles the metric value, default to $DEFAULT_VALUE_FIELD")
+      buildOption("value", "value-field", true, true, s"the column name that handles the metric value, default to $DEFAULT_VALUE_FIELD")
     )
     options.addOption(
-      buildOption("tf","timestamp-format",true,true,s"the format of timestamp conversion, can be java date pattern or s or ms, default to $DEFAULT_TIMESTAMP_FORMAT")
+      buildOption("tf", "timestamp-format", true, true, s"the format of timestamp conversion, can be java date pattern or s or ms, default to $DEFAULT_TIMESTAMP_FORMAT")
     )
     options.addOption(
-      buildOption("cd","column-delimiter",true,true,s"the char delimiter for a column, default to $DEFAULT_CSV_COLUMN_DELIMITER")
+      buildOption("cd", "column-delimiter", true, true, s"the char delimiter for a column, default to $DEFAULT_CSV_COLUMN_DELIMITER")
     )
     options.addOption(
-      buildOption("quality","quality-field",true,true,s"the column name that handles the metric quality, default to $DEFAULT_QUALITY_FIELD")
+      buildOption("quality", "quality-field", true, true, s"the column name that handles the metric quality, default to $DEFAULT_QUALITY_FIELD")
+    )
+    options.addOption(
+      buildOption("origin", "origin", true, true, s"the origin name, default to $DEFAULT_ORIGIN")
+    )
+    options.addOption(
+      buildOption("dbf", "date-format-bucket", true, true, s"the date pattern to broup by measures like by day, hour, ... $DEFAULT_DATE_BUCKET_FORMAT")
     )
 
     // parse the command line arguments
@@ -130,7 +140,7 @@ object FileLoader {
     val chunksSize = if (line.hasOption("cs")) line.getOptionValue("chunks").toInt else DEFAULT_CHUNK_SIZE
     val alphabetSize = if (line.hasOption("sas")) line.getOptionValue("sa").toInt else DEFAULT_SAX_ALPHABET_SIZE
     val saxStringLength = if (line.hasOption("ssl")) line.getOptionValue("sl").toInt else DEFAULT_SAX_STRING_LENGTH
-    val tagNames = if (line.hasOption("tags")) line.getOptionValue("tags")  else ""
+    val tagNames = if (line.hasOption("tags")) line.getOptionValue("tags") else ""
     val groupByCols = if (line.hasOption("groupBy")) line.getOptionValue("groupBy") else DEFAULT_GROUP_BY_COLS
     val timestampField = if (line.hasOption("ts")) line.getOptionValue("ts") else DEFAULT_TIMESTAMP_FIELD
     val nameField = if (line.hasOption("name")) line.getOptionValue("name") else DEFAULT_NAME_FIELD
@@ -138,6 +148,8 @@ object FileLoader {
     val qualityField = if (line.hasOption("quality")) line.getOptionValue("quality") else DEFAULT_QUALITY_FIELD
     val timestampFormat = if (line.hasOption("tf")) line.getOptionValue("tf") else DEFAULT_TIMESTAMP_FORMAT
     val columnDelimiter = if (line.hasOption("cd")) line.getOptionValue("cd") else DEFAULT_CSV_COLUMN_DELIMITER
+    val origin = if (line.hasOption("origin")) line.getOptionValue("origin") else DEFAULT_ORIGIN
+    val dateBucketFormat = if (line.hasOption("dbf")) line.getOptionValue("dbf") else DEFAULT_DATE_BUCKET_FORMAT
 
 
     // build the option handler
@@ -157,7 +169,9 @@ object FileLoader {
       valueField,
       qualityField,
       timestampFormat,
-      columnDelimiter
+      columnDelimiter,
+      origin,
+      dateBucketFormat
     )
 
     logger.info(s"Command line options : $opts")
@@ -167,20 +181,15 @@ object FileLoader {
   private val logger = LoggerFactory.getLogger(classOf[FileLoader])
 
 
-
   /**
+    * 4' by day for S35 : 35M raw zip / 250M raw / 50M index
     *
     *
-    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' \
-    *   --class com.hurence.historian.spark.loader.FileLoader \
-    *   --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  \
-    *   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar \
-    *   -csv historian-spark/src/test/resources/chemistry/dataHistorian-ISNTS35-N-20200301*.csv \
-    *   -groupBy name -zk localhost:9983 -col historian2 -name tagname -cd ";" \
-    *   -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss"
+    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' --class com.hurence.historian.spark.loader.FileLoader  --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  -csv "historian-spark/src/test/resources/chemistry/dataHistorian-ISNTS35-N-20200301*.csv"  -groupBy name -zk localhost:9983 -col historian -name tagname -cd ";"  -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss" -origin chemistry -dbf "yyyy-MM-dd.HH"
     *
     *
-    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' --class com.hurence.historian.spark.loader.FileLoader --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar -csv historian-spark/src/test/resources/it-data-4metrics.csv.gz -tags metric_id -groupBy name,tags.metric_id -zk localhost:9983 -name metric_name
+    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' --class com.hurence.historian.spark.loader.FileLoader --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar -csv historian-spark/src/test/resources/it-data-4metrics.csv.gz -tags metric_id -groupBy name,tags.metric_id -zk localhost:9983 -name metric_name -origin it-data
+    *
     *
     * @param args
     */
@@ -212,21 +221,19 @@ object FileLoader {
       )))
 
     measuresDS.show()
+    System.out.println(measuresDS.count())
 
     val chunkyfier = new Chunkyfier()
-      .setGroupByCols( options.groupByCols.split(","))
-      .setDateBucketFormat("yyyy-MM-dd")
+      .setOrigin(options.origin)
+      .setGroupByCols(options.groupByCols.split(","))
+      .setDateBucketFormat(options.dateBucketFormat)
       .setSaxAlphabetSize(options.saxAlphabetSize)
       .setSaxStringLength(options.saxStringLength)
 
-
-    val chunksDF = chunkyfier.transform(measuresDS)
-
-      chunksDF.show()
-
-    val chunksDS = chunksDF.as[Chunk](Encoders.bean(classOf[Chunk]))
-   //   .repartition(8)
-
+    val chunksDS = chunkyfier.transform(measuresDS)
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
+      .repartition(8)
+    chunksDS.show()
 
     val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
     writer.write(sql.Options(options.collectionName, Map(

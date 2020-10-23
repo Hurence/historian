@@ -114,10 +114,10 @@ public class Chunk implements Serializable, ChunkClusterable {
     public double[] getPoint() {
         assert sax != null;
 
-        double[] saxAsDoubles = new double[sax.length()+3];
+        double[] saxAsDoubles = new double[sax.length() + 3];
 
         for (int i = 0; i < sax.length(); i++) {
-            saxAsDoubles[3+i] = (Character.getNumericValue(sax.charAt(i)) - 10.0);
+            saxAsDoubles[3 + i] = (Character.getNumericValue(sax.charAt(i)) - 10.0);
         }
 
         char previousChar = sax.charAt(0);
@@ -130,11 +130,11 @@ public class Chunk implements Serializable, ChunkClusterable {
             if (previousChar - currentChar == 0) {
                 saxAsDoubles[0]++;
                 numConsecutiveEqualsValues++;
-            }else
-                numConsecutiveEqualsValues =0;
+            } else
+                numConsecutiveEqualsValues = 0;
 
             // consecutiveness
-            if(numConsecutiveEqualsValues>=2){
+            if (numConsecutiveEqualsValues >= 2) {
                 saxAsDoubles[1]++;
             }
 
@@ -198,8 +198,7 @@ public class Chunk implements Serializable, ChunkClusterable {
          * compute the metrics from the valueBinaries field so there's no need to read them
          */
         public ChunkBuilder computeMetrics() {
-            DateTime time = new DateTime(start)
-                    .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
+            DateTime time = new DateTime(start);
             day = time.toString("yyyy-MM-dd");
             year = time.getYear();
             month = time.getMonthOfYear();
