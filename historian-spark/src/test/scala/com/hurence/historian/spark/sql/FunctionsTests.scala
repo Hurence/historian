@@ -1,5 +1,8 @@
 package com.hurence.historian.spark.sql
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
@@ -14,7 +17,7 @@ import org.junit.jupiter.api.{BeforeAll, Test, TestInstance}
 import org.slf4j.LoggerFactory
 
 @TestInstance(Lifecycle.PER_CLASS)
-class FunctionsTests  {
+class FunctionsTests {
 
   private val logger = LoggerFactory.getLogger(classOf[FunctionsTests])
 
@@ -23,9 +26,18 @@ class FunctionsTests  {
   def testDateUtils() = {
 
     val dateString = "01/03/2020 00:06:14"
-    val dateFormat= "dd/MM/yyyy HH:mm:ss"
+    val dateFormat = "dd/MM/yyyy HH:mm:ss"
     val time = DateUtil.parse(dateString, dateFormat).getTime
 
     assertEquals(1583017574000L, time)
+
+
+    val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
+
+    val date1 = new Date()
+    date1.setTime(1583017254000L)
+    assertEquals("2020-03-01", simpleDateFormat.format(date1))
+    // 2019-11-25|1574726294000
+
   }
 }

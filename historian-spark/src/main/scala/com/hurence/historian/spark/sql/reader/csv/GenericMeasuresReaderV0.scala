@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.sql.reader.csv
 
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.functions.{toTimestampUTC}
+import com.hurence.historian.spark.sql.functions.{toDateUTC, toTimestampUTC}
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions.{lit, _}
@@ -86,11 +86,11 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
 
 
    dfPlusTime
-      .withColumn("year", year(from_unixtime($"timestamp" / 1000L)))
+   /*   .withColumn("year", year(from_unixtime($"timestamp" / 1000L)))
       .withColumn("month", month(from_unixtime($"timestamp" / 1000L)))
       .withColumn("hour", hour(from_unixtime($"timestamp" / 1000L)))
-      .withColumn("day", from_unixtime($"timestamp" / 1000L, "yyyy-MM-dd"))
-      // .withColumn("day", toDateUTC($"timestamp", lit("yyyy-MM-dd")))
+     // .withColumn("day", from_unixtime($"timestamp" / 1000L, "yyyy-MM-dd"))
+      .withColumn("day", toDateUTC($"timestamp", lit("yyyy-MM-dd")))*/
       .drop(tagsFields: _*)
       .map(r => {
         val builder = Measure.builder()

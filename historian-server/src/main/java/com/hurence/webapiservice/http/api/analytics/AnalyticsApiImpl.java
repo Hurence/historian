@@ -59,38 +59,38 @@ public class AnalyticsApiImpl implements AnalyticsApi {
 
     /**
      * Build a cluster list of chunks based on sax strings
-     *
+     * <p>
      * curl --location --request GET 'localhost:8080/api/historian/v0/analytics/clustering' \
      * --header 'Content-Type: application/json' \
      * --data-raw '{
-     *     "names": ["ack"],
-     *     "day": "2019-11-28",
-     *     "k": 5
+     * "names": ["ack"],
+     * "day": "2019-11-28",
+     * "k": 5
      * }'
-     *
+     * <p>
      * return
-     *
+     * <p>
      * {
-     *     "clustering.algo": "kmeans",
-     *     "k": 5,
-     *     "day": "2019-11-28",
-     *     "maxIterations": 100,
-     *     "elapsed_time": 358,
-     *     "clusters": [
-     *         {
-     *             "sax_cluster": "0",
-     *             "cluster_size": 1,
-     *             "chunks": [
-     *                 {
-     *                     "id": "5ba8f698c82ed652b034d22f04db844ea43531536d19150ccc0071e482791bf4",
-     *                     "chunk_sax": "dddddgdddddddddddddd",
-     *                     "metric_key": "ack|crit$null|metric_id$621ba06c-d980-4b9f-9018-8688ff17f252|warn$null",
-     *                     "chunk_avg": "7.352941176470604E-4"
-     *                 }
-     *             ]
-     *         },
-     *         ...
-     *     ]
+     * "clustering.algo": "kmeans",
+     * "k": 5,
+     * "day": "2019-11-28",
+     * "maxIterations": 100,
+     * "elapsed_time": 358,
+     * "clusters": [
+     * {
+     * "sax_cluster": "0",
+     * "cluster_size": 1,
+     * "chunks": [
+     * {
+     * "id": "5ba8f698c82ed652b034d22f04db844ea43531536d19150ccc0071e482791bf4",
+     * "chunk_sax": "dddddgdddddddddddddd",
+     * "metric_key": "ack|crit$null|metric_id$621ba06c-d980-4b9f-9018-8688ff17f252|warn$null",
+     * "chunk_avg": "7.352941176470604E-4"
+     * }
+     * ]
+     * },
+     * ...
+     * ]
      * }
      *
      * @param context the current vert.x RoutingContext
@@ -146,15 +146,15 @@ public class AnalyticsApiImpl implements AnalyticsApi {
                             })
                             .filter(Objects::nonNull)
                             .collect(Collectors.toList());
-
-                    // proceed to clustering
-                    ChunksClustering clustering = KMeansChunksClustering.builder()
-                            .k(request.getK())
-                            .maxIterations(request.getMaxIterations())
-                            .distance(KMeansChunksClustering.Distance.DEFAULT)
-                            .build();
-                    clustering.cluster(chunkWrappers);
-
+                    if (chunkWrappers.size() != 0) {
+                        // proceed to clustering
+                        ChunksClustering clustering = KMeansChunksClustering.builder()
+                                .k(request.getK())
+                                .maxIterations(request.getMaxIterations())
+                                .distance(KMeansChunksClustering.Distance.DEFAULT)
+                                .build();
+                        clustering.cluster(chunkWrappers);
+                    }
                     // build Json response
                     Map<String, JsonObject> clustersJson = new HashMap<>();
                     chunkWrappers.forEach(chunkClusterable -> {

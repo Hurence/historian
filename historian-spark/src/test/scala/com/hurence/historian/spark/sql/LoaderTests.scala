@@ -102,7 +102,7 @@ class LoaderTests extends SparkSessionTestWrapper {
 
   def checkChunk(chunktoCheck: Chunk) = {
 
-    assertEquals("a51873f9e3f34e39d7fccdc80408dae82cbd054c6f2cafb8c0656c008bdae344", chunktoCheck.getId);
+    assertEquals("33c9933d91c44f075f8523612df68280dd0ffa1ec43aedfae406a2f2ec9b7625", chunktoCheck.getId);
     assertEquals("ack" + TOKEN_SEPARATOR_CHAR +
       "crit" + TAG_KEY_VALUE_SEPARATOR_CHAR + "null" + TOKEN_SEPARATOR_CHAR +
       "max" + TAG_KEY_VALUE_SEPARATOR_CHAR + "null" + TOKEN_SEPARATOR_CHAR +
@@ -162,6 +162,52 @@ class LoaderTests extends SparkSessionTestWrapper {
     if (logger.isDebugEnabled) {
       ds.show()
     }
+
+  }
+
+  @Test
+  def testLoaderCSV2() = {
+
+    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val filePath = this.getClass.getClassLoader.getResource("chemistry").getPath
+    val options = com.hurence.historian.spark.sql.Options(
+      filePath + "/dataHistorian-ISNTS35-N-2020030100*.csv",
+      Map(
+        "inferSchema" -> "true",
+        "delimiter" -> ";",
+        "header" -> "true",
+        "nameField" -> "tagname",
+        "timestampField" -> "timestamp",
+        "qualityField" -> "quality",
+        "timestampDateFormat" -> "dd/MM/yyyy HH:mm:ss",
+        "valueField" -> "value",
+        "tagsFields" -> "tagname"
+      ))
+
+    val ds = reader.read(options)
+      .filter(r => r.getName.equals("068_PI01") || r.getName.equals("455_PI01"))      .cache()
+
+    ds.show()
+   System.out.println(ds.count())
+
+    val chunkyfier = new Chunkyfier()
+      .setOrigin("chemistry")
+      .setGroupByCols("name".split(","))
+      .setDateBucketFormat("yyyy-MM-dd")
+      .setSaxAlphabetSize(7)
+      .setSaxStringLength(24)
+
+    val chunksDS = chunkyfier.transform(ds)
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
+
+
+   // if (logger.isDebugEnabled)
+    {
+
+
+      chunksDS.show()
+    }
+
 
   }
 
