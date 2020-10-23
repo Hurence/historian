@@ -57,7 +57,7 @@ public class QueryEndPointWithQualityCurrentVersionIT {
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion(
-                Arrays.asList("temp_a", "temp_b", "temp_c", "mixed1", "mixed2", "non_mixed"),
+                Arrays.asList("temp_a", "temp_b", "temp_c", "mixed1", "mixed2", "non_mixed", "nanQuality"),
                 Arrays.asList(
                         Arrays.asList(
                                 Measure.fromValueAndQuality( 1477895624866L, 622, 0.9f),
@@ -104,6 +104,14 @@ public class QueryEndPointWithQualityCurrentVersionIT {
                                 Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
                                 Measure.fromValueAndQuality( 1477917224866L, 365, 0.7f),    // avg = 0.58
                                 Measure.fromValueAndQuality( 1477924624866L, 568, 0.6f),
+                                Measure.fromValueAndQuality( 1477948224866L, 14, 0.8f),
+                                Measure.fromValueAndQuality( 1477957224866L, 86, 0.2f)
+                        ),//with_nan_quality
+                        Arrays.asList(
+                                Measure.fromValue( 1477895624866L, 622),
+                                Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
+                                Measure.fromValue( 1477917224866L, 365),
+                                Measure.fromValue( 1477924624866L, 568),
                                 Measure.fromValueAndQuality( 1477948224866L, 14, 0.8f),
                                 Measure.fromValueAndQuality( 1477957224866L, 86, 0.2f)
                         )
@@ -163,6 +171,15 @@ public class QueryEndPointWithQualityCurrentVersionIT {
                 "/http/grafana/hurence/query/testWithQuality/test5/request.json",
                 "/http/grafana/hurence/query/testWithQuality/test5/expectedResponse.json");
     }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryWithNaN(Vertx vertx, VertxTestContext testContext) {
+        assertRequestGiveResponseFromFile(vertx, testContext,
+                "/http/grafana/hurence/query/testWithQuality/test6/request.json",
+                "/http/grafana/hurence/query/testWithQuality/test6/expectedResponse.json");
+    }
+
 
     public void assertRequestGiveResponseFromFile(Vertx vertx, VertxTestContext testContext,
                                                   String requestFile, String responseFile) {
