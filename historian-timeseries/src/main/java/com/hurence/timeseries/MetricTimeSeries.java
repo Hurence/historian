@@ -480,6 +480,7 @@ public final class MetricTimeSeries implements Serializable {
         public Builder point(long timestamp, double value) {
             metricTimeSeries.timestamps.add(timestamp);
             metricTimeSeries.values.add(value);
+            metricTimeSeries.qualities.add(Float.NaN);
             return this;
         }
 
