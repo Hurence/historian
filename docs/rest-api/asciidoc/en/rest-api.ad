@@ -25,6 +25,9 @@
 :grafana-simplejson-annotations-endpoint: {grafana-simplejson-endpoint}/annotations
 :grafana-simplejson-tag-keys-endpoint: {grafana-simplejson-endpoint}/tag-keys
 :grafana-simplejson-tag-values-endpoint: {grafana-simplejson-endpoint}/tag-values
+:samples-path: samples
+:samples-minimal-path: {samples-path}/minimal
+:samples-happiness-path: {samples-path}/happiness
 
 == Introduction
 
