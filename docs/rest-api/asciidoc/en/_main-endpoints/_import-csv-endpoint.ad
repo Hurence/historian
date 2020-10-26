@@ -120,7 +120,7 @@ Otherwise the other accepted values are the column names added as a tag.
 
 ====== Examples
 
-======= Example 1
+.Example 1
 
 Example of a minimal curl command :
 
@@ -159,7 +159,7 @@ Here the answer :
 }
 ----
 
-======= Example 2
+.Example 2
 
 Example of a curl command :
 
@@ -220,7 +220,7 @@ Here the answer :
 }
 ----
 
-======= Example 3
+.Example 3
 
 Example of a curl command :
 
@@ -287,7 +287,7 @@ then the chunks will be created only one time. There will have no duplicate in t
 Reminder:: A chunk is created for every metric name, tags that has been chosen and for every day !
 
 
-======= Example with an empty file
+.Example with an empty file
 
 ----
 curl -X POST \
@@ -307,7 +307,7 @@ http://localhost:8080{import-csv-endpoint} \
 }
 ----
 
-======= Example with a file containig just the header
+.Example with a file containig just the header
 
 ----
 curl -X POST \
