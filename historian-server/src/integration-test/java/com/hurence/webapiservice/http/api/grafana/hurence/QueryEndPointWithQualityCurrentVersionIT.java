@@ -57,7 +57,7 @@ public class QueryEndPointWithQualityCurrentVersionIT {
     public static void injectChunksIntoSolr(SolrClient client) throws SolrServerException, IOException {
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion(
-                Arrays.asList("temp_a", "temp_b", "temp_c", "mixed1", "mixed2", "non_mixed", "nanQuality"),
+                Arrays.asList("temp_a", "temp_b", "temp_c", "mixed1", "mixed2", "non_mixed", "nanQuality1", "nanQuality2","nanQuality3"),
                 Arrays.asList(
                         Arrays.asList(
                                 Measure.fromValueAndQuality( 1477895624866L, 622, 0.9f),
@@ -106,7 +106,7 @@ public class QueryEndPointWithQualityCurrentVersionIT {
                                 Measure.fromValueAndQuality( 1477924624866L, 568, 0.6f),
                                 Measure.fromValueAndQuality( 1477948224866L, 14, 0.8f),
                                 Measure.fromValueAndQuality( 1477957224866L, 86, 0.2f)
-                        ),//with_nan_quality
+                        ),//with_nan_quality1
                         Arrays.asList(
                                 Measure.fromValue( 1477895624866L, 622),
                                 Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
@@ -114,6 +114,22 @@ public class QueryEndPointWithQualityCurrentVersionIT {
                                 Measure.fromValue( 1477924624866L, 568),
                                 Measure.fromValueAndQuality( 1477948224866L, 14, 0.8f),
                                 Measure.fromValueAndQuality( 1477957224866L, 86, 0.2f)
+                        ),//with_nan_quality2
+                        Arrays.asList(
+                                Measure.fromValueAndQuality( 1477895624866L, 622, 0.9f),
+                                Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
+                                Measure.fromValueAndQuality( 1477917224866L, 365, 0.5f),
+                                Measure.fromValue( 1477924624866L, 568),
+                                Measure.fromValue( 1477948224866L, 14),
+                                Measure.fromValue( 1477957224866L, 86)
+                        ),//with_nan_quality3
+                        Arrays.asList(
+                                Measure.fromValueAndQuality( 1477895624866L, 622, 0.9f),
+                                Measure.fromValueAndQuality( 1477916224866L, -3, 0.4f),
+                                Measure.fromValueAndQuality( 1477917224866L, 365, 0.5f),
+                                Measure.fromValueAndQuality( 1477924624866L, 568, 0.2f),
+                                Measure.fromValueAndQuality( 1477948224866L, 14, 0.8f),
+                                Measure.fromValue( 1477957224866L, 86)
                         )
                 ));
         injector.injectChunks(client);
