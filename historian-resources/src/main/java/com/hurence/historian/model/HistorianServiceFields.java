@@ -29,6 +29,8 @@ public class HistorianServiceFields {
     public static String QUALITY_RETURN  = "quality_return";
     public static String USE_QUALITY  = "use_quality";
     public static String QUALITY_CHECK  = "is_quality_ok";
+    public static String VALUE = "value";
+    public static String DATE = "date";
     public static String ORIGIN = HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
 
     //Response fields
