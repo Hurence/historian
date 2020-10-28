@@ -20,10 +20,12 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.management.ValueExp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.hurence.historian.model.HistorianChunkCollectionFieldsVersionEVOA0.QUALITY;
 import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.FIELD_NAME;
 import static com.hurence.timeseries.model.Definitions.FIELD_TAGS;
@@ -131,9 +133,10 @@ public class MainHistorianApiImpl implements MainHistorianApi {
                     ResponseAsList responseAsList = new ResponseAsList(timeseries);
                     List<ResponseAsList.SubResponse> list = responseAsList.ReturnList();
                     CsvSchema schema = CsvSchema.builder()
-                            .addColumn("metric")
-                            .addColumn("value")
-                            .addColumn("date")
+                            .addColumn(METRIC)
+                            .addColumn(VALUE)
+                            .addColumn(DATE)
+                            .addColumn(QUALITY)
                             .build();
                     CsvMapper csvMapper = new CsvMapper();
                     csvMapper.configure(JsonGenerator.Feature.IGNORE_UNKNOWN,true);
