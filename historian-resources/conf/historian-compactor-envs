@@ -18,26 +18,26 @@
 # Spark home to find the spark-submit command
 # Can be overwritten with option: -s|--spark-home <spark-home-path>
 #
-# SPARK_HOME="Uncomment and set me"
+#SPARK_HOME="Uncomment and set me"
 
 # Hadoop configuration directory (contains at least the core-site.xml file)
 # Can be overwritten with option: -h|--hadoop-config <hadoop-config-path>
 #
-# HADOOP_CONF_DIR="Uncomment and set me"
+#HADOOP_CONF_DIR="Uncomment and set me"
 
 # YARN configuration directory. Not mandatory if yarn-site.xml file is in the
 # same directory as core-site.xml.
 # Can be overwritten with option: -y|--yarn-config <yarn-config-path>
 #
-# YARN_CONF_DIR="Uncomment and set me"
+#YARN_CONF_DIR="Uncomment and set me"
 
 # Kerberos credentials. To enable kerberos, set USE_KERBEROS to "true" then
 # fill KERBEROS_PRINCIPAL and KERBEROS_KEYTAB variables.
 # Can overwrite those 3 variables with -krb, -p and -kt options.
 #
 #   Uncomment and set to true to enable kerberos authentication
-# USE_KERBEROS="true"
+#USE_KERBEROS="true"
 #   Kerberos user name (principal)
-# KERBEROS_PRINCIPAL="Uncomment and set me"
+#KERBEROS_PRINCIPAL="Uncomment and set me"
 #   Path to kerberos keytab file
-# KERBEROS_KEYTAB="Uncomment and set me"
+#KERBEROS_KEYTAB="Uncomment and set me"

@@ -22,7 +22,7 @@ HISTORIAN_VARS_FILE=${HISTORIAN_CONF_DIR}/historian-compactor-envs
 # Functions
 ################################################################################
 
-# Prints usage
+# Print usage
 usage() {
     SCRIPT_NAME=$(basename ${0})
     cat << EOF
@@ -78,7 +78,7 @@ ${SCRIPT_NAME} start -c /foobar/custom-historian-compactor.yaml
 EOF
 }
 
-# Prints usage then exits with error
+# Print usage then exits with error
 # shellcheck disable=SC2120
 print_usage_and_exit_on_error() {
   usage
@@ -91,7 +91,7 @@ print_usage_and_exit_on_error() {
   exit "${EXIT_CODE}"
 }
 
-# Validates option parameter
+# Validate option parameter
 # Option parameter must present, should not start with '-' or be a
 # command.
 # Expecting to have the original parameters starting from the option to check
@@ -234,6 +234,40 @@ overwrite_variables() {
   fi
 }
 
+# Read environment variables file if enabled
+read_variables_file() {
+  # If variable files enabled, read it
+  if [ ${USE_VAR_FILE} == "true" ]
+  then
+    if [[ ! -a ${HISTORIAN_VARS_FILE} ]]
+    then
+      # Environment variables file does not exist
+      echo "Environment variables file does not exist: ${HISTORIAN_VARS_FILE}"
+      print_usage_and_exit_on_error
+    fi
+    echo "Reading environment variables from ${HISTORIAN_VARS_FILE}"
+    source "${HISTORIAN_VARS_FILE}"
+  else
+    echo "Will not use environment variables file. Just already defined environment variables."
+  fi
+}
+
+# Resume what will be done and used
+display_summary() {
+  echo
+  echo "Command: ${COMMAND}"
+  echo "Configuration file: ${HISTORIAN_CONFIG_FILE}"
+  echo "Spark Home: ${SPARK_HOME}"
+  echo "Hadoop configuration directory: ${HADOOP_CONF_DIR}"
+  echo "Yarn configuration directory: ${YARN_CONF_DIR}"
+  echo "Use Kerberos: ${USE_KERBEROS}"
+  if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
+  then
+    printf "\tKerberos principal: %s\n" "${KERBEROS_PRINCIPAL}"
+    printf "\tKerberos keytab: %s\n" "${KERBEROS_KEYTAB}"
+  fi
+}
+
 ################################################################################
 # Main
 ################################################################################
@@ -252,33 +286,11 @@ echo "Historian home: ${HISTORIAN_HOME}"
 echo "Historian conf dir: ${HISTORIAN_CONF_DIR}"
 echo "Historian lib dir: ${HISTORIAN_LIB_DIR}"
 
-# If variable files enabled, read it
-if [ ${USE_VAR_FILE} == "true" ]
-then
-  if [[ ! -a ${HISTORIAN_VARS_FILE} ]]
-  then
-    # Environment variables file does not exist
-    echo "Environment variables file does not exist: ${HISTORIAN_VARS_FILE}"
-    print_usage_and_exit_on_error
-  fi
-  echo "Reading environment variables from ${HISTORIAN_VARS_FILE}"
-  source "${HISTORIAN_VARS_FILE}"
-else
-  echo "Will not use environment variables file. Just already defined environment variables."
-fi
+# Read environment variables file if enabled
+read_variables_file
 
 # If some options have been set to overwrite some environment variables use them
 overwrite_variables
 
-echo
-echo "Command: ${COMMAND}"
-echo "Configuration file: ${HISTORIAN_CONFIG_FILE}"
-echo "Spark Home: ${SPARK_HOME}"
-echo "Hadoop configuration directory: ${HADOOP_CONF_DIR}"
-echo "Yarn configuration directory: ${YARN_CONF_DIR}"
-echo "Use Kerberos: ${USE_KERBEROS}"
-if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
-then
-  printf "\tKerberos principal: %s\n" ${KERBEROS_PRINCIPAL}
-  printf "\tKerberos keytab: %s\n" ${KERBEROS_KEYTAB}
-fi
+# Resume what will be done and used
+display_summary
