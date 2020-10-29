@@ -198,12 +198,7 @@ public final class MetricTimeSeries implements Serializable {
         }
         return IntStream
             .range(0, Math.min(timestamps.size(), values.size()))
-            .mapToObj(i -> {
-                if(i < qualities.size())
-                    return Measure.fromValueAndQuality(timestamps.get(i), values.get(i), qualities.get(i));
-                else
-                    return Measure.fromValue(timestamps.get(i), values.get(i));
-            });
+            .mapToObj(i -> Measure.fromValueAndQuality(timestamps.get(i), values.get(i), qualities.get(i)));
     }
 
     /**
@@ -215,6 +210,9 @@ public final class MetricTimeSeries implements Serializable {
     private void setAll(LongList timestamps, DoubleList values) {
         this.timestamps = timestamps;
         this.values = values;
+        for (int size = 0 ; size < timestamps.size(); size++ )  {
+            this.qualities.add(Float.NaN);
+        }
 
         needsSort = true;
     }
@@ -253,6 +251,9 @@ public final class MetricTimeSeries implements Serializable {
     public final void addAll(long[] timestamps, double[] values) {
         this.timestamps.addAll(timestamps);
         this.values.addAll(values);
+        for (int size = 0 ; size < timestamps.length; size++ )  {
+            this.qualities.add(Float.NaN);
+        }
 
         needsSort = true;
     }
@@ -278,6 +279,7 @@ public final class MetricTimeSeries implements Serializable {
     public final void add(long timestamp, double value) {
         this.timestamps.add(timestamp);
         this.values.add(value);
+        this.qualities.add(Float.NaN);
 
         needsSort = true;
     }
