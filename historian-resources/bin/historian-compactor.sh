@@ -9,6 +9,10 @@ HISTORIAN_HOME="$( cd "${CURRENT_SCRIPT_DIR}/.." >/dev/null 2>&1 && pwd )"
 HISTORIAN_LIB_DIR="${HISTORIAN_HOME}/lib"
 HISTORIAN_CONF_DIR="${HISTORIAN_HOME}/conf"
 
+COMMAND=""
+USE_VAR_FILE="true"
+USE_KERBEROS="false"
+
 # Default configuration file path
 HISTORIAN_CONFIG_FILE=${HISTORIAN_CONF_DIR}/historian-compactor.yaml
 # Default environment variables file
@@ -86,17 +90,49 @@ print_usage_and_exit_on_error() {
   fi
   exit "${EXIT_CODE}"
 }
-# Parse options given by user
-parse_input() {
-  #echo "Processing options : $*"
 
-  # Check there is at least one parameter
-  if [[ $# -eq 0 ]]
+# Validates option parameter
+# Option parameter must present, should not start with '-' or be a
+# command.
+# Expecting to have the original parameters starting from the option to check
+# passed as parameters to this function
+# i.e: --config foo bar etc...
+# In that example we will check foo (the --config option parameter) exists and
+# is valid.
+validate_option_parameter() {
+  #echo "$@"
+  OPTION="${1}"
+  shift
+  OPTION_PARAM="${1}"
+
+  # Something begin the option?
+  if [[ $# -lt 1 ]]
   then
     # shellcheck disable=SC2119
-    echo "Missing command"
+    echo "Missing option ${OPTION} parameter"
     print_usage_and_exit_on_error
   fi
+
+  # Option parameter starts with '-' or is a command ?
+  case ${OPTION_PARAM} in
+    help|start)
+      # Is a command -> error
+      echo "Missing option ${OPTION} parameter"
+      print_usage_and_exit_on_error
+    ;;
+    -*)
+      # Sounds like an option -> error
+      echo "Missing option ${OPTION} parameter"
+      print_usage_and_exit_on_error
+    ;;
+    *)
+      # Ok
+    ;;
+  esac
+}
+
+# Parse options given by user
+parse_cli_params() {
 
   while [[ $# -gt 0 ]]
     do
@@ -113,15 +149,47 @@ parse_input() {
         ;;
         # Options
         -c|--config)
-          if [ "X${2}" == "X" ]
-          then
-            echo "Missing configuration file after ${param} option"
-            print_usage_and_exit_on_error
-          fi
+          validate_option_parameter "$@"
           HISTORIAN_CONFIG_FILE="${2}"
           shift # Next argument
         ;;
-        # Rest
+        -n|--no-var-file)
+          USE_VAR_FILE="false"
+        ;;
+        -v|--var-file)
+          validate_option_parameter "$@"
+          HISTORIAN_VARS_FILE="${2}"
+          shift # Next argument
+        ;;
+        -s|--spark-home)
+          validate_option_parameter "$@"
+          TMP_SPARK_HOME="${2}"
+          shift # Next argument
+        ;;
+        -h|--hadoop-config)
+          validate_option_parameter "$@"
+          TMP_HADOOP_CONF_DIR="${2}"
+          shift # Next argument
+        ;;
+        -y|--yarn-config)
+          validate_option_parameter "$@"
+          TMP_YARN_CONF_DIR="${2}"
+          shift # Next argument
+        ;;
+        -krb|--kerberos)
+          TMP_USE_KERBEROS="true"
+        ;;
+        -p|--principal)
+          validate_option_parameter "$@"
+          TMP_KERBEROS_PRINCIPAL="${2}"
+          shift # Next argument
+        ;;
+        -kt|--keytab)
+          validate_option_parameter "$@"
+          TMP_KERBEROS_KEYTAB="${2}"
+          shift # Next argument
+        ;;
+        # Error if anything else
         *)
           # Unknown parameter
           echo "Unknown command or option: ${param}"
@@ -132,17 +200,85 @@ parse_input() {
     done
 }
 
+# Overwrite any environment variable that has been overwritten through CLI option
+overwrite_variables() {
+
+  if [[ -n ${TMP_SPARK_HOME} ]] # If variable is set
+  then
+    SPARK_HOME="${TMP_SPARK_HOME}"
+  fi
+
+  if [[ -n ${TMP_HADOOP_CONF_DIR} ]] # If variable is set
+  then
+    HADOOP_CONF_DIR="${TMP_HADOOP_CONF_DIR}"
+  fi
+
+  if [[ -n ${TMP_YARN_CONF_DIR} ]] # If variable is set
+  then
+    YARN_CONF_DIR="${TMP_YARN_CONF_DIR}"
+  fi
+
+  if [[ -n ${TMP_USE_KERBEROS} ]] # If variable is set
+  then
+    USE_KERBEROS="${TMP_USE_KERBEROS}"
+  fi
+
+  if [[ -n ${TMP_KERBEROS_PRINCIPAL} ]] # If variable is set
+  then
+    KERBEROS_PRINCIPAL="${TMP_KERBEROS_PRINCIPAL}"
+  fi
+
+  if [[ -n ${TMP_KERBEROS_KEYTAB} ]] # If variable is set
+  then
+    KERBEROS_KEYTAB="${TMP_KERBEROS_KEYTAB}"
+  fi
+}
+
 ################################################################################
 # Main
 ################################################################################
 
-echo ${HISTORIAN_HOME}
-echo ${HISTORIAN_LIB_DIR}
-echo ${HISTORIAN_CONF_DIR}
-
 # Parse options
-echo
-parse_input "$@"
+parse_cli_params "$@"
 
+# Check a command has been set
+if [[ -z ${COMMAND} ]] # If variable is not set
+then
+    echo "Missing command"
+    print_usage_and_exit_on_error
+fi
+
+echo "Historian home: ${HISTORIAN_HOME}"
+echo "Historian conf dir: ${HISTORIAN_CONF_DIR}"
+echo "Historian lib dir: ${HISTORIAN_LIB_DIR}"
+
+# If variable files enabled, read it
+if [ ${USE_VAR_FILE} == "true" ]
+then
+  if [[ ! -a ${HISTORIAN_VARS_FILE} ]]
+  then
+    # Environment variables file does not exist
+    echo "Environment variables file does not exist: ${HISTORIAN_VARS_FILE}"
+    print_usage_and_exit_on_error
+  fi
+  echo "Reading environment variables from ${HISTORIAN_VARS_FILE}"
+  source "${HISTORIAN_VARS_FILE}"
+else
+  echo "Will not use environment variables file. Just already defined environment variables."
+fi
+
+# If some options have been set to overwrite some environment variables use them
+overwrite_variables
+
+echo
 echo "Command: ${COMMAND}"
 echo "Configuration file: ${HISTORIAN_CONFIG_FILE}"
+echo "Spark Home: ${SPARK_HOME}"
+echo "Hadoop configuration directory: ${HADOOP_CONF_DIR}"
+echo "Yarn configuration directory: ${YARN_CONF_DIR}"
+echo "Use Kerberos: ${USE_KERBEROS}"
+if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
+then
+  printf "\tKerberos principal: %s\n" ${KERBEROS_PRINCIPAL}
+  printf "\tKerberos keytab: %s\n" ${KERBEROS_KEYTAB}
+fi
