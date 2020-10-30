@@ -31,6 +31,11 @@
 #
 #YARN_CONF_DIR="Uncomment and set me"
 
+# YARN deploy mode option. Must be 'client' or 'cluster'. Defaults to 'cluster'
+# if not overwritten here or through -cl|--client-mode option.
+#
+#COMPACTOR_DEPLOY_MODE="client"
+
 # Kerberos credentials. To enable kerberos, set USE_KERBEROS to "true" then
 # fill KERBEROS_PRINCIPAL and KERBEROS_KEYTAB variables.
 # Can overwrite those 3 variables with -krb, -p and -kt options.

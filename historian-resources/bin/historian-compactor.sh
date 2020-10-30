@@ -10,8 +10,10 @@ HISTORIAN_LIB_DIR="${HISTORIAN_HOME}/lib"
 HISTORIAN_CONF_DIR="${HISTORIAN_HOME}/conf"
 
 COMMAND=""
+COMPACTOR_DEPLOY_MODE="cluster"
 USE_VARS_FILE="true"
 USE_KERBEROS="false"
+HISTORIAN_VERSION="1.3.6-SNAPSHOT"
 
 # Default configuration file path
 HISTORIAN_CONFIG_FILE=${HISTORIAN_CONF_DIR}/historian-compactor.yaml
@@ -38,6 +40,11 @@ ${SCRIPT_NAME} <command> [options]
 [options]:
             -c|--config <config-file-path> : Use configuration file different
               from the default one (${HISTORIAN_CONFIG_FILE}).
+            -cl|--client-mode : Run job in client mode. Default is use cluster
+              mode in which the spark driver runs anywhere on the cluster
+              whereas client mode makes the driver run where you run the
+              spark-submit command. This creates or overwrites the
+              COMPACTOR_DEPLOY_MODE environment variable whose default is cluster.
             -h|--hadoop-config <hadoop-config-path> : The path to the directory
               where the core-site.xml file path resides. If not set, will use
               the HADOOP_CONF_DIR environment variable. If the yarn-site.xml
@@ -153,12 +160,28 @@ parse_cli_params() {
           HISTORIAN_CONFIG_FILE="${2}"
           shift # Next argument
         ;;
+        -cl|--client-mode)
+          TMP_COMPACTOR_DEPLOY_MODE="client"
+        ;;
+        -h|--hadoop-config)
+          validate_option_parameter "$@"
+          TMP_HADOOP_CONF_DIR="${2}"
+          shift # Next argument
+        ;;
+        -krb|--kerberos)
+          TMP_USE_KERBEROS="true"
+        ;;
+        -kt|--keytab)
+          validate_option_parameter "$@"
+          TMP_KERBEROS_KEYTAB="${2}"
+          shift # Next argument
+        ;;
         -n|--no-var-file)
           USE_VARS_FILE="false"
         ;;
-        -v|--var-file)
+        -p|--principal)
           validate_option_parameter "$@"
-          HISTORIAN_VARS_FILE="${2}"
+          TMP_KERBEROS_PRINCIPAL="${2}"
           shift # Next argument
         ;;
         -s|--spark-home)
@@ -166,27 +189,14 @@ parse_cli_params() {
           TMP_SPARK_HOME="${2}"
           shift # Next argument
         ;;
-        -h|--hadoop-config)
+        -v|--var-file)
           validate_option_parameter "$@"
-          TMP_HADOOP_CONF_DIR="${2}"
+          HISTORIAN_VARS_FILE="${2}"
           shift # Next argument
         ;;
         -y|--yarn-config)
           validate_option_parameter "$@"
           TMP_YARN_CONF_DIR="${2}"
-          shift # Next argument
-        ;;
-        -krb|--kerberos)
-          TMP_USE_KERBEROS="true"
-        ;;
-        -p|--principal)
-          validate_option_parameter "$@"
-          TMP_KERBEROS_PRINCIPAL="${2}"
-          shift # Next argument
-        ;;
-        -kt|--keytab)
-          validate_option_parameter "$@"
-          TMP_KERBEROS_KEYTAB="${2}"
           shift # Next argument
         ;;
         # Error if anything else
@@ -232,6 +242,11 @@ overwrite_variables() {
   then
     KERBEROS_KEYTAB="${TMP_KERBEROS_KEYTAB}"
   fi
+
+  if [[ -n ${TMP_COMPACTOR_DEPLOY_MODE} ]] # If variable is set
+  then
+    COMPACTOR_DEPLOY_MODE="${TMP_COMPACTOR_DEPLOY_MODE}"
+  fi
 }
 
 # Read environment variables file if enabled
@@ -259,6 +274,7 @@ display_summary() {
   echo "Spark Home: ${SPARK_HOME}"
   echo "Hadoop configuration directory: ${HADOOP_CONF_DIR}"
   echo "Yarn configuration directory: ${YARN_CONF_DIR}"
+  echo "Yarn deploy mode: ${COMPACTOR_DEPLOY_MODE}"
   echo "Use Kerberos: ${USE_KERBEROS}"
   if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
   then
@@ -270,18 +286,29 @@ display_summary() {
 # Check variables
 check_variables() {
 
+  # Spark
   if [[ -z ${SPARK_HOME} ]] # If variable is not set
   then
     echo "Spark home not specified. Set SPARK_HOME environment variable or use -s|--spark-home option"
     print_usage_and_exit_on_error
   fi
 
+  # Hadoop
   if [[ -z ${HADOOP_CONF_DIR} ]] # If variable is not set
   then
     echo "Hadoop configuration directory not specified. Set HADOOP_CONF_DIR environment variable or use -h|--hadoop-config option"
     print_usage_and_exit_on_error
   fi
 
+  # Yarn
+  echo "deploy mode: ${COMPACTOR_DEPLOY_MODE}"
+  if [[ -z ${COMPACTOR_DEPLOY_MODE} || "${COMPACTOR_DEPLOY_MODE}" != "client" && "${COMPACTOR_DEPLOY_MODE}" != "cluster" ]]
+  then
+    echo "COMPACTOR_DEPLOY_MODE must be set to 'client' or 'cluster'. COMPACTOR_DEPLOY_MODE value is: '${COMPACTOR_DEPLOY_MODE}'"
+    print_usage_and_exit_on_error
+  fi
+
+  # Kerberos
   if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
   then
     if [[ -z ${KERBEROS_PRINCIPAL} ]] # If variable is not set
@@ -308,6 +335,14 @@ cmd_start() {
   then
     export YARN_CONF_DIR
   fi
+
+  # Create csv list of needed dependency jars
+  # Do not put tabs/spaces on all lines or they will appear in the final JARS variable value
+  JARS="${HISTORIAN_LIB_DIR}/historian-compactor-${HISTORIAN_VERSION}.jar,\
+${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
+${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
+
+  # config file .get, class, deploy mode option, logs, debug mode ?
 
   #"${SPARK_HOME}"/bin/spark-submit --master yarn --deploy-mode cluster --num-executors 2 --executor-memory 2G --executor-cores 4 --class org.apache.spark.examples.SparkPi ~/addons/spark/examples/jars/spark-examples_2.11-2.3.2.jar
 }
