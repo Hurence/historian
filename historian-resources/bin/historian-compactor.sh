@@ -10,7 +10,6 @@ HISTORIAN_LIB_DIR="${HISTORIAN_HOME}/lib"
 HISTORIAN_CONF_DIR="${HISTORIAN_HOME}/conf"
 
 COMMAND=""
-COMPACTOR_DEPLOY_MODE="cluster"
 USE_VARS_FILE="true"
 USE_KERBEROS="false"
 HISTORIAN_VERSION="1.3.6-SNAPSHOT"
@@ -19,6 +18,9 @@ HISTORIAN_VERSION="1.3.6-SNAPSHOT"
 HISTORIAN_CONFIG_FILE=${HISTORIAN_CONF_DIR}/historian-compactor.yaml
 # Default environment variables file
 HISTORIAN_VARS_FILE=${HISTORIAN_CONF_DIR}/historian-compactor-envs
+
+# Run variables
+COMPACTOR_DEPLOY_MODE="cluster"
 
 ################################################################################
 # Functions
@@ -336,15 +338,22 @@ cmd_start() {
     export YARN_CONF_DIR
   fi
 
+  # Jar holding the main Compactor class
+  COMPACTOR_JAR="${HISTORIAN_LIB_DIR}/historian-compactor-${HISTORIAN_VERSION}.jar"
+
+  # Class to run
+  COMPACTOR_CLASS="com.hurence.historian.compactor.Compactor"
+
   # Create csv list of needed dependency jars
-  # Do not put tabs/spaces on all lines or they will appear in the final JARS variable value
-  JARS="${HISTORIAN_LIB_DIR}/historian-compactor-${HISTORIAN_VERSION}.jar,\
-${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
+  # Do not put tabs/spaces on lines after the first one or they will appear in
+  # the final JARS variable value
+  COMPACTOR_DEP_JARS="${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
 ${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
 
-  # config file .get, class, deploy mode option, logs, debug mode ?
-
-  #"${SPARK_HOME}"/bin/spark-submit --master yarn --deploy-mode cluster --num-executors 2 --executor-memory 2G --executor-cores 4 --class org.apache.spark.examples.SparkPi ~/addons/spark/examples/jars/spark-examples_2.11-2.3.2.jar
+  # TBD use config sparkFile.get, logs, debug mode ?
+  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode ${COMPACTOR_DEPLOY_MODE} --num-executors 2 --executor-memory 2G --executor-cores 4 --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} ${COMPACTOR_JAR}"
+  echo ${CMD}
+  ${CMD}
 }
 
 ################################################################################
