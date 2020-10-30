@@ -10,7 +10,7 @@ HISTORIAN_LIB_DIR="${HISTORIAN_HOME}/lib"
 HISTORIAN_CONF_DIR="${HISTORIAN_HOME}/conf"
 
 COMMAND=""
-USE_VAR_FILE="true"
+USE_VARS_FILE="true"
 USE_KERBEROS="false"
 
 # Default configuration file path
@@ -28,7 +28,7 @@ usage() {
     cat << EOF
 
 --------------------------------------------------------------------------------
-Command to manage the historian compactor spark job. Usage:
+Command to manage the Historian Compactor spark job. Usage:
 
 ${SCRIPT_NAME} <command> [options]
 
@@ -38,14 +38,6 @@ ${SCRIPT_NAME} <command> [options]
 [options]:
             -c|--config <config-file-path> : Use configuration file different
               from the default one (${HISTORIAN_CONFIG_FILE}).
-            -n|--no-var-file : Do not use any environment variables file (which
-              defaults to ${HISTORIAN_VARS_FILE}).
-            -v|--var-file <var-file-path> : Use the provided environment
-              variables file instead of the default one (${HISTORIAN_VARS_FILE}).
-            -s|--spark-home <spark-home-path> : The path to spark home for
-              finding the spark-submit command. If not set, will use the
-              SPARK_HOME environment variable. This creates or overwrites the
-              SPARK_HOME environment variable.
             -h|--hadoop-config <hadoop-config-path> : The path to the directory
               where the core-site.xml file path resides. If not set, will use
               the HADOOP_CONF_DIR environment variable. If the yarn-site.xml
@@ -54,20 +46,28 @@ ${SCRIPT_NAME} <command> [options]
               environment variable so that spark-submit knows how to contact the
               YARN resource manager server. This creates or overwrites the
               HADOOP_CONF_DIR environment variable.
+            -krb|--kerberos : Enable kerberos authentication. If used,
+              principal and keytab options must be set or the corresponding
+              environment variables.
+            -kt|--keytab <keytab-file-path>: Use kerberos with the passed keytab
+              file path. Must be used in conjunction with the -krb option. This
+              creates or overwrites the KERBEROS_KEYTAB environment variable.
+            -n|--no-var-file : Do not use any environment variables file (which
+              defaults to ${HISTORIAN_VARS_FILE}).
+            -p|--principal <principal>: Use kerberos with the passed principal.
+              Must be used in conjunction with the -krb option. This creates or
+              overwrites the KERBEROS_PRINCIPAL environment variable.
+            -s|--spark-home <spark-home-path> : The path to spark home for
+              finding the spark-submit command. If not set, will use the
+              SPARK_HOME environment variable. This creates or overwrites the
+              SPARK_HOME environment variable.
+            -v|--var-file <var-file-path> : Use the provided environment
+              variables file instead of the default one (${HISTORIAN_VARS_FILE}).
             -y|--yarn-config <yarn-config-path> : The path to the directory
               where the yarn-site.xml file path resides. May be useless if
               yarn-site.xml file is already in <hadoop-config-path> or the
               YARN_CONF_DIR environment variable is set. This creates or
               overwrites the YARN_CONF_DIR environment variable.
-            -krb|--kerberos : Enable kerberos authentication. If used,
-              principal and keytab options must be set or the corresponding
-              environment variables.
-            -p|--principal <principal>: Use kerberos with the passed principal.
-              Must be used in conjunction with the -k option. This creates or
-              overwrites the KERBEROS_PRINCIPAL environment variable.
-            -kt|--keytab <keytab-file-path>: Use kerberos with the passed keytab
-              file path. Must be used in conjunction with the -p option. This
-              creates or overwrites the KERBEROS_KEYTAB environment variable.
 
 Examples:
 
@@ -154,7 +154,7 @@ parse_cli_params() {
           shift # Next argument
         ;;
         -n|--no-var-file)
-          USE_VAR_FILE="false"
+          USE_VARS_FILE="false"
         ;;
         -v|--var-file)
           validate_option_parameter "$@"
@@ -237,7 +237,7 @@ overwrite_variables() {
 # Read environment variables file if enabled
 read_variables_file() {
   # If variable files enabled, read it
-  if [ ${USE_VAR_FILE} == "true" ]
+  if [[ -n ${USE_VARS_FILE} && "${USE_VARS_FILE}" == "true" ]]
   then
     if [[ ! -a ${HISTORIAN_VARS_FILE} ]]
     then
@@ -254,7 +254,6 @@ read_variables_file() {
 
 # Resume what will be done and used
 display_summary() {
-  echo
   echo "Command: ${COMMAND}"
   echo "Configuration file: ${HISTORIAN_CONFIG_FILE}"
   echo "Spark Home: ${SPARK_HOME}"
@@ -266,6 +265,51 @@ display_summary() {
     printf "\tKerberos principal: %s\n" "${KERBEROS_PRINCIPAL}"
     printf "\tKerberos keytab: %s\n" "${KERBEROS_KEYTAB}"
   fi
+}
+
+# Check variables
+check_variables() {
+
+  if [[ -z ${SPARK_HOME} ]] # If variable is not set
+  then
+    echo "Spark home not specified. Set SPARK_HOME environment variable or use -s|--spark-home option"
+    print_usage_and_exit_on_error
+  fi
+
+  if [[ -z ${HADOOP_CONF_DIR} ]] # If variable is not set
+  then
+    echo "Hadoop configuration directory not specified. Set HADOOP_CONF_DIR environment variable or use -h|--hadoop-config option"
+    print_usage_and_exit_on_error
+  fi
+
+  if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
+  then
+    if [[ -z ${KERBEROS_PRINCIPAL} ]] # If variable is not set
+    then
+      echo "Need kerberos principal when kerberos is enabled. Set KERBEROS_PRINCIPAL environment variable or use -p|--principal option"
+      print_usage_and_exit_on_error
+    fi
+    if [[ -z ${KERBEROS_KEYTAB} ]] # If variable is not set
+    then
+      echo "Need kerberos keytab when kerberos is enabled. Set KERBEROS_KEYTAB environment variable or use -kt|--keytab option"
+      print_usage_and_exit_on_error
+    fi
+  fi
+}
+
+# Execute the start command
+cmd_start() {
+
+  echo "Starting Historian Compactor Job..."
+
+  # Export variables needed to spark-submit
+  export HADOOP_CONF_DIR
+  if [[ -n ${YARN_CONF_DIR} ]] # If variable is set
+  then
+    export YARN_CONF_DIR
+  fi
+
+  #"${SPARK_HOME}"/bin/spark-submit --master yarn --deploy-mode cluster --num-executors 2 --executor-memory 2G --executor-cores 4 --class org.apache.spark.examples.SparkPi ~/addons/spark/examples/jars/spark-examples_2.11-2.3.2.jar
 }
 
 ################################################################################
@@ -282,15 +326,31 @@ then
     print_usage_and_exit_on_error
 fi
 
-echo "Historian home: ${HISTORIAN_HOME}"
-echo "Historian conf dir: ${HISTORIAN_CONF_DIR}"
-echo "Historian lib dir: ${HISTORIAN_LIB_DIR}"
-
 # Read environment variables file if enabled
 read_variables_file
 
 # If some options have been set to overwrite some environment variables use them
 overwrite_variables
 
+# Check variables
+check_variables
+
+echo "Historian home: ${HISTORIAN_HOME}"
+echo "Historian conf dir: ${HISTORIAN_CONF_DIR}"
+echo "Historian lib dir: ${HISTORIAN_LIB_DIR}"
+
 # Resume what will be done and used
+echo
 display_summary
+echo
+
+case ${COMMAND} in
+  start)
+    cmd_start
+  ;;
+  *)
+    # Unknown command but not possible as already tested by parsing system!
+    echo "Unknown command"
+    print_usage_and_exit_on_error
+  ;;
+esac
