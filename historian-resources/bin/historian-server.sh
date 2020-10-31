@@ -36,7 +36,7 @@ The script start or stop the historian server.
 EOF
 }
 
-# Parse method is not used for now but we put one exemple here if we want to add arguments
+# Parse method is not used for now but we put one example here if we want to add arguments
 parse_args() {
     POSITIONAL=()
     while [[ $# -gt 0 ]]
