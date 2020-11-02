@@ -53,7 +53,7 @@ public class ConfigurationBuilder {
     }
 
     public ConfigurationBuilder withSparkConfig(String configKey, String configValue) {
-        sparkConfig.put("spark." + configKey, configValue);
+        sparkConfig.put(configKey, configValue);
         return this;
     }
 
@@ -162,9 +162,14 @@ public class ConfigurationBuilder {
         }
         Map<String, Object> spark = (Map<String, Object>)sparkValues;
 
-        spark.forEach((configKey, configValue) -> {
+        for (Map.Entry<String, Object> entry : spark.entrySet()) {
+            String configKey = entry.getKey();
+            Object configValue = entry.getValue();
+            if (!configKey.startsWith("spark.")) {
+                throw new ConfigurationException(KEY_SPARK + " entry values must always start with 'spark.'");
+            }
             configurationBuilder.withSparkConfig(configKey, (String)configValue);
-        });
+        }
 
         /**
          * Parse compaction section
