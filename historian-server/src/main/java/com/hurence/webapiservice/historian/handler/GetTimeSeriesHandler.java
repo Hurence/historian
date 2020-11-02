@@ -3,6 +3,9 @@ package com.hurence.webapiservice.historian.handler;
 import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent;
 import com.hurence.historian.model.HistorianConf;
 import com.hurence.historian.model.HistorianServiceFields;
+import com.hurence.historian.model.SchemaVersion;
+import com.hurence.historian.model.solr.Schema;
+import com.hurence.historian.model.solr.SolrField;
 import com.hurence.historian.model.solr.SolrFieldMapping;
 import com.hurence.historian.model.stream.ChunkStream;
 import com.hurence.timeseries.compaction.BinaryCompactionUtil;
@@ -454,6 +457,10 @@ public class GetTimeSeriesHandler {
             final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, queryParams);
             final SolrDocumentList documents = response.getResults();
 
+            Collection<String> schemaFields = Schema.getChunkSchema(SchemaVersion.getCurrentVersion()).getFields()
+                    .stream().map(SolrField::getName)
+                    .collect(Collectors.toList());
+
             //print("Found " + documents.getNumFound() + " documents");
             for (SolrDocument document : documents) {
                 final String id = (String) document.getFirstValue(SOLR_COLUMN_ID);
@@ -470,12 +477,23 @@ public class GetTimeSeriesHandler {
                     measures.forEach(m -> m.setName(name))
                     ChunkToMeasures toMeasures = new ChunkToMeasures();
                     Chunk chunk = toMeasures.chunk(measures);;*/
+
+
+                    Map<String, String> tags = new HashMap<>();
+                    document.getFieldNames().forEach(n -> {
+                            if ( ! schemaFields.contains(n))
+                                tags.put(n, (String)document.getFieldValue(n));
+                        });
+
+
+
                     Chunk chunk = Chunk.builder()
                             .id(id)
                             .name(name)
                             .start(chunkStart)
                             .end(chunkEnd)
                             .value(compressedPoints)
+                            .tags(tags)
                             .count(count)
                             .buildId()
                             .computeMetrics()
