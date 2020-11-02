@@ -4,9 +4,9 @@ solr:
 spark:
   # Any entry under the spark entry is expected to match the spark application configuration
   # specified at https://spark.apache.org/docs/latest/configuration.html#application-properties
-  # without the "spark." prefix. For instance app.name for spark.app.name, master for spark.master...
-  app.name: HistorianCompactor
-  master: local[*]
+  # including the "spark." prefix.
+  spark.app.name: HistorianCompactor
+  spark.master: local[*]
 compaction:
   scheduling:
     # Period at which the compaction algorithm is launched in seconds
