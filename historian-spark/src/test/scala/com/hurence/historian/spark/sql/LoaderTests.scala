@@ -115,6 +115,8 @@ class LoaderTests extends SparkSessionTestWrapper {
     assertEquals(68.8, chunktoCheck.getMin)
     assertEquals(2145.6, chunktoCheck.getMax)
     assertEquals(1496.6, chunktoCheck.getFirst)
+
+    //first=1496.6, min=68.8, max=2145.6, sum=475649.6, avg=1651.5611111111111, last=1519.4, stdDev=178.49958904923906, qualityFirst=1497.6, qualityMin=69.8, qualityMax=2146.6, qualitySum=475937.6, qualityAvg=1652.5612
     assertEquals(1615.4, chunktoCheck.getLast)
     assertEquals(475649.5999999999, chunktoCheck.getSum)
     assertFalse(chunktoCheck.isOutlier);
