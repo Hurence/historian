@@ -184,6 +184,7 @@ public class Compactor implements Runnable {
      */
     private static final Set<String> SPARK_PARAMS_HANDLED_BY_RUN_SCRIPT =
             Stream.of("spark.master",
+                    "spark.submit.deployMode",
                     "spark.driver.", // Any driver parameter
                     "spark.executor.") // Any executor parameter
             .collect(Collectors.toSet());
