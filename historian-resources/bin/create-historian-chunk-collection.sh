@@ -285,7 +285,7 @@ create_schema() {
             SOLR_UPDATE_QUERY="${SOLR_UPDATE_QUERY}, \"add-field\": { \"name\":\"name\", \"type\":\"string\", \"indexed\":true, \"multiValued\":false, \"required\":true, \"stored\" : true }"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "version" "string"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "metric_key" "string"
-            add_field_not_indexed_to_variable "SOLR_UPDATE_QUERY" "chunk_value" "string"
+            add_field_not_indexed_to_variable "SOLR_UPDATE_QUERY" "chunk_value" "text_general"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_start" "plong"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_end" "plong"
             add_field_name_type_to_variable "SOLR_UPDATE_QUERY" "chunk_avg" "pdouble"
