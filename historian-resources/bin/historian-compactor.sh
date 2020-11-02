@@ -351,7 +351,10 @@ cmd_start() {
 ${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
 
   # TBD use config sparkFile.get, logs, debug mode ?
-  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode ${COMPACTOR_DEPLOY_MODE} --num-executors 2 --executor-memory 2G --executor-cores 4 --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} ${COMPACTOR_JAR}"
+  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode \
+${COMPACTOR_DEPLOY_MODE} --num-executors 2 --executor-memory 2G --executor-cores 4 \
+--jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} ${COMPACTOR_JAR} \
+--config-file ${HISTORIAN_CONFIG_FILE}"
   echo ${CMD}
   ${CMD}
 }
