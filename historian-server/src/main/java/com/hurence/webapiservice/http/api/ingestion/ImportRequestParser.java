@@ -258,7 +258,7 @@ public class ImportRequestParser {
                 continue;
             }
             try {
-                if ((pointArray.getDouble(1) == null)) {
+                if (pointArray.getDouble(1) == null) {
                     numberOfFailedPointsForThisName++;
                     continue;
                 }
