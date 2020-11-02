@@ -1,10 +1,15 @@
 package com.hurence.webapiservice.historian.handler;
 
+import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent;
 import com.hurence.historian.model.HistorianConf;
 import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.historian.model.solr.SolrFieldMapping;
 import com.hurence.historian.model.stream.ChunkStream;
+import com.hurence.timeseries.compaction.BinaryCompactionUtil;
+import com.hurence.timeseries.compaction.BinaryEncodingUtils;
+import com.hurence.timeseries.compaction.ChunkToMeasures;
 import com.hurence.timeseries.model.Chunk;
+import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 
 import com.hurence.webapiservice.historian.impl.*;
@@ -28,6 +33,10 @@ import org.apache.solr.client.solrj.io.Tuple;
 import org.apache.solr.client.solrj.io.stream.SolrStream;
 import org.apache.solr.client.solrj.io.stream.StreamContext;
 import org.apache.solr.client.solrj.io.stream.TupleStream;
+import org.apache.solr.client.solrj.response.QueryResponse;
+import org.apache.solr.common.SolrDocument;
+import org.apache.solr.common.SolrDocumentList;
+import org.apache.solr.common.params.MapSolrParams;
 import org.apache.solr.common.params.ModifiableSolrParams;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +44,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.hurence.historian.model.HistorianServiceFields.*;
 import static com.hurence.timeseries.model.Definitions.*;
@@ -95,7 +105,7 @@ public class GetTimeSeriesHandler {
             LOGGER.trace("requesting timeseries to {}", request.getTo());
             queryBuilder.append(SOLR_COLUMN_START).append(":[* TO ").append(request.getTo()).append("]");
         }
-        if (request.getFrom()  != null) {
+        if (request.getFrom() != null) {
             LOGGER.trace("requesting timeseries from {}", request.getFrom());
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
@@ -161,13 +171,13 @@ public class GetTimeSeriesHandler {
     }
 
     /**
-     *        Joins every metric filter by a "OR"
+     * Joins every metric filter by a "OR"
+     *
      * @param metricFilters
      * @return final filter query should be
      * <pre>
      *     (filter1) OR (filter2) OR ... OR (filtern)
      * </pre>
-     *
      */
     private String buildFinalFilterQuery(List<String> metricFilters) {
         return metricFilters.stream().collect(Collectors.joining(") OR (", "(", ")"));
@@ -175,17 +185,16 @@ public class GetTimeSeriesHandler {
 
     /**
      * filter query for each metric
-     *     each string should looks like "(name:A && usine:usine_1 && sensor:sensor_1)"
-     *     we filter on metric name and on every tags we get. we use tags of metricRequests and of rootTags.
-     *     If there is conflict then tags of metricRequests have priority.
+     * each string should looks like "(name:A && usine:usine_1 && sensor:sensor_1)"
+     * we filter on metric name and on every tags we get. we use tags of metricRequests and of rootTags.
+     * If there is conflict then tags of metricRequests have priority.
+     *
      * @param metricRequests
      * @return filter query for each metric
-     *         each string should looks like :
-     *         <pre>
+     * each string should looks like :
+     * <pre>
      *             name:"A" AND usine:"usine_1" AND sensor:"sensor_1"
      *         </pre>
-     *
-     *
      */
     //TODO
     private List<String> buildFilterForEachMetric(List<MetricRequest> metricRequests,
@@ -194,10 +203,10 @@ public class GetTimeSeriesHandler {
         metricRequests.forEach(metricRequest -> {
             StringBuilder queryForEachMetricBuilder = new StringBuilder();
             List<String> tagsFilter = getTagsAsPair(metricRequest);
-            if(!tagsFilter.isEmpty())
-                queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", SOLR_COLUMN_NAME +":\""+metricRequest.getName()+"\" AND ", "")));
+            if (!tagsFilter.isEmpty())
+                queryForEachMetricBuilder.append(tagsFilter.stream().collect(Collectors.joining(" AND ", SOLR_COLUMN_NAME + ":\"" + metricRequest.getName() + "\" AND ", "")));
             else
-                queryForEachMetricBuilder.append(SOLR_COLUMN_NAME + ":\""+metricRequest.getName()+"\"");
+                queryForEachMetricBuilder.append(SOLR_COLUMN_NAME + ":\"" + metricRequest.getName() + "\"");
             if (useQuality) {
                 Float qualityValue = metricRequest.getQuality().getQualityValue();
                 String qualityField = SOLR_COLUMN_QUALITY_AVG;//at the moment always use AVG to filter
@@ -211,7 +220,7 @@ public class GetTimeSeriesHandler {
     private List<String> getTagsAsPair(MetricRequest metricRequest) {
         List<String> tagsFilter = new ArrayList<>();
         metricRequest.getTags().forEach((key, value) -> {
-            tagsFilter.add(key+":\""+value+"\"");
+            tagsFilter.add(key + ":\"" + value + "\"");
         });
         return tagsFilter;
     }
@@ -257,7 +266,7 @@ public class GetTimeSeriesHandler {
         MetricsSizeInfoImpl metricsInfo = new MetricsSizeInfoImpl();
         while (!tuple.EOF) {
             LOGGER.trace("tuple : {}", tuple.jsonStr());//TODO truncate chunk if necessary how ?
-            for (MetricRequest request: requests) {
+            for (MetricRequest request : requests) {
                 if (isTupleMatchingMetricRequest(request, tuple)) {
                     metricsInfo.increaseNumberOfChunksForMetricRequest(request,
                             tuple.getLong("count(*)")
@@ -289,6 +298,7 @@ public class GetTimeSeriesHandler {
 
     /**
      * join string so that we got somthing like <pre>elem1,elem2,elem3</pre>
+     *
      * @param neededFields
      * @return
      */
@@ -298,6 +308,7 @@ public class GetTimeSeriesHandler {
 
     /**
      * return all tags name needed for querying metrics.
+     *
      * @param requests
      * @return
      */
@@ -313,20 +324,20 @@ public class GetTimeSeriesHandler {
      * return true if the tuple (one document response from solr) match the query for MetricRequest
      *
      * @param request the asked query. This is a combinaison of "name" and tags.
-     * @param tuple the count of chunks and measures for all chunk matching the query.
-     *              There is a tuple for each combinaison of name/tag found.
-     *
-     *              for example something like that (each line is a tuple except the header)
-     *              <pre>
-     *              name    | usine     | sensor    | count(*) | sum(chunk_count)
-     *              temp_a  | usine_1   | sensor_1  | 100      | 1000
-     *              temp_a  | usine_1   | sensor_2  | 10       | 100
-     *              temp_b  | usine_1   | null      | 100      | 1000
-     *              </pre>
+     * @param tuple   the count of chunks and measures for all chunk matching the query.
+     *                There is a tuple for each combinaison of name/tag found.
+     *                <p>
+     *                for example something like that (each line is a tuple except the header)
+     *                <pre>
+     *                                            name    | usine     | sensor    | count(*) | sum(chunk_count)
+     *                                            temp_a  | usine_1   | sensor_1  | 100      | 1000
+     *                                            temp_a  | usine_1   | sensor_2  | 10       | 100
+     *                                            temp_b  | usine_1   | null      | 100      | 1000
+     *                                            </pre>
      * @return
      */
     private boolean isTupleMatchingMetricRequest(MetricRequest request, Tuple tuple) {
-        if (!request.getName().equals(tuple.fields.get(SOLR_COLUMN_NAME))){
+        if (!request.getName().equals(tuple.fields.get(SOLR_COLUMN_NAME))) {
             return false;
         } else {
             for (Map.Entry<String, String> entry : request.getTags().entrySet()) {
@@ -369,6 +380,7 @@ public class GetTimeSeriesHandler {
 
     /**
      * We suppose that we already know that this is not QUERY MODE 1
+     *
      * @param metricsInfo
      * @return true if we should use query mode 2 (sampling with pre agg)
      */
@@ -379,8 +391,8 @@ public class GetTimeSeriesHandler {
             return metricsInfo.getTotalNumberOfChunksWithCorrectQuality() < solrHistorianConf.limitNumberOfChunks;
         }
     }
+
     /**
-     *
      * @param metricsInfo
      * @return true if we should use query mode 1 not using pre agg and decompressing all chunks.
      */
@@ -426,13 +438,77 @@ public class GetTimeSeriesHandler {
 
 
     public void requestSolrAndBuildTimeSeries(SolrQuery query, Promise<JsonObject> p, MultiTimeSeriesExtracter timeSeriesExtracter) {
-        try (ChunkStream stream = queryStream(query)) {
-            JsonObject timeseries = extractTimeSeriesThenBuildResponse(stream, timeSeriesExtracter);
+
+        // new immplem here where we avoir SolR streams becaouse of docValues big on chunk_value field
+        try {
+
+            StringBuilder exprBuilder = new StringBuilder();
+
+            final Map<String, String> queryParamMap = new HashMap<>();
+            queryParamMap.put("q", query.getQuery());
+            queryParamMap.put("fq", String.join(" ", query.getFilterQueries()));
+            queryParamMap.put("fl", query.getFields());
+            queryParamMap.put("sort", query.getSortField());
+            MapSolrParams queryParams = new MapSolrParams(queryParamMap);
+
+            final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, queryParams);
+            final SolrDocumentList documents = response.getResults();
+
+            //print("Found " + documents.getNumFound() + " documents");
+            for (SolrDocument document : documents) {
+                final String id = (String) document.getFirstValue(SOLR_COLUMN_ID);
+                final String name = (String) document.getFirstValue(SOLR_COLUMN_NAME);
+                final String value = (String) document.getFirstValue(SOLR_COLUMN_VALUE);
+                final int count = (int) document.getFirstValue(SOLR_COLUMN_COUNT);
+
+
+                long chunkStart = (Long) document.getFieldValue(SOLR_COLUMN_START);
+                long chunkEnd = (Long) document.getFieldValue(SOLR_COLUMN_END);
+                try {
+                    byte[] compressedPoints = BinaryEncodingUtils.decode(value);
+                   /* TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
+                    measures.forEach(m -> m.setName(name))
+                    ChunkToMeasures toMeasures = new ChunkToMeasures();
+                    Chunk chunk = toMeasures.chunk(measures);;*/
+                    Chunk chunk = Chunk.builder()
+                            .id(id)
+                            .name(name)
+                            .start(chunkStart)
+                            .end(chunkEnd)
+                            .value(compressedPoints)
+                            .count(count)
+                            .buildId()
+                            .computeMetrics()
+                            .build();
+
+                    timeSeriesExtracter.addChunk(chunk);
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage());
+                    //=fail(e.getMessage());
+                }
+
+
+            }
+            timeSeriesExtracter.flush();
+            LOGGER.debug("read {} chunks ", documents.size());//one doc is EOF
+
+
+            JsonObject timeseries = buildTimeSeriesResponse(timeSeriesExtracter);
             p.complete(timeseries);
         } catch (Exception e) {
             LOGGER.error("unexpected exception while reading JsonStream", e);
             p.fail(e);
         }
+
+
+
+       /* try (ChunkStream stream = queryStream(query)) {
+            JsonObject timeseries = extractTimeSeriesThenBuildResponse(stream, timeSeriesExtracter);
+            p.complete(timeseries);
+        } catch (Exception e) {
+            LOGGER.error("unexpected exception while reading JsonStream", e);
+            p.fail(e);
+        }*/
     }
 
     public void addFieldsThatWillBeNeededBySamplingAlgorithms(Request request, SolrQuery query, MetricsSizeInfo metricsInfo) {
@@ -526,7 +602,7 @@ public class GetTimeSeriesHandler {
                 timeSeriesExtracter.setTotalNumberOfPointForMetric(metricRequest, metricsInfo.getMetricInfo(metricRequest).totalNumberOfPoints);
             });
         }
-        fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
+        fillingExtractorWithAggregToReturn(timeSeriesExtracter, aggregationList);
         return timeSeriesExtracter;
     }
 
@@ -539,7 +615,7 @@ public class GetTimeSeriesHandler {
         metricsInfo.getMetricRequests().forEach(metricRequest -> {
             timeSeriesExtracter.setTotalNumberOfPointForMetric(metricRequest, metricsInfo.getMetricInfo(metricRequest).totalNumberOfPoints);
         });
-        fillingExtractorWithAggregToReturn(timeSeriesExtracter,aggregationList);
+        fillingExtractorWithAggregToReturn(timeSeriesExtracter, aggregationList);
         return timeSeriesExtracter;
     }
 
@@ -615,7 +691,9 @@ public class GetTimeSeriesHandler {
                     .collect(Collectors.toList());
         }
 
-        public boolean getUseQuality() { return params.getBoolean(USE_QUALITY, false);}
+        public boolean getUseQuality() {
+            return params.getBoolean(USE_QUALITY, false);
+        }
 
         public Long getTo() {
             return params.getLong(TO);
@@ -634,7 +712,7 @@ public class GetTimeSeriesHandler {
         }
 
         public Map<String, String> getRootTags() {
-            Map<String,String> tagsMap = new HashMap<>();
+            Map<String, String> tagsMap = new HashMap<>();
             params.getJsonObject(FIELD_TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
             return tagsMap;
         }
@@ -643,6 +721,7 @@ public class GetTimeSeriesHandler {
          * return the metric name desired with the associated tags and the associated quality (if quality exist).
          * The tags must be the result of the merge of specific tags and rootTags
          * The quality must be the result of the merge of specific quality and rootQuality
+         *
          * @return
          */
         public List<MetricRequest> getMetricRequestsWithFinalTagsAndFinalQualities() {
@@ -652,27 +731,27 @@ public class GetTimeSeriesHandler {
                     String name = metricObject.getString(SOLR_COLUMN_NAME);
                     Float qualityValue = metricObject.getFloat(QUALITY_VALUE, getRootQuality().getQualityValue());
                     String qualityAgg = getRootQuality().getQualityAgg().toString();
-                    Map<String,String> tagsMap = new HashMap<>();
+                    Map<String, String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     metricObject.getJsonObject(FIELD_TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
                     QualityConfig qualityConfig = new QualityConfig(qualityValue, qualityAgg);
                     return new MetricRequest(name, tagsMap, qualityConfig);
-                }catch (Exception ex) {
+                } catch (Exception ex) {
                     String name = i.toString();
-                    Map<String,String> tagsMap = new HashMap<>();
+                    Map<String, String> tagsMap = new HashMap<>();
                     getRootTags().forEach(tagsMap::put);
                     QualityConfig qualityConfig = getRootQuality();
                     return new MetricRequest(name, tagsMap, qualityConfig);
                 }
             })
-            .collect(Collectors.toList());
+                    .collect(Collectors.toList());
         }
 
         public QualityConfig getRootQuality() {
             return new QualityConfig(
                     params.getFloat(QUALITY_VALUE, Float.NaN),
                     params.getString(QUALITY_AGG, QualityAgg.NONE.toString())
-            ) ;
+            );
         }
 
         public int getMaxPoint() {
