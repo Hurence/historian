@@ -1,3 +1,5 @@
 {
-  "error": "can't use both mapping.name and custom.name in the attributes"
+  "Error Message": "Error parsing request",
+  "Exception Class": "java.io.IOException",
+  "Exception Message": "can't use both mapping.name and custom.name in the attributes"
 }

@@ -110,6 +110,7 @@
                                     <directory>../historian-resources/bin</directory>
                                     <excludes>
                                         <exclude>historian-server.sh</exclude>
+                                        <exclude>historian-compactor.sh</exclude>
                                     </excludes>
                                 </resource>
                             </resources>

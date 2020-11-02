@@ -4,14 +4,21 @@ public class ErrorMsgHelper {
 
     private ErrorMsgHelper() {}
 
-    public static String createMsgError(String prefixMsg, Exception ex) {
+    public static String createMsgError(String prefixMsg, Throwable ex) {
+        String error = "";
         if (prefixMsg != null && !prefixMsg.isEmpty()) {
-            return prefixMsg + "\nException type :" + ex.getClass() + "\nException message :" + ex.getMessage();
+            error = prefixMsg;
+            if (ex != null) {
+                error+= "\n";
+            }
         }
-        return "Exception type :" + ex.getClass() + "\nException message :" + ex.getMessage();
+        if (ex != null) {
+            error += "Exception type :" + ex.getClass().getCanonicalName() + "\nException message :" + ex.getMessage();
+        }
+        return error;
     }
 
-    public static String createMsgError(Exception ex) {
+    public static String createMsgError(Throwable ex) {
         return createMsgError("", ex);
     }
 }

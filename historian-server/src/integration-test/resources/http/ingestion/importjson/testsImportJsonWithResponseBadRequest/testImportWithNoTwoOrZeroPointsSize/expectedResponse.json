@@ -1,1 +1,5 @@
-{"error" : "Points should be of the form [timestamp, value]"}
+{
+  "Error Message": "Error parsing request",
+  "Exception Class": "java.lang.IllegalArgumentException",
+  "Exception Message": "Points should be of the form [timestamp, value]"
+}
