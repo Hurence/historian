@@ -45,17 +45,27 @@ create_collection() {
   echo -e "${GREEN}will create collection ${collection_name} on ${solr_host} with ${NUM_SHARDS} shard and ${REPLICATION_FACTOR} replicas ${NOCOLOR}"
   response_to_creation=$(curl "http://${solr_host}/admin/collections?action=CREATE&name=${collection_name}&numShards=${NUM_SHARDS}&replicationFactor=${REPLICATION_FACTOR}")
 
-  echo "TEST_SOLR_CURL_OK is ${TEST_SOLR_CURL_OK}"
   if [[ ! $response_to_creation == *${TEST_SOLR_CURL_OK}* ]];then
     echo -e "${RED}It seems that creation of collection ${collection_name} on ${solr_host} failed !"
     return 1;
   fi
   echo "waiting 5' for changes propagation"
   sleep 5
+  response_to_dynamic_all_field=$(curl -X POST -H 'Content-type:application/json' --data-binary '{
+  "add-dynamic-field":{
+     "name":"*",
+     "type":"string",
+     "stored":true }
+  }' http://${solr_host}/${collection_name}/schema)
+   if [[ ! $response_to_dynamic_all_field == *${TEST_SOLR_CURL_OK}* ]];then
+    echo -e "${RED}It seems that adding dynamic field * for collection ${collection_name} on ${solr_host} failed !"
+#    return 2;
+  fi
+  sleep 1
   response_to_disabling_autoCreateFields=$(curl -X POST -H 'Content-type:application/json' -d "{\"set-user-property\": {\"update.autoCreateFields\":\"false\"}}}" "http://${solr_host}/${collection_name}/config")
   if [[ ! $response_to_disabling_autoCreateFields == *${TEST_SOLR_CURL_OK}* ]];then
     echo -e "${RED}It seems that disabling autoCreateFields for collection ${collection_name} on ${solr_host} failed !"
-    return 2;
+#    return 3;
   fi
   sleep 1
   return 0;

@@ -332,7 +332,7 @@ main() {
         "create-collection")
             echo -e "${YELLOW}Creating chunk collection for ${SOLR_COLLECTION} on ${SOLR_HOST} ${NOCOLOR}"
             if ! create_collection "${SOLR_HOST}" "${SOLR_COLLECTION}";then
-              echo "${RED}create_collection failed${NOCOLOR}"
+              echo -e "${RED}create_collection failed${NOCOLOR}"
 #              exit 1;#failed
             fi
 
