@@ -152,30 +152,12 @@ final class Chunkyfier(override val uid: String)
       baseDf = baseDf.withColumn(FIELD_QUALITY, lit(Float.NaN))
     }
 
-    val noTags = if (!baseDf.schema.fieldNames.contains($(tagsCol))) {
-      true
-    } else false
+    if (!baseDf.schema.fieldNames.contains($(tagsCol))) {
+      baseDf = baseDf.withColumn($(tagsCol), typedLit(Map[String, String]()))
+    }
 
 
-    val groupedDF = if (noTags) {
-      // compute all the stats and aggregations here
-      baseDf
-        .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
-       // .orderBy(col($(timestampCol)).asc)
-        .groupBy(groupingCols: _*)
-        .agg(
-          collect_list(col($(valueCol))).over(w).as(COLUMN_VALUES),
-          collect_list(col($(timestampCol))).over(w).as(COLUMN_TIMESTAMPS),
-          collect_list(col($(qualityCol))).over(w).as(COLUMN_QUALITIES),
-          min(col($(timestampCol))).as(FIELD_START),
-          max(col($(timestampCol))).as(FIELD_END),
-          min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
-          max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
-          first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
-          sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
-          avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
-    } else {
-      baseDf
+    val groupedDF = baseDf
         .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
         .orderBy(col($(timestampCol)).asc)
         .groupBy(groupingCols: _*)
@@ -191,7 +173,7 @@ final class Chunkyfier(override val uid: String)
           first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
           sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
           avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
-    }
+
 
     groupedDF
       // compute analysis from values & timestamps lists
@@ -217,11 +199,8 @@ final class Chunkyfier(override val uid: String)
       .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev", "analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
       .map(r => {
 
-        val tags = if (noTags) {
-          Map[String, String]()
-        } else {
-          r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
-        }
+        val tags =  r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
+
 
         Chunk.builder()
           .name(r.getAs[String](FIELD_NAME))
