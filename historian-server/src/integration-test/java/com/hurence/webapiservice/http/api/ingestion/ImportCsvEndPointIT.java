@@ -231,7 +231,6 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_TIMESTAMP, "timestamp")
                 .attribute(MAPPING_NAME, "metric")
                 .attribute(MAPPING_VALUE, "value")
-                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH)
@@ -267,7 +266,6 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_TIMESTAMP, "timestamp")
                 .attribute(MAPPING_NAME, "metric")
                 .attribute(MAPPING_VALUE, "value")
-                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
@@ -866,7 +864,7 @@ public class ImportCsvEndPointIT {
     }
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testCsvFileImportWithWrongQuality(Vertx vertx, VertxTestContext testContext) {
+    public void testCsvFileImportWithWrongQualityShouldPass(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints2.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
                 .attribute(MAPPING_QUALITY, "quality")
