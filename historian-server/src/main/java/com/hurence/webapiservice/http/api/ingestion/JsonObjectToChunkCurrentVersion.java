@@ -58,8 +58,6 @@ public class JsonObjectToChunkCurrentVersion {
             double value = jsonPoint.getDouble(1);
             try{
                 Float quality = jsonPoint.getFloat(2);
-                if (quality == null || quality < 0f || quality > 1f)
-                    throw new IllegalArgumentException();
                 measures.add( Measure.fromValueAndQuality(timestamps, value, quality));
             }catch (Exception ex) {
                 measures.add( Measure.fromValue(timestamps, value));
