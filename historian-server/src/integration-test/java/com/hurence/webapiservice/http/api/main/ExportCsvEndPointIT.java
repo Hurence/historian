@@ -121,7 +121,7 @@ public class ExportCsvEndPointIT {
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
                             "/http/mainapi/test1/request-with-quality.json",
-                            "/http/mainapi/test1/expectedResponse.csv");
+                            "/http/mainapi/test1/expectedResponse-with-quality.csv");
                     return t;
                 }).subscribe();
     }

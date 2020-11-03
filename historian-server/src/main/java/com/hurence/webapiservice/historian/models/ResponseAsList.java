@@ -35,11 +35,11 @@ public class ResponseAsList {
         public String metric;
         public Long date;
         public double value;
-        public Float quality = Float.NaN;
+        public String quality = "NaN";
 
         public SubResponse(JsonArray line) {
             try{
-                this.quality = line.getFloat(3);
+                this.quality = line.getFloat(3).toString();
                 this.metric = line.getString(0);
                 this.date = line.getLong(2);
                 this.value = line.getDouble(1);
