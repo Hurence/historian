@@ -127,7 +127,11 @@ public class Compactor implements Runnable {
             throw new IllegalStateException("Cannot call run on closed compactor");
         }
 
-        doCompact();
+        try {
+            doCompact();
+        } catch (Throwable t) {
+            logger.error("Error running compaction algorithm", t);
+        }
     }
 
     /**
