@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.sql
 
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{Date, TimeZone}
 
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.historian.spark.SparkSessionTestWrapper
@@ -25,19 +25,11 @@ class FunctionsTests {
   @Test
   def testDateUtils() = {
 
+    val utcTime = 1583017574000L
     val dateString = "01/03/2020 00:06:14"
     val dateFormat = "dd/MM/yyyy HH:mm:ss"
     val time = DateUtil.parse(dateString, dateFormat).getTime
 
-    assertEquals(1583017574000L, time)
-
-
-    val simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd")
-
-    val date1 = new Date()
-    date1.setTime(1583017254000L)
-    assertEquals("2020-03-01", simpleDateFormat.format(date1))
-    // 2019-11-25|1574726294000
-
+    assertEquals(utcTime, time)
   }
 }

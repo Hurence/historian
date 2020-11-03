@@ -2,7 +2,7 @@ package com.hurence.historian.spark.sql
 
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
-import java.util.Date
+import java.util.{Date, TimeZone}
 import java.util.stream.Collectors
 
 import com.google.common.hash.Hashing
@@ -29,6 +29,7 @@ object functions {
       .withZone(java.time.ZoneId.of("UTC"))*/
       new SimpleDateFormat(dateFormat)
 
+    dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"))
     try {
       dateFormatter.format(new Date(epochMilliUTC))
     } catch {
