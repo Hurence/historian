@@ -13,6 +13,7 @@ import io.vertx.junit5.VertxTestContext;
 import io.vertx.reactivex.core.Vertx;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.SolrServerException;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -29,6 +30,7 @@ import java.util.Arrays;
  * on localhost:8080 so you can query it. It serves for exemple to test the rest api manually and do some debugging !
  */
 @ExtendWith({VertxExtension.class, SolrExtension.class})
+@Disabled("This test is usefull to start historian we some data and test REST api in local.")
 public class LocalHistorianIT {
 
     private static Logger LOGGER = LoggerFactory.getLogger(LocalHistorianIT.class);
@@ -38,6 +40,12 @@ public class LocalHistorianIT {
         initSolr(container);
         injectChunksIntoSolr(client);
         initVerticles(container, vertx, context);
+    }
+
+    @AfterAll
+    static void finish(Vertx vertx, VertxTestContext context) {
+        LOGGER.info("closing vertx");
+        vertx.close(context.completing());
     }
 
 
@@ -123,7 +131,7 @@ public class LocalHistorianIT {
      * on localhost:8080 so you can query it. It serves for exemple to test the rest api manually and do some debugging !
      */
     @Test
-    @Disabled
+    @Disabled("This test is usefull to start historian we some data and test REST api in local.")
     public void testRunLocalHistorian() {
         while(true) {
             try {
