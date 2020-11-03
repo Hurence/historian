@@ -18,6 +18,8 @@ HISTORIAN_VERSION="1.3.6-SNAPSHOT"
 HISTORIAN_CONFIG_FILE=${HISTORIAN_CONF_DIR}/historian-compactor.yaml
 # Default environment variables file
 HISTORIAN_VARS_FILE=${HISTORIAN_CONF_DIR}/historian-compactor-envs
+# Default log4j configuration file
+HISTORIAN_LOG4J_FILE=${HISTORIAN_CONF_DIR}/log4j-compactor.properties
 
 ################################################################################
 # Functions
@@ -37,8 +39,8 @@ ${SCRIPT_NAME} <command> [options]
             help: Print this help then exits.
             start: Start the historian compactor job.
 [options]:
-            -c|--config <config-file-path> : Use configuration file different
-              from the default one (${HISTORIAN_CONFIG_FILE}).
+            -c|--config-file <config-file-path> : Use configuration file
+              different from the default one (${HISTORIAN_CONFIG_FILE}).
             -h|--hadoop-config <hadoop-config-path> : The path to the directory
               where the core-site.xml file path resides. If not set, will use
               the HADOOP_CONF_DIR environment variable. If the yarn-site.xml
@@ -50,9 +52,11 @@ ${SCRIPT_NAME} <command> [options]
             -krb|--kerberos : Enable kerberos authentication. If used,
               principal and keytab options must be set or the corresponding
               environment variables.
-            -kt|--keytab <keytab-file-path>: Use kerberos with the passed keytab
-              file path. Must be used in conjunction with the -krb option. This
-              creates or overwrites the KERBEROS_KEYTAB environment variable.
+            -kt|--keytab-file <keytab-file-path>: Use kerberos with the passed
+              keytab file path. Must be used in conjunction with the -krb option.
+              This creates or overwrites the KERBEROS_KEYTAB environment variable.
+            -l|--log4j-file <log4j-config-file-path> : Use log4j configuration file
+              different from the default one (${HISTORIAN_LOG4J_FILE}).
             -n|--no-var-file : Do not use any environment variables file (which
               defaults to ${HISTORIAN_VARS_FILE}).
             -p|--principal <principal>: Use kerberos with the passed principal.
@@ -148,7 +152,7 @@ parse_cli_params() {
             cmd_help
           ;;
         # Options
-        -c|--config)
+        -c|--config-file)
           validate_option_parameter "$@"
           HISTORIAN_CONFIG_FILE="${2}"
           shift # Next argument
@@ -161,9 +165,14 @@ parse_cli_params() {
         -krb|--kerberos)
           TMP_USE_KERBEROS="true"
           ;;
-        -kt|--keytab)
+        -kt|--keytab-file)
           validate_option_parameter "$@"
           TMP_KERBEROS_KEYTAB="${2}"
+          shift # Next argument
+          ;;
+        -l|--log4j-file)
+          validate_option_parameter "$@"
+          HISTORIAN_LOG4J_FILE="${2}"
           shift # Next argument
           ;;
         -n|--no-var-file)
@@ -259,6 +268,7 @@ display_summary() {
   echo "Spark Home: ${SPARK_HOME}"
   echo "Hadoop configuration directory: ${HADOOP_CONF_DIR}"
   echo "Yarn configuration directory: ${YARN_CONF_DIR}"
+  echo "Log4j configuration file: ${HISTORIAN_LOG4J_FILE}"
   echo "Use Kerberos: ${USE_KERBEROS}"
   if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
   then
@@ -326,8 +336,8 @@ cmd_start() {
   # Create csv list of needed dependency jars
   # Do not put tabs/spaces on lines after the first one or they will appear in
   # the final JARS variable value
-  COMPACTOR_DEP_JARS="${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
-${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
+  COMPACTOR_DEP_JARS="file:${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
+file:${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
 
   # Now get run mode and apply what's asked
   SPARK_MASTER=$(read_property_from_config_file "spark.master")
@@ -418,10 +428,22 @@ start_yarn_client() {
   # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
   prepare_kerberos_options
 
+  YARN_FILES_OPTIONS=""
+  YARN_FILES_OPTIONS="${YARN_FILES_OPTIONS} ${HISTORIAN_LOG4J_FILE}#log4j.properties" # Whatever filename is uploaded, the #log4j.properties will set an alias for accessing this file
+  LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${HISTORIAN_LOG4J_FILE}" # Could use HDFS one like for executors but as driver runs locally...
+  LOG4J_WORKERS_SETTINGS="-Dlog4j.configuration=log4j.properties"
+
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode client \
-${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
-${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+   ${SPARK_SUBMIT_OPTIONS} \
+   ${SPARK_SUBMIT_KERBEROS_OPTIONS} \
+   --driver-java-options ${LOG4J_DRIVER_SETTINGS} \
+   --conf ${LOG4J_WORKERS_SETTINGS} \
+   --jars ${COMPACTOR_DEP_JARS} \
+   --class ${COMPACTOR_CLASS} \
+   --files ${YARN_FILES_OPTIONS} \
+   file:${COMPACTOR_JAR} \
+   --config-file ${HISTORIAN_CONFIG_FILE}"
   echo "${CMD}"
   ${CMD}
 }
@@ -439,7 +461,7 @@ start_yarn_cluster() {
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode cluster \
 ${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
-${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+file:${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
   echo "${CMD}"
   ${CMD}
 }
