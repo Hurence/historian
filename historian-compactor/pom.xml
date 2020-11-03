@@ -132,20 +132,41 @@
                     </execution>
                 </executions>
             </plugin>
-<!--            &lt;!&ndash; Make a fat jar &ndash;&gt;-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-shade-plugin</artifactId>-->
-<!--                <version>${shade-plugin.version}</version>-->
-<!--                <executions>-->
-<!--                    <execution>-->
-<!--                        <phase>package</phase>-->
-<!--                        <goals>-->
-<!--                            <goal>shade</goal>-->
-<!--                        </goals>-->
-<!--                    </execution>-->
-<!--                </executions>-->
-<!--            </plugin>-->
+            <!-- Make a fat jar -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>${shade-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <!-- Remove useless classes (it is long to do so comment for the moment as we develop...) -->
+                            <minimizeJar>true</minimizeJar>
+                            <relocations>
+                                <relocation>
+                                    <!-- Spark/Yarn come with a previous version of commons cli.
+                                    we want to use 1.4 and have no conflict with their versions so shade ours
+                                    and embed it in our jar -->
+                                    <pattern>org.apache.commons.cli</pattern>
+                                    <shadedPattern>shaded.org.apache.commons.cli</shadedPattern>
+                                </relocation>
+                            </relocations>
+                            <artifactSet>
+                                <includes>
+                                    <!-- Specify our direct dependencies that are not coming from historian
+                                    modules as we will use their own jars at runtime -->
+                                    <include>org.yaml:snakeyaml</include>
+                                    <include>commons-cli:commons-cli</include> <!-- applies to shaded package -->
+                                </includes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
         </plugins>
     </build>
 

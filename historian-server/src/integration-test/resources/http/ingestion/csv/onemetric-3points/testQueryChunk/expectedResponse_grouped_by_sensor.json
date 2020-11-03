@@ -55,7 +55,7 @@
       "chunk_quality_min":"NaN",
       "chunk_quality_max":"NaN",
       "chunk_quality_first":"NaN",
-      "chunk_quality_sum":"NaN",
+      "chunk_quality_sum":0.0,
       "chunk_quality_avg":"NaN",
       "chunk_max": 3.0,
       "chunk_min": 3.0,
