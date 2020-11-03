@@ -24,8 +24,8 @@ public class ImportRequestParser {
      *                                  {
      *                                      "name": ...
      *                                      "measures": [
-     *                                          [time, value],
-     *                                          [time, value]
+     *                                          [time, value, quality],
+     *                                          [time, value, quality]
      *                                      ]
      *                                  },
      *                                 {

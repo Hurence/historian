@@ -35,7 +35,7 @@ public class DataConverter {
     public JsonArray toGroupedByMetricDataPoints(List<LineWithDateInfo> lineWithDateInfos) {
 
         List<Map<String, Object>> finalGroupedPoints = lineWithDateInfos.stream()
-                //group by metric,tag,date -> [value, date] ( in case where group by just metric : metric,date -> [value, date])
+                //group by metric,tag,date -> [value, date, quality] ( in case where group by just metric : metric,date -> [value, date, quality])
                 .collect(Collectors.groupingBy(this::customGroupingBy,
                         LinkedHashMap::new,
                         Collectors.mapping(this::customMapping, Collectors.toList())))
