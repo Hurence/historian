@@ -145,8 +145,7 @@ parse_cli_params() {
           COMMAND="start"
           ;;
         help)
-            usage
-            exit 0
+            cmd_help
           ;;
         # Options
         -c|--config)
@@ -300,6 +299,11 @@ check_variables() {
     fi
   fi
 }
+# Execute the help command
+cmd_help() {
+  usage
+  exit 0
+}
 
 # Execute the start command
 cmd_start() {
@@ -351,27 +355,105 @@ ${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
   esac
 }
 
+# If kerberos is requested, prepare spark-submit options for kerberos
+prepare_kerberos_options() {
+
+  SPARK_SUBMIT_KERBEROS_OPTIONS=""
+
+  if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
+  then
+    SPARK_SUBMIT_KERBEROS_OPTIONS="--principal ${KERBEROS_PRINCIPAL} --keytab ${KERBEROS_KEYTAB}"
+  fi
+}
+
+# Read spark properties from configuration file
+# and prepare spark submit options accordingly
+read_spark_properties_from_config_file() {
+
+  SPARK_SUBMIT_OPTIONS=""
+
+  # Number of executors
+  SPARK_EXECUTOR_INSTANCES=$(read_property_from_config_file "spark.executor.instances")
+  if [[ -n ${SPARK_EXECUTOR_INSTANCES} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --num-executors ${SPARK_EXECUTOR_INSTANCES}"
+  fi
+
+  # Driver cores
+  SPARK_DRIVER_CORES=$(read_property_from_config_file "spark.driver.cores")
+  if [[ -n ${SPARK_DRIVER_CORES} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --driver-cores ${SPARK_DRIVER_CORES}"
+  fi
+
+  # Driver memory
+  SPARK_DRIVER_MEMORY=$(read_property_from_config_file "spark.driver.memory")
+  if [[ -n ${SPARK_DRIVER_MEMORY} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --driver-memory ${SPARK_DRIVER_MEMORY}"
+  fi
+
+  # Executor cores
+  SPARK_EXECUTOR_CORES=$(read_property_from_config_file "spark.executor.cores")
+  if [[ -n ${SPARK_EXECUTOR_CORES} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --executor-cores ${SPARK_EXECUTOR_CORES}"
+  fi
+
+  # Executor memory
+  SPARK_EXECUTOR_MEMORY=$(read_property_from_config_file "spark.executor.memory")
+  if [[ -n ${SPARK_EXECUTOR_MEMORY} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --executor-memory ${SPARK_EXECUTOR_MEMORY}"
+  fi
+}
+
 # Start compactor job in yarn client mode
 start_yarn_client() {
   echo "Starting Compactor Job in YARN client mode"
 
-  # TBD use config sparkFile.get, logs, debug mode ?
-  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode \
-client --num-executors 2 --executor-memory 2G --executor-cores 4 \
---jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} ${COMPACTOR_JAR} \
---config-file ${HISTORIAN_CONFIG_FILE}"
-  echo ${CMD}
+  # Read any spark property that we support and prepare SPARK_SUBMIT_OPTIONS
+  read_spark_properties_from_config_file
+
+  # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
+  prepare_kerberos_options
+
+  # Run spark-submit command
+  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode client \
+${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
+${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+  echo "${CMD}"
   ${CMD}
 }
 
 # Start compactor job in yarn cluster mode
 start_yarn_cluster() {
   echo "Starting Compactor Job in YARN cluster mode"
+
+  # Read any spark property that we support and prepare SPARK_SUBMIT_OPTIONS
+  read_spark_properties_from_config_file
+
+  # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
+  prepare_kerberos_options
+
+  # Run spark-submit command
+  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode cluster \
+${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
+${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+  echo "${CMD}"
+  ${CMD}
 }
 
 # Start compactor in local mode
 start_local() {
   echo "Starting Compactor Job in local mode: ${SPARK_MASTER}"
+
+  # Run spark-submit command
+  CMD="${SPARK_HOME}/bin/spark-submit --master ${SPARK_MASTER} \
+${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
+${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+  echo "${CMD}"
+  ${CMD}
 }
 
 # Read passed property ($1) content from the config file.
@@ -383,9 +465,9 @@ read_property_from_config_file() {
     echo "Expecting one parameter at read_property_from_config_file function"
     exit 1
   fi
-  # Fin the line with the parameter and cut using the ':' yaml separator
+  # Find the line with the parameter and cut using the ':' yaml separator
   # We ignore any line with # comment character (even if at end of line...)
-  PROPERTY_VALUE=$(grep "${1}" "${HISTORIAN_CONFIG_FILE}" | grep -v "#" |cut -d':' -f2)
+  PROPERTY_VALUE=$(grep "${1}" "${HISTORIAN_CONFIG_FILE}"|grep -v "#"|cut -d':' -f2)
   # xargs allows to trim any heading/leading space/tab and also remove potential
   # double quotes (key: "value" -> value)
   echo "${PROPERTY_VALUE}" | xargs
