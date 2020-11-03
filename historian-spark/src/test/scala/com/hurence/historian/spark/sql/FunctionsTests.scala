@@ -25,7 +25,7 @@ class FunctionsTests {
   @Test
   def testDateUtils() = {
 
-    val utcTime = 1583017574000L
+    val utcTime = 1583021174000L
     val dateString = "01/03/2020 00:06:14"
     val dateFormat = "dd/MM/yyyy HH:mm:ss"
     val time = DateUtil.parse(dateString, dateFormat).getTime

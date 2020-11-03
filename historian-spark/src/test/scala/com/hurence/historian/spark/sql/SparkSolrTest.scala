@@ -111,7 +111,7 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         measuresBack.sort("timestamp"))
 
       assert(solrDF.count == 6)
-      /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
+      /*  assert(solrDF.schema.fields.lengthTestda === 5) // _root_ id one_txt two_txt three_s
         val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
         assert(oneColFirstRow != null)
         val firstRow = solrDF.head.toSeq                        // query for all columns
