@@ -362,6 +362,7 @@ public class GetTimeSeriesHandler {
         query.addField(SOLR_COLUMN_VALUE);
         if (isQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 1");
+            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (isQueryMode2ConsideringNotQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 2");
@@ -444,6 +445,7 @@ public class GetTimeSeriesHandler {
 
         // new immplem here where we avoir SolR streams becaouse of docValues big on chunk_value field
         try {
+            ChunkStream stream = queryStream(query);
 
             StringBuilder exprBuilder = new StringBuilder();
 
@@ -471,6 +473,7 @@ public class GetTimeSeriesHandler {
 
                 long chunkStart = (Long) document.getFieldValue(SOLR_COLUMN_START);
                 long chunkEnd = (Long) document.getFieldValue(SOLR_COLUMN_END);
+                double chunkFirst = (double) document.getFirstValue(SOLR_COLUMN_FIRST);
                 try {
                     byte[] compressedPoints = BinaryEncodingUtils.decode(value);
                    /* TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
@@ -490,6 +493,7 @@ public class GetTimeSeriesHandler {
                     Chunk chunk = Chunk.builder()
                             .id(id)
                             .name(name)
+                            .first(chunkFirst)
                             .start(chunkStart)
                             .end(chunkEnd)
                             .value(compressedPoints)
