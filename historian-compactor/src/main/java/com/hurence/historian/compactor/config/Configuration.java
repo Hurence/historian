@@ -20,6 +20,8 @@ public class Configuration implements Serializable {
         return solrZkHost;
     }
 
+    // Also the ConfigurationBuilder must be used, this method is public for
+    // CompactorIT test access only
     public void setSolrZkHost(String solrZkHost) {
         this.solrZkHost = solrZkHost;
     }
@@ -28,7 +30,7 @@ public class Configuration implements Serializable {
         return solrCollection;
     }
 
-    public void setSolrCollection(String solrCollection) {
+    void setSolrCollection(String solrCollection) {
         this.solrCollection = solrCollection;
     }
 
@@ -36,7 +38,7 @@ public class Configuration implements Serializable {
         return compactionSchedulingPeriod;
     }
 
-    public void setCompactionSchedulingPeriod(int compactionSchedulingPeriod) {
+    void setCompactionSchedulingPeriod(int compactionSchedulingPeriod) {
         this.compactionSchedulingPeriod = compactionSchedulingPeriod;
     }
 
@@ -44,7 +46,7 @@ public class Configuration implements Serializable {
         return compactionSchedulingStartNow;
     }
 
-    public void setCompactionSchedulingStartNow(boolean compactionSchedulingStartNow) {
+    void setCompactionSchedulingStartNow(boolean compactionSchedulingStartNow) {
         this.compactionSchedulingStartNow = compactionSchedulingStartNow;
     }
 
@@ -56,7 +58,7 @@ public class Configuration implements Serializable {
         return sparkConfig;
     }
 
-    public void setSparkConfig(Map<String, String> sparkConfig) {
+    void setSparkConfig(Map<String, String> sparkConfig) {
         this.sparkConfig = sparkConfig;
     }
 }
