@@ -362,7 +362,10 @@ public class GetTimeSeriesHandler {
         query.addField(SOLR_COLUMN_VALUE);
         if (isQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 1");
-            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
+            query.addField(SOLR_COLUMN_FIRST);
+            query.addField(SOLR_COLUMN_SUM);
+            query.addField(SOLR_COLUMN_MIN);
+            query.addField(SOLR_COLUMN_MAX);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (isQueryMode2ConsideringNotQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 2");
@@ -473,7 +476,11 @@ public class GetTimeSeriesHandler {
 
                 long chunkStart = (Long) document.getFieldValue(SOLR_COLUMN_START);
                 long chunkEnd = (Long) document.getFieldValue(SOLR_COLUMN_END);
+                String fields = query.getFields();
                 double chunkFirst = (double) document.getFirstValue(SOLR_COLUMN_FIRST);
+                double chunkMax = (double) document.getFirstValue(SOLR_COLUMN_MAX);
+                double chunkMin = (double) document.getFirstValue(SOLR_COLUMN_MIN);
+                double chunkSum = (double) document.getFirstValue(SOLR_COLUMN_SUM);
                 try {
                     byte[] compressedPoints = BinaryEncodingUtils.decode(value);
                    /* TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
@@ -494,6 +501,9 @@ public class GetTimeSeriesHandler {
                             .id(id)
                             .name(name)
                             .first(chunkFirst)
+                            .max(chunkMax)
+                            .min(chunkMin)
+                            .sum(chunkSum)
                             .start(chunkStart)
                             .end(chunkEnd)
                             .value(compressedPoints)
@@ -532,6 +542,7 @@ public class GetTimeSeriesHandler {
             p.fail(e);
         }*/
     }
+
 
     public void addFieldsThatWillBeNeededBySamplingAlgorithms(Request request, SolrQuery query, MetricsSizeInfo metricsInfo) {
         SamplingConf requestedSamplingConf = getSamplingConf(request);
