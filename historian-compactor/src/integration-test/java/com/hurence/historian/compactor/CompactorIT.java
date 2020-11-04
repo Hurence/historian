@@ -1041,7 +1041,7 @@ public class CompactorIT {
 
         compactorConfig.setSolrZkHost(zkHost);
         logger.info("Using compactor configuration: " + compactorConfig);
-        Compactor compactor = new Compactor(compactorConfig);
+        Compactor compactor = new Compactor(compactorConfig, true);
 
 //        System.out.println("Before recompaction: ");
 //        printSolrJsonDocs(solrClient, chunksCollection);
