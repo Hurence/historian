@@ -25,6 +25,5 @@ jobs:
       with:
         java-version: 1.8
     - name: Build with Maven
-      # The 'install' maven phase is just after the 'verify' phase which is the
-      # needed one for running integration tests.
-      run: mvn -Pintegration-tests -q mvn clean install
+      # The 'verify' phase which is the needed one for running integration tests
+      run: mvn -Pintegration-tests -q clean verify
