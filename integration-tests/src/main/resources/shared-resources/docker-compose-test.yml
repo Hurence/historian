@@ -4,6 +4,8 @@ services:
 
   zookeeper:
     image: wurstmeister/zookeeper
+    ports:
+      - "2181:2181"
     networks:
       - solr_net
 
