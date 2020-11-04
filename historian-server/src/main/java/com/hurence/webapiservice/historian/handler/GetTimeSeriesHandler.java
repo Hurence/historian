@@ -366,6 +366,10 @@ public class GetTimeSeriesHandler {
             query.addField(SOLR_COLUMN_SUM);
             query.addField(SOLR_COLUMN_MIN);
             query.addField(SOLR_COLUMN_MAX);
+            query.addField(SOLR_COLUMN_QUALITY_FIRST);
+            query.addField(SOLR_COLUMN_QUALITY_AVG);
+            query.addField(SOLR_COLUMN_QUALITY_MIN);
+            query.addField(SOLR_COLUMN_QUALITY_MAX);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (isQueryMode2ConsideringNotQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 2");
@@ -477,10 +481,17 @@ public class GetTimeSeriesHandler {
                 long chunkStart = (Long) document.getFieldValue(SOLR_COLUMN_START);
                 long chunkEnd = (Long) document.getFieldValue(SOLR_COLUMN_END);
                 String fields = query.getFields();
+
                 double chunkFirst = (double) document.getFirstValue(SOLR_COLUMN_FIRST);
                 double chunkMax = (double) document.getFirstValue(SOLR_COLUMN_MAX);
                 double chunkMin = (double) document.getFirstValue(SOLR_COLUMN_MIN);
                 double chunkSum = (double) document.getFirstValue(SOLR_COLUMN_SUM);
+
+                float chunkQualityMin = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_MIN);
+                float chunkQualityMax = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_MAX);
+                float chunkQualityAvg = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_AVG);
+                float chunkQualityFirst = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_FIRST);
+
                 try {
                     byte[] compressedPoints = BinaryEncodingUtils.decode(value);
                    /* TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
@@ -504,6 +515,10 @@ public class GetTimeSeriesHandler {
                             .max(chunkMax)
                             .min(chunkMin)
                             .sum(chunkSum)
+                            .qualityMin(chunkQualityMin)
+                            .qualityMax(chunkQualityMax)
+                            .qualityAvg(chunkQualityAvg)
+                            .qualityFirst(chunkQualityFirst)
                             .start(chunkStart)
                             .end(chunkEnd)
                             .value(compressedPoints)
@@ -548,15 +563,13 @@ public class GetTimeSeriesHandler {
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         Set<SamplingAlgorithm> samplingAlgos = determineSamplingAlgoThatWillBeUsed(requestedSamplingConf, metricsInfo);
         addNecessaryFieldToQuery(query, samplingAlgos);
-        if (request.getQualityReturn()) {
-            addNecessaryQualityFieldToQuery(request, query, samplingAlgos);
-        }
+        addNecessaryQualityFieldToQuery(request, query, samplingAlgos);
     }
 
 
     private void addNecessaryQualityFieldToQuery(Request request, SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
         /*if(request.getUseQuality())*/
-        samplingAlgos.forEach(algo -> {
+        /*samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
                     break;
@@ -575,12 +588,16 @@ public class GetTimeSeriesHandler {
                 default:
                     throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
             }
-        });
+        });*/
+        query.addField(SOLR_COLUMN_QUALITY_FIRST);
+        query.addField(SOLR_COLUMN_QUALITY_AVG);
+        query.addField(SOLR_COLUMN_QUALITY_MIN);
+        query.addField(SOLR_COLUMN_QUALITY_MAX);
     }
 
 
     private void addNecessaryFieldToQuery(SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
-        samplingAlgos.forEach(algo -> {
+        /*samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
                     query.addField(SOLR_COLUMN_VALUE);
@@ -603,7 +620,11 @@ public class GetTimeSeriesHandler {
                 default:
                     throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
             }
-        });
+        });*/
+        query.addField(SOLR_COLUMN_FIRST);
+        query.addField(SOLR_COLUMN_SUM);
+        query.addField(SOLR_COLUMN_MIN);
+        query.addField(SOLR_COLUMN_MAX);
     }
 
     private Set<SamplingAlgorithm> determineSamplingAlgoThatWillBeUsed(SamplingConf askedSamplingConf, MetricsSizeInfo metricsSizeInfo) {
