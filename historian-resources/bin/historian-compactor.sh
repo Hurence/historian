@@ -10,6 +10,8 @@ HISTORIAN_LIB_DIR="${HISTORIAN_HOME}/lib"
 HISTORIAN_CONF_DIR="${HISTORIAN_HOME}/conf"
 
 COMMAND=""
+DEBUG="false"
+CUSTOM_LOG4J_FILE="false"
 USE_VARS_FILE="true"
 USE_KERBEROS="false"
 HISTORIAN_VERSION="1.3.6-SNAPSHOT"
@@ -18,9 +20,9 @@ HISTORIAN_VERSION="1.3.6-SNAPSHOT"
 HISTORIAN_CONFIG_FILE=${HISTORIAN_CONF_DIR}/historian-compactor.yaml
 # Default environment variables file
 HISTORIAN_VARS_FILE=${HISTORIAN_CONF_DIR}/historian-compactor-envs
-
-# Run variables
-COMPACTOR_DEPLOY_MODE="cluster"
+# Default log4j configuration files
+HISTORIAN_LOG4J_FILE=${HISTORIAN_CONF_DIR}/log4j-compactor.properties
+HISTORIAN_LOG4J_DEBUG_FILE=${HISTORIAN_CONF_DIR}/log4j-compactor-debug.properties
 
 ################################################################################
 # Functions
@@ -40,13 +42,11 @@ ${SCRIPT_NAME} <command> [options]
             help: Print this help then exits.
             start: Start the historian compactor job.
 [options]:
-            -c|--config <config-file-path> : Use configuration file different
-              from the default one (${HISTORIAN_CONFIG_FILE}).
-            -cl|--client-mode : Run job in client mode. Default is use cluster
-              mode in which the spark driver runs anywhere on the cluster
-              whereas client mode makes the driver run where you run the
-              spark-submit command. This creates or overwrites the
-              COMPACTOR_DEPLOY_MODE environment variable whose default is cluster.
+            -c|--config-file <config-file-path> : Use configuration file
+              different from the default one (${HISTORIAN_CONFIG_FILE}).
+            -d|--debug : Enable debug mode. This forces using the log4j debug file
+              located at ${HISTORIAN_LOG4J_DEBUG_FILE}.
+              Thus, this cannot be used with the -l option.
             -h|--hadoop-config <hadoop-config-path> : The path to the directory
               where the core-site.xml file path resides. If not set, will use
               the HADOOP_CONF_DIR environment variable. If the yarn-site.xml
@@ -58,9 +58,12 @@ ${SCRIPT_NAME} <command> [options]
             -krb|--kerberos : Enable kerberos authentication. If used,
               principal and keytab options must be set or the corresponding
               environment variables.
-            -kt|--keytab <keytab-file-path>: Use kerberos with the passed keytab
-              file path. Must be used in conjunction with the -krb option. This
-              creates or overwrites the KERBEROS_KEYTAB environment variable.
+            -kt|--keytab-file <keytab-file-path>: Use kerberos with the passed
+              keytab file path. Must be used in conjunction with the -krb option.
+              This creates or overwrites the KERBEROS_KEYTAB environment variable.
+            -l|--log4j-file <log4j-config-file-path> : Use log4j configuration file
+              different from the default one (${HISTORIAN_LOG4J_FILE}).
+              Cannot be used with the -d option.
             -n|--no-var-file : Do not use any environment variables file (which
               defaults to ${HISTORIAN_VARS_FILE}).
             -p|--principal <principal>: Use kerberos with the passed principal.
@@ -151,65 +154,88 @@ parse_cli_params() {
         # Commands
         start)
           COMMAND="start"
-        ;;
+          ;;
         help)
-            usage
-            exit 0
-        ;;
+            cmd_help
+          ;;
         # Options
-        -c|--config)
+        -c|--config-file)
           validate_option_parameter "$@"
           HISTORIAN_CONFIG_FILE="${2}"
           shift # Next argument
-        ;;
-        -cl|--client-mode)
-          TMP_COMPACTOR_DEPLOY_MODE="client"
-        ;;
+          ;;
+        -d|--debug)
+          DEBUG="true"
+          HISTORIAN_LOG4J_FILE="${HISTORIAN_LOG4J_DEBUG_FILE}"
+          ;;
         -h|--hadoop-config)
           validate_option_parameter "$@"
           TMP_HADOOP_CONF_DIR="${2}"
           shift # Next argument
-        ;;
+          ;;
         -krb|--kerberos)
           TMP_USE_KERBEROS="true"
-        ;;
-        -kt|--keytab)
+          ;;
+        -kt|--keytab-file)
           validate_option_parameter "$@"
           TMP_KERBEROS_KEYTAB="${2}"
           shift # Next argument
-        ;;
+          ;;
+        -l|--log4j-file)
+          validate_option_parameter "$@"
+          HISTORIAN_LOG4J_FILE="${2}"
+          CUSTOM_LOG4J_FILE="true"
+          shift # Next argument
+          ;;
         -n|--no-var-file)
           USE_VARS_FILE="false"
-        ;;
+          ;;
         -p|--principal)
           validate_option_parameter "$@"
           TMP_KERBEROS_PRINCIPAL="${2}"
           shift # Next argument
-        ;;
+          ;;
         -s|--spark-home)
           validate_option_parameter "$@"
           TMP_SPARK_HOME="${2}"
           shift # Next argument
-        ;;
+          ;;
         -v|--var-file)
           validate_option_parameter "$@"
           HISTORIAN_VARS_FILE="${2}"
           shift # Next argument
-        ;;
+          ;;
         -y|--yarn-config)
           validate_option_parameter "$@"
           TMP_YARN_CONF_DIR="${2}"
           shift # Next argument
-        ;;
+          ;;
         # Error if anything else
         *)
           # Unknown parameter
           echo "Unknown command or option: ${param}"
           print_usage_and_exit_on_error
-        ;;
+          ;;
       esac
       shift # Next argument
     done
+}
+
+check_cli_consistency() {
+
+  # Check a command has been set
+  if [[ -z ${COMMAND} ]] # If variable is not set
+  then
+      echo "Missing command"
+      print_usage_and_exit_on_error
+  fi
+
+  # Check mutual exclusion for usage of -d and -l options
+  if [[ -n ${DEBUG} && "${DEBUG}" == "true" && -n ${CUSTOM_LOG4J_FILE} && "${CUSTOM_LOG4J_FILE}" == "true" ]]
+  then
+    echo "Cannot use both -d and -l options"
+    print_usage_and_exit_on_error
+  fi
 }
 
 # Overwrite any environment variable that has been overwritten through CLI option
@@ -244,11 +270,6 @@ overwrite_variables() {
   then
     KERBEROS_KEYTAB="${TMP_KERBEROS_KEYTAB}"
   fi
-
-  if [[ -n ${TMP_COMPACTOR_DEPLOY_MODE} ]] # If variable is set
-  then
-    COMPACTOR_DEPLOY_MODE="${TMP_COMPACTOR_DEPLOY_MODE}"
-  fi
 }
 
 # Read environment variables file if enabled
@@ -276,7 +297,8 @@ display_summary() {
   echo "Spark Home: ${SPARK_HOME}"
   echo "Hadoop configuration directory: ${HADOOP_CONF_DIR}"
   echo "Yarn configuration directory: ${YARN_CONF_DIR}"
-  echo "Yarn deploy mode: ${COMPACTOR_DEPLOY_MODE}"
+  echo "Debug mode: ${DEBUG}"
+  echo "Log4j configuration file: ${HISTORIAN_LOG4J_FILE}"
   echo "Use Kerberos: ${USE_KERBEROS}"
   if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
   then
@@ -302,14 +324,6 @@ check_variables() {
     print_usage_and_exit_on_error
   fi
 
-  # Yarn
-  echo "deploy mode: ${COMPACTOR_DEPLOY_MODE}"
-  if [[ -z ${COMPACTOR_DEPLOY_MODE} || "${COMPACTOR_DEPLOY_MODE}" != "client" && "${COMPACTOR_DEPLOY_MODE}" != "cluster" ]]
-  then
-    echo "COMPACTOR_DEPLOY_MODE must be set to 'client' or 'cluster'. COMPACTOR_DEPLOY_MODE value is: '${COMPACTOR_DEPLOY_MODE}'"
-    print_usage_and_exit_on_error
-  fi
-
   # Kerberos
   if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
   then
@@ -324,6 +338,11 @@ check_variables() {
       print_usage_and_exit_on_error
     fi
   fi
+}
+# Execute the help command
+cmd_help() {
+  usage
+  exit 0
 }
 
 # Execute the start command
@@ -347,13 +366,163 @@ cmd_start() {
   # Create csv list of needed dependency jars
   # Do not put tabs/spaces on lines after the first one or they will appear in
   # the final JARS variable value
-  COMPACTOR_DEP_JARS="${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
-${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
+  COMPACTOR_DEP_JARS="file:${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
+file:${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
 
-  # TBD use config sparkFile.get, logs, debug mode ?
-  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode ${COMPACTOR_DEPLOY_MODE} --num-executors 2 --executor-memory 2G --executor-cores 4 --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} ${COMPACTOR_JAR}"
-  echo ${CMD}
+  # Now get run mode and apply what's asked
+  SPARK_MASTER=$(read_property_from_config_file "spark.master")
+  case ${SPARK_MASTER} in
+    yarn)
+      YARN_DEPLOY_MODE=$(read_property_from_config_file "spark.submit.deployMode")
+      case ${YARN_DEPLOY_MODE} in
+        cluster)
+          start_yarn_cluster
+          ;;
+        client|*) # client mode is the default one if not set in config file
+          start_yarn_client
+          ;;
+      esac
+      ;;
+    local*)
+      # Local mode is for debug only, that why we don't care if it is mandatory
+      # to pass hadoop configuration in script options
+      start_local
+      ;;
+    *)
+      echo "Unsupported run mode: ${SPARK_MASTER}"
+      print_usage_and_exit_on_error
+      ;;
+  esac
+}
+
+# If kerberos is requested, prepare spark-submit options for kerberos
+prepare_kerberos_options() {
+
+  SPARK_SUBMIT_KERBEROS_OPTIONS=""
+
+  if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
+  then
+    SPARK_SUBMIT_KERBEROS_OPTIONS="--principal ${KERBEROS_PRINCIPAL} --keytab ${KERBEROS_KEYTAB}"
+  fi
+}
+
+# Read spark properties from configuration file
+# and prepare spark submit options accordingly
+read_spark_properties_from_config_file() {
+
+  SPARK_SUBMIT_OPTIONS=""
+
+  # Number of executors
+  SPARK_EXECUTOR_INSTANCES=$(read_property_from_config_file "spark.executor.instances")
+  if [[ -n ${SPARK_EXECUTOR_INSTANCES} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --num-executors ${SPARK_EXECUTOR_INSTANCES}"
+  fi
+
+  # Driver cores
+  SPARK_DRIVER_CORES=$(read_property_from_config_file "spark.driver.cores")
+  if [[ -n ${SPARK_DRIVER_CORES} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --driver-cores ${SPARK_DRIVER_CORES}"
+  fi
+
+  # Driver memory
+  SPARK_DRIVER_MEMORY=$(read_property_from_config_file "spark.driver.memory")
+  if [[ -n ${SPARK_DRIVER_MEMORY} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --driver-memory ${SPARK_DRIVER_MEMORY}"
+  fi
+
+  # Executor cores
+  SPARK_EXECUTOR_CORES=$(read_property_from_config_file "spark.executor.cores")
+  if [[ -n ${SPARK_EXECUTOR_CORES} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --executor-cores ${SPARK_EXECUTOR_CORES}"
+  fi
+
+  # Executor memory
+  SPARK_EXECUTOR_MEMORY=$(read_property_from_config_file "spark.executor.memory")
+  if [[ -n ${SPARK_EXECUTOR_MEMORY} ]]
+  then
+    SPARK_SUBMIT_OPTIONS="${SPARK_SUBMIT_OPTIONS} --executor-memory ${SPARK_EXECUTOR_MEMORY}"
+  fi
+}
+
+# Start compactor job in yarn client mode
+start_yarn_client() {
+  echo "Starting Compactor Job in YARN client mode"
+
+  # Read any spark property that we support and prepare SPARK_SUBMIT_OPTIONS
+  read_spark_properties_from_config_file
+
+  # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
+  prepare_kerberos_options
+
+  YARN_FILES_OPTIONS=""
+  YARN_FILES_OPTIONS="${YARN_FILES_OPTIONS} ${HISTORIAN_LOG4J_FILE}#log4j.properties" # Whatever filename is uploaded, the #log4j.properties will set an alias for accessing this file
+  LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${HISTORIAN_LOG4J_FILE}" # Could use HDFS one like for executors but as driver runs locally...
+  LOG4J_WORKERS_SETTINGS="-Dlog4j.configuration=log4j.properties"
+
+  # Run spark-submit command
+  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode client \
+   ${SPARK_SUBMIT_OPTIONS} \
+   ${SPARK_SUBMIT_KERBEROS_OPTIONS} \
+   --driver-java-options ${LOG4J_DRIVER_SETTINGS} \
+   --conf ${LOG4J_WORKERS_SETTINGS} \
+   --jars ${COMPACTOR_DEP_JARS} \
+   --class ${COMPACTOR_CLASS} \
+   --files ${YARN_FILES_OPTIONS} \
+   file:${COMPACTOR_JAR} \
+   --config-file ${HISTORIAN_CONFIG_FILE}"
+  echo "${CMD}"
   ${CMD}
+}
+
+# Start compactor job in yarn cluster mode
+start_yarn_cluster() {
+  echo "Starting Compactor Job in YARN cluster mode"
+
+  # Read any spark property that we support and prepare SPARK_SUBMIT_OPTIONS
+  read_spark_properties_from_config_file
+
+  # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
+  prepare_kerberos_options
+
+  # Run spark-submit command
+  CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode cluster \
+${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
+file:${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+  echo "${CMD}"
+  ${CMD}
+}
+
+# Start compactor in local mode
+start_local() {
+  echo "Starting Compactor Job in local mode: ${SPARK_MASTER}"
+
+  # Run spark-submit command
+  CMD="${SPARK_HOME}/bin/spark-submit --master ${SPARK_MASTER} \
+${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
+${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+  echo "${CMD}"
+  ${CMD}
+}
+
+# Read passed property ($1) content from the config file.
+# Returns the read value. Empty can mean that the property does not exist or is
+# set with empty value
+read_property_from_config_file() {
+  if [[ -z ${1} || ${#} != 1 ]]
+  then
+    echo "Expecting one parameter at read_property_from_config_file function"
+    exit 1
+  fi
+  # Find the line with the parameter and cut using the ':' yaml separator
+  # We ignore any line with # comment character (even if at end of line...)
+  PROPERTY_VALUE=$(grep "${1}" "${HISTORIAN_CONFIG_FILE}"|grep -v "#"|cut -d':' -f2)
+  # xargs allows to trim any heading/leading space/tab and also remove potential
+  # double quotes (key: "value" -> value)
+  echo "${PROPERTY_VALUE}" | xargs
 }
 
 ################################################################################
@@ -363,12 +532,8 @@ ${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
 # Parse options
 parse_cli_params "$@"
 
-# Check a command has been set
-if [[ -z ${COMMAND} ]] # If variable is not set
-then
-    echo "Missing command"
-    print_usage_and_exit_on_error
-fi
+# Check cli command and options consistency
+check_cli_consistency
 
 # Read environment variables file if enabled
 read_variables_file
@@ -391,10 +556,10 @@ echo
 case ${COMMAND} in
   start)
     cmd_start
-  ;;
+    ;;
   *)
     # Unknown command but not possible as already tested by parsing system!
     echo "Unknown command"
     print_usage_and_exit_on_error
-  ;;
+    ;;
 esac
