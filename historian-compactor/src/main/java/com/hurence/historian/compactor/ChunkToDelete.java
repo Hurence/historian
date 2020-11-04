@@ -2,7 +2,6 @@ package com.hurence.historian.compactor;
 
 import org.apache.commons.lang3.builder.ReflectionToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
-import spire.random.rng.Serial;
 
 import java.io.Serializable;
 
