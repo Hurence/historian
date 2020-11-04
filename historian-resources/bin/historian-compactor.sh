@@ -10,6 +10,8 @@ HISTORIAN_LIB_DIR="${HISTORIAN_HOME}/lib"
 HISTORIAN_CONF_DIR="${HISTORIAN_HOME}/conf"
 
 COMMAND=""
+DEBUG="false"
+CUSTOM_LOG4J_FILE="false"
 USE_VARS_FILE="true"
 USE_KERBEROS="false"
 HISTORIAN_VERSION="1.3.6-SNAPSHOT"
@@ -18,8 +20,9 @@ HISTORIAN_VERSION="1.3.6-SNAPSHOT"
 HISTORIAN_CONFIG_FILE=${HISTORIAN_CONF_DIR}/historian-compactor.yaml
 # Default environment variables file
 HISTORIAN_VARS_FILE=${HISTORIAN_CONF_DIR}/historian-compactor-envs
-# Default log4j configuration file
+# Default log4j configuration files
 HISTORIAN_LOG4J_FILE=${HISTORIAN_CONF_DIR}/log4j-compactor.properties
+HISTORIAN_LOG4J_DEBUG_FILE=${HISTORIAN_CONF_DIR}/log4j-compactor-debug.properties
 
 ################################################################################
 # Functions
@@ -41,6 +44,9 @@ ${SCRIPT_NAME} <command> [options]
 [options]:
             -c|--config-file <config-file-path> : Use configuration file
               different from the default one (${HISTORIAN_CONFIG_FILE}).
+            -d|--debug : Enable debug mode. This forces using the log4j debug file
+              located at ${HISTORIAN_LOG4J_DEBUG_FILE}.
+              Thus, this cannot be used with the -l option.
             -h|--hadoop-config <hadoop-config-path> : The path to the directory
               where the core-site.xml file path resides. If not set, will use
               the HADOOP_CONF_DIR environment variable. If the yarn-site.xml
@@ -57,6 +63,7 @@ ${SCRIPT_NAME} <command> [options]
               This creates or overwrites the KERBEROS_KEYTAB environment variable.
             -l|--log4j-file <log4j-config-file-path> : Use log4j configuration file
               different from the default one (${HISTORIAN_LOG4J_FILE}).
+              Cannot be used with the -d option.
             -n|--no-var-file : Do not use any environment variables file (which
               defaults to ${HISTORIAN_VARS_FILE}).
             -p|--principal <principal>: Use kerberos with the passed principal.
@@ -157,6 +164,10 @@ parse_cli_params() {
           HISTORIAN_CONFIG_FILE="${2}"
           shift # Next argument
           ;;
+        -d|--debug)
+          DEBUG="true"
+          HISTORIAN_LOG4J_FILE="${HISTORIAN_LOG4J_DEBUG_FILE}"
+          ;;
         -h|--hadoop-config)
           validate_option_parameter "$@"
           TMP_HADOOP_CONF_DIR="${2}"
@@ -173,6 +184,7 @@ parse_cli_params() {
         -l|--log4j-file)
           validate_option_parameter "$@"
           HISTORIAN_LOG4J_FILE="${2}"
+          CUSTOM_LOG4J_FILE="true"
           shift # Next argument
           ;;
         -n|--no-var-file)
@@ -207,6 +219,23 @@ parse_cli_params() {
       esac
       shift # Next argument
     done
+}
+
+check_cli_consistency() {
+
+  # Check a command has been set
+  if [[ -z ${COMMAND} ]] # If variable is not set
+  then
+      echo "Missing command"
+      print_usage_and_exit_on_error
+  fi
+
+  # Check mutual exclusion for usage of -d and -l options
+  if [[ -n ${DEBUG} && "${DEBUG}" == "true" && -n ${CUSTOM_LOG4J_FILE} && "${CUSTOM_LOG4J_FILE}" == "true" ]]
+  then
+    echo "Cannot use both -d and -l options"
+    print_usage_and_exit_on_error
+  fi
 }
 
 # Overwrite any environment variable that has been overwritten through CLI option
@@ -268,6 +297,7 @@ display_summary() {
   echo "Spark Home: ${SPARK_HOME}"
   echo "Hadoop configuration directory: ${HADOOP_CONF_DIR}"
   echo "Yarn configuration directory: ${YARN_CONF_DIR}"
+  echo "Debug mode: ${DEBUG}"
   echo "Log4j configuration file: ${HISTORIAN_LOG4J_FILE}"
   echo "Use Kerberos: ${USE_KERBEROS}"
   if [[ -n ${USE_KERBEROS} && "${USE_KERBEROS}" == "true" ]]
@@ -502,12 +532,8 @@ read_property_from_config_file() {
 # Parse options
 parse_cli_params "$@"
 
-# Check a command has been set
-if [[ -z ${COMMAND} ]] # If variable is not set
-then
-    echo "Missing command"
-    print_usage_and_exit_on_error
-fi
+# Check cli command and options consistency
+check_cli_consistency
 
 # Read environment variables file if enabled
 read_variables_file
