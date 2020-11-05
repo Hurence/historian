@@ -362,19 +362,12 @@ public class GetTimeSeriesHandler {
         query.addField(SOLR_COLUMN_VALUE);
         if (isQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 1");
-            query.addField(SOLR_COLUMN_FIRST);
-            query.addField(SOLR_COLUMN_SUM);
-            query.addField(SOLR_COLUMN_MIN);
-            query.addField(SOLR_COLUMN_MAX);
-            query.addField(SOLR_COLUMN_QUALITY_FIRST);
-            query.addField(SOLR_COLUMN_QUALITY_AVG);
-            query.addField(SOLR_COLUMN_QUALITY_MIN);
-            query.addField(SOLR_COLUMN_QUALITY_MAX);
+            addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (isQueryMode2ConsideringNotQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 2");
             buildFilters(request, query, true);
-            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
+            addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         } else {
             LOGGER.debug("QUERY MODE 3 : else");
@@ -383,7 +376,7 @@ public class GetTimeSeriesHandler {
             //TODO Sample points with chunk aggs depending on alg (min, avg),
             // but should using agg on solr side (using key partition, by month, daily ? yearly ?)
             // For the moment we use the stream api without partitionning
-            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
+            addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         }
         return timeSeriesExtracter;
@@ -452,7 +445,6 @@ public class GetTimeSeriesHandler {
 
         // new immplem here where we avoir SolR streams becaouse of docValues big on chunk_value field
         try {
-            ChunkStream stream = queryStream(query);
 
             StringBuilder exprBuilder = new StringBuilder();
 
@@ -461,7 +453,7 @@ public class GetTimeSeriesHandler {
             queryParamMap.put("fq", String.join(" ", query.getFilterQueries()));
             queryParamMap.put("fl", query.getFields());
             queryParamMap.put("sort", query.getSortField());
-            queryParamMap.put("rows", "5000");
+            queryParamMap.put("rows", String.valueOf(solrHistorianConf.limitNumberOfChunks)); // can't have limitNumberOfChunks < nombres of docs
             MapSolrParams queryParams = new MapSolrParams(queryParamMap);
 
             final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, queryParams);
@@ -481,7 +473,6 @@ public class GetTimeSeriesHandler {
 
                 long chunkStart = (Long) document.getFieldValue(SOLR_COLUMN_START);
                 long chunkEnd = (Long) document.getFieldValue(SOLR_COLUMN_END);
-                String fields = query.getFields();
 
                 double chunkFirst = (double) document.getFirstValue(SOLR_COLUMN_FIRST);
                 double chunkMax = (double) document.getFirstValue(SOLR_COLUMN_MAX);
@@ -570,7 +561,7 @@ public class GetTimeSeriesHandler {
 
     private void addNecessaryQualityFieldToQuery(Request request, SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
         /*if(request.getUseQuality())*/
-        /*samplingAlgos.forEach(algo -> {
+        samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
                     break;
@@ -589,16 +580,12 @@ public class GetTimeSeriesHandler {
                 default:
                     throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
             }
-        });*/
-        query.addField(SOLR_COLUMN_QUALITY_FIRST);
-        query.addField(SOLR_COLUMN_QUALITY_AVG);
-        query.addField(SOLR_COLUMN_QUALITY_MIN);
-        query.addField(SOLR_COLUMN_QUALITY_MAX);
+        });
     }
 
 
     private void addNecessaryFieldToQuery(SolrQuery query, Set<SamplingAlgorithm> samplingAlgos) {
-        /*samplingAlgos.forEach(algo -> {
+        samplingAlgos.forEach(algo -> {
             switch (algo) {
                 case NONE:
                     query.addField(SOLR_COLUMN_VALUE);
@@ -621,11 +608,18 @@ public class GetTimeSeriesHandler {
                 default:
                     throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
             }
-        });*/
+        });
+    }
+
+    private void addFieldsThatWillBeNeeded(SolrQuery query) {
         query.addField(SOLR_COLUMN_FIRST);
         query.addField(SOLR_COLUMN_SUM);
         query.addField(SOLR_COLUMN_MIN);
         query.addField(SOLR_COLUMN_MAX);
+        query.addField(SOLR_COLUMN_QUALITY_FIRST);
+        query.addField(SOLR_COLUMN_QUALITY_AVG);
+        query.addField(SOLR_COLUMN_QUALITY_MIN);
+        query.addField(SOLR_COLUMN_QUALITY_MAX);
     }
 
     private Set<SamplingAlgorithm> determineSamplingAlgoThatWillBeUsed(SamplingConf askedSamplingConf, MetricsSizeInfo metricsSizeInfo) {
