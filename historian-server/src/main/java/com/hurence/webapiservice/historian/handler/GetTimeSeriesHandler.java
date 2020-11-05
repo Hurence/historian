@@ -461,6 +461,7 @@ public class GetTimeSeriesHandler {
             queryParamMap.put("fq", String.join(" ", query.getFilterQueries()));
             queryParamMap.put("fl", query.getFields());
             queryParamMap.put("sort", query.getSortField());
+            queryParamMap.put("rows", "5000");
             MapSolrParams queryParams = new MapSolrParams(queryParamMap);
 
             final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, queryParams);
