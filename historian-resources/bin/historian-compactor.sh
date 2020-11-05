@@ -468,14 +468,14 @@ start_yarn_client() {
   # Notation: local-file-path1#uploaded-file-name1[,local-file-path2#uploaded-file-name2]
   YARN_FILES_OPTIONS="${HISTORIAN_LOG4J_FILE}#${UPLOADED_LOG4J_CONFIG_FILE}"
   LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${HISTORIAN_LOG4J_FILE}" # Could use HDFS one like for executors but as driver runs locally...
-  LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:log4j.properties"
+  LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
 
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode client \
    ${SPARK_SUBMIT_OPTIONS} \
    ${SPARK_SUBMIT_KERBEROS_OPTIONS} \
    --driver-java-options ${LOG4J_DRIVER_SETTINGS} \
-   --conf ${LOG4J_EXECUTORS_SETTINGS} \
+   --conf spark.executor.extraJavaOptions=${LOG4J_EXECUTORS_SETTINGS} \
    --jars ${COMPACTOR_DEP_JARS} \
    --class ${COMPACTOR_CLASS} \
    --files ${YARN_FILES_OPTIONS} \
@@ -514,7 +514,7 @@ start_yarn_cluster() {
    ${SPARK_SUBMIT_OPTIONS} \
    ${SPARK_SUBMIT_KERBEROS_OPTIONS} \
    --driver-java-options ${LOG4J_DRIVER_SETTINGS} \
-   --conf ${LOG4J_EXECUTORS_SETTINGS} \
+   --conf spark.executor.extraJavaOptions=${LOG4J_EXECUTORS_SETTINGS} \
    --jars ${COMPACTOR_DEP_JARS} \
    --class ${COMPACTOR_CLASS} \
    --files ${YARN_FILES_OPTIONS} \
