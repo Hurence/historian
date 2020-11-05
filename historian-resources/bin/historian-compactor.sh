@@ -17,12 +17,12 @@ USE_KERBEROS="false"
 HISTORIAN_VERSION="1.3.6-SNAPSHOT"
 
 # Default configuration file path
-HISTORIAN_CONFIG_FILE=${HISTORIAN_CONF_DIR}/historian-compactor.yaml
+HISTORIAN_CONFIG_FILE="${HISTORIAN_CONF_DIR}/historian-compactor.yaml"
 # Default environment variables file
-HISTORIAN_VARS_FILE=${HISTORIAN_CONF_DIR}/historian-compactor-envs
+HISTORIAN_VARS_FILE="${HISTORIAN_CONF_DIR}/historian-compactor-envs"
 # Default log4j configuration files
-HISTORIAN_LOG4J_FILE=${HISTORIAN_CONF_DIR}/log4j-compactor.properties
-HISTORIAN_LOG4J_DEBUG_FILE=${HISTORIAN_CONF_DIR}/log4j-compactor-debug.properties
+HISTORIAN_LOG4J_FILE="${HISTORIAN_CONF_DIR}/log4j-compactor.properties"
+HISTORIAN_LOG4J_DEBUG_FILE="${HISTORIAN_CONF_DIR}/log4j-compactor-debug.properties"
 
 ################################################################################
 # Functions
@@ -458,17 +458,18 @@ start_yarn_client() {
   # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
   prepare_kerberos_options
 
-  YARN_FILES_OPTIONS=""
-  YARN_FILES_OPTIONS="${YARN_FILES_OPTIONS} ${HISTORIAN_LOG4J_FILE}#log4j.properties" # Whatever filename is uploaded, the #log4j.properties will set an alias for accessing this file
+  UPLOADED_LOG4J_CONFIG_FILE="log4j-compactor.properties"
+  # Notation: local-file-path1#uploaded-file-name1[,local-file-path2#uploaded-file-name2]
+  YARN_FILES_OPTIONS="${HISTORIAN_LOG4J_FILE}#${UPLOADED_LOG4J_CONFIG_FILE}"
   LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${HISTORIAN_LOG4J_FILE}" # Could use HDFS one like for executors but as driver runs locally...
-  LOG4J_WORKERS_SETTINGS="-Dlog4j.configuration=log4j.properties"
+  LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:log4j.properties"
 
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode client \
    ${SPARK_SUBMIT_OPTIONS} \
    ${SPARK_SUBMIT_KERBEROS_OPTIONS} \
    --driver-java-options ${LOG4J_DRIVER_SETTINGS} \
-   --conf ${LOG4J_WORKERS_SETTINGS} \
+   --conf ${LOG4J_EXECUTORS_SETTINGS} \
    --jars ${COMPACTOR_DEP_JARS} \
    --class ${COMPACTOR_CLASS} \
    --files ${YARN_FILES_OPTIONS} \
@@ -488,10 +489,24 @@ start_yarn_cluster() {
   # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
   prepare_kerberos_options
 
+  UPLOADED_HISTORIAN_CONFIG_FILE="historian-compactor.yaml"
+  UPLOADED_LOG4J_CONFIG_FILE="log4j-compactor.properties"
+  # Notation: local-file-path1#uploaded-file-name1[,local-file-path2#uploaded-file-name2]
+  YARN_FILES_OPTIONS="${HISTORIAN_CONFIG_FILE}#${UPLOADED_HISTORIAN_CONFIG_FILE},${HISTORIAN_LOG4J_FILE}#${UPLOADED_LOG4J_CONFIG_FILE}"
+  LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
+  LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
+
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode cluster \
-${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
-file:${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+   ${SPARK_SUBMIT_OPTIONS} \
+   ${SPARK_SUBMIT_KERBEROS_OPTIONS} \
+   --driver-java-options ${LOG4J_DRIVER_SETTINGS} \
+   --conf ${LOG4J_EXECUTORS_SETTINGS} \
+   --jars ${COMPACTOR_DEP_JARS} \
+   --class ${COMPACTOR_CLASS} \
+   --files ${YARN_FILES_OPTIONS} \
+   file:${COMPACTOR_JAR} \
+   --config-file ${UPLOADED_HISTORIAN_CONFIG_FILE}"
   echo "${CMD}"
   ${CMD}
 }
@@ -500,10 +515,25 @@ file:${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
 start_local() {
   echo "Starting Compactor Job in local mode: ${SPARK_MASTER}"
 
+  # Read any spark property that we support and prepare SPARK_SUBMIT_OPTIONS
+  read_spark_properties_from_config_file
+
+  # Prepare spark-submit kerberos options in SPARK_SUBMIT_KERBEROS_OPTIONS
+  prepare_kerberos_options
+
+  LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${HISTORIAN_LOG4J_FILE}"
+  LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:${HISTORIAN_LOG4J_FILE}"
+
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master ${SPARK_MASTER} \
-${SPARK_SUBMIT_OPTIONS} ${SPARK_SUBMIT_KERBEROS_OPTIONS} --jars ${COMPACTOR_DEP_JARS} --class ${COMPACTOR_CLASS} \
-${COMPACTOR_JAR} --config-file ${HISTORIAN_CONFIG_FILE}"
+   ${SPARK_SUBMIT_OPTIONS} \
+   ${SPARK_SUBMIT_KERBEROS_OPTIONS} \
+   --driver-java-options ${LOG4J_DRIVER_SETTINGS} \
+   --conf ${LOG4J_EXECUTORS_SETTINGS} \
+   --jars ${COMPACTOR_DEP_JARS} \
+   --class ${COMPACTOR_CLASS} \
+   file:${COMPACTOR_JAR} \
+   --config-file ${HISTORIAN_CONFIG_FILE}"
   echo "${CMD}"
   ${CMD}
 }
