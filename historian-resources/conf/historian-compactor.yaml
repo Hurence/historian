@@ -1,5 +1,5 @@
 solr:
-  zkHost: <set me>
+  zkHost: zookeeper:2181
   collection: historian
 spark:
   # Any entry under the spark entry is expected to match the spark application configuration
@@ -10,9 +10,9 @@ spark:
   spark.submit.deployMode: client
   spark.executor.instances: "2"
   spark.driver.cores: "1"
-  spark.driver.memory: "1G"
+  spark.driver.memory: "512m"
   spark.executor.cores: "1"
-  spark.executor.memory: "1G"
+  spark.executor.memory: "512m"
 compaction:
   scheduling:
     # Period at which the compaction algorithm is launched in seconds
