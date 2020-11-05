@@ -410,6 +410,12 @@ prepare_kerberos_options() {
 # and prepare spark submit options accordingly
 read_spark_properties_from_config_file() {
 
+  READ_APPLICATION_NAME=$(read_property_from_config_file "spark.app.name")
+  if [[ -n ${READ_APPLICATION_NAME} ]]
+  then
+    APPLICATION_NAME="${READ_APPLICATION_NAME}"
+  fi
+
   SPARK_SUBMIT_OPTIONS=""
 
   # Number of executors
@@ -496,6 +502,13 @@ start_yarn_cluster() {
   LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
   LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
 
+  # In YARN cluster mode, we have to force application name whereas doing from java code works for other modes (yarn client, local)
+  APPLICATION_NAME_OPTION=""
+  if [[ -n ${APPLICATION_NAME} ]]
+  then
+    APPLICATION_NAME_OPTION="--name ${APPLICATION_NAME}"
+  fi
+
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode cluster \
    ${SPARK_SUBMIT_OPTIONS} \
@@ -505,6 +518,7 @@ start_yarn_cluster() {
    --jars ${COMPACTOR_DEP_JARS} \
    --class ${COMPACTOR_CLASS} \
    --files ${YARN_FILES_OPTIONS} \
+   ${APPLICATION_NAME_OPTION} \
    file:${COMPACTOR_JAR} \
    --config-file ${UPLOADED_HISTORIAN_CONFIG_FILE}"
   echo "${CMD}"
