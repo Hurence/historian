@@ -453,7 +453,7 @@ public class GetTimeSeriesHandler {
             queryParamMap.put("fq", String.join(" ", query.getFilterQueries()));
             queryParamMap.put("fl", query.getFields());
             queryParamMap.put("sort", query.getSortField());
-            queryParamMap.put("rows", String.valueOf(solrHistorianConf.limitNumberOfChunks)); // can't have limitNumberOfChunks < nombres of docs
+            queryParamMap.put("rows", "50000");
             MapSolrParams queryParams = new MapSolrParams(queryParamMap);
 
             final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, queryParams);
