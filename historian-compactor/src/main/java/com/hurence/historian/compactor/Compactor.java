@@ -158,6 +158,8 @@ public class Compactor implements Runnable {
             return;
         }
 
+        close();
+
         started = false;
         logger.info("Compactor stopped");
     }
@@ -613,6 +615,32 @@ public class Compactor implements Runnable {
         Configuration configuration = loadConfigFile();
         Compactor compactor = new Compactor(configuration);
         compactor.start();
+        compactor.waitForStop();
+    }
+
+    /**
+     * Wait for the compactor to be stopped by someone else
+     */
+    public synchronized void waitForStop() {
+
+        if (closed) {
+            // Just stopped, nothing to do
+            return;
+        }
+
+        if (!started) {
+            // Not started, nothing to do
+            return;
+        }
+
+        logger.info("Waiting for compactor to stop");
+        while(true) {
+            try {
+                scheduledThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.debug("Interrupted waiting for compactor to stop: " + e.getMessage());
+            }
+        }
     }
 
     /**
