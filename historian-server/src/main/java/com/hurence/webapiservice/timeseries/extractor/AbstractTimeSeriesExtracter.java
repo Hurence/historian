@@ -93,7 +93,7 @@ public abstract class AbstractTimeSeriesExtracter implements TimeSeriesExtracter
                 * may be the best solution I think. The requesting code here should suppose chunks are not intersecting.
                 * We sort just so that user can not realize there is a problem in chunks.
                 */
-                .sorted(Comparator.comparing(Measure::getTimestamp))
+                .sorted(Comparator.comparing(Measure::getTimestamp).thenComparing(Measure::getValue))
                 .map(this::returnPoint)
                 .collect(Collectors.toList());
         JsonObject toReturn = new JsonObject();
