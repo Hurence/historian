@@ -62,8 +62,9 @@ object functions {
 
     // (timestamps zip values).map { case (t, v) => builder.point(t, v) }
     (timestamps, values, qualities).zipped.map { case (t, v, q) => builder.point(t, v, q) }
-
-    BinaryCompactionUtil.serializeTimeseries(builder.build())
+    val ts = builder.build()
+    ts.sort()
+    BinaryCompactionUtil.serializeTimeseries(ts)
     // BinaryEncodingUtils.encode(bytes)
 
   }
