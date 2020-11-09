@@ -362,11 +362,12 @@ public class GetTimeSeriesHandler {
         query.addField(SOLR_COLUMN_VALUE);
         if (isQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 1");
+            addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (isQueryMode2ConsideringNotQueryMode1(request, metricsInfo)) {
             LOGGER.debug("QUERY MODE 2");
             buildFilters(request, query, true);
-            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
+            addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         } else {
             LOGGER.debug("QUERY MODE 3 : else");
@@ -375,7 +376,7 @@ public class GetTimeSeriesHandler {
             //TODO Sample points with chunk aggs depending on alg (min, avg),
             // but should using agg on solr side (using key partition, by month, daily ? yearly ?)
             // For the moment we use the stream api without partitionning
-            addFieldsThatWillBeNeededBySamplingAlgorithms(request, query, metricsInfo);
+            addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
         }
         return timeSeriesExtracter;
@@ -452,6 +453,7 @@ public class GetTimeSeriesHandler {
             queryParamMap.put("fq", String.join(" ", query.getFilterQueries()));
             queryParamMap.put("fl", query.getFields());
             queryParamMap.put("sort", query.getSortField());
+            queryParamMap.put("rows", "50000");
             MapSolrParams queryParams = new MapSolrParams(queryParamMap);
 
             final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, queryParams);
@@ -471,6 +473,17 @@ public class GetTimeSeriesHandler {
 
                 long chunkStart = (Long) document.getFieldValue(SOLR_COLUMN_START);
                 long chunkEnd = (Long) document.getFieldValue(SOLR_COLUMN_END);
+
+                double chunkFirst = (double) document.getFirstValue(SOLR_COLUMN_FIRST);
+                double chunkMax = (double) document.getFirstValue(SOLR_COLUMN_MAX);
+                double chunkMin = (double) document.getFirstValue(SOLR_COLUMN_MIN);
+                double chunkSum = (double) document.getFirstValue(SOLR_COLUMN_SUM);
+
+                float chunkQualityMin = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_MIN);
+                float chunkQualityMax = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_MAX);
+                float chunkQualityAvg = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_AVG);
+                float chunkQualityFirst = (float) document.getFirstValue(SOLR_COLUMN_QUALITY_FIRST);
+
                 try {
                     byte[] compressedPoints = BinaryEncodingUtils.decode(value);
                    /* TreeSet<Measure> measures = BinaryCompactionUtil.unCompressPoints(compressedPoints, chunkStart, chunkEnd);
@@ -490,6 +503,14 @@ public class GetTimeSeriesHandler {
                     Chunk chunk = Chunk.builder()
                             .id(id)
                             .name(name)
+                            .first(chunkFirst)
+                            .max(chunkMax)
+                            .min(chunkMin)
+                            .sum(chunkSum)
+                            .qualityMin(chunkQualityMin)
+                            .qualityMax(chunkQualityMax)
+                            .qualityAvg(chunkQualityAvg)
+                            .qualityFirst(chunkQualityFirst)
                             .start(chunkStart)
                             .end(chunkEnd)
                             .value(compressedPoints)
@@ -529,13 +550,12 @@ public class GetTimeSeriesHandler {
         }*/
     }
 
+
     public void addFieldsThatWillBeNeededBySamplingAlgorithms(Request request, SolrQuery query, MetricsSizeInfo metricsInfo) {
         SamplingConf requestedSamplingConf = getSamplingConf(request);
         Set<SamplingAlgorithm> samplingAlgos = determineSamplingAlgoThatWillBeUsed(requestedSamplingConf, metricsInfo);
         addNecessaryFieldToQuery(query, samplingAlgos);
-        if (request.getQualityReturn()) {
-            addNecessaryQualityFieldToQuery(request, query, samplingAlgos);
-        }
+        addNecessaryQualityFieldToQuery(request, query, samplingAlgos);
     }
 
 
@@ -589,6 +609,17 @@ public class GetTimeSeriesHandler {
                     throw new IllegalStateException("algorithm " + algo.name() + " is not yet supported !");
             }
         });
+    }
+
+    private void addFieldsThatWillBeNeeded(SolrQuery query) {
+        query.addField(SOLR_COLUMN_FIRST);
+        query.addField(SOLR_COLUMN_SUM);
+        query.addField(SOLR_COLUMN_MIN);
+        query.addField(SOLR_COLUMN_MAX);
+        query.addField(SOLR_COLUMN_QUALITY_FIRST);
+        query.addField(SOLR_COLUMN_QUALITY_AVG);
+        query.addField(SOLR_COLUMN_QUALITY_MIN);
+        query.addField(SOLR_COLUMN_QUALITY_MAX);
     }
 
     private Set<SamplingAlgorithm> determineSamplingAlgoThatWillBeUsed(SamplingConf askedSamplingConf, MetricsSizeInfo metricsSizeInfo) {

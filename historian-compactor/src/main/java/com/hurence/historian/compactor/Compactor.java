@@ -33,6 +33,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent.*;
 
@@ -54,11 +55,24 @@ public class Compactor implements Runnable {
     private volatile boolean started = false;
     private volatile boolean closed = false;
 
+    // Set this flag to true when Compactor created from test code and we want
+    // all spark parameters from configuration file being taken into account
+    private boolean treatAllSparkParameters = false;
+
     /**
      *
      * @param configuration
      */
     public Compactor(Configuration configuration) {
+        this(configuration, false);
+    }
+    /**
+     *
+     * @param configuration
+     * @param treatAllSparkParameters
+     */
+    public Compactor(Configuration configuration, boolean treatAllSparkParameters) {
+        this.treatAllSparkParameters = treatAllSparkParameters;
         this.configuration = configuration;
         initialize();
     }
@@ -109,7 +123,11 @@ public class Compactor implements Runnable {
             throw new IllegalStateException("Cannot call run on closed compactor");
         }
 
-        doCompact();
+        try {
+            doCompact();
+        } catch (Throwable t) {
+            logger.error("Error running compaction algorithm", t);
+        }
     }
 
     /**
@@ -136,6 +154,8 @@ public class Compactor implements Runnable {
             return;
         }
 
+        close();
+
         started = false;
         logger.info("Compactor stopped");
     }
@@ -157,6 +177,35 @@ public class Compactor implements Runnable {
     }
 
     /**
+     * List of spark configuration properties we must ignore from the
+     * configuration file as they are read and set from the run script.
+     * This can be a property or the beginning of a property (we use startsWith)
+     * Configuration properties documentation:
+     * https://spark.apache.org/docs/[version|latest]/configuration.html
+     * i.e: https://spark.apache.org/docs/2.3.2/configuration.html
+     */
+    private static final Set<String> SPARK_PARAMS_HANDLED_BY_RUN_SCRIPT =
+            Stream.of("spark.master",
+                    "spark.submit.deployMode",
+                    "spark.driver.", // Any driver parameter
+                    "spark.executor.") // Any executor parameter
+            .collect(Collectors.toSet());
+
+    /**
+     * Returns true if the passed spark parameter is treated by the run script
+     * @param parameter
+     * @return
+     */
+    private static boolean configTreatedByRunScript(String parameter) {
+        for (String parameterStart : SPARK_PARAMS_HANDLED_BY_RUN_SCRIPT) {
+            if (parameter.startsWith(parameterStart)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Initializes the spark session according to the configuration
      */
     private void initSparkEnv() {
@@ -171,11 +220,19 @@ public class Compactor implements Runnable {
             logger.info("No spark options");
         } else {
             // Apply spark config entries defined in the configuration
+            // except those handled by the run script
             StringBuilder sb = new StringBuilder();
-            configuration.getSparkConfig().forEach((configKey, configValue) -> {
-                sessionBuilder.config(configKey, configValue);
-                sb.append("\n" + configKey + ": " + configValue);
-            });
+            for (Map.Entry<String, String> entry : configuration.getSparkConfig().entrySet()) {
+                String configKey = entry.getKey();
+                String configValue = entry.getValue();
+                if (treatAllSparkParameters || !configTreatedByRunScript(configKey)) {
+                    sessionBuilder.config(configKey, configValue);
+                    sb.append("\n" + configKey + ": " + configValue);
+                } else {
+                    logger.debug("Ignoring spark parameter handled by script: " +
+                            configKey + "=" + configValue);
+                }
+            }
             logger.info("Using the following spark options:" + sb);
         }
 
@@ -554,6 +611,32 @@ public class Compactor implements Runnable {
         Configuration configuration = loadConfigFile();
         Compactor compactor = new Compactor(configuration);
         compactor.start();
+        compactor.waitForStop();
+    }
+
+    /**
+     * Wait for the compactor to be stopped by someone else
+     */
+    public synchronized void waitForStop() {
+
+        if (closed) {
+            // Just stopped, nothing to do
+            return;
+        }
+
+        if (!started) {
+            // Not started, nothing to do
+            return;
+        }
+
+        logger.info("Waiting for compactor to stop");
+        while(true) {
+            try {
+                scheduledThreadPool.awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                logger.debug("Interrupted waiting for compactor to stop: " + e.getMessage());
+            }
+        }
     }
 
     /**
