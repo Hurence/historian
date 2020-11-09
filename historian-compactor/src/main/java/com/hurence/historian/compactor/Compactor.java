@@ -40,6 +40,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent.*;
+import static com.hurence.historian.compactor.ZkUtils.*;
 
 public class Compactor implements Runnable {
 
@@ -276,9 +277,20 @@ public class Compactor implements Runnable {
     private void initSolrClient() {
 
         logger.info("Initializing solr client");
-        List<String> zkHosts = Arrays.asList(configuration.getSolrZkHost());
+
+        String zkHosts = configuration.getSolrZkHost();
+        logger.debug("Parsing zk connect string: " + zkHosts);
+        SolrZkConnectInfo solrZkConnectInfo = SolrZkConnectInfo.parseZkConnectString(zkHosts);
+        logger.debug("Initializing solr client with: " + solrZkConnectInfo);
+
+        Optional optionalChRoot = Optional.empty();
+        String chRoot = solrZkConnectInfo.getZkChroot();
+        if (chRoot != null) {
+            optionalChRoot = Optional.of(chRoot);
+        }
+
         CloudSolrClient.Builder solrClientBuilder =
-                new CloudSolrClient.Builder(zkHosts, Optional.empty());
+                new CloudSolrClient.Builder(solrZkConnectInfo.getZkHosts(), optionalChRoot);
         solrClient = solrClientBuilder.build();
         logger.info("Solr client initialized");
     }
