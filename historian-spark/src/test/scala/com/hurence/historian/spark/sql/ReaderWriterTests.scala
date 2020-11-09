@@ -54,6 +54,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
           "valueField" -> "value",
           "tagsFields" -> "metric_id,warn,crit"
         )))
+      .as[Measure]
 
     // load IT data with specific CSV reader
     val itDataCSVReaderDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
@@ -65,6 +66,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
           "header" -> "true",
           "dateFormat" -> ""
         )))
+      .as[Measure]
 
     // compare those 2 datasets
     val e1 = intercept[DatasetContentMismatch] {
@@ -78,6 +80,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
     val parquetFilePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
     val itDataParquetReaderDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
       .read(Options(parquetFilePath, Map()))
+      .as[Measure]
 
     // compare those 2 datasets
     val e2 = intercept[DatasetContentMismatch] {
