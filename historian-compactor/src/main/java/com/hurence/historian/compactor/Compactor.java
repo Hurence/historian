@@ -336,6 +336,28 @@ public class Compactor implements Runnable {
     }
 
     /**
+     * Test if a dataset is empty
+     * @return
+     */
+    private static boolean isEmpty(Dataset<Row> dataset) {
+
+        Row[] firstRows = null;
+        try {
+            firstRows = (Row[])dataset.head(1);
+        } catch(Throwable e) {
+            logger.debug("Empty dataset: " + e.getMessage());
+            return true;
+        }
+
+        if ( (firstRows == null) || (firstRows.length == 0) ) {
+            logger.debug("No rows in dataset");
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Get not yet compacted chunks and compact them with potentially already compacted chunks
      * for the same day.
      */
@@ -379,6 +401,13 @@ public class Compactor implements Runnable {
                 .options(options)
                 .load();
 
+        // Test emptiness (nothing to recompact or empty collection)
+        if (isEmpty(resultDs)) {
+            logger.debug("Nothing to re-compact");
+            resultDs.unpersist();
+            return;
+        }
+
         /**
          * Sort by metric key then day
          */
@@ -398,6 +427,8 @@ public class Compactor implements Runnable {
             String day = row.getAs(CHUNK_DAY);
             reCompact(metricKey, day);
         }
+
+        resultDs.unpersist();
     }
 
     /**
