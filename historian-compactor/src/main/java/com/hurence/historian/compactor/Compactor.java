@@ -36,6 +36,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent.*;
+import static com.hurence.historian.compactor.ZkUtils.*;
 
 public class Compactor implements Runnable {
 
@@ -272,9 +273,20 @@ public class Compactor implements Runnable {
     private void initSolrClient() {
 
         logger.info("Initializing solr client");
-        List<String> zkHosts = Arrays.asList(configuration.getSolrZkHost());
+
+        String zkHosts = configuration.getSolrZkHost();
+        logger.debug("Parsing zk connect string: " + zkHosts);
+        SolrZkConnectInfo solrZkConnectInfo = SolrZkConnectInfo.parseZkConnectString(zkHosts);
+        logger.debug("Initializing solr client with: " + solrZkConnectInfo);
+
+        Optional optionalChRoot = Optional.empty();
+        String chRoot = solrZkConnectInfo.getZkChroot();
+        if (chRoot != null) {
+            optionalChRoot = Optional.of(chRoot);
+        }
+
         CloudSolrClient.Builder solrClientBuilder =
-                new CloudSolrClient.Builder(zkHosts, Optional.empty());
+                new CloudSolrClient.Builder(solrZkConnectInfo.getZkHosts(), optionalChRoot);
         solrClient = solrClientBuilder.build();
         logger.info("Solr client initialized");
     }
@@ -317,6 +329,28 @@ public class Compactor implements Runnable {
         // 1600387200388 -> 1600387200000
 
         return (timestampMillis / 1000L) * 1000L;
+    }
+
+    /**
+     * Test if a dataset is empty
+     * @return
+     */
+    private static boolean isEmpty(Dataset<Row> dataset) {
+
+        Row[] firstRows = null;
+        try {
+            firstRows = (Row[])dataset.head(1);
+        } catch(Throwable e) {
+            logger.debug("Empty dataset: " + e.getMessage());
+            return true;
+        }
+
+        if ( (firstRows == null) || (firstRows.length == 0) ) {
+            logger.debug("No rows in dataset");
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -363,6 +397,13 @@ public class Compactor implements Runnable {
                 .options(options)
                 .load();
 
+        // Test emptiness (nothing to recompact or empty collection)
+        if (isEmpty(resultDs)) {
+            logger.debug("Nothing to re-compact");
+            resultDs.unpersist();
+            return;
+        }
+
         /**
          * Sort by metric key then day
          */
@@ -382,6 +423,8 @@ public class Compactor implements Runnable {
             String day = row.getAs(CHUNK_DAY);
             reCompact(metricKey, day);
         }
+
+        resultDs.unpersist();
     }
 
     /**
