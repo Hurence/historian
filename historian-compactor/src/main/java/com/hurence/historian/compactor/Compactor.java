@@ -415,8 +415,8 @@ public class Compactor implements Runnable {
         // One row per (metric key,day)
         resultDs = resultDs.distinct();
 
-        // Sort per metric key then day
-        resultDs = resultDs.sort(resultDs.col(METRIC_KEY), resultDs.col(CHUNK_DAY));
+        // Sort by day, then by metric key
+        resultDs = resultDs.sort(resultDs.col(CHUNK_DAY), resultDs.col(METRIC_KEY));
 
         /**
          * Re-compact each (metric key,day) chunks whether from injector or compactor
