@@ -101,9 +101,15 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
           .value(r.getAs[Double]("value"))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
 
-        if (hasQuality)
-          builder.quality(r.getAs[Double]("quality").toFloat)
-        else
+        if (hasQuality) {
+          try{
+            builder.quality(r.getAs[Double]("quality").toFloat)
+          }catch {
+            case _: Throwable =>
+              builder.quality(java.lang.Float.NaN)
+          }
+
+        } else
           builder.quality(java.lang.Float.NaN)
 
         builder.build()
