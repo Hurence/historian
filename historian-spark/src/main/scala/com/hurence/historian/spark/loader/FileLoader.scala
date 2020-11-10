@@ -1,20 +1,22 @@
 package com.hurence.historian.spark.loader
 
-import com.hurence.timeseries.model.Definitions._
-import com.hurence.timeseries.model.{Chunk, Measure}
-import com.hurence.historian.spark.ml.Chunkyfier
+import com.hurence.historian.service.SolrChunkService
+import com.hurence.historian.spark.ml.{Chunkyfier, ChunkyfierStreaming}
 import com.hurence.historian.spark.sql
-import org.apache.spark.sql._
 import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.writer.solr.SolrChunkForeachWriter
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
+import com.hurence.timeseries.model.Chunk
+import com.hurence.timeseries.model.Definitions._
 import com.lucidworks.spark.util.SolrSupport
-import org.apache.commons.cli.{CommandLine, CommandLineParser, GnuParser, Option, Options}
-import org.apache.spark.sql.SparkSession
+import org.apache.commons.cli.{GnuParser, Option, Options}
+import org.apache.log4j.LogManager
+import org.apache.spark.sql.{SparkSession, _}
+import org.apache.spark.sql.streaming.OutputMode
 import org.slf4j.LoggerFactory
 
 
 class FileLoader extends Serializable {
-  private val logger = LoggerFactory.getLogger(classOf[FileLoader])
 }
 
 object FileLoader {
@@ -22,7 +24,7 @@ object FileLoader {
   val DEFAULT_CHUNK_SIZE = 1440
   val DEFAULT_SAX_ALPHABET_SIZE = 7
   val DEFAULT_SAX_STRING_LENGTH = 24
-  val DEFAULT_GROUP_BY_COLS = SOLR_COLUMN_NAME
+  val DEFAULT_GROUP_BY_COLS = "name"
   val DEFAULT_TIMESTAMP_FIELD = "timestamp"
   val DEFAULT_NAME_FIELD = "name"
   val DEFAULT_VALUE_FIELD = "value"
@@ -31,6 +33,9 @@ object FileLoader {
   val DEFAULT_CSV_COLUMN_DELIMITER = ","
   val DEFAULT_ORIGIN = "file_loader"
   val DEFAULT_DATE_BUCKET_FORMAT = "yyyy-MM-dd"
+  val DEFAULT_STREAMING_ENABLED = false
+  val DEFAULT_CHECKOINT_DIR = "checkpoint/file-loader"
+
 
   def buildOption(opt: String, longOpt: String, hasArg: Boolean, optionalArg: Boolean, description: String) = {
     val option = new Option(opt, longOpt, hasArg, description)
@@ -56,9 +61,17 @@ object FileLoader {
                                timestampFormat: String,
                                columnDelimiter: String,
                                origin: String,
-                               dateBucketFormat: String)
+                               dateBucketFormat: String,
+                               streamingEnabled: Boolean,
+                               checkpointLocation: String)
 
 
+  /**
+    * transform commands line args into FileLoaderOptions
+    *
+    * @param args
+    * @return
+    */
   def parseCommandLine(args: Array[String]): FileLoaderOptions = {
     val parser = new GnuParser()
     val options = new Options
@@ -128,6 +141,13 @@ object FileLoader {
     options.addOption(
       buildOption("dbf", "date-format-bucket", true, true, s"the date pattern to broup by measures like by day, hour, ... $DEFAULT_DATE_BUCKET_FORMAT")
     )
+    options.addOption(
+      buildOption("stream", "streaming-enabled", false, true, s"do we stream files continously from folder $DEFAULT_STREAMING_ENABLED")
+    )
+    options.addOption(
+      buildOption("checkpoint", "checkpoint-location", true, true, s"spark checkpointing folder $DEFAULT_CHECKOINT_DIR")
+    )
+
 
     // parse the command line arguments
     val line = parser.parse(options, args)
@@ -150,7 +170,8 @@ object FileLoader {
     val columnDelimiter = if (line.hasOption("cd")) line.getOptionValue("cd") else DEFAULT_CSV_COLUMN_DELIMITER
     val origin = if (line.hasOption("origin")) line.getOptionValue("origin") else DEFAULT_ORIGIN
     val dateBucketFormat = if (line.hasOption("dbf")) line.getOptionValue("dbf") else DEFAULT_DATE_BUCKET_FORMAT
-
+    val streamingEnabled = if (line.hasOption("stream")) true else DEFAULT_STREAMING_ENABLED
+    val checkpointLocation = if (line.hasOption("checkpoint")) line.getOptionValue("checkpoint") else DEFAULT_CHECKOINT_DIR
 
     // build the option handler
     val opts = FileLoaderOptions(sparkMaster,
@@ -171,84 +192,136 @@ object FileLoader {
       timestampFormat,
       columnDelimiter,
       origin,
-      dateBucketFormat
+      dateBucketFormat,
+      streamingEnabled,
+      checkpointLocation
     )
 
     logger.info(s"Command line options : $opts")
     opts
   }
 
-  private val logger = LoggerFactory.getLogger(classOf[FileLoader])
+  private val logger = LogManager.getLogger(classOf[SolrChunkService])
 
 
   /**
     * 4' by day for S35 : 35M raw zip / 250M raw / 50M index
     *
     *
-    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' --class com.hurence.historian.spark.loader.FileLoader  --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  -csv "historian-spark/src/test/resources/chemistry/dataHistorian-ISNTS35-N-20200301*.csv"  -groupBy name -zk localhost:9983 -col historian -name tagname -cd ";"  -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss" -origin chemistry -dbf "yyyy-MM-dd.HH"
+    * $SPARK_HOME/bin/spark-submit --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties" --class com.hurence.historian.spark.loader.FileLoader  --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  -csv "data/chemistry/dataHistorian-ISNTS35-N-20200301*.csv"  -groupBy name -zk localhost:9983 -col historian -name tagname -cd ";"  -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss" -origin chemistry -dbf "yyyy-MM-dd.HH"
     *
     *
     * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' --class com.hurence.historian.spark.loader.FileLoader --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar -csv historian-spark/src/test/resources/it-data-4metrics.csv.gz -tags metric_id -groupBy name,tags.metric_id -zk localhost:9983 -name metric_name -origin it-data
     *
     *
+  $SPARK_HOME/bin/spark-submit --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties" --class com.hurence.historian.spark.loader.FileLoader  --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  -csv "data/chemistry/_in"  -groupBy name -zk localhost:9983 -col historian -name tagname -cd ";"  -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss" -origin chemistry -dbf "yyyy-MM-dd.HH" -stream
+
     * @param args
     */
   def main(args: Array[String]): Unit = {
 
-    // get arguments
+    // get arguments & setup spark session
     val options = FileLoader.parseCommandLine(args)
-
-    // setup spark session
+    val appName = if (options.streamingEnabled) "historian-loader-streaming" else "historian-loader-batch"
     val spark = SparkSession.builder
-      .appName("FileLoader")
+      .appName(appName)
       .master(options.master)
       .getOrCreate()
 
+    // run batch or stream
+    if (options.streamingEnabled) {
+      runStreaming(options)
+    }
+    else {
+      runBatch(options)
+      spark.close()
+    }
 
-    val reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
-    val measuresDS = reader.read(sql.Options(
-      options.csvFilePath.get,
-      Map(
-        "inferSchema" -> "true",
-        "delimiter" -> options.columnDelimiter,
-        "header" -> "true",
-        "nameField" -> options.nameField,
-        "timestampField" -> options.timestampField,
-        "timestampDateFormat" -> options.timestampFormat,
-        "valueField" -> options.valueField,
-        "qualityField" -> options.qualityField,
-        "tagsFields" -> options.tagNames
-      )))
+  }
 
-    measuresDS.show()
-    System.out.println(measuresDS.count())
 
-    val chunkyfier = new Chunkyfier()
+  def runStreaming(options: FileLoaderOptions): Unit = {
+
+    val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_STREAM_CSV)
+      .read(sql.Options(
+        options.csvFilePath.get,
+        Map(
+          "inferSchema" -> "true",
+          "delimiter" -> options.columnDelimiter,
+          "header" -> "true",
+          "nameField" -> options.nameField,
+          "timestampField" -> options.timestampField,
+          "timestampDateFormat" -> options.timestampFormat,
+          "valueField" -> options.valueField,
+          "qualityField" -> options.qualityField,
+          "tagsFields" -> options.tagNames
+        )))
+
+    val chunkyfier = new ChunkyfierStreaming()
       .setOrigin(options.origin)
       .setGroupByCols(options.groupByCols.split(","))
       .setDateBucketFormat(options.dateBucketFormat)
       .setSaxAlphabetSize(options.saxAlphabetSize)
       .setSaxStringLength(options.saxStringLength)
 
-    val chunksDS = chunkyfier.transform(measuresDS)
+    val writer = new SolrChunkForeachWriter(options.zkHosts, options.collectionName)
+
+    val query = chunkyfier.transform(measuresDS)
       .as[Chunk](Encoders.bean(classOf[Chunk]))
       .repartition(8)
-    chunksDS.show()
+      .writeStream
+      .format("console")
+      .outputMode(OutputMode.Update())
+      .option("checkpointLocation", options.checkpointLocation)
+      .foreach(writer)
+      .start()
 
-    val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
-    writer.write(sql.Options(options.collectionName, Map(
-      "zkhost" -> options.zkHosts,
-      "collection" -> options.collectionName,
-      "tag_names" -> options.tagNames
-    )), chunksDS)
+    query.awaitTermination()
+  }
 
+  def runBatch(options: FileLoaderOptions): Unit = {
+    logger.info(s"start batch loading files from : ${options.csvFilePath.get}")
 
-    // Explicit commit to make sure all docs are visible
+    // load CSV files as a DataSet
+    val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+      .read(sql.Options(
+        options.csvFilePath.get,
+        Map(
+          "inferSchema" -> "true",
+          "delimiter" -> options.columnDelimiter,
+          "header" -> "true",
+          "nameField" -> options.nameField,
+          "timestampField" -> options.timestampField,
+          "timestampDateFormat" -> options.timestampFormat,
+          "valueField" -> options.valueField,
+          "qualityField" -> options.qualityField,
+          "tagsFields" -> options.tagNames
+        )))
+
+    // transform Measures into Chunks
+    val chunksDS = new Chunkyfier()
+      .setOrigin(options.origin)
+      .setGroupByCols(options.groupByCols.split(","))
+      .setDateBucketFormat(options.dateBucketFormat)
+      .setSaxAlphabetSize(options.saxAlphabetSize)
+      .setSaxStringLength(options.saxStringLength)
+      .transform(measuresDS)
+      .as[Chunk](Encoders.bean(classOf[Chunk]))
+      .repartition(8)
+
+    // write chunks to SolR
+    WriterFactory.getChunksWriter(WriterType.SOLR)
+      .write(sql.Options(options.collectionName, Map(
+        "zkhost" -> options.zkHosts,
+        "collection" -> options.collectionName,
+        "tag_names" -> options.tagNames
+      )), chunksDS)
+
+    // explicit commit to make sure all docs are imediately visible
     val solrCloudClient = SolrSupport.getCachedCloudClient(options.zkHosts)
     val response = solrCloudClient.commit(options.collectionName, true, true)
     logger.info(s"done saving new chunks : ${response.toString} to collection ${options.collectionName}")
 
-    spark.close()
   }
 
 }
