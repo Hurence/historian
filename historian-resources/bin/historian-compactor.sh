@@ -69,6 +69,7 @@ ${SCRIPT_NAME} <command> [options]
             -p|--principal <principal>: Use kerberos with the passed principal.
               Must be used in conjunction with the -krb option. This creates or
               overwrites the KERBEROS_PRINCIPAL environment variable.
+            -q|--queue <queue>: When in yarn mode, defined the submit queue to use.
             -s|--spark-home <spark-home-path> : The path to spark home for
               finding the spark-submit command. If not set, will use the
               SPARK_HOME environment variable. This creates or overwrites the
@@ -193,6 +194,11 @@ parse_cli_params() {
         -p|--principal)
           validate_option_parameter "$@"
           TMP_KERBEROS_PRINCIPAL="${2}"
+          shift # Next argument
+          ;;
+        -q|--queue)
+          validate_option_parameter "$@"
+          YARN_QUEUE="${2}"
           shift # Next argument
           ;;
         -s|--spark-home)
@@ -470,6 +476,13 @@ start_yarn_client() {
   LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${HISTORIAN_LOG4J_FILE}" # Could use HDFS one like for executors but as driver runs locally...
   LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
 
+  # Set YARN queue option if requested
+  YARN_QUEUE_OPTION=""
+  if [[ -n ${YARN_QUEUE} ]]
+  then
+    YARN_QUEUE_OPTION="--queue ${YARN_QUEUE}"
+  fi
+
   # Run spark-submit command
   CMD="${SPARK_HOME}/bin/spark-submit --master yarn --deploy-mode client \
    ${SPARK_SUBMIT_OPTIONS} \
@@ -479,6 +492,7 @@ start_yarn_client() {
    --jars ${COMPACTOR_DEP_JARS} \
    --class ${COMPACTOR_CLASS} \
    --files ${YARN_FILES_OPTIONS} \
+   ${YARN_QUEUE_OPTION} \
    file:${COMPACTOR_JAR} \
    --config-file ${HISTORIAN_CONFIG_FILE}"
   echo "${CMD}"
@@ -502,6 +516,13 @@ start_yarn_cluster() {
   LOG4J_DRIVER_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
   LOG4J_EXECUTORS_SETTINGS="-Dlog4j.configuration=file:${UPLOADED_LOG4J_CONFIG_FILE}"
 
+  # Set YARN queue option if requested
+  YARN_QUEUE_OPTION=""
+  if [[ -n ${YARN_QUEUE} ]]
+  then
+    YARN_QUEUE_OPTION="--queue ${YARN_QUEUE}"
+  fi
+
   # In YARN cluster mode, we have to force application name whereas doing from java code works for other modes (yarn client, local)
   APPLICATION_NAME_OPTION=""
   if [[ -n ${APPLICATION_NAME} ]]
@@ -519,6 +540,7 @@ start_yarn_cluster() {
    --class ${COMPACTOR_CLASS} \
    --files ${YARN_FILES_OPTIONS} \
    ${APPLICATION_NAME_OPTION} \
+   ${YARN_QUEUE_OPTION} \
    file:${COMPACTOR_JAR} \
    --config-file ${UPLOADED_HISTORIAN_CONFIG_FILE}"
   echo "${CMD}"
