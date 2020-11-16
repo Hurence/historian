@@ -411,8 +411,8 @@ public class Compactor implements Runnable {
         // One row per (metric key,day)
         resultDs = resultDs.distinct();
 
-        // Sort per metric key then day
-        resultDs = resultDs.sort(resultDs.col(METRIC_KEY), resultDs.col(CHUNK_DAY));
+        // Sort per metric day then key
+        resultDs = resultDs.sort( resultDs.col(CHUNK_DAY), resultDs.col(METRIC_KEY));
 
         /**
          * Re-compact each (metric key,day) chunks whether from injector or compactor
@@ -540,9 +540,7 @@ public class Compactor implements Runnable {
                 .setOrigin(ChunkOrigin.COMPACTOR.toString())
                 .setTimestampCol("timestamp")
                 .setGroupByCols(groupByColsArray)
-                .setDateBucketFormat("yyyy-MM-dd")
-                .setSaxAlphabetSize(7)
-                .setSaxStringLength(50);
+                .setDateBucketFormat("yyyy-MM-dd.HH");
         Dataset<Row> recompactedChunksRows = chunkyfier.transform(metricsToRecompact);
 
         //System.out.println("Recompacted chunks (" + recompactedChunksRows.count() + " chunks):");
