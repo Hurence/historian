@@ -103,7 +103,7 @@ final class Chunkyfier(override val uid: String)
 
   def setSaxAlphabetSize(value: Int): this.type = set(saxAlphabetSize, value)
 
-  setDefault(saxAlphabetSize, 5)
+  setDefault(saxAlphabetSize, 7)
 
   val saxStringLength: Param[Int] = new Param[Int](this, "saxStringLength",
     "the SAX string length",
@@ -111,15 +111,15 @@ final class Chunkyfier(override val uid: String)
 
   def setSaxStringLength(value: Int): this.type = set(saxStringLength, value)
 
-  setDefault(saxStringLength, 50)
+  setDefault(saxStringLength, 24)
 
-  val chunkMaxSize: Param[Int] = new Param[Int](this, "chunkMaxSize",
+  val chunkMaxSize: Param[Long] = new Param[Long](this, "chunkMaxSize",
     "the chunk max measures count",
     ParamValidators.inRange(0, 100000))
 
-  def setChunkMaxSize(value: Int): this.type = set(chunkMaxSize, value)
+  def setChunkMaxSize(value: Long): this.type = set(chunkMaxSize, value)
 
-  setDefault(chunkMaxSize, 1440)
+  setDefault(chunkMaxSize, 1440L)
 
 
   final val chunkValueCol: Param[String] = new Param[String](this, "chunkValueCol", "column name for chunk Value")
@@ -152,44 +152,28 @@ final class Chunkyfier(override val uid: String)
       baseDf = baseDf.withColumn(FIELD_QUALITY, lit(Float.NaN))
     }
 
-    val noTags = if (!baseDf.schema.fieldNames.contains($(tagsCol))) {
-      true
-    } else false
-
-    val groupedBy = baseDf
-      .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
-      .withColumn(COLUMN_VALUES, collect_list(col($(valueCol))).over(w))
-      .withColumn(COLUMN_TIMESTAMPS, collect_list(col($(timestampCol))).over(w))
-      .withColumn(COLUMN_QUALITIES, collect_list(col($(qualityCol))).over(w))
-      .groupBy(groupingCols: _*)
-
-    val groupedDF = if (noTags) {
-      // compute all the stats and aggregations here
-      groupedBy.agg(
-        last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
-        last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
-        last(col(COLUMN_QUALITIES)).as(COLUMN_QUALITIES),
-        min(col($(timestampCol))).as(FIELD_START),
-        max(col($(timestampCol))).as(FIELD_END),
-        min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
-        max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
-        first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
-        sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
-        avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
-    } else {
-      groupedBy.agg(
-        last(col(COLUMN_VALUES)).as(COLUMN_VALUES),
-        last(col(COLUMN_TIMESTAMPS)).as(COLUMN_TIMESTAMPS),
-        last(col(COLUMN_QUALITIES)).as(COLUMN_QUALITIES),
-        first(col($(tagsCol))).as(FIELD_TAGS),
-        min(col($(timestampCol))).as(FIELD_START),
-        max(col($(timestampCol))).as(FIELD_END),
-        min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
-        max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
-        first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
-        sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
-        avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
+    if (!baseDf.schema.fieldNames.contains($(tagsCol))) {
+      baseDf = baseDf.withColumn($(tagsCol), typedLit(Map[String, String]()))
     }
+
+
+    val groupedDF = baseDf
+        .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
+        .orderBy(col($(timestampCol)).asc)
+        .groupBy(groupingCols: _*)
+        .agg(
+          collect_list(col($(valueCol))).as(COLUMN_VALUES),
+          collect_list(col($(timestampCol))).as(COLUMN_TIMESTAMPS),
+          collect_list(col($(qualityCol))).as(COLUMN_QUALITIES),
+          first(col($(tagsCol))).as(FIELD_TAGS),
+          min(col($(timestampCol))).as(FIELD_START),
+          max(col($(timestampCol))).as(FIELD_END),
+          min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
+          max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
+          first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
+          sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
+          avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
+
 
     groupedDF
       // compute analysis from values & timestamps lists
@@ -212,14 +196,11 @@ final class Chunkyfier(override val uid: String)
         groupedDF.col(COLUMN_VALUES)))
       // drop temporary values timestamps and qualities columns
       .drop(COLUMN_VALUES, COLUMN_TIMESTAMPS, COLUMN_QUALITIES)
-      .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev","analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
+      .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev", "analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
       .map(r => {
 
-        val tags = if (noTags) {
-          Map[String, String]()
-        } else {
-          r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
-        }
+        val tags =  r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
+
 
         Chunk.builder()
           .name(r.getAs[String](FIELD_NAME))

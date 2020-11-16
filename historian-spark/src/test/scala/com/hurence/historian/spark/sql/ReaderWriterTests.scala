@@ -1,10 +1,13 @@
 package com.hurence.historian.spark.sql
 
+import java.util
+
 import com.hurence.historian.spark.{DataFrameComparer, DatasetContentMismatch, SparkSessionTestWrapper}
 import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
 import com.hurence.historian.spark.sql.functions._
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import com.hurence.timeseries.compaction.BinaryEncodingUtils
+import com.hurence.timeseries.converter.{MeasuresToChunk, MeasuresToChunkVersionCurrent}
 import com.hurence.timeseries.model.{Chunk, Measure}
 import org.apache.spark.sql.Encoders
 import org.apache.spark.sql.functions._
@@ -15,6 +18,7 @@ import org.scalatest.Matchers.intercept
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
+import scala.collection.mutable.ListBuffer
 
 @TestInstance(Lifecycle.PER_CLASS)
 class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
@@ -50,6 +54,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
           "valueField" -> "value",
           "tagsFields" -> "metric_id,warn,crit"
         )))
+      .as[Measure]
 
     // load IT data with specific CSV reader
     val itDataCSVReaderDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
@@ -61,6 +66,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
           "header" -> "true",
           "dateFormat" -> ""
         )))
+      .as[Measure]
 
     // compare those 2 datasets
     val e1 = intercept[DatasetContentMismatch] {
@@ -74,6 +80,7 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
     val parquetFilePath = this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath
     val itDataParquetReaderDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
       .read(Options(parquetFilePath, Map()))
+      .as[Measure]
 
     // compare those 2 datasets
     val e2 = intercept[DatasetContentMismatch] {
@@ -139,6 +146,40 @@ class ReaderWriterTests extends SparkSessionTestWrapper with DataFrameComparer {
         true
       )*/
 
+  }
+
+  @Test
+  def chunkyfierTest()= {
+
+
+    // build a bunch of random measures
+    val name = "metric"
+    val tags = new util.HashMap[String, String]() {}
+    val inputMeasures = ListBuffer[Measure]()
+    for (i <- 0 until 10000) {
+      inputMeasures += (randomMeasure(name, tags, 0, 100, "1977-03-02"))
+    }
+
+    val ds = spark.sparkContext.parallelize( inputMeasures).toDS()
+    // convert them as a Chunk
+
+
+
+    val chunkyfier = new Chunkyfier()
+      .setOrigin("chunkyfierTest")
+      .setGroupByCols("name".split(","))
+      .setDateBucketFormat("yyyy-MM-dd.HH")
+      .setSaxAlphabetSize(7)
+      .setSaxStringLength(24)
+
+
+    val chunksDS = chunkyfier.transform(ds)
+
+
+    chunksDS.show(30)
+
+    /*val converter = new MeasuresToChunkVersionCurrent("chunkyfierTest")
+    val chunk = converter.buildChunk(name, inputMeasures, tags)*/
   }
 
 }
