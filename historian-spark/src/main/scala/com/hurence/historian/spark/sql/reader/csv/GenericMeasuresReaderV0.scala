@@ -1,7 +1,7 @@
 package com.hurence.historian.spark.sql.reader.csv
 
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.functions.{toTimestampUTC}
+import com.hurence.historian.spark.sql.functions.{toDateUTC, toTimestampUTC}
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions.{lit, _}
@@ -66,7 +66,7 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
       .options(options.config)
       .load(options.path)
       .select(mainCols: _*)
-      .withColumn("timestamp", $"timestamp" * 1L)
+   //   .withColumn("timestamp", $"timestamp" * 1L)
       .withColumn("tags", map(tagsMapping: _*))
 
     //
@@ -84,12 +84,13 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
     }
 
 
+
    dfPlusTime
-      .withColumn("year", year(from_unixtime($"timestamp" / 1000L)))
+   /*   .withColumn("year", year(from_unixtime($"timestamp" / 1000L)))
       .withColumn("month", month(from_unixtime($"timestamp" / 1000L)))
       .withColumn("hour", hour(from_unixtime($"timestamp" / 1000L)))
-      .withColumn("day", from_unixtime($"timestamp" / 1000L, "yyyy-MM-dd"))
-      // .withColumn("day", toDateUTC($"timestamp", lit("yyyy-MM-dd")))
+     // .withColumn("day", from_unixtime($"timestamp" / 1000L, "yyyy-MM-dd"))
+      .withColumn("day", toDateUTC($"timestamp", lit("yyyy-MM-dd")))*/
       .drop(tagsFields: _*)
       .map(r => {
         val builder = Measure.builder()
@@ -100,8 +101,16 @@ class GenericMeasuresReaderV0 extends Reader[Measure] {
           .value(r.getAs[Double]("value"))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
 
-        if (hasQuality)
-          builder.quality(r.getAs[Float]("quality"))
+        if (hasQuality) {
+          try{
+            builder.quality(r.getAs[Double]("quality").toFloat)
+          }catch {
+            case _: Throwable =>
+              builder.quality(java.lang.Float.NaN)
+          }
+
+        } else
+          builder.quality(java.lang.Float.NaN)
 
         builder.build()
 

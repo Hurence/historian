@@ -18,7 +18,7 @@ public class ChunkSchemaVersion1 implements Schema{
                     .withRequired(true).build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_VALUE)
-                    .withType("string")
+                    .withType("text_general")
                     .withIndexed(false).build(),
             new SolrField.Builder()
                     .withName(HistorianChunkCollectionFieldsVersionCurrent.CHUNK_START)

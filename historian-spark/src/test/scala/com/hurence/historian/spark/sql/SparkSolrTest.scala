@@ -84,7 +84,6 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
 
       val q = new SolrQuery("*:*")
       val response = solrCloudClient.query(collectionName, q)
-     println(response.getResults.get(0).toString)
 
       // 5. load back those chunks to verify
       val reader = ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
@@ -98,16 +97,10 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         solrDF.show()
       }
 
-      solrDF.printSchema()
-      solrDF.show(100, false)
 
       val unchunkyfier = new UnChunkyfier()
-
       val measuresBack = unchunkyfier.transform(solrDF)
         .as[Measure](Encoders.bean(classOf[Measure]))
-
-      measuresBack.printSchema()
-      measuresBack.show(100, false)
 
       if (logger.isDebugEnabled) {
         measuresBack.show()
@@ -118,7 +111,7 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         measuresBack.sort("timestamp"))
 
       assert(solrDF.count == 6)
-      /*  assert(solrDF.schema.fields.length === 5) // _root_ id one_txt two_txt three_s
+      /*  assert(solrDF.schema.fields.lengthTestda === 5) // _root_ id one_txt two_txt three_s
         val oneColFirstRow = solrDF.select("one_txt").head()(0) // query for one column
         assert(oneColFirstRow != null)
         val firstRow = solrDF.head.toSeq                        // query for all columns

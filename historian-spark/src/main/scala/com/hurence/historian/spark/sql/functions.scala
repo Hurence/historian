@@ -1,15 +1,17 @@
 package com.hurence.historian.spark.sql
 
 import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
+import java.util.{Date, TimeZone}
 import java.util.stream.Collectors
 
 import com.google.common.hash.Hashing
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.timeseries.MetricTimeSeries
-import com.hurence.timeseries.analysis.{TimeseriesAnalyzer}
-import com.hurence.timeseries.compaction.{BinaryCompactionUtil}
+import com.hurence.timeseries.analysis.TimeseriesAnalyzer
+import com.hurence.timeseries.compaction.BinaryCompactionUtil
 import com.hurence.timeseries.sax.{GuessSaxParameters, SaxAnalyzer, SaxConverter}
-import org.apache.spark.sql.{DataFrame}
+import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.functions.{col, udf}
 
 import scala.collection.JavaConverters._
@@ -23,11 +25,13 @@ object functions {
   }
 
   val toDateUTC = udf { (epochMilliUTC: Long, dateFormat: String) =>
-    val dateFormatter = java.time.format.DateTimeFormatter.ofPattern(dateFormat)
-      .withZone(java.time.ZoneId.of("UTC"))
+    val dateFormatter = /*java.time.format.DateTimeFormatter.ofPattern(dateFormat)
+      .withZone(java.time.ZoneId.of("UTC"))*/
+      new SimpleDateFormat(dateFormat)
 
+    dateFormatter.setTimeZone(TimeZone.getTimeZone("UTC"))
     try {
-      dateFormatter.format(java.time.Instant.ofEpochMilli(epochMilliUTC))
+      dateFormatter.format(new Date(epochMilliUTC))
     } catch {
       case NonFatal(_) => null
     }
@@ -58,8 +62,9 @@ object functions {
 
     // (timestamps zip values).map { case (t, v) => builder.point(t, v) }
     (timestamps, values, qualities).zipped.map { case (t, v, q) => builder.point(t, v, q) }
-
-    BinaryCompactionUtil.serializeTimeseries(builder.build())
+    val ts = builder.build()
+    ts.sort()
+    BinaryCompactionUtil.serializeTimeseries(ts)
     // BinaryEncodingUtils.encode(bytes)
 
   }

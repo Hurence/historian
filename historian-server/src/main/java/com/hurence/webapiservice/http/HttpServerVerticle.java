@@ -2,6 +2,8 @@ package com.hurence.webapiservice.http;
 
 import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
+import com.hurence.webapiservice.http.api.analytics.AnalyticsApi;
+import com.hurence.webapiservice.http.api.analytics.AnalyticsApiImpl;
 import com.hurence.webapiservice.http.api.grafana.*;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApi;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
@@ -28,7 +30,7 @@ public class HttpServerVerticle extends AbstractVerticle {
     public static final String CONFIG_UPLOAD_DIRECTORY = "upload_directory";
     public static final String GRAFANA = "grafana";
     public static final String VERSION = "version";
-//    public static final String API = "api";
+    //    public static final String API = "api";
 //    public static final String SEARCH = "search";
 //    public static final String LIMIT_DEFAULT = "limit_default";
     public static final String CONFIG_HISTORIAN_ADDRESS = "historian.address";
@@ -46,6 +48,9 @@ public class HttpServerVerticle extends AbstractVerticle {
     private static final String IMPORT_ENDPOINT = MAIN_API_ENDPOINT + "/import";
     public static final String IMPORT_CSV_ENDPOINT = IMPORT_ENDPOINT + IngestionApi.CSV_ENDPOINT;
     public static final String IMPORT_JSON_ENDPOINT = IMPORT_ENDPOINT + IngestionApi.JSON_ENDPOINT;
+
+    private static final String ANALYTICS_ENDPOINT = MAIN_API_ENDPOINT + "/analytics";
+   // public static final String ANALYTICS_CLUSTERING_ENDPOINT = ANALYTICS_ENDPOINT + AnalyticsApi.CLUSTERING_ENDPOINT;
     //grafana
     private static final String GRAFANA_API_ENDPOINT = "/api/grafana";
     private static final String SIMPLE_JSON_GRAFANA_API_ENDPOINT = GRAFANA_API_ENDPOINT + "/simplejson";
@@ -88,16 +93,22 @@ public class HttpServerVerticle extends AbstractVerticle {
                 .setUploadsDirectory(conf.getUploadDirectory())
                 .setDeleteUploadedFilesOnEnd(true)
         );
+
         //main
         Router mainApi = new MainHistorianApiImpl(historianService, conf.getMaxDataPointsAllowed())
                 .getMainRouter(vertx);
         router.mountSubRouter(MAIN_API_ENDPOINT, mainApi);
         Router importApi = new IngestionApiImpl(historianService).getImportRouter(vertx);
         router.mountSubRouter(IMPORT_ENDPOINT, importApi);
+
+        // analytics
+        Router analyticsApi = new AnalyticsApiImpl(historianService).getRouter(vertx);
+        router.mountSubRouter(ANALYTICS_ENDPOINT, analyticsApi);
+
         //grafana
-        Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService,conf.getMaxDataPointsAllowed())
+        Router hurenceGraphanaApi = new GrafanaHurenceDatasourcePluginApiImpl(historianService, conf.getMaxDataPointsAllowed())
                 .getGraphanaRouter(vertx);
-        Router simpleJsonGraphanaApi = new  GrafanaSimpleJsonPluginApiImpl(historianService,conf.getMaxDataPointsAllowed())
+        Router simpleJsonGraphanaApi = new GrafanaSimpleJsonPluginApiImpl(historianService, conf.getMaxDataPointsAllowed())
                 .getGraphanaRouter(vertx);
         router.mountSubRouter(SIMPLE_JSON_GRAFANA_API_ENDPOINT, simpleJsonGraphanaApi);
         router.mountSubRouter(HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT, hurenceGraphanaApi);

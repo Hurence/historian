@@ -266,7 +266,7 @@ val measuresDS = reader.read(sql.Options(
 
 
 
-val chunkyfier = new Chunkyfier().setGroupByCols(Array(  "name", "tags.metric_id")).setSaxStringLength(50)
+val chunkyfier = new Chunkyfier().setGroupByCols(Array(  "name", "tags.metric_id")).setSaxStringLength(20)
 val chunksDS = chunkyfier.transform(measuresDS).as[Chunk](Encoders.bean(classOf[Chunk]))
 
 

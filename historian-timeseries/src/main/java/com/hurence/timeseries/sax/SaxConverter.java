@@ -36,7 +36,7 @@ public class SaxConverter {
 
     @Builder.Default int paaSize = 7;
     @Builder.Default double nThreshold = 0;
-    @Builder.Default int alphabetSize = 100;
+    @Builder.Default int alphabetSize = 24;
 
 
     /**

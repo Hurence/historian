@@ -1,0 +1,69 @@
+[[import-json]]
+===== GET {analytics-clustering-endpoint}
+
+====== Description Générale
+
+Permet de déterminer des groupes ou cluster de blocs de données de l'historian à partir d'un corps de requête au format json.
+Le format de la requête attendue est une requête avec Content-Type: application/json;
+
+Le corps de la requête attendue est une liste json d'objets. Chaque objet doit être composé des attributs suivants :
+
+
+====== Exemples
+
+Exemple d'une requête (le body) :
+
+[source,json]
+----
+{
+    "names": ["ack"],
+    "day": "2019-11-28",
+    "k": 5
+}
+----
+
+----
+
+Exemple d'une requête avec curl et de sa réponse :
+
+[source,curl,subs="attributes"]
+----
+curl --location --request GET {analytics-clustering-endpoint} \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "names": ["ack"],
+    "day": "2019-11-28",
+    "k": 5
+}'
+----
+
+[source,json]
+----
+{
+    "clustering.algo": "kmeans",
+    "k": 5,
+    "day": "2019-11-28",
+    "maxIterations": 100,
+    "elapsed_time": 358,
+    "clusters": [
+        {
+            "sax_cluster": "0",
+            "cluster_size": 1,
+            "chunks": [
+                {
+                    "id": "5ba8f698c82ed652b034d22f04db844ea43531536d19150ccc0071e482791bf4",
+                    "chunk_sax": "dddddgdddddddddddddd",
+                    "metric_key": "ack|crit$null|metric_id$621ba06c-d980-4b9f-9018-8688ff17f252|warn$null",
+                    "chunk_avg": "7.352941176470604E-4"
+                }
+            ]
+        },
+        ...
+    ]
+}
+----
+
+====== Errors
+
+
+----

@@ -14,11 +14,7 @@ import com.hurence.historian.spark.sql.writer.WriterType;
 import com.hurence.historian.spark.sql.writer.solr.SolrChunksWriter;
 import com.hurence.timeseries.core.ChunkOrigin;
 import com.hurence.timeseries.model.Chunk;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
+import org.apache.commons.cli.*;
 import org.apache.solr.client.solrj.SolrClient;
 import org.apache.solr.client.solrj.impl.CloudSolrClient;
 import org.apache.spark.sql.Dataset;
@@ -415,8 +411,9 @@ public class Compactor implements Runnable {
         // One row per (metric key,day)
         resultDs = resultDs.distinct();
 
-        // Sort by day, then by metric key
-        resultDs = resultDs.sort(resultDs.col(CHUNK_DAY), resultDs.col(METRIC_KEY));
+        // Sort per metric day then key
+        resultDs = resultDs.sort( resultDs.col(CHUNK_DAY), resultDs.col(METRIC_KEY));
+
 
         /**
          * Re-compact each (metric key,day) chunks whether from injector or compactor
@@ -544,9 +541,7 @@ public class Compactor implements Runnable {
                 .setOrigin(ChunkOrigin.COMPACTOR.toString())
                 .setTimestampCol("timestamp")
                 .setGroupByCols(groupByColsArray)
-                .setDateBucketFormat("yyyy-MM-dd")
-                .setSaxAlphabetSize(7)
-                .setSaxStringLength(50);
+                .setDateBucketFormat("yyyy-MM-dd.HH");
         Dataset<Row> recompactedChunksRows = chunkyfier.transform(metricsToRecompact);
 
         //System.out.println("Recompacted chunks (" + recompactedChunksRows.count() + " chunks):");
@@ -696,7 +691,7 @@ public class Compactor implements Runnable {
         final String OPTION_CONFIG_FILE_LONG = "config-file";
 
         // Handling arguments
-        CommandLineParser parser = new DefaultParser();
+        CommandLineParser parser = new GnuParser();
         org.apache.commons.cli.Options options = new org.apache.commons.cli.Options();
 
         // Path to config file

@@ -11,3 +11,7 @@ include::./_main-endpoints/_import-json-endpoint.ad[]
 ==== Export de données
 
 include::./_main-endpoints/_export-csv-endpoint.ad[]
+
+==== Analyse de données
+
+include::./_main-endpoints/_analytics-endpoint.ad[]

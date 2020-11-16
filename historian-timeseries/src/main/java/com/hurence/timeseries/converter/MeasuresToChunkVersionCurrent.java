@@ -97,7 +97,7 @@ public class MeasuresToChunkVersionCurrent implements MeasuresToChunk {
      */
     private void computeAndSetAggs(Chunk.ChunkBuilder builder, MetricTimeSeries timeSeries) {
         Integer sax_alphabet_size = Math.max(Math.min(timeSeries.size(), 7), 2);
-        Integer sax_string_length = Math.min(timeSeries.size(), 100);
+        Integer sax_string_length = Math.min(timeSeries.size(), 24);
 
         timeSeries.sort();
         final List<Double> values = timeSeries.getValues().toList();
