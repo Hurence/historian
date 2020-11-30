@@ -7,6 +7,7 @@ from multiprocessing import Pool, Process, Manager
 
 logger = logging.getLogger('historian-tools')
 
+
 def setup_logger(out_dir):
     logger.setLevel(logging.DEBUG)
     if not os.path.exists(out_dir):
@@ -39,8 +40,7 @@ def read_csv(file):
         # some file may be broken
         df = pd.read_csv(file, sep=';')
         return df
-    except OSError as e:
-        print(e)
+    except:
         pass
 
 
@@ -65,44 +65,48 @@ def compact_csv_files(root_dir, out_dir):
 
         root_path = root_path + "/ISNTS{}-N-{}-{}".format(server, year, month)
 
-        logger.info("root_path {}, server {}, year {}, month {}".format( root_path, server, year, month))
+        logger.info("root_path {}, server {}, year {}, month {}".format(root_path, server, year, month))
 
         # 2. group files by day
         num_days = calendar.monthrange(int(year), int(month))[1]
-        days = [datetime.date(int(year), int(month), day) for day in range(1, num_days+1)]
+        days = [datetime.date(int(year), int(month), day) for day in range(1, num_days + 1)]
         for day in days:
             file_pattern = root_path + "/dataHistorian-ISNTS" + server + "-N-" + day.strftime("%Y%m%d") + "*.csv"
             files = glob.glob(file_pattern)
             files_count = len(files)
             if files_count > 0:
-                out_dir_day = out_dir + '/' + year + '-ISNTS' + server
+                out_dir_day = out_dir + day.strftime("/%Y-%m-ISNTS") + server
                 out_file_day = out_dir_day + "/dataHistorian-ISNTS" + server + "-N-" + day.strftime("%Y%m%d.csv.gz")
                 if not os.path.exists(out_dir_day):
                     os.makedirs(out_dir_day)
 
                 if os.path.exists(out_file_day):
-                    logger.info("{} already exists, no procesing for this day".format(out_file_day))
+                    logger.info("{} already exists, no processing for this day".format(out_file_day))
                 else:
-                    logger.info("found {} files for day {} with following file pattern {}".format( files_count, day, file_pattern))
+                    logger.info("found {} files for day {} with following file pattern {}".format(files_count, day,
+                                                                                                  file_pattern))
                     start = time.time()
                     pool = Pool(8)
                     df_collection = pool.map(read_csv, files)
                     pool.close()
                     pool.join()
 
-                    big_df = pd.concat(df_collection)
+                    try:
+                        big_df = pd.concat(df_collection)
 
-                    print("done in %d seconds" %
-                          (time.time()-start))
+                        print("done in %d seconds" %
+                              (time.time() - start))
 
-                    logger.info("done creating one single big dataframe")
+                        logger.info("done creating one single big dataframe")
 
-                    if not os.path.exists(out_file_day):
-                        big_df.to_csv(out_file_day, index=False, compression='gzip')
-                        logger.info("done zipping big dataframe")
+                        if not os.path.exists(out_file_day):
+                            big_df.to_csv(out_file_day, index=False, compression='gzip')
+                            logger.info("done zipping big dataframe")
+                    except:
+                        logger.error("unable to concatenate thoses files into a single one " + out_file_day)
 
             else:
-                logger.info("found no files for day {} ".format( day))
+                logger.info("found no files for day {} ".format(day))
 
 
 def parse_command_line():
@@ -119,10 +123,9 @@ def main():
     compact_csv_files(args.rootDir, args.outDir)
     logger.info("------------ END -------------")
 
+
 if __name__ == "__main__":
     main()
 
-
-#rootDir='/Users/tom/Documents/workspace/historian/data/chemistry'
-#outDir = '/Users/tom/Documents/workspace/historian/data/out'
-
+# rootDir='/Users/tom/Documents/workspace/historian/data/chemistry'
+# outDir = '/Users/tom/Documents/workspace/historian/data/out'
