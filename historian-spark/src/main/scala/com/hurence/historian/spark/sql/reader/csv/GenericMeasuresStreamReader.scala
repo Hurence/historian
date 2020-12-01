@@ -1,5 +1,6 @@
 package com.hurence.historian.spark.sql.reader.csv
 
+import com.hurence.historian.spark.loader.ConfigLoader
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.functions.toTimestampUTC
 import com.hurence.historian.spark.sql.reader.Reader
@@ -31,8 +32,6 @@ class GenericMeasuresStreamReader extends Reader[Measure] {
     val spark = SparkSession.getActiveSession.get
     import spark.implicits._
 
-    // set this to automatically infer schema from csv files
-    spark.sqlContext.setConf("spark.sql.streaming.schemaInference", "true")
 
     implicit val measureEncoder = Encoders.bean(classOf[Measure])
 
@@ -65,9 +64,18 @@ class GenericMeasuresStreamReader extends Reader[Measure] {
         col(qualityField).as("quality"),
         col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag))
 
-    val df = spark
-      .readStream
-      .options(options.config)
+    val dsStreamReader = spark.readStream.options(options.config)
+
+    // set this to automatically infer schema from csv files
+    val schema = ConfigLoader.toSchema(options.config("schema"))
+    if (schema.isDefined) {
+      dsStreamReader.schema(schema.get)
+    }
+    else {
+      spark.sqlContext.setConf("spark.sql.streaming.schemaInference", "true")
+    }
+
+    val df = dsStreamReader
       .csv(options.path)
       .select(mainCols: _*)
       .withColumn("tags", map(tagsMapping: _*))

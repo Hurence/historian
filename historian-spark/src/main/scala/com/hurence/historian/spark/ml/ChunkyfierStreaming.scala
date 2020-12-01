@@ -134,6 +134,19 @@ final class ChunkyfierStreaming(override val uid: String)
   setDefault(tagsCol, FIELD_TAGS)
 
 
+  final val windowDuration: Param[String] = new Param[String](this, "windowDuration", "windowDuration for state handling")
+
+  def setWindowDuration(value: String): this.type = set(windowDuration, value)
+
+  setDefault(windowDuration, "2 minutes")
+
+
+  final val watermarkDelayThreshold: Param[String] = new Param[String](this, "watermarkDelayThreshold", "watermarkDelayThreshold for state handling")
+
+  def setWatermarkDelayThreshold(value: String): this.type = set(watermarkDelayThreshold, value)
+
+  setDefault(watermarkDelayThreshold, "5 minutes")
+
   val COLUMN_VALUES = "values"
   val COLUMN_TIMESTAMPS = "timestamps"
   val COLUMN_QUALITIES = "qualities"
@@ -141,7 +154,7 @@ final class ChunkyfierStreaming(override val uid: String)
   def transform(df: Dataset[_]): DataFrame = {
     implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
 
-    val groupingCols =   window(col("eventTime"), "1 hour") :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
+    val groupingCols = window(col("eventTime"), $(windowDuration)) :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
     val w = Window.partitionBy(groupingCols: _*)
       .orderBy(col($(timestampCol)))
 
@@ -155,43 +168,25 @@ final class ChunkyfierStreaming(override val uid: String)
       baseDf = baseDf.withColumn($(tagsCol), typedLit(Map[String, String]()))
     }
 
-/*
-    measuresDS
-      .withColumn(FIELD_DAY, toDateUTC(col("timestamp"), lit("yyyy-MM-dd")))
-      .withColumn("eventTime", col("timestamp") / 1000L)
-      .withColumn("eventTime", col("eventTime").cast(TimestampType))
-      .withWatermark("eventTime", "1 minute")
-
-      .groupBy(
-        window(col("eventTime"), "2 minutes"),
-        col("name")
-      )
-      .agg(
-        collect_list(col("value")).as("values"),
-        collect_list(col("timestamp")).as("timestamps")
-      )
-    */
-
 
     val groupedDF = baseDf
-        .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
-      //  .orderBy(col($(timestampCol)).asc)
+      .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
       .withColumn("eventTime", col("timestamp") / 1000L)
       .withColumn("eventTime", col("eventTime").cast(TimestampType))
-      .withWatermark("eventTime", "1 day")
-        .groupBy(groupingCols: _*)
-        .agg(
-          collect_list(col($(valueCol))).as(COLUMN_VALUES),
-          collect_list(col($(timestampCol))).as(COLUMN_TIMESTAMPS),
-          collect_list(col($(qualityCol))).as(COLUMN_QUALITIES),
-          first(col($(tagsCol))).as(FIELD_TAGS),
-          min(col($(timestampCol))).as(FIELD_START),
-          max(col($(timestampCol))).as(FIELD_END),
-          min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
-          max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
-          first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
-          sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
-          avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
+      .withWatermark("eventTime", $(watermarkDelayThreshold))
+      .groupBy(groupingCols: _*)
+      .agg(
+        collect_list(col($(valueCol))).as(COLUMN_VALUES),
+        collect_list(col($(timestampCol))).as(COLUMN_TIMESTAMPS),
+        collect_list(col($(qualityCol))).as(COLUMN_QUALITIES),
+        first(col($(tagsCol))).as(FIELD_TAGS),
+        min(col($(timestampCol))).as(FIELD_START),
+        max(col($(timestampCol))).as(FIELD_END),
+        min(col($(qualityCol))).as(FIELD_QUALITY_MIN),
+        max(col($(qualityCol))).as(FIELD_QUALITY_MAX),
+        first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
+        sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
+        avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
 
 
     groupedDF
@@ -218,7 +213,7 @@ final class ChunkyfierStreaming(override val uid: String)
       .select("*", "analysis.min", "analysis.max", "analysis.sum", "analysis.avg", "analysis.stdDev", "analysis.trend", "analysis.outlier", "analysis.count", "analysis.first", "analysis.last")
       .map(r => {
 
-        val tags =  r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
+        val tags = r.getAs[Map[String, String]](FIELD_TAGS).map(t => (t._1, if (t._2 != null) t._2 else "null"))
 
 
         Chunk.builder()

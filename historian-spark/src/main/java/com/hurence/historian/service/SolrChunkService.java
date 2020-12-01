@@ -36,10 +36,6 @@ import java.util.concurrent.BlockingQueue;
 public class SolrChunkService {
     private final static Logger logger = LogManager.getLogger(SolrChunkService.class);
 
-    static final int DEFAULT_BATCH_SIZE = 1000;
-    static final int DEFAULT_NUM_CONCURRENT_REQUESTS = 2;
-    static final int DEFAULT_FLUSH_INTERVAL = 500;
-
 
     protected volatile SolrClient solrClient;
     protected List<SolrUpdater> updaters;
@@ -52,14 +48,14 @@ public class SolrChunkService {
      * @param zkHosts
      * @param collectionName
      */
-    public SolrChunkService(String zkHosts, String collectionName) {
+    public SolrChunkService(String zkHosts, String collectionName, int numConcurrentRequests, int batchSize, int flushInterval) {
         logger.info("creating solr client for " + zkHosts);
         solrClient = SolrSupport.getNewSolrCloudClient(zkHosts);
 
-        logger.info("setup a thread pool of " + DEFAULT_NUM_CONCURRENT_REQUESTS + " solr updaters");
-        updaters = new ArrayList<>(DEFAULT_NUM_CONCURRENT_REQUESTS);
-        for (int i = 0; i < DEFAULT_NUM_CONCURRENT_REQUESTS; i++) {
-            SolrUpdater updater = new SolrUpdater(solrClient, collectionName, queue, DEFAULT_BATCH_SIZE, DEFAULT_FLUSH_INTERVAL);
+        logger.info("setup a thread pool of " + numConcurrentRequests + " solr updaters");
+        updaters = new ArrayList<>(numConcurrentRequests);
+        for (int i = 0; i < numConcurrentRequests; i++) {
+            SolrUpdater updater = new SolrUpdater(solrClient, collectionName, queue, batchSize, flushInterval);
             new Thread(updater).start();
             updaters.add(updater);
         }

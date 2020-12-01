@@ -125,7 +125,8 @@ public class PointsUnCompressorWithQuality {
 
     private static float getQuality(List<ChunkProtocolBuffers.Quality> qList, ChunkProtocolBuffers.Quality q) {
         float quality;
-        if (q.hasVIndex()) {
+        // fix here an ArrayOutOfBoundEx
+        if (q.hasVIndex() && (q.getVIndex() < qList.size()) ) {
             quality = qList.get(q.getVIndex()).getV();
         } else {
             quality = q.getV();
@@ -136,7 +137,8 @@ public class PointsUnCompressorWithQuality {
 
     private static double getValue(List<ChunkProtocolBuffers.Point> pList, ChunkProtocolBuffers.Point p) {
         double value;
-        if (p.hasVIndex()) {
+        // fix here an ArrayOutOfBoundEx
+        if (p.hasVIndex() && (p.getVIndex() < pList.size())) {
             value = pList.get(p.getVIndex()).getV();
         } else {
             value = p.getV();

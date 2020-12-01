@@ -11,13 +11,17 @@ import org.apache.spark.sql.ForeachWriter
   * @param zkHosts
   * @param collectionName
   */
-class SolrChunkForeachWriter(zkHosts: String, collectionName: String) extends ForeachWriter[Chunk] {
+class SolrChunkForeachWriter(zkHosts: String,
+                             collectionName: String,
+                             numConcurrentRequests: Int,
+                             batchSize: Int,
+                             flushInterval: Int) extends ForeachWriter[Chunk] {
 
   override def open(partitionId: Long, version: Long) = true
 
   override def process(value: Chunk) = {
     CacheSolrChunkService.cache
-      .get(ShardInfo(zkHosts, collectionName))
+      .get(ShardInfo(zkHosts, collectionName, numConcurrentRequests, batchSize, flushInterval))
       .put(value)
   }
 
@@ -32,7 +36,7 @@ class SolrChunkForeachWriter(zkHosts: String, collectionName: String) extends Fo
   * @param zkHosts
   * @param collectionName
   */
-case class ShardInfo(zkHosts: String, collectionName: String)
+case class ShardInfo(zkHosts: String, collectionName: String, numConcurrentRequests: Int, batchSize: Int, flushInterval: Int)
 
 
 /**
@@ -41,9 +45,13 @@ case class ShardInfo(zkHosts: String, collectionName: String)
 object CacheSolrChunkService {
 
   private val loader = new CacheLoader[ShardInfo, SolrChunkService]() {
-    def load(infos: ShardInfo): SolrChunkService = {
-      new SolrChunkService(infos.zkHosts, infos.collectionName)
-    }
+    def load(infos: ShardInfo): SolrChunkService = new SolrChunkService(
+      infos.zkHosts,
+      infos.collectionName,
+      infos.numConcurrentRequests,
+      infos.batchSize,
+      infos.flushInterval
+    )
   }
 
   private val listener = new RemovalListener[ShardInfo, SolrChunkService]() {
