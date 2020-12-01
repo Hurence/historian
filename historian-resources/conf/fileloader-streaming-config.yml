@@ -1,0 +1,49 @@
+# Sample configuration file for the file-loader Job
+---
+conf:
+  # Information about solr
+  solr:
+    zkHosts: "localhost:9983"
+    collectionName: "historian"
+    batchSize: 2000
+    numConcurrentRequests: 2
+    flushInterval: 2000
+
+  # Config on spark resources and job scheduling
+  spark:
+    master:  "local[*]"
+    appName: "historian-loader"
+    streamingEnabled: true
+    deployMode: ""
+    driverMemory: "1g"
+    driverCores: 1
+    numExecutors: 5
+    executorMemory: "1g"
+    executorCores: 1
+    sqlShufflePartitions: 8
+    checkpointDir: "checkpoints/historian-loader"
+
+  reader:
+    csvFilePath: "/Users/tom/Documents/workspace/historian/data/chemistry/_in/ISNTS*/"
+    schema: "timestamp:string,tagname:string,value:double,quality:float"
+    tagNames: "tagname"
+    maxFileAge: "1h"
+    maxFilesPerTrigger: 200
+    encoding: "UTF-8"
+    groupByCols: "name"
+    timestampField: "timestamp"
+    nameField: "tagname"
+    valueField: "value"
+    qualityField: "quality"
+    timestampFormat: "dd/MM/yyyy HH:mm:ss"
+    columnDelimiter: ";"
+
+  chunkyfier:
+    chunkSize: 1440
+    saxAlphabetSize: 7
+    saxStringLength: 24
+    groupByCols: "name"
+    origin: "file-loader"
+    dateBucketFormat: "yyyy-MM-dd.HH"
+    watermarkDelayThreshold: "5 minutes"
+    windowDuration: "2 minutes"

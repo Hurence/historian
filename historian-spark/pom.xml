@@ -231,6 +231,13 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Scala command line parsing -->
+        <dependency>
+            <groupId>com.outr</groupId>
+            <artifactId>profig_${scala.binary.version}</artifactId>
+            <version>2.3.7</version>
+        </dependency>
+
 
         <dependency>
             <groupId>org.apache.hadoop</groupId>
