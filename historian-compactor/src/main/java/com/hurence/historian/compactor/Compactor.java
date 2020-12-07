@@ -541,7 +541,7 @@ public class Compactor implements Runnable {
                 .setOrigin(ChunkOrigin.COMPACTOR.toString())
                 .setTimestampCol("timestamp")
                 .setGroupByCols(groupByColsArray)
-                .setDateBucketFormat("yyyy-MM-dd.HH");
+                .setDateBucketFormat(configuration.getDateBucketFormat());
         Dataset<Row> recompactedChunksRows = chunkyfier.transform(metricsToRecompact);
 
         //System.out.println("Recompacted chunks (" + recompactedChunksRows.count() + " chunks):");

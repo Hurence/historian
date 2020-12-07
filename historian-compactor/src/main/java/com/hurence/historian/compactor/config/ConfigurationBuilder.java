@@ -18,6 +18,7 @@ public class ConfigurationBuilder {
     private static final String KEY_SOLR = "solr";
     private static final String KEY_SOLR_ZKHOST = "zkHost";
     private static final String KEY_SOLR_COLLECTION = "collection";
+    private static final String KEY_DATE_BUCKET_FORMAT = "date.bucket.format";
 
     private static final String KEY_SPARK = "spark";
 
@@ -28,9 +29,16 @@ public class ConfigurationBuilder {
 
     private String solrZkHost = null;
     private String solrCollection = null;
+    private String dateBucketFormat = null;
     private int compactionSchedulingPeriod = -1;
     private boolean compactionSchedulingStartNow = true;
     private Map<String, String> sparkConfig = new HashMap<String, String>();
+
+
+    public ConfigurationBuilder withDateBucketFormat(String dateBucketFormat) {
+        this.dateBucketFormat = dateBucketFormat;
+        return this;
+    }
 
     public ConfigurationBuilder withSolrZkHost(String solrZkHost) {
         this.solrZkHost = solrZkHost;
@@ -89,6 +97,7 @@ public class ConfigurationBuilder {
         configuration.setCompactionSchedulingPeriod(compactionSchedulingPeriod);
         configuration.setCompactionSchedulingStartNow(compactionSchedulingStartNow);
         configuration.setSparkConfig(sparkConfig);
+        configuration.setDateBucketFormat(dateBucketFormat);
 
         return  configuration;
     }
@@ -165,9 +174,9 @@ public class ConfigurationBuilder {
         for (Map.Entry<String, Object> entry : spark.entrySet()) {
             String configKey = entry.getKey();
             Object configValue = entry.getValue();
-            if (!configKey.startsWith("spark.")) {
+          /*  if (!configKey.startsWith("spark.")) {
                 throw new ConfigurationException(KEY_SPARK + " entry properties names must always start with 'spark.': " + configKey);
-            }
+            }*/
             if (!(configValue instanceof String)) {
                 throw new ConfigurationException(KEY_SPARK + " entry properties values must always be strings: " +
                         configKey + ": " + configValue + "(this is a " + configValue.getClass().getSimpleName() + ")");
@@ -208,6 +217,15 @@ public class ConfigurationBuilder {
         Object compactionSchedulingStartNow = compactionScheduling.get(KEY_COMPACTION_SCHEDULING_STARTNOW);
         if (compactionSchedulingStartNow != null) {
             configurationBuilder.withCompactionSchedulingStartNow((Boolean)compactionSchedulingStartNow);
+        }
+
+        // solr collection name
+        Object dateBucketFormat = compactionScheduling.get(KEY_DATE_BUCKET_FORMAT);
+        if (dateBucketFormat == null) {
+            throw new ConfigurationException("Missing " + KEY_DATE_BUCKET_FORMAT + " entry in " + KEY_SOLR + " entry");
+        } else
+        {
+            configurationBuilder.withDateBucketFormat((String)dateBucketFormat);
         }
 
         return configurationBuilder.build();

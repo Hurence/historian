@@ -15,6 +15,15 @@ public class Configuration implements Serializable {
     private Map<String, String> sparkConfig = new HashMap<String, String>();
     private int compactionSchedulingPeriod = -1;
     private boolean compactionSchedulingStartNow = true;
+    private String dateBucketFormat = "yyyy-MM-dd.HH";
+
+    public String getDateBucketFormat() {
+        return dateBucketFormat;
+    }
+
+    public void setDateBucketFormat(String dateBucketFormat) {
+        this.dateBucketFormat = dateBucketFormat;
+    }
 
     public String getSolrZkHost() {
         return solrZkHost;

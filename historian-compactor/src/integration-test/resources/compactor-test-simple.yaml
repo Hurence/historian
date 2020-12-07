@@ -1,12 +1,14 @@
 solr:
   zkHost: localhost # Will be overwritten in integration test with the runtime docker url
   collection: historian
+
 spark:
   # Any entry under the spark entry is expected to match the spark application configuration
   # specified at https://spark.apache.org/docs/latest/configuration.html#application-properties
   # including the "spark." prefix.
-  spark.app.name: HistorianCompactor
-  spark.master: local[*]
+  appName: HistorianCompactor
+  master: local[*]
+
 compaction:
   scheduling:
     # Period at which the compaction algorithm is launched in seconds
@@ -17,3 +19,4 @@ compaction:
     # Should the first algorithm run occur as soon as the compactor starts, or should it wait for the next period
     # before running for the first time? Defaults to true.
     startNow: true
+    date.bucket.format: yyyy-MM-dd

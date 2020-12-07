@@ -6,18 +6,20 @@ solr:
   # "/app/a/foo/bar" (from the server perspective).
   zkHost: zookeeper:2181
   collection: historian
+
 spark:
   # Any entry under the spark entry is expected to match the spark application configuration
   # specified at https://spark.apache.org/docs/latest/configuration.html#application-properties
   # including the "spark." prefix.
-  spark.app.name: HistorianCompactor
-  spark.master: yarn
-  spark.submit.deployMode: client
-  spark.executor.instances: "2"
-  spark.driver.cores: "1"
-  spark.driver.memory: "512m"
-  spark.executor.cores: "1"
-  spark.executor.memory: "512m"
+  appName: HistorianCompactor
+  master: yarn
+  deployMode: client
+  numExecutors: "2"
+  driverCores: "1"
+  driverMemory: "512m"
+  executorCores: "1"
+  executorMemory: "512m"
+
 compaction:
   scheduling:
     # Period at which the compaction algorithm is launched in seconds
@@ -28,3 +30,4 @@ compaction:
     # Should the first algorithm run occur as soon as the compactor starts, or should it wait for the next period
     # before running for the first time? Defaults to true.
     startNow: true
+    date.bucket.format: yyyy-MM-dd
