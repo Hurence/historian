@@ -105,7 +105,7 @@ public final class DateUtil {
      */
     public static Date parse(String dateString, String dateFormat) throws ParseException {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
-     //   simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         simpleDateFormat.setLenient(false); // Don't automatically convert invalid date.
         return simpleDateFormat.parse(dateString);
     }
