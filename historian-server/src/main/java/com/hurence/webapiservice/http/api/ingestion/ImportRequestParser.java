@@ -24,8 +24,8 @@ public class ImportRequestParser {
      *                                  {
      *                                      "name": ...
      *                                      "measures": [
-     *                                          [time, value],
-     *                                          [time, value]
+     *                                          [time, value, quality],
+     *                                          [time, value, quality]
      *                                      ]
      *                                  },
      *                                 {
@@ -78,8 +78,8 @@ public class ImportRequestParser {
                 if (pointArray.size() == 0){
                     correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because this point was an empty array");
                     continue;
-                } else if (pointArray.size() != 2)
-                    throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
+                } else if (pointArray.size() != 2 && pointArray.size() != 3)
+                    throw new IllegalArgumentException("Points should be of the form [timestamp, value] or [timestamp, value, quality]");
                 try {
                     if (pointArray.getLong(0) == null) {
                         correctPointsAndErrorMessages.errorMessages.add(commonErrorMessage + "' because its timestamp is null");
@@ -174,7 +174,8 @@ public class ImportRequestParser {
 
             JsonObject newTimeserie = getTimeserieWithoutPoints(timeserie);
 
-            numberOfFailedPointsForThisName += parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport, newTimeserie);
+            numberOfFailedPointsForThisName += parseEachPointInTheObject(timeserie, numberOfFailedPointsForThisName, fileReport,
+                                                            newTimeserie, csvFilesConvertorConf);
 
             calculateNumberOfFailedPoints(fileReport, csvFilesConvertorConf, timeserie, numberOfFailedPointsForThisName);
 
@@ -232,7 +233,8 @@ public class ImportRequestParser {
      *
      * @return void
      */
-    private static int parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport, JsonObject newTimeserie) {
+    private static int parseEachPointInTheObject(JsonObject timeserie, int numberOfFailedPointsForThisName, FileReport fileReport,
+                                                                        JsonObject newTimeserie, CsvFilesConvertorConf csvFilesConvertorConf) {
         JsonArray newPoints = new JsonArray();
         for (Object point : timeserie.getJsonArray(POINTS)) {
             JsonArray pointArray;
@@ -246,7 +248,9 @@ public class ImportRequestParser {
             if (pointArray.size() == 0){
                 numberOfFailedPointsForThisName++;
                 continue;
-            } else if (pointArray.size() != 2)
+            } else if (csvFilesConvertorConf.getQuality() != null && pointArray.size() != 3) {
+                throw new IllegalArgumentException("Points should be of the form [timestamp, value, quality]");
+            } else if (csvFilesConvertorConf.getQuality() == null && pointArray.size() != 2)
                 throw new IllegalArgumentException("Points should be of the form [timestamp, value]");
             try {
                 if (pointArray.getLong(0) == null) {

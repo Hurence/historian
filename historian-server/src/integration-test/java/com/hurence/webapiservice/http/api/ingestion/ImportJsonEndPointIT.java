@@ -136,11 +136,11 @@ public class ImportJsonEndPointIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testImportWithNoTwoOrZeroPointsSize(Vertx vertx, VertxTestContext testContext) {
+    public void testImportWithNoTwoOrThreeOrZeroPointsSize(Vertx vertx, VertxTestContext testContext) {
 
         assertWrongImportRequestWithBadRequestResponse(vertx, testContext,
-                "/http/ingestion/importjson/testsImportJsonWithResponseBadRequest/testImportWithNoTwoOrZeroPointsSize/request.json",
-                "/http/ingestion/importjson/testsImportJsonWithResponseBadRequest/testImportWithNoTwoOrZeroPointsSize/expectedResponse.json");
+                "/http/ingestion/importjson/testsImportJsonWithResponseBadRequest/testImportWithNoTwoOrThreeOrZeroPointsSize/request.json",
+                "/http/ingestion/importjson/testsImportJsonWithResponseBadRequest/testImportWithNoTwoOrThreeOrZeroPointsSize/expectedResponse.json");
     }
 
     @Test
@@ -218,6 +218,39 @@ public class ImportJsonEndPointIT {
                 "/http/ingestion/importjson/testsImportJsonWithResponseBadRequest/testImportAllNonBadRequestErrors/expectedResponse.json");
     }
 
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testImportWithQuality(Vertx vertx, VertxTestContext testContext) {
+
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithQuality/testImportJson/request.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithQuality/testImportJson/expectedResponse.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithQuality/testQuery/request.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithQuality/testQuery/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testImportWithoutQuality(Vertx vertx, VertxTestContext testContext) {
+
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithoutQuality/testImportJson/request.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithoutQuality/testImportJson/expectedResponse.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithoutQuality/testQuery/request.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithoutQuality/testQuery/expectedResponse.json");
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testImportWithWrongQuality(Vertx vertx, VertxTestContext testContext) {
+
+        assertWrongImportRequestWithOKResponse(vertx, testContext,
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithWrongQuality/testImportJson/request.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithWrongQuality/testImportJson/expectedResponse.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithWrongQuality/testQuery/request.json",
+                "/http/ingestion/importjson/testsImportJsonWithStatusOK/testCorrectJsonImportWithWrongQuality/testQuery/expectedResponse.json");
+    }
+
     public void assertWrongImportRequestWithBadRequestResponse(Vertx vertx, VertxTestContext testContext,
                                                                String requestFile, String responseFile) {
         assertHelper1.assertRequestGiveObjectResponseFromFile(vertx, testContext,
@@ -227,8 +260,8 @@ public class ImportJsonEndPointIT {
     public void assertWrongImportRequestWithOKResponse(Vertx vertx, VertxTestContext testContext,
                                                        String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
         List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, StatusMessages.CREATED, BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT, queryRequestFile, queryResponseFile, OK, StatusMessages.OK, BodyCodec.jsonArray(), vertx)
+                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "CREATED", BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
@@ -237,8 +270,8 @@ public class ImportJsonEndPointIT {
     public void assertCorrectPointsImportRequest(Vertx vertx, VertxTestContext testContext,
                                                  String addRequestFile, String addResponseFile, String queryRequestFile, String queryResponseFile) {
         List<RequestResponseConfI<?>> confs = Arrays.asList(
-                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, StatusMessages.CREATED, BodyCodec.jsonObject(), vertx),
-                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT, queryRequestFile, queryResponseFile, OK, StatusMessages.OK, BodyCodec.jsonArray(), vertx)
+                new RequestResponseConf<JsonObject>(IMPORT_JSON_ENDPOINT, addRequestFile, addResponseFile, CREATED, "CREATED", BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT, queryRequestFile, queryResponseFile, OK, "OK", BodyCodec.jsonArray(), vertx)
         );
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);

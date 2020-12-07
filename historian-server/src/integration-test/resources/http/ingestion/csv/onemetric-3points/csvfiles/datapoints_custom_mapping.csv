@@ -1,4 +1,4 @@
 metric_name,metric_timestamp,metric_value,metric_quality
-metric_1, 1, 1.2 ,1.4
-metric_1, 2, 2.0 ,1.4
-metric_1, 3, 3 ,1.4
+metric_1, 1, 1.2 ,0.4
+metric_1, 2, 2.0 ,0.4
+metric_1, 3, 3 ,0.4

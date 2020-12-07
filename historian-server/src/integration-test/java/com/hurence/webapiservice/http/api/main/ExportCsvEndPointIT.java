@@ -52,58 +52,16 @@ public class ExportCsvEndPointIT {
         HistorianSolrITHelper.createChunkCollection(client, container, SchemaVersion.getCurrentVersion());
         LOGGER.info("Indexing some documents in {} collection", HistorianSolrITHelper.COLLECTION_HISTORIAN);
         SolrInjector injector = new SolrInjectorMultipleMetricSpecificPointsChunkCurrentVersion(
-                Arrays.asList("temp_a", "temp_b", "maxDataPoints"),
+                Arrays.asList("temp_a", "temp_b"),
                 Arrays.asList(
                         Arrays.asList(
-                                Measure.fromValue( 1477895624866L, 622.1),
+                                Measure.fromValueAndQuality( 1477895624866L, 622.1, 0.9f),
                                 Measure.fromValue( 1477916224866L, -3),
                                 Measure.fromValue( 1477917224866L, 365)
                         ),
                         Arrays.asList(
                                 Measure.fromValue( 1477895624866L, 861),
-                                Measure.fromValue( 1477917224866L, 767)
-                        ),
-                        Arrays.asList(//maxDataPoints we are not testing value only sampling
-                                Measure.fromValue( 1477895624866L, 1),
-                                Measure.fromValue( 1477895624867L, 1),
-                                Measure.fromValue( 1477895624868L, 1),
-                                Measure.fromValue( 1477895624869L, 1),
-                                Measure.fromValue( 1477895624870L, 1),
-                                Measure.fromValue( 1477895624871L, 1),
-                                Measure.fromValue( 1477895624872L, 1),
-                                Measure.fromValue( 1477895624873L, 1),
-                                Measure.fromValue( 1477895624874L, 1),
-                                Measure.fromValue( 1477895624875L, 1),
-                                Measure.fromValue( 1477895624876L, 1),
-                                Measure.fromValue( 1477895624877L, 1),
-                                Measure.fromValue( 1477895624878L, 1),
-                                Measure.fromValue( 1477895624879L, 1),
-                                Measure.fromValue( 1477895624880L, 1),
-                                Measure.fromValue( 1477895624881L, 1),
-                                Measure.fromValue( 1477895624882L, 1),
-                                Measure.fromValue( 1477895624883L, 1),
-                                Measure.fromValue( 1477895624884L, 1),
-                                Measure.fromValue( 1477895624885L, 1),
-                                Measure.fromValue( 1477895624886L, 1),
-                                Measure.fromValue( 1477895624887L, 1),
-                                Measure.fromValue( 1477895624888L, 1),
-                                Measure.fromValue( 1477895624889L, 1),
-                                Measure.fromValue( 1477895624890L, 1),
-                                Measure.fromValue( 1477895624891L, 1),
-                                Measure.fromValue( 1477895624892L, 1),
-                                Measure.fromValue( 1477895624893L, 1),
-                                Measure.fromValue( 1477895624894L, 1),
-                                Measure.fromValue( 1477895624895L, 1),
-                                Measure.fromValue( 1477895624896L, 1),
-                                Measure.fromValue( 1477895624897L, 1),
-                                Measure.fromValue( 1477895624898L, 1),
-                                Measure.fromValue( 1477895624899L, 1),
-                                Measure.fromValue( 1477895624900L, 1),
-                                Measure.fromValue( 1477895624901L, 1),
-                                Measure.fromValue( 1477895624902L, 1),
-                                Measure.fromValue( 1477895624903L, 1),
-                                Measure.fromValue( 1477895624904L, 1),
-                                Measure.fromValue( 1477895624905L, 1)
+                                Measure.fromValueAndQuality( 1477917224866L, 767, 0.2f)
                         )
                 ));
         injector.injectChunks(client);
@@ -132,8 +90,8 @@ public class ExportCsvEndPointIT {
         HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
-                            "/http/grafana/hurence/query/test1/request.json",
-                            "/http/grafana/simplejson/query/extract-algo/test1/expectedResponse.csv");
+                            "/http/mainapi/test1/request.json",
+                            "/http/mainapi/test1/expectedResponse.csv");
                     return t;
                 }).subscribe();
     }
@@ -147,7 +105,23 @@ public class ExportCsvEndPointIT {
         HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
                 .map(t -> {
                     assertRequestGiveResponseFromFile(vertx, testContext,
-                            "/http/grafana/hurence/query/test1/request.json");
+                            "/http/mainapi/test1/request.json");
+                    return t;
+                }).subscribe();
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testQueryExportCsvWithQuality(DockerComposeContainer container, Vertx vertx, VertxTestContext testContext) {
+        JsonObject httpConf = new JsonObject();
+        HttpVerticleConfHelper.setMaxNumberOfDatapointAllowedInExport(httpConf, 10000);
+        JsonObject historianConf = new JsonObject();
+        HistorianVerticleConfHelper.setSchemaVersion(historianConf, SchemaVersion.VERSION_1);
+        HttpWithHistorianSolrITHelper.deployCustomHttpAndCustomHistorianVerticle(container, vertx, historianConf, httpConf)
+                .map(t -> {
+                    assertRequestGiveResponseFromFile(vertx, testContext,
+                            "/http/mainapi/test1/request-with-quality.json",
+                            "/http/mainapi/test1/expectedResponse-with-quality.csv");
                     return t;
                 }).subscribe();
     }

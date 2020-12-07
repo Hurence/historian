@@ -1,4 +1,4 @@
 metric,timestamp,value,quality,sensor,code_install
-metric_1, 1, 1.2 ,1.4,sensor_1,code_1
-metric_1, 2, 2 ,1.4,sensor_1,code_2
-metric_1, 3, 3 ,1.4,sensor_2,code_1
+metric_1, 1, 1.2 ,0.4,sensor_1,code_1
+metric_1, 2, 2 ,0.4,sensor_1,code_2
+metric_1, 3, 3 ,0.4,sensor_2,code_1
