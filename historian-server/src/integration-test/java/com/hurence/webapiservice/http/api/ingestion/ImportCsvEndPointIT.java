@@ -204,7 +204,7 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_NAME, "metric_name_2")
                 .attribute(MAPPING_VALUE, "metric_value_2")
                 .attribute(MAPPING_QUALITY, "metric_quality_2")
-                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
+                .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH)
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
                 .textFileUpload("my_csv_file", "datapoints.csv", pathCsvFile, "text/csv");
         List<RequestResponseConfI<?>> confs = Arrays.asList(
@@ -225,13 +225,12 @@ public class ImportCsvEndPointIT {
 
     @Test
     @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
-    public void testCsvFileImportWithTags(Vertx vertx, VertxTestContext testContext) {  // if there is tags shouldn't there be tags [..] in response !
+    public void testCsvFileImportWithTags(Vertx vertx, VertxTestContext testContext) {
         String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints_with_tags.csv").getFile();
         MultipartForm multipartForm = MultipartForm.create()
                 .attribute(MAPPING_TIMESTAMP, "timestamp")
                 .attribute(MAPPING_NAME, "metric")
                 .attribute(MAPPING_VALUE, "value")
-                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH)
@@ -267,7 +266,6 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_TIMESTAMP, "timestamp")
                 .attribute(MAPPING_NAME, "metric")
                 .attribute(MAPPING_VALUE, "value")
-                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(FORMAT_DATE, TimestampUnit.MILLISECONDS_EPOCH.toString())
@@ -669,7 +667,6 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_TIMESTAMP, "timestamp")
                 .attribute(MAPPING_NAME, "metric_name_2")
                 .attribute(MAPPING_VALUE, "value_2")
-                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "fruit")
                 .attribute(MAPPING_TAGS, "code_install")
@@ -771,7 +768,6 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_TIMESTAMP, "timestamp")
                 .attribute(CUSTOM_NAME, "my_super_metric")
                 .attribute(MAPPING_VALUE, "value_2")
-                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
@@ -804,7 +800,6 @@ public class ImportCsvEndPointIT {
                 .attribute(MAPPING_NAME, "metric_name_2")
                 .attribute(CUSTOM_NAME, "my_super_metric")
                 .attribute(MAPPING_VALUE, "value_2")
-                .attribute(MAPPING_QUALITY, "quality")
                 .attribute(MAPPING_TAGS, "sensor")
                 .attribute(MAPPING_TAGS, "code_install")
                 .attribute(GROUP_BY, DEFAULT_NAME_FIELD)
@@ -822,5 +817,74 @@ public class ImportCsvEndPointIT {
         AssertResponseGivenRequestHelper
                 .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
     }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithQuality(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_QUALITY, "quality")
+                .textFileUpload("datapoints", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
+                        CREATED, StatusMessages.CREATED,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request-with-quality.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse-with-quality.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithoutQuality(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .textFileUpload("datapoints", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse.json",
+                        CREATED, StatusMessages.CREATED,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request-with-quality.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse-without-quality.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+    @Test
+    @Timeout(value = 5, timeUnit = TimeUnit.SECONDS)
+    public void testCsvFileImportWithWrongQualityShouldPass(Vertx vertx, VertxTestContext testContext) {
+        String pathCsvFile = AssertResponseGivenRequestHelper.class.getResource("/http/ingestion/csv/onemetric-3points/csvfiles/datapoints2.csv").getFile();
+        MultipartForm multipartForm = MultipartForm.create()
+                .attribute(MAPPING_QUALITY, "quality")
+                .textFileUpload("datapoints", "datapoints.csv", pathCsvFile, "text/csv");
+        List<RequestResponseConfI<?>> confs = Arrays.asList(
+                new MultipartRequestResponseConf<JsonObject>(IMPORT_CSV_ENDPOINT,
+                        multipartForm,
+                        "/http/ingestion/csv/onemetric-3points/testImport/expectedResponse3.json",
+                        CREATED, StatusMessages.CREATED,
+                        BodyCodec.jsonObject(), vertx),
+                new RequestResponseConf<JsonArray>(HURENCE_DATASOURCE_GRAFANA_QUERY_API_ENDPOINT,
+                        "/http/ingestion/csv/onemetric-3points/testQuery/request-with-quality.json",
+                        "/http/ingestion/csv/onemetric-3points/testQuery/expectedResponse-with-wrong-quality.json",
+                        OK, StatusMessages.OK,
+                        BodyCodec.jsonArray(), vertx)
+        );
+        AssertResponseGivenRequestHelper
+                .assertRequestGiveResponseFromFileAndFinishTest(webClient, testContext, confs);
+    }
+
+
 }
 
