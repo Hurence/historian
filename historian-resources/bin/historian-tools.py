@@ -3,7 +3,9 @@ from distutils.dir_util import copy_tree
 import re, logging, argparse
 import datetime, calendar
 import pandas as pd
+import sys, os, hashlib, sh
 from multiprocessing import Pool, Process, Manager
+
 
 logger = logging.getLogger('historian-tools')
 
@@ -27,25 +29,25 @@ def setup_logger(out_dir):
     logger.info("------------ START -------------")
 
 
-# create the env
-# conda create --name historian pandas
-
-
-def synchronize_folders(src, dst):
-    copy_tree(src, dst)
 
 
 def read_csv(file):
+    """Read a single csv file as a pandas dataframe
+    :param file: the csv
+    :return: a dataframe
+    """
     try:
         # some file may be broken
         df = pd.read_csv(file, sep=';')
         return df
-    except:
+    except Exception as ex:
+        logger.error("unable to process file " + file + " exception " +ex)
         pass
 
 
-def compact_csv_files(root_dir, out_dir):
-    """
+def process_csv_files(root_dir, out_dir, num_threads, do_compaction):
+    """Take a root directory with subdir containing csv files and make just
+    one single tgz csv file for each day
 
     :param root_dir:
     :return:
@@ -71,12 +73,24 @@ def compact_csv_files(root_dir, out_dir):
         num_days = calendar.monthrange(int(year), int(month))[1]
         days = [datetime.date(int(year), int(month), day) for day in range(1, num_days + 1)]
         for day in days:
+            out_dir_day = out_dir + day.strftime("/%Y-%m-ISNTS") + server
+            out_file_day = out_dir_day + "/dataHistorian-ISNTS" + server + "-N-" + day.strftime("%Y%m%d.csv.gz")
             file_pattern = root_path + "/dataHistorian-ISNTS" + server + "-N-" + day.strftime("%Y%m%d") + "*.csv"
             files = glob.glob(file_pattern)
+
+            # check for completion
             files_count = len(files)
-            if files_count > 0:
-                out_dir_day = out_dir + day.strftime("/%Y-%m-ISNTS") + server
-                out_file_day = out_dir_day + "/dataHistorian-ISNTS" + server + "-N-" + day.strftime("%Y%m%d.csv.gz")
+            is_complete = (files_count == 1440)
+
+            if is_complete:
+                completion_message = "complete data"
+            else:
+                completion_message = "missing data"
+            logger.info("found {} files for ISNTS{}-N-{} => {}".format(files_count, server, day.strftime("%Y%m%d"), completion_message))
+
+            # loop over files to do the compaction
+            if files_count > 0 and do_compaction:
+
                 if not os.path.exists(out_dir_day):
                     os.makedirs(out_dir_day)
 
@@ -86,7 +100,7 @@ def compact_csv_files(root_dir, out_dir):
                     logger.info("found {} files for day {} with following file pattern {}".format(files_count, day,
                                                                                                   file_pattern))
                     start = time.time()
-                    pool = Pool(8)
+                    pool = Pool(num_threads)
                     df_collection = pool.map(read_csv, files)
                     pool.close()
                     pool.join()
@@ -109,23 +123,51 @@ def compact_csv_files(root_dir, out_dir):
                 logger.info("found no files for day {} ".format(day))
 
 
+
+
+
+def synchronize_folders(src, dst):
+    copy_tree(src, dst)
+
+
+def put_to_dhfs(local_file_path, hdfs_folder):
+
+    # upload file to hdfs
+    sh.hdfs( "dfs", "-put", local_file_path, hdfs_folder )
+
+
+def check_csv_file_integrity(local_file_path):
+
+    # verify that the file can be dezipped, that its a valid csv and has a full day range
+
+    return os.EX_OK
+
+
+def report(server, day):
+
+    # count finished
+
+
 def parse_command_line():
+    """Take command line and parse it"""
     parser = argparse.ArgumentParser(description='Take ')
     parser.add_argument('--rootDir', help='root directory for input csv files', default='.')
     parser.add_argument('--outDir', help='output directory for zipped csv files', default='.')
+    parser.add_argument('--numThreads', help='num thread to read files in parralel', default=8)
+    parser.add_argument('--mode', help='report or run', default='report')
     args = parser.parse_args()
     return args
 
 
+
 def main():
+    """Main program entry"""
     args = parse_command_line()
     setup_logger(args.outDir)
-    compact_csv_files(args.rootDir, args.outDir)
+    process_csv_files(args.rootDir, args.outDir, args.numThreads, False)
     logger.info("------------ END -------------")
 
 
 if __name__ == "__main__":
     main()
 
-# rootDir='/Users/tom/Documents/workspace/historian/data/chemistry'
-# outDir = '/Users/tom/Documents/workspace/historian/data/out'

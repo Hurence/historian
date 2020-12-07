@@ -67,13 +67,11 @@ class GenericMeasuresStreamReader extends Reader[Measure] {
     val dsStreamReader = spark.readStream.options(options.config)
 
     // set this to automatically infer schema from csv files
-    val schema = ConfigLoader.toSchema(options.config("schema"))
+    spark.sqlContext.setConf("spark.sql.streaming.schemaInference", "true")
+  /*  val schema = ConfigLoader.toSchema(options.config("schema"))
     if (schema.isDefined) {
       dsStreamReader.schema(schema.get)
-    }
-    else {
-      spark.sqlContext.setConf("spark.sql.streaming.schemaInference", "true")
-    }
+    }*/
 
     val df = dsStreamReader
       .csv(options.path)

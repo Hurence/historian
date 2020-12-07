@@ -81,7 +81,8 @@ object FileLoader {
         options.reader.csvFilePath,
         Map(
           "inferSchema" -> "true",
-          "schema" -> options.reader.schema,
+         // "schema" -> options.reader.schema,
+          "header"-> "true",
           "maxFileAge" -> options.reader.maxFileAge,
           "maxFilesPerTrigger" -> s"${options.reader.maxFilesPerTrigger}",
           "delimiter" -> options.reader.columnDelimiter,
