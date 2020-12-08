@@ -2,11 +2,15 @@ package com.hurence.historian.spark.sql
 
 import com.hurence.historian.spark.SparkSessionTestWrapper
 import com.hurence.historian.spark.ml.Chunkyfier
+import com.hurence.historian.spark.sql.functions.toDateUTC
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
 import com.hurence.timeseries.model.Chunk
 import com.hurence.timeseries.model.Chunk.MetricKey.TOKEN_SEPARATOR_CHAR
-import com.hurence.timeseries.model.Chunk.MetricKey.TAG_KEY_VALUE_SEPARATOR_CHAR;
+import com.hurence.timeseries.model.Chunk.MetricKey.TAG_KEY_VALUE_SEPARATOR_CHAR
+import com.hurence.timeseries.model.Definitions.FIELD_DAY
 import org.apache.spark.sql.Encoders
+import org.apache.spark.sql.functions._
+import org.apache.spark.sql.functions.{avg, collect_list, count, first, last, lit, max, min, stddev}
 import org.junit.jupiter.api.Assertions.{assertEquals, assertFalse, assertTrue}
 import org.junit.jupiter.api.TestInstance.Lifecycle
 import org.junit.jupiter.api.{BeforeAll, Test, TestInstance}
@@ -224,10 +228,67 @@ class LoaderTests extends SparkSessionTestWrapper {
       ))
     val itDataV0Reader = ReaderFactory.getMeasuresReader(MeasuresReaderType.ITDATA_CSV)
 
-    val ds = itDataV0Reader.read(options)
+    val ds = itDataV0Reader.read(options).cache()
+    val ackDS = ds.filter(r => r.getName.equals("ack"))
+
+    assertEquals(484107, ds.count())
+    assertEquals(40971, ackDS.count())
+
+
+    val ackGroupedByMetricId = ackDS
+      .withColumn("day", toDateUTC(col("timestamp"), lit("yyyy-MM-dd")))
+      .groupBy(col("day"), col("tags.metric_id"))
+
+
+    assertEquals(144, ackGroupedByMetricId.count().count())
+
+    val stats = ackGroupedByMetricId.agg(
+      min(col("value")).as("min_value"),
+      max(col("value")).as("max_value"),
+      avg(col("value")).as("avg_value"),
+      min(col("timestamp")).as("min_timestamp"),
+      max(col("timestamp")).as("max_timestamp"),
+      count(col("value")).as("count"),
+      toDateUTC(min(col("timestamp")), lit("yyyy-MM-dd HH:mm:ss")).as("start"),
+      toDateUTC(max(col("timestamp")), lit("yyyy-MM-dd HH:mm:ss")).as("end")
+    ).sort(col("day"), col("metric_id"))
+
+
+
+
+    val oneLiner = stats.filter(r => r.getAs[String]("day").equals("2019-11-25") &&
+      r.getAs[String]("metric_id").equals("dea8601d-8aa7-4c59-a3ce-99bbab8ac5ca")).collect()(0)
+
+    assertEquals(73.0, oneLiner.getAs[Double]("min_value"))
+    assertEquals(212.4 , oneLiner.getAs[Double]("max_value"))
+    assertEquals(151.69791666666663 , oneLiner.getAs[Double]("avg_value"))
+    assertEquals(1574640105000L , oneLiner.getAs[Long]("min_timestamp"))
+    assertEquals(1574726195000L , oneLiner.getAs[Long]("max_timestamp"))
+    assertEquals(288 , oneLiner.getAs[Long]("count"))
+
+    val chunkyfier = new Chunkyfier()
+      .setGroupByCols("name,tags.metric_id".split(","))
+      .setDateBucketFormat("yyyy-MM-dd")
+      .setSaxAlphabetSize(7)
+      .setSaxStringLength(24)
+
+    implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
+    val chunks = chunkyfier.transform(ackDS).as[Chunk]
+
+
+    val oneLinerChunk = chunks.filter(r => r.getDay.equals("2019-11-25") &&
+      r.getTag("metric_id").equals("dea8601d-8aa7-4c59-a3ce-99bbab8ac5ca")).collect()(0)
+
+    assertEquals(73.0, oneLinerChunk.getMin)
+    assertEquals(212.4 , oneLinerChunk.getMax)
+    assertEquals(151.69791666666666 , oneLinerChunk.getAvg)
+    assertEquals(1574640105000L , oneLinerChunk.getStart)
+    assertEquals(1574726195000L , oneLinerChunk.getEnd)
+    assertEquals(288 , oneLinerChunk.getCount)
 
     if (logger.isDebugEnabled) {
-      ds.show()
+      ds.show(false)
+      stats.show(false)
     }
   }
 
