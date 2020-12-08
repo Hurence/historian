@@ -145,6 +145,12 @@ object FileLoader {
           "tagsFields" -> options.reader.tagNames
         )))
 
+    if(logger.isDebugEnabled){
+      val count = measuresDS.count()
+      logger.debug(count)
+    }
+
+
     // transform Measures into Chunks
     val chunksDS = new Chunkyfier()
       .setOrigin(options.chunkyfier.origin)

@@ -26,10 +26,9 @@ conf:
     csvFilePath: "."
     schema: "timestamp:string,tagname:string,value:double,quality:float"
     tagNames: ""
-    maxFileAge: "1h",
+    maxFileAge: "1h"
     maxFilesPerTrigger: 200
     encoding: "UTF-8"
-    groupByCols: "name"
     timestampField: "timestamp"
     nameField: "name"
     valueField: "value"
