@@ -23,7 +23,7 @@ object FileLoader {
 
 
 
-  private val logger = LogManager.getLogger(classOf[SolrChunkService])
+  private val logger = LogManager.getLogger(classOf[FileLoader])
 
 
   /**
@@ -144,12 +144,6 @@ object FileLoader {
           "qualityField" -> options.reader.qualityField,
           "tagsFields" -> options.reader.tagNames
         )))
-
-    if(logger.isDebugEnabled){
-      val count = measuresDS.count()
-      logger.debug(count)
-    }
-
 
     // transform Measures into Chunks
     val chunksDS = new Chunkyfier()
