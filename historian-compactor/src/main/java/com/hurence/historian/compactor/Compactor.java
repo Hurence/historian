@@ -3,6 +3,7 @@ package com.hurence.historian.compactor;
 import com.hurence.historian.compactor.config.Configuration;
 import com.hurence.historian.compactor.config.ConfigurationBuilder;
 import com.hurence.historian.compactor.config.ConfigurationException;
+import com.hurence.historian.date.util.DateUtil;
 import com.hurence.historian.spark.ml.Chunkyfier;
 import com.hurence.historian.spark.ml.UnChunkyfier;
 import com.hurence.historian.spark.sql.Options;
@@ -307,29 +308,7 @@ public class Compactor implements Runnable {
         this.startNow = startNow;
     }
 
-    /**
-     * Get the first timestamp (in milliseconds) of the current day in UTC format.
-     * For instance if you call this method on Friday 18 September 2020 in the middle of the day,
-     * this should return 1600387200000 which corresponds to GMT: Friday 18 September 2020 00:00:00
-     * @return
-     */
-    private static long utcFirstTimestampOfTodayMs() {
 
-        // Get current time in UTC timezone
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DATE);
-        calendar.set(year, month, day, 0, 0, 0); // Remove hour, minute and seconds of the day from the time
-
-        // This may return 1600387200388 timestamp in milliseconds which is GMT: Friday 18 September 2020 00:00:00.388
-        long timestampMillis = calendar.getTime().getTime();
-
-        // Remove the milliseconds by rounding down to number of seconds and passing again into ms
-        // 1600387200388 -> 1600387200000
-
-        return (timestampMillis / 1000L) * 1000L;
-    }
 
     /**
      * Test if a dataset is empty
@@ -383,7 +362,7 @@ public class Compactor implements Runnable {
          * rows 1000
          * request_handler /export
          */
-        String query = CHUNK_START + ":[* TO " + (utcFirstTimestampOfTodayMs()-1L)+ "]" // Chunks from epoch to yesterday (included)
+        String query = CHUNK_START + ":[* TO " + (DateUtil.utcFirstTimestampOfTodayMs()-1L)+ "]" // Chunks from epoch to yesterday (included)
                 + "AND -" + CHUNK_ORIGIN + ":" + ChunkOrigin.COMPACTOR; // Only not yet compacted chunks
         options.put("query", query);
         options.put("fields", METRIC_KEY + "," + CHUNK_DAY); // Return only metric_key and chunk_day fields
