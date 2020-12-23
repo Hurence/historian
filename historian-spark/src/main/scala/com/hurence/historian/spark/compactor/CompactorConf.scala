@@ -22,11 +22,9 @@ case class SolrConf(zkHosts: String = "localhost:9983",
                     flushInterval: Int = 2000)
 
 case class ReaderConf(queryFilters: String = "",
-                      tagNames: String = "tagname,metric_id",
-                      maxKeysPerTrigger: Int = -1)
+                      tagNames: String = "tagname,metric_id")
 
-case class ChunkyfierConf(chunkSize: Int = 1440,
-                          saxAlphabetSize: Int = 7,
+case class ChunkyfierConf(saxAlphabetSize: Int = 7,
                           saxStringLength: Int = 24,
                           groupByCols: String = "name",
                           origin: String = "compactor",
