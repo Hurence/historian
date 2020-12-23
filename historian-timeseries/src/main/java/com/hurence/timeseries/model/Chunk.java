@@ -181,6 +181,7 @@ public class Chunk implements Serializable, ChunkClusterable {
             } catch (UnsupportedEncodingException e) {
                 LOGGER.error("Error encoding binaries", e);
             }
+            newId.append(origin);
 
             // Id is hash of metric key + measures
             id = Hashing.sha256()

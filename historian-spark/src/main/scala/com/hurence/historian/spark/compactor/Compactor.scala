@@ -4,13 +4,11 @@ package com.hurence.historian.spark.compactor
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 
 import com.hurence.historian.date.util.DateUtil
-import com.hurence.historian.model.HistorianChunkCollectionFieldsVersionCurrent._
 import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
 import com.hurence.historian.spark.sql
 import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.hurence.timeseries.model.Definitions._
-import com.hurence.timeseries.core.ChunkOrigin
 import com.hurence.timeseries.model.{Chunk, Measure}
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.log4j.{Level, LogManager}
@@ -31,9 +29,6 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
   private var closed = false
 
   def start(): Unit = {
-    logger.setLevel(Level.DEBUG)
-    LogManager.getLogger("org.apache.spark").setLevel(Level.WARN)
-
     if (closed) throw new IllegalStateException("Cannot call start on closed compactor")
     if (!started) {
       logger.info("Starting compactor using configuration: " + options)
@@ -91,7 +86,6 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
 
   override def run(): Unit = {
 
-    logger.debug("running compaction")
     if (closed) throw new IllegalStateException("Cannot call run on closed compactor")
 
     try {
@@ -100,10 +94,17 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
           val uncompactedChunks = loadChunksFromSolr(day)
           val measuresDS = convertChunksToMeasures(uncompactedChunks)
           val compactedChunksDS = convertMeasuresToChunks(measuresDS)
-          compactedChunksDS.show(20,false)
-        //  writeCompactedChunksToSolr(compactedChunksDS)
-        //  checkChunksIntegrity(compactedChunksDS)
-        //  deleteOldChunks(uncompactedChunks)
+          writeCompactedChunksToSolr(compactedChunksDS)
+          if (checkChunksIntegrity(compactedChunksDS))
+            deleteOldChunks(day)
+
+          /*
+            curl http://localhost:8983/solr/historian/update -H "Content-type: text/xml" --data-binary '<delete><query>chunk_origin:compactor*it*</query></delete>'
+            curl http://localhost:8983/solr/historian/update -H "Content-type: text/xml" --data-binary '<commit />'
+
+
+
+           */
         })
     }
     catch {
@@ -137,27 +138,31 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
   def findDaysToCompact() = {
     val days = mutable.HashSet[String]()
 
-    // build SolR query
+    // build SolR facet query
     val solrQuery = new SolrQuery("*:*")
-    /*solrQuery.addFilterQuery(CHUNK_START + ":[* TO " +
-      (DateUtil.utcFirstTimestampOfTodayMs - 1L) + "]" +
-      "AND -" + CHUNK_ORIGIN + ":" + ChunkOrigin.COMPACTOR)*/
-    solrQuery.addFilterQuery(s"$CHUNK_START :[* TO " +
-      s"${DateUtil.utcFirstTimestampOfTodayMs - 1L} ]" +
-      s"AND $CHUNK_ORIGIN:loader-it-data")
+    val filterQuery = if (options.reader.queryFilters.isEmpty)
+      s"$SOLR_COLUMN_START :[* TO ${DateUtil.utcFirstTimestampOfTodayMs - 1L} ]"
+    else
+      s"$SOLR_COLUMN_START :[* TO ${DateUtil.utcFirstTimestampOfTodayMs - 1L} ] AND (${options.reader.queryFilters})"
 
-    solrQuery.addField(CHUNK_DAY)
-    solrQuery.setRows(1000)
-    logger.debug("solr query : " + solrQuery.toQueryString)
+    solrQuery.addFilterQuery(filterQuery)
+    solrQuery.setRows(0)
+    solrQuery.addFacetField(SOLR_COLUMN_DAY)
+    solrQuery.setFacet(true)
+    solrQuery.setFacetMinCount(1)
+    logger.debug(s"looking for days to compact : fq=$filterQuery")
 
     // run that query and convert response to a set of days
     val response = solrClient.query(options.solr.collectionName, solrQuery)
     import scala.collection.JavaConversions._
-    for (d <- response.getResults) {
-      days.add(d.get(CHUNK_DAY).asInstanceOf[String])
+    for (d <- response.getFacetField(SOLR_COLUMN_DAY).getValues) {
+      days.add(d.getName)
     }
 
-    logger.debug("found " + days.toList.mkString(",") + " to be compacted")
+    if (days.isEmpty)
+      logger.debug("no chunk found for compaction")
+    else
+      logger.debug("found " + days.toList.mkString(",") + " to be compacted")
     days
   }
 
@@ -170,6 +175,11 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
   def loadChunksFromSolr(day: String) = {
     logger.debug(s"start loading chunks from SolR collection : ${options.solr.collectionName} for day $day")
 
+    val filterQuery = if (options.reader.queryFilters.isEmpty)
+      s"$SOLR_COLUMN_DAY:$day"
+    else
+      s"$SOLR_COLUMN_DAY:$day AND (${options.reader.queryFilters})"
+
     ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
       .read(sql.Options(
         options.solr.collectionName,
@@ -177,8 +187,7 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
           "zkhost" -> options.solr.zkHosts,
           "collection" -> options.solr.collectionName,
           "tag_names" -> options.reader.tagNames,
-          "filters" -> s"$SOLR_COLUMN_DAY:$day",
-          "query" -> "chunk_origin:loader-it-data"
+          "filters" -> filterQuery
         )))
       .as[Chunk](Encoders.bean(classOf[Chunk]))
   }
@@ -209,7 +218,6 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
       .setSaxStringLength(options.chunkyfier.saxStringLength)
       .transform(measuresDS)
       .as[Chunk](Encoders.bean(classOf[Chunk]))
-      .repartition(8)
   }
 
   /**
@@ -228,7 +236,7 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
 
     // explicit commit to make sure all docs are immediately visible
     val response = solrClient.commit(options.solr.collectionName, true, true)
-    logger.debug(s"done saving new chunks : ${response.toString} to collection ${options.solr.collectionName}")
+    logger.debug(s"done saving new chunks to collection ${options.solr.collectionName}")
 
     chunksDS
   }
@@ -250,27 +258,24 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
     *
     * @return
     */
-  def deleteOldChunks(chunksDS: Dataset[Chunk]) = {
+  def deleteOldChunks(day: String) = {
+    val solrQuery = s"$SOLR_COLUMN_DAY:$day AND -$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin}"
+    logger.debug(s"will delete by query  q=$solrQuery")
+
+    try solrClient.deleteByQuery(options.solr.collectionName, solrQuery)
+    catch {
+      case e: Exception =>
+        logger.error(s"Error deleting chunk documents q=$solrQuery : ${e.getMessage}")
+    }
 
 
-    chunksDS.foreachPartition(partition => {
-      logger.debug("Will delete old documents for that partition")
-      partition.foreach(chunk => {
-        logger.debug("Deleting document id " + chunk.getId)
-        try solrClient.deleteById(options.solr.collectionName, chunk.getId)
-        catch {
-          case e: Exception =>
-            logger.error("Error deleting chunk document with id " + chunk.getId + ": " + e.getMessage)
-        }
-      })
-      try {
-        logger.debug("Committing documents deletion")
-        solrClient.commit(options.solr.collectionName, true, true)
-      } catch {
-        case e: Exception =>
-          logger.error("Error committing deleted chunks: " + e.getMessage)
-      }
-    })
+    try {
+      logger.debug("Committing documents deletion")
+      solrClient.commit(options.solr.collectionName, true, true)
+    } catch {
+      case e: Exception =>
+        logger.error("Error committing deleted chunks: " + e.getMessage)
+    }
   }
 
 }
@@ -279,39 +284,21 @@ object Compactor {
 
 
   /**
-    * 4' by day for S35 : 35M raw zip / 250M raw / 50M index
     *
-    *
-    * $SPARK_HOME/bin/spark-submit --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties" --class com.hurence.historian.spark.loader.FileLoader  --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  -csv "data/chemistry/dataHistorian-ISNTS35-N-20200301*.csv"  -groupBy name -zk localhost:9983 -col historian -name tagname -cd ";"  -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss" -origin chemistry -dbf "yyyy-MM-dd.HH"
-    *
-    *
-    * $SPARK_HOME/bin/spark-submit --driver-java-options '-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties' --class com.hurence.historian.spark.loader.FileLoader --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar -csv historian-spark/src/test/resources/it-data-4metrics.csv.gz -tags metric_id -groupBy name,tags.metric_id -zk localhost:9983 -name metric_name -origin it-data
-    *
-    *
-    * $SPARK_HOME/bin/spark-submit --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties" --class com.hurence.historian.spark.loader.FileLoader  --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar   historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  -csv "data/chemistry/_in"  -groupBy name -zk localhost:9983 -col historian -name tagname -cd ";"  -tags tagname -quality quality -tf "dd/MM/yyyy HH:mm:ss" -origin chemistry -dbf "yyyy-MM-dd.HH" -stream
-    *
-    *
-    *
-    *
-    * $SPARK_HOME/bin/spark-submit --conf "spark.driver.extraJavaOptions=-Dlog4j.configuration=file:historian-spark/src/main/resources/log4j.properties" --class com.hurence.historian.spark.loader.FileLoader  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar --config-file historian-spark/src/main/resources/fileloader-streaming-config.yml
+    * $SPARK_HOME/bin/spark-submit --driver-memory 4g --driver-java-options '-Dlog4j.configuration=file:historian-resources/conf/log4j.properties' --class  com.hurence.historian.spark.compactor.Compactor --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar --config-file historian-resources/conf/compactor-config.yaml
     *
     * @param args
     */
   def main(args: Array[String]): Unit = {
-
-
     // get arguments & setup spark session
     val options = if (args.size == 0)
       ConfigLoader.defaults()
     else
       ConfigLoader.loadFromFile(args(1))
 
-
+    // start compaction
     val compactor = new Compactor(options)
-
     compactor.start()
-
-
   }
 
 

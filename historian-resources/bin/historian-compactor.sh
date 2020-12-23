@@ -33,16 +33,15 @@ cmd_start() {
   fi
 
   # Jar holding the main Compactor class
-  COMPACTOR_JAR="${HISTORIAN_LIB_DIR}/historian-compactor-${HISTORIAN_VERSION}.jar"
+  COMPACTOR_JAR="${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar"
 
   # Class to run
-  COMPACTOR_CLASS="com.hurence.historian.compactor.Compactor"
+  COMPACTOR_CLASS="com.hurence.historian.spark.compactor.Compactor"
 
   # Create csv list of needed dependency jars
   # Do not put tabs/spaces on lines after the first one or they will appear in
   # the final JARS variable value
-  COMPACTOR_DEP_JARS="file:${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar,\
-file:${HISTORIAN_LIB_DIR}/historian-timeseries-${HISTORIAN_VERSION}.jar"
+  COMPACTOR_DEP_JARS="file:${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar"
 
   # Now get run mode and apply what's asked
   SPARK_MASTER=$(read_property_from_config_file "spark.master")
