@@ -3,7 +3,7 @@ package com.hurence.historian.solr
 import java.net.{ConnectException, SocketException}
 
 import com.lucidworks.spark.util.{CacheCloudSolrClient, SolrSupport}
-import com.lucidworks.spark.{LazyLogging, SparkSolrAccumulator}
+import com.lucidworks.spark.SparkSolrAccumulator
 import org.apache.http.NoHttpResponseException
 import org.apache.solr.client.solrj.SolrClient
 import org.apache.solr.client.solrj.request.UpdateRequest

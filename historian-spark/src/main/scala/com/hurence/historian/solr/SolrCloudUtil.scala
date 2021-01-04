@@ -1,13 +1,12 @@
-package com.hurence.solr
+package com.hurence.historian.solr
 
-import org.apache.solr.client.solrj.{SolrClient, SolrQuery}
+import org.apache.solr.client.solrj.SolrClient
 import org.apache.solr.client.solrj.impl.CloudSolrClient
 import org.apache.solr.client.solrj.request.CollectionAdminRequest
-import org.apache.solr.client.solrj.response.QueryResponse
-import org.apache.solr.common.cloud._
+import org.apache.solr.common.cloud.{ClusterState, DocCollection}
 import org.noggit.{CharArr, JSONWriter}
 
-import scala.collection.JavaConversions._
+import scala.collection.JavaConversions.asScalaSet
 
 object SolrCloudUtil extends LazyLogging {
 

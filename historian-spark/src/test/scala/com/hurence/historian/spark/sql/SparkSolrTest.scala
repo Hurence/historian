@@ -4,7 +4,7 @@ import java.util.UUID
 
 import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.reader.{ReaderFactory, ReaderType}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.hurence.historian.{SolrCloudUtilForTests, SolrUtils}
 import com.hurence.test.framework.SparkSolrTests
@@ -14,16 +14,16 @@ import io.vertx.core.json.JsonArray
 import org.apache.spark.sql.SaveMode.Overwrite
 import org.apache.spark.sql._
 import org.apache.spark.sql.types._
-import com.hurence.historian.spark.DatasetComparer
 import com.hurence.historian.spark.sql.functions.reorderColumns
 import com.hurence.timeseries.model.Definitions.FIELD_QUALITY_AVG
 import org.apache.solr.client.solrj.SolrQuery
 import org.apache.spark.sql.functions.col
+import org.junit.Assert.{assertArrayEquals, assertEquals}
 
 import scala.Seq
+import scala.collection.JavaConverters._
 
-
-class SparkSolrTest extends SparkSolrTests with DatasetComparer {
+class SparkSolrTest extends SparkSolrTests {
 
   test("Solr version") {
     val solrVersion = SolrSupport.getSolrVersion(zkAddressSolr)
@@ -44,10 +44,10 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
     try {
       // 1. load measures from parquet file
 
-      val measures = ReaderFactory.getMeasuresReader(MeasuresReaderType.PARQUET)
+      val measures = ReaderFactory.getMeasuresReader(ReaderType.PARQUET)
         .read(Options(this.getClass.getClassLoader.getResource("it-data-4metrics.parquet").getPath, Map()))
-        .where("name = 'ack' AND tags.metric_id LIKE '08%'")
         .as[Measure](Encoders.bean(classOf[Measure]))
+        .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d'")
         .cache()
 
       if (logger.isDebugEnabled) {
@@ -86,7 +86,7 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
       val response = solrCloudClient.query(collectionName, q)
 
       // 5. load back those chunks to verify
-      val reader = ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
+      val reader = ReaderFactory.getChunksReader(ReaderType.SOLR)
       val solrDF = reader.read(sql.Options(collectionName, Map(
         "zkhost" -> zkAddressSolr,
         "collection" -> collectionName,
@@ -106,9 +106,11 @@ class SparkSolrTest extends SparkSolrTests with DatasetComparer {
         measuresBack.show()
       }
 
-      assertSmallDatasetEquality(
-        measures.sort("timestamp"),
-        measuresBack.sort("timestamp"))
+      assertEquals(
+        measures.sort("timestamp").collect().toList.asJava,
+        measuresBack.sort("timestamp").collect().toList.asJava
+      )
+
 
       assert(solrDF.count == 6)
       /*  assert(solrDF.schema.fields.lengthTestda === 5) // _root_ id one_txt two_txt three_s

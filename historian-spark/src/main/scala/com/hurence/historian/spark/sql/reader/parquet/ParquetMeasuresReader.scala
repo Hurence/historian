@@ -2,7 +2,7 @@ package com.hurence.historian.spark.sql.reader.parquet
 
 import com.hurence.historian.spark.sql.Options
 import com.hurence.historian.spark.sql.functions.reorderColumns
-import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, Reader, ReaderFactory}
+import com.hurence.historian.spark.sql.reader.{Reader, ReaderFactory}
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 

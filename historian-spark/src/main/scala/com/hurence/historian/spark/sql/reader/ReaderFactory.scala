@@ -1,10 +1,9 @@
 package com.hurence.historian.spark.sql.reader
 
-import com.hurence.historian.spark.sql.reader.ChunksReaderType.ChunksReaderType
-import com.hurence.historian.spark.sql.reader.MeasuresReaderType.MeasuresReaderType
-import com.hurence.historian.spark.sql.reader.csv.{EvoaCSVMeasuresReader, GenericMeasuresReaderV0, GenericMeasuresStreamReader, ITDataCSVMeasuresReaderV0}
-import com.hurence.historian.spark.sql.reader.parquet.{ParquetChunksReader, ParquetMeasuresReader}
-import com.hurence.historian.spark.sql.reader.solr.SolrChunksReader
+import com.hurence.historian.spark.sql.reader.ReaderType.ReaderType
+import com.hurence.historian.spark.sql.reader.csv._
+import com.hurence.historian.spark.sql.reader.parquet._
+import com.hurence.historian.spark.sql.reader.solr._
 import com.hurence.timeseries.model.{Chunk, Measure}
 
 
@@ -13,17 +12,14 @@ import com.hurence.timeseries.model.{Chunk, Measure}
   */
 object ReaderFactory {
 
-
-  def getMeasuresReader(readerType: MeasuresReaderType): Reader[Measure] = readerType match {
-    case MeasuresReaderType.EVOA_CSV => new EvoaCSVMeasuresReader()
-    case MeasuresReaderType.ITDATA_CSV => new ITDataCSVMeasuresReaderV0()
-    case MeasuresReaderType.PARQUET => new ParquetMeasuresReader()
-    case MeasuresReaderType.GENERIC_CSV => new GenericMeasuresReaderV0()
-    case MeasuresReaderType.GENERIC_STREAM_CSV => new GenericMeasuresStreamReader()
+  def getMeasuresReader(readerType: ReaderType): Reader[Measure] = readerType match {
+    case ReaderType.PARQUET => new ParquetMeasuresReader()
+    case ReaderType.CSV => new CsvMeasuresReader()
+    case ReaderType.STREAM_CSV => new CsvMeasuresStreamReader()
   }
 
-  def getChunksReader(readerType: ChunksReaderType): Reader[Chunk] = readerType match {
-    case ChunksReaderType.PARQUET => new ParquetChunksReader()
-    case ChunksReaderType.SOLR => new SolrChunksReader()
+  def getChunksReader(readerType: ReaderType): Reader[Chunk] = readerType match {
+    case ReaderType.PARQUET => new ParquetChunksReader()
+    case ReaderType.SOLR => new SolrChunksReader()
   }
 }

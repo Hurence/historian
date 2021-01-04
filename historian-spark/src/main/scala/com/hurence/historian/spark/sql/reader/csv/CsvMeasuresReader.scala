@@ -1,20 +1,18 @@
 package com.hurence.historian.spark.sql.reader.csv
 
-import com.hurence.historian.spark.loader.ConfigLoader
 import com.hurence.historian.spark.sql.Options
-import com.hurence.historian.spark.sql.functions.toTimestampUTC
+import com.hurence.historian.spark.sql.functions.{toDateUTC, toTimestampUTC}
 import com.hurence.historian.spark.sql.reader.Reader
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.functions.{lit, _}
-import org.apache.spark.sql.types.{FloatType, TimestampType}
-import org.apache.spark.sql.{Dataset, Encoders, Row, SparkSession}
+import org.apache.spark.sql.{Dataset, Encoders, SparkSession}
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConverters._
 
-class GenericMeasuresStreamReader extends Reader[Measure] {
+class CsvMeasuresReader extends Reader[Measure] {
 
-  private val logger = LoggerFactory.getLogger(classOf[GenericMeasuresStreamReader])
+  private val logger = LoggerFactory.getLogger(classOf[CsvMeasuresReader])
 
   def config(): Map[String, String] = Map(
     "inferSchema" -> "true",
@@ -28,24 +26,17 @@ class GenericMeasuresStreamReader extends Reader[Measure] {
   )
 
   override def read(options: Options): Dataset[Measure] = {
-    // 5. load back those chunks to verify
     val spark = SparkSession.getActiveSession.get
     import spark.implicits._
-
 
     implicit val measureEncoder = Encoders.bean(classOf[Measure])
 
 
     val valueField = options.config("valueField")
     val nameField = options.config("nameField")
-    val qualityField = options.config("qualityField")
     val timestampField = options.config("timestampField")
     val timestampDateFormat = options.config("timestampDateFormat")
     val hasQuality = options.config.isDefinedAt("qualityField") && !options.config("qualityField").isEmpty
-
-    val isTimestampInSeconds = timestampDateFormat.equalsIgnoreCase("s") ||
-      timestampDateFormat.equalsIgnoreCase("seconds")
-    val isTimestampInMilliSeconds = timestampDateFormat.equalsIgnoreCase("ms")
 
     val tagsFields = options.config("tagsFields")
       .split(",").toList
@@ -61,23 +52,21 @@ class GenericMeasuresStreamReader extends Reader[Measure] {
       List(
         col(nameField).as("name"),
         col(valueField).as("value"),
-        col(qualityField).as("quality"),
+        col(options.config("qualityField")).as("quality"),
         col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag))
 
-    val dsStreamReader = spark.readStream.options(options.config)
 
-    // set this to automatically infer schema from csv files
-    spark.sqlContext.setConf("spark.sql.streaming.schemaInference", "true")
-  /*  val schema = ConfigLoader.toSchema(options.config("schema"))
-    if (schema.isDefined) {
-      dsStreamReader.schema(schema.get)
-    }*/
-
-    val df = dsStreamReader
-      .csv(options.path)
+    val df = spark.read
+      .format("csv")
+      .options(options.config)
+      .load(options.path)
       .select(mainCols: _*)
       .withColumn("tags", map(tagsMapping: _*))
 
+    // Manage timestamp conversion
+    val isTimestampInSeconds = timestampDateFormat.equalsIgnoreCase("s") ||
+      timestampDateFormat.equalsIgnoreCase("seconds")
+    val isTimestampInMilliSeconds = timestampDateFormat.equalsIgnoreCase("ms")
     val dfPlusTime = if (isTimestampInSeconds) {
       logger.info("getting date from timestamp in seconds")
       df.withColumn("timestamp", $"timestamp" * 1000L)
@@ -91,7 +80,9 @@ class GenericMeasuresStreamReader extends Reader[Measure] {
       df.withColumn("timestamp", toTimestampUTC(col("timestamp"), lit(timestampDateFormat)))
     }
 
-    dfPlusTime
+
+
+   dfPlusTime
       .drop(tagsFields: _*)
       .map(r => {
         val builder = Measure.builder()
@@ -102,13 +93,18 @@ class GenericMeasuresStreamReader extends Reader[Measure] {
           .value(r.getAs[Double]("value"))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
 
-        if (hasQuality)
-          builder.quality(r.getAs[Double]("quality").toFloat)
-        else
+        // Set NaN as default quality
+        if (hasQuality) {
+          try{
+            builder.quality(r.getAs[Double]("quality").toFloat)
+          }catch {
+            case _: Throwable =>
+              builder.quality(java.lang.Float.NaN)
+          }
+        } else
           builder.quality(java.lang.Float.NaN)
 
         builder.build()
-
       })
       .as[Measure]
   }
