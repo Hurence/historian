@@ -18,8 +18,6 @@
             <!-- Now, select which projects to include in this module-set. -->
             <includes>
                 <include>com.hurence.historian:historian-spark</include>
-                <include>com.hurence.historian:historian-timeseries</include>
-                <include>com.hurence.historian:historian-compactor</include>
             </includes>
             <binaries>
                 <directoryMode>0770</directoryMode>

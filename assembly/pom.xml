@@ -24,16 +24,6 @@
             <artifactId>historian-spark</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <dependency>
-            <groupId>com.hurence.historian</groupId>
-            <artifactId>historian-compactor</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.hurence.historian</groupId>
-            <artifactId>historian-spark</artifactId>
-            <version>${project.version}</version>
-        </dependency>
     </dependencies>
     <build>
         <plugins>
