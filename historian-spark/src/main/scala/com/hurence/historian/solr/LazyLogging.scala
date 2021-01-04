@@ -1,4 +1,4 @@
-package com.hurence.solr
+package com.hurence.historian.solr
 
 import org.slf4j.{Logger, LoggerFactory}
 

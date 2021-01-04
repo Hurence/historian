@@ -3,7 +3,7 @@ package com.hurence.historian.spark.loader
 import com.hurence.historian.service.SolrChunkService
 import com.hurence.historian.spark.ml.{Chunkyfier, ChunkyfierStreaming}
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.reader.{MeasuresReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.reader.{ReaderFactory, ReaderType}
 import com.hurence.historian.spark.sql.writer.solr.SolrChunkForeachWriter
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.hurence.timeseries.model.Chunk
@@ -76,7 +76,7 @@ object FileLoader {
 
   def runStreaming(options: FileLoaderConf): Unit = {
 
-    val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_STREAM_CSV)
+    val measuresDS = ReaderFactory.getMeasuresReader(ReaderType.STREAM_CSV)
       .read(sql.Options(
         options.reader.csvFilePath,
         Map(
@@ -130,7 +130,7 @@ object FileLoader {
     logger.info(s"start batch loading files from : ${options.reader.csvFilePath}")
 
     // load CSV files as a DataSet
-    val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV)
+    val measuresDS = ReaderFactory.getMeasuresReader(ReaderType.CSV)
       .read(sql.Options(
         options.reader.csvFilePath,
         Map(

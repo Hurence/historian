@@ -6,7 +6,7 @@ import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.reader.{ChunksReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.reader.{ReaderType, ReaderFactory}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.hurence.timeseries.model.Definitions._
 import com.hurence.timeseries.model.{Chunk, Measure}
@@ -180,7 +180,7 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
     else
       s"$SOLR_COLUMN_DAY:$day AND (${options.reader.queryFilters})"
 
-    ReaderFactory.getChunksReader(ChunksReaderType.SOLR)
+    ReaderFactory.getChunksReader(ReaderType.SOLR)
       .read(sql.Options(
         options.solr.collectionName,
         Map(

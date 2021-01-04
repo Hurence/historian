@@ -3,17 +3,15 @@ package com.hurence.historian
 import java.io.File
 
 import com.hurence.historian.model.SchemaVersion
-import com.hurence.historian.solr.util.SolrITHelper
-import com.hurence.solr.{LazyLogging, SolrCloudUtil}
+import com.hurence.historian.solr.{LazyLogging, SolrCloudUtil}
 import org.apache.solr.client.solrj.impl.CloudSolrClient
-import org.apache.solr.client.solrj.request.{CollectionAdminRequest, QueryRequest, UpdateRequest}
+import org.apache.solr.client.solrj.request.{QueryRequest, UpdateRequest}
 import org.apache.solr.client.solrj.response.QueryResponse
 import org.apache.solr.client.solrj.{SolrClient, SolrQuery}
 import org.apache.solr.common.SolrInputDocument
 import org.apache.solr.common.cloud._
 import org.apache.solr.common.params.{CollectionParams, CoreAdminParams, ModifiableSolrParams}
 import org.junit.Assert.{assertNotNull, assertTrue, fail}
-import org.noggit.{CharArr, JSONWriter}
 
 import scala.collection.JavaConversions._
 

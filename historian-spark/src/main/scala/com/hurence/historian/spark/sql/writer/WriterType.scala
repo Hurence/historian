@@ -3,6 +3,7 @@ package com.hurence.historian.spark.sql.writer
 object WriterType extends Enumeration {
   type WriterType = Value
 
-  val SOLR:Value = Value("SOLR")
-  val PARQUET:Value = Value("PARQUET")
+  val CSV: Value = Value("csv")
+  val SOLR:Value = Value("solr")
+  val PARQUET:Value = Value("parquet")
 }
