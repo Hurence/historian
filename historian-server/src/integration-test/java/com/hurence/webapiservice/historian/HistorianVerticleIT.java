@@ -148,7 +148,7 @@ public class HistorianVerticleIT {
                         assertTrue(doc1.containsKey(SOLR_COLUMN_SUM));
                         assertTrue(doc1.containsKey(SOLR_COLUMN_FIRST));
                         assertEquals(28, doc1.size());
-                        assertEquals("c598923bb1aa77c6bec68bf64146633339fe22a7c85dcf0a9a49386ff38b4d8e", doc1.getString(ID));
+                        assertEquals("703e23e9dc743034695aa4bd095588cd452521ab2d6c55b17649a4f94c1ae09b", doc1.getString(ID));
                         assertEquals(1L, doc1.getLong(SOLR_COLUMN_START));
                         assertEquals(4L, doc1.getLong(SOLR_COLUMN_END));
                         JsonObject doc2 = docs.getJsonObject(1);
@@ -156,7 +156,7 @@ public class HistorianVerticleIT {
                         assertEquals(5L, doc2.getLong(SOLR_COLUMN_START));
                         assertEquals(8L, doc2.getLong(SOLR_COLUMN_END));
                         JsonObject doc3 = docs.getJsonObject(2);
-                        assertEquals("05e93d0232a6b8ff65de193c251a3369c2d179ff2df5a3f5d85ef304c71e9a47", doc3.getString(ID));
+                        assertEquals("36bd5e6db7615eaf7312c6637564b50692bef3ada457bd425e5ed4ccbb9979b4", doc3.getString(ID));
                         assertEquals(9L, doc3.getLong(SOLR_COLUMN_START));
                         assertEquals(12L, doc3.getLong(SOLR_COLUMN_END));
                         testContext.completeNow();
@@ -177,7 +177,7 @@ public class HistorianVerticleIT {
                     testContext.verify(() -> {
                         JsonArray docs = rsp.getJsonArray(CHUNKS);
                         JsonObject doc2 = docs.getJsonObject(0);
-                        assertEquals("05e93d0232a6b8ff65de193c251a3369c2d179ff2df5a3f5d85ef304c71e9a47", doc2.getString(ID));
+                        assertEquals("36bd5e6db7615eaf7312c6637564b50692bef3ada457bd425e5ed4ccbb9979b4", doc2.getString(ID));
                         JsonObject doc3 = docs.getJsonObject(1);
                         assertEquals("76b6954755cee70cea39e10ea28629657ba62f0fd6cd84f72d30bf26510ea16d", doc3.getString(ID));
                         testContext.completeNow();
@@ -198,7 +198,7 @@ public class HistorianVerticleIT {
                     testContext.verify(() -> {
                         JsonArray docs = rsp.getJsonArray(CHUNKS);
                         JsonObject doc1 = docs.getJsonObject(0);
-                        assertEquals("c598923bb1aa77c6bec68bf64146633339fe22a7c85dcf0a9a49386ff38b4d8e", doc1.getString(ID));
+                        assertEquals("703e23e9dc743034695aa4bd095588cd452521ab2d6c55b17649a4f94c1ae09b", doc1.getString(ID));
                         JsonObject doc2 = docs.getJsonObject(1);
                         assertEquals("a17c15b77fa8b7c2f31099d9d2168ca339a031f84c2ef024a2ca26c02eedf9a3", doc2.getString(ID));
                         testContext.completeNow();
