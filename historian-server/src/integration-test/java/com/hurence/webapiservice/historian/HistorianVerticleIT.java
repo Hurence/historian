@@ -152,7 +152,7 @@ public class HistorianVerticleIT {
                         assertEquals(1L, doc1.getLong(SOLR_COLUMN_START));
                         assertEquals(4L, doc1.getLong(SOLR_COLUMN_END));
                         JsonObject doc2 = docs.getJsonObject(1);
-                        assertEquals("a17c15b77fa8b7c2f31099d9d2168ca339a031f84c2ef024a2ca26c02eedf9a3", doc2.getString(ID));
+                        assertEquals("b4a872769523a2bb3661cc28d0f0939d9dce9ebe403b1f41c58cf0946a1c474c", doc2.getString(ID));
                         assertEquals(5L, doc2.getLong(SOLR_COLUMN_START));
                         assertEquals(8L, doc2.getLong(SOLR_COLUMN_END));
                         JsonObject doc3 = docs.getJsonObject(2);
@@ -177,7 +177,7 @@ public class HistorianVerticleIT {
                     testContext.verify(() -> {
                         JsonArray docs = rsp.getJsonArray(CHUNKS);
                         JsonObject doc2 = docs.getJsonObject(0);
-                        assertEquals("36bd5e6db7615eaf7312c6637564b50692bef3ada457bd425e5ed4ccbb9979b4", doc2.getString(ID));
+                        assertEquals("502d4c7de107feadf86cf0e96420b3c477de246bfc1217a41502376e8b64006e", doc2.getString(ID));
                         JsonObject doc3 = docs.getJsonObject(1);
                         assertEquals("76b6954755cee70cea39e10ea28629657ba62f0fd6cd84f72d30bf26510ea16d", doc3.getString(ID));
                         testContext.completeNow();
@@ -200,7 +200,7 @@ public class HistorianVerticleIT {
                         JsonObject doc1 = docs.getJsonObject(0);
                         assertEquals("703e23e9dc743034695aa4bd095588cd452521ab2d6c55b17649a4f94c1ae09b", doc1.getString(ID));
                         JsonObject doc2 = docs.getJsonObject(1);
-                        assertEquals("a17c15b77fa8b7c2f31099d9d2168ca339a031f84c2ef024a2ca26c02eedf9a3", doc2.getString(ID));
+                        assertEquals("b4a872769523a2bb3661cc28d0f0939d9dce9ebe403b1f41c58cf0946a1c474c", doc2.getString(ID));
                         testContext.completeNow();
                     });
                 })
