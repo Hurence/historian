@@ -1,8 +1,0 @@
-{
-  "errors": [
-    {
-      "file" : "csv_5001_lines.csv",
-      "cause" : "The csv contains 5001 lines which is more than the max number of line of 5000"
-    }
-  ]
-}

@@ -31,7 +31,7 @@
     <fileSets>
         <!--   Embed all resources in logisland-resources module  -->
         <fileSet>
-            <directory>../historian-resources/bin</directory>
+            <directory>../resources/bin</directory>
             <directoryMode>0770</directoryMode>
             <fileMode>0770</fileMode>
             <outputDirectory>./bin</outputDirectory>
@@ -44,7 +44,7 @@
         </fileSet>
 
         <fileSet>
-            <directory>../historian-resources/conf</directory>
+            <directory>../resources/conf</directory>
             <directoryMode>0770</directoryMode>
             <fileMode>0770</fileMode>
             <outputDirectory>./conf</outputDirectory>
@@ -54,7 +54,7 @@
         </fileSet>
 
         <fileSet>
-            <directory>../historian-resources/samples</directory>
+            <directory>../resources/samples</directory>
             <directoryMode>0770</directoryMode>
             <fileMode>0770</fileMode>
             <outputDirectory>./samples</outputDirectory>
@@ -66,7 +66,7 @@
             See https://logging.apache.org/log4j/2.x/log4j-to-slf4j/index.html
          -->
         <fileSet>
-            <directory>../historian-resources/lib</directory>
+            <directory>../resources/lib</directory>
             <directoryMode>0770</directoryMode>
             <fileMode>0770</fileMode>
             <outputDirectory>./lib</outputDirectory>

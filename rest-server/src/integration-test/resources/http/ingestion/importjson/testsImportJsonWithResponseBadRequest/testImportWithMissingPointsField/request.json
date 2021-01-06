@@ -1,0 +1,22 @@
+[
+  {
+    "name": "openSpaceSensors.Temperature5"
+  },
+  {
+    "name": "openSpaceSensors.Temperature6",
+    "points": [
+      [1477917224866, 8.0],
+      [1477895624866, 43.0]
+    ]
+  },
+  {
+    "name": "openSpaceSensors.Temperature7",
+    "points": [
+      [1477895624865, 88],
+      [1477916224066, 447.0]
+    ]
+  },
+  {
+    "name": "openSpaceSensors.Temperature8"
+  }
+]

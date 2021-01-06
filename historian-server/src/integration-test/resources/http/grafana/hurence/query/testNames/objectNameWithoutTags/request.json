@@ -1,8 +1,0 @@
-
-{
-  "from": "2016-10-31T06:33:44.866Z",
-  "to": "2020-10-31T12:33:44.866Z",
-  "names": [{"name" : "temp_a"}, { "name" : "temp_b"}],
-  "format": "json",
-  "max_data_points": 550
-}

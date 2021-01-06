@@ -1,0 +1,6 @@
+{
+  "names": ["metric_1"],
+  "tags": {
+    "sensor" : "sensor_1"
+  }
+}

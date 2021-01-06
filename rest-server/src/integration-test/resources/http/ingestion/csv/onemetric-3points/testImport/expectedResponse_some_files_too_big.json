@@ -1,0 +1,18 @@
+{
+  "tags": [],
+  "grouped_by": ["name"],
+  "report" : [
+    {
+      "name": "metric_1",
+      "number_of_points_injected": 3,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 1
+    }
+  ],
+  "errors": [
+    {
+      "file" : "csv_5001_lines.csv",
+      "cause" : "The csv contains 5001 lines which is more than the max number of line of 5000"
+    }
+  ]
+}

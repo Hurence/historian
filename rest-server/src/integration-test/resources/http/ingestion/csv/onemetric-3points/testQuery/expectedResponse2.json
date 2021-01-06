@@ -1,0 +1,18 @@
+[
+  {
+    "name": "metric_1",
+    "datapoints": [
+      [1.2, 1],
+      [2.0, 2],
+      [3.0, 3]
+    ],"total_points":3
+  },
+  {
+    "name": "metric_2",
+    "datapoints": [
+      [1.2, 1],
+      [2.0, 2],
+      [3.0, 3]
+    ],"total_points":3
+  }
+]

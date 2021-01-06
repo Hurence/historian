@@ -1,0 +1,68 @@
+{
+  "query": {
+    "metrics": [
+      "metric_1"
+    ]
+  },
+  "total": 2,
+  "chunks": [
+    {
+      "name": "metric_1",
+      "chunk_start": 1,
+      "chunk_end": 2,
+      "chunk_count": 2,
+      "chunk_value": "H4sIAAAAAAAAAOPilDQGg8/2XNySDBDgYMAoxc7BIMrA0LAfAE0NFIMhAAAA",
+      "chunk_year": 1970,
+      "chunk_month": 1,
+      "chunk_day": "1970-01-01",
+      "chunk_origin": "ingestion-csv",
+      "id": "48e2e600d6672df7826204208855b1522ed1346b68168cb1c9f9e1baa37aa85f",
+      "version":"VERSION_1",
+      "metric_key":"metric_1",
+      "chunk_quality_min":"NaN",
+      "chunk_quality_max":"NaN",
+      "chunk_quality_first":"NaN",
+      "chunk_quality_sum":0.0,
+      "chunk_quality_avg":"NaN",
+      "chunk_max": 2.0,
+      "chunk_min": 1.2,
+      "chunk_avg": 1.6,
+      "chunk_sax": "ab",
+      "chunk_trend": true,
+      "chunk_outlier": false,
+      "chunk_first": 1.2,
+      "chunk_last": 2.0,
+      "chunk_sum": 3.2,
+      "chunk_std_dev": 0.5656854249492381
+    },
+    {
+      "name": "metric_1",
+      "chunk_start": 300000000,
+      "chunk_end": 300000000,
+      "chunk_count": 1,
+      "chunk_value": "H4sIAAAAAAAAAOPilGQAAw4HKXYOBlEGhob9AEulw7wUAAAA",
+      "chunk_year": 1970,
+      "chunk_month": 1,
+      "chunk_day": "1970-01-04",
+      "chunk_origin": "ingestion-csv",
+      "id": "2676538a48e2da4e511c6686b7c3c66007bd433cb23c35e19c38a9c4c9ca0578",
+      "version":"VERSION_1",
+      "metric_key":"metric_1",
+      "chunk_quality_min":"NaN",
+      "chunk_quality_max":"NaN",
+      "chunk_quality_first":"NaN",
+      "chunk_quality_sum":0.0,
+      "chunk_quality_avg":"NaN",
+      "chunk_max": 3.0,
+      "chunk_min": 3.0,
+      "chunk_avg": 3.0,
+      "chunk_sax": "a",
+      "chunk_trend": false,
+      "chunk_outlier": false,
+      "chunk_first": 3.0,
+      "chunk_last": 3.0,
+      "chunk_sum": 3.0,
+      "chunk_std_dev": 0.0
+    }
+  ]
+}

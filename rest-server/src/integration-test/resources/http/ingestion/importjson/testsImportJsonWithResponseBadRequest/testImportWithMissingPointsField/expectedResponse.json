@@ -1,0 +1,5 @@
+{
+  "Error Message": "Error parsing request",
+  "Exception Class": "java.lang.IllegalArgumentException",
+  "Exception Message": "field 'measures' is required"
+}

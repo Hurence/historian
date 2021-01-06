@@ -1,0 +1,45 @@
+# Sample configuration file for the file-loader Job
+---
+conf:
+  # Information about solr
+  solr:
+    zkHosts: "localhost:9983"
+    collectionName: "historian"
+    batchSize: 2000
+    numConcurrentRequests: 2
+    flushInterval: 2000
+
+  # Config on spark resources and job scheduling
+  spark:
+    master:  "local[*]"
+    appName: "historian-loader"
+    streamingEnabled: false
+    deployMode: ""
+    driverMemory: "1g"
+    driverCores: 1
+    numExecutors: 5
+    executorMemory: "1g"
+    executorCores: 1
+    checkpointDir: "checkpoints/historian-loader"
+
+  reader:
+    csvFilePath: "."
+    schema: "timestamp:string,tagname:string,value:double,quality:float"
+    tagNames: ""
+    maxFileAge: "1h"
+    maxFilesPerTrigger: 200
+    encoding: "UTF-8"
+    timestampField: "timestamp"
+    nameField: "name"
+    valueField: "value"
+    qualityField: "quality"
+    timestampFormat: "seconds"
+    columnDelimiter: ","
+
+  chunkyfier:
+    chunkSize: 1440
+    saxAlphabetSize: 7
+    saxStringLength: 24
+    groupByCols: "name"
+    origin: "file-loader"
+    dateBucketFormat: "yyyy-MM-dd.HH"
