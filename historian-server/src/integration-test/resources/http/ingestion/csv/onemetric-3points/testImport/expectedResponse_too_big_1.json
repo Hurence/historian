@@ -1,8 +1,0 @@
-{
-  "errors": [
-    {
-      "file" : "datapoints.csv",
-      "cause" : "The csv contains 12 lines which is more than the max number of line of 11"
-    }
-  ]
-}

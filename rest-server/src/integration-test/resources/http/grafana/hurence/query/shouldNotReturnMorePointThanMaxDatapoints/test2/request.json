@@ -1,0 +1,5 @@
+{
+  "names": ["maxDataPoints"],
+  "max_data_points": 10,
+  "aggregations": ["COUNT"]
+}

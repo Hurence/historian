@@ -1,7 +1,0 @@
-{
-  "from": "2016-10-31T06:33:44.875Z",
-  "to": "2016-10-31T06:33:44.895Z",
-  "names": ["maxDataPoints"],
-  "max_data_points": 10,
-  "aggregations": ["COUNT"]
-}

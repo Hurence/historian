@@ -1,0 +1,12 @@
+{
+  "tags": [],
+  "grouped_by": ["name"],
+  "report" : [
+    {
+      "name": "metric_1",
+      "number_of_points_injected": 3,
+      "number_of_point_failed": 0,
+      "number_of_chunk_created": 1
+    }
+  ]
+}

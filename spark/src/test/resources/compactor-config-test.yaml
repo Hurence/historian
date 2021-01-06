@@ -1,0 +1,59 @@
+# Sample configuration file for the compactor Job
+---
+conf:
+
+  spark:
+    # Any entry under the spark entry is expected to match the spark application configuration
+    # specified at https://spark.apache.org/docs/latest/configuration.html#application-properties
+    # including the "spark." prefix.
+    master:  "local[*]"
+    appName: "historian-compactor"
+    streamingEnabled: false
+    deployMode: ""
+    driverMemory: "1g"
+    driverCores: 1
+    numExecutors: 5
+    executorMemory: "1g"
+    executorCores: 1
+    sqlShufflePartitions: 10
+    checkpointDir: "checkpoints/historian-compactor"
+
+  solr:
+    # ZK connect string. Comma separated host:port pairs, each corresponding to a zk server. e.g.
+    # "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002" If the optional chroot suffix is used the example would look like:
+    # "127.0.0.1:3000,127.0.0.1:3001,127.0.0.1:3002/app/a" where the client would be rooted at "/app/a" and all paths
+    # would be relative to this root - ie getting/setting/etc..."/foo/bar" would result in operations being run on
+    # "/app/a/foo/bar" (from the server perspective).
+    zkHosts: "localhost:9983"
+    collectionName: "historian"
+    batchSize: 2000
+    numConcurrentRequests: 2
+    flushInterval: 2000
+
+  reader:
+    # a filter to limit input
+    queryFilters: "chunk_origin:loader-chemistry"
+    # the tags to be read from solr
+    tagNames: "name"
+
+  # the way Measures are converted to Chunks
+  chunkyfier:
+    # the num of different letters in SAX string
+    saxAlphabetSize: 7
+    # the size of the SAX string
+    saxStringLength: 24
+    # a chunk will contain only points with same following fields
+    groupByCols: "name"
+    origin: "compactor-chemistry"
+    # the time bucket (yyyy-MM is a month, yyyy-MM-dd is a day, yyyy-MM-dd.HH an hour)
+    dateBucketFormat: "yyyy-MM-dd.HH"
+
+  scheduler:
+    # Period at which the compaction algorithm is launched in seconds
+    # If an algorithm run takes longer than this time to run, a second run will not be launched while
+    # the first has not completed. If the algorithm run takes less time than the period to run, the next
+    # algorithm run will be at [start time of first run + period].
+    period: 10
+    # Should the first algorithm run occur as soon as the compactor starts, or should it wait for the next period
+    # before running for the first time? Defaults to true.
+    startNow: true

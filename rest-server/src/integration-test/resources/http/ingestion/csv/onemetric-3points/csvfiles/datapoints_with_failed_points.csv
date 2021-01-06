@@ -1,0 +1,13 @@
+metric,timestamp,value,quality,sensor,code_install
+metric_1, 1970-1-1 00:00:00.001, value ,0.4,sensor_1,code_1
+metric_1, string, 1.2 ,0.4,sensor_1,code_1
+metric_1, string, 1.2 ,0.4,sensor_1,code_1
+metric_1, 1970-1-1 00:00:00.001, 1.2 ,0.4,sensor_1,code_1
+metric_1, 1970-2-1 00:00:00.002, 2 ,0.4,sensor_1,code_1
+metric_1, 1970-3-1 00:00:00.003, 3 ,0.4,sensor_2,code_1
+metric_2, 1970-1-1 00:00:00.004, 4 ,0.5,sensor_2,code_1
+metric_2, 1970-1-1 00:00:00.004, 2 ,0.5,sensor_1,code_1
+metric_2, 1970-1-1 00:00:00.004, 2 ,0.5,sensor_1,code_1
+metric_3, 1970-1-1 00:00:00.004, 3.2 ,0.5,sensor_2,code_1
+metric_3, string, 3.2 ,0.5,sensor_2,code_1
+metric_4, string, 3.2 ,0.5,sensor_2,code_1

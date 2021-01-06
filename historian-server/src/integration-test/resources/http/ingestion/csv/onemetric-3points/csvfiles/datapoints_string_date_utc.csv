@@ -1,4 +1,0 @@
-metric,timestamp,value,quality
-metric_1, 1970-01-01T00:00:00.001Z, 1.2 ,1.4
-metric_1, 1970-01-01T00:00:00.002Z, 2 ,1.4
-metric_1, 1970-01-01T00:00:00.003Z, 3 ,1.4
