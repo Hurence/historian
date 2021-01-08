@@ -1,2 +1,2 @@
-resources/jars/ filter=lfs diff=lfs merge=lfs -text
-resources/jars/spark-solr-3.6.6-shaded.jar filter=lfs diff=lfs merge=lfs -text
+historian-resources/jars/ filter=lfs diff=lfs merge=lfs -text
+historian-resources/jars/spark-solr-3.6.6-shaded.jar filter=lfs diff=lfs merge=lfs -text
