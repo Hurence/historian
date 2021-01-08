@@ -1,19 +1,22 @@
 package com.hurence.historian.spark.compactor
 
 
+import java.io.IOException
 import java.util.concurrent.{Executors, ScheduledExecutorService, TimeUnit}
 
+import com.hurence.historian.converter.SolrDocumentReader.fromSolrDocument
 import com.hurence.historian.date.util.DateUtil
 import com.hurence.historian.spark.ml.{Chunkyfier, UnChunkyfier}
 import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.reader.{ReaderType, ReaderFactory}
+import com.hurence.historian.spark.sql.reader.{ReaderFactory, ReaderType}
 import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
 import com.hurence.timeseries.model.Definitions._
 import com.hurence.timeseries.model.{Chunk, Measure}
 import com.lucidworks.spark.util.SolrSupport
 import org.apache.log4j.{Level, LogManager}
 import org.apache.solr.client.solrj.impl.CloudSolrClient
-import org.apache.solr.client.solrj.{SolrClient, SolrQuery}
+import org.apache.solr.client.solrj.{SolrClient, SolrQuery, SolrServerException}
+import org.apache.solr.common.{SolrDocument, SolrDocumentList}
 import org.apache.spark.sql.{SparkSession, _}
 
 import scala.collection.mutable
@@ -27,6 +30,10 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
   private var scheduledThreadPool: ScheduledExecutorService = null
   private var started = false
   private var closed = false
+
+  def setSolrClient(solrClient: CloudSolrClient): Unit = {
+    this.solrClient = solrClient
+  }
 
   def start(): Unit = {
     if (closed) throw new IllegalStateException("Cannot call start on closed compactor")
@@ -75,44 +82,69 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
         return
     }
 
+    close()
+    started = false
+    logger.info("Compactor stopped")
+  }
+
+  def close() = {
     logger.info("Closing compactor")
 
     spark.close()
     solrClient.close()
     closed = true
-    started = false
-    logger.info("Compactor stopped")
   }
 
   override def run(): Unit = {
-
-    if (closed) throw new IllegalStateException("Cannot call run on closed compactor")
+    if (closed)
+      throw new IllegalStateException("Cannot call run on closed compactor")
 
     try {
-      findDaysToCompact()
-        .foreach(day => {
-          val uncompactedChunks = loadChunksFromSolr(day)
-          val measuresDS = convertChunksToMeasures(uncompactedChunks)
-          val compactedChunksDS = convertMeasuresToChunks(measuresDS)
-          writeCompactedChunksToSolr(compactedChunksDS)
-          if (checkChunksIntegrity(compactedChunksDS))
-            deleteOldChunks(day)
-
-          /*
-            curl http://localhost:8983/solr/historian/update -H "Content-type: text/xml" --data-binary '<delete><query>chunk_origin:compactor*it*</query></delete>'
-            curl http://localhost:8983/solr/historian/update -H "Content-type: text/xml" --data-binary '<commit />'
-
-
-
-           */
-        })
+      doCompact()
     }
     catch {
       case t: Throwable =>
         logger.error("Error running compaction algorithm", t)
     }
+  }
+
+  def doCompact() = {
+    val days = findDaysToCompact()
+    days
+      // .filter(d => d == "2020-08-29")
+      .foreach(day => {
+        println(day)
+        val uncompactedChunks = loadChunksFromSolr(day)
+        val ids = getChunkIdList(uncompactedChunks)
+
+        val measuresDS = convertChunksToMeasures(uncompactedChunks)
+        val compactedChunksDS = convertMeasuresToChunks(measuresDS)
+
+       //  uncompactedChunks.show(50, false)
+        // measuresDS.show(50, false)
+       //   compactedChunksDS.show(50, false)
 
 
+        writeCompactedChunksToSolr(compactedChunksDS)
+        deleteOldChunks( ids)
+       // printChunks(day)
+
+
+        /*
+         curl http://localhost:8983/solr/historian/update -H "Content-type: text/xml" --data-binary '<delete><query>chunk_origin:compactor*it*</query></delete>'
+         curl http://localhost:8983/solr/historian/update -H "Content-type: text/xml" --data-binary '<commit />'
+        */
+      })
+  }
+
+  def getChunkIdList(chunks:Dataset[Chunk]) : List[(String,String)] = {
+
+    import chunks.sparkSession.implicits._
+
+    chunks.select(FIELD_ID, FIELD_ORIGIN)
+      .map(r => ( r.getAs[String](FIELD_ID), r.getAs[String](FIELD_ORIGIN)))
+      .collect()
+      .toList
   }
 
   /**
@@ -235,7 +267,7 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
       )), chunksDS)
 
     // explicit commit to make sure all docs are immediately visible
-    val response = solrClient.commit(options.solr.collectionName, true, true)
+    val response = solrClient.commit(options.solr.collectionName)
     logger.debug(s"done saving new chunks to collection ${options.solr.collectionName}")
 
     chunksDS
@@ -253,21 +285,51 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
     true
   }
 
+
+  def printChunks(day: String) = {
+
+    println(s"---------- $day -----------")
+    val query = new SolrQuery(s"$SOLR_COLUMN_DAY:$day").setRows(1000).setFields("metric_key", "chunk_origin", "chunk_count", "id")
+    try {
+      val queryResponse = solrClient.query(options.solr.collectionName, query)
+
+
+      val solrDocumentList = queryResponse.getResults
+
+      import scala.collection.JavaConversions._
+      for (solrDocument <- solrDocumentList) {
+        println(solrDocument.toString)
+      }
+    }
+    catch {
+      case e: SolrServerException =>
+        e.printStackTrace()
+      case e: IOException =>
+        e.printStackTrace()
+    }
+  }
+
+  import scala.collection.JavaConversions._
+  import collection.JavaConverters._
+
   /**
     * remove all previous chunks
     *
     * @return
     */
-  def deleteOldChunks(day: String) = {
-    val solrQuery = s"$SOLR_COLUMN_DAY:$day AND -$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin}"
-    logger.debug(s"will delete by query  q=$solrQuery")
+  def deleteOldChunks(ids:List[(String,String)]) = {
 
-    try solrClient.deleteByQuery(options.solr.collectionName, solrQuery)
-    catch {
-      case e: Exception =>
-        logger.error(s"Error deleting chunk documents q=$solrQuery : ${e.getMessage}")
+
+  //  println(s"-----------delete ---------")
+    for (id <- ids) {
+      logger.debug("Deleting document id " + id)
+     // println(s"id=$id")
+      try solrClient.deleteById(options.solr.collectionName, id._1)
+      catch {
+        case e: Exception =>
+          logger.error("Error deleting chunk document with id " + id._1 + ": " + e.getMessage)
+      }
     }
-
 
     try {
       logger.debug("Committing documents deletion")
@@ -276,6 +338,7 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
       case e: Exception =>
         logger.error("Error committing deleted chunks: " + e.getMessage)
     }
+
   }
 
 }

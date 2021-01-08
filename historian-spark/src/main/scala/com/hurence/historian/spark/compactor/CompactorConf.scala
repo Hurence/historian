@@ -73,4 +73,19 @@ object ConfigLoader {
     Profig.load(ProfigLookupPath(filePath, FileType.Yaml, LoadType.Merge))
     Profig("conf").as[CompactorConf]
   }
+
+  def loadFromValues(zkHosts: String,
+                     collectionName: String,
+                     queryFilters:String,
+                     tagNames: String,
+                     groupByCols: String = "name",
+                     origin: String = "compactor",
+                     dateBucketFormat: String = "yyyy-MM-dd.HH") = {
+    CompactorConf(
+      SparkConf(),
+      SolrConf(zkHosts, collectionName),
+      ReaderConf(queryFilters,tagNames),
+      ChunkyfierConf(groupByCols=groupByCols,origin=origin, dateBucketFormat=dateBucketFormat),
+      SchedulerConf())
+  }
 }

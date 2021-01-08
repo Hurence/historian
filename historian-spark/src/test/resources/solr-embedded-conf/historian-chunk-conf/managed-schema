@@ -115,7 +115,10 @@
   <field name="_root_" type="string" docValues="false" indexed="true" stored="false"/>
    <field name="_text_" type="text_general" multiValued="true" indexed="true" stored="false"/>
   <field name="_version_" type="plong" indexed="false" stored="false"/>
+
+
   <field name="chunk_avg" type="pdouble"/>
+  <field name="chunk_count" type="pint"/>
   <field name="chunk_day" type="string"/>
   <field name="chunk_end" type="plong"/>
   <field name="chunk_first" type="pdouble"/>
@@ -126,18 +129,29 @@
   <field name="chunk_month" type="pint"/>
   <field name="chunk_origin" type="string"/>
   <field name="chunk_outlier" type="boolean"/>
+  <field name="chunk_quality_avg" type="pfloat"/>
+  <field name="chunk_quality_first" type="pfloat"/>
+  <field name="chunk_quality_max" type="pfloat"/>
+  <field name="chunk_quality_min" type="pfloat"/>
+  <field name="chunk_quality_sum" type="pfloat"/>
   <field name="chunk_sax" type="ngramtext"/>
-  <field name="chunk_size" type="pint"/>
-  <field name="chunk_size_bytes" type="pint"/>
   <field name="chunk_start" type="plong"/>
   <field name="chunk_std_dev" type="pdouble"/>
   <field name="chunk_sum" type="pdouble"/>
   <field name="chunk_trend" type="boolean"/>
-  <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
+  <field name="chunk_value" type="text_general" multiValued="false" indexed="false"/>
   <field name="chunk_year" type="pint"/>
-  <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
   <field name="id" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+  <field name="metric_id" type="string" docValues="true" multiValued="false" indexed="true" stored="true"/>
+  <field name="metric_key" type="string"/>
   <field name="name" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
+  <field name="tagname" type="string" docValues="true" multiValued="false" indexed="true" stored="true"/>
+
+  <field name="room" type="string" docValues="true" multiValued="false" indexed="true" stored="true"/>
+  <field name="dataCenter" type="string" docValues="true" multiValued="false" indexed="true" stored="true"/>
+  <field name="version" type="string"/>
+
+
   <dynamicField name="*_descendent_path" type="descendent_path" indexed="true" stored="true"/>
   <dynamicField name="*_ancestor_path" type="ancestor_path" indexed="true" stored="true"/>
   <dynamicField name="ignored_*" type="ignored"/>
@@ -169,4 +183,3 @@
   <dynamicField name="*_d" type="pdouble" indexed="true" stored="true"/>
   <dynamicField name="*_p" type="location" indexed="true" stored="true"/>
 </schema>
-
