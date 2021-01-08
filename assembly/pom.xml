@@ -9,8 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>historian-assembly</artifactId>
-    <name>Packaging assembly</name>
+    <artifactId>assembly</artifactId>
     <packaging>pom</packaging>
     <description>This is the historian assembly</description>
     <properties>

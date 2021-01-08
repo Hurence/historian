@@ -19,7 +19,7 @@
 <!--suppress ALL -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-    <name>Hurence Historian</name>
+    <name>Logisland Project Parent</name>
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.hurence.historian</groupId>
     <artifactId>historian</artifactId>
@@ -99,12 +99,12 @@
         <shade-plugin.version>3.2.4</shade-plugin.version>
     </properties>
     <modules>
-        <module>core</module>
-        <module>rest-server</module>
-        <module>spark</module>
-        <module>resources</module>
-        <module>solr</module>
-        <module>logisland</module>
+        <module>historian-timeseries</module>
+        <module>historian-server</module>
+        <module>historian-spark</module>
+        <module>historian-resources</module>
+        <module>historian-tools</module>
+        <module>logisland-timeseries</module>
         <module>integration-tests</module>
         <module>assembly</module>
     </modules>
