@@ -172,6 +172,13 @@ public class Chunk implements Serializable, ChunkClusterable {
                 // java: non-static variable tags cannot be referenced from a static context
                 tags = new HashMap<String, String>();
             }
+            for ( String key : tags.keySet()){
+                tags.putIfAbsent(key, "null");
+            }
+
+            for(String key : tags.keySet()){
+                tags.putIfAbsent(key, "null");
+            }
 
             metricKey = buildMetricKey(); // Compute and store metric key
 
@@ -282,9 +289,12 @@ public class Chunk implements Serializable, ChunkClusterable {
             // If there are some tags, add them with their values in an alphabetically sorted way
             // according to the tag key
             if (tags != null && tags.size() > 0) {
-                SortedSet sortedTags = new TreeSet(tags.keySet()); // Sort tag keys
+                SortedSet<String> sortedTags = new TreeSet<>(tags.keySet()); // Sort tag keys
                 sortedTags.forEach((tagKey) -> {
-                    idBuilder.append(TOKEN_SEPARATOR).append(tagKey).append(TAG_KEY_VALUE_SEPARATOR).append(tags.get(tagKey));
+                    idBuilder.append(TOKEN_SEPARATOR)
+                            .append(tagKey)
+                            .append(TAG_KEY_VALUE_SEPARATOR)
+                            .append(tags.get(tagKey));
                 });
             }
             return idBuilder.toString();
