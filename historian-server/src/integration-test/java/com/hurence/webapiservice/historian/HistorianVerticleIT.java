@@ -156,7 +156,7 @@ public class HistorianVerticleIT {
                         assertEquals(5L, doc2.getLong(SOLR_COLUMN_START));
                         assertEquals(8L, doc2.getLong(SOLR_COLUMN_END));
                         JsonObject doc3 = docs.getJsonObject(2);
-                        assertEquals("36bd5e6db7615eaf7312c6637564b50692bef3ada457bd425e5ed4ccbb9979b4", doc3.getString(ID));
+                        assertEquals("502d4c7de107feadf86cf0e96420b3c477de246bfc1217a41502376e8b64006e", doc3.getString(ID));
                         assertEquals(9L, doc3.getLong(SOLR_COLUMN_START));
                         assertEquals(12L, doc3.getLong(SOLR_COLUMN_END));
                         testContext.completeNow();
@@ -179,7 +179,7 @@ public class HistorianVerticleIT {
                         JsonObject doc2 = docs.getJsonObject(0);
                         assertEquals("36bd5e6db7615eaf7312c6637564b50692bef3ada457bd425e5ed4ccbb9979b4", doc2.getString(ID));
                         JsonObject doc3 = docs.getJsonObject(1);
-                        assertEquals("36bd5e6db7615eaf7312c6637564b50692bef3ada457bd425e5ed4ccbb9979b4", doc3.getString(ID));
+                        assertEquals("502d4c7de107feadf86cf0e96420b3c477de246bfc1217a41502376e8b64006e", doc3.getString(ID));
                         testContext.completeNow();
                     });
                 })
