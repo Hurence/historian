@@ -1,6 +1,6 @@
 
-[![Build Status](https://github.com/Hurence/historian/workflows/unit-tests/badge.svg)](https://github.com/Hurence/historian/actions)
-
+[![Build Status](https://github.com/Hurence/historian/workflows/integration%20tests/badge.svg)](https://github.com/Hurence/historian/actions)
+[![Build Status](https://github.com/Hurence/historian/workflows/build/badge.svg)](https://github.com/Hurence/historian/actions)
 
 # Hurence Data Historian (HDH)
 
