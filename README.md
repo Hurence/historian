@@ -1,3 +1,7 @@
+
+[![Build Status](https://github.com/Hurence/historian/workflows/unit-tests/badge.svg)](https://github.com/Hurence/historian/actions)
+
+
 # Hurence Data Historian (HDH)
 
 Timeseries big data analytics tools
