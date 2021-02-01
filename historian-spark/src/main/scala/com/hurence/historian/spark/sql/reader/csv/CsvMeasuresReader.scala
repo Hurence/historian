@@ -59,6 +59,7 @@ class CsvMeasuresReader extends Reader[Measure] {
     val df = spark.read
       .format("csv")
       .options(options.config)
+      .option("mode", "DROPMALFORMED")
       .load(options.path)
       .select(mainCols: _*)
       .withColumn("tags", map(tagsMapping: _*))
@@ -90,8 +91,15 @@ class CsvMeasuresReader extends Reader[Measure] {
         builder
           .name(r.getAs[String]("name"))
           .timestamp(r.getAs[Long]("timestamp"))
-          .value(r.getAs[Double]("value"))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
+
+        try{
+          builder.value(r.getAs[Double]("value"))
+        }catch {
+          case _: Throwable =>
+            builder.value(java.lang.Double.NaN)
+        }
+
 
         // Set NaN as default quality
         if (hasQuality) {

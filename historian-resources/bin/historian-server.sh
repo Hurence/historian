@@ -10,6 +10,7 @@ LOG=$ROOT_DIR/app.log
 ERROR=$ROOT_DIR/app-error.log
 DEBUG_MODE=false
 
+
 cd "$SCRIPT_DIR" || exit
 source historian.properties
 

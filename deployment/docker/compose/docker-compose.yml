@@ -73,8 +73,5 @@ services:
 #    networks:
 #      - historian
 
-volumes:
-  kafka-home:
-
 networks:
   historian:
