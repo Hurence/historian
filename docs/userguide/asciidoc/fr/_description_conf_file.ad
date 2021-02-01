@@ -10,11 +10,11 @@ Voici le fichier de configuration par défaut, il contient toutes les informatio
     "port" : 8080,
     "historian.address": "historian",
     "debug": false,
-    "max_data_points_allowed_for_ExportCsv" : 10000,
-    "upload_directory": "/tmp/hurence-historian"
+    "upload_directory" : "/tmp/historian",
+    "max_data_points_maximum_allowed" : 50000
   },
   "historian": {
-    "schema_version": "VERSION_0",
+    "schema_version": "VERSION_1",
     "address" : "historian",
     "limit_number_of_point_before_using_pre_agg" : 50000,
     "limit_number_of_chunks_before_using_solr_partition" : 50000,

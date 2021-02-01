@@ -1,7 +1,7 @@
 Hurence Data Historian is a set of scripts and binaries that help you work with time series and chunks.
 
 You can download the installation script for your version at :
-https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
+https://github.com/Hurence/historian/releases/download/v1.3.6/install.sh[install.sh].
 
 Launch the install with this script:
 

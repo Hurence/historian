@@ -302,10 +302,10 @@ install_embedded_solr_and_start_it_if_needed() {
     # démarre un core Solr localement ainsi qu'un serveur zookeeper standalone.
 
     # We use force to enable solr to be run even as root user.
-    ${SOLR_HOME}/bin/solr start -cloud -s "$SOLR_NODE_1" -p 8983 -force
+    eval "${SOLR_HOME}/bin/solr start -cloud -s ${SOLR_NODE_1} -p 8983 -force"
     # démarre un second core Solr localement qui va utiliser le serveur zookeeper précédament créer.
     # We use force to enable solr to be run even as root user.
-    ${SOLR_HOME}/bin/solr start -cloud -s "$SOLR_NODE_2" -p 7574 -z localhost:9983 -force
+    eval "${SOLR_HOME}/bin/solr start -cloud -s "${SOLR_NODE_2}" -p 7574 -z localhost:9983 -force"
     echo "solr is now running at ${SOLR_HOST_PORT_SOLR}"
     echo -e "\n"
   fi
@@ -528,7 +528,7 @@ main() {
 }
 
 declare -r DEFAULT_HOST_PORT_SOLR="localhost:8983/solr"
-declare -r HISTORIAN_VERSION="1.3.6-SNAPSHOT"
+declare -r HISTORIAN_VERSION="1.3.6"
 declare -r HISTORIAN_DIR_NAME="historian-${HISTORIAN_VERSION}"
 declare -r HISTORIAN_TGZ_NAME="${HISTORIAN_DIR_NAME}-bin.tgz"
 declare -r URL_HISTORIAN_TGZ_RELEASE="https://github.com/Hurence/historian/releases/download/v${HISTORIAN_VERSION}/${HISTORIAN_TGZ_NAME}"

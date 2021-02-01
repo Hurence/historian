@@ -1,6 +1,6 @@
 Hurence Data Historian est composé de scripts et fichiers binaires qui permettent de travailler avec les time series
 et les chunks. Téléchargez le script d'installation de l'historian pour votre version
-https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh[install.sh].
+https://github.com/Hurence/historian/releases/download/v1.3.6/install.sh[install.sh].
 Lancez l'installation en lançant ce script :
 
 NOTE:: Solr n'aime pas pour des questions de sécurité que vous installiez et lanciez en root.

@@ -12,37 +12,40 @@ Nous utilison le "chunking" à la place du stockage brut des données afin d'éc
 
 === Modèle de données
 
-Une Measure est un point dans le temps Identifié par les champs suivants :
-[source,scala]
+Une Measure est un point de donnée dans le temps. On peut y associer des méta-informations sous forme de tags.
+
+[source,java]
 ----
-case class Measure(name: String,
-                   value: Double,
-                   timestamp: Long,
-                   year: Int,
-                   month: Int,
-                   day: String,
-                   hour: Int,
-                   tags: Map[String,String])
+class Measure  {
+    String name;
+    long timestamp;
+    double value;
+    float quality;
+    Map<String, String> tags;
+}
 ----
 
 
-Un Chunk est identifié par les champs suivants :
-[source,scala]
+Un Chunk est un ensemble de Measures ordonnées chronologiquement groupées par nom ou valeurs de tags. La valeur est un tableau de bytes encodé en protocol buffer, ce qui implique la compaction des données.
+[source,java]
 ----
-case class Chunk(name: String,
-     day:String,
-     start: Long,
-     end: Long,
-     chunk: String,
-     count: Long,
-     avg: Double,
-     std_dev: Double,
-     min: Double,
-     max: Double,
-     first: Double,
-     last: Double,
-     sax: String,
-     tags: Map[String,String])
+class Chunk  {
+    SchemaVersion version = SchemaVersion.VERSION_1;
+    String name, id, metricKey;
+    byte[] value;
+    long start, end;
+    Map<String, String> tags;
+
+    long count, first, min, max, sum, avg, last, stdDev;
+    float qualityFirst, qualityMin, qualityMax, qualitySum, qualityAvg;
+
+    int year, month;
+    String day;
+    String origin;
+    String sax;
+    boolean trend;
+    boolean outlier;
+}
 ----
 
 Comme vous pouvez le constater lors du passage entre la Measure et le Chunk de Measure, le "timestamp" a été remplacé par "start" et "stop" qui définissent l'intervalle de temps, la valeur est, elle, passée d'un double dans le champs "value" à une string en base64 appelée "chunk". Cette string contient l'ensemble des valeurs du chunk, compressées par un algorithme.
@@ -53,27 +56,45 @@ Dans solr les chunks sont stockés avec le schéma suivant :
 ----
 <schema name="default-config" version="1.6">
     ...
-    <field name="chunk_avg" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_value" type="string" multiValued="false" indexed="false"/>
-    <field name="chunk_count" type="pint" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_day" type="string" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_end" type="plong" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_first" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_hour" type="pint" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_last" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_max" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_min" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_month" type="pint" multiValued="false" indexed="true" stored="true"/>
-    <field name="name" type="string" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_outlier" type="boolean" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_sax" type="ngramtext" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_start" type="plong" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_std_dev" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_sum" type="pdouble" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_trend" type="boolean" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_year" type="pint" multiValued="false" indexed="true" stored="true"/>
-    <field name="chunk_origin" type="string" multiValued="false" indexed="true" stored="true"/>
-    <field name="compactions_running" type="string" multiValued="true" indexed="true" stored="true"/>
+  <field name="chunk_avg" type="pdouble"/>
+  <field name="chunk_count" type="pint"/>
+  <field name="chunk_day" type="string"/>
+  <field name="chunk_end" type="plong"/>
+  <field name="chunk_first" type="pdouble"/>
+  <field name="chunk_hour" type="pint"/>
+  <field name="chunk_last" type="pdouble"/>
+  <field name="chunk_max" type="pdouble"/>
+  <field name="chunk_min" type="pdouble"/>
+  <field name="chunk_month" type="pint"/>
+  <field name="chunk_origin" type="string"/>
+  <field name="chunk_outlier" type="boolean"/>
+  <field name="chunk_quality_avg" type="pfloat"/>
+  <field name="chunk_quality_first" type="pfloat"/>
+  <field name="chunk_quality_max" type="pfloat"/>
+  <field name="chunk_quality_min" type="pfloat"/>
+  <field name="chunk_quality_sum" type="pfloat"/>
+  <field name="chunk_sax" type="ngramtext"/>
+  <field name="chunk_start" type="plong"/>
+  <field name="chunk_std_dev" type="pdouble"/>
+  <field name="chunk_sum" type="pdouble"/>
+  <field name="chunk_trend" type="boolean"/>
+  <field name="chunk_value" type="text_general" multiValued="false" indexed="false"/>
+  <field name="chunk_year" type="pint"/>
+  <field name="metric_id" type="string" docValues="true" multiValued="false" indexed="true" stored="true"/>
+  <field name="metric_key" type="string"/>
+  <field name="name" type="string" multiValued="false" indexed="true" required="true" stored="true"/>
 </schema>
 ----
 
+=== Encodage symbolique SAX
+On notera que le Chunk comporte des champs aggrégés. Outre les statistiques classiques sur la valeur et la qualité du point, on intègre aussi l'encodage symbolique avec SAX.
+
+L'avantage d'utiliser SAX est qu'il est capable d'agir comme un outil de réduction de dimensionnalité, il tolère les séries temporelles de différentes longueurs et facilite la recherche de tendances.
+
+Le codage SAX est une méthode utilisée pour simplifier les séries chronologiques grâce à une sorte de résumé des intervalles de temps. En calculant la moyenne, en regroupant et en représentant symboliquement les périodes, les données deviennent beaucoup plus petites et plus faciles à traiter, tout en capturant ses aspects importants. On peut par exemple s'en servir pour détecter des changements statistiques des tendance et donc des comportements anormaux.
+
+
+https://www.kdnuggets.com/2019/09/time-series-baseball.html
+http://www.marc-boulle.fr/publications/BonduEtAlIJCNN13.pdf
+
+---

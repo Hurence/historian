@@ -348,7 +348,7 @@ object Compactor {
 
   /**
     *
-    * $SPARK_HOME/bin/spark-submit --driver-memory 4g --driver-java-options '-Dlog4j.configuration=file:historian-resources/conf/log4j.properties' --class  com.hurence.historian.spark.compactor.Compactor --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar  historian-spark/target/historian-spark-1.3.6-SNAPSHOT.jar --config-file historian-resources/conf/compactor-config.yaml
+    * $SPARK_HOME/bin/spark-submit --driver-memory 4g --driver-java-options '-Dlog4j.configuration=file:historian-resources/conf/log4j.properties' --class  com.hurence.historian.spark.compactor.Compactor --jars  historian-resources/jars/spark-solr-3.6.6-shaded.jar,historian-spark/target/historian-spark-1.3.6.jar  historian-spark/target/historian-spark-1.3.6.jar --config-file historian-resources/conf/compactor-config.yaml
     *
     * @param args
     */

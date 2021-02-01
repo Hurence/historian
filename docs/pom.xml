@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>historian</groupId>
     <artifactId>historian-usermanual</artifactId>
-    <version>1.3.5</version>
+    <version>1.3.6</version>
     <name>Historian User Manual</name>
     <description>The generation of the Historian User Manual Docs in various formats from asciidoc</description>
 
