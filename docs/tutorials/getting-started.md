@@ -79,7 +79,7 @@ first we load some it monitoring data to analyse an issue. we'll bucket just on 
 ### play with spark API
 
 
-* run a shell "../../spark-2.3.2-bin-hadoop2.7/bin/spark-shell --jars lib/historian-spark-1.3.6-SNAPSHOT.jar --driver-memory 4g"
+* run a shell "../../spark-2.3.2-bin-hadoop2.7/bin/spark-shell --jars lib/historian-spark-1.3.6.jar --driver-memory 4g"
 * imports all needed
 
 ```scala

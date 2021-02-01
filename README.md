@@ -6,30 +6,23 @@
 
 Timeseries big data analytics tools
 
+
+
 ## User
 
-Please find the documentation for your version :
+Please find the code/documentation for your version :
 
-* [release v1.3.5](https://github.com/Hurence/historian/tree/release-1.3.5)
+* [release v1.3.6](https://github.com/Hurence/historian/tree/v1.3.6)
+* [release v1.3.5](https://github.com/Hurence/historian/tree/v1.3.5)
 
 ## Development
 
 Please see our documentation [here](DEVELOPMENT.md)
 
+## Build
+Build with maven through a JDK 8+
 
-
-## migration
-todo list
-
-- benchmark comparatif influx
-- valorisation SAX
-- revoir la mécanique d'injection
-- revoir le setup de l'install
-- reprise historique
-- partitionning hdfs
-- datebucketpattern
-- tar.gz finalizer dans HDFS
-- metrologie prometheus / profiling
+    mvn clean install
 
 
 

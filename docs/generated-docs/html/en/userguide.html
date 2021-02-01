@@ -455,6 +455,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#concepts">2. Concepts</a>
 <ul class="sectlevel2">
 <li><a href="#data-model">2.1. Data model</a></li>
+<li><a href="#sax-symbolic-encoding">2.2. SAX symbolic encoding</a></li>
 </ul>
 </li>
 <li><a href="#installation">3. Installation</a>
@@ -540,7 +541,7 @@ The key concepts are simple :</p>
 <div class="ulist">
 <ul>
 <li>
-<p><strong>Measure</strong> is a measure in time with a floating measure value identified by a name and some tags (categorical features)</p>
+<p><strong>Measure</strong> is a point in time with a floating point value identified by a name and some tags (categorical features)</p>
 </li>
 <li>
 <p><strong>Chunk</strong> is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and eventually some tags</p>
@@ -554,18 +555,17 @@ We use chunking instead of raw storage in order to save some disk space and redu
 <div class="sect2">
 <h3 id="data-model"><a class="anchor" href="#data-model"></a>2.1. Data model</h3>
 <div class="paragraph">
-<p>A Measure measure is identified by the following fields</p>
+<p>A Measure point is identified by the following fields. Tags are used to add meta-information.</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="scala">case class Measure(name: String,
-                   value: Double,
-                   timestamp: Long,
-                   year: Int,
-                   month: Int,
-                   day: String,
-                   hour: Int,
-                   tags: Map[String,String])</code></pre>
+<pre class="CodeRay highlight"><code data-lang="java"><span class="type">class</span> <span class="class">Measure</span>  {
+    <span class="predefined-type">String</span> name;
+    <span class="type">long</span> timestamp;
+    <span class="type">double</span> value;
+    <span class="type">float</span> quality;
+    <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; tags;
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
@@ -573,24 +573,27 @@ We use chunking instead of raw storage in order to save some disk space and redu
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="CodeRay highlight"><code data-lang="scala">case class Chunk(name: String,
-     day:String,
-     start: Long,
-     end: Long,
-     chunk: String,
-     count: Long,
-     avg: Double,
-     std_dev: Double,
-     min: Double,
-     max: Double,
-     first: Double,
-     last: Double,
-     sax: String,
-     tags: Map[String,String])</code></pre>
+<pre class="CodeRay highlight"><code data-lang="java"><span class="type">class</span> <span class="class">Chunk</span>  {
+    SchemaVersion version = SchemaVersion.VERSION_1;
+    <span class="predefined-type">String</span> name, id, metricKey;
+    <span class="type">byte</span><span class="type">[]</span> value;
+    <span class="type">long</span> start, end;
+    <span class="predefined-type">Map</span>&lt;<span class="predefined-type">String</span>, <span class="predefined-type">String</span>&gt; tags;
+
+    <span class="type">long</span> count, first, min, max, sum, avg, last, stdDev;
+    <span class="type">float</span> qualityFirst, qualityMin, qualityMax, qualitySum, qualityAvg;
+
+    <span class="type">int</span> year, month;
+    <span class="predefined-type">String</span> day;
+    <span class="predefined-type">String</span> origin;
+    <span class="predefined-type">String</span> sax;
+    <span class="type">boolean</span> trend;
+    <span class="type">boolean</span> outlier;
+}</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>As you can see from a Measure measures to a Chunk of Measures, the <code>timestamp</code> field has been replaced by a <code>start</code> and <code>stop</code> interval and the <code>value</code> is now a base64 encoded string named <code>chunk</code>.</p>
+<p>As you can see from a Measure points to a Chunk of Measures, the <code>timestamp</code> field has been replaced by a <code>start</code> and <code>stop</code> interval and the <code>value</code> is now a base64 encoded string named <code>chunk</code>.</p>
 </div>
 <div class="paragraph">
 <p>In SolR the chunks will be stored according to  the following schema (for the current version)</p>
@@ -599,31 +602,53 @@ We use chunking instead of raw storage in order to save some disk space and redu
 <div class="content">
 <pre class="CodeRay highlight"><code data-lang="xml"><span class="tag">&lt;schema</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">default-config</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">version</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">1.6</span><span class="delimiter">&quot;</span></span><span class="tag">&gt;</span>
     ...
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_avg</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_value</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_count</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_day</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_end</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_first</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_hour</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_last</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_max</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_min</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_month</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_outlier</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_qualities</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sax</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ngramtext</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_start</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_std_dev</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sum</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">tags</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">text_en</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_timestamp</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_trend</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
-    <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_year</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_avg</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_count</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_day</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_end</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_first</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_hour</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_last</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_max</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_min</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_month</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_origin</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_outlier</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_quality_avg</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pfloat</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_quality_first</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pfloat</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_quality_max</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pfloat</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_quality_min</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pfloat</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_quality_sum</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pfloat</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sax</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">ngramtext</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_start</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">plong</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_std_dev</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_sum</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pdouble</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_trend</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">boolean</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_value</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">text_general</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">chunk_year</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">pint</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">metric_id</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">docValues</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">metric_key</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
+  <span class="tag">&lt;field</span> <span class="attribute-name">name</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">name</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">type</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">string</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">multiValued</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">false</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">indexed</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">required</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span> <span class="attribute-name">stored</span>=<span class="string"><span class="delimiter">&quot;</span><span class="content">true</span><span class="delimiter">&quot;</span></span><span class="tag">/&gt;</span>
 <span class="tag">&lt;/schema&gt;</span></code></pre>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="sax-symbolic-encoding"><a class="anchor" href="#sax-symbolic-encoding"></a>2.2. SAX symbolic encoding</h3>
+<div class="paragraph">
+<p>Note that the Chunk has aggregated fields. In addition to the classic statistics on the value and the quality of the point, we also integrate symbolic encoding with SAX.</p>
+</div>
+<div class="paragraph">
+<p>The advantage of using SAX is that it is able to act as a dimensionality reduction tool, it tolerates time series of different lengths and makes it easier to find trends.</p>
+</div>
+<div class="paragraph">
+<p>SAX encoding is a method used to simplify time series through a kind of summary of time intervals. By averaging, grouping and symbolically representing periods, the data becomes much smaller and easier to process, while still capturing its important aspects. For example, it can be used to detect statistical changes in trends and therefore abnormal behavior.</p>
+</div>
+<div class="paragraph">
+<p><a href="https://www.kdnuggets.com/2019/09/time-series-baseball.html" class="bare">https://www.kdnuggets.com/2019/09/time-series-baseball.html</a>
+<a href="http://www.marc-boulle.fr/publications/BonduEtAlIJCNN13.pdf" class="bare">http://www.marc-boulle.fr/publications/BonduEtAlIJCNN13.pdf</a></p>
+</div>
+<hr>
 </div>
 </div>
 </div>
@@ -721,7 +746,7 @@ Hurence proposes services to install the data historian on Big Data infrastructu
 </div>
 <div class="paragraph">
 <p>You can download the installation script for your version at :
-<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.</p>
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.6/install.sh">install.sh</a>.</p>
 </div>
 <div class="paragraph">
 <p>Launch the install with this script:</p>
@@ -770,7 +795,7 @@ Refer to your system documentation.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/screenshot_install_standalone.png" alt="screenshot install standalone">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/screenshot_install_standalone.png" alt="screenshot install standalone">
 </div>
 </div>
 <div class="paragraph">
@@ -778,7 +803,7 @@ Refer to your system documentation.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
 </div>
 </div>
 <div class="paragraph">
@@ -892,11 +917,11 @@ You can check the Grafana documentation to interact with Grafana (starting and s
     <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span> : <span class="integer">8080</span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/hurence-historian</span><span class="delimiter">&quot;</span></span>
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_maximum_allowed</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>
   },
   <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">address</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_point_before_using_pre_agg</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_chunks_before_using_solr_partition</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
@@ -953,7 +978,7 @@ You can check the Grafana documentation to interact with Grafana (starting and s
 <p>http_server/historian.address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. It is important to master vertx when changing this parameter.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum measures the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
+<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum points the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
 </li>
 <li>
 <p>http_server/upload_directory : Repertory where csv file uploaded will be stored (temporarily).</p>
@@ -1191,7 +1216,7 @@ cp $HDH_HOME/historian-1.3.5-SNAPSHOT/lib/loader-1.3.5-SNAPSHOT.jar $HDH_HOME/sp
 </div>
 <div class="paragraph">
 <p>You can download the installation script for your version at :
-<a href="https://github.com/Hurence/historian/releases/download/v1.3.5/install.sh">install.sh</a>.</p>
+<a href="https://github.com/Hurence/historian/releases/download/v1.3.6/install.sh">install.sh</a>.</p>
 </div>
 <div class="paragraph">
 <p>Launch the install with this script:</p>
@@ -1240,7 +1265,7 @@ Refer to your system documentation.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/screenshot_install_mono_noeud.png" alt="screenshot install mono noeud">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/screenshot_install_mono_noeud.png" alt="screenshot install mono noeud">
 </div>
 </div>
 <div class="paragraph">
@@ -1248,7 +1273,7 @@ Refer to your system documentation.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/screenshot_install_succeeded.png" alt="screenshot install succeeded">
 </div>
 </div>
 <div class="paragraph">
@@ -1340,11 +1365,11 @@ Refer to your system documentation.</p>
     <span class="key"><span class="delimiter">&quot;</span><span class="content">port</span><span class="delimiter">&quot;</span></span> : <span class="integer">8080</span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">historian.address</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">debug</span><span class="delimiter">&quot;</span></span>: <span class="value">false</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_allowed_for_ExportCsv</span><span class="delimiter">&quot;</span></span> : <span class="integer">10000</span>,
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/hurence-historian</span><span class="delimiter">&quot;</span></span>
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">upload_directory</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">/tmp/historian</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">max_data_points_maximum_allowed</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>
   },
   <span class="key"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>: {
-    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_0</span><span class="delimiter">&quot;</span></span>,
+    <span class="key"><span class="delimiter">&quot;</span><span class="content">schema_version</span><span class="delimiter">&quot;</span></span>: <span class="string"><span class="delimiter">&quot;</span><span class="content">VERSION_1</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">address</span><span class="delimiter">&quot;</span></span> : <span class="string"><span class="delimiter">&quot;</span><span class="content">historian</span><span class="delimiter">&quot;</span></span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_point_before_using_pre_agg</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
     <span class="key"><span class="delimiter">&quot;</span><span class="content">limit_number_of_chunks_before_using_solr_partition</span><span class="delimiter">&quot;</span></span> : <span class="integer">50000</span>,
@@ -1401,7 +1426,7 @@ Refer to your system documentation.</p>
 <p>http_server/historian.address : the name of the deployed vertex historian service. We advice to not change this parameter unless you manage other vertx services. It is important to master vertx when changing this parameter.</p>
 </li>
 <li>
-<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum measures the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
+<p>http_server/max_data_points_allowed_for_ExportCsv : this parameter defines the maximum points the historian will return when a client used the REST export mechanism in CSV format. It is important to set the parameter carefully (not too large and large enough) since all returned data will reside in memory. For large exports we advice using other technics than the REST API call. Parallel processing using Spark is a far better way to export large datasets.</p>
 </li>
 <li>
 <p>http_server/upload_directory : Repertory where csv file uploaded will be stored (temporarily).</p>
@@ -1633,7 +1658,7 @@ interact with the historian according to your culture and your needs.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>Get some measures measures within a time range</p>
+<p>Get some measures points within a time range</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1733,7 +1758,7 @@ val writer = WriterFactory.getChunksWriter(WriterType.SOLR)
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/grafana_ui_datasource.png" alt="go to datasource page">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/grafana_ui_datasource.png" alt="go to datasource page">
 </div>
 </div>
 <div class="paragraph">
@@ -1742,7 +1767,7 @@ You just have to enter the URL <a href="http://localhost:8080/api/grafana/v0" cl
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/datasource_historian_setup.png" alt="datasource setup">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/datasource_historian_setup.png" alt="datasource setup">
 </div>
 </div>
 <div class="paragraph">
@@ -1751,7 +1776,7 @@ Then create a new dashboard.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/grafana_ui_create_dashboard.png" alt="go to new dashboard page">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/grafana_ui_create_dashboard.png" alt="go to new dashboard page">
 </div>
 </div>
 <div class="paragraph">
@@ -1759,7 +1784,7 @@ Then create a new dashboard.</p>
 </div>
 <div class="imageblock">
 <div class="content">
-<img src="/home/gregoire/github/historian/docs/resources/images/grafana_graph_config_exemple.png" alt="exemple of query config">
+<img src="/Users/tom/Documents/workspace/historian/docs/resources/images/grafana_graph_config_exemple.png" alt="exemple of query config">
 </div>
 </div>
 <div class="paragraph">
@@ -1827,7 +1852,7 @@ bin / solr stop -all</pre>
 <div id="footer">
 <div id="footer-text">
 Version v1.0<br>
-Last updated 2020-09-16 09:19:53 +0200
+Last updated 2021-01-08 11:16:03 +0100
 </div>
 </div>
 <style>
