@@ -29,6 +29,16 @@
         </moduleSet>
     </moduleSets>
     <fileSets>
+        <fileSet>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0660</fileMode>
+            <directory>../historian-spark/target</directory>
+            <outputDirectory>./lib</outputDirectory>
+            <includes>
+                <include>historian-*.jar</include>
+            </includes>
+        </fileSet>
+
         <!--   Embed all resources in logisland-resources module  -->
         <fileSet>
             <directory>../historian-resources/bin</directory>

@@ -23,18 +23,19 @@ conf:
     checkpointDir: "checkpoints/historian-loader"
 
   reader:
-    csvFilePath: "."
+    csvFilePath: "/Users/tom/Documents/data/tmp/dataHistorian-ISNTS35-N-2021-01-01.csv.gz"
     schema: "timestamp:string,tagname:string,value:double,quality:float"
-    tagNames: ""
+    tagNames: "tagname"
     maxFileAge: "1h"
     maxFilesPerTrigger: 200
     encoding: "UTF-8"
+    groupByCols: "name"
     timestampField: "timestamp"
-    nameField: "name"
+    nameField: "tagname"
     valueField: "value"
     qualityField: "quality"
-    timestampFormat: "seconds"
-    columnDelimiter: ","
+    timestampFormat: "dd/MM/yyyy HH:mm:ss"
+    columnDelimiter: ";"
 
   chunkyfier:
     chunkSize: 1440
