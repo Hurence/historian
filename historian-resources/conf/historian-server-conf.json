@@ -12,6 +12,13 @@
   "historian": {
     "schema_version": "VERSION_1",
     "address" : "historian",
+    "metric_name_lookup" : {
+      "enabled" : true,
+      "csv_file" : {
+        "path" : "",
+        "separator" : ";"
+      }
+    },
     "limit_number_of_point_before_using_pre_agg" : 50000,
     "limit_number_of_chunks_before_using_solr_partition" : 50000,
     "api": {
