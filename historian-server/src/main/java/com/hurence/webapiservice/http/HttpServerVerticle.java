@@ -5,6 +5,7 @@ import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.analytics.AnalyticsApi;
 import com.hurence.webapiservice.http.api.analytics.AnalyticsApiImpl;
 import com.hurence.webapiservice.http.api.grafana.*;
+import com.hurence.webapiservice.http.api.grafana.promql.router.GrafanaPromQLDatasourcePluginApiImpl;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApi;
 import com.hurence.webapiservice.http.api.ingestion.IngestionApiImpl;
 import com.hurence.webapiservice.http.api.main.MainHistorianApi;
@@ -74,6 +75,9 @@ public class HttpServerVerticle extends AbstractVerticle {
     public static final String HURENCE_DATASOURCE_GRAFANA_ANNOTATIONS_API_ENDPOINT = HttpServerVerticle.HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT +
             GrafanaHurenceDatasourcePluginApi.ANNOTATIONS_ENDPOINT;
 
+    // Grafana PromQL endpoint
+    private static final String API_V1_ENDPOINT = "/api/v1";
+
     //test endpoints
     private static final String TEST_API_ENDPOINT = "/test/api";
     public static final String TEST_CHUNK_QUERY_ENDPOINT = HttpServerVerticle.TEST_API_ENDPOINT + TestHistorianApi.QUERY_CHUNK_ENDPOINT;
@@ -112,6 +116,11 @@ public class HttpServerVerticle extends AbstractVerticle {
                 .getGraphanaRouter(vertx);
         router.mountSubRouter(SIMPLE_JSON_GRAFANA_API_ENDPOINT, simpleJsonGraphanaApi);
         router.mountSubRouter(HURENCE_DATASOURCE_GRAFANA_API_ENDPOINT, hurenceGraphanaApi);
+
+        // grafana PromQL
+        Router hurenceGraphanaPromQLApi = new GrafanaPromQLDatasourcePluginApiImpl(historianService, conf.getMaxDataPointsAllowed())
+                .getGraphanaPrometheusRouter(vertx);
+        router.mountSubRouter(API_V1_ENDPOINT, hurenceGraphanaPromQLApi);
 
         //test
         if (conf.isDebugModeEnabled()) {

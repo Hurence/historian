@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http.api.grafana.modele;
+package com.hurence.webapiservice.http.api.grafana.model;
 
 public class AdHocFilter {
     private String key;

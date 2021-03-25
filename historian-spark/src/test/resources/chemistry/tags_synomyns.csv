@@ -1,4 +1,8 @@
-tag;synonym
+name;unit;category;location;type
+
+UT800D.U004_COEF_A_FI01.F_CV;U004;DebitVolumique;H2_Reacteur1_Petite_Plage;Coefficient_Metrologique_A
+U086.TC134_OP.F_CV;U086-1;Temperature;Ligne_Entree_Sortie_Reacteur1;Pour_Cent_OP
+
 UT800D.U004_COEF_A_FI01.F_CV;DebitVolumique.H2_Reacteur1_Petite_Plage.Coefficient_Metrologique_A.U004
 UT800D.U004_COEF_A_FI11.F_CV;DebitVolumique.H2_Colonne_de_Strippage.Coefficient_Metrologique_A.U004
 UT800D.U004_COEF_A_FQ05.F_CV;DebitVolumique.Gaz_HP.Coefficient_Metrologique_A.U004

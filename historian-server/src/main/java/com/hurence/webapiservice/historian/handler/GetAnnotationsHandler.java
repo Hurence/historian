@@ -2,7 +2,7 @@ package com.hurence.webapiservice.historian.handler;
 
 import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
-import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
+import com.hurence.webapiservice.http.api.grafana.model.AnnotationRequestType;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;

@@ -1,6 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana;
 
-import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
+import com.hurence.webapiservice.http.api.grafana.model.QueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.parser.QueryRequestParser;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.IntStream;
 
-import static com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam.DEFAULT_BUCKET_SIZE;
-import static com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam.DEFAULT_SAMPLING_ALGORITHM;
+import static com.hurence.webapiservice.http.api.grafana.model.QueryRequestParam.DEFAULT_BUCKET_SIZE;
+import static com.hurence.webapiservice.http.api.grafana.model.QueryRequestParam.DEFAULT_SAMPLING_ALGORITHM;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class QueryRequestParserTest {

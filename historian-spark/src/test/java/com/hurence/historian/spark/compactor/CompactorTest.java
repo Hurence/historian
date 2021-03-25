@@ -1,4 +1,4 @@
-package com.hurence.historian.compactor;
+package com.hurence.historian.spark.compactor;
 
 import com.hurence.historian.SolrCloudUtilForTests;
 import com.hurence.historian.TestSolrCloudClusterSupport;
