@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana;
 
-import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestParam;
-import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
+import com.hurence.webapiservice.http.api.grafana.model.AnnotationRequestParam;
+import com.hurence.webapiservice.http.api.grafana.model.AnnotationRequestType;
 import com.hurence.webapiservice.http.api.grafana.parser.AnnotationRequestParser;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;

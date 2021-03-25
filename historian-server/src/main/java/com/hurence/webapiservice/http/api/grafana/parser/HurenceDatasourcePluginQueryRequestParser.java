@@ -2,7 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.parser;
 
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
 import com.hurence.webapiservice.NameLookup;
-import com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam;
+import com.hurence.webapiservice.http.api.grafana.model.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
 import io.vertx.core.json.JsonArray;

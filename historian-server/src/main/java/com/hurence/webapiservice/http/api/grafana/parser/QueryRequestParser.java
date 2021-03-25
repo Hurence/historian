@@ -1,8 +1,8 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
-import com.hurence.webapiservice.http.api.grafana.modele.AdHocFilter;
-import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
-import com.hurence.webapiservice.http.api.grafana.modele.Target;
+import com.hurence.webapiservice.http.api.grafana.model.AdHocFilter;
+import com.hurence.webapiservice.http.api.grafana.model.QueryRequestParam;
+import com.hurence.webapiservice.http.api.grafana.model.Target;
 import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;

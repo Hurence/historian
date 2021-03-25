@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http.api.grafana.modele;
+package com.hurence.webapiservice.http.api.grafana.model;
 
 public class SearchValuesRequestParam {
     public static final String DEFAULT_STRING_TO_USE_TO_FIND_METRICS = "";

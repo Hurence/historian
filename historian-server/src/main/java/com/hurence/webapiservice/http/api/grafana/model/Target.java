@@ -1,4 +1,4 @@
-package com.hurence.webapiservice.http.api.grafana.modele;
+package com.hurence.webapiservice.http.api.grafana.model;
 
 /**
  * Serialized so should be a java bean.

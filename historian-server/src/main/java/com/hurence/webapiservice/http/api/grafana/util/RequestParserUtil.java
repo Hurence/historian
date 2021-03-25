@@ -14,7 +14,7 @@ import java.time.ZoneId;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static com.hurence.webapiservice.http.api.grafana.modele.HurenceDatasourcePluginQueryRequestParam.DEFAULT_ALL_AGGREGATION_LIST;
+import static com.hurence.webapiservice.http.api.grafana.model.HurenceDatasourcePluginQueryRequestParam.DEFAULT_ALL_AGGREGATION_LIST;
 import static com.hurence.webapiservice.modele.AGG.values;
 
 public class RequestParserUtil {

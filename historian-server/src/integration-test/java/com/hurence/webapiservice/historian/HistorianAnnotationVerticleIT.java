@@ -4,7 +4,7 @@ import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.historian.model.SchemaVersion;
 import com.hurence.historian.solr.util.SolrITHelper;
 import com.hurence.unit5.extensions.SolrExtension;
-import com.hurence.webapiservice.http.api.grafana.modele.AnnotationRequestType;
+import com.hurence.webapiservice.http.api.grafana.model.AnnotationRequestType;
 import com.hurence.webapiservice.util.HistorianSolrITHelper;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonArray;

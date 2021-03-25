@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
-import com.hurence.webapiservice.http.api.grafana.modele.QueryRequestParam;
-import com.hurence.webapiservice.http.api.grafana.modele.SearchRequestParam;
+import com.hurence.webapiservice.http.api.grafana.model.QueryRequestParam;
+import com.hurence.webapiservice.http.api.grafana.model.SearchRequestParam;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -2,7 +2,7 @@
   "web.verticles.instance.number": 1,
   "historian.verticles.instance.number": 2,
   "http_server" : {
-    "host": "localhost",
+    "host": "0.0.0.0",
     "port" : 8080,
     "historian.address": "historian",
     "debug": false,

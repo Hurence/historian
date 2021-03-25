@@ -32,6 +32,14 @@ public class HistorianServiceFields {
     public static String VALUE = "value";
     public static String DATE = "date";
     public static String ORIGIN = HistorianChunkCollectionFieldsVersion0.CHUNK_ORIGIN;
+    public static String START = "start";
+    public static String END = "end";
+    public static String DATA = "data";
+    public static String STATUS = "status";
+    public static String SUCCESS = "success";
+    public static String TIMEOUT = "timeout";
+    public static String STEP = "step";
+    public static String MATCH = "match[]";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";

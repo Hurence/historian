@@ -37,13 +37,6 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
 
     @Override
     public void start(Promise<Void> promise) throws Exception {
-        // load cache
-        if (conf.isTagsLookupEnabled()){
-            NameLookup.enable();
-            NameLookup.loadCacheFromFile(conf.getTagsLookupfilePath(), conf.getTagsLookupSeparator());
-        }
-
-
         // set this property so vertx use slf4j logging.
         System.setProperty("vertx.logger-delegate-factory-class-name", "io.vertx.core.logging.SLF4JLogDelegateFactory");
         vertx.getOrCreateContext();
@@ -51,6 +44,14 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
         LOGGER.info("deploying {} verticle with config : {}", WebApiServiceMainVerticle.class.getSimpleName(), this.conf);
         LOGGER.debug("You see log level DEBUG");
         LOGGER.trace("You see log level TRACE");
+
+        // load cache
+        if (conf.isTagsLookupEnabled()){
+            NameLookup.enable();
+            NameLookup.loadCacheFromFile(conf.getTagsLookupfilePath(), conf.getTagsLookupSeparator());
+        }
+
+        // deploy verticle
         Single<String> dbVerticleDeployment = deployHistorianVerticle();
         dbVerticleDeployment
                 .flatMap(id -> deployHttpVerticle())
