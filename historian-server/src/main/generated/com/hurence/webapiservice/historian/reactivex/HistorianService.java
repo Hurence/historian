@@ -200,6 +200,28 @@ public class HistorianService {
     });
   }
 
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getSeries(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler) { 
+    delegate.getSeries(params, resultHandler);
+    return this;
+  }
+
+  public Single<JsonArray> rxGetSeries(JsonObject params) { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getSeries(params, handler);
+    });
+  }
+
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getLabels(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler) { 
+    delegate.getLabels(params, resultHandler);
+    return this;
+  }
+
+  public Single<JsonArray> rxGetLabels(JsonObject params) { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getLabels(params, handler);
+    });
+  }
+
 
   public static  HistorianService newInstance(com.hurence.webapiservice.historian.HistorianService arg) {
     return arg != null ? new HistorianService(arg) : null;

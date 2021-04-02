@@ -40,6 +40,8 @@ public class HistorianServiceFields {
     public static String TIMEOUT = "timeout";
     public static String STEP = "step";
     public static String MATCH = "match[]";
+    public static String __NAME__ = "__name__";
+    public static String LUCENE_QUERY = "lucene_query";
 
     //Response fields
     public static String TOTAL_POINTS = "total_points";

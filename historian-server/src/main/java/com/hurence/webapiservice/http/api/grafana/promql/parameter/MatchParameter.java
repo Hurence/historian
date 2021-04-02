@@ -2,6 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.promql.parameter;
 
 
 
+import com.hurence.webapiservice.QueryParamLookup;
 import lombok.Builder;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -10,34 +11,31 @@ import org.slf4j.LoggerFactory;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.hurence.historian.model.HistorianServiceFields.MATCH;
+import static com.hurence.historian.model.HistorianServiceFields.*;
 
 
 @Data
 @Builder
 public class MatchParameter {
 
-    private String matchStr;
-    private Map<String, String> match;
+    private String name;
+    private Map<String, String> tags;
     private String luceneQuery;
 
 
     public static class MatchParameterBuilder {
 
+        private Map<String, String> tags= new HashMap<>();
+
         private static final Logger LOGGER = LoggerFactory.getLogger(MatchParameterBuilder.class);
 
         public MatchParameterBuilder parameters(Map<String, String> parameters) {
 
-            if (match == null)
-                match = new HashMap<>();
-
-            // parsing query
+                      // parsing query
             if(!parameters.containsKey(MATCH))
                 throw new IllegalArgumentException(MATCH + " key not found in parameters");
 
-            matchStr = parameters.get(MATCH);
-
-            String[] matches = matchStr
+            String[] matches = parameters.get(MATCH)
                     .replaceAll("\\{", "")
                     .replaceAll("\\}", "")
                     .split(",");
@@ -47,10 +45,21 @@ public class MatchParameter {
                 String[] arg = m.split("=");
                 String key = arg[0];
                 String value = arg[1].replaceAll("\"", "");
-                match.put(key, value);
-                if(luceneQueryBuilder.length()!=0)
-                    luceneQueryBuilder.append( " AND" );
-                luceneQueryBuilder.append( String.format(" %s:\"%s\"", key, value) );
+                if(value.contains(" "))
+                    value = String.format("\"%s\"", value);
+
+                if(key.equals(__NAME__)){
+                    name = QueryParamLookup.getOriginalName(value);
+                    if (luceneQueryBuilder.length() != 0)
+                        luceneQueryBuilder.append(" AND");
+
+                    luceneQueryBuilder.append(String.format(" name:%s", name));
+                }else {
+                    tags.put(key, value);
+                    if (luceneQueryBuilder.length() != 0)
+                        luceneQueryBuilder.append(" AND");
+                    luceneQueryBuilder.append(String.format(" %s:%s", key, value));
+                }
             }
             luceneQuery = luceneQueryBuilder.toString().trim();
 

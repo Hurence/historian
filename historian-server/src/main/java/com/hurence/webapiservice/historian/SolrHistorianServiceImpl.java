@@ -245,4 +245,20 @@ public class SolrHistorianServiceImpl implements HistorianService {
         return this;
     }
 
+
+    @Override
+    public HistorianService getSeries(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler) {
+        GetSeriesHandler requestHandler = new GetSeriesHandler(solrHistorianConf);
+        Handler<Promise<JsonArray>> handler = requestHandler.getHandler(params);
+        vertx.executeBlocking(handler, resultHandler);
+        return this;
+    }
+
+    @Override
+    public HistorianService getLabels(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler) {
+        GetLabelsHandler requestHandler = new GetLabelsHandler(solrHistorianConf);
+        Handler<Promise<JsonArray>> handler = requestHandler.getHandler(params);
+        vertx.executeBlocking(handler, resultHandler);
+        return this;
+    }
 }

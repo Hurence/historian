@@ -70,7 +70,7 @@ public class RunHistorianServerInLocalJob {
         return new JsonObject()
                 .put(HttpServerVerticle.CONFIG_HTTP_SERVER_PORT, 8080)
 //                .put(HttpServerVerticle.CONFIG_HISTORIAN_ADDRESS, HISTORIAN_ADRESS)
-                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "localhost")
+                .put(HttpServerVerticle.CONFIG_HTTP_SERVER_HOSTNAME, "0.0.0.0")
                 .put(HttpServerVerticle.CONFIG_MAXDATAPOINT_MAXIMUM_ALLOWED, 10000)
                 .put(HttpServerVerticle.CONFIG_DEBUG_MODE, true);
     }

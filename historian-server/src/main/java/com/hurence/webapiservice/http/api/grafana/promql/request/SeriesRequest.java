@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.promql.request;
 
-import com.hurence.webapiservice.http.api.grafana.promql.parameter.ErrorParameter;
-import com.hurence.webapiservice.http.api.grafana.promql.parameter.MatchParameter;
+import com.hurence.webapiservice.http.api.grafana.promql.parameter.*;
 import lombok.Builder;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -41,7 +40,9 @@ public class SeriesRequest {
             }
 
             try{
-                matchParameter = MatchParameter.builder().parameters(parameters).build();
+                matchParameter = MatchParameter.builder()
+                        .parameters(parameters)
+                        .build();
             }catch (Exception exception) {
                 errors.addError(exception);
             }

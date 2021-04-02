@@ -150,6 +150,16 @@ public class HistorianServiceVertxProxyHandler extends ProxyHandler {
                         HelperUtils.createHandler(msg));
           break;
         }
+        case "getSeries": {
+          service.getSeries((io.vertx.core.json.JsonObject)json.getValue("params"),
+                        HelperUtils.createHandler(msg));
+          break;
+        }
+        case "getLabels": {
+          service.getLabels((io.vertx.core.json.JsonObject)json.getValue("params"),
+                        HelperUtils.createHandler(msg));
+          break;
+        }
         default: throw new IllegalStateException("Invalid action: " + action);
       }
     } catch (Throwable t) {

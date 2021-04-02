@@ -26,6 +26,10 @@ Hurence historian implements a subset of this query language to interact with ti
 | UT900Z.U028_COEF_A_FI02.F_CV | col_flow_rate | u028 | h2_reactor2 | coefficient_metro_a |
 
 
+T473.SC02_OP.F_CV{ sampling_algo="min", bucket_size="10" }
+
+
+
 ## Selecting series
 Select latest sample for series with a given metric (Instant vector selectors) :
 
