@@ -1,0 +1,5 @@
+name,synonym
+cpu_prct_used{metric_id=ac8519bc-2985-4869-8aa8-c5fdfc68ec44},cpu_prct_used_a
+cpu_prct_used{metric_id=ae320972-f612-4cef-8570-908250b8bd1a},cpu_prct_used_b
+cpu_prct_used{metric_id=af33574c-c852-4b76-9e67-b19ad444250d},cpu_prct_used_c
+cpu_prct_used{metric_id=b2c2b01e-2c54-4d05-9687-b69cab6cfc68},cpu_prct_used_d

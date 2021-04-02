@@ -229,4 +229,10 @@ public interface HistorianService {
      */
     @Fluent
     HistorianService addTimeSeries(JsonObject timeseries, Handler<AsyncResult<JsonObject>> resultHandler);
+
+    @Fluent
+    HistorianService getSeries(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler);
+
+    @Fluent
+    HistorianService getLabels(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler);
 }

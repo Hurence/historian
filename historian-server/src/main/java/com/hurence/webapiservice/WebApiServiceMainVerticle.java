@@ -47,8 +47,9 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
 
         // load cache
         if (conf.isTagsLookupEnabled()){
-            NameLookup.enable();
-            NameLookup.loadCacheFromFile(conf.getTagsLookupfilePath(), conf.getTagsLookupSeparator());
+            LOGGER.info("name lookup is enabled");
+            QueryParamLookup.enable();
+            QueryParamLookup.loadCacheFromFile(conf.getTagsLookupfilePath(), conf.getTagsLookupSeparator());
         }
 
         // deploy verticle

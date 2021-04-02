@@ -1,5 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.promql.parameter;
 
+import com.hurence.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.webapiservice.modele.SamplingConf;
 import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import lombok.Builder;
@@ -7,10 +9,7 @@ import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,34 +29,43 @@ public class QueryParameter {
     private Optional<AggregationOperator> aggregationOperator;
 
     // NONE, FIRST, AVERAGE, MODE_MEDIAN, LTTB, MIN_MAX, MIN, MAX
-    private String sampling;
-    private Integer samplingBucketSize;
+    private SamplingConf sampling;
     private Boolean quality;
 
 
-    private static Pattern pattern = Pattern.compile("(\\S+)\\{(\\S+)?\\}");
+    public String toQueryString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(name);
+
+        if(!tags.isEmpty()){
+            sb.append("{");
+            tags.forEach( (key, value) -> sb.append(key).append("=").append(value).append(", "));
+            sb.delete(sb.length()-2,sb.length());
+            sb.append("}");
+        }
+
+        return sb.toString();
+    }
+
 
     public static class QueryParameterBuilder {
+        private Map<String, String> tags = new TreeMap<>();
+        private SamplingConf sampling = new SamplingConf(SamplingAlgorithm.NONE, 1, 1440);
+        private Optional<AggregationOperator> aggregationOperator = Optional.empty();
 
         private static final Logger LOGGER = LoggerFactory.getLogger(QueryParameterBuilder.class);
+        private static Pattern pattern = Pattern.compile("(\\S+)\\{(\\S+)?\\}");
 
-        public QueryParameterBuilder parameters(Map<String, String> parameters) {
-            if (tags == null)
-                tags = new HashMap<>();
+        public QueryParameterBuilder parse(String queryStr) {
 
-            // parsing query
-            if(!parameters.containsKey(QUERY))
-                throw new IllegalArgumentException(QUERY + " key not found in parameters");
 
-            String queryStr = parameters
-                    .get(QUERY)
-                    .replaceAll("\\s+", "");
+            queryStr = queryStr.replaceAll("\\s+", "");
             aggregationOperator = AggregationOperator.findMatching(queryStr);
 
             // remove operator
             if (aggregationOperator.isPresent())
                 queryStr = queryStr
-                        .replace(aggregationOperator.get().label, "")
+                        .replace(aggregationOperator.get().label + "(", "")
                         .replace("(", "")
                         .replace(")", "");
 
@@ -70,10 +78,27 @@ public class QueryParameter {
                     String[] tagsTupples = matcher.group(2).split(",");
                     for (String t : tagsTupples) {
                         String[] tag = t.split("=");
-                        tags.put(tag[0], tag[1].replaceAll("\"", ""));
+
+                        String tagName = tag[0];
+                        String tagValue = tag[1].replaceAll("\"", "");
+                        if (tagName.equalsIgnoreCase(SAMPLING_ALGO)) {
+                            try {
+                                sampling.setAlgo(SamplingAlgorithm.valueOf(tagValue.toUpperCase()));
+                            } catch (Exception ex) {
+                                LOGGER.warn("unable to parse sampling algo : " + tagValue);
+                            }
+                        } else if (tagName.equalsIgnoreCase(BUCKET_SIZE)) {
+                            try {
+                                sampling.setBucketSize(Integer.parseInt(tagValue));
+                            } catch (Exception ex) {
+                                LOGGER.warn("unable to parse bucket size : " + tagValue);
+                            }
+                        } else {
+                            tags.put(tagName, tagValue);
+                        }
                     }
                 }
-            }else{
+            } else {
                 // bad trick for strings like "U1230" without "{"
                 name = queryStr;
             }

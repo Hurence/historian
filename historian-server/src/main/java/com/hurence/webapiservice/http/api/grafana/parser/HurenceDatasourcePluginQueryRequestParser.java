@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.parser;
 
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
-import com.hurence.webapiservice.NameLookup;
 import com.hurence.webapiservice.http.api.grafana.model.HurenceDatasourcePluginQueryRequestParam;
 import com.hurence.webapiservice.http.api.grafana.util.QualityAgg;
 import com.hurence.webapiservice.modele.AGG;
@@ -183,13 +182,6 @@ public class HurenceDatasourcePluginQueryRequestParser {
                             JsonObject jsonObject = (JsonObject) el;
 
                             String fieldName = jsonObject.getString(FIELD_NAME);
-                            if(NameLookup.isEnabled()){
-                                Optional<String> nameFromSynonym = NameLookup.getNameFromSynonym(fieldName);
-                                if(nameFromSynonym.isPresent()){
-                                    fieldName = nameFromSynonym.get();
-                                    LOGGER.debug("replacing metric name {} by that synonym {}", fieldName, nameFromSynonym.get());
-                                }
-                            }
 
                             JsonObject toReturn = new JsonObject()
                                     .put(FIELD_NAME, fieldName);

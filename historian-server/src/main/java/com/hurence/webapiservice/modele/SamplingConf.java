@@ -25,6 +25,18 @@ public class SamplingConf {
         return maxPoint;
     }
 
+    public void setAlgo(SamplingAlgorithm algo) {
+        this.algo = algo;
+    }
+
+    public void setBucketSize(int bucketSize) {
+        this.bucketSize = bucketSize;
+    }
+
+    public void setMaxPoint(int maxPoint) {
+        this.maxPoint = maxPoint;
+    }
+
     @Override
     public String toString() {
         return "SamplingConf{" +

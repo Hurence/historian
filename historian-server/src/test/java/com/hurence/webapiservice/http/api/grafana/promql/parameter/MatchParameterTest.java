@@ -21,11 +21,27 @@ class MatchParameterTest {
                 .parameters(query)
                 .build();
 
-        assertEquals("U004_TC01", parameter.getMatch().get("__name__"));
-        assertEquals("temperature",parameter.getMatch().get("type"));
-        assertEquals("reacteur1_coquille1",parameter.getMatch().get("sub_unit"));
-        assertEquals("true",parameter.getMatch().get("sample"));
-        assertEquals(4,parameter.getMatch().size());
+        assertEquals("U004_TC01", parameter.getName());
+        assertEquals("temperature",parameter.getTags().get("type"));
+        assertEquals("reacteur1_coquille1",parameter.getTags().get("sub_unit"));
+        assertEquals("true",parameter.getTags().get("sample"));
+        assertEquals(3,parameter.getTags().size());
+    }
+
+    @Test
+    void testMatchwithPoint() {
+
+        Map<String, String> query = ImmutableMap.of(
+                MATCH,
+                "{__name__=\"U004_TC01.test\",sample=\"true\"}");
+
+        MatchParameter parameter = MatchParameter.builder()
+                .parameters(query)
+                .build();
+
+        assertEquals("U004_TC01.test", parameter.getName());
+        assertEquals("true",parameter.getTags().get("sample"));
+        assertEquals(1,parameter.getTags().size());
     }
 
     @Test
@@ -39,6 +55,6 @@ class MatchParameterTest {
                 .parameters(query)
                 .build();
 
-        assertEquals("__name__:\"U004_TC01\" AND sample:\"true\" AND sub_unit:\"reacteur1_coquille1\" AND type:\"temperature\"", parameter.getLuceneQuery());
+        assertEquals("name:U004_TC01 AND sample:true AND sub_unit:reacteur1_coquille1 AND type:temperature", parameter.getLuceneQuery());
     }
 }

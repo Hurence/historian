@@ -37,7 +37,12 @@ public class QueryRequest {
             LOGGER.debug("trying to parse context : {}", parameters);
 
             try{
-                query = QueryParameter.builder().parameters(parameters).build();
+
+                // parsing query
+                if (!parameters.containsKey(QUERY))
+                    throw new IllegalArgumentException(QUERY + " key not found in parameters");
+
+                query = QueryParameter.builder().parse(parameters.get(QUERY)).build();
 
                 if(parameters.containsKey(TIME)){
                     time = Long.valueOf(parameters.get(TIME));
