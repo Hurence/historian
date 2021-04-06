@@ -196,63 +196,7 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
      */
     @Override
     public void query(RoutingContext context) {
-        QueryRequest queryRequest = QueryRequest.builder()
-                .parameters(getParameters(context))
-                .build();
-
-
-        // submit the request to the handler
-        JsonObject response = new JsonObject()
-                .put(STATUS, SUCCESS)
-                .put(DATA, new JsonObject()
-                        .put("resultType", "vector")
-                        .put("result", new JsonArray()
-                                .add(new JsonObject()
-                                        .put("metric", new JsonObject()
-                                                .put("__name__", "U004_TC01")
-                                                .put("type", "temperature")
-                                                .put("sub_unit", "reacteur1_coquille1")
-                                                .put("measure", "pour_cent_op"))
-                                        .put("value", new JsonArray()
-                                                .add(queryRequest.getTime())
-                                                .add("0.0000798")
-                                        )
-                                )
-                                .add(new JsonObject()
-                                        .put("metric", new JsonObject()
-                                                .put("__name__", "U004_TC01")
-                                                .put("type", "temperature")
-                                                .put("sub_unit", "reacteur1_coquille1")
-                                                .put("measure", "mesure_pv"))
-                                        .put("value", new JsonArray()
-                                                .add(queryRequest.getTime())
-                                                .add("0.0001298")
-                                        )
-                                )
-                        )
-                );
-
-        context.response()
-                .setStatusCode(HttpResponseStatus.OK.code())
-                .end(response.encode());
-
-
-      /*  service.rxGetMetricsName(queryRequest.getMetricsParam())
-                .doOnError(ex -> {
-                    LOGGER.error("Unexpected error : ", ex);
-                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
-                            .errorMsg("Unexpected error :")
-                            .throwable(ex)
-                            .routingContext(context)
-                            .build();
-                    VertxHttpErrorMsgHelper.answerWithError(error);
-                })
-                .doOnSuccess(metricResponse -> {
-                    JsonArray array = metricResponse.getJsonArray(HistorianServiceFields.METRICS);
-                    context.response().setStatusCode(200);
-                    context.response().putHeader("Content-Type", "application/json");
-                    context.response().end(array.encode());
-                }).subscribe();*/
+        queryRange(context);
     }
 
     private Map<String, String> getParameters(RoutingContext context) {
@@ -409,8 +353,6 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
                         .put(DATA, new JsonObject());
 
             JsonObject firstEntry = timeseriesAsList.get(0);
-
-
             JsonArray values = new JsonArray();
             for (int i = 0; i < firstEntry.getJsonArray(DATAPOINTS).size(); i++) {
                 JsonArray point = firstEntry.getJsonArray(DATAPOINTS).getJsonArray(i);
@@ -421,6 +363,12 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
                 );
             }
 
+            JsonObject metric = new JsonObject()
+                    .put("__name__",request.getQuery().getName());
+            request.getQuery()
+                    .getTags()
+                    .keySet()
+                    .forEach(key -> metric.put(key, request.getQuery().getTags().get(key)));
 
             return new JsonObject()
                     .put(STATUS, SUCCESS)
@@ -428,13 +376,8 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
                             .put("resultType", "matrix")
                             .put("result", new JsonArray()
                                     .add(new JsonObject()
-                                            .put("metric", new JsonObject()
-                                                    .put("__name__", firstEntry.getString(NAME))
-                                                    .put("type", "temperature")
-                                                    .put("sub_unit", "reacteur1_coquille1")
-                                                    .put("measure", "pour_cent_op"))
-                                            .put("values", values
-                                            )
+                                            .put("metric", metric)
+                                            .put("values", values)
                                     )
                             )
                     );
@@ -509,7 +452,6 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
                     JsonObject response = new JsonObject()
                             .put(STATUS, SUCCESS)
                             .put(DATA, labels);
-                    LOGGER.info(response.encodePrettily());
                     context.response().setStatusCode(200);
                     context.response().putHeader("Content-Type", "application/json");
                     context.response().end(response.encode());

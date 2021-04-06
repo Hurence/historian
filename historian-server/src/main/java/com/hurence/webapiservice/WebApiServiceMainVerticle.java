@@ -2,6 +2,7 @@ package com.hurence.webapiservice;
 
 import com.hurence.webapiservice.historian.HistorianVerticle;
 import com.hurence.webapiservice.http.HttpServerVerticle;
+import com.hurence.webapiservice.http.api.grafana.promql.converter.PromQLSynonymLookup;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonObject;
@@ -48,8 +49,8 @@ public class WebApiServiceMainVerticle extends AbstractVerticle {
         // load cache
         if (conf.isTagsLookupEnabled()){
             LOGGER.info("name lookup is enabled");
-            QueryParamLookup.enable();
-            QueryParamLookup.loadCacheFromFile(conf.getTagsLookupfilePath(), conf.getTagsLookupSeparator());
+            PromQLSynonymLookup.enable();
+            PromQLSynonymLookup.loadCacheFromFile(conf.getTagsLookupfilePath(), conf.getTagsLookupSeparator());
         }
 
         // deploy verticle

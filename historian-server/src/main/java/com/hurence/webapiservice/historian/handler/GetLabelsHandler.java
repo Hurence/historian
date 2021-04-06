@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian.handler;
 
 import com.hurence.historian.model.HistorianServiceFields;
-import com.hurence.webapiservice.QueryParamLookup;
+import com.hurence.webapiservice.http.api.grafana.promql.converter.PromQLSynonymLookup;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -40,7 +40,15 @@ public class GetLabelsHandler {
                 StringBuilder queryBuilder = new StringBuilder();
                 Long from = params.getLong(HistorianServiceFields.FROM);
                 Long to = params.getLong(HistorianServiceFields.TO);
-                String dateRange = String.format("%s:[* TO %d] AND %s:[%d TO *]", SOLR_COLUMN_START, to, SOLR_COLUMN_END, from);
+
+                String dateRange = "*:*";
+                if(from != null && to != null){
+                    dateRange = String.format("%s:[* TO %d] AND %s:[%d TO *]", SOLR_COLUMN_START, to, SOLR_COLUMN_END, from);
+                }else if(from != null){
+                    dateRange = String.format("%s:[%d TO *]", SOLR_COLUMN_END, from);
+                }else if(to != null){
+                    dateRange = String.format("%s:[* TO %d]", SOLR_COLUMN_START, to);
+                }
 
                 final SolrQuery query = new SolrQuery();
                 query.setQuery(dateRange);
@@ -61,7 +69,7 @@ public class GetLabelsHandler {
                 if (facetField == null || facetField.getValues() == null) {
                     LOGGER.warn("unable to retrieve any labels from facet : {}", query.toQueryString());
                 } else {
-                    facetField.getValues().forEach(count -> uniqueSynonymNames.add(QueryParamLookup.getSynonymName(count.getName())));
+                    facetField.getValues().forEach(count -> uniqueSynonymNames.add(PromQLSynonymLookup.getSynonymName(count.getName())));
                     uniqueSynonymNames.forEach(data::add);
                 }
 

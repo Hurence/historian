@@ -105,11 +105,9 @@ public class GetTimeSeriesHandler {
     private SolrQuery buildTimeSeriesQuery(Request request) {
         StringBuilder queryBuilder = new StringBuilder();
         if (request.getTo() != null) {
-            LOGGER.trace("requesting timeseries to {}", request.getTo());
             queryBuilder.append(SOLR_COLUMN_START).append(":[* TO ").append(request.getTo()).append("]");
         }
         if (request.getFrom() != null) {
-            LOGGER.trace("requesting timeseries from {}", request.getFrom());
             if (queryBuilder.length() != 0)
                 queryBuilder.append(" AND ");
             queryBuilder.append(SOLR_COLUMN_END).append(":[").append(request.getFrom()).append(" TO *]");
@@ -285,7 +283,6 @@ public class GetTimeSeriesHandler {
             }
             tuple = solrStream.read();
         }
-        LOGGER.debug("metric response : {}", tuple.jsonStr());
         solrStream.close();
         return metricsInfo;
     }
@@ -361,11 +358,9 @@ public class GetTimeSeriesHandler {
         //by removing data after t3 !
         query.addField(SOLR_COLUMN_VALUE);
         if (isQueryMode1(request, metricsInfo)) {
-            LOGGER.debug("QUERY MODE 1");
             addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorSamplingAllPoints(request, metricsInfo, aggregationList);
         } else if (isQueryMode2ConsideringNotQueryMode1(request, metricsInfo)) {
-            LOGGER.debug("QUERY MODE 2");
             buildFilters(request, query, true);
             addFieldsThatWillBeNeeded(query);
             timeSeriesExtracter = createTimeSerieExtractorUsingChunks(request, metricsInfo, aggregationList);
