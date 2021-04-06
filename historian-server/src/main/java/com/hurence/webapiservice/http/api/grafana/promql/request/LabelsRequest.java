@@ -30,13 +30,13 @@ public class LabelsRequest {
             LOGGER.debug("trying to parse requestBody : {}", parameters);
 
             try {
-                start = Long.parseLong(parameters.get(START));
+                start = Long.parseLong(parameters.get(START)) * 1000;
             } catch (Exception exception) {
                 errors.addError(exception);
             }
 
             try {
-                end = Long.parseLong(parameters.get(END));
+                end = Long.parseLong(parameters.get(END)) * 1000;
             } catch (Exception exception) {
                 errors.addError(exception);
             }

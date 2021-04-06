@@ -2,7 +2,7 @@ package com.hurence.webapiservice.http.api.grafana.promql.parameter;
 
 
 
-import com.hurence.webapiservice.QueryParamLookup;
+import com.hurence.webapiservice.http.api.grafana.promql.converter.PromQLSynonymLookup;
 import lombok.Builder;
 import lombok.Data;
 import org.slf4j.Logger;
@@ -49,7 +49,7 @@ public class MatchParameter {
                     value = String.format("\"%s\"", value);
 
                 if(key.equals(__NAME__)){
-                    name = QueryParamLookup.getOriginalName(value);
+                    name = PromQLSynonymLookup.getOriginalName(value);
                     if (luceneQueryBuilder.length() != 0)
                         luceneQueryBuilder.append(" AND");
 

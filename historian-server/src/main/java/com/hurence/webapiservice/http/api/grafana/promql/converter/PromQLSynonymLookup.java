@@ -1,4 +1,4 @@
-package com.hurence.webapiservice;
+package com.hurence.webapiservice.http.api.grafana.promql.converter;
 
 import com.fasterxml.jackson.databind.MappingIterator;
 import com.fasterxml.jackson.dataformat.csv.CsvMapper;
@@ -15,14 +15,18 @@ import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class QueryParamLookup {
+
+/**
+ * This class
+ */
+public class PromQLSynonymLookup {
 
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueryParamLookup.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PromQLSynonymLookup.class);
 
-    private static Map<String, String> originalNameSynonymNameMap = new HashMap<>();
-    private static BiMap<String, String> originalSynonymMap = HashBiMap.create();
-    private static Map<String, Map<String, String>> synonymsNamesTagsMap = new HashMap<>();
+    private static final Map<String, String> originalNameSynonymNameMap = new HashMap<>();
+    private static final BiMap<String, String> originalSynonymMap = HashBiMap.create();
+    private static final Map<String, Map<String, String>> synonymsNamesTagsMap = new HashMap<>();
 
     private static boolean isEnabled = false;
 
@@ -30,11 +34,14 @@ public class QueryParamLookup {
         return isEnabled;
     }
 
+    /**
+     * clear the maps and enable the lookup
+     */
     public static void enable() {
-        isEnabled = true;
         originalSynonymMap.clear();
         synonymsNamesTagsMap.clear();
         originalNameSynonymNameMap.clear();
+        isEnabled = true;
         LOGGER.debug("NameLookup is enabled");
     }
 
@@ -44,6 +51,19 @@ public class QueryParamLookup {
         private String synonym;
     }
 
+    /**
+     * Load a lookup cache from a CSV file.
+     * 
+     * the file must contain 2 columns name,synonym
+     * 
+     * T123.P34_PV.F_CV;Temperature{unit="T123", location="plant_34", type="Mesure_PV"}
+     * T123.P34_SP.F_CV;Temperature{unit="T123", location="plant_34", type="Consigne_SP"}
+     * T123.P34_OP.F_CV;Temperature{unit="T123", location="plant_34", type="Pour_Cent_OP"}
+     *
+     * @param tagsFilePath the path of the CSV file
+     * @param columnSeparator the separator
+     * @throws IOException
+     */
     public static void loadCacheFromFile(String tagsFilePath, char columnSeparator) throws IOException {
         if (isEnabled) {
             File file = new File(tagsFilePath);
@@ -75,33 +95,29 @@ public class QueryParamLookup {
     }
 
     public static String getOriginal(String synonym) {
-
         String reorderdSynonym = QueryParameter.builder().parse(synonym).build().toQueryString();
         String original = originalSynonymMap.inverse().get(reorderdSynonym);
         return original == null ? synonym : original;
     }
 
-    public static QueryParameter getSynonym(QueryParameter original) {
-        String synonym = getSynonym(original.toQueryString());
-        return QueryParameter.builder().parse(synonym).build();
-    }
-
     public static String getSynonym(String original) {
-
         String synonym = originalSynonymMap.get(original);
         return synonym == null ? original : synonym;
     }
 
 
+    /**
+     * Store a new mapping original <=> synonym
+     *
+     * @param original
+     * @param synonym
+     */
     public static void put(String original, String synonym) {
-
         QueryParameter synonymQP = QueryParameter.builder().parse(synonym).build();
         QueryParameter originalQP = QueryParameter.builder().parse(original).build();
 
         originalSynonymMap.putIfAbsent(originalQP.toQueryString(), synonymQP.toQueryString());
-
-        if (!synonymsNamesTagsMap.containsKey(synonymQP.getName()))
-            synonymsNamesTagsMap.put(synonymQP.getName(), new HashMap<>());
+        synonymsNamesTagsMap.putIfAbsent(synonymQP.getName(), new HashMap<>());
 
         synonymsNamesTagsMap.get(synonymQP.getName()).putAll(synonymQP.getTags().entrySet()
                 .stream().collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey)));
@@ -109,6 +125,9 @@ public class QueryParamLookup {
         originalNameSynonymNameMap.putIfAbsent(originalQP.getName(), synonymQP.getName());
     }
 
+    /**
+     * @return all synonyms names
+     */
     public static Set<String> getSynonymsNames() {
         return synonymsNamesTagsMap.keySet();
     }
@@ -117,17 +136,21 @@ public class QueryParamLookup {
         return synonymsNamesTagsMap.getOrDefault(name, null);
     }
 
+    /**
+     * @param original
+     * @return the synonym name from an original string
+     */
     public static String getSynonymName(String original) {
-
-
         String originalName = original;
         if (original.contains("{")) {
             originalName = QueryParameter.builder().parse(original).build().getName();
         }
-
         return originalNameSynonymNameMap.getOrDefault(originalName, originalName);
     }
 
+    /**
+     * @return original name from the synonym
+     */
     public static String getOriginalName(String synonym) {
         String original = getOriginal(synonym);
         return QueryParameter.builder().parse(original).build().getName();

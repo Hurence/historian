@@ -1,7 +1,7 @@
 package com.hurence.webapiservice.historian.handler;
 
 import com.hurence.historian.model.HistorianServiceFields;
-import com.hurence.webapiservice.QueryParamLookup;
+import com.hurence.webapiservice.http.api.grafana.promql.converter.PromQLSynonymLookup;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
 import com.hurence.webapiservice.util.StringParserUtils;
 import io.vertx.core.Handler;
@@ -38,13 +38,13 @@ public class GetSeriesHandler {
 
                 // first step : get all possible tag names
                 String synonymName= params.getString(SOLR_COLUMN_NAME);
-                String originalName = QueryParamLookup.getOriginal( synonymName);
+                String originalName = PromQLSynonymLookup.getOriginal( synonymName);
 
 
                 // second step facet on those tags names to get possible values
                 JsonArray data = new JsonArray();
                 LOGGER.debug("looking up tags for originalName : {}", originalName);
-                Map<String, String> synonymsTags = QueryParamLookup.getSwappedTagsBySynonymName(synonymName);
+                Map<String, String> synonymsTags = PromQLSynonymLookup.getSwappedTagsBySynonymName(synonymName);
                 if (synonymsTags != null && !synonymsTags.isEmpty()) {
                     synonymsTags.keySet().forEach(tag -> data.add(
                             new JsonObject()

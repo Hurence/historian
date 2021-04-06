@@ -3,7 +3,23 @@
 Prometheus provides a functional query language called PromQL (Prometheus Query Language) that lets the user select and aggregate time series data in real time. The result of an expression can either be shown as a graph, viewed as tabular data in Prometheus's expression browser, or consumed by external systems via the HTTP API.
 
 
+## Time series dimensions and labels
 
+Another feature of a TSDB is the ability to filter measurements using tags. Each data point is labeled with a tag that adds context information, such as where the measurement was taken.
+
+With time series data, the data often contain more than a single series, and is a set of multiple time series. Many Grafana data sources support this type of data.
+
+The common case is issuing a single query for a measurement with one or more additional properties as dimensions. For example, querying a temperature measurement along with a location property. In this case, multiple series are returned back from that single query and each series has unique location as a dimension.
+
+To identify unique series within a set of time series, Grafana stores dimensions in labels.
+
+Each time series in Grafana optionally has labels. labels are set a of key/value pairs for identifying dimensions. Example labels could are `{location=us}` or `{country=us,state=ma,city=boston}`. Within a set of time series, the combination of its name and labels identifies each series. For example, temperature `{country=us,state=ma,city=boston}`.
+
+Different sources of time series data have dimensions stored natively, or common storage patterns that allow the data to be extracted into dimensions.
+
+Time series databases (TSDBs) usually natively support dimensionality. Prometheus also stores dimensions in labels. In TSDBs such as Graphite or OpenTSDB the term tags is used instead.
+
+In table databases such SQL, these dimensions are generally the GROUP BY parameters of a query
 
 ## Expression language data types
 In Prometheus's expression language, an expression or sub-expression can evaluate to one of four types:

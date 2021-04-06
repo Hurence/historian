@@ -45,23 +45,26 @@ public class QueryRequest {
                 query = QueryParameter.builder().parse(parameters.get(QUERY)).build();
 
                 if(parameters.containsKey(TIME)){
-                    time = Long.valueOf(parameters.get(TIME));
+                    time = Long.parseLong(parameters.get(TIME))*1000;
                     start = time;
                     end = time;
                 }
+
                 if(parameters.containsKey(TIMEOUT)){
-                    timeout = Long.valueOf(parameters.get(TIMEOUT));
+                    timeout = Long.parseLong(parameters.get(TIMEOUT));
                 }
+
                 if(parameters.containsKey(STEP)){
-                    step = Integer.valueOf(parameters.get(STEP));
+                    step = Integer.parseInt(parameters.get(STEP));
                 }
 
                 if(parameters.containsKey(START)){
-                    start = Long.valueOf(parameters.get(START));
+                    start = Long.parseLong(parameters.get(START))*1000;
                     time = start;
                 }
+
                 if(parameters.containsKey(END)){
-                    end = Long.valueOf(parameters.get(END));
+                    end = Long.valueOf(parameters.get(END))*1000;
                 }
             }catch (Exception exception){
                 errors.addError(exception);
