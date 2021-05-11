@@ -45,7 +45,7 @@ def get_rules():
     return json.dumps(rules)
 
 
-@api.route('/api/v1/query', methods=['GET'])
+@api.route('/api/v1/query', methods=['POST'])
 def get_query():
     ''' save and test in datasource setup : ([('query', '1+1'), ('time', '1616404376.622')] '''
     # Called when shift-Enter and print data in table view (only one point for each metric)
@@ -103,4 +103,4 @@ def get_series():
 
 
 if __name__ == '__main__':
-    api.run(host="0.0.0.0", port=9099)
+    api.run(host="0.0.0.0", port=8081)

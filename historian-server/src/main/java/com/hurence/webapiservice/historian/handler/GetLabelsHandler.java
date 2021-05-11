@@ -55,7 +55,7 @@ public class GetLabelsHandler {
                 query.setRows(0);
                 query.setFacet(true);
                 query.setFacetMinCount(1);
-                query.setFacetLimit(2000);
+                query.setFacetLimit(10000);
                 query.addFacetField(SOLR_COLUMN_NAME);
                 query.setFacetSort("index");
 
@@ -74,6 +74,7 @@ public class GetLabelsHandler {
                 }
 
 
+                LOGGER.debug("done getting labels ");
 
                 // build json response
                 p.complete(data);

@@ -6,6 +6,7 @@ import com.hurence.webapiservice.http.api.grafana.promql.converter.RequestConver
 import com.hurence.webapiservice.http.api.grafana.promql.request.LabelsRequest;
 import com.hurence.webapiservice.http.api.grafana.promql.request.QueryRequest;
 import com.hurence.webapiservice.http.api.grafana.promql.request.SeriesRequest;
+import com.hurence.webapiservice.http.api.grafana.util.RequestParserUtil;
 import com.hurence.webapiservice.util.VertxErrorAnswerDescription;
 import com.hurence.webapiservice.util.VertxHttpErrorMsgHelper;
 import io.netty.handler.codec.http.HttpResponseStatus;
@@ -329,9 +330,27 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
     @Override
     public void queryRange(RoutingContext context) {
 
+
         final QueryRequest request = QueryRequest.builder()
-                .parameters(getParameters(context))
+                .body(context.getBodyAsString())
                 .build();
+
+        // check for handshake query
+        if(request.getQuery().getName().equals("1%2B1")){
+            JsonObject response = new JsonObject()
+                    .put(STATUS, SUCCESS)
+                    .put(DATA, "ok");
+
+            context.response()
+                    .setStatusCode(HttpResponseStatus.OK.code())
+                    .end(response.encode());
+
+            return;
+        }
+
+
+
+
 
 
         final JsonObject getTimeSeriesChunkParams = RequestConverter.toGetTimeSeriesRequest(request);
@@ -350,7 +369,7 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
             if (timeseriesAsList.isEmpty())
                 return new JsonObject()
                         .put(STATUS, "error")
-                        .put(DATA, new JsonObject());
+                        .put(DATA, "no data found for request : " +  request.toString());
 
             JsonObject firstEntry = timeseriesAsList.get(0);
             JsonArray values = new JsonArray();
