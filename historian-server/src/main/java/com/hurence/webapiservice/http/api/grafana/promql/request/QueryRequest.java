@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.hurence.historian.model.HistorianServiceFields.*;
@@ -32,6 +33,22 @@ public class QueryRequest {
     public static class QueryRequestBuilder {
         private ErrorParameter errors = new ErrorParameter();
         private static final Logger LOGGER = LoggerFactory.getLogger(QueryRequestBuilder.class);
+
+        public QueryRequestBuilder body(String bodyAsString) {
+            LOGGER.debug("trying to parse context from by string: {}", bodyAsString);
+
+            if(bodyAsString.isEmpty())
+                return this;
+
+            String[] keyValues = bodyAsString.split("&");
+            Map<String, String> bodyParameters = new HashMap<>();
+            for(String kv : keyValues){
+                String[] split = kv.split("=");
+                bodyParameters.put(split[0],split[1]);
+            }
+
+            return parameters(bodyParameters);
+        }
 
         public QueryRequestBuilder parameters(Map<String, String> parameters) {
             LOGGER.debug("trying to parse context : {}", parameters);

@@ -51,7 +51,6 @@ public class GetSeriesHandler {
                                     .put(__NAME__, synonymName)
                                     .put(synonymsTags.get(tag), tag))
                     );
-                    LOGGER.debug("found tags in synonyms :{}", data.encodePrettily());
                 } else {
                     LOGGER.debug("looking for tags in solr :{}", synonymName);
                     final SolrQuery tagNamesQuery = buildTagNamesQuery(params);

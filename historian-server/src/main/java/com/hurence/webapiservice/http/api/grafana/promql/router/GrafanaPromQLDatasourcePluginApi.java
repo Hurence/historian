@@ -22,10 +22,10 @@ public interface GrafanaPromQLDatasourcePluginApi {
         router.get(LABELS_ENDPOINT)
                 .produces("application/json")
                 .handler(this::labels);
-        router.get(QUERY_ENDPOINT)
+        router.post(QUERY_ENDPOINT)
                 .produces("application/json")
-                .handler(this::query);
-        router.get(QUERY_RANGE_ENDPOINT)
+                .blockingHandler(this::query);
+        router.post(QUERY_RANGE_ENDPOINT)
                 .produces("application/json")
                 .handler(this::queryRange);
         router.get(SERIES_ENDPOINT)
