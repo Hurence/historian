@@ -9,6 +9,7 @@ public interface GrafanaPromQLDatasourcePluginApi {
     String RULES_ENDPOINT = "/rules";
     String LABELS_ENDPOINT = "/label/__name__/values";
     String QUERY_ENDPOINT = "/query";
+    String QUERY_EXEMPLARS_ENDPOINT = "/query_exemplars";
     String QUERY_RANGE_ENDPOINT = "/query_range";
     String SERIES_ENDPOINT = "/series";
     String METADATA_ENDPOINT = "/metadata";
@@ -28,6 +29,9 @@ public interface GrafanaPromQLDatasourcePluginApi {
         router.post(QUERY_RANGE_ENDPOINT)
                 .produces("application/json")
                 .handler(this::queryRange);
+        router.post(QUERY_EXEMPLARS_ENDPOINT)
+                .produces("application/json")
+                .handler(this::queryExemplars);
         router.post(SERIES_ENDPOINT)
                 .produces("application/json")
                 .handler(this::series);
@@ -71,4 +75,10 @@ public interface GrafanaPromQLDatasourcePluginApi {
      * @param context
      */
     void metadata(RoutingContext context);
+
+    /**
+     * fake endpoint
+     * @param context
+     */
+    void queryExemplars(RoutingContext context);
 }

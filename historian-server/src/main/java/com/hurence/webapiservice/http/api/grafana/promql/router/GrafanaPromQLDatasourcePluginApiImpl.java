@@ -279,6 +279,17 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
                 .end(response.encode());
     }
 
+    @Override
+    public void queryExemplars(RoutingContext context) {
+        JsonObject response = new JsonObject()
+                .put(STATUS, SUCCESS)
+                .put(DATA, "");
+
+        context.response()
+                .setStatusCode(HttpResponseStatus.OK.code())
+                .end(response.encode());
+    }
+
 
     /**
      * used to query metrics datapoints in grafana panels.
