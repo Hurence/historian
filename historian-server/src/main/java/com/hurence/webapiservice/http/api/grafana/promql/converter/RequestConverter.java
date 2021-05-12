@@ -41,8 +41,10 @@ public class RequestConverter {
 
     public static JsonObject toGetTimeSeriesRequest(QueryRequest request) throws IllegalArgumentException {
         QueryParameter qp = PromQLSynonymLookup.getOriginal(request.getQuery());
-        LOGGER.info("synonym lookup {} -> {}",request.getQuery().getName(), qp.getName() );
-
+        if(!request.getQuery().getName().equals( qp.getName()))
+            LOGGER.info("found synonym \"{}\" for metric \"{}\" in lookup table", qp.getName() ,request.getQuery());
+        else
+            LOGGER.info("synonym not found for metric \"{}\" in lookup table", request.getQuery());
 
         // build other parameters from
         // @TODO add quality and aggregation metrics

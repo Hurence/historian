@@ -110,6 +110,22 @@ class QueryParameterTest {
     }
 
     @Test
+    void queryWithoutOperatorNoComma() {
+        String query = "U004_TC01{type=\"temperature\" sub_unit=\"reacteur1_coquille1\", sample=\"true\", bucket=\"12\"}";
+        QueryParameter parameter = QueryParameter.builder()
+                .parse(query)
+                .build();
+
+        assertFalse(parameter.getAggregationOperator().isPresent());
+        assertEquals("U004_TC01", parameter.getName());
+        assertEquals("temperature", parameter.getTags().get("type"));
+        assertEquals("reacteur1_coquille1", parameter.getTags().get("sub_unit"));
+        assertEquals("true", parameter.getTags().get("sample"));
+        assertEquals("12", parameter.getTags().get("bucket"));
+        assertEquals(4, parameter.getTags().size());
+    }
+
+    @Test
     void queryWithoutOperatorWithoutTags() {
         String query = "U004_TC01{}";
         QueryParameter parameter = QueryParameter.builder()

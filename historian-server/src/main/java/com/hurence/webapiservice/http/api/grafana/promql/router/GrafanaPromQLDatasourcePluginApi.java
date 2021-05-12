@@ -28,7 +28,7 @@ public interface GrafanaPromQLDatasourcePluginApi {
         router.post(QUERY_RANGE_ENDPOINT)
                 .produces("application/json")
                 .handler(this::queryRange);
-        router.get(SERIES_ENDPOINT)
+        router.post(SERIES_ENDPOINT)
                 .produces("application/json")
                 .handler(this::series);
         router.get(METADATA_ENDPOINT)
