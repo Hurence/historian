@@ -347,10 +347,10 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
                 .build();
 
         // check for handshake query
-        if(request.getQuery().getName().equals("1%2B1")){
+        if(request.getQuery().getName().equals("1+1")){
             JsonObject response = new JsonObject()
                     .put(STATUS, SUCCESS)
-                    .put(DATA, "ok");
+                    .put(DATA, "2");
 
             context.response()
                     .setStatusCode(HttpResponseStatus.OK.code())

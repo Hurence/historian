@@ -59,7 +59,11 @@ public class QueryParameter {
         public QueryParameterBuilder parse(String queryStr) {
 
 
-            queryStr = queryStr.replaceAll("\\s+", "");
+            queryStr = queryStr
+                    .replaceAll("\\{\\s+", "{")
+                    .replaceAll("\\s+\\}", "}")
+                    .replaceAll(",\\s+", ",")
+                    .replaceAll("\\s+", ",");
             aggregationOperator = AggregationOperator.findMatching(queryStr);
 
             // remove operator
