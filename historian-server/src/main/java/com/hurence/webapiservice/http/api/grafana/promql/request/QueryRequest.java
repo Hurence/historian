@@ -43,7 +43,7 @@ public class QueryRequest {
             String[] keyValues = bodyAsString.split("&");
             Map<String, String> bodyParameters = new HashMap<>();
             for(String kv : keyValues){
-                String[] split = kv.split("=");
+                String[] split = kv.split("=", 2);
                 bodyParameters.put(split[0],split[1]);
             }
 

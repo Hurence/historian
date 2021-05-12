@@ -1,6 +1,7 @@
 package com.hurence.webapiservice.http.api.grafana.promql.router;
 
 
+import com.google.common.collect.Multimaps;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.promql.converter.RequestConverter;
 import com.hurence.webapiservice.http.api.grafana.promql.request.LabelsRequest;
@@ -17,6 +18,9 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -330,9 +334,16 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
     @Override
     public void queryRange(RoutingContext context) {
 
+        String bodyDecoded = "";
+        try {
+            bodyDecoded = URLDecoder.decode(context.getBodyAsString(), StandardCharsets.UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            LOGGER.error("unable to decode url query {}", context.getBodyAsString());
+        }
 
         final QueryRequest request = QueryRequest.builder()
-                .body(context.getBodyAsString())
+                .body(bodyDecoded)
+               // .parameters(Multimaps.asMap(context.queryParams()))
                 .build();
 
         // check for handshake query

@@ -69,7 +69,11 @@ public class GetLabelsHandler {
                 if (facetField == null || facetField.getValues() == null) {
                     LOGGER.warn("unable to retrieve any labels from facet : {}", query.toQueryString());
                 } else {
-                    facetField.getValues().forEach(count -> uniqueSynonymNames.add(PromQLSynonymLookup.getSynonymName(count.getName())));
+                    facetField.getValues().forEach(count -> {
+                        String synonymName = PromQLSynonymLookup.getSynonymName(count.getName());
+                        if(!synonymName.equals(count.getName()))
+                            uniqueSynonymNames.add(synonymName);
+                    });
                     uniqueSynonymNames.forEach(data::add);
                 }
 
