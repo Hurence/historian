@@ -3,7 +3,7 @@
   "historian.verticles.instance.number": 2,
   "http_server" : {
     "host": "0.0.0.0",
-    "port" : 8080,
+    "port" : 8081,
     "historian.address": "historian",
     "debug": false,
     "upload_directory" : "/tmp/historian",

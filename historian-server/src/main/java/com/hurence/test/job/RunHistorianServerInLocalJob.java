@@ -20,7 +20,7 @@ public class RunHistorianServerInLocalJob {
         vertx = Vertx.vertx();
         deployWebApiServiceMainVerticle().subscribe();
         try {
-            while(true) {
+            while (true) {
                 LOGGER.info("sleep 100000");
                 Thread.sleep(100000);
             }
@@ -43,8 +43,11 @@ public class RunHistorianServerInLocalJob {
         JsonObject httpConf = getHttpVerticleConf();
         return new DeploymentOptions().setConfig(
                 new JsonObject()
-                .put(WebApiServiceMainVerticle.CONFIG_HTTP_SERVER_ROOT, httpConf)
-                .put(WebApiServiceMainVerticle.CONFIG_HISTORIAN_ROOT, historianConf)
+                        .put(WebApiServiceMainVerticle.CONFIG_HTTP_SERVER_ROOT, httpConf)
+                        .put(WebApiServiceMainVerticle.CONFIG_HISTORIAN_ROOT, historianConf)
+                        .put("historian.metric_name_lookup.csv_file.path", "/Users/tom/Documents/workspace/ifpen/data-historian/conf/synonyms.csv")
+                        .put("historian.metric_name_lookup.csv_file.separator", ";")
+                        .put("historian.metric_name_lookup.enabled", true)
         );
     }
 
