@@ -78,8 +78,8 @@ add columns :
 [**Linear regression**](https://en.wikipedia.org/wiki/Linear_regression) is a linear approach to modelling the relationship between the variable(s) and a scalar response.
 
 |  Pros  | Cons | Existing implementations | topologies | inference live ? | training cost | parallelization | inference time | ease to use | one day's game | complexity score | point precision |
-|---------|------|--------------------------|------------|------------------|:---------------:|-----------------|----------------|-------------|----------------|------------------|-----------------|
-|<li>Linear combinations are easy to implement <li>Guarantee to find optimal weights<li>A lot of information on the Internet|The linear combinations oversimplify the reality|[Tensorflow Core v2.5.0](https://www.tensorflow.org/api_docs/python/tf/estimator/LinearRegressor) <p>[sklearn v0.24.2](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)| | |metric_data: 10.61s|||||||
+|---------|------|--------------------------|------------|------------------|:---------------:|-----------------|:----------------:|-------------|----------------|------------------|-----------------|
+|<li>Linear combinations are easy to implement <li>Guarantee to find optimal weights<li>A lot of information on the Internet|The linear combinations oversimplify the reality|[Tensorflow Core v2.5.0](https://www.tensorflow.org/api_docs/python/tf/estimator/LinearRegressor) <p>[sklearn v0.24.2](https://scikit-learn.org/stable/modules/generated/sklearn.linear_model.LinearRegression.html)| | |it-data-4metrics: 11.11s  for 121984516 data needed|possible|it-data-4metrics: 0.02s  for 978408 data|||||
 
 
 
