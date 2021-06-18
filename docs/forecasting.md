@@ -46,7 +46,7 @@ Even if a dataset seems to be chaotic, we can study its morphology to find some 
 
 We can also define the time series with other adjectives.
 
-**Noisy**: data with some unwanted modifications due to the capture/storage/transmission of the data.  
+**Noisy**: peaks and troughs at random intervals  
 **Monotonic**: data is always evolving in the same way (increasing or decreasing).  
 **Big Gaps**: there is some big missing gaps in the data, because data are missing or because there is no data during some periods (e.g. animal hibernation, migration...)  
 **Big Changes**: 
@@ -128,6 +128,7 @@ A radial basis function is a function whose value depends only on the distance b
 
 |  Pros  | Cons | Existing implementations | topologies | inference live ? | training cost | parallelization | inference time | ease to use | one day's game | complexity score | point precision |
 |--------|------|--------------------------|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
+| | | [keras](https://www.tensorflow.org/api_docs/python/tf/keras/layers/GRU/) |
 
 
 #### (Seasonal) AutoRegressive Integrated Moving Average (SARIMA)
@@ -151,11 +152,12 @@ If there is some seasonal element in the data set we can also extend to the SARI
 
 
 |  Pros  | Cons | Existing implementations | topologies | inference live ? | training cost | parallelization | inference time | ease to use | one day's game | complexity score | point precision |
-|--------|------|--------------------------|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
+|--------|------|:------------------------:|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
+| | |[Statsmodels](https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima_model.ARIMA.html)
 
 
 ### Prophet
 
 |  Pros  | Cons | Existing implementations | topologies | inference live ? | training cost | parallelization | inference time | ease to use | one day's game | complexity score | point precision |
-|--------|------|:--------------------------:|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
+|--------|------|:------------------------:|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
 | | |[Prophet](https://facebook.github.io/prophet/docs/quick_start.html#python-api) | Facebook : <li>big changes<li>big gaps
