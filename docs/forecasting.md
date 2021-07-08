@@ -160,4 +160,4 @@ If there is some seasonal element in the data set we can also extend to the SARI
 
 |  Pros  | Cons | Existing implementations | topologies | inference live ? | training cost | parallelization | inference time | ease to use | one day's game | complexity score | point precision |
 |--------|------|:------------------------:|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
-| | |[Prophet](https://facebook.github.io/prophet/docs/quick_start.html#python-api) | Facebook : <li>big changes<li>big gaps
+| | |[Prophet](https://facebook.github.io/prophet/docs/quick_start.html#python-api) <p>Not available on python 3.9| Facebook : <li>big changes<li>big gaps
