@@ -121,7 +121,7 @@ A radial basis function is a function whose value depends only on the distance b
 
 |  Pros  | Cons | Existing implementations | topologies | inference live ? | training cost | parallelization | inference time | ease to use | one day's game | complexity score | point precision |
 |--------|------|--------------------------|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
-| | | [keras](https://keras.io/api/layers/recurrent_layers/lstm/) |
+| very good accuracy but slow to train | | [keras](https://keras.io/api/layers/recurrent_layers/lstm/) |
 
 ### Gated Recurrent Unit (GRU)
 [**GRU**](https://penseeartificielle.fr/comprendre-lstm-gru-fonctionnement-schema/) is like a LSTM but with only two gates, a reset gate, and an update gate.
@@ -153,7 +153,7 @@ If there is some seasonal element in the data set we can also extend to the SARI
 
 |  Pros  | Cons | Existing implementations | topologies | inference live ? | training cost | parallelization | inference time | ease to use | one day's game | complexity score | point precision |
 |--------|------|:------------------------:|------------|------------------|---------------|-----------------|----------------|-------------|----------------|------------------|-----------------|
-| | |[Statsmodels](https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima_model.ARIMA.html)
+| Fastest inference time and good accuracy | problem with non stationary data |[Statsmodels](https://www.statsmodels.org/stable/generated/statsmodels.tsa.arima_model.ARIMA.html)
 
 
 ### Prophet
