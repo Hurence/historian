@@ -21,7 +21,7 @@ import com.hurence.timeseries.model.Measure;
 public class ForecasterFactory {
 
     /**
-     * Instanciates a forecaster.
+     * Instantiates a forecaster.
      *
      * @param algorithm the forecasting algorithm
      * @return the sampler
@@ -32,6 +32,10 @@ public class ForecasterFactory {
                 return new ArimaDoubleForecaster();
             case ARIMA_MEASURE:
                 return new ArimaMeasureForecaster();
+            case LSTM:
+                return new LstmForecaster();
+            case DNN:
+                return new DnnForecaster();
             default:
                 throw new UnsupportedOperationException("algorithm " + algorithm.name() + " is not yet supported !");
 
