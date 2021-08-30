@@ -115,61 +115,33 @@ public class LstmForecaster implements Forecaster<Measure>{
      * @return
      */
     public MultiLayerConfiguration createLSTMModel() {
-        int kernelSize = 2;
-
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .seed(12345)
-                .weightInit(WeightInit.XAVIER)
-                .updater(new AdaGrad(0.005))
+                .updater(new Nesterovs(0.005, 0.9))
+                .l2(1e-4)
                 .list()
                 .layer(0, new DenseLayer.Builder()
-                        .nIn(1) //1 channel
+                        .nIn(1)
                         .nOut(8)
                         .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
                         .build())
                 .layer(1, new LSTM.Builder()
-                        .activation(Activation.SOFTSIGN)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
                         .nIn(8)
                         .nOut(16)
                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                         .gradientNormalizationThreshold(10)
                         .build())
                 .layer(2, new RnnOutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                        .activation(Activation.IDENTITY)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
                         .nIn(16)
                         .nOut(1)
                         .gradientNormalization(GradientNormalization.ClipElementWiseAbsoluteValue)
                         .gradientNormalizationThreshold(10)
-                        .build())
-                .build();
-        return conf;
-    }
-
-    public MultiLayerConfiguration createModel() {
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .seed(12345) //include a random seed for reproducibility
-                // use stochastic gradient descent as an optimization algorithm
-                .updater(new Nesterovs(0.006, 0.9))
-                .l2(1e-4)
-                .list()
-                .layer(new DenseLayer.Builder() //create the first, input layer with xavier initialization
-                        .nIn(1)
-                        .nOut(16)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .layer(new DenseLayer.Builder()
-                        .nIn(16)
-                        .nOut(8)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .layer(new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                        .nIn(8)
-                        .nOut(1)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
                         .build())
                 .build();
         return conf;
