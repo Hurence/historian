@@ -18,5 +18,6 @@ package com.hurence.forecasting;
 public enum ForecastingAlgorithm {
     ARIMA_DOUBLE,
     ARIMA_MEASURE,
-    LSTM
+    LSTM,
+    DNN;
 }
