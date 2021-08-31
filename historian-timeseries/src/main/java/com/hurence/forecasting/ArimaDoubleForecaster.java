@@ -9,17 +9,16 @@ import java.util.*;
 
 public class ArimaDoubleForecaster implements Forecaster<Double> {
 
+    private int p = 2;
+    private int d = 2;
+    private int q = 0;
+    private int P = 0;
+    private int D = 0;
+    private int Q = 0;
+    private int m = 0;
 
     @Override
     public List<Double> forecast(List<Double> inputData, int numPoints) {
-        List<Integer> order = autoArima(inputData);
-        int p = order.get(0);
-        int d = order.get(1);
-        int q = order.get(2);
-        int P = order.get(3);
-        int D = order.get(4);
-        int Q = order.get(5);
-        int m = order.get(6);
 
         double[] dataArray = new double[inputData.size()];
         for (int i = 0; i < dataArray.length; i++) {
@@ -35,7 +34,7 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
         ArrayList<Double> forecasted = new ArrayList<Double>();
         for (int i = 0; i < forecastData.length; i++) {
             forecasted.add(forecastData[i]);
-            System.out.printf(""+forecasted.get(i)+ ", ");
+            System.out.printf("" + forecasted.get(i) + ", ");
         }
         System.out.println("");
         return forecasted;
@@ -48,12 +47,15 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
      * @param inputData the given elements to forecast
      * @return a list of the ARIMA's parameters
      */
-    public List<Integer> autoArima(List<Double> inputData) {
-         // Verify if inputData is constant
-//        if (new HashSet<Double>(inputData).size() <= 1) {
-//            return Arrays.asList(0, 0, 0, 0, 0, 0, 0);
-//        }
+    public void fit(List<Double> inputData) {
+        List<Integer> order = Arrays.asList(2, 0, 2, 0, 0, 0, 0);
+        p = order.get(0);
+        d = order.get(1);
+        q = order.get(2);
+        P = order.get(3);
+        D = order.get(4);
+        Q = order.get(5);
+        m = order.get(6);
         //TODO: find the best parameters beside input data
-        return Arrays.asList(2, 0, 2, 0, 0, 0, 0);
     }
 }
