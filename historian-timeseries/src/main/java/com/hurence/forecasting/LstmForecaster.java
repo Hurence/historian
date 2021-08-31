@@ -3,45 +3,62 @@ package com.hurence.forecasting;
 import com.hurence.timeseries.model.Measure;
 
 
+import java.io.IOException;
 import java.util.*;
 
 import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.*;
 import org.deeplearning4j.nn.conf.layers.*;
-import org.deeplearning4j.nn.conf.preprocessor.CnnToRnnPreProcessor;
-import org.deeplearning4j.nn.conf.preprocessor.RnnToCnnPreProcessor;
 import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.nn.weights.WeightInit;
-import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.evaluation.classification.Evaluation;
 import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.nd4j.linalg.factory.Nd4j;
-import org.nd4j.linalg.learning.config.AdaGrad;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
-import scala.Int;
 
 
 public class LstmForecaster implements Forecaster<Measure>{
 
-    @Override
-    public List<Measure> forecast(List<Measure> inputs, int numPoints) {
+    private MultiLayerNetwork model;
 
+    @Override
+    public List<Measure> forecast(List<Measure> inputs, int numPoints) throws IOException {
+
+        if(model == null)
+            throw new IOException("model must be initialized first, did you really call fit method before forecasting ?");
+
+        DataSetIterator inputDataIterator = toDataSetIterator(inputs, inputs.size(), 10);
+        INDArray output = model.output(inputDataIterator);
+
+        // TODO compute time step to fill timestamp part of the measure
+        List<Measure> forecasted = new ArrayList<>();
+        double[] doubleVector = output.toDoubleVector();
+        for (double value : doubleVector ){
+            forecasted.add(Measure.fromValue(0, value));
+        }
+
+        // TODO loop over numPoints to return more than 1 forecasted point
+        return forecasted;
+    }
+
+    @Override
+    public void fit(List<Measure> trainingData) {
         System.out.println("Split into training/validating....");
-        List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
-        List<Measure> validating = inputs.subList(inputs.size()- numPoints, inputs.size());
+        List<Measure> training = trainingData.subList(0, trainingData.size() - 10);
+        List<Measure> validating = trainingData.subList(trainingData.size()- 10, trainingData.size());
 
         System.out.println("Create DataSetIterator....");
-        DataSetIterator dsiTrain = getDataSetIterator(training, training.size(), 100);
-        DataSetIterator dsiValid = getDataSetIterator(validating, validating.size(), 10);
+        DataSetIterator dsiTrain = toDataSetIterator(training, training.size(), 100);
+        DataSetIterator dsiValid = toDataSetIterator(validating, validating.size(), 10);
 
         System.out.println("Create model....");
         MultiLayerConfiguration conf = createLSTMModel();
-        MultiLayerNetwork model = new MultiLayerNetwork(conf);
+        model = new MultiLayerNetwork(conf);
         model.getLayerWiseConfigurations().setValidateOutputLayerConfig(false);
         System.out.println("Initialize model....");
         model.init();
@@ -52,21 +69,9 @@ public class LstmForecaster implements Forecaster<Measure>{
 
         Evaluation eval = model.evaluate(dsiValid);
         System.out.println(eval.stats());
-
-//        Evaluation eval = new Evaluation(numPoints);
-//        while (dsiValid.hasNext()) {
-//            DataSet t = dsiValid.next();
-//            INDArray features = t.getFeatures();
-//            INDArray labels = t.getLabels();
-//            INDArray predicted = model.output(features, false);
-//            eval.eval(labels, predicted);
-//        }
-//
-//        System.out.println(eval.stats());
-        return Collections.emptyList();
     }
 
-    public DataSetIterator getDataSetIterator(List<Measure> data, int numPoints, int batch) {
+    public DataSetIterator toDataSetIterator(List<Measure> data, int numPoints, int batch) {
         INDArray input = Nd4j.create(numPoints, 1);
         INDArray output = Nd4j.create(numPoints, 1);
         int i = 0;

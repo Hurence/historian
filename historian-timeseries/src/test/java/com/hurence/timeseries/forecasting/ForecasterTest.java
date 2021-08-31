@@ -165,6 +165,7 @@ public class ForecasterTest {
         List<Measure> validating = inputs.subList(inputs.size()-numPoints, inputs.size());
 
         printm(validating);
+        forecaster.fit(training);
 
         List<Measure> forecasted = forecaster.forecast(training, numPoints);
 
@@ -182,7 +183,7 @@ public class ForecasterTest {
 
 
         List<Measure> inputs = getInputMeasureData("test_data.csv");
-
+        forecaster.fit(inputs);
         List<Measure> forecasted = forecaster.forecast(inputs, numPoints);
 
     }
@@ -196,7 +197,7 @@ public class ForecasterTest {
 
 
         List<Measure> inputs = getInputMeasureData("test_data.csv");
-
+        forecaster.fit(inputs);
         List<Measure> forecasted = forecaster.forecast(inputs, numPoints);
 
     }
