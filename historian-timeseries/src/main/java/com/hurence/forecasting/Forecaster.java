@@ -21,5 +21,5 @@ public interface Forecaster<T> {
      *
      * @param trainingData the given elements to train the model
      */
-    void fit(List<T> trainingData);
+    void fit(List<T> trainingData, List<T> validatingData) throws IOException;
 }
