@@ -7,31 +7,21 @@ import com.hurence.forecasting.ForecasterFactory;
 import com.hurence.forecasting.ForecastingAlgorithm;
 import com.hurence.timeseries.model.Measure;
 import com.hurence.timeseries.model.MeasuresLoader;
-import org.datavec.api.records.reader.RecordReader;
-import org.datavec.api.records.reader.impl.csv.CSVRecordReader;
-import org.datavec.api.split.FileSplit;
-import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
-import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
-import org.jfree.data.general.Dataset;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.dataset.DataSet;
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
-import org.nd4j.linalg.factory.Nd4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Random;
+
 
 public class ForecasterTest {
-    private static int numPoints = 3;
-    private static int limit = 5;
+    private static final int numPoints = 200;
+    private static final int limit = 10;
+    private static final String file = "test_data.csv";
 
     private static final Logger logger = LoggerFactory.getLogger(ForecasterTest.class);
 
@@ -43,17 +33,25 @@ public class ForecasterTest {
     }
 
     private void printd(List<Double> inputs) {
-        System.out.printf("[");
+        System.out.print("[");
         for (Double elmt : inputs) {
-            System.out.printf("" + elmt + ", ");
+            System.out.printf("%.2f", elmt);
+            System.out.print(", ");
         }
         System.out.println("]");
     }
-    
     private void printm(List<Measure> inputs) {
-        System.out.printf("[");
+        System.out.print("[");
         for (Measure elmt : inputs) {
-            System.out.printf("" + elmt.getValue() + ", ");
+            System.out.printf("%.2f", elmt.getValue());
+            System.out.print(", ");
+        }
+        System.out.println("]");
+    }
+    private void printt(List<Measure> inputs) {
+        System.out.print("[");
+        for (Measure elmt : inputs) {
+            System.out.printf("" + elmt.getTimestamp() + ", ");
         }
         System.out.println("]");
     }
@@ -141,15 +139,29 @@ public class ForecasterTest {
         System.out.println("\nARIMA_DOUBLE TEST :");
         Forecaster<Double> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.ARIMA_DOUBLE);
 
-        List<Double> inputs = getInputDoubleData("test_data.csv");
+        List<Double> inputs = getInputDoubleData(file);
         List<Double> training = inputs.subList(0, inputs.size() - numPoints);
         List<Double> validating = inputs.subList(inputs.size()-numPoints, inputs.size());
 
-        printd(validating);
+        double debut = System.currentTimeMillis();
+        forecaster.fit(training, validating);
+        double fin = System.currentTimeMillis();
+        double time = (fin - debut)/1000;
 
+        debut = System.currentTimeMillis();
         List<Double> forecasted = forecaster.forecast(training, numPoints);
+        fin = System.currentTimeMillis();
+        double iTime = (fin - debut)/1000;
+
+        if (numPoints < 20) {
+            printd(validating);
+            printd(forecasted);
+        }
+
         Double mse = rootMeanSquaredErrorDouble(validating, forecasted);
         System.out.println("Root Mean Squared value = " + mse);
+        System.out.println("Fitting time : " + time + "s");
+        System.out.println("Inference time : " + iTime + "s");
 
         Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
     }
@@ -160,17 +172,29 @@ public class ForecasterTest {
 
         Forecaster<Measure> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.ARIMA_MEASURE);
 
-        List<Measure> inputs = getInputMeasureData("test_data.csv");
+        List<Measure> inputs = getInputMeasureData(file);
         List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
         List<Measure> validating = inputs.subList(inputs.size()-numPoints, inputs.size());
 
-        printm(validating);
-        forecaster.fit(training);
+        double debut = System.currentTimeMillis();
+        forecaster.fit(training, validating);
+        double fin = System.currentTimeMillis();
+        double fTime = (fin - debut)/1000;
 
+        debut = System.currentTimeMillis();
         List<Measure> forecasted = forecaster.forecast(training, numPoints);
+        fin = System.currentTimeMillis();
+        double iTime = (fin - debut)/1000;
+
+        if (numPoints < 20) {
+            printm(validating);
+            printm(forecasted);
+        }
 
         Double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
         System.out.println("Root Mean Squared value = " + mse);
+        System.out.println("Fitting time : " + fTime + "s");
+        System.out.println("Inference time : " + iTime + "s");
 
         Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
     }
@@ -181,10 +205,33 @@ public class ForecasterTest {
 
         Forecaster<Measure> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.LSTM);
 
+        int lookback = Math.min(numPoints, 30);
 
-        List<Measure> inputs = getInputMeasureData("test_data.csv");
-        forecaster.fit(inputs);
-        List<Measure> forecasted = forecaster.forecast(inputs, numPoints);
+        List<Measure> inputs = getInputMeasureData(file);
+        List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
+        List<Measure> validating = inputs.subList(inputs.size() - numPoints - lookback, inputs.size());
+
+        double debut = System.currentTimeMillis();
+        forecaster.fit(training, validating);
+        double fin = System.currentTimeMillis();
+        double fTime = (fin - debut)/1000;
+
+        debut = System.currentTimeMillis();
+        List<Measure> forecasted = forecaster.forecast(validating, numPoints);
+        fin = System.currentTimeMillis();
+        double iTime = (fin - debut)/1000;
+
+        if (numPoints < 20) {
+            printm(inputs.subList(inputs.size()-numPoints, inputs.size()));
+            printm(forecasted);
+        }
+
+        double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
+        System.out.println("Root Mean Squared value = " + mse);
+        System.out.println("Fitting time : " + fTime + "s");
+        System.out.println("Inference time : " + iTime + "s");
+
+        Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
 
     }
 
@@ -195,10 +242,31 @@ public class ForecasterTest {
 
         Forecaster<Measure> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.DNN);
 
+        List<Measure> inputs = getInputMeasureData(file);
+        List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
+        List<Measure> validating = inputs.subList(inputs.size() - numPoints, inputs.size());
 
-        List<Measure> inputs = getInputMeasureData("test_data.csv");
-        forecaster.fit(inputs);
-        List<Measure> forecasted = forecaster.forecast(inputs, numPoints);
+        double debut = System.currentTimeMillis();
+        forecaster.fit(training, validating);
+        double fin = System.currentTimeMillis();
+        double fTime = (fin - debut)/1000;
+
+        debut = System.currentTimeMillis();
+        List<Measure> forecasted = forecaster.forecast(validating, numPoints);
+        fin = System.currentTimeMillis();
+        double iTime = (fin - debut)/1000;
+
+        if (numPoints < 20) {
+            printm(validating);
+            printm(forecasted);
+        }
+
+        double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
+        System.out.println("Root Mean Squared value = " + mse);
+        System.out.println("Fitting time : " + fTime + "s");
+        System.out.println("Inference time : " + iTime + "s");
+
+        Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
 
     }
 }
