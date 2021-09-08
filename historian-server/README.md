@@ -1,4 +1,4 @@
-#Build historian gateway
+#Build historian server
 
 run :
 ```shell script
@@ -8,7 +8,7 @@ mvn clean install
 require some other logisland module, if it fails try this :
 
 ```shell script
-mvn -pl :logisland-gateway-historian -am clean install -DskipTests
+mvn -pl :logisland-server-historian -am clean install -DskipTests
 ```
 
 ## Run server on local
