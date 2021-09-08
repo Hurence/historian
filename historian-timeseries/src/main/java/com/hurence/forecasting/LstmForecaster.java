@@ -36,8 +36,8 @@ public class LstmForecaster implements Forecaster<Measure>{
         if(model == null)
             throw new IOException("model must be initialized first, did you really call fit method before forecasting ?");
 
-        DataSetIterator inputDataIterator = toDataSetIterator(inputs.subList(2, inputs.size()), 10);
-        DataSetIterator inputDataIterator2 = toDataSetIterator(inputs.subList(2, inputs.size()), 10);
+        DataSetIterator inputDataIterator = toDataSetIterator(inputs.subList(2, inputs.size()), 1);
+        DataSetIterator inputDataIterator2 = toDataSetIterator(inputs.subList(2, inputs.size()), 1);
         INDArray output = model.output(inputDataIterator);
 
 //        while (inputDataIterator2.hasNext()) {
@@ -68,9 +68,8 @@ public class LstmForecaster implements Forecaster<Measure>{
                 lookback = 1;
             }
         }
-        lookback=1; // ca marche mais on a que des 0
 
-        DataSetIterator dsiTrain = toDataSetIterator(trainingData, 100);
+        DataSetIterator dsiTrain = toDataSetIterator(trainingData, 1);
         dsiTrain.setPreProcessor(new LabelLastTimeStepPreProcessor());
 
         MultiLayerConfiguration conf = createLSTMModel();

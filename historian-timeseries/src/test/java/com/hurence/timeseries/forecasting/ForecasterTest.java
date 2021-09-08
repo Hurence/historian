@@ -19,9 +19,9 @@ import java.util.List;
 
 
 public class ForecasterTest {
-    private static final int numPoints = 200;
+    private static final int numPoints = 3;
     private static final int limit = 10;
-    private static final String file = "test_data.csv";
+    private static final String file = "test_data0.csv";
 
     private static final Logger logger = LoggerFactory.getLogger(ForecasterTest.class);
 
@@ -217,8 +217,8 @@ public class ForecasterTest {
         double fTime = (fin - debut)/1000;
 
         debut = System.currentTimeMillis();
-        List<Measure> forecasted = forecaster.forecast(inputs.subList(inputs.size() - numPoints - 2, inputs.size()), numPoints);
-//        List<Measure> forecasted = forecaster.forecast(validating, numPoints)
+//        List<Measure> forecasted = forecaster.forecast(inputs.subList(inputs.size() - numPoints - 2, inputs.size()), numPoints);
+        List<Measure> forecasted = forecaster.forecast(validating, numPoints);
         fin = System.currentTimeMillis();
         double iTime = (fin - debut)/1000;
 
