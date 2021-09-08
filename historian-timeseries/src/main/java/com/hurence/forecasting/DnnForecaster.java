@@ -52,32 +52,7 @@ public class DnnForecaster implements Forecaster<Measure>{
     @Override
     public void fit(List<Measure> trainingData, List<Measure> validatingData) {
         DataSetIterator dsiTrain = toDataSetIterator(trainingData, trainingData.size(), 100);
-
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
-                .seed(12345)
-                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
-                .updater(new Nesterovs(0.005, 0.9))
-                .l2(1e-4)
-                .list()
-                .layer(0, new DenseLayer.Builder() //create the first, input layer with xavier initialization
-                        .nIn(1)
-                        .nOut(16)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .layer(1, new DenseLayer.Builder()
-                        .nIn(16)
-                        .nOut(8)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
-                        .nIn(8)
-                        .nOut(1)
-                        .activation(Activation.RELU)
-                        .weightInit(WeightInit.XAVIER)
-                        .build())
-                .build();
+        MultiLayerConfiguration conf = createDNNModel();
         model = new MultiLayerNetwork(conf);
         model.getLayerWiseConfigurations().setValidateOutputLayerConfig(false);
         model.init();
@@ -106,5 +81,37 @@ public class DnnForecaster implements Forecaster<Measure>{
         return new ListDataSetIterator<>(listDataSet, batch);
     }
 
-
+    /**
+     * Create a MutliLayerConfiguration that will be use to create the DNN model
+     *
+     * @return a MultiLayerConfiguration
+     */
+    public MultiLayerConfiguration createDNNModel() {
+        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+                .seed(12345)
+                .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
+                .updater(new Nesterovs(0.005, 0.9))
+                .l2(1e-4)
+                .list()
+                .layer(0, new DenseLayer.Builder() //create the first, input layer with xavier initialization
+                        .nIn(1)
+                        .nOut(16)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .layer(1, new DenseLayer.Builder()
+                        .nIn(16)
+                        .nOut(8)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+                        .nIn(8)
+                        .nOut(1)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .build();
+        return conf;
+    }
 }
