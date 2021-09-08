@@ -37,7 +37,12 @@ public class LstmForecaster implements Forecaster<Measure>{
             throw new IOException("model must be initialized first, did you really call fit method before forecasting ?");
 
         DataSetIterator inputDataIterator = toDataSetIterator(inputs.subList(2, inputs.size()), 10);
+        DataSetIterator inputDataIterator2 = toDataSetIterator(inputs.subList(2, inputs.size()), 10);
         INDArray output = model.output(inputDataIterator);
+
+//        while (inputDataIterator2.hasNext()) {
+//            System.out.println(inputDataIterator2.next());
+//        }
 
         // TODO compute time step to fill timestamp part of the measure
         List<Measure> forecasted = new ArrayList<>();
@@ -47,6 +52,7 @@ public class LstmForecaster implements Forecaster<Measure>{
             forecasted.add(Measure.fromValue(inputs.get(inputs.size() - numPoints + i).getTimestamp(), value));
             i++;
         }
+
         // TODO loop over numPoints to return more than 1 forecasted point
         return forecasted;
     }
@@ -62,6 +68,7 @@ public class LstmForecaster implements Forecaster<Measure>{
                 lookback = 1;
             }
         }
+        lookback=1; // ca marche mais on a que des 0
 
         DataSetIterator dsiTrain = toDataSetIterator(trainingData, 100);
         dsiTrain.setPreProcessor(new LabelLastTimeStepPreProcessor());
@@ -89,12 +96,12 @@ public class LstmForecaster implements Forecaster<Measure>{
             timestamps.add(inputDatum.getTimestamp());
         }
         INDArray input = Nd4j.create(values.size() - lookback +1, 1, lookback);
-        INDArray output = Nd4j.create(values.size() - lookback +1, 1, lookback);
+        INDArray output = Nd4j.create(values.size() - lookback +1, 1, 1);
         for (int i = 0; i < values.size() - lookback +1; i++) {
             for (int j = 0; j < lookback; j++) {
                 input.putScalar(new int[]{i, 0, j}, values.get(i+j));
-                output.putScalar(new int[]{i, 0, j}, timestamps.get(i+j));
             }
+            output.putScalar(new int[]{i, 0, 0}, timestamps.get(i+lookback-1));
         }
         DataSet dataSet = new DataSet( input, output );
         List<DataSet> listDataSet = dataSet.asList();
@@ -105,7 +112,7 @@ public class LstmForecaster implements Forecaster<Measure>{
     /**
      * Create a MutliLayerConfiguration that will be use to create the LSTM model
      *
-     * @return
+     * @return a MultiLayerConfiguration
      */
     public MultiLayerConfiguration createLSTMModel() {
         MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()

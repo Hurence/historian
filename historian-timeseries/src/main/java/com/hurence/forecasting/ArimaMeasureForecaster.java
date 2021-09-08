@@ -23,15 +23,12 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
     public List<Measure> forecast(List<Measure> inputData, int numPoints) {
         double[] dataArray = measureToDouble(inputData);
 
-        // Obtain forecast result. The structure contains forecasted values and performance metric etc.
         ForecastResult forecastResult = Arima.forecast_arima(dataArray, numPoints, new ArimaParams(p, d, q, P, D, Q, m));
-
-        // Read forecast values
         double[] forecastData = forecastResult.getForecast();
 
-        Long lastTimestamp = inputData.get(inputData.size()-1).getTimestamp();
-        Long preTimestamp = inputData.get(inputData.size()-2).getTimestamp();
-        Long interval = lastTimestamp - preTimestamp;
+        long lastTimestamp = inputData.get(inputData.size()-1).getTimestamp();
+        long preTimestamp = inputData.get(inputData.size()-2).getTimestamp();
+        long interval = lastTimestamp - preTimestamp;
 
         ArrayList<Measure> forecasted = new ArrayList<Measure>();
         for (int i = 0; i < forecastData.length; i++) {
@@ -45,8 +42,8 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
     /**
      * Find the ARIMA's parameters
      *
-     * @param trainingData the given elements to forecast
-     * @return a list of the ARIMA's parameters
+     * @param trainingData the given elements to train the model
+     * @param validatingData the elements to compare with the forecasted values
      */
     @Override
     public void fit(List<Measure> trainingData, List<Measure> validatingData) {

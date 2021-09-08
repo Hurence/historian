@@ -84,11 +84,19 @@ public class DnnForecaster implements Forecaster<Measure>{
         model.fit(dsiTrain, 100);
     }
 
-    public DataSetIterator toDataSetIterator(List<Measure> data, int numPoints, int batch) {
+    /**
+     * Create a DataSetIterator from a list of measures
+     *
+     * @param inputData is the list of measures with at least a value and a timestamp
+     * @param numPoints lenght of inputData
+     * @param batch size
+     * @return the DataSetIterator
+     */
+    public DataSetIterator toDataSetIterator(List<Measure> inputData, int numPoints, int batch) {
         INDArray input = Nd4j.create(numPoints, 1);
         INDArray output = Nd4j.create(numPoints, 1);
         int i = 0;
-        for (Measure elm : data) {
+        for (Measure elm : inputData) {
             input.putScalar(i, elm.getTimestamp());
             output.putScalar(i, elm.getValue());
             i++;
