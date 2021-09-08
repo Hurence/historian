@@ -25,15 +25,12 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
             dataArray[i] = inputData.get(i);
         }
 
-        // Obtain forecast result. The structure contains forecasted values and performance metric etc.
         ForecastResult forecastResult = Arima.forecast_arima(dataArray, numPoints, new ArimaParams(p, d, q, P, D, Q, m));
-
-        // Read forecast values
         double[] forecastData = forecastResult.getForecast();
 
         ArrayList<Double> forecasted = new ArrayList<Double>();
-        for (int i = 0; i < forecastData.length; i++) {
-            forecasted.add(forecastData[i]);
+        for (double forecastDatum : forecastData) {
+            forecasted.add(forecastDatum);
         }
         return forecasted;
     }
@@ -42,8 +39,8 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
     /**
      * Find the ARIMA's parameters
      *
-     * @param trainingData the given elements to forecast
-     * @return a list of the ARIMA's parameters
+     * @param trainingData the given elements to train the model
+     * @param validatingData the elements to compare with the forecasted values
      */
     @Override
     public void fit(List<Double> trainingData, List<Double> validatingData) {

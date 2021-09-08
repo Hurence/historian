@@ -217,7 +217,8 @@ public class ForecasterTest {
         double fTime = (fin - debut)/1000;
 
         debut = System.currentTimeMillis();
-        List<Measure> forecasted = forecaster.forecast(validating, numPoints);
+        List<Measure> forecasted = forecaster.forecast(inputs.subList(inputs.size() - numPoints - 2, inputs.size()), numPoints);
+//        List<Measure> forecasted = forecaster.forecast(validating, numPoints)
         fin = System.currentTimeMillis();
         double iTime = (fin - debut)/1000;
 
