@@ -1,0 +1,1 @@
+Configset files for solr directory
