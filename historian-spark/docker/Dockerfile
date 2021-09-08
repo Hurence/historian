@@ -7,7 +7,7 @@ ARG spark_version="2.3.2"
 
 MAINTAINER hurence
 
-RUN apk add --update unzip wget curl docker jq coreutils procps vim
+RUN apk add --update curl docker jq coreutils procps vim
 
 VOLUME ["/spark"]
 

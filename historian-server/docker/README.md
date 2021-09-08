@@ -6,7 +6,7 @@ Build your own
 
 use appropriate version of jar !
 
-Build historian-gateway
+Build historian-server
 
 ```shell script
 mvn clean package
@@ -16,15 +16,15 @@ copy paste jar and conf file
 
 ```shell script
 cd ./docker
-cp ../target/historian-gateway-1.3.0-fat.jar .
+cp ../target/historian-server-1.3.8-fat.jar .
 cp ../target/classes/config.json .
 ```  
   
 Building the image, modify version of jar in ENTRYPOINT if needed
 
 ```shell script
-docker build --rm -t hurence/historian .
-docker tag hurence/historian:latest hurence/historian:1.3.0
+docker build --rm -t hurence/historian-server .
+docker tag hurence/historian-server:latest hurence/historian-server:1.3.8
 ```
 
 Deploy the image to Docker hub
@@ -43,7 +43,8 @@ then login and push the latest image
 
 ```shell script
 docker login
-docker push hurence/historian
+docker push hurence/historian-server
+docker push hurence/historian-server:1.3.8
 ````
 
 
