@@ -19,7 +19,9 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
 import org.nd4j.linalg.dataset.api.preprocessor.LabelLastTimeStepPreProcessor;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -28,7 +30,6 @@ import org.nd4j.linalg.lossfunctions.LossFunctions;
 public class LstmForecaster implements Forecaster<Measure>{
 
     private MultiLayerNetwork model;
-    private int lookback;
 
     @Override
     public List<Measure> forecast(List<Measure> inputs, int numPoints) throws IOException {
@@ -36,13 +37,15 @@ public class LstmForecaster implements Forecaster<Measure>{
         if(model == null)
             throw new IOException("model must be initialized first, did you really call fit method before forecasting ?");
 
-        DataSetIterator inputDataIterator = toDataSetIterator(inputs.subList(2, inputs.size()), 1);
-        DataSetIterator inputDataIterator2 = toDataSetIterator(inputs.subList(2, inputs.size()), 1);
-        INDArray output = model.output(inputDataIterator);
+        DataSetIterator inputDataIterator = toDataSetIterator(inputs, 10);
+        // Normalize the training data
+        DataNormalization normalizer = new NormalizerStandardize();
+        normalizer.fit(inputDataIterator);              // Collect training data statistics
+        inputDataIterator.reset();
+        inputDataIterator.setPreProcessor(normalizer);
+//        inputDataIterator.setPreProcessor(new LabelLastTimeStepPreProcessor());
 
-//        while (inputDataIterator2.hasNext()) {
-//            System.out.println(inputDataIterator2.next());
-//        }
+        INDArray output = model.output(inputDataIterator);
 
         // TODO compute time step to fill timestamp part of the measure
         List<Measure> forecasted = new ArrayList<>();
@@ -59,22 +62,17 @@ public class LstmForecaster implements Forecaster<Measure>{
 
     @Override
     public void fit(List<Measure> trainingData, List<Measure> validatingData) throws IOException {
-        if (lookback == 0) {
-            if (validatingData.size() > 60) {
-                lookback = 30;
-            } else if ( validatingData.size() > 3) {
-                lookback = validatingData.size() / 2 - 1;
-            } else {
-                lookback = 1;
-            }
-        }
-
-        DataSetIterator dsiTrain = toDataSetIterator(trainingData, 1);
-        dsiTrain.setPreProcessor(new LabelLastTimeStepPreProcessor());
+        // Create the dataSetIterator
+        DataSetIterator dsiTrain = toDataSetIterator(trainingData, 100);
+        // Normalize the training data
+        DataNormalization normalizer = new NormalizerStandardize();
+        normalizer.fit(dsiTrain);              // Collect training data statistics
+        dsiTrain.reset();
+        dsiTrain.setPreProcessor(normalizer);
+//        dsiTrain.setPreProcessor(new LabelLastTimeStepPreProcessor());
 
         MultiLayerConfiguration conf = createLSTMModel();
         model = new MultiLayerNetwork(conf);
-        model.getLayerWiseConfigurations().setValidateOutputLayerConfig(false);
 
         model.init();
         model.fit(dsiTrain, 100);
@@ -88,25 +86,18 @@ public class LstmForecaster implements Forecaster<Measure>{
      * @return the DataSetIterator
      */
     public DataSetIterator toDataSetIterator(List<Measure> inputData, int batch) {
-        List<Double> values = new ArrayList<>();
-        List<Long> timestamps = new ArrayList<>();
-        for (Measure inputDatum : inputData) {
-            values.add(inputDatum.getValue());
-            timestamps.add(inputDatum.getTimestamp());
-        }
-        INDArray input = Nd4j.create(values.size() - lookback +1, 1, lookback);
-        INDArray output = Nd4j.create(values.size() - lookback +1, 1, 1);
-        for (int i = 0; i < values.size() - lookback +1; i++) {
-            for (int j = 0; j < lookback; j++) {
-                input.putScalar(new int[]{i, 0, j}, values.get(i+j));
-            }
-            output.putScalar(new int[]{i, 0, 0}, timestamps.get(i+lookback-1));
+        INDArray input = Nd4j.create(inputData.size(), 1);
+        INDArray output = Nd4j.create(inputData.size(), 1);
+        int i = 0;
+        for (Measure elm : inputData) {
+            input.putScalar(i, elm.getTimestamp());
+            output.putScalar(i, elm.getValue());
+            i++;
         }
         DataSet dataSet = new DataSet( input, output );
         List<DataSet> listDataSet = dataSet.asList();
-        return new ListDataSetIterator<DataSet>( listDataSet, batch );
+        return new ListDataSetIterator<>(listDataSet, batch);
     }
-
 
     /**
      * Create a MutliLayerConfiguration that will be use to create the LSTM model
@@ -120,13 +111,20 @@ public class LstmForecaster implements Forecaster<Measure>{
                 .updater(new Nesterovs(0.005, 0.9))
                 .l2(1e-4)
                 .list()
-                .layer(0, new LastTimeStep(new LSTM.Builder()
+//                .layer(0, new LastTimeStep(new LSTM.Builder()
+                .layer(0, new DenseLayer.Builder() //create the first, input layer with xavier initialization
                         .nIn(1)
+                        .nOut(16)
+                        .activation(Activation.RELU)
+                        .weightInit(WeightInit.XAVIER)
+                        .build())
+                .layer(1, new LSTM.Builder()
+                        .nIn(16)
                         .nOut(8)
                         .activation(Activation.RELU)
                         .weightInit(WeightInit.XAVIER)
-                        .build()))
-                .layer(1, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
+                        .build())
+                .layer(2, new OutputLayer.Builder(LossFunctions.LossFunction.MSE)
                         .nIn(8)
                         .nOut(1)
                         .activation(Activation.RELU)
