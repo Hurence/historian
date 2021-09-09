@@ -13,6 +13,8 @@ import org.nd4j.linalg.activations.Activation;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.nd4j.linalg.dataset.api.preprocessor.DataNormalization;
+import org.nd4j.linalg.dataset.api.preprocessor.NormalizerStandardize;
 import org.nd4j.linalg.factory.Nd4j;
 import org.nd4j.linalg.learning.config.Nesterovs;
 import org.nd4j.linalg.lossfunctions.LossFunctions;
@@ -33,6 +35,10 @@ public class DnnForecaster implements Forecaster<Measure>{
             throw new IOException("model must be initialized first, did you really call forecast method before fitting ?");
 
         DataSetIterator inputDataIterator = toDataSetIterator(inputs, inputs.size(), 10);
+        DataNormalization normalizer = new NormalizerStandardize();
+        normalizer.fit(inputDataIterator);              // Collect training data statistics
+        inputDataIterator.reset();
+        inputDataIterator.setPreProcessor(normalizer);
 
         INDArray output = model.output(inputDataIterator);
 
@@ -52,6 +58,11 @@ public class DnnForecaster implements Forecaster<Measure>{
     @Override
     public void fit(List<Measure> trainingData, List<Measure> validatingData) {
         DataSetIterator dsiTrain = toDataSetIterator(trainingData, trainingData.size(), 100);
+        // Normalize the training data
+        DataNormalization normalizer = new NormalizerStandardize();
+        normalizer.fit(dsiTrain);              // Collect training data statistics
+        dsiTrain.reset();
+        dsiTrain.setPreProcessor(normalizer);
         MultiLayerConfiguration conf = createDNNModel();
         model = new MultiLayerNetwork(conf);
         model.getLayerWiseConfigurations().setValidateOutputLayerConfig(false);

@@ -19,9 +19,9 @@ import java.util.List;
 
 
 public class ForecasterTest {
-    private static final int numPoints = 3;
+    private static final int numPoints = 400;
     private static final int limit = 10;
-    private static final String file = "test_data0.csv";
+    private static final String file = "test_data.csv";
 
     private static final Logger logger = LoggerFactory.getLogger(ForecasterTest.class);
 
@@ -205,11 +205,9 @@ public class ForecasterTest {
 
         Forecaster<Measure> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.LSTM);
 
-        int lookback = Math.min(numPoints, 30);
-
         List<Measure> inputs = getInputMeasureData(file);
         List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
-        List<Measure> validating = inputs.subList(inputs.size() - numPoints - lookback, inputs.size());
+        List<Measure> validating = inputs.subList(inputs.size() - numPoints, inputs.size());
 
         double debut = System.currentTimeMillis();
         forecaster.fit(training, validating);
@@ -217,14 +215,14 @@ public class ForecasterTest {
         double fTime = (fin - debut)/1000;
 
         debut = System.currentTimeMillis();
-//        List<Measure> forecasted = forecaster.forecast(inputs.subList(inputs.size() - numPoints - 2, inputs.size()), numPoints);
         List<Measure> forecasted = forecaster.forecast(validating, numPoints);
         fin = System.currentTimeMillis();
         double iTime = (fin - debut)/1000;
 
         if (numPoints < 20) {
-            printm(inputs.subList(inputs.size()-numPoints, inputs.size()));
+            printm(validating);
             printm(forecasted);
+            printt(forecasted);
         }
 
         double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
