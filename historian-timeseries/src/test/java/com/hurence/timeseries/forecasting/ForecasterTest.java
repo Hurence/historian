@@ -12,14 +12,14 @@ import org.junit.jupiter.api.Assertions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
 public class ForecasterTest {
-    private static final int numPoints = 400;
+    public static int numPoints = 400;
     private static final int limit = 10;
     private static final String file = "test_data.csv";
 
@@ -32,7 +32,7 @@ public class ForecasterTest {
                 "---------------------------------------------------------------------------------------");
     }
 
-    private void printd(List<Double> inputs) {
+    private static void printd(List<Double> inputs) {
         System.out.print("[");
         for (Double elmt : inputs) {
             System.out.printf("%.2f", elmt);
@@ -40,7 +40,7 @@ public class ForecasterTest {
         }
         System.out.println("]");
     }
-    private void printm(List<Measure> inputs) {
+    private static void printm(List<Measure> inputs) {
         System.out.print("[");
         for (Measure elmt : inputs) {
             System.out.printf("%.2f", elmt.getValue());
@@ -48,7 +48,7 @@ public class ForecasterTest {
         }
         System.out.println("]");
     }
-    private void printt(List<Measure> inputs) {
+    private static void printt(List<Measure> inputs) {
         System.out.print("[");
         for (Measure elmt : inputs) {
             System.out.printf("" + elmt.getTimestamp() + ", ");
@@ -62,7 +62,7 @@ public class ForecasterTest {
      * @return list of Measures with their timestamp and their value
      * @throws IOException
      */
-    private List<Measure> getInputMeasureData(String file) throws IOException {
+    private static List<Measure> getInputMeasureData(String file) throws IOException {
         return getDataFromFile("src/test/resources/data/"+ file);
     }
 
@@ -72,7 +72,7 @@ public class ForecasterTest {
      * @return list of values type=Double
      * @throws IOException
      */
-    private List<Double> getInputDoubleData(String file) throws IOException {
+    private static List<Double> getInputDoubleData(String file) throws IOException {
         // TODO : lecture d'un fichier csv
         File csvFile = new File("src/test/resources/data/"+ file).getAbsoluteFile();
 
@@ -100,7 +100,7 @@ public class ForecasterTest {
      * @return the list of Measure with timestamp and value tag
      * @throws IOException
      */
-    private List<Measure> getDataFromFile(String filePath) throws IOException {
+    private static List<Measure> getDataFromFile(String filePath) throws IOException {
         return MeasuresLoader.loadFromCSVFile(filePath);
     }
 
@@ -111,7 +111,7 @@ public class ForecasterTest {
      * @param forecasted data
      * @return RMS
      */
-    private double rootMeanSquaredErrorDouble (List<Double> measured, List<Double> forecasted) {
+    private static double rootMeanSquaredErrorDouble (List<Double> measured, List<Double> forecasted) {
         double mse = 0;
         for (int i=0;i<forecasted.size();i++) {
             mse += Math.pow(measured.get(i) - forecasted.get(i), 2);
@@ -126,7 +126,7 @@ public class ForecasterTest {
      * @param forecasted data
      * @return RMS
      */
-    private double rootMeanSquaredErrorMeasure (List<Measure> measured, List<Measure> forecasted) {
+    private static double rootMeanSquaredErrorMeasure(List<Measure> measured, List<Measure> forecasted) {
         double mse = 0;
         for (int i=0;i<forecasted.size();i++) {
             mse += Math.pow(measured.get(i).getValue() - forecasted.get(i).getValue(), 2);
@@ -134,10 +134,108 @@ public class ForecasterTest {
         return Math.sqrt(mse / forecasted.size());
     }
 
+    /**
+     * create a csv file named 'algo'_java and write 'args' in the file
+     *
+     * @param algo name for the file
+     * @param args data to write in the file
+     * @throws IOException
+     */
+    private static void csvWriter(String algo, String args) throws IOException {
+        FileWriter pw = null;
+        File file = new File("src/test/resources/data/results_forecasting/" + algo + "_java.csv");
+        try {
+            pw = new FileWriter(file);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String columnNamesList = "metric_id,mean_squared_error,training_time,inference_time";
+        // No need give the headers Like: id, Name on builder.append
+        String builder = columnNamesList + "\n" + args;
+        assert pw != null;
+        pw.write(builder);
+        pw.close();
+        System.out.println("done!");
+    }
+
+    /**
+     * Iterate on all files in resources/data/split_data and forecasted the last 1/3 data of each file
+     * then it save the result using csvWriter
+     *
+     * @param forecaster used to forecast
+     * @param algo name of the forecaster
+     * @throws IOException
+     */
+    private static void recorderNN(Forecaster forecaster, String algo) throws IOException {
+        File filePath = new File("src/test/resources/data/split_data/");
+        File[] files = filePath.listFiles();
+        String result = "";
+        for (File file : files) {
+            if(file != null) {
+                List<Measure> inputs = getInputMeasureData("split_data/" + file.getName());
+                numPoints = (int) (inputs.size()*0.67);
+                List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
+                List<Measure> validating = inputs.subList(inputs.size()-numPoints, inputs.size());
+
+                double debut = System.currentTimeMillis();
+                forecaster.fit(training, validating);
+                double fin = System.currentTimeMillis();
+                double fTime = (fin - debut)/1000;
+
+                debut = System.currentTimeMillis();
+                List<Measure> forecasted = forecaster.forecast(validating, numPoints);
+                fin = System.currentTimeMillis();
+                double iTime = (fin - debut)/1000;
+
+                Double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
+                if (!(mse.isNaN())) {
+                    result = result + file.getName() +","+mse+","+fTime+","+iTime+"\n";
+                }
+            }
+        }
+
+        csvWriter(algo, result);
+    }
+    private static void recorderArima(Forecaster forecaster, String algo) throws IOException {
+        File filePath = new File("src/test/resources/data/split_data/");
+        File[] files = filePath.listFiles();
+        String result = "";
+        for (File file : files) {
+            if(file != null) {
+                List<Measure> inputs = getInputMeasureData("split_data/" + file.getName());
+                numPoints = (int) (inputs.size()*0.67);
+                List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
+                List<Measure> validating = inputs.subList(inputs.size()-numPoints, inputs.size());
+
+                double debut = System.currentTimeMillis();
+                forecaster.fit(training, validating);
+                double fin = System.currentTimeMillis();
+                double fTime = (fin - debut)/1000;
+
+                debut = System.currentTimeMillis();
+                List<Measure> forecasted = forecaster.forecast(training, numPoints);
+                fin = System.currentTimeMillis();
+                double iTime = (fin - debut)/1000;
+
+                Double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
+                if (!(mse.isNaN())) {
+                    result = result + file.getName() +","+mse+","+fTime+","+iTime+"\n";
+                }
+            }
+        }
+
+        csvWriter(algo, result);
+    }
+
     @Test
     public void testArimaDoubleForecasting() throws IOException {
         System.out.println("\nARIMA_DOUBLE TEST :");
         Forecaster<Double> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.ARIMA_DOUBLE);
+
+        /* TODO: boucler sur tous les fichiers dans le split_data
+                 nom des fichiers : test_data i .csv
+                 en iterrant sur i
+         */
 
         List<Double> inputs = getInputDoubleData(file);
         List<Double> training = inputs.subList(0, inputs.size() - numPoints);
@@ -174,7 +272,7 @@ public class ForecasterTest {
 
         List<Measure> inputs = getInputMeasureData(file);
         List<Measure> training = inputs.subList(0, inputs.size() - numPoints);
-        List<Measure> validating = inputs.subList(inputs.size()-numPoints, inputs.size());
+        List<Measure> validating = inputs.subList(inputs.size() - numPoints, inputs.size());
 
         double debut = System.currentTimeMillis();
         forecaster.fit(training, validating);
@@ -182,7 +280,7 @@ public class ForecasterTest {
         double fTime = (fin - debut)/1000;
 
         debut = System.currentTimeMillis();
-        List<Measure> forecasted = forecaster.forecast(training, numPoints);
+        List<Measure> forecasted = forecaster.forecast(validating, numPoints);
         fin = System.currentTimeMillis();
         double iTime = (fin - debut)/1000;
 
@@ -197,6 +295,7 @@ public class ForecasterTest {
         System.out.println("Inference time : " + iTime + "s");
 
         Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
+//        recorderArima(forecaster, "Arima");
     }
 
     @Test
@@ -222,7 +321,6 @@ public class ForecasterTest {
         if (numPoints < 20) {
             printm(validating);
             printm(forecasted);
-            printt(forecasted);
         }
 
         double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
@@ -231,7 +329,7 @@ public class ForecasterTest {
         System.out.println("Inference time : " + iTime + "s");
 
         Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
-
+//        recorderNN(forecaster, "Lstm");
     }
 
     @Test
@@ -259,13 +357,12 @@ public class ForecasterTest {
             printm(validating);
             printm(forecasted);
         }
-
         double mse = rootMeanSquaredErrorMeasure(validating, forecasted);
         System.out.println("Root Mean Squared value = " + mse);
         System.out.println("Fitting time : " + fTime + "s");
         System.out.println("Inference time : " + iTime + "s");
 
         Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
-
+//        recorderNN(forecaster, "Dnn");
     }
 }
