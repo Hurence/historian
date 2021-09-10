@@ -22,7 +22,7 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
     @Override
     public List<Measure> forecast(List<Measure> inputData, int numPoints) {
         double[] dataArray = measureToDouble(inputData);
-
+        verifier();
         ForecastResult forecastResult = Arima.forecast_arima(dataArray, numPoints, new ArimaParams(p, d, q, P, D, Q, m));
         double[] forecastData = forecastResult.getForecast();
 
@@ -78,7 +78,6 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
         D = order.get(4);
         Q = order.get(5);
         m = p + q + P + Q + 1;
-        printOrder();
     }
 
     public void printOrder() {
@@ -112,5 +111,11 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
             result[i] = inputData.get(i).getValue();
         }
         return result;
+    }
+
+    public void verifier() {
+        if (p == 0 && q == 0) {
+            p=1;
+        }
     }
 }

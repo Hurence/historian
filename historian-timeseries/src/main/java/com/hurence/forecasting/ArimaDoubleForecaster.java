@@ -1,6 +1,5 @@
 package com.hurence.forecasting;
 
-import com.hurence.timeseries.model.Measure;
 import com.workday.insights.timeseries.arima.Arima;
 import com.workday.insights.timeseries.arima.struct.ArimaParams;
 import com.workday.insights.timeseries.arima.struct.ForecastResult;
@@ -24,7 +23,7 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
         for (int i = 0; i < dataArray.length; i++) {
             dataArray[i] = inputData.get(i);
         }
-
+        verifier();
         ForecastResult forecastResult = Arima.forecast_arima(dataArray, numPoints, new ArimaParams(p, d, q, P, D, Q, m));
         double[] forecastData = forecastResult.getForecast();
 
@@ -75,7 +74,6 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
         D = order.get(4);
         Q = order.get(5);
         m = p + q + P + Q + 1;
-        printOrder();
     }
 
     public void printOrder() {
@@ -102,5 +100,11 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
             result[i] = inputData.get(i);
         }
         return result;
+    }
+
+    public void verifier() {
+        if (p == 0 && q == 0) {
+            p=1;
+        }
     }
 }
