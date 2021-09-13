@@ -28,13 +28,22 @@ public class DnnForecaster implements Forecaster<Measure>{
 
     private MultiLayerNetwork model;
 
+    /**
+     * Forecast the number of points we want of a time series
+     *
+     * @param inputs get the timestamps of the points we want to forecast
+     * @param numPoints number of points to forecast
+     * @return a list of measure with their timestamp and their forecasted values
+     * @throws IOException
+     */
     @Override
     public List<Measure> forecast(List<Measure> inputs, int numPoints) throws IOException {
 
         if (model == null)
             throw new IOException("model must be initialized first, did you really call forecast method before fitting ?");
-
-        DataSetIterator inputDataIterator = toDataSetIterator(inputs, inputs.size(), 10);
+        // Create the dataSetIterator
+        DataSetIterator inputDataIterator = toDataSetIterator(inputs, 10);
+        // Normalize the training data
         DataNormalization normalizer = new NormalizerStandardize();
         normalizer.fit(inputDataIterator);              // Collect training data statistics
         inputDataIterator.reset();
@@ -42,7 +51,6 @@ public class DnnForecaster implements Forecaster<Measure>{
 
         INDArray output = model.output(inputDataIterator);
 
-        // TODO compute time step to fill timestamp part of the measure
         List<Measure> forecasted = new ArrayList<>();
         double[] doubleVector = output.toDoubleVector();
         int i = 0;
@@ -50,37 +58,41 @@ public class DnnForecaster implements Forecaster<Measure>{
             forecasted.add(Measure.fromValue(inputs.get(inputs.size() - numPoints + i).getTimestamp(), value));
             i++;
         }
-
         return forecasted;
     }
 
-
+    /**
+     * Create and fit the neural network
+     *
+     * @param trainingData the given elements to train the model
+     * @param validatingData the elements to compare with the forecasted values
+     */
     @Override
     public void fit(List<Measure> trainingData, List<Measure> validatingData) {
-        DataSetIterator dsiTrain = toDataSetIterator(trainingData, trainingData.size(), 100);
+        // Create the dataSetIterator
+        DataSetIterator dsiTrain = toDataSetIterator(trainingData, 100);
         // Normalize the training data
         DataNormalization normalizer = new NormalizerStandardize();
         normalizer.fit(dsiTrain);              // Collect training data statistics
         dsiTrain.reset();
         dsiTrain.setPreProcessor(normalizer);
+
         MultiLayerConfiguration conf = createDNNModel();
         model = new MultiLayerNetwork(conf);
-        model.getLayerWiseConfigurations().setValidateOutputLayerConfig(false);
         model.init();
         model.fit(dsiTrain, 100);
     }
 
     /**
-     * Create a DataSetIterator from a list of measures
+     * Create a 2D rank DataSetIterator from a list of measures
      *
      * @param inputData is the list of measures with at least a value and a timestamp
-     * @param numPoints lenght of inputData
      * @param batch size
      * @return the DataSetIterator
      */
-    public DataSetIterator toDataSetIterator(List<Measure> inputData, int numPoints, int batch) {
-        INDArray input = Nd4j.create(numPoints, 1);
-        INDArray output = Nd4j.create(numPoints, 1);
+    public DataSetIterator toDataSetIterator(List<Measure> inputData, int batch) {
+        INDArray input = Nd4j.create(inputData.size(), 1);
+        INDArray output = Nd4j.create(inputData.size(), 1);
         int i = 0;
         for (Measure elm : inputData) {
             input.putScalar(i, elm.getTimestamp());
@@ -93,12 +105,12 @@ public class DnnForecaster implements Forecaster<Measure>{
     }
 
     /**
-     * Create a MutliLayerConfiguration that will be use to create the DNN model
+     * Create a MultiLayerConfiguration that will be used to create the DNN model
      *
      * @return a MultiLayerConfiguration
      */
     public MultiLayerConfiguration createDNNModel() {
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+        return new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .updater(new Nesterovs(0.005, 0.9))
@@ -123,6 +135,5 @@ public class DnnForecaster implements Forecaster<Measure>{
                         .weightInit(WeightInit.XAVIER)
                         .build())
                 .build();
-        return conf;
     }
 }

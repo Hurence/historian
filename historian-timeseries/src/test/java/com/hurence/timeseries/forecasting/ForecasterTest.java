@@ -150,7 +150,6 @@ public class ForecasterTest {
             e.printStackTrace();
         }
         String columnNamesList = "metric_id,mean_squared_error,training_time,inference_time";
-        // No need give the headers Like: id, Name on builder.append
         String builder = columnNamesList + "\n" + args;
         assert pw != null;
         pw.write(builder);
@@ -231,11 +230,6 @@ public class ForecasterTest {
     public void testArimaDoubleForecasting() throws IOException {
         System.out.println("\nARIMA_DOUBLE TEST :");
         Forecaster<Double> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.ARIMA_DOUBLE);
-
-        /* TODO: boucler sur tous les fichiers dans le split_data
-                 nom des fichiers : test_data i .csv
-                 en iterrant sur i
-         */
 
         List<Double> inputs = getInputDoubleData(file);
         List<Double> training = inputs.subList(0, inputs.size() - numPoints);

@@ -5,6 +5,7 @@ import com.workday.insights.timeseries.arima.Arima;
 import com.workday.insights.timeseries.arima.struct.ArimaParams;
 import com.workday.insights.timeseries.arima.struct.ForecastResult;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,14 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
     private int Q = 0;
     private int m = 0;
 
+    /**
+     * Forecast the number of points we want of a time series
+     *
+     * @param inputData the series which we want to predict the next points
+     * @param numPoints number of points to forecast
+     * @return a list of measure with their timestamp and their forecasted values
+     * @throws IOException
+     */
     @Override
     public List<Measure> forecast(List<Measure> inputData, int numPoints) {
         double[] dataArray = measureToDouble(inputData);
@@ -80,12 +89,15 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
         m = p + q + P + Q + 1;
     }
 
+    /**
+     * Print the ARIMA's parameters
+     */
     public void printOrder() {
         System.out.println("p = " + p + "\td = " + d + "\tq = " + q + "\tm = " + m);
     }
 
     /**
-     * Compute the Root Mean Squared between 2 lists of double value
+     * Compute the Root Mean Squared of 2 lists of double value
      *
      * @param measured data
      * @param forecasted data
@@ -113,6 +125,9 @@ public class ArimaMeasureForecaster implements Forecaster<Measure> {
         return result;
     }
 
+    /**
+     * Verification of ARIMA's parameters (p and q must not = 0 at same time)
+     */
     public void verifier() {
         if (p == 0 && q == 0) {
             p=1;
