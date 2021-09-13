@@ -31,23 +31,29 @@ public class LstmForecaster implements Forecaster<Measure>{
 
     private MultiLayerNetwork model;
 
+    /**
+     * Forecast the number of points we want of a time series
+     *
+     * @param inputs get the timestamps of the points we want to forecast
+     * @param numPoints number of points to forecast
+     * @return a list of measure with their timestamp and their forecasted values
+     * @throws IOException
+     */
     @Override
     public List<Measure> forecast(List<Measure> inputs, int numPoints) throws IOException {
 
         if(model == null)
             throw new IOException("model must be initialized first, did you really call fit method before forecasting ?");
-
+        // Create the dataSetIterator
         DataSetIterator inputDataIterator = toDataSetIterator(inputs, 10);
         // Normalize the training data
         DataNormalization normalizer = new NormalizerStandardize();
         normalizer.fit(inputDataIterator);              // Collect training data statistics
         inputDataIterator.reset();
         inputDataIterator.setPreProcessor(normalizer);
-//        inputDataIterator.setPreProcessor(new LabelLastTimeStepPreProcessor());
 
         INDArray output = model.output(inputDataIterator);
 
-        // TODO compute time step to fill timestamp part of the measure
         List<Measure> forecasted = new ArrayList<>();
         double[] doubleVector = output.toDoubleVector();
         int i = 0;
@@ -55,11 +61,15 @@ public class LstmForecaster implements Forecaster<Measure>{
             forecasted.add(Measure.fromValue(inputs.get(inputs.size() - numPoints + i).getTimestamp(), value));
             i++;
         }
-
-        // TODO loop over numPoints to return more than 1 forecasted point
         return forecasted;
     }
 
+    /**
+     * Create and fit the neural network
+     *
+     * @param trainingData the given elements to train the model
+     * @param validatingData the elements to compare with the forecasted values
+     */
     @Override
     public void fit(List<Measure> trainingData, List<Measure> validatingData) throws IOException {
         // Create the dataSetIterator
@@ -69,17 +79,15 @@ public class LstmForecaster implements Forecaster<Measure>{
         normalizer.fit(dsiTrain);              // Collect training data statistics
         dsiTrain.reset();
         dsiTrain.setPreProcessor(normalizer);
-//        dsiTrain.setPreProcessor(new LabelLastTimeStepPreProcessor());
 
         MultiLayerConfiguration conf = createLSTMModel();
         model = new MultiLayerNetwork(conf);
-
         model.init();
         model.fit(dsiTrain, 100);
     }
 
     /**
-     * Create a 3D rank DataSetIterator from a list of measures
+     * Create a 2D rank DataSetIterator from a list of measures
      *
      * @param inputData is the list of measures with at least a value and a timestamp
      * @param batch size
@@ -105,13 +113,12 @@ public class LstmForecaster implements Forecaster<Measure>{
      * @return a MultiLayerConfiguration
      */
     public MultiLayerConfiguration createLSTMModel() {
-        MultiLayerConfiguration conf = new NeuralNetConfiguration.Builder()
+        return new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
                 .updater(new Nesterovs(0.005, 0.9))
                 .l2(1e-4)
                 .list()
-//                .layer(0, new LastTimeStep(new LSTM.Builder()
                 .layer(0, new DenseLayer.Builder() //create the first, input layer with xavier initialization
                         .nIn(1)
                         .nOut(32)
@@ -132,6 +139,5 @@ public class LstmForecaster implements Forecaster<Measure>{
                         .build())
                 .backpropType(BackpropType.Standard)
                 .build();
-        return conf;
     }
 }

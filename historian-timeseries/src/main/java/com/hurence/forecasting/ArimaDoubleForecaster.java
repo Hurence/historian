@@ -4,6 +4,7 @@ import com.workday.insights.timeseries.arima.Arima;
 import com.workday.insights.timeseries.arima.struct.ArimaParams;
 import com.workday.insights.timeseries.arima.struct.ForecastResult;
 
+import java.io.IOException;
 import java.util.*;
 
 public class ArimaDoubleForecaster implements Forecaster<Double> {
@@ -16,6 +17,14 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
     private int Q = 0;
     private int m = 0;
 
+    /**
+     * Forecast the number of points we want of a time series
+     *
+     * @param inputData the series which we want to predict the next points
+     * @param numPoints number of points to forecast
+     * @return a list of double forecasted values
+     * @throws IOException
+     */
     @Override
     public List<Double> forecast(List<Double> inputData, int numPoints) {
 
@@ -76,10 +85,20 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
         m = p + q + P + Q + 1;
     }
 
+    /**
+     * Print the ARIMA's parameters
+     */
     public void printOrder() {
         System.out.println("p = " + p + "\td = " + d + "\tq = " + q + "\tm = " + m);
     }
 
+    /**
+     * Compute the root mean squared error of two lists of doubles
+     *
+     * @param measured data
+     * @param forecasted data
+     * @return root mean squared error
+     */
     public double rootMeanSquaredError (double[] measured, double[] forecasted) {
         double mse = 0;
         for (int i=0;i<forecasted.length;i++) {
@@ -102,6 +121,9 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
         return result;
     }
 
+    /**
+     * Verification of ARIMA's parameters (p and q must not = 0 at same time)
+     */
     public void verifier() {
         if (p == 0 && q == 0) {
             p=1;
