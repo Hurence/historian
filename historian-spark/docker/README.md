@@ -16,21 +16,14 @@ copy paste jar and conf file
 
 ```shell script
 cd ./docker
-cp ../target/historian-server-1.3.8-fat.jar .
-cp ../target/classes/config.json .
-
-cd  ../../historian-resources/conf/solr/conf/
-zip -r historian-configset.zip ./*
-cd -;
-mv ../../historian-resources/conf/solr/conf/historian-configset.zip .
-
+cp ../../assembly/target/historian-1.3.8-bin.tgz .
 ```  
   
 Building the image, modify version of jar in ENTRYPOINT if needed
 
 ```shell script
-docker build --rm -t hurence/historian-server .
-docker tag hurence/historian-server:latest hurence/historian-server:1.3.8
+docker build --rm -t hurence/historian-spark .
+docker tag hurence/historian-spark:latest hurence/historian-spark:1.3.8
 ```
 
 Deploy the image to Docker hub
@@ -49,8 +42,8 @@ then login and push the latest image
 
 ```shell script
 docker login
-docker push hurence/historian-server
-docker push hurence/historian-server:1.3.8
+docker push hurence/historian-spark
+docker push hurence/historian-spark:1.3.8
 ````
 
 

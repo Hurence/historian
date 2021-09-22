@@ -27,7 +27,6 @@ public class JsonObjectToChunkCurrentVersion {
         this.converter = new MeasuresToChunkVersionCurrent(chunkOrigin);
     }
 
-
     public SolrInputDocument chunkIntoSolrDocument(JsonObject json) {
         TreeSet<Measure> measures = getPoints(json);
         String name = getName(json);

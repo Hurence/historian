@@ -53,6 +53,9 @@ public class SolrUpdater {
     @Value("${historian.solr.flushIntervalMs}")
     private Long flushIntervalMs;
 
+    @Value("${historian.solr.chunkOrigin}")
+    private String chunkOrigin;
+
     @Autowired
     private SolrClient solrClient;
 
@@ -70,7 +73,7 @@ public class SolrUpdater {
         executor.setThreadNamePrefix("PrometheusScrapper-");
         executor.initialize();
 
-        SolrUpdaterThread updaterThread = new SolrUpdaterThread(collection, batchSize, flushIntervalMs, solrClient, updateQueue);
+        SolrUpdaterThread updaterThread = new SolrUpdaterThread(collection, batchSize, flushIntervalMs, solrClient, updateQueue, chunkOrigin);
         executor.execute(updaterThread);
 
         return executor;

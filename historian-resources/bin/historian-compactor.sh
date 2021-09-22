@@ -44,10 +44,10 @@ cmd_start() {
   COMPACTOR_DEP_JARS="file:${HISTORIAN_LIB_DIR}/historian-spark-${HISTORIAN_VERSION}.jar"
 
   # Now get run mode and apply what's asked
-  SPARK_MASTER=$(read_property_from_config_file "spark.master")
+  SPARK_MASTER=$(read_property_from_config_file "master")
   case ${SPARK_MASTER} in
     yarn)
-      YARN_DEPLOY_MODE=$(read_property_from_config_file "spark.submit.deployMode")
+      YARN_DEPLOY_MODE=$(read_property_from_config_file "deployMode")
       case ${YARN_DEPLOY_MODE} in
         cluster)
           start_yarn_cluster

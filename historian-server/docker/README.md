@@ -18,6 +18,12 @@ copy paste jar and conf file
 cd ./docker
 cp ../target/historian-server-1.3.8-fat.jar .
 cp ../target/classes/config.json .
+
+cd  ../../historian-resources/conf/solr/conf/
+zip -r historian-configset.zip ./*
+cd -;
+mv ../../historian-resources/conf/solr/conf/historian-configset.zip .
+
 ```  
   
 Building the image, modify version of jar in ENTRYPOINT if needed
