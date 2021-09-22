@@ -15,7 +15,7 @@ DEBUG="false"
 CUSTOM_LOG4J_FILE="false"
 USE_VARS_FILE="true"
 USE_KERBEROS="false"
-HISTORIAN_VERSION="1.3.6"
+HISTORIAN_VERSION="1.3.8"
 
 
 # Default environment variables file

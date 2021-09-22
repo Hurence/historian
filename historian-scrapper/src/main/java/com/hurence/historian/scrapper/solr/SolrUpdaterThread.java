@@ -35,26 +35,32 @@ public class SolrUpdaterThread implements Runnable {
     private static Logger log = LogManager.getLogger(SolrUpdaterThread.class);
 
 
-    private final MeasuresToChunkVersionCurrent converter = new MeasuresToChunkVersionCurrent("prometheus-scrapper");
+    private final MeasuresToChunkVersionCurrent converter;
 
     private volatile int batchedUpdates = 0;
     private volatile long lastTS = System.currentTimeMillis() * 100; // far in the future ...
 
-    private String collection;
-    private Integer batchSize;
-    private Long flushIntervalMs;
-    private SolrClient solrClient;
+    private final String collection;
+    private final Integer batchSize;
+    private final Long flushIntervalMs;
+    private final SolrClient solrClient;
 
     private BlockingQueue<Measure> updateQueue;
     private List<SolrInputDocument> buffer = new ArrayList<>();
 
 
-    public SolrUpdaterThread(String collection, Integer batchSize, Long flushIntervalMs, SolrClient solrClient, BlockingQueue<Measure> updateQueue) {
+    public SolrUpdaterThread(String collection,
+                             Integer batchSize,
+                             Long flushIntervalMs,
+                             SolrClient solrClient,
+                             BlockingQueue<Measure> updateQueue,
+                             String chunkOrigin) {
         this.collection = collection;
         this.batchSize = batchSize;
         this.flushIntervalMs = flushIntervalMs;
         this.solrClient = solrClient;
         this.updateQueue = updateQueue;
+        this.converter = new MeasuresToChunkVersionCurrent(chunkOrigin);
     }
 
     @Override
@@ -65,6 +71,7 @@ public class SolrUpdaterThread implements Runnable {
             Measure measure = null;
             try {
                 measure = updateQueue.take();
+                // TODO remove this
                 if (measure != null && !measure.getName().equals("solr_metrics_core_highlighter_request_total")) {
                     SolrInputDocument doc = measureToChunkSolrDocument(measure);
                     //  req.add(doc);

@@ -6,7 +6,7 @@ conf:
     # Any entry under the spark entry is expected to match the spark application configuration
     # specified at https://spark.apache.org/docs/latest/configuration.html#application-properties
     # including the "spark." prefix.
-    master:  "local[*]"
+    master: "local[*]"
     appName: "historian-compactor"
     streamingEnabled: false
     deployMode: ""
