@@ -161,43 +161,43 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
      * @param context The data section of the query result has the following format:
      *
      *                <pre>
-     *                                                                                                                                        {
-     *                                                                                                                                          "resultType": "matrix" | "vector" | "scalar" | "string",
-     *                                                                                                                                          "result": <value>
-     *                                                                                                                                        }
-     *                                                                                                                                        </pre>
+     *                                                                                                                                                                      {
+     *                                                                                                                                                                        "resultType": "matrix" | "vector" | "scalar" | "string",
+     *                                                                                                                                                                        "result": <value>
+     *                                                                                                                                                                      }
+     *                                                                                                                                                                      </pre>
      *
      *                <value> refers to the query result data, which has varying formats depending on the resultType. See the expression query result formats.
      *                <p>
      *                The following example evaluates the expression up at the time 2015-07-01T20:10:51.781Z:
      *
      *                <pre>
-     *                                                                                                                                        $ curl 'http://localhost:9090/api/v1/query?query=up&time=2015-07-01T20:10:51.781Z'
-     *                                                                                                                                        {
-     *                                                                                                                                           "status" : "success",
-     *                                                                                                                                           "data" : {
-     *                                                                                                                                              "resultType" : "vector",
-     *                                                                                                                                              "result" : [
-     *                                                                                                                                                 {
-     *                                                                                                                                                    "metric" : {
-     *                                                                                                                                                       "__name__" : "up",
-     *                                                                                                                                                       "job" : "prometheus",
-     *                                                                                                                                                       "instance" : "localhost:9090"
-     *                                                                                                                                                    },
-     *                                                                                                                                                    "value": [ 1435781451.781, "1" ]
-     *                                                                                                                                                 },
-     *                                                                                                                                                 {
-     *                                                                                                                                                    "metric" : {
-     *                                                                                                                                                       "__name__" : "up",
-     *                                                                                                                                                       "job" : "node",
-     *                                                                                                                                                       "instance" : "localhost:9100"
-     *                                                                                                                                                    },
-     *                                                                                                                                                    "value" : [ 1435781451.781, "0" ]
-     *                                                                                                                                                 }
-     *                                                                                                                                              ]
-     *                                                                                                                                           }
-     *                                                                                                                                        }
-     *                                                                                                                                        </pre>
+     *                                                                                                                                                                      $ curl 'http://localhost:9090/api/v1/query?query=up&time=2015-07-01T20:10:51.781Z'
+     *                                                                                                                                                                      {
+     *                                                                                                                                                                         "status" : "success",
+     *                                                                                                                                                                         "data" : {
+     *                                                                                                                                                                            "resultType" : "vector",
+     *                                                                                                                                                                            "result" : [
+     *                                                                                                                                                                               {
+     *                                                                                                                                                                                  "metric" : {
+     *                                                                                                                                                                                     "__name__" : "up",
+     *                                                                                                                                                                                     "job" : "prometheus",
+     *                                                                                                                                                                                     "instance" : "localhost:9090"
+     *                                                                                                                                                                                  },
+     *                                                                                                                                                                                  "value": [ 1435781451.781, "1" ]
+     *                                                                                                                                                                               },
+     *                                                                                                                                                                               {
+     *                                                                                                                                                                                  "metric" : {
+     *                                                                                                                                                                                     "__name__" : "up",
+     *                                                                                                                                                                                     "job" : "node",
+     *                                                                                                                                                                                     "instance" : "localhost:9100"
+     *                                                                                                                                                                                  },
+     *                                                                                                                                                                                  "value" : [ 1435781451.781, "0" ]
+     *                                                                                                                                                                               }
+     *                                                                                                                                                                            ]
+     *                                                                                                                                                                         }
+     *                                                                                                                                                                      }
+     *                                                                                                                                                                      </pre>
      */
     @Override
     public void query(RoutingContext context) {
@@ -205,10 +205,30 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
     }
 
     private Map<String, String> getParameters(RoutingContext context) {
-        Map<String, String> parameters = context.queryParams()
-                .entries()
-                .stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, String> parameters = new LinkedHashMap<>();
+
+        if (context.queryParams().isEmpty()) {
+            String body = context.getBodyAsString();
+
+            try {
+                String query = URLDecoder.decode(body, StandardCharsets.UTF_8.name());
+                String[] pairs = query.split("&");
+                for (String pair : pairs) {
+                    int idx = pair.indexOf("=");
+                    parameters.put(URLDecoder.decode(pair.substring(0, idx), "UTF-8"), URLDecoder.decode(pair.substring(idx + 1), "UTF-8"));
+                }
+            } catch (UnsupportedEncodingException e) {
+                LOGGER.error("unable to get query parameters, {}", e.getMessage());
+            }
+        } else {
+            parameters = context.queryParams()
+                    .entries()
+                    .stream()
+                    .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        }
+
+        if (context.pathParams().containsKey("name"))
+            parameters.put("name", context.pathParam("name"));
         return parameters;
     }
 
@@ -217,30 +237,31 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
      * used to get values of certain field
      *
      * @param context Expected request exemple :
-     * <pre>
-     * {
-     *     "field": "name",
-     *     "query": "met",
-     *     "limit": 100
-     * }
-     * </pre>
-     *
-     * "query" is optional, "limit" is optional.
-     * <p>
-     *
-     * response Example :
-     * <pre>
-     * ["metric_25","metric_50","metric_75","metric_90","metric_95"]
-     * </pre>
+     *                <pre>
+     *                               {
+     *                                   "field": "name",
+     *                                   "query": "met",
+     *                                   "limit": 100
+     *                               }
+     *                               </pre>
+     *                <p>
+     *                "query" is optional, "limit" is optional.
+     *                <p>
+     *                <p>
+     *                response Example :
+     *                <pre>
+     *                               ["metric_25","metric_50","metric_75","metric_90","metric_95"]
+     *                               </pre>
      */
     @Override
-    public void labels(RoutingContext context) {
+    public void labelNameValues(RoutingContext context) {
+
         LabelsRequest request = LabelsRequest.builder()
                 .parameters(getParameters(context))
                 .build();
 
 
-        service.rxGetLabels(RequestConverter.toGetLabelsParameters(request))
+        service.rxGetLabelNameValues(RequestConverter.toGetLabelsParameters(request))
                 .doOnError(ex -> {
                     LOGGER.error("Unexpected error : ", ex);
                     VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
@@ -263,16 +284,53 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
                 }).subscribe();
     }
 
+    @Override
+    public void labels(RoutingContext context) {
+        LabelsRequest request = LabelsRequest.builder()
+                .parameters(getParameters(context))
+                .build();
+
+
+        service.rxGetLabels(RequestConverter.toGetLabelsParameters(request))
+                .doOnError(ex -> {
+                    LOGGER.error("Unexpected error : ", ex);
+                    VertxErrorAnswerDescription error = VertxErrorAnswerDescription.builder()
+                            .errorMsg("Unexpected error :")
+                            .throwable(ex)
+                            .routingContext(context)
+                            .build();
+                    VertxHttpErrorMsgHelper.answerWithError(error);
+                })
+                .doOnSuccess(valuesResponse -> {
+
+                    // submit the request to the handler
+                    JsonObject response = new JsonObject()
+                            .put(STATUS, SUCCESS)
+                            .put(DATA, valuesResponse.add("__name__"));
+
+                    context.response().setStatusCode(200);
+                    context.response().putHeader("Content-Type", "application/json");
+                    context.response().end(response.encode());
+                }).subscribe();
+    }
+
 
     /**
      * not available yet
+     *
      * @param context
      */
     @Override
     public void metadata(RoutingContext context) {
+
+
         JsonObject response = new JsonObject()
                 .put(STATUS, SUCCESS)
-                .put(DATA, "");
+                .put(DATA, new JsonObject().put("go_gc_duration_seconds", new JsonArray()
+                        .add(new JsonObject().put("type", "summary"))
+                        .add(new JsonObject().put("help", "A summary of the pause duration of garbage collection cycles."))
+                        .add(new JsonObject().put("unit", ""))));
+
 
         context.response()
                 .setStatusCode(HttpResponseStatus.OK.code())
@@ -296,46 +354,46 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
      *
      * @param context Expected request exemple :
      *                <pre>
-     *                                                                                                                                          {
-     *                                                                                                                                            "from": "2016-10-31T06:33:44.866Z",
-     *                                                                                                                                            "to": "2020-10-31T12:33:44.866Z",
-     *                                                                                                                                            "names": ["metric_1"],
-     *                                                                                                                                            "format": "json",
-     *                                                                                                                                            "max_data_points": 8,
-     *                                                                                                                                            "tags": {
-     *                                                                                                                                                "sensor" : "sensor_1"
-     *                                                                                                                                            },
-     *                                                                                                                                            "sampling":{
-     *                                                                                                                                               "algorithm": "MIN",
-     *                                                                                                                                               "bucket_size" : 100
-     *                                                                                                                                            }
-     *                                                                                                                                          }
-     *                                                                                                                                        </pre>
+     *                                                                                                                                                                        {
+     *                                                                                                                                                                          "from": "2016-10-31T06:33:44.866Z",
+     *                                                                                                                                                                          "to": "2020-10-31T12:33:44.866Z",
+     *                                                                                                                                                                          "names": ["metric_1"],
+     *                                                                                                                                                                          "format": "json",
+     *                                                                                                                                                                          "max_data_points": 8,
+     *                                                                                                                                                                          "tags": {
+     *                                                                                                                                                                              "sensor" : "sensor_1"
+     *                                                                                                                                                                          },
+     *                                                                                                                                                                          "sampling":{
+     *                                                                                                                                                                             "algorithm": "MIN",
+     *                                                                                                                                                                             "bucket_size" : 100
+     *                                                                                                                                                                          }
+     *                                                                                                                                                                        }
+     *                                                                                                                                                                      </pre>
      *                response Exemple :
      *                <pre>
-     *                                                                                                                                        [
-     *                                                                                                                                          {
-     *                                                                                                                                            "target":"upper_75",
-     *                                                                                                                                            "tags" : {
-     *                                                                                                                                                "sensor" : "sensor_1"
-     *                                                                                                                                            },
-     *                                                                                                                                            "datapoints":[
-     *                                                                                                                                              [622,1450754160000],
-     *                                                                                                                                              [365,1450754220000]
-     *                                                                                                                                            ]
-     *                                                                                                                                          },
-     *                                                                                                                                          {
-     *                                                                                                                                            "target":"upper_90",
-     *                                                                                                                                            "tags" : {
-     *                                                                                                                                               "sensor" : "sensor_1"
-     *                                                                                                                                            },
-     *                                                                                                                                            "datapoints":[
-     *                                                                                                                                              [861,1450754160000],
-     *                                                                                                                                              [767,1450754220000]
-     *                                                                                                                                            ]
-     *                                                                                                                                          }
-     *                                                                                                                                        ]
-     *                                                                                                                                        </pre>
+     *                                                                                                                                                                      [
+     *                                                                                                                                                                        {
+     *                                                                                                                                                                          "target":"upper_75",
+     *                                                                                                                                                                          "tags" : {
+     *                                                                                                                                                                              "sensor" : "sensor_1"
+     *                                                                                                                                                                          },
+     *                                                                                                                                                                          "datapoints":[
+     *                                                                                                                                                                            [622,1450754160000],
+     *                                                                                                                                                                            [365,1450754220000]
+     *                                                                                                                                                                          ]
+     *                                                                                                                                                                        },
+     *                                                                                                                                                                        {
+     *                                                                                                                                                                          "target":"upper_90",
+     *                                                                                                                                                                          "tags" : {
+     *                                                                                                                                                                             "sensor" : "sensor_1"
+     *                                                                                                                                                                          },
+     *                                                                                                                                                                          "datapoints":[
+     *                                                                                                                                                                            [861,1450754160000],
+     *                                                                                                                                                                            [767,1450754220000]
+     *                                                                                                                                                                          ]
+     *                                                                                                                                                                        }
+     *                                                                                                                                                                      ]
+     *                                                                                                                                                                      </pre>
      *                <p>
      *                le champs "tags" n'est retourné que si présent dans la requête.
      * @see <a href="https://grafana.com/grafana/plugins/grafana-simple-json-datasource.">
@@ -354,11 +412,10 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
 
         final QueryRequest request = QueryRequest.builder()
                 .body(bodyDecoded)
-               // .parameters(Multimaps.asMap(context.queryParams()))
                 .build();
 
         // check for handshake query
-        if(request.getQuery().getName().equals("1+1")){
+        if (request.getQuery().getName().equals("1+1")) {
             JsonObject response = new JsonObject()
                     .put(STATUS, SUCCESS)
                     .put(DATA, "2");
@@ -366,61 +423,56 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
             context.response()
                     .setStatusCode(HttpResponseStatus.OK.code())
                     .end(response.encode());
-
             return;
         }
 
-
-
-
-
-
+        // run the query handler
         final JsonObject getTimeSeriesChunkParams = RequestConverter.toGetTimeSeriesRequest(request);
-
-
         Single<JsonObject> rsp = service.rxGetTimeSeries(getTimeSeriesChunkParams);
         rsp.map(timeseries -> {
 
             JsonArray sampledTimeSeries = timeseries.getJsonArray(TIMESERIES);
-            List<JsonObject> timeseriesAsList = sampledTimeSeries.stream().map(timeserieWithoutRefId -> {
-                JsonObject timeserieWithRefIdIfExist = (JsonObject) timeserieWithoutRefId;
-                return timeserieWithRefIdIfExist;
-            }).collect(Collectors.toList());
+            List<JsonObject> timeseriesAsList = sampledTimeSeries.stream()
+                    .map(timeserieWithoutRefId -> (JsonObject) timeserieWithoutRefId).collect(Collectors.toList());
 
 
             if (timeseriesAsList.isEmpty())
                 return new JsonObject()
                         .put(STATUS, "error")
-                        .put(DATA, "no data found for request : " +  request.toString());
+                        .put(DATA, "no data found for request : " + request.toString());
 
-            JsonObject firstEntry = timeseriesAsList.get(0);
-            JsonArray values = new JsonArray();
-            for (int i = 0; i < firstEntry.getJsonArray(DATAPOINTS).size(); i++) {
-                JsonArray point = firstEntry.getJsonArray(DATAPOINTS).getJsonArray(i);
-                values.add(
-                        new JsonArray()
-                                .add(point.getLong(1) / 1000)
-                                .add(point.getDouble(0))
+            JsonArray result = new JsonArray();
+            timeseriesAsList.forEach(ts -> {
+                // setup values
+                JsonArray values = new JsonArray();
+                for (int i = 0; i < ts.getJsonArray(DATAPOINTS).size(); i++) {
+                    JsonArray point = ts.getJsonArray(DATAPOINTS).getJsonArray(i);
+                    values.add(new JsonArray()
+                            .add(point.getLong(1) / 1000)
+                            .add(point.getDouble(0))
+                    );
+                }
+
+                // setup name
+                JsonObject metric = new JsonObject()
+                        .put("__name__", ts.getString("name"));
+
+                // setup tags
+                ts.getJsonObject("tags").stream()
+                        .forEach( kv -> metric.put(kv.getKey(), kv.getValue()));
+
+                result.add(new JsonObject()
+                        .put("metric", metric)
+                        .put("values", values)
                 );
-            }
+            });
 
-            JsonObject metric = new JsonObject()
-                    .put("__name__",request.getQuery().getName());
-            request.getQuery()
-                    .getTags()
-                    .keySet()
-                    .forEach(key -> metric.put(key, request.getQuery().getTags().get(key)));
 
             return new JsonObject()
                     .put(STATUS, SUCCESS)
                     .put(DATA, new JsonObject()
                             .put("resultType", "matrix")
-                            .put("result", new JsonArray()
-                                    .add(new JsonObject()
-                                            .put("metric", metric)
-                                            .put("values", values)
-                                    )
-                            )
+                            .put("result", result)
                     );
         })
                 .doOnError(ex -> {
@@ -446,28 +498,28 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
      *
      * @param context Expected request exemple :
      *                <pre>
-     *                                                                                                                                        {
-     *                                                                                                                                            "from": "2020-2-14T01:43:14.070Z",
-     *                                                                                                                                            "to": "2020-2-14T06:50:14.070Z",
-     *                                                                                                                                            "limit" : 100,
-     *                                                                                                                                            "tags": ["tag1", "tag2"],
-     *                                                                                                                                            "matchAny": false,
-     *                                                                                                                                            "type": "tags"
-     *                                                                                                                                        }
-     *                                                                                                                                        </pre>
+     *                                                                                                                                                                      {
+     *                                                                                                                                                                          "from": "2020-2-14T01:43:14.070Z",
+     *                                                                                                                                                                          "to": "2020-2-14T06:50:14.070Z",
+     *                                                                                                                                                                          "limit" : 100,
+     *                                                                                                                                                                          "tags": ["tag1", "tag2"],
+     *                                                                                                                                                                          "matchAny": false,
+     *                                                                                                                                                                          "type": "tags"
+     *                                                                                                                                                                      }
+     *                                                                                                                                                                      </pre>
      *                response Exemple :
      *                <pre>
-     *                                                                                                                                        {
-     *                                                                                                                                          "annotations" : [
-     *                                                                                                                                            {
-     *                                                                                                                                              "time": 1581648194070,
-     *                                                                                                                                              "text": "annotation 1",
-     *                                                                                                                                              "tags": ["tag1","tag2"]
-     *                                                                                                                                            }
-     *                                                                                                                                          ],
-     *                                                                                                                                          "total_hit" : 1
-     *                                                                                                                                        }
-     *                                                                                                                                        </pre>
+     *                                                                                                                                                                      {
+     *                                                                                                                                                                        "annotations" : [
+     *                                                                                                                                                                          {
+     *                                                                                                                                                                            "time": 1581648194070,
+     *                                                                                                                                                                            "text": "annotation 1",
+     *                                                                                                                                                                            "tags": ["tag1","tag2"]
+     *                                                                                                                                                                          }
+     *                                                                                                                                                                        ],
+     *                                                                                                                                                                        "total_hit" : 1
+     *                                                                                                                                                                      }
+     *                                                                                                                                                                      </pre>
      * @see <a href="https://grafana.com/grafana/plugins/grafana-simple-json-datasource.">
      * https://grafana.com/grafana/plugins/grafana-simple-json-datasource.
      * </a>

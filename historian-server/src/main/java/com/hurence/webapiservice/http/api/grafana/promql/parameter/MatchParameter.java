@@ -35,18 +35,31 @@ public class MatchParameter {
             if(!parameters.containsKey(MATCH))
                 throw new IllegalArgumentException(MATCH + " key not found in parameters");
 
-            String[] matches = parameters.get(MATCH)
+            StringBuilder luceneQueryBuilder = new StringBuilder();
+            String matchQuery = parameters.get(MATCH);
+            int firstBracket = matchQuery.indexOf("{");
+
+            if(firstBracket!=0){
+                name = PromQLSynonymLookup.getOriginalName(matchQuery.substring(0,firstBracket));
+                luceneQueryBuilder.append(String.format("name:%s", name));
+                matchQuery = matchQuery.substring(firstBracket);
+            }
+
+            String[] matches = matchQuery
                     .replaceAll("\\{", "")
                     .replaceAll("\\}", "")
                     .split(",");
 
-            StringBuilder luceneQueryBuilder = new StringBuilder();
+
             for (String m : matches) {
                 String[] arg = m.split("=");
                 String key = arg[0];
                 String value = arg[1].replaceAll("\"", "");
                 if(value.contains(" "))
                     value = String.format("\"%s\"", value);
+
+                if(value.equals("~.*") || value.equals("~.+"))
+                    value = "*";
 
                 if(key.equals(__NAME__)){
                     name = PromQLSynonymLookup.getOriginalName(value);
@@ -58,7 +71,7 @@ public class MatchParameter {
                     tags.put(key, value);
                     if (luceneQueryBuilder.length() != 0)
                         luceneQueryBuilder.append(" AND");
-                    luceneQueryBuilder.append(String.format(" %s:%s", key, value));
+                    luceneQueryBuilder.append(String.format(" %s:\"%s\"", key, value));
                 }
             }
             luceneQuery = luceneQueryBuilder.toString().trim();

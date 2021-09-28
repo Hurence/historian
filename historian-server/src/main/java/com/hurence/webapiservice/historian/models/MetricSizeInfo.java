@@ -22,14 +22,14 @@ public class MetricSizeInfo {
     }
 
     public long totalNumberOfPointsToReturn(){
-        if (metricRequest.getQuality().getQualityValue().isNaN())
+        if (metricRequest.getQualityConfig().getQualityValue().isNaN())
             return totalNumberOfPoints;
         else
             return totalNumberOfPointsWithCorrectQuality;
     }
 
     public long totalNumberOfChunksToReturn(){
-        if (metricRequest.getQuality().getQualityValue().isNaN())
+        if (metricRequest.getQualityConfig().getQualityValue().isNaN())
             return totalNumberOfChunks;
         else
             return totalNumberOfChunksWithCorrectQuality;

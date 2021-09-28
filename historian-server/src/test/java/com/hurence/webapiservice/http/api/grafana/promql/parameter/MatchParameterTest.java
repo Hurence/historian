@@ -57,4 +57,47 @@ class MatchParameterTest {
 
         assertEquals("name:U004_TC01 AND sample:true AND sub_unit:reacteur1_coquille1 AND type:temperature", parameter.getLuceneQuery());
     }
+
+    @Test
+    void testLuceneQueryWithWildcards() {
+
+        Map<String, String> query = ImmutableMap.of(
+                MATCH,
+                "{__name__=\"U004_TC01\",sample=\"true\",sub_unit=~\".*\",type=\"temperature\"}");
+
+        MatchParameter parameter = MatchParameter.builder()
+                .parameters(query)
+                .build();
+
+        assertEquals("name:U004_TC01 AND sample:true AND sub_unit:* AND type:temperature", parameter.getLuceneQuery());
+
+
+        Map<String, String> query2 = ImmutableMap.of(
+                MATCH,
+                "{__name__=\"U004_TC01\",sample=\"true\",sub_unit=~\".+\",type=\"temperature\"}");
+
+        MatchParameter parameter2 = MatchParameter.builder()
+                .parameters(query2)
+                .build();
+
+        assertEquals("name:U004_TC01 AND sample:true AND sub_unit:* AND type:temperature", parameter2.getLuceneQuery());
+
+    }
+
+    @Test
+    void testLuceneQuery2() {
+
+        Map<String, String> query = ImmutableMap.of(
+                MATCH,
+                "solr_collections_shard_state{zk_host=~\".*\",collection=~\".+\"}");
+
+        MatchParameter parameter = MatchParameter.builder()
+                .parameters(query)
+                .build();
+
+        assertEquals("name:solr_collections_shard_state AND zk_host:* AND collection:*", parameter.getLuceneQuery());
+
+
+    }
+
 }

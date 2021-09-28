@@ -261,4 +261,12 @@ public class SolrHistorianServiceImpl implements HistorianService {
         vertx.executeBlocking(handler, resultHandler);
         return this;
     }
+
+    @Override
+    public HistorianService getLabelNameValues(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler) {
+        GetLabelHandler requestHandler = new GetLabelHandler(solrHistorianConf);
+        Handler<Promise<JsonArray>> handler = requestHandler.getHandler(params);
+        vertx.executeBlocking(handler, resultHandler);
+        return this;
+    }
 }

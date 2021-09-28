@@ -2,7 +2,6 @@ package com.hurence.webapiservice.historian.handler;
 
 import com.hurence.historian.model.HistorianServiceFields;
 import com.hurence.timeseries.model.Chunk;
-import com.hurence.webapiservice.http.api.grafana.promql.converter.PromQLSynonymLookup;
 import com.hurence.webapiservice.historian.SolrHistorianConf;
 import io.vertx.core.Handler;
 import io.vertx.core.Promise;
@@ -21,13 +20,13 @@ import java.util.Set;
 
 import static com.hurence.timeseries.model.Definitions.*;
 
-public class GetLabelsHandler {
+public class GetLabelHandler {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(GetLabelsHandler.class);
+    private static Logger LOGGER = LoggerFactory.getLogger(GetLabelHandler.class);
     SolrHistorianConf solrHistorianConf;
 
 
-    public GetLabelsHandler(SolrHistorianConf solrHistorianConf) {
+    public GetLabelHandler(SolrHistorianConf solrHistorianConf) {
         this.solrHistorianConf = solrHistorianConf;
     }
 
@@ -51,13 +50,16 @@ public class GetLabelsHandler {
                     dateRange = String.format("%s:[* TO %d]", SOLR_COLUMN_START, to);
                 }
 
+
+                String name = (String) params.getValue("name") ;
+                String facetFieldName = (name == null || name.equals("__name__")) ? SOLR_COLUMN_NAME : name;
                 final SolrQuery query = new SolrQuery();
                 query.setQuery(dateRange);
                 query.setRows(0);
                 query.setFacet(true);
                 query.setFacetMinCount(1);
                 query.setFacetLimit(10000);
-                query.addFacetField(SOLR_COLUMN_METRIC_KEY);
+                query.addFacetField( facetFieldName );
                 query.setFacetSort("index");
 
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);
@@ -66,26 +68,12 @@ public class GetLabelsHandler {
                 JsonArray data = new JsonArray();
                 Set<String> uniqueSynonymNames = new HashSet<>();
 
-                FacetField facetField = response.getFacetField(SOLR_COLUMN_METRIC_KEY);
+                FacetField facetField = response.getFacetField(facetFieldName);
                 if (facetField == null || facetField.getValues() == null) {
                     LOGGER.warn("unable to retrieve any labels from facet : {}", query.toQueryString());
                 } else {
                     facetField.getValues().forEach(count -> {
-
-                        String name = count.getName();
-                        try{
-                            Chunk.MetricKey metricKey = Chunk.MetricKey.parse(name);
-                        /*  String synonymName = PromQLSynonymLookup.getSynonymName(count.getName());
-                      if(!synonymName.equals(count.getName()))
-                            uniqueSynonymNames.add(synonymName);*/
-
-                            uniqueSynonymNames.addAll(metricKey.getTagKeys());
-                        }catch (Exception e){
-                            LOGGER.debug("error parsing metric key, {}", name);
-                        }
-
-
-
+                        uniqueSynonymNames.add(count.getName());
                     });
                     uniqueSynonymNames.forEach(data::add);
                 }

@@ -235,4 +235,7 @@ public interface HistorianService {
 
     @Fluent
     HistorianService getLabels(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler);
+
+    @Fluent
+    HistorianService getLabelNameValues(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler);
 }

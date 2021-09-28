@@ -84,7 +84,7 @@ public class QueryParameter {
                         String[] tag = t.split("=");
 
                         String tagName = tag[0];
-                        String tagValue = tag[1].replaceAll("\"", "");
+                        String tagValue = tag[1].replaceAll("\"", "").replaceAll("~.", "");
                         if (tagName.equalsIgnoreCase(SAMPLING_ALGO)) {
                             try {
                                 sampling.setAlgo(SamplingAlgorithm.valueOf(tagValue.toUpperCase()));
@@ -97,7 +97,7 @@ public class QueryParameter {
                             } catch (Exception ex) {
                                 LOGGER.warn("unable to parse bucket size : " + tagValue);
                             }
-                        } else {
+                        } else if(!tagValue.equalsIgnoreCase("*")){
                             tags.put(tagName, tagValue);
                         }
                     }
