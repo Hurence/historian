@@ -122,7 +122,7 @@ public class NumberOfPointsWithQualityOkByMetricHelperImpl implements NumberOfPo
                     conditionForOneMetricRequest.append("eq("+tagName+","+tagValue+"), ")
             );
             conditionForOneMetricRequest.append("gteq("+ getAggFieldForFilteringQuality()+","
-                    +metricRequest.getQuality().getQualityValue().toString()+"))");
+                    +metricRequest.getQualityConfig().getQualityValue().toString()+"))");
             isQualityOkList.add(conditionForOneMetricRequest.toString());
         });
         return isQualityOkList;

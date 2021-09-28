@@ -9,12 +9,12 @@ import java.util.Objects;
 public class MetricRequest {
     private final String name;
     private final Map<String, String> tags;
-    private final QualityConfig quality;
+    private final QualityConfig qualityConfig;
 
-    public MetricRequest(String name, Map<String, String> tags, QualityConfig quality) {
+    public MetricRequest(String name, Map<String, String> tags, QualityConfig qualityConfig) {
         this.name = name;
         this.tags = tags;
-        this.quality = quality;
+        this.qualityConfig = qualityConfig;
     }
 
     public String getName() {
@@ -32,7 +32,7 @@ public class MetricRequest {
             return "";
     }
 
-    public QualityConfig getQuality() { return quality; }
+    public QualityConfig getQualityConfig() { return qualityConfig; }
 
     @Override
     public String toString() {
@@ -49,12 +49,12 @@ public class MetricRequest {
         MetricRequest that = (MetricRequest) o;
         return Objects.equals(name, that.name) &&
                 Objects.equals(tags, that.tags) &&
-                Objects.equals(quality, that.quality);
+                Objects.equals(qualityConfig, that.qualityConfig);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name, tags, quality);
+        return Objects.hash(name, tags, qualityConfig);
     }
 
     /**
@@ -68,7 +68,7 @@ public class MetricRequest {
         if (!getName().equals(chunkName)) {
             return false;
         }
-        if (getQuality() != null && !getQuality().matchChunk(chunk)) {
+        if (getQualityConfig() != null && !getQualityConfig().matchChunk(chunk)) {
             return false;
         }
         boolean isChunkMatching = true;

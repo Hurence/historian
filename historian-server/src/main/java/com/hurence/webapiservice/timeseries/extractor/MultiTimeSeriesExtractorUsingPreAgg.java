@@ -15,6 +15,6 @@ public class MultiTimeSeriesExtractorUsingPreAgg extends MultiTimeSeriesExtracte
     @Override
     protected TimeSeriesExtracter createTimeSeriesExtractor(MetricRequest metricRequest) {
         return new TimeSeriesExtracterUsingPreAgg(from, to, samplingConf, totalNumberOfPointByMetrics.get(metricRequest), aggregList,
-                returnQuality, metricRequest.getQuality().getQualityAgg());
+                returnQuality, metricRequest.getQualityConfig().getQualityAgg());
     }
 }

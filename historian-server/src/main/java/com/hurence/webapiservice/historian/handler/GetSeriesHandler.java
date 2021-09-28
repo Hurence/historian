@@ -52,7 +52,7 @@ public class GetSeriesHandler {
                                     .put(synonymsTags.get(tag), tag))
                     );
                 } else {
-                    LOGGER.debug("looking for tags in solr :{}", synonymName);
+                    LOGGER.debug("looking for tags in solr : {}", synonymName);
                     final SolrQuery tagNamesQuery = buildTagNamesQuery(params);
                     final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, tagNamesQuery);
                     List<SolrDocument> solrDocuments = new ArrayList<>(response.getResults());

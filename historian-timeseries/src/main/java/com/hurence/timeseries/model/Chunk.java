@@ -163,6 +163,8 @@ public class Chunk implements Serializable, ChunkClusterable {
         public ChunkBuilder buildId() {
             StringBuilder newId = new StringBuilder();
 
+            newId.append(start).append(end);
+
             if (tags == null) {
                 // Workaround to initializer not working with lombok:
                 // If we declare tags like this:
@@ -172,11 +174,11 @@ public class Chunk implements Serializable, ChunkClusterable {
                 // java: non-static variable tags cannot be referenced from a static context
                 tags = new HashMap<String, String>();
             }
-            for ( String key : tags.keySet()){
+            for (String key : tags.keySet()) {
                 tags.putIfAbsent(key, "null");
             }
 
-            for(String key : tags.keySet()){
+            for (String key : tags.keySet()) {
                 tags.putIfAbsent(key, "null");
             }
 
@@ -353,9 +355,15 @@ public class Chunk implements Serializable, ChunkClusterable {
                         } else {
                             stringBuilder.append(" null");
                         }
-                        throw new IllegalArgumentException("tag component has wrong format:" + stringBuilder);
+
+                        // sometimes there's no value for one key. this is real life :)
+                        if (tagAndValue.length == 1)
+                            tags.put(tagAndValue[0], "");
+                        else
+                            throw new IllegalArgumentException("tag component has wrong format:" + stringBuilder);
+                    } else {
+                        tags.put(tagAndValue[0], tagAndValue[1]);
                     }
-                    tags.put(tagAndValue[0], tagAndValue[1]);
                 }
                 return new MetricKey(name, tags);
             }

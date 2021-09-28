@@ -25,7 +25,8 @@ public class RequestConverter {
     public static JsonObject toGetLabelsParameters(LabelsRequest request) {
         return new JsonObject()
                 .put(FROM, request.getStart())
-                .put(TO, request.getEnd());
+                .put(TO, request.getEnd())
+                .put(NAME, request.getName());
     }
 
     public static JsonObject toGetSeriesParameters(SeriesRequest request) {

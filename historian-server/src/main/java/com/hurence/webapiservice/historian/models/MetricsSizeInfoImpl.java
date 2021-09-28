@@ -52,16 +52,16 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
     /**
      * increase the number of point of MetricSizeInfo corresponding to this metricRequest if it already exist otherwise add a
      * new MetricSizeInfo with this metricRequest initialized with numberOfPoints.
-     * @param metric
+     * @param metricRequest
      * @param numberOfPoints
      */
-    public void increaseNumberOfPointsForMetricRequest(MetricRequest metric, long numberOfPoints) {
-        if (metricsInfo.containsKey(metric)) {
-            metricsInfo.get(metric).totalNumberOfPoints += numberOfPoints;
+    public void increaseNumberOfPointsForMetricRequest(MetricRequest metricRequest, long numberOfPoints) {
+        if (metricsInfo.containsKey(metricRequest)) {
+            metricsInfo.get(metricRequest).totalNumberOfPoints += numberOfPoints;
         } else {
             MetricSizeInfo metricInfo = new MetricSizeInfo();
             metricInfo.totalNumberOfPoints = numberOfPoints;
-            metricInfo.metricRequest = metric;
+            metricInfo.metricRequest = metricRequest;
             setMetricInfo(metricInfo);
         }
     }
@@ -69,42 +69,26 @@ public class MetricsSizeInfoImpl implements MetricsSizeInfo {
     /**
      * increase the number of chunks of MetricSizeInfo corresponding to this metricRequest if it already exist otherwise add a
      * new MetricSizeInfo with this metricRequest initialized with numberOfChunks.
-     * @param metric
-     */
-    public void increaseNumberOfChunksForMetricRequest(MetricRequest metric) {
-        if (metricsInfo.containsKey(metric)) {
-            metricsInfo.get(metric).totalNumberOfChunks += 1;
-        } else {
-            MetricSizeInfo metricInfo = new MetricSizeInfo();
-            metricInfo.totalNumberOfChunks = 1;
-            metricInfo.metricRequest = metric;
-            setMetricInfo(metricInfo);
-        }
-    }
-
-    /**
-     * increase the number of chunks of MetricSizeInfo corresponding to this metricRequest if it already exist otherwise add a
-     * new MetricSizeInfo with this metricRequest initialized with numberOfChunks.
-     * @param metric
+     * @param metricRequest
      * @param numberOfChunks
      */
-    public void increaseNumberOfChunksForMetricRequest(MetricRequest metric, long numberOfChunks) {
-        if (metricsInfo.containsKey(metric)) {
-            metricsInfo.get(metric).totalNumberOfChunks += numberOfChunks;;
+    public void increaseNumberOfChunksForMetricRequest(MetricRequest metricRequest, long numberOfChunks) {
+        if (metricsInfo.containsKey(metricRequest)) {
+            metricsInfo.get(metricRequest).totalNumberOfChunks += numberOfChunks;;
         } else {
             MetricSizeInfo metricInfo = new MetricSizeInfo();
             metricInfo.totalNumberOfChunks = numberOfChunks;;
-            metricInfo.metricRequest = metric;
+            metricInfo.metricRequest = metricRequest;
             setMetricInfo(metricInfo);
         }
     }
 
-    public void increaseNumberOfChunksWithQualityOkForMetricRequest(MetricRequest metric, long numberOfChunksWithCorrectQuality) {
-        metricsInfo.get(metric).totalNumberOfChunksWithCorrectQuality += numberOfChunksWithCorrectQuality;
+    public void increaseNumberOfChunksWithQualityOkForMetricRequest(MetricRequest metricRequest, long numberOfChunksWithCorrectQuality) {
+        metricsInfo.get(metricRequest).totalNumberOfChunksWithCorrectQuality += numberOfChunksWithCorrectQuality;
     }
 
-    public void increaseNumberOfPointsWithQualityOkForMetricRequest(MetricRequest metric, long numberOfPointsWithCorrectQuality) {
-        metricsInfo.get(metric).totalNumberOfPointsWithCorrectQuality += numberOfPointsWithCorrectQuality;
+    public void increaseNumberOfPointsWithQualityOkForMetricRequest(MetricRequest metricRequest, long numberOfPointsWithCorrectQuality) {
+        metricsInfo.get(metricRequest).totalNumberOfPointsWithCorrectQuality += numberOfPointsWithCorrectQuality;
     }
 
     @Override

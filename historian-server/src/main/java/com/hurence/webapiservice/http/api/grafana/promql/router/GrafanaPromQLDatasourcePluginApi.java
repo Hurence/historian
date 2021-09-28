@@ -7,7 +7,8 @@ import io.vertx.reactivex.ext.web.RoutingContext;
 public interface GrafanaPromQLDatasourcePluginApi {
 
     String RULES_ENDPOINT = "/rules";
-    String LABELS_ENDPOINT = "/label/__name__/values";
+    String LABELS = "/labels";
+    String LABEL_NAME_VALUES = "/label/:name/values";
     String QUERY_ENDPOINT = "/query";
     String QUERY_EXEMPLARS_ENDPOINT = "/query_exemplars";
     String QUERY_RANGE_ENDPOINT = "/query_range";
@@ -20,7 +21,10 @@ public interface GrafanaPromQLDatasourcePluginApi {
         router.get(RULES_ENDPOINT)
                 .produces("application/json")
                 .handler(this::rules);
-        router.get(LABELS_ENDPOINT)
+        router.get(LABEL_NAME_VALUES)
+                .produces("application/json")
+                .handler(this::labelNameValues);
+        router.post(LABELS)
                 .produces("application/json")
                 .handler(this::labels);
         router.post(QUERY_ENDPOINT)
@@ -51,6 +55,9 @@ public interface GrafanaPromQLDatasourcePluginApi {
     /**
      * should return label values based on input.
      */
+    void labelNameValues(RoutingContext context);
+
+
     void labels(RoutingContext context);
 
     /**

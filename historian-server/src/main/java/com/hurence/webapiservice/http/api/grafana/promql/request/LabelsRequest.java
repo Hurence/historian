@@ -17,6 +17,7 @@ import static com.hurence.historian.model.HistorianServiceFields.*;
 public class LabelsRequest {
 
 
+    private String name;
     private Long start;
     private Long end;
     private ErrorParameter errors;
@@ -37,6 +38,12 @@ public class LabelsRequest {
 
             try {
                 end = Long.parseLong(parameters.get(END)) * 1000;
+            } catch (Exception exception) {
+                errors.addError(exception);
+            }
+
+            try {
+                name = parameters.get(NAME);
             } catch (Exception exception) {
                 errors.addError(exception);
             }

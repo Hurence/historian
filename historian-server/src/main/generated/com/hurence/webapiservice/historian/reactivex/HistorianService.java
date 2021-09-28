@@ -222,6 +222,17 @@ public class HistorianService {
     });
   }
 
+  public com.hurence.webapiservice.historian.reactivex.HistorianService getLabelNameValues(JsonObject params, Handler<AsyncResult<JsonArray>> resultHandler) { 
+    delegate.getLabelNameValues(params, resultHandler);
+    return this;
+  }
+
+  public Single<JsonArray> rxGetLabelNameValues(JsonObject params) { 
+    return io.vertx.reactivex.impl.AsyncResultSingle.toSingle(handler -> {
+      getLabelNameValues(params, handler);
+    });
+  }
+
 
   public static  HistorianService newInstance(com.hurence.webapiservice.historian.HistorianService arg) {
     return arg != null ? new HistorianService(arg) : null;
