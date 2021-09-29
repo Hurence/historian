@@ -7,7 +7,12 @@ import com.hurence.webapiservice.http.api.grafana.promql.request.QueryRequest;
 import org.junit.jupiter.api.Test;
 
 
+import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.hurence.historian.model.HistorianServiceFields.*;
@@ -158,23 +163,23 @@ class QueryParameterTest {
         assertEquals("aze", parameter.getTags().get("measure"));
         assertEquals(1, parameter.getTags().size());
 
-        assertEquals( SamplingAlgorithm.MIN, parameter.getSampling().getAlgo());
-        assertEquals( 100, parameter.getSampling().getBucketSize());
+        assertEquals(SamplingAlgorithm.MIN, parameter.getSampling().getAlgo());
+        assertEquals(100, parameter.getSampling().getBucketSize());
 
         String query2 = "T473.SC02_OP.F_CV{ measure=\"aze\", sampling_algo=\"MINz\", bucket_size=\"100\" }";
         QueryParameter parameter2 = QueryParameter.builder()
                 .parse(query2)
                 .build();
 
-        assertEquals( SamplingAlgorithm.NONE, parameter2.getSampling().getAlgo());
-        assertEquals( 100, parameter2.getSampling().getBucketSize());
+        assertEquals(SamplingAlgorithm.NONE, parameter2.getSampling().getAlgo());
+        assertEquals(100, parameter2.getSampling().getBucketSize());
 
         String query3 = "T473.SC02_OP.F_CV{  sampling_algo=\"max\" }";
         QueryParameter parameter3 = QueryParameter.builder()
                 .parse(query3)
                 .build();
 
-        assertEquals( SamplingAlgorithm.MAX, parameter3.getSampling().getAlgo());
+        assertEquals(SamplingAlgorithm.MAX, parameter3.getSampling().getAlgo());
     }
 
 
@@ -192,5 +197,51 @@ class QueryParameterTest {
                 .build();
 
         assertFalse(request.getErrors().error.isEmpty());
+    }
+
+
+    @Test
+    void testRangeDuration() {
+
+        String query = "increase(node_cpu_seconds_total{ measure=\"aze\", sampling_algo=\"MIN\"}[1h])";
+        RangeDuration rangeDuration = RangeDuration.builder().parse(query).build();
+
+        QueryParameter queryParameter = QueryParameter.builder().parse(query).build();
+
+        assertEquals(SamplingAlgorithm.MIN, queryParameter.getSampling().getAlgo());
+        assertEquals(1, queryParameter.getSampling().getBucketSize());
+        assertEquals(Duration.ofHours(1), queryParameter.getRangeDuration().getDuration());
+        assertEquals(AggregationOperator.INCREASE, queryParameter.getAggregationOperator().get());
+        assertEquals("aze", queryParameter.getTags().get("measure"));
+    }
+
+        @Test
+    void multiplePromQLQueries() {
+
+        List<String> queries = Arrays.asList(
+                "node_cpu_seconds_total",
+                "node_cpu_seconds_total[5m]",
+                "node_cpu_seconds_total{cpu=\"15\",mode=\"idle\"}",
+                "node_cpu_seconds_total{cpu=\"15\",mode=\"idle\"}[5m]",
+                "sum(node_cpu_seconds_total{cpu=\"45\",mode=\"idle\"}[5m])",
+                "node_cpu_seconds_total{cpu!=\"0\",mode=~\"user|system\"}",
+                "sum(node_cpu_seconds_total)",
+                "rate(node_cpu_seconds_total[5m])",
+                "increase(node_cpu_seconds_total[1h])"/*,
+                "node_cpu_seconds_total offset 1d",
+                "sum by(job, instance) (node_cpu_seconds_total)",
+                "sum without(instance, job) (node_cpu_seconds_total)"*/
+                );
+
+        List<QueryParameter> queryParameters = queries.stream()
+                .map(q -> QueryParameter.builder().parse(q).build())
+                .collect(Collectors.toList());
+        int size = queries.size();
+
+        String METRIC_NAME = "node_cpu_seconds_total";
+        for (int i = 0; i < size; i++) {
+            assertEquals(METRIC_NAME, queryParameters.get(i).getName());
+        }
+
     }
 }
