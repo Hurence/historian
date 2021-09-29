@@ -20,7 +20,10 @@ public enum AggregationOperator {
     GROUP("group"),
     BOTTOMK("bottomk"),
     TOPK("topk"),
-    QUANTILE("quantile");
+    QUANTILE("quantile"),
+    PREDICT_ARIMA("predict_arima"),
+    RATE("rate"),
+    INCREASE("increase");
 
     public final String label;
 

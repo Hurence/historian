@@ -6,9 +6,11 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.reactivex.ext.web.RoutingContext;
 import lombok.Builder;
 import lombok.Data;
+import org.joda.time.convert.DurationConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -31,6 +33,8 @@ public class QueryParameter {
     // NONE, FIRST, AVERAGE, MODE_MEDIAN, LTTB, MIN_MAX, MIN, MAX
     private SamplingConf sampling;
     private Boolean quality;
+
+    private RangeDuration rangeDuration;
 
 
     public String toQueryString() {
@@ -58,6 +62,9 @@ public class QueryParameter {
 
         public QueryParameterBuilder parse(String queryStr) {
 
+            // first get and remove duration
+            rangeDuration = RangeDuration.builder().parse(queryStr).build();
+            queryStr = rangeDuration.getQueryWithoutDuration();
 
             queryStr = queryStr
                     .replaceAll("\\{\\s+", "{")
@@ -74,6 +81,7 @@ public class QueryParameter {
                         .replace(")", "");
 
             Matcher matcher = pattern.matcher(queryStr);
+
 
             if (matcher.matches()) {
                 name = matcher.group(1);
