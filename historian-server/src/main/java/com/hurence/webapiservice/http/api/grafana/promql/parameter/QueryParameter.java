@@ -1,16 +1,13 @@
 package com.hurence.webapiservice.http.api.grafana.promql.parameter;
 
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.webapiservice.http.api.grafana.promql.function.TimeserieFunctionType;
 import com.hurence.webapiservice.modele.SamplingConf;
-import io.vertx.core.json.JsonObject;
-import io.vertx.reactivex.ext.web.RoutingContext;
 import lombok.Builder;
 import lombok.Data;
-import org.joda.time.convert.DurationConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,10 +22,9 @@ import static com.hurence.historian.model.HistorianServiceFields.*;
 @Builder
 public class QueryParameter {
 
-    private List<String> keys;
     private String name;
     private Map<String, String> tags;
-    private Optional<AggregationOperator> aggregationOperator;
+    private Optional<TimeserieFunctionType> aggregationOperator;
 
     // NONE, FIRST, AVERAGE, MODE_MEDIAN, LTTB, MIN_MAX, MIN, MAX
     private SamplingConf sampling;
@@ -55,7 +51,7 @@ public class QueryParameter {
     public static class QueryParameterBuilder {
         private Map<String, String> tags = new TreeMap<>();
         private SamplingConf sampling = new SamplingConf(SamplingAlgorithm.NONE, 1, 1440);
-        private Optional<AggregationOperator> aggregationOperator = Optional.empty();
+        private Optional<TimeserieFunctionType> aggregationOperator = Optional.empty();
 
         private static final Logger LOGGER = LoggerFactory.getLogger(QueryParameterBuilder.class);
         private static Pattern pattern = Pattern.compile("(\\S+)\\{(\\S+)?\\}");
@@ -71,7 +67,7 @@ public class QueryParameter {
                     .replaceAll("\\s+\\}", "}")
                     .replaceAll(",\\s+", ",")
                     .replaceAll("\\s+", ",");
-            aggregationOperator = AggregationOperator.findMatching(queryStr);
+            aggregationOperator = TimeserieFunctionType.findMatching(queryStr);
 
             // remove operator
             if (aggregationOperator.isPresent())

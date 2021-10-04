@@ -3,6 +3,7 @@ package com.hurence.webapiservice.http.api.grafana.promql.parameter;
 import com.google.common.collect.ImmutableMap;
 
 import com.hurence.timeseries.sampling.SamplingAlgorithm;
+import com.hurence.webapiservice.http.api.grafana.promql.function.TimeserieFunctionType;
 import com.hurence.webapiservice.http.api.grafana.promql.request.QueryRequest;
 import org.junit.jupiter.api.Test;
 
@@ -12,7 +13,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.hurence.historian.model.HistorianServiceFields.*;
@@ -203,7 +203,7 @@ class QueryParameterTest {
     @Test
     void testRangeDuration() {
 
-        String query = "increase(node_cpu_seconds_total{ measure=\"aze\", sampling_algo=\"MIN\"}[1h])";
+        String query = "abs(node_cpu_seconds_total{ measure=\"aze\", sampling_algo=\"MIN\"}[1h])";
         RangeDuration rangeDuration = RangeDuration.builder().parse(query).build();
 
         QueryParameter queryParameter = QueryParameter.builder().parse(query).build();
@@ -211,7 +211,7 @@ class QueryParameterTest {
         assertEquals(SamplingAlgorithm.MIN, queryParameter.getSampling().getAlgo());
         assertEquals(1, queryParameter.getSampling().getBucketSize());
         assertEquals(Duration.ofHours(1), queryParameter.getRangeDuration().getDuration());
-        assertEquals(AggregationOperator.INCREASE, queryParameter.getAggregationOperator().get());
+        assertEquals(TimeserieFunctionType.ABS, queryParameter.getAggregationOperator().get());
         assertEquals("aze", queryParameter.getTags().get("measure"));
     }
 
