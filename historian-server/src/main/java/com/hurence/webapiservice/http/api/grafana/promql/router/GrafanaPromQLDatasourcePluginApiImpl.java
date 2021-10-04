@@ -4,6 +4,9 @@ package com.hurence.webapiservice.http.api.grafana.promql.router;
 import com.google.common.collect.Multimaps;
 import com.hurence.webapiservice.historian.reactivex.HistorianService;
 import com.hurence.webapiservice.http.api.grafana.promql.converter.RequestConverter;
+import com.hurence.webapiservice.http.api.grafana.promql.function.TimeserieFunctionFactory;
+import com.hurence.webapiservice.http.api.grafana.promql.function.TimeserieFunctionType;
+import com.hurence.webapiservice.http.api.grafana.promql.function.TimeseriesFunction;
 import com.hurence.webapiservice.http.api.grafana.promql.request.LabelsRequest;
 import com.hurence.webapiservice.http.api.grafana.promql.request.QueryRequest;
 import com.hurence.webapiservice.http.api.grafana.promql.request.SeriesRequest;
@@ -432,17 +435,29 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
         rsp.map(timeseries -> {
 
             JsonArray sampledTimeSeries = timeseries.getJsonArray(TIMESERIES);
-            List<JsonObject> timeseriesAsList = sampledTimeSeries.stream()
-                    .map(timeserieWithoutRefId -> (JsonObject) timeserieWithoutRefId).collect(Collectors.toList());
 
-
-            if (timeseriesAsList.isEmpty())
+            // if there's no data
+            if (sampledTimeSeries.isEmpty())
                 return new JsonObject()
                         .put(STATUS, "error")
                         .put(DATA, "no data found for request : " + request.toString());
 
+            // check if we need to process timeseries function
+            Optional<TimeserieFunctionType> functionType = request.getQuery().getAggregationOperator();
+            if(functionType.isPresent()){
+                TimeseriesFunction function = TimeserieFunctionFactory.getInstance(functionType.get());
+                sampledTimeSeries = function.process(sampledTimeSeries);
+            }
+
+            List<JsonObject> timeseriesAsList = sampledTimeSeries.stream()
+                    .map(timeserieWithoutRefId -> (JsonObject) timeserieWithoutRefId)
+                    .collect(Collectors.toList());
+
             JsonArray result = new JsonArray();
-            timeseriesAsList.forEach(ts -> {
+            sampledTimeSeries.forEach(timeserieWithoutRefId -> {
+
+                JsonObject ts = (JsonObject) timeserieWithoutRefId;
+
                 // setup values
                 JsonArray values = new JsonArray();
                 for (int i = 0; i < ts.getJsonArray(DATAPOINTS).size(); i++) {
