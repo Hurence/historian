@@ -83,7 +83,7 @@ class ChunkyfierTests extends SparkSessionTestWrapper {
 
   def checkChunkNoTags(chunktoCheck: Chunk) = {
 
-    assertEquals("a2c2bb92ab5e8a233ee495c8a0d860a33f2d128dcdd3f673641ba36d291a44b3", chunktoCheck.getId);
+    assertEquals("0b62bd7fc29fb65a7b1b75531a8419ab1af4bab5d3c28bccf6000648d1191b2b", chunktoCheck.getId);
     assertEquals("ack", chunktoCheck.getMetricKey);
 
     assertEquals(1574985682000L, chunktoCheck.getStart)

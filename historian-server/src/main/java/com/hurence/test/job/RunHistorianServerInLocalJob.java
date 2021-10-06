@@ -47,7 +47,7 @@ public class RunHistorianServerInLocalJob {
                         .put(WebApiServiceMainVerticle.CONFIG_HISTORIAN_ROOT, historianConf)
                         .put("historian.metric_name_lookup.csv_file.path", "/Users/tom/Documents/workspace/ifpen/data-historian/conf/synonyms.csv")
                         .put("historian.metric_name_lookup.csv_file.separator", ";")
-                        .put("historian.metric_name_lookup.enabled", true)
+                        .put("historian.metric_name_lookup.enabled", false)
         );
     }
 

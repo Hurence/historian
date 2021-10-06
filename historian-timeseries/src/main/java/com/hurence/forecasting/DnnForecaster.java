@@ -1,5 +1,5 @@
 package com.hurence.forecasting;
-
+/*
 import com.hurence.timeseries.model.Measure;
 import org.deeplearning4j.datasets.iterator.impl.ListDataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
@@ -23,10 +23,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+*/
+public class DnnForecaster {//implements Forecaster<Measure>{
 
-public class DnnForecaster implements Forecaster<Measure>{
-
-    private MultiLayerNetwork model;
+  //  private MultiLayerNetwork model;
 
     /**
      * Forecast the number of points we want of a time series
@@ -36,7 +36,7 @@ public class DnnForecaster implements Forecaster<Measure>{
      * @return a list of measure with their timestamp and their forecasted values
      * @throws IOException
      */
-    @Override
+   /* @Override
     public List<Measure> forecast(List<Measure> inputs, int numPoints) throws IOException {
 
         if (model == null)
@@ -59,7 +59,7 @@ public class DnnForecaster implements Forecaster<Measure>{
             i++;
         }
         return forecasted;
-    }
+    }*/
 
     /**
      * Create and fit the neural network
@@ -67,7 +67,7 @@ public class DnnForecaster implements Forecaster<Measure>{
      * @param trainingData the given elements to train the model
      * @param validatingData the elements to compare with the forecasted values
      */
-    @Override
+   /* @Override
     public void fit(List<Measure> trainingData, List<Measure> validatingData) {
         // Create the dataSetIterator
         DataSetIterator dsiTrain = toDataSetIterator(trainingData, 100);
@@ -81,7 +81,7 @@ public class DnnForecaster implements Forecaster<Measure>{
         model = new MultiLayerNetwork(conf);
         model.init();
         model.fit(dsiTrain, 100);
-    }
+    }*/
 
     /**
      * Create a 2D rank DataSetIterator from a list of measures
@@ -90,7 +90,7 @@ public class DnnForecaster implements Forecaster<Measure>{
      * @param batch size
      * @return the DataSetIterator
      */
-    public DataSetIterator toDataSetIterator(List<Measure> inputData, int batch) {
+   /* public DataSetIterator toDataSetIterator(List<Measure> inputData, int batch) {
         INDArray input = Nd4j.create(inputData.size(), 1);
         INDArray output = Nd4j.create(inputData.size(), 1);
         int i = 0;
@@ -102,14 +102,14 @@ public class DnnForecaster implements Forecaster<Measure>{
         DataSet dataSet = new DataSet( input, output );
         List<DataSet> listDataSet = dataSet.asList();
         return new ListDataSetIterator<>(listDataSet, batch);
-    }
+    }*/
 
     /**
      * Create a MultiLayerConfiguration that will be used to create the DNN model
      *
      * @return a MultiLayerConfiguration
      */
-    public MultiLayerConfiguration createDNNModel() {
+   /* public MultiLayerConfiguration createDNNModel() {
         return new NeuralNetConfiguration.Builder()
                 .seed(12345)
                 .optimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT)
@@ -135,5 +135,5 @@ public class DnnForecaster implements Forecaster<Measure>{
                         .weightInit(WeightInit.XAVIER)
                         .build())
                 .build();
-    }
+    }*/
 }
