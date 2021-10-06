@@ -3,11 +3,15 @@ package com.hurence.forecasting;
 import com.workday.insights.timeseries.arima.Arima;
 import com.workday.insights.timeseries.arima.struct.ArimaParams;
 import com.workday.insights.timeseries.arima.struct.ForecastResult;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 
 public class ArimaDoubleForecaster implements Forecaster<Double> {
+
+    private static Logger logger = LoggerFactory.getLogger(ArimaDoubleForecaster.class.getName());
 
     private int p = 2;
     private int d = 0;
@@ -59,23 +63,30 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
         for (int i = 0; i < 10; i++) {
             for (int j = 0; j < 10; j++) {
                 for (int k = 0; k < 10; k++) {
-                    ForecastResult forecastResult = null;
-                    if (i == 0 && k == 0) {
-                        forecastResult = Arima.forecast_arima(train, valid.length, new ArimaParams(1, j, k, P, D, Q, 1+k+1));
-                    } else {
-                        forecastResult = Arima.forecast_arima(train, valid.length, new ArimaParams(i, j, k, P, D, Q, i+k+1));
+                    try{
+                        ForecastResult forecastResult = null;
+                        if (i == 0 && k == 0) {
+                            forecastResult = Arima.forecast_arima(train, valid.length, new ArimaParams(1, j, k, P, D, Q, 1+k+1));
+                        } else {
+                            forecastResult = Arima.forecast_arima(train, valid.length, new ArimaParams(i, j, k, P, D, Q, i+k+1));
+                        }
+                        double[] forecastData = forecastResult.getForecast();
+                        double mse = rootMeanSquaredError(valid, forecastData);
+                        if (mse < minMse) {
+                            minMse = mse;
+                            order.set(0, i);
+                            order.set(1, j);
+                            order.set(2, k);
+                        }
+                    }catch (Exception ex){
+                        logger.debug(ex.getMessage());
                     }
-                    double[] forecastData = forecastResult.getForecast();
-                    double mse = rootMeanSquaredError(valid, forecastData);
-                    if (mse < minMse) {
-                        minMse = mse;
-                        order.set(0, i);
-                        order.set(1, j);
-                        order.set(2, k);
-                    }
+
                 }
             }
         }
+
+
         p = order.get(0);
         d = order.get(1);
         q = order.get(2);
@@ -83,6 +94,8 @@ public class ArimaDoubleForecaster implements Forecaster<Double> {
         D = order.get(4);
         Q = order.get(5);
         m = p + q + P + Q + 1;
+
+        logger.debug("Min RMSE={} found , for p={}, d={}, q={}, P={}, D={}, Q={}, m={}", minMse, p, d, q, P, D, Q, m);
     }
 
     /**

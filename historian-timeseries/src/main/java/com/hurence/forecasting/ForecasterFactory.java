@@ -32,10 +32,10 @@ public class ForecasterFactory {
                 return new ArimaDoubleForecaster();
             case ARIMA_MEASURE:
                 return new ArimaMeasureForecaster();
-            case LSTM:
+          /*  case LSTM:
                 return new LstmForecaster();
             case DNN:
-                return new DnnForecaster();
+                return new DnnForecaster();*/
             default:
                 throw new UnsupportedOperationException("algorithm " + algorithm.name() + " is not yet supported !");
 

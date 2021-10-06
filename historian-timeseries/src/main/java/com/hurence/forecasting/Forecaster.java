@@ -1,6 +1,5 @@
 package com.hurence.forecasting;
 
-import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 import java.io.IOException;
 import java.util.List;

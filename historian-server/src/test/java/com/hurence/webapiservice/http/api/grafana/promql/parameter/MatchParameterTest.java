@@ -55,7 +55,7 @@ class MatchParameterTest {
                 .parameters(query)
                 .build();
 
-        assertEquals("name:U004_TC01 AND sample:true AND sub_unit:reacteur1_coquille1 AND type:temperature", parameter.getLuceneQuery());
+        assertEquals("name:U004_TC01 AND sample:\"true\" AND sub_unit:\"reacteur1_coquille1\" AND type:\"temperature\"", parameter.getLuceneQuery());
     }
 
     @Test
@@ -69,7 +69,7 @@ class MatchParameterTest {
                 .parameters(query)
                 .build();
 
-        assertEquals("name:U004_TC01 AND sample:true AND sub_unit:* AND type:temperature", parameter.getLuceneQuery());
+        assertEquals("name:U004_TC01 AND sample:\"true\" AND sub_unit:\"*\" AND type:\"temperature\"", parameter.getLuceneQuery());
 
 
         Map<String, String> query2 = ImmutableMap.of(
@@ -80,7 +80,7 @@ class MatchParameterTest {
                 .parameters(query2)
                 .build();
 
-        assertEquals("name:U004_TC01 AND sample:true AND sub_unit:* AND type:temperature", parameter2.getLuceneQuery());
+        assertEquals("name:U004_TC01 AND sample:\"true\" AND sub_unit:\"*\" AND type:\"temperature\"", parameter2.getLuceneQuery());
 
     }
 
@@ -95,7 +95,7 @@ class MatchParameterTest {
                 .parameters(query)
                 .build();
 
-        assertEquals("name:solr_collections_shard_state AND zk_host:* AND collection:*", parameter.getLuceneQuery());
+        assertEquals("name:solr_collections_shard_state AND zk_host:\"*\" AND collection:\"*\"", parameter.getLuceneQuery());
 
 
     }

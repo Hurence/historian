@@ -292,8 +292,8 @@ public class ForecasterTest {
 //        recorderArima(forecaster, "Arima");
     }
 
-    @Test
-    public void testLSTMForecasting() throws IOException {
+   /*  @Test
+   public void testLSTMForecasting() throws IOException {
         System.out.println("\nLSTM TEST :");
 
         Forecaster<Measure> forecaster = ForecasterFactory.getForecaster(ForecastingAlgorithm.LSTM);
@@ -358,5 +358,5 @@ public class ForecasterTest {
 
         Assertions.assertTrue(mse < limit, "Low precision MSE = " + mse + " > " + limit);
 //        recorderNN(forecaster, "Dnn");
-    }
+    }*/
 }
