@@ -1109,8 +1109,6 @@ public class CompactorTest {
                 zkAddressSolr,
                 SolrITHelper.COLLECTION_HISTORIAN,
                 "",
-                "dataCenter,room",
-                "name,tags.room,tags.dataCenter",
                 "compactor",
                 "yyyy-MM-dd");
 
@@ -1134,6 +1132,31 @@ public class CompactorTest {
 //        for (Chunk expectedChunk : expectedChunks.values()) {
 //            System.out.println("Expected chunk:\n" + expectedChunk.toHumanReadable(false));
 //        }
+
+        compareChunks(expectedChunks, actualChunks);
+    }
+
+    @Test
+    public void testCompactorHourly(SparkSession sparkSession) throws InterruptedException {
+
+
+        injectChunksForTestCompactor(cloudClient);
+
+        CompactorConf conf = ConfigLoader.loadFromValues(
+                zkAddressSolr,
+                SolrITHelper.COLLECTION_HISTORIAN,
+                "",
+                "compactor",
+                "yyyy-MM-dd.HH");
+
+        Compactor compactor = new Compactor(conf);
+        compactor.setSolrClient(cloudClient);
+
+        compactor.doCompact();
+        Map<String, Chunk> actualChunks = getSolrChunks(cloudClient, SolrITHelper.COLLECTION_HISTORIAN);
+
+        Map<String, Chunk> expectedChunks = expectedRecompactedChunksForTestCompactor();
+
 
         compareChunks(expectedChunks, actualChunks);
     }

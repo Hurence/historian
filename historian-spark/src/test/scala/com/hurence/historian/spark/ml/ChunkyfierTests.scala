@@ -33,21 +33,20 @@ class ChunkyfierTests extends SparkSessionTestWrapper {
   def testChunkyfier() = {
 
     val chunkyfier = new Chunkyfier()
-      .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
       .setSaxAlphabetSize(7)
       .setSaxStringLength(50)
 
     if (logger.isDebugEnabled) {
-      it4MetricsDS.show()
+      it4MetricsDS.show(false)
     }
 
     // Transform original data into its bucket index.
     val sample = chunkyfier.transform(
       it4MetricsDS.where("name = 'ack' AND " +
         "tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND " +
-        "day = '2019-11-29'")
+        "timestamp > 1574985600000 AND timestamp < 1575071999000") // same as day = 2019-11-29
     ).as[Chunk](Encoders.bean(classOf[Chunk]))
       .collect()
 
@@ -58,14 +57,14 @@ class ChunkyfierTests extends SparkSessionTestWrapper {
   def testChunkyfierNoTags() = {
 
     val chunkyfier = new Chunkyfier()
-      .setGroupByCols(Array("name"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
       .setSaxAlphabetSize(7)
       .setSaxStringLength(50)
 
     val it4MetricsDSNoTags = it4MetricsDS
-      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND day = '2019-11-29'")
+      .where("name = 'ack' AND tags.metric_id = '08f9583b-6999-4835-af7d-cf2f82ddcd5d' AND " +
+        "timestamp > 1574985600000 AND timestamp < 1575071999000") // same as day = 2019-11-29
       .drop("tags")
 
     if (logger.isDebugEnabled) {
@@ -165,7 +164,6 @@ class ChunkyfierTests extends SparkSessionTestWrapper {
     val unchunkyfier = new UnChunkyfier()
     val chunkyfier = new Chunkyfier()
       .setOrigin("chunkyfierTest")
-      .setGroupByCols("name".split(","))
       .setDateBucketFormat("yyyy-MM-dd.HH")
       .setSaxAlphabetSize(7)
       .setSaxStringLength(24)

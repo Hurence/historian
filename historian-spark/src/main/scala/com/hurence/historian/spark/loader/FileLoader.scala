@@ -148,7 +148,6 @@ object FileLoader {
     // transform Measures into Chunks
     val chunksDS = new Chunkyfier()
       .setOrigin(options.chunkyfier.origin)
-      .setGroupByCols(options.chunkyfier.groupByCols.split(","))
       .setDateBucketFormat(options.chunkyfier.dateBucketFormat)
       .setSaxAlphabetSize(options.chunkyfier.saxAlphabetSize)
       .setSaxStringLength(options.chunkyfier.saxStringLength)

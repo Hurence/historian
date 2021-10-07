@@ -47,6 +47,11 @@ final class Chunkyfier(override val uid: String)
 
   def this() = this(Identifiable.randomUID("chunkyfier"))
 
+  val nameCol: Param[String] = new Param[String](this, "nameCol", "column name for metric name")
+
+  setDefault(nameCol, FIELD_NAME)
+
+  def setNameCol(value: String): this.type = set(nameCol, value)
 
   val valueCol: Param[String] = new Param[String](this, "valueCol", "column name for value")
 
@@ -86,16 +91,6 @@ final class Chunkyfier(override val uid: String)
   def setDateBucketFormat(value: String): this.type = set(dateBucketFormat, value)
 
   setDefault(dateBucketFormat, "yyyy-MM-dd")
-
-  /**
-    * Param for group by column names.
-    *
-    * @group param
-    */
-  final val groupByCols: StringArrayParam = new StringArrayParam(this, "groupByCols", "group by column names")
-
-  def setGroupByCols(value: Array[String]): this.type = set(groupByCols, value)
-
 
   val saxAlphabetSize: Param[Int] = new Param[Int](this, "saxAlphabetSize",
     "the SAX akphabet size.",
@@ -142,7 +137,8 @@ final class Chunkyfier(override val uid: String)
   def transform(df: Dataset[_]): DataFrame = {
     implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
 
-    val groupingCols = col(FIELD_DAY) :: $(groupByCols).map(col).toList // "day", "name", "tags.metric_id"
+    // TODO shall be replaced by metric_key in any case ?
+    val groupingCols = List(col("date_bucket"), col(FIELD_METRIC_KEY))
     val w = Window.partitionBy(groupingCols: _*)
       .orderBy(col($(timestampCol)))
 
@@ -156,15 +152,16 @@ final class Chunkyfier(override val uid: String)
       baseDf = baseDf.withColumn($(tagsCol), typedLit(Map[String, String]()))
     }
 
-
     val groupedDF = baseDf
-        .withColumn(FIELD_DAY, toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
+
+        .withColumn("date_bucket", toDateUTC(col($(timestampCol)), lit($(dateBucketFormat))))
         .orderBy(col($(timestampCol)).asc)
         .groupBy(groupingCols: _*)
         .agg(
           collect_list(col($(valueCol))).as(COLUMN_VALUES),
           collect_list(col($(timestampCol))).as(COLUMN_TIMESTAMPS),
           collect_list(col($(qualityCol))).as(COLUMN_QUALITIES),
+          first(col($(nameCol))).as(FIELD_NAME),
           first(col($(tagsCol))).as(FIELD_TAGS),
           min(col($(timestampCol))).as(FIELD_START),
           max(col($(timestampCol))).as(FIELD_END),
@@ -173,7 +170,6 @@ final class Chunkyfier(override val uid: String)
           first(col($(qualityCol))).as(FIELD_QUALITY_FIRST),
           sum(col($(qualityCol))).as(FIELD_QUALITY_SUM),
           avg(col($(qualityCol))).as(FIELD_QUALITY_AVG))
-
 
     groupedDF
       // compute analysis from values & timestamps lists

@@ -182,7 +182,17 @@ public class Chunk implements Serializable, ChunkClusterable {
                 tags.putIfAbsent(key, "null");
             }
 
-            metricKey = buildMetricKey(); // Compute and store metric key
+            // compute tags from metricKey if possible
+            if(metricKey != null && !metricKey.isEmpty()){
+                try {
+                    tags = MetricKey.parse(metricKey).tags;
+                }catch (Exception ex){
+                    LOGGER.debug("unable to parse metric key to get tags : {}", metricKey);
+                }
+            }else{
+                metricKey = buildMetricKey(); // Compute and store metric key
+            }
+
 
             newId.append(metricKey);
             try {
@@ -300,6 +310,10 @@ public class Chunk implements Serializable, ChunkClusterable {
                 });
             }
             return idBuilder.toString();
+        }
+
+        public static String build(String name, Map<String, String> tags) {
+            return new MetricKey(name, tags).compute();
         }
 
         @Override

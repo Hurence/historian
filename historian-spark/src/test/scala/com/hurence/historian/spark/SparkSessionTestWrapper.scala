@@ -1,15 +1,13 @@
 package com.hurence.historian.spark
 
 
-import java.time.ZoneId
-import java.util
-import java.util.{Map, TimeZone}
+import com.hurence.timeseries.model.Definitions._
 
 import com.hurence.timeseries.model.Measure
 import org.apache.spark.sql.{Encoders, SparkSession}
 import org.joda.time.format.{DateTimeFormat, DateTimeFormatter, DateTimeParser}
 import org.joda.time.{DateTime, DateTimeZone}
-
+import collection.JavaConverters._
 /**
   * Initialize a Spark session for unit tests
   */
@@ -37,12 +35,21 @@ trait SparkSessionTestWrapper {
 
     spark.read
       .parquet(filePath)
+      .map(r => {
+        Measure.builder()
+          .name(r.getAs[String](FIELD_NAME))
+          .timestamp(r.getAs[Long](FIELD_TIMESTAMP))
+          .quality(r.getAs[Float](FIELD_QUALITY))
+          .value(r.getAs[Double](FIELD_VALUE))
+          .tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
+          .build()
+      })
       .as[Measure]
       .cache()
   }
 
   def randomMeasure(name: String,
-                    tags: util.Map[String, String],
+                    tags: java.util.Map[String, String],
                     lowerValueBound:Double,
                     upperValueBound:Double,
                     withinDay: String = "",
