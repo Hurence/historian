@@ -24,7 +24,7 @@ import scala.collection.mutable
 
 class Compactor(val options: CompactorConf) extends Serializable with Runnable {
 
-  @transient lazy val  logger = LogManager.getLogger(classOf[Compactor])
+  @transient lazy val logger = LogManager.getLogger(classOf[Compactor])
   private var solrClient: CloudSolrClient = null
   private var spark: SparkSession = null
   private var scheduledThreadPool: ScheduledExecutorService = null
@@ -118,6 +118,8 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
 
         val measuresDS = convertChunksToMeasures(uncompactedChunks)
         val compactedChunksDS = convertMeasuresToChunks(measuresDS)
+        compactedChunksDS.show(10,false)
+
         writeCompactedChunksToSolr(compactedChunksDS)
         deleteOldChunks(day)
         deleteOldChunksByIds(ids)
@@ -130,11 +132,27 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
     import chunks.sparkSession.implicits._
 
     val origin = options.chunkyfier.origin
-    chunks.select(FIELD_ID,FIELD_ORIGIN)
-      .filter( r => r.getAs[String](FIELD_ORIGIN) == origin )
+    chunks.select(FIELD_ID, FIELD_ORIGIN)
+      .filter(r => r.getAs[String](FIELD_ORIGIN) == origin)
       .map(r => r.getAs[String](FIELD_ID))
       .collect()
       .toList
+  }
+
+
+  /**
+   * Make sure we won't process too recent chunks
+   *
+   * @return a date filter string
+   */
+  def dateLimitFilter() = {
+    if (options.chunkyfier.dateBucketFormat.toLowerCase.contains("hh")) {
+      s"$SOLR_COLUMN_START:[* TO ${DateUtil.utcCurrentHourTimestampOfTodayMs() - 1L}]"
+    }
+    // or previous day
+    else {
+      s"$SOLR_COLUMN_START:[* TO ${DateUtil.utcFirstTimestampOfTodayMs - 1L}]"
+    }
   }
 
   /**
@@ -161,15 +179,12 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
     val days = mutable.HashSet[String]()
 
     // build SolR facet query
-    val solrQuery = new SolrQuery("*:*")
     val filterQuery = if (options.reader.queryFilters.isEmpty)
-      s"$SOLR_COLUMN_START:[* TO ${DateUtil.utcFirstTimestampOfTodayMs - 1L}] AND " +
-        s"-$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin}"
+      dateLimitFilter()
     else
-      s"$SOLR_COLUMN_START:[* TO ${DateUtil.utcFirstTimestampOfTodayMs - 1L}] AND " +
-        s"-$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin} AND " +
-        s"${options.reader.queryFilters}"
+      s"${dateLimitFilter()} AND ${options.reader.queryFilters}"
 
+    val solrQuery = new SolrQuery("*:*")
     solrQuery.addFilterQuery(filterQuery)
     solrQuery.setRows(0)
     solrQuery.addFacetField(SOLR_COLUMN_DAY)
@@ -198,12 +213,13 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
    * @return the chunks dataset
    */
   def loadChunksFromSolr(day: String) = {
-    logger.info(s"start loading chunks from SolR collection : ${options.solr.collectionName} for day $day")
 
     val filterQuery = if (options.reader.queryFilters.isEmpty)
-      s"$SOLR_COLUMN_DAY:$day"
+      s"$SOLR_COLUMN_DAY:$day AND ${dateLimitFilter()}"
     else
-      s"$SOLR_COLUMN_DAY:$day AND ${options.reader.queryFilters}"
+      s"$SOLR_COLUMN_DAY:$day AND ${options.reader.queryFilters} AND ${dateLimitFilter()}"
+
+    logger.info(s"will load chunks from SolR collection : ${options.solr.collectionName} for day $day with fq=$filterQuery")
 
     ReaderFactory.getChunksReader(ReaderType.SOLR)
       .read(sql.Options(
@@ -211,7 +227,6 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
         Map(
           "zkhost" -> options.solr.zkHosts,
           "collection" -> options.solr.collectionName,
-          "tag_names" -> options.reader.tagNames,
           "filters" -> filterQuery
         )))
       .as[Chunk](Encoders.bean(classOf[Chunk]))
@@ -237,7 +252,6 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
   def convertMeasuresToChunks(measuresDS: Dataset[Measure]): Dataset[Chunk] = {
     new Chunkyfier()
       .setOrigin(options.chunkyfier.origin)
-      .setGroupByCols(options.chunkyfier.groupByCols.split(","))
       .setDateBucketFormat(options.chunkyfier.dateBucketFormat)
       .setSaxAlphabetSize(options.chunkyfier.saxAlphabetSize)
       .setSaxStringLength(options.chunkyfier.saxStringLength)
@@ -255,8 +269,7 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
     WriterFactory.getChunksWriter(WriterType.SOLR)
       .write(sql.Options(options.solr.collectionName, Map(
         "zkhost" -> options.solr.zkHosts,
-        "collection" -> options.solr.collectionName,
-        "tag_names" -> options.reader.tagNames
+        "collection" -> options.solr.collectionName
       )), chunksDS)
 
     // explicit commit to make sure all docs are immediately visible
@@ -314,9 +327,9 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
 
     // build SolR facet query
     val query = if (options.reader.queryFilters.isEmpty)
-      s"$SOLR_COLUMN_DAY:$day AND -$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin}"
+      s"$SOLR_COLUMN_DAY:$day AND ${dateLimitFilter()} AND -$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin}"
     else
-      s"$SOLR_COLUMN_DAY:$day AND -$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin} AND ${options.reader.queryFilters}"
+      s"$SOLR_COLUMN_DAY:$day AND ${dateLimitFilter()} AND -$SOLR_COLUMN_ORIGIN:${options.chunkyfier.origin} AND ${options.reader.queryFilters}"
 
     logger.info(s"will delete by query the following matching chunks : $query")
     solrClient.deleteByQuery(options.solr.collectionName, query)
@@ -334,14 +347,14 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
 
   def deleteOldChunksByIds(ids: List[String]) = {
 
-   // logger.info(s"start deletion of old chunks from origin ${options.chunkyfier.origin}")
-    ids.foreach( id => {
-        logger.debug("Deleting document id " + id)
-        try solrClient.deleteById(options.solr.collectionName, id)
-        catch {
-          case e: Exception =>
-           logger.error("Error deleting chunk document with id " + id + ": " + e.getMessage)
-        }
+    // logger.info(s"start deletion of old chunks from origin ${options.chunkyfier.origin}")
+    ids.foreach(id => {
+      logger.debug("Deleting document id " + id)
+      try solrClient.deleteById(options.solr.collectionName, id)
+      catch {
+        case e: Exception =>
+          logger.error("Error deleting chunk document with id " + id + ": " + e.getMessage)
+      }
     })
 
 

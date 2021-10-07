@@ -40,7 +40,23 @@ public class Measure implements Serializable, Comparable<Measure> {
     @Builder.Default private float quality = DEFAULT_QUALITY;
     protected Map<String, String> tags;
 
+    private String metricKey;
 
+
+    public static class MeasureBuilder {
+
+        public MeasureBuilder metricKey(String metricKey) {
+            this.metricKey = metricKey;
+            this.tags = Chunk.MetricKey.parse(metricKey).getTags();
+            return this;
+        }
+
+        public MeasureBuilder tags(Map<String, String> tags) {
+            this.tags = tags;
+            this.metricKey = Chunk.MetricKey.build(name, tags);
+            return this;
+        }
+    }
 
     public boolean containsTag(String tagName) {
         return tags.containsKey(tagName);
@@ -134,7 +150,6 @@ public class Measure implements Serializable, Comparable<Measure> {
                 .withZone(DateTimeZone.forTimeZone(TimeZone.getTimeZone(ZoneId.of("UTC"))));
        return time.toString("yyyy-MM-dd");
     }
-
 
     /**
      * @return true if quality is set to something else than NaN

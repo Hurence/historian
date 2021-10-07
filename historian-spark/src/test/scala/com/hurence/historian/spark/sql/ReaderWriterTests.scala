@@ -105,7 +105,6 @@ class ReaderWriterTests extends SparkSessionTestWrapper {
     implicit val chunkEncoder = Encoders.bean(classOf[Chunk])
 
     val chunkyfier = new Chunkyfier()
-      .setGroupByCols(Array("name", "tags.metric_id"))
       .setDateBucketFormat("yyyy-MM-dd")
       .doDropLists(false)
       .setSaxAlphabetSize(7)

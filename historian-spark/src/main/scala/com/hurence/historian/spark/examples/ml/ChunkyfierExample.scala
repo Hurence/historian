@@ -78,7 +78,6 @@ object ChunkyfierExample {
     val chunkyfier = new Chunkyfier()
       .setValueCol("value")
       .setTimestampCol("timestamp")
-      .setGroupByCols(Array( "name", "tags.metric_id" ))
       .setDateBucketFormat("yyyy-MM-dd")
       .setChunkMaxSize(1440)
       .setSaxAlphabetSize(4)

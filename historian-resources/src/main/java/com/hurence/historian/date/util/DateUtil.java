@@ -471,4 +471,30 @@ public final class DateUtil {
         return (timestampMillis / 1000L) * 1000L;
     }
 
+
+
+    /**
+     * Get the timestamp (in milliseconds) of the current day at the current hour in UTC format.
+     * For instance if you call this method on Friday 18 September 2020 in the middle of the day,
+     * this should return 1600387200000 which corresponds to GMT: Friday 18 September 2020 00:00:00
+     * @return
+     */
+    public static long utcCurrentHourTimestampOfTodayMs() {
+
+        // Get current time in UTC timezone
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        int year = calendar.get(Calendar.YEAR);
+        int month = calendar.get(Calendar.MONTH);
+        int day = calendar.get(Calendar.DATE);
+        int hourOfTheDay = calendar.get(Calendar.HOUR_OF_DAY);
+        calendar.set(year, month, day, hourOfTheDay, 0, 0); // Remove minute and seconds of the day from the time
+
+        // This may return 1600387200388 timestamp in milliseconds which is GMT: Friday 18 September 2020 00:00:00.388
+        long timestampMillis = calendar.getTime().getTime();
+
+        // Remove the milliseconds by rounding down to number of seconds and passing again into ms
+        // 1600387200388 -> 1600387200000
+
+        return (timestampMillis / 1000L) * 1000L;
+    }
 }

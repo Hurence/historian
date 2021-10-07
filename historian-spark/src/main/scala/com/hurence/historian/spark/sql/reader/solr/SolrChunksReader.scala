@@ -20,7 +20,7 @@ class SolrChunksReader extends Reader[Chunk] {
 
     implicit val encoder = Encoders.bean(classOf[Chunk])
 
-    var someTags : Boolean = true
+   /* var someTags : Boolean = true
     val tagNames: List[Column] = if (options.config.contains(TAG_NAMES)) {
       options.config(TAG_NAMES)
         .split(",").toList
@@ -29,17 +29,17 @@ class SolrChunksReader extends Reader[Chunk] {
       // No tags specified
       someTags = false
       List[Column]()
-    }
+    }*/
     val mainCols = SOLR_COLUMNS.asScala.toList
-      .map(name => col(name).as(getFieldFromColumn(name))) ::: tagNames
+      .map(name => col(name).as(getFieldFromColumn(name))) /*::: tagNames*/
 
     var tags : List[Column] = List[Column]()
 
-    if (someTags) {
+   /* if (someTags) {
       tags = options.config(TAG_NAMES)
         .split(",").toList
         .flatMap(tag => List(lit(s"$tag"), col(s"tag_$tag")))
-    }
+    }*/
 
     var chunksDf = spark.read
       .format("solr")
@@ -72,10 +72,10 @@ class SolrChunksReader extends Reader[Chunk] {
       .withColumn(FIELD_YEAR, col(FIELD_YEAR).cast(IntegerType))
       .withColumn(FIELD_MONTH, col(FIELD_MONTH).cast(IntegerType))
 
-    if (someTags) {
+   /* if (someTags) {
       chunksDf = chunksDf
         .withColumn(FIELD_TAGS, map(tags: _*))
-    }
+    }*/
 
     chunksDf.map(r => {
         val builder : ChunkBuilder = Chunk.builder()
@@ -100,10 +100,10 @@ class SolrChunksReader extends Reader[Chunk] {
           .trend(r.getAs[Boolean](FIELD_TREND))
           .outlier(r.getAs[Boolean](FIELD_OUTLIER))
           .value(r.getAs[Array[Byte]](FIELD_VALUE))
-
-        if (someTags) {
+          .metricKey(r.getAs[String](FIELD_METRIC_KEY))
+       /* if (someTags) {
           builder.tags(r.getAs[Map[String, String]](FIELD_TAGS).asJava)
-        }
+        }*/
 
         builder.buildId()
           .computeMetrics()

@@ -21,12 +21,10 @@ case class SolrConf(zkHosts: String = "localhost:9983",
                     numConcurrentRequests: Int = 2,
                     flushInterval: Int = 2000)
 
-case class ReaderConf(queryFilters: String = "",
-                      tagNames: String = "tagname,metric_id")
+case class ReaderConf(queryFilters: String = "")
 
 case class ChunkyfierConf(saxAlphabetSize: Int = 7,
                           saxStringLength: Int = 24,
-                          groupByCols: String = "name",
                           origin: String = "compactor",
                           dateBucketFormat: String = "yyyy-MM-dd.HH")
 
@@ -77,15 +75,13 @@ object ConfigLoader {
   def loadFromValues(zkHosts: String,
                      collectionName: String,
                      queryFilters:String,
-                     tagNames: String,
-                     groupByCols: String = "name",
                      origin: String = "compactor",
                      dateBucketFormat: String = "yyyy-MM-dd.HH") = {
     CompactorConf(
       SparkConf(),
       SolrConf(zkHosts, collectionName),
-      ReaderConf(queryFilters,tagNames),
-      ChunkyfierConf(groupByCols=groupByCols,origin=origin, dateBucketFormat=dateBucketFormat),
+      ReaderConf(queryFilters),
+      ChunkyfierConf(origin=origin, dateBucketFormat=dateBucketFormat),
       SchedulerConf())
   }
 }
