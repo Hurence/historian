@@ -112,6 +112,7 @@
 
     <repositories>
         <repository>
+            <id>spring-plug-repo</id>
             <name>spring plugins repo</name>
             <url>https://repo.spring.io/plugins-release/</url>
         </repository>
