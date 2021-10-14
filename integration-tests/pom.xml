@@ -97,6 +97,7 @@
         <dependency>
             <groupId>com.hurence.historian</groupId>
             <artifactId>historian-tools</artifactId>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
     </dependencies>
