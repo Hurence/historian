@@ -83,8 +83,8 @@
         <spark.version>2.3.2</spark.version>
         <spark.solr>3.6.6</spark.solr>
         <!--        junit-->
-        <junit.version>4.13.1</junit.version>
-        <junit-platform.version>1.2.0</junit-platform.version>
+        <junit.version>4.13</junit.version>
+        <junit-platform.version>1.5.2</junit-platform.version>
         <junit.jupiter.version>5.5.2</junit.jupiter.version>
         <!--        vertx-->
         <vertx.version>3.8.1</vertx.version>

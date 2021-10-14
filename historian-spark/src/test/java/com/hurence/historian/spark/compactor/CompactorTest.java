@@ -1147,7 +1147,7 @@ public class CompactorTest {
                 SolrITHelper.COLLECTION_HISTORIAN,
                 "",
                 "compactor",
-                "yyyy-MM-dd.HH");
+                "yyyy-MM-dd");
 
         Compactor compactor = new Compactor(conf);
         compactor.setSolrClient(cloudClient);
