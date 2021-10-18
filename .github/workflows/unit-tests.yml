@@ -3,7 +3,6 @@ name: build
 on:
   push:
     branches-ignore:
-      - 'feature/it-test'
 
 jobs:
   build:
