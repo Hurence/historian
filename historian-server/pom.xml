@@ -16,7 +16,6 @@
         <vertx.version>3.8.1</vertx.version>
         <vertx-swagger-router.version>1.5.0</vertx-swagger-router.version>
         <solr.version>8.2.0</solr.version>
-        <test.containers>1.12.2</test.containers>
     </properties>
 
     <dependencyManagement>
@@ -185,7 +184,7 @@
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>testcontainers</artifactId>
-            <version>1.12.2</version>
+            <version>${test.containers}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>

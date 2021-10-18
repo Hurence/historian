@@ -11,11 +11,6 @@
     <artifactId>integration-tests</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <scala.binary.version>2.11</scala.binary.version>
-        <solr.version>8.2.0</solr.version>
-        <test.containers>1.12.2</test.containers>
-    </properties>
 
     <dependencies>
         <!-- HISTORIAN modules -->
