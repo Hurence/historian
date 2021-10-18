@@ -1,6 +1,9 @@
 name: build
 
-on: [push]
+on:
+  push:
+    branches-ignore:
+      - 'feature/it-test'
 
 jobs:
   build:
