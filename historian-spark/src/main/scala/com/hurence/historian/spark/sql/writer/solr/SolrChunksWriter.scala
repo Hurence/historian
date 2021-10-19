@@ -12,12 +12,12 @@ import com.hurence.timeseries.model.Definitions._
 import scala.collection.JavaConverters._
 
 /**
-  * val options.config = Map(
-  * "zkhost" -> options.zkHosts,
-  * "collection" -> options.collectionName
-  * )
-  *
-  */
+ * val options.config = Map(
+ * "zkhost" -> options.zkHosts,
+ * "collection" -> options.collectionName
+ * )
+ *
+ */
 class SolrChunksWriter extends Writer[Chunk] {
 
 
@@ -32,22 +32,15 @@ class SolrChunksWriter extends Writer[Chunk] {
     else
       options.config
 
-    var someTags : Boolean = true
-    val tagCols : List[Column] = if (options.config.contains(TAG_NAMES)) {
-      options.config(TAG_NAMES).split(",").toList
-        .map(tag => col(FIELD_TAGS)(tag).as(tag))
-    } else  {
-      // No tags specified
-      someTags = false
-      List[Column]()
-    }
+    // build column names with tags
+    val mainCols = FIELDS.asScala.toList.map(name => col(name).as(getColumnFromField(name)))
+    val keysDF = ds.select(explode(map_keys(col(FIELD_TAGS)))).distinct()
+    val keys = keysDF.collect().map(f=>f.get(0))
+    val tagCols = keys.map(f=> col(FIELD_TAGS).getItem(f).as(f.toString)).toList
 
-    val mainCols = FIELDS.asScala.toList
-      .map(name => col(name).as(getColumnFromField(name)))
-
-    // todo manage dateFormatbucket and date interval
+    // write the dataset to SolR
     ds
-      .select(mainCols ::: tagCols: _*)
+      .select(mainCols ::: tagCols:_*)
       .withColumn(SOLR_COLUMN_VALUE, base64(col(SOLR_COLUMN_VALUE)))
       .write
       .format("solr")
