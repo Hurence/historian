@@ -29,15 +29,6 @@ docker tag hurence/historian-spark:latest hurence/historian-spark:1.3.8
 Deploy the image to Docker hub
 ------------------------------
 
-tag the image as latest
-
-verify image build :
-
-```shell script
-docker images
-docker tag <IMAGE_ID> latest
-```
-
 then login and push the latest image
 
 ```shell script
