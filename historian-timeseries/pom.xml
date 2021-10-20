@@ -26,7 +26,7 @@
             <artifactId>historian-resources</artifactId>
             <version>${project.version}</version>
         </dependency>
-        <!--        VERTX-->
+        <!-- TODO remove that dependency-->
         <dependency>
             <groupId>io.vertx</groupId>
             <artifactId>vertx-core</artifactId>
@@ -141,7 +141,7 @@
         <dependency>
             <groupId>com.hurence.historian</groupId>
             <artifactId>historian-resources</artifactId>
-            <version>1.3.9</version>
+            <version>${project.version}</version>
             <scope>compile</scope>
         </dependency>
 
