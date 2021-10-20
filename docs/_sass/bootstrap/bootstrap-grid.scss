@@ -19,12 +19,12 @@ html {
 @import "functions";
 @import "variables";
 
-@import "_sass/bootstrap/mixins/deprecate";
-@import "_sass/bootstrap/mixins/breakpoints";
-@import "_sass/bootstrap/mixins/grid-framework";
-@import "_sass/bootstrap/mixins/grid";
+@import "mixins/deprecate";
+@import "mixins/breakpoints";
+@import "mixins/grid-framework";
+@import "mixins/grid";
 
 @import "grid";
-@import "_sass/bootstrap/utilities/display";
-@import "_sass/bootstrap/utilities/flex";
-@import "_sass/bootstrap/utilities/spacing";
+@import "utilities/display";
+@import "utilities/flex";
+@import "utilities/spacing";
