@@ -61,19 +61,27 @@ Run the following command in the root directory of historian source checkout.
     
 ## Release process
 
-Ensure all tests are passing
-
 Create release branch :
 
 ```bash
-git checkout -b release-x.x.x
+git hf release start vx.x.x
 ```
 
 Update maven version :
 
 ```bash
 mvn versions:set -DnewVersion=x.x.x
+# commit if ok
+mvn versions:commit
 ```
+
+Ensure all tests are passing (even integ ones)
+
+```bash
+mvn clean install
+mvn -Pintegration-tests -q clean verify
+```
+
 
 verify modification and commit them.
 
