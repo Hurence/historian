@@ -54,11 +54,7 @@ Run the following command in the root directory of historian source checkout.
     git clone git@github.com:Hurence/historian.git
     cd historian
     mvn clean install -DskipTests -Pbuild-integration-tests
-    
- To run integration tests
- 
-    mvn install -Pintegration-tests
-    
+
 ## Release process
 
 Create release branch :
@@ -99,9 +95,7 @@ run the script install :
 bash ./install.sh
 ```
     
-## Good practices
-
-### Logs
+## Logging
 
 * Never use println
 * Never use show() (Dataframe) or conditionnaly, for exemple :
@@ -122,10 +116,4 @@ one in main and one in test folders.
 We added the enforcer plugin to ensure that all slf4j implementation embedded by transitive dependencies are excluded.
 If not you will get an error message and you have to exclude the conflicting dependency.
 
-  
-### Tests
-
-Unit test should be implemented inside src/test directory and suffixed with "Test".
-Integration tests should be put into src/integration-test and be suffixed with "IT" so 
-that it is not run as Unit tests !
 

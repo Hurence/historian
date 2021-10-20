@@ -7,11 +7,11 @@
 Timeseries big data analytics tools
 
 
-
 ## User
 
 Please find the code/documentation for your version :
 
+* [release v1.3.9](https://github.com/Hurence/historian/tree/v1.3.9)
 * [release v1.3.6](https://github.com/Hurence/historian/tree/v1.3.6)
 * [release v1.3.5](https://github.com/Hurence/historian/tree/v1.3.5)
 
