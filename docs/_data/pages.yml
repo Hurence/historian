@@ -1,0 +1,44 @@
+toc:
+  - title: Generalities
+    subfolderitems:
+      - page: Features
+        content: what can we do with this tool ?
+        url: features
+      - page: Concepts
+        content: core entities for manipulating time series and chunks
+        url: concepts
+      - page: Architecture
+        content: all the building blocks of that framework
+        url: architecture
+      - page: Data Model
+        content: to dive deeper into the concepts and the object model.
+        url: data-model
+      - page: PromQL dialect
+        content: to interact with the data
+        url: promql
+  - title: Tutorials
+    subfolderitems:
+      - page: Quick start
+        content: the first link to click if you want to play right now
+        url: getting-started
+      - page: Inject data
+        url: data-injection
+        content: different ways to feed historian with data
+      - page: Data visualisation
+        url: data-viz
+        content: how to use grafana to get visual insights
+  - title: Operational
+    subfolderitems:
+      - page: Run on kube
+        content: learn how to use Helm to easily deploy on Kubernetes
+        url: kube-setup
+      - page: Bare-metal setup
+        content: install all the components from scratch over on-prem hardware
+        url: bare-metal-setup
+      - page: Monitoring
+        content: how do we monitor our Smart Historian
+        url: monitoring
+      - page: Developer guide
+        content: everything about building, test and extending the framework
+        url: developer-guide
+
