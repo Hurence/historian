@@ -1,6 +1,6 @@
 ---
 layout: page
-title: Getting Started Guide
+title: Data injection
 categories: TUTORIAL HOWTOS
 ---
 
