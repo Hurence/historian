@@ -27,6 +27,15 @@ toc:
       - page: Data visualisation
         url: data-viz
         content: how to use grafana to get visual insights
+      - page: Alerting on prediction
+        url: data-prediction
+        content: how to generate grafana alerts based on predictions
+      - page: Timeseries clustering
+        url: clustering
+        content: find anomalies with tie series clustering (keans over mllib)
+      - page: Data mining with python
+        url: py-data-mining
+        content: let's play with pandas, scikit and other py toys
   - title: Operational
     subfolderitems:
       - page: Run on kube
