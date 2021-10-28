@@ -30,7 +30,7 @@ collected will be returned in the data field.
 
 The JSON response envelope format is as follows:
 
-```
+```json
 {
   "status": "success" | "error",
   "data": <data>,
@@ -105,8 +105,8 @@ formats](#expression-query-result-formats).
 The following example evaluates the expression `up` at the time
 `2015-07-01T20:10:51.781Z`:
 
-```json
-$ curl 'http://localhost:9090/api/v1/query?query=up&time=2015-07-01T20:10:51.781Z'
+```bash
+$ curl 'localhost:8080/api/v1/query?query=up&time=2015-07-01T20:10:51.781Z'
 {
    "status" : "success",
    "data" : {
@@ -170,8 +170,8 @@ format](#range-vectors).
 The following example evaluates the expression `up` over a 30-second range with
 a query resolution of 15 seconds.
 
-```json
-$ curl 'http://localhost:9090/api/v1/query_range?query=up&start=2015-07-01T20:10:30.781Z&end=2015-07-01T20:11:00.781Z&step=15s'
+```bash
+$ curl 'localhost:8080/api/v1/query_range?query=up&start=2015-07-01T20:10:30.781Z&end=2015-07-01T20:11:00.781Z&step=15s'
 {
    "status" : "success",
    "data" : {
@@ -238,8 +238,8 @@ contain the label name/value pairs which identify each series.
 The following example returns all series that match either of the selectors
 `up` or `process_start_time_seconds{job="prometheus"}`:
 
-```json
-$ curl -g 'http://localhost:9090/api/v1/series?' --data-urlencode 'match[]=up' --data-urlencode 'match[]=process_start_time_seconds{job="prometheus"}'
+```bash
+$ curl 'localhost:8080/api/v1/series?' --data-urlencode 'match[]=up' --data-urlencode 'match[]=process_start_time_seconds{job="prometheus"}'
 {
    "status" : "success",
    "data" : [
@@ -283,8 +283,8 @@ The `data` section of the JSON response is a list of string label names.
 
 Here is an example.
 
-```json
-$ curl 'localhost:9090/api/v1/labels'
+```bash
+$ curl 'localhost:8080/api/v1/labels'
 {
     "status": "success",
     "data": [
@@ -333,8 +333,8 @@ The `data` section of the JSON response is a list of string label values.
 
 This example queries for all label values for the `job` label:
 
-```json
-$ curl http://localhost:9090/api/v1/label/job/values
+```bash
+$ curl 'localhost:8080/api/v1/label/job/values'
 {
    "status" : "success",
    "data" : [
@@ -345,15 +345,15 @@ $ curl http://localhost:9090/api/v1/label/job/values
 ```
 
 ### Importing data in csv
-This request allows to inject data points from CSV files.
-The format of the http request must be Content-Type: multipart/form-data;
+The following endpoint allows to inject data points from CSV files.
 
+```
+POST /api/historian/v0/import/csv
+```
+
+The format of the http request must be `Content-Type: multipart/form-data`
 
 URL query parameters:
-
-
-|===
-| attribute | multivalued | description | mandatory | possible values | default value
 
 - `my_csv_file` : the path of the csv files to import. Please note that each file is imported individually independently.
 In other words, listing several files or making a request per file is equivalent. The settings of the request
@@ -366,36 +366,23 @@ are common to all the files listed in the request. The files must contain a head
 - `mapping.tags`: The names of the header columns to be considered as a tag. Tags are concepts that describe the metric in addition to its name ("name" column). All columns not entered in the mapping will be ignored during the injection. must be a column name from the header of the attached csv files.
 - `format_date` : The expected format for the values in the "timestamp" column. Must be a value in: [MILLISECONDS_EPOCH,SECONDS_EPOCH,MICROSECONDS_EPOCH,NANOSECONDS_EPOCH]. MILLISECONDS_EPOCH by default
 - `timezone_date` : the timezone for the dates in the csv. must be a valid timezone. "UTC" by default
-- `group_by` : This parameter is very important! If it is misused it is possible to corrupt already existing data. List all the fields that will be used to build the chunks here. By default we group the points in chunk only according to their name. However, it is also possible to group according to the value of some tags. Be aware that this will impact the way the data will be retrieved later. For example if we inject data by grouping by "name" and the tag "factory". Then we can request the values
-for each factory by filtering on the correct value of the factory tag (see the API to request the points). Only if
-thereafter someone injects other data without grouping by the tag "factory" then the data will find themselves mixed. Accepted values are "name" (whatever the mapping, use "name" and not the name of the column in the csv). Otherwise the other accepted values are the column names added as a tag.
+- `group_by` : This parameter is very important! If it is misused it is possible to corrupt already existing data. List all the fields that will be used to build the chunks here. By default we group the points in chunk only according to their name. However, it is also possible to group according to the value of some tags. Be aware that this will impact the way the data will be retrieved later. For example if we inject data by grouping by "name" and the tag "factory". Then we can request the values for each factory by filtering on the correct value of the factory tag (see the API to request the points). Only if thereafter someone injects other data without grouping by the tag "factory" then the data will find themselves mixed. Accepted values are "name" (whatever the mapping, use "name" and not the name of the column in the csv). Otherwise the other accepted values are the column names added as a tag.
 
 
-* If there is a problem with the request we receive a 400 BAD_REQUEST response.
+> If there is a problem with the request we receive a 400 BAD_REQUEST response. If everything went well we receive a 201 CREATED response:
 
-* If everything went well we receive a 201 CREATED response:
+Response description :
 
-.Response description
-[cols="13,10,40"]
-|===
-| json path | type | description
+- `tags` : array of the tags entered in the request.
+- `grouped_by` : array of the fields that are used for the group by (completed in the request).
+- `report` : json object, a report on the chunks that were injected.
 
-|tags
-|array
-|the tags entered in the request.
-
-|grouped_by
-|array
-|the fields that are used for the group by (completed in the request).
-
-|report
-|json object
-|a report on the chunks that were injected.
+Here is an example.
 
 ```bash
-curl --location --request POST 'localhost:8080/api/historian/v0/import/csv' \
+curl -X POST 'localhost:8080/api/historian/v0/import/csv' \
   --header 'Content-Type: application/json' \
-  --form 'my_csv_file=@"/Users/tom/Documents/workspace/historian/historian-server/owid-covid-data.csv"' \
+  --form 'my_csv_file=@"/tmp/owid-covid-data.csv"' \
   --form 'mapping.name="iso_code"' \
   --form 'mapping.value="total_deaths_per_million"' \
   --form 'mapping.timestamp="date"' \
@@ -412,25 +399,25 @@ curl --location --request POST 'localhost:8080/api/historian/v0/import/csv' \
 
 
 ```bash
-curl --location --request POST 'localhost:8080/api/historian/v0/export/csv' \
---header 'Content-Type: application/json' \
---data-raw '{
-    "from": "2019-11-26T00:00:00.000Z",
-    "to": "2019-11-26T23:59:59.999Z",
-    "names": [
-        "ack"
-    ],
-    "tags":{
-        "metric_id" : "b04775fb-05d1-4430-82b8-ccf012ffb951"
-    },
-    "max_data_points": 500,
-    "sampling": {
-        "algorithm": "NONE",
-        "bucket_size": 5
-    },
-    
-    "return_with_quality": false
-}'
+curl -X POST 'localhost:8080/api/historian/v0/export/csv' \
+  --header 'Content-Type: application/json' \
+  --data-raw '{
+      "from": "2019-11-26T00:00:00.000Z",
+      "to": "2019-11-26T23:59:59.999Z",
+      "names": [
+          "ack"
+      ],
+      "tags":{
+          "metric_id" : "b04775fb-05d1-4430-82b8-ccf012ffb951"
+      },
+      "max_data_points": 500,
+      "sampling": {
+          "algorithm": "NONE",
+          "bucket_size": 5
+      },
+      
+      "return_with_quality": false
+  }'
 ```
 
 
@@ -438,7 +425,7 @@ curl --location --request POST 'localhost:8080/api/historian/v0/export/csv' \
 
 
 ```bash
-curl --request GET 'localhost:8080/api/historian/v0/analytics/clustering' \
+curl 'localhost:8080/api/historian/v0/analytics/clustering' \
   --header 'Content-Type: application/json' \
   --data-raw '{
     "names": [

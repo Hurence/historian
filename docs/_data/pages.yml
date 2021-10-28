@@ -19,6 +19,9 @@ toc:
       - page: PromQL dialect
         content: to interact with the data
         url: promql
+      - page: REST api
+        content: query historian with http calls
+        url: api
   - title: Tutorials
     subfolderitems:
       - page: Inject data

@@ -123,3 +123,25 @@ Historian server should start up. You should also be able to browse to a status 
 curl -X GET http://localhost:8080/api/v1
 > Historian PromQL api is working fine, enjoy!
 ```
+
+
+### Injecting data
+Since you have been working ard on your single node Historian setup, you'll be rewarded by adding some data. this can be done in several ways, but may be the simplest one is by importing a csv file.
+
+```bash
+```bash
+curl -X POST 'localhost:8080/api/historian/v0/import/csv' \
+  --header 'Content-Type: application/json' \
+  --form 'my_csv_file=@"/tmp/owid-covid-data.csv"' \
+  --form 'mapping.name="iso_code"' \
+  --form 'mapping.value="total_deaths_per_million"' \
+  --form 'mapping.timestamp="date"' \
+  --form 'mapping.tags="location"' \
+  --form 'mapping.tags="continent"' \
+  --form 'mapping.tags="iso_code"' \
+  --form 'group_by="name"' \
+  --form 'format_date="yyyy-MM-dd"' \
+  --form 'timezone_date="UTC"' \
+  --form 'max_number_of_lignes="200000"'
+```
+```
