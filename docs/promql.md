@@ -3,9 +3,9 @@ layout: page
 title: PromQL Cheat Sheet
 ---
 
-Prometheus provides a functional query language called PromQL (Prometheus Query Language) that lets the user select and aggregate time series data in real time. The result of an expression can either be shown as a graph, viewed as tabular data in Prometheus's expression browser, or consumed by external systems via the HTTP API.
+Historian provides a functional query language called PromQL (a subset of Prometheus Query Language) that lets the user select and aggregate time series data in real time. The result of an expression can either be shown as a graph viewed in Grafana consumed by external systems via the HTTP API.
 
-
+![sample](assets/images/prediction-arima.png)
 ## Time series dimensions and labels
 
 Another feature of a TSDB is the ability to filter measurements using tags. Each data point is labeled with a tag that adds context information, such as where the measurement was taken.
@@ -76,11 +76,7 @@ Complex label matchers:
 ## Rates of increase for counters
 Per-second rate of increase, averaged over last 5 minutes:
 
-``rate(col_flow_rate[5m])`
-
-Per-second rate of increase, calculated over last two samples in a 1-minute time window:
-
-`irate(col_flow_rate[1m])`
+`rate(col_flow_rate[5m])`
 
 Absolute increase over last hour:
 
@@ -90,14 +86,6 @@ Absolute increase over last hour:
 Sum over all series:
 
 `sum(col_flow_rate)`
-
-Preserve the instance and job label dimensions:
-
-`sum by(job, instance) (col_flow_rate)`
-
-Aggregate away the instance and job label dimensions:
-
-`sum without(instance, job) (col_flow_rate)`
 
 Available aggregation operators:
 
@@ -114,21 +102,3 @@ Available aggregation operators:
 - `topk()`
 - `quantile()`
 
-## Filtering series by value
-Only keep series with a sample value greater than a given number:
-
-`node_filesystem_avail_bytes > 10*1024*1024`
-
-Only keep series from the left-hand side whose sample values are larger than their right-hand-side matches:
-
-`go_goroutines > go_threads`
-
-Instead of filtering, return 0 or 1 for each compared series:
-
-`go_goroutines > bool go_threads`
-
-Match only on specific labels:
-
-`go_goroutines > bool on(job, instance) go_threads`
-
-Available comparison operators: `==, `!=, `>, `<, `>=`, `<=`

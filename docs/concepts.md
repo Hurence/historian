@@ -3,54 +3,25 @@ layout: page
 title: Concepts
 ---
 
-This is a free solution to handle massive loads of timeseries data into a search engine (such as Apache SolR).
-The key concepts are simple :
+This is a free solution to handle massive loads of timeseries data into a search engine (such as Apache SolR). It is built to store time series highly compressed and for fast access times. In comparison to related time series databases, Smart Historian does not only take 5 to 171 times less space, but it also shaves off 83% of the access time, and up to 78% off the runtime on a mix of real world queries (single node benchmark)
+
+### Time compaction
+The first gain come from storing only offsets in timestamps and (optionnaly) removing values below a timestamp delta threshold.
+
+![time compaction](assets/images/timestamp-compaction.png)
+
+### Blob encoding
+This is the process of converting a set of related `Measures`  (uniquely identified by a name and a set of key/value tags) into a `Chunk`. A `Measure` for example could be `cpu_time{ host="computer1", dc="datacenter1"}` and another one `cpu_time{ host="computer2", dc="datacenter2"}` both sharing the same name but with different tag values. The `start` timestamp is the earliest timestamp of the `Measure`'s set and the `end` timestamp is the latest timestamp of the `Measure`'s set.
+![blob encoding](assets/images/blob-encoding.png)
+
+### The key entities
 
 - **Measure** is a point in time with a floating point value identified by a name and some tags (categorical features)
-- **Chunk** is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and eventually some tags
+- **Chunk** is a set of contiguous Measures with a time interval grouped by a date bucket, the measure name and some tags
 
 The main purpose of this tool is to help creating, storing and retrieving these chunks of timeseries.
 We use chunking instead of raw storage in order to save some disk space and reduce costs at scale. Also chunking is very usefull to pre-compute some aggregation and to facilitate down-sampling
-
-### Measure
-
-A `Measure` point is identified by the following fields. Tags are used to add meta-information.
-```java
-class Measure  {
-    String name;
-    long timestamp;
-    double value;
-    float quality;
-    Map<String, String> tags;
-}
-```
-
-### Chunk
-
-A `Chunk` is identified by the following fields
-```java
-class Chunk  {
-SchemaVersion version = SchemaVersion.VERSION_1;
-String name, id, metricKey;
-byte[] value;
-long start, end;
-Map<String, String> tags;
-
-    long count, first, min, max, sum, avg, last, stdDev;
-    float qualityFirst, qualityMin, qualityMax, qualitySum, qualityAvg;
-
-    int year, month;
-    String day;
-    String origin;
-    String sax;
-    boolean trend;
-    boolean outlier;
-}
-```
-
-As you can see from a `Measure` points to a `Chunk` of Measures, the `timestamp` field has been replaced by a `start` and `stop` interval and the `value` is now a base64 encoded string named `chunk`.
-
-
+    
 
 <div class="card text-white bg-dark mb-12" >
   <div class="card-header">Chunk encode value</div>
@@ -59,14 +30,24 @@ As you can see from a `Measure` points to a `Chunk` of Measures, the `timestamp`
   </div>
 </div>
 
+---
+
+
 ### SAX symbolic encoding
 
 Note that the Chunk has aggregated fields. In addition to the classic statistics on the value and the quality of the point, we also integrate symbolic encoding with SAX.
 
 The advantage of using SAX is that it is able to act as a dimensionality reduction tool, it tolerates time series of different lengths and makes it easier to find trends.
 
-SAX encoding is a method used to simplify time series through a kind of summary of time intervals. By averaging, grouping and symbolically representing periods, the data becomes much smaller and easier to process, while still capturing its important aspects. For example, it can be used to detect statistical changes in trends and therefore abnormal behavior.
+[SAX encoding](sax-encoding) is a method used to simplify time series through a kind of summary of time intervals. By averaging, grouping and symbolically representing periods, the data becomes much smaller and easier to process, while still capturing its important aspects. For example, it can be used to detect statistical changes in trends and therefore abnormal behavior.
 
 
-- [https://www.kdnuggets.com/2019/09/time-series-baseball.html](https://www.kdnuggets.com/2019/09/time-series-baseball.html)
-- [http://www.marc-boulle.fr/publications/BonduEtAlIJCNN13.pdf](http://www.marc-boulle.fr/publications/BonduEtAlIJCNN13.pdf)
+![sax encoding](assets/images/sax-encoding.png)
+
+### SensorML (future work)
+
+SensorML provides standard models and an XML encoding for describing any process, including the process of measurement by sensors and instructions for deriving higher-level information from observations. It provides a provider-centric view of information in a sensor web, which is complemented by Observations and Measurements which provides a user-centric view.
+
+Processes described in SensorML are discoverable and executable. All processes define their inputs, outputs, parameters, and method, as well as provide relevant metadata. SensorML models detectors and sensors as processes that convert real phenomena to data.
+
+SensorML does not encode measurements taken by sensors; measurements can be represented in TransducerML, as observations in Observations and Measurements, or in other forms, such as IEEE 1451.

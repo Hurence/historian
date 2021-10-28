@@ -19,7 +19,7 @@ the user guide can be read in [https://github.com/Hurence/historian/tree/master/
 
 ## Development
 
-Please see our documentation [here](DEVELOPMENT.md)
+Please see our documentation [here](docs/developer-guide.md)
 
 ## Build
 Build with maven through a JDK 8+
