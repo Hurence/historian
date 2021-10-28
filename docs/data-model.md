@@ -5,6 +5,45 @@ title: Data Model
 
 This section describes protocol buffers specification and solr schema for storage.
 
+
+### Object entities
+
+A `Measure` point is identified by the following fields. Tags are used to add meta-information.
+```java
+class Measure  {
+    String name;
+    long timestamp;
+    double value;
+    float quality;
+    Map<String, String> tags;
+}
+```
+
+
+A `Chunk` is identified by the following fields
+```java
+class Chunk  {
+    String name, id, metricKey;
+    byte[] value;
+    long start, end;
+    Map<String, String> tags;
+
+    long count, first, min, max, sum, avg, last, stdDev;
+    float qualityFirst, qualityMin, qualityMax, qualitySum, qualityAvg;
+
+    int year, month;
+    String day;
+    String origin;
+    String sax;
+    boolean trend;
+    boolean outlier;
+}
+```
+
+As you can see from a `Measure` points to a `Chunk` of Measures, the `timestamp` field has been replaced by a `start` and `stop` interval and the `value` is now a base64 encoded string named `chunk`.
+
+
+
 ### Protocol Buffers
 
 The following protocol [buffer specification](https://github.com/Hurence/historian/blob/master/historian-timeseries/src/main/protobuf/chunk_protocol_buffers.proto) is the art of the serialized value of a Chunk
