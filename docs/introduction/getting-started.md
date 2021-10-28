@@ -128,7 +128,7 @@ curl -X GET http://localhost:8080/api/v1
 ### Injecting data
 Since you have been working ard on your single node Historian setup, you'll be rewarded by adding some data. this can be done in several ways, but may be the simplest one is by importing a csv file.
 
-```bash
+
 ```bash
 curl -X POST 'localhost:8080/api/historian/v0/import/csv' \
   --header 'Content-Type: application/json' \
@@ -143,5 +143,4 @@ curl -X POST 'localhost:8080/api/historian/v0/import/csv' \
   --form 'format_date="yyyy-MM-dd"' \
   --form 'timezone_date="UTC"' \
   --form 'max_number_of_lignes="200000"'
-```
 ```
