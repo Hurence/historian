@@ -27,29 +27,26 @@ toc:
       - page: Big Data api with Spark
         url: tutorials/spark-api
         content: different ways to feed historian with data
-      - page: Data visualisation
-        url: tutorials/data-viz
-        content: how to use grafana to get visual insights
-      - page: Alerting on prediction
-        url: data-prediction
-        content: how to generate grafana alerts based on predictions
       - page: Timeseries clustering
         url: tutorials/clustering
         content: find anomalies with tie series clustering (keans over mllib)
-      - page: Data mining with python
-        url: py-data-mining
-        content: let's play with pandas, scikit and other py toys
+      - page: Data visualisation
+        url: tutorials/data-viz
+        content: how to use grafana to get visual insights
+     # - page: Alerting on prediction
+     #   url: data-prediction
+      #   content: how to generate grafana alerts based on predictions
+        # - page: Data mining with python
+        #   url: py-data-mining
+      #  content: let's play with pandas, scikit and other py toys
   - title: Operational
     subfolderitems:
       - page: Run on kube
         content: learn how to use Helm to easily deploy on Kubernetes
         url: kube-setup
-      - page: Bare-metal setup
-        content: install all the components from scratch over on-prem hardware
-        url: bare-metal-setup
-      - page: Monitoring
-        content: how do we monitor our Smart Historian
-        url: monitoring
+    #  - page: Monitoring
+    #    content: how do we monitor our Smart Historian
+    #    url: monitoring
       - page: Developer guide
         content: everything about building, test and extending the framework
         url: developer-guide
