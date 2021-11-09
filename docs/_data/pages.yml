@@ -4,9 +4,6 @@ toc:
       - page: Features
         content: what do we mean by “Industrial Data Management System” ?
         url: features
-      - page: Getting started
-        content: the first link to click if you want to play right now
-        url: introduction/getting-started
       - page: Concepts
         content: core entities for manipulating time series and chunks
         url: concepts
@@ -24,17 +21,20 @@ toc:
         url: api
   - title: Tutorials
     subfolderitems:
-      - page: Inject data
-        url: data-injection
+      - page: Getting started
+        content: the first link to click if you want to play right now
+        url: tutorials/getting-started
+      - page: Big Data api with Spark
+        url: tutorials/spark-api
         content: different ways to feed historian with data
       - page: Data visualisation
-        url: data-viz
+        url: tutorials/data-viz
         content: how to use grafana to get visual insights
       - page: Alerting on prediction
         url: data-prediction
         content: how to generate grafana alerts based on predictions
       - page: Timeseries clustering
-        url: clustering
+        url: tutorials/clustering
         content: find anomalies with tie series clustering (keans over mllib)
       - page: Data mining with python
         url: py-data-mining

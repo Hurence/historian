@@ -12,7 +12,6 @@ The Data historian has evolved from being just a place for storing data to becom
 
 
 
-
 {% for item in site.data.pages.toc %}
 <h3>{{ item.title }}</h3>
   <ul>
