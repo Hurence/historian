@@ -130,17 +130,59 @@ Since you have been working ard on your single node Historian setup, you'll be r
 
 
 ```bash
-curl -X POST 'localhost:8080/api/historian/v0/import/csv' \
-  --header 'Content-Type: application/json' \
-  --form 'my_csv_file=@"/tmp/owid-covid-data.csv"' \
-  --form 'mapping.name="iso_code"' \
-  --form 'mapping.value="total_deaths_per_million"' \
-  --form 'mapping.timestamp="date"' \
-  --form 'mapping.tags="location"' \
-  --form 'mapping.tags="continent"' \
-  --form 'mapping.tags="iso_code"' \
-  --form 'group_by="name"' \
-  --form 'format_date="yyyy-MM-dd"' \
-  --form 'timezone_date="UTC"' \
-  --form 'max_number_of_lignes="200000"'
+curl --location --request POST 'localhost:8081/api/historian/v0/import/csv' \
+--form 'my_csv_file=@"historian-1.3.9/samples/it-data-small.csv"' \
+--form 'mapping.name=metric' \
+--form 'mapping.value=value' \
+--form 'mapping.timestamp=timestamp' \
+--form 'mapping.tags=host_id' \
+--form 'group_by=name' \
+--form 'group_by=tags.host_id' \
+--form 'format_date=SECONDS_EPOCH' \
+--form 'timezone_date=UTC'
 ```
+
+
+
+curl --location --request POST 'localhost:8081/api/v1/labels?start=1546372224&end=1636393824'
+
+{
+"status": "success",
+"data": [
+"id",
+"host_id",
+"__name__"
+]
+}
+
+
+
+curl --location --request GET 'http://localhost:8081/api/v1/label/__name__/values?start=1478627424&end=1636393824'
+
+{
+    "status":"success",
+    "data":[
+        "memoryConsumed",
+        "ack",
+        "cpu",
+        "cpu_ready",
+        "messages",
+        "consumers",
+        "cpu_wait",
+        "cpu_usage",
+        "messages_ready",
+        "messages_unacknowledged",
+        "cpu_prct_used"
+    ]
+}
+
+
+
+ack|id$089ab721585b4cb9ab20aaa6a13f08ea
+
+
+## What's next
+Now we have a basic single node, you may ask where to go from there ?
+
+- See how to inject/query data from [REST API](rest-api)
+- See how to handle big data workflows with [Spark API](spark-api)
