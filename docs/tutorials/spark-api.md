@@ -29,7 +29,7 @@ curl -g "http://localhost:8983/solr/historian/update" \
 ## Run a spark shell
 In the [getting started guide](introduction/getting-started) we have downloaded and set up spark and Hurence Historian.
 
-You can then run a shell with Historian framework `$SPARK_HOME/bin/spark-shell --jars $HISTORIAN_HOME/lib/historian-spark-1.3.9.jar --driver-memory 4g`
+You can then run a shell with Historian framework `$SPARK_HOME/bin/spark-shell --jars $HISTORIAN_HOME/lib/historian-spark-1.3.9.jar --driver-memory 6g`
 
 imports all needed packages
 
