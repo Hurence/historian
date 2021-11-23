@@ -3,7 +3,7 @@
 
 FROM anapsix/alpine-java:8_jdk_nashorn
 ARG spark_version="2.3.2"
-ARG historian_version="1.3.8"
+ARG historian_version="1.3.9"
 
 MAINTAINER hurence
 

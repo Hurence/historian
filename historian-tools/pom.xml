@@ -5,14 +5,12 @@
     <parent>
         <artifactId>historian</artifactId>
         <groupId>com.hurence.historian</groupId>
-        <version>1.3.8</version>
+        <version>1.3.9</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
-
     <artifactId>historian-tools</artifactId>
 
     <dependencies>
-        <!--SOLR-->
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
@@ -23,12 +21,6 @@
             <artifactId>historian-timeseries</artifactId>
             <version>${project.version}</version>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>com.google.guava</groupId>-->
-<!--            <artifactId>guava</artifactId>-->
-<!--            <version>27.0.1-jre</version>-->
-<!--            <scope>compile</scope>-->
-<!--        </dependency>-->
     </dependencies>
 
 </project>

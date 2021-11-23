@@ -1,199 +1,133 @@
+---
+layout: page
+title: Getting Started Guide
+categories: TUTORIAL HOWTOS
+---
 
+The following tutorial will help you to try out the features of Historian in a few steps
 
-# Getting Started with Hurence Data Historian
+> All is done here with single node setup, but you can also install all the components on a Kubernetes cluster through [Helm chart](kube-setup) or via [docker compose](docker-setup)
 
-The following tutorial will help you to try out the features of Data Historian in a few steps
-
-> All is done here with docker-compose but everything could be done and installed manually
-
-1. setup the docker environement
+1. setup the single node environment (solr/grafana/spark/historian)
 2. inject some data
 3. search and retrieve data within the REST API
 4. visualize data
-5. load data with spark
 
 
-## Setup Docker Environement
+### Prerequisites
 
+- JDK 1.8+
+- Apache Maven 3.6.0+
+- Docker 20+
 
-### instal Solr
+### Downloading Spark
+[Apache Spark™](https://spark.apache.org/) is a multi-language engine for executing data engineering, data science, and machine learning on single-node machines or clusters.
 
-wget https://archive.apache.org/dist/lucene/solr/8.2.0/solr-8.2.0.tgz
-
-
-Introduction
-ZooKeeper is an Apache Software Foundation project designed to simplify monitoring and managing group services. It uses a simple interface for its centralized coordination service that manages configuration, information, naming, distributed synchronization, and provisioning.
-
-In this tutorial, learn how to install and set up Apache ZooKeeper on Ubuntu 18.04 or 20.04.
-
-Install Apache ZooKeeper on Ubuntu.
-Prerequisites
-A Linux system running Ubuntu 20.04 or 18.04
-Access to a terminal window/command line (Search > Terminal)
-A user account with sudo or root privileges
-Installing Apache ZooKeeper on Ubuntu
-Step 1: Installing Java
-ZooKeeper is written in Java and requires this programming language to work. To check whether Java is already installed, run the command:
-
-    java --version
-
-If the output displays a running Java version, you can move on to the next step. If the system says there is no such file or directory, you need to install Java before moving on to ZooKeeper.
-
-There are different open-source Java packages available for Ubuntu. Find which one is best for you and its installation guide in How to Install Java on Ubuntu. The instructions apply to Ubuntu 18.04 and Ubuntu 20.04.
-
-
-
-
-cat <<EOT >> /etc/default/solr.in.sh
-ZK_HOST=10.20.20.142:2181,10.20.20.140:2181
-SOLR_LOG_LEVEL=WARN
-EOT
-
-
-
-## Demo
-
-
-
-
-
-### load data
-
-first we load some it monitoring data to analyse an issue. we'll bucket just on day
-
-* batch load som csv files "bin/historian-loader.sh start -c conf/fileloader-it-data.yml"
-* have a look to yaml conf, envs files
-* just check chunks into solr "metric_id:f5efa804-8b41-40c5-8101-34464c02fe7a"
-* a facet on "chunk_count"
-* sort by "chunk_day asc"
-* analyze "chunk_sax,chunk_day,chunk_avg", is there a day which is different from the others ?
-* filter on outliers and export them to csv with a tag
-* do a simple dashboard on messages to show the peak on day 28
-* launch clustering on this day
-* show clustering result in dashboard grafana
-* then load chemistry data "bin/historian-loader.sh start -c conf/fileloader-chemistry.yml"
-* do a sinmple dashboard around the 2020-03-01
-
-
-
-### play with spark API
-
-
-* run a shell "../../spark-2.3.2-bin-hadoop2.7/bin/spark-shell --jars lib/historian-spark-1.3.6.jar --driver-memory 4g"
-* imports all needed
-
-```scala
-import com.hurence.historian.service.SolrChunkService
-import com.hurence.historian.spark.ml.{Chunkyfier, ChunkyfierStreaming,UnChunkyfier}
-import com.hurence.historian.spark.sql
-import com.hurence.historian.spark.sql.reader.{ChunksReaderType, MeasuresReaderType, ReaderFactory}
-import com.hurence.historian.spark.sql.writer.solr.SolrChunkForeachWriter
-import com.hurence.historian.spark.sql.writer.{WriterFactory, WriterType}
-import com.hurence.timeseries.model.{Measure,Chunk}
-import org.apache.spark.sql.{SparkSession, _}
-import org.apache.spark.sql.streaming.OutputMode
-import org.apache.spark.ml.feature.{VectorAssembler,NGram,RegexTokenizer, Tokenizer, CountVectorizer}
-import org.apache.spark.ml.feature.Word2Vec
-import org.apache.spark.ml.linalg.Vector
-import org.apache.spark.sql.Row
-import org.apache.spark.ml.Pipeline
-import org.apache.spark.ml.clustering.KMeans
+[Download Apache Spark](https://archive.apache.org/dist/spark/spark-2.4.8/spark-2.4.8-bin-without-hadoop.tgz) then extract it:
+```shell
+wget https://archive.apache.org/dist/spark/spark-2.4.8/spark-2.4.8-bin-without-hadoop.tgz
+tar xvfz spark-*.tgz
+rm spark-*.tgz
 ```
 
-* just read som csv as Measures
+### Downloading SolR
+[Apache SolR](https://solr.apache.org/) is the popular, blazing-fast, open source enterprise search platform built on Apache Lucene™. SolR is highly reliable, scalable and fault tolerant, providing distributed indexing, replication and load-balanced querying, automated failover and recovery, centralized configuration and more. Solr powers the search and navigation features of many of the world's largest internet sites.
 
-```scala
-/* a csv reader*/
-val measuresDS = ReaderFactory.getMeasuresReader(MeasuresReaderType.GENERIC_CSV).read(sql.Options(
-        "/Users/tom/Documents/data/chemistry/ISNTS35-N-2020-03/*.csv",
-        Map(
-          "inferSchema" -> "true",
-          "delimiter" -> ";",
-          "header" -> "true",
-          "nameField" -> "tagname",
-          "timestampField" -> "timestamp",
-          "timestampDateFormat" -> "dd/MM/yyyy HH:mm:ss",
-          "valueField" -> "value",
-          "qualityField" -> "quality",
-          "tagsFields" -> "tagname"
-        ))).cache()
-
-
-measuresDS.filter( r => r.getName() == "068_PI01").count
-measuresDS.filter( r => r.getName() == "068_PI01").orderBy("timestamp").show
+[Download Apache SolR](https://archive.apache.org/dist/lucene/solr/8.9.0/solr-8.9.0.tgz), then extract it and start a solr node in cloud mode on port 8983:
+```shell
+wget https://archive.apache.org/dist/lucene/solr/8.9.0/solr-8.9.0.tgz
+tar xvfz solr-*.tgz
+rm solr-*.tgz
 ```
 
-* now play with chunks
+### Downloading Historian
+[Download the latest release](https://github.com/Hurence/historian/releases/download/v1.3.8/historian-1.3.9-bin.tgz) of Historian then extract it:
 
-```scala
-// transform Measures into Chunks
-val chunkyfier = new Chunkyfier()
-  .setOrigin("shell")
-  .setGroupByCols("name".split(","))
-  .setDateBucketFormat("yyyy-MM-dd.HH")
-  .setSaxAlphabetSize(7)
-  .setSaxStringLength(24)
+```shell
+wget https://github.com/Hurence/historian/releases/download/v1.3.8/historian-1.3.9-bin.tgz
+tar xvfz historian-*.tgz
+rm historian-*.tgz
+```
 
-val chunksDS = chunkyfier.transform(measuresDS).as[Chunk](Encoders.bean(classOf[Chunk])).cache()
+### Downloading grafana
+Centralize the analysis, visualization, and alerting for all of your data with Grafana.
 
-chunksDS.filter( r => r.getName() == "068_PI01")
-    .orderBy("start")
-    .select( "day", "count", "avg", "sax")
-    .show(false)
+[Download the latest release](https://grafana.com/grafana/download?edition=oss&platform=linux&plcmt=footer) of Grafana then follow the given instructions for your platform.
+
+### Configuring Solr 
+Before starting Historian we need to have a running solr cloud (even with one node), with a collection `historian` created from a working configset. Here are the commands to handle that :
+
+```shell
+# create a folder for solr data
+mkdir -p data/solr/node1
+cp historian-1.3.9/conf/solr.xml data/solr/node1
+cp historian-1.3.9/conf/zoo.cfg data/solr/node1
+
+# start a solr node and wait a little for the core to be initialized
+solr-8.9.0/bin/solr start -cloud -s data/solr/node1/ -p 8983
+
+# create config set archive
+cd  historian-1.3.9/conf/solr/conf/ ; zip -r historian-configset.zip ./* ; cd -;
+
+# upload configset to solr cloud
+curl --location --request POST "http://localhost:8983/solr/admin/configs?action=UPLOAD&name=historian" \
+            --header 'Content-Type: application/zip' \
+            --data-binary '@historian-1.3.9/conf/solr/conf/historian-configset.zip'
+
+# create the collection
+curl --location --request POST "http://localhost:8983/v2/c" \
+    --header 'Content-Type: application/json' \
+    --data-raw '{
+        "create": {
+            "name": "historian",
+            "config": "historian",
+            "maxShardsPerNode": 6,
+            "numShards": 3,
+            "replicationFactor": 1
+        }
+    }'
+```
+
+Now if you go to [http://localhost:8983/solr/#/~cloud?view=graph](http://localhost:8983/solr/#/~cloud?view=graph) you should see an `historian` collection made of 3 shards on one Solr core. And if you want to have a look to the pre-defined schema let's open your browser with [http://localhost:8983/solr/#/historian/files?file=managed-schema](http://localhost:8983/solr/#/historian/files?file=managed-schema)
+
+
+### Configuring Historian server
+Historian server configuration is in [json](https://www.json.org/). The historian download comes with a sample configuration filecalled [conf/historian-server-conf.json](https://github.com/Hurence/historian/blob/master/historian-resources/conf/historian-server-conf.json) that is a good place to get started. For this setup you shouldn't have much to change but here is an excerpt of what could interest you in first place (in case you have changed some server ports for instance), other properties have been hidden to make it more succinct  :
+
+```json
+{
+  "http_server" : {
+    "host": "0.0.0.0",
+    "port" : 8080
+  },
+  "historian": {
+    "solr" : {
+      "zookeeper_urls": ["localhost:9983"],
+      "stream_url" : "http://localhost:8983/solr/historian",
+      "chunk_collection": "historian"
+    }
+  }
+}
+```
+
+### Starting Historian server
+To start Historian server with our newly created configuration file run:
+
+```bash
+java -jar historian-1.3.9/lib/historian-server-1.3.9-fat.jar  -conf historian-1.3.9/conf/historian-server-conf.json 
+```
+
+Historian server should start up. You should also be able to browse to a status page about itself at http://localhost:8080. 
+
+```bash
+curl -X GET http://localhost:8080/api/v1
+> Historian PromQL api is working fine, enjoy!
 ```
 
 
 
+## What's next
+Now we have a basic single node, you may ask where to go from there ?
 
-* now we'll load it data from solr
-
-```scala
-spark.catalog.clearCache
-
-
-/* get data from solr*/
-val solrDF = ReaderFactory.getChunksReader(ChunksReaderType.SOLR).read(sql.Options("historian", Map(
-    "zkhost" -> "localhost:9983",
-    "collection" -> "historian",
-    "tag_names" -> "metric_id"
-  ))).as[Chunk](Encoders.bean(classOf[Chunk])).cache()
-
-val acksDS = solrDF.filter( r => r.getName() == "ack")
-acksDS.filter( r => r.getTag("metric_id") == "dea8601d-8aa7-4c59-a3ce-99bbab8ac5ca").select("day", "avg", "count", "start", "sax").orderBy("day").show(false)
-
-
-/* conversion to Measures */
-val unchunkyfier = new UnChunkyfier()
-
-val measuresDS = unchunkyfier.transform(acksDS).as[Measure](Encoders.bean(classOf[Measure])).cache()
-measuresDS.filter( r => r.getTag("metric_id") == "dea8601d-8aa7-4c59-a3ce-99bbab8ac5ca").orderBy("timestamp").show(false)
-```
-
-* let's play with spark MLLib and Kmeans
-
-```scala
-/* Kmeans clustering*/
-
-val tokenizer = new RegexTokenizer().setInputCol("sax").setOutputCol("words").setPattern("(?!^)")
-val vectorizer = new CountVectorizer().setInputCol("words").setOutputCol("features")
-val pipeline = new Pipeline().setStages(Array(tokenizer,vectorizer))
-
-val splits = acksDS.randomSplit(Array(0.8, 0.2), 15L)
-val (train, test) = (splits(0), splits(1))
-
-
-val dataset = pipeline.fit(train).transform(train)
-dataset.select("day","avg","tags","sax","features").show(false)
-
-val kmeans = new KMeans().setK(5).setSeed(1L).setMaxIter(20)
-val model = kmeans.fit(dataset)
-val predictions = model.transform(dataset)
-predictions.select("day", "avg","tags","sax","prediction").orderBy("prediction").show(300,false)
-model.clusterCenters.foreach(println)
-```
-
-
-
-### the compactor
-
-* launch the compactor to see that
+- See how to inject/query data from [REST API](rest-api)
+- Or may be you want to know how to handle big data workflows with [Spark API](spark-api)

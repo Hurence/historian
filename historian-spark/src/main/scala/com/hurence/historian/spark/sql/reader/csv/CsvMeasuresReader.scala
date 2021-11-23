@@ -36,24 +36,32 @@ class CsvMeasuresReader extends Reader[Measure] {
     val nameField = options.config("nameField")
     val timestampField = options.config("timestampField")
     val timestampDateFormat = options.config("timestampDateFormat")
-    val hasQuality = options.config.isDefinedAt("qualityField") && !options.config("qualityField").isEmpty
+    val hasQuality = options.config.isDefinedAt("qualityField") && options.config("qualityField").nonEmpty
+
+    val defaultName = if(options.config.isDefinedAt("defaultName") && options.config("nameField").isEmpty){
+      Some(options.config("defaultName"))
+    } else None
+
 
     val tagsFields = options.config("tagsFields")
       .split(",").toList
     val tagsMapping = tagsFields.flatMap(tag => List(lit(tag), col(tag)))
 
 
-    val mainCols = if (!hasQuality)
+    val mainCols = if (defaultName.isDefined)
       List(
-        col(nameField).as("name"),
         col(valueField).as("value"),
-        col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag))
+        col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag).cast("string"))
     else
       List(
         col(nameField).as("name"),
         col(valueField).as("value"),
-        col(options.config("qualityField")).as("quality"),
-        col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag))
+        col(timestampField).as("timestamp")) ::: tagsFields.map(tag => col(tag).cast("string"))
+
+    val allColumns = if (hasQuality)
+      mainCols :+ col(options.config("qualityField")).as("quality")
+    else
+      mainCols
 
 
     val df = spark.read
@@ -61,7 +69,7 @@ class CsvMeasuresReader extends Reader[Measure] {
       .options(options.config)
       .option("mode", "DROPMALFORMED")
       .load(options.path)
-      .select(mainCols: _*)
+      .select(allColumns: _*)
       .withColumn("tags", map(tagsMapping: _*))
 
     // Manage timestamp conversion
@@ -89,7 +97,7 @@ class CsvMeasuresReader extends Reader[Measure] {
         val builder = Measure.builder()
 
         builder
-          .name(r.getAs[String]("name"))
+          .name( defaultName.getOrElse(r.getAs[String]("name")))
           .timestamp(r.getAs[Long]("timestamp"))
           .tags(r.getAs[Map[String, String]]("tags").asJava)
 
