@@ -118,7 +118,6 @@ class Compactor(val options: CompactorConf) extends Serializable with Runnable {
 
         val measuresDS = convertChunksToMeasures(uncompactedChunks)
         val compactedChunksDS = convertMeasuresToChunks(measuresDS)
-        compactedChunksDS.show(10,false)
 
         writeCompactedChunksToSolr(compactedChunksDS)
         deleteOldChunks(day)

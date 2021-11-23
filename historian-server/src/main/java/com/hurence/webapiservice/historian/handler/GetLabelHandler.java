@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
+import static com.hurence.historian.model.HistorianServiceFields.MATCH;
 import static com.hurence.timeseries.model.Definitions.*;
 
 public class GetLabelHandler {
@@ -42,24 +43,29 @@ public class GetLabelHandler {
                 Long to = params.getLong(HistorianServiceFields.TO);
 
                 String dateRange = "*:*";
-                if(from != null && to != null){
+                if (from != null && to != null) {
                     dateRange = String.format("%s:[* TO %d] AND %s:[%d TO *]", SOLR_COLUMN_START, to, SOLR_COLUMN_END, from);
-                }else if(from != null){
+                } else if (from != null) {
                     dateRange = String.format("%s:[%d TO *]", SOLR_COLUMN_END, from);
-                }else if(to != null){
+                } else if (to != null) {
                     dateRange = String.format("%s:[* TO %d]", SOLR_COLUMN_START, to);
                 }
 
 
-                String name = (String) params.getValue("name") ;
+                String match = params.getString(MATCH);
+                String name = (String) params.getValue("name");
                 String facetFieldName = (name == null || name.equals("__name__")) ? SOLR_COLUMN_NAME : name;
                 final SolrQuery query = new SolrQuery();
+                if (match != null && !match.isEmpty()) {
+                    query.setFilterQueries( SOLR_COLUMN_NAME + ":" + match);
+                }
+
                 query.setQuery(dateRange);
                 query.setRows(0);
                 query.setFacet(true);
                 query.setFacetMinCount(1);
                 query.setFacetLimit(10000);
-                query.addFacetField( facetFieldName );
+                query.addFacetField(facetFieldName);
                 query.setFacetSort("index");
 
                 final QueryResponse response = solrHistorianConf.client.query(solrHistorianConf.chunkCollection, query);

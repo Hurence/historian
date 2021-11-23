@@ -3,15 +3,15 @@
   "historian.verticles.instance.number": 2,
   "http_server" : {
     "host": "0.0.0.0",
-    "port" : 8081,
+    "port" : 8080,
     "historian.address": "historian",
     "debug": false,
     "upload_directory" : "/tmp/historian",
     "max_data_points_maximum_allowed" : 50000
   },
-  "historian.metric_name_lookup.csv_file.path": "/Users/tom/Documents/workspace/ifpen/data-historian/conf/synonyms.csv",
+  "historian.metric_name_lookup.csv_file.path": "./synonyms.csv",
   "historian.metric_name_lookup.csv_file.separator": ";",
-  "historian.metric_name_lookup.enabled": true,
+  "historian.metric_name_lookup.enabled": false,
   "historian": {
     "schema_version": "VERSION_1",
     "address" : "historian",

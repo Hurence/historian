@@ -1,6 +1,8 @@
+---
+layout: home
+title: Forecasting
+---
 
-
-# Forecasting
 
 ## Methodology
 état de l’art des algorithmes et méthodes

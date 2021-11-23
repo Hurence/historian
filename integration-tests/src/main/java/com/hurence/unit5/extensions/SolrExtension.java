@@ -41,7 +41,7 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
     public final static String SOLR1_SERVICE_NAME = "solr1_1";
     public final static int SOLR_1_PORT = 8983;
     public final static int SOLR_2_PORT = 8983;
-    public final static String ZOOKEEPER_SERVICE_NAME = "zookeeper_1";
+    public final static String ZOOKEEPER_SERVICE_NAME = "zoo1_1";
     public final static int ZOOKEEPER_PORT = 2181;
     private final static String IMAGE = "solr:8";
     public final static String SOLR_CONF_TEMPLATE_HISTORIAN_CURRENT = "historian-current";
@@ -77,11 +77,11 @@ public class SolrExtension implements BeforeAllCallback, AfterAllCallback, Param
     @Override
     public void beforeAll(ExtensionContext extensionContext) throws Exception {
         this.dockerComposeContainer = new DockerComposeContainer(
-                new File(getClass().getResource("/shared-resources/docker-compose-test.yml").getFile())
+                new File(getClass().getResource("/docker-compose-for-grafana-tests.yml").getFile())
         )
-                .withExposedService(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT, Wait.forListeningPort())
+             ;/*  .withExposedService(ZOOKEEPER_SERVICE_NAME, ZOOKEEPER_PORT, Wait.forListeningPort())
                 .withExposedService(SOLR1_SERVICE_NAME, SOLR_1_PORT, Wait.forListeningPort())
-                .waitingFor(SOLR2_SERVICE_NAME, Wait.forListeningPort());
+                .waitingFor(SOLR2_SERVICE_NAME, Wait.forListeningPort());*/
         logger.info("Starting docker compose");
         this.dockerComposeContainer.start();
 
