@@ -23,9 +23,9 @@ The following tutorial will help you to try out the features of Historian in a f
 ### Downloading Spark
 [Apache Spark™](https://spark.apache.org/) is a multi-language engine for executing data engineering, data science, and machine learning on single-node machines or clusters.
 
-[Download Apache Spark](https://archive.apache.org/dist/spark/spark-2.4.8/spark-2.4.8-bin-without-hadoop.tgz) then extract it:
+[Download Apache Spark](https://archive.apache.org/dist/spark/spark-2.4.8/spark-2.4.8-bin-hadoop2.7.tgz) then extract it:
 ```shell
-wget https://archive.apache.org/dist/spark/spark-2.4.8/spark-2.4.8-bin-without-hadoop.tgz
+wget https://archive.apache.org/dist/spark/spark-2.4.8/spark-2.4.8-bin-hadoop2.7.tgz
 tar xvfz spark-*.tgz
 rm spark-*.tgz
 ```
@@ -41,10 +41,10 @@ rm solr-*.tgz
 ```
 
 ### Downloading Historian
-[Download the latest release](https://github.com/Hurence/historian/releases/download/v1.3.8/historian-1.3.9-bin.tgz) of Historian then extract it:
+[Download the latest release](https://github.com/Hurence/historian/releases/download/v1.3.9/historian-1.3.9-bin.tgz) of Historian then extract it:
 
 ```shell
-wget https://github.com/Hurence/historian/releases/download/v1.3.8/historian-1.3.9-bin.tgz
+wget https://github.com/Hurence/historian/releases/download/v1.3.9/historian-1.3.9-bin.tgz
 tar xvfz historian-*.tgz
 rm historian-*.tgz
 ```
