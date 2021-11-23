@@ -33,8 +33,12 @@ public class SumTimeSerieFunction implements TimeseriesFunction {
             Double valueSum = firstEntryPoints.getJsonArray(i).getDouble(0);
             Long time = firstEntryPoints.getJsonArray(i).getLong(1);
             for (int j = 1; j < seriesCount; j++) {
+                try{
                 valueSum += timeseries.getJsonObject(j).getJsonArray("datapoints")
                         .getJsonArray(i).getDouble(0);
+                }catch (Exception ex){
+                    // do nothing
+                }
             }
             firstEntryPoints.getJsonArray(i).clear();
             firstEntryPoints.getJsonArray(i).add(valueSum).add(time);
