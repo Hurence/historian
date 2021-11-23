@@ -131,8 +131,8 @@ And finally you all want to get some data out of the historian, for exemple `ack
 curl --location --request POST 'localhost:8080/api/v1/query_range' \
     --header 'Content-Type: application/x-www-form-urlencoded' \
     --data-urlencode 'query=ack' \
-    --data-urlencode 'start=1574640104' \
-    --data-urlencode 'end=1574642504'
+    --data-urlencode 'start=1574739995' \
+    --data-urlencode 'end=1574777192'
 ```
 
 
