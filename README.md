@@ -15,7 +15,7 @@ Please find the code/documentation for your version :
 * [release v1.3.6](https://github.com/Hurence/historian/tree/v1.3.6)
 * [release v1.3.5](https://github.com/Hurence/historian/tree/v1.3.5)
 
-the user guide can be read in [https://github.com/Hurence/historian/tree/master/docs/generated-docs/pdf/en/userguide.pdf](https://github.com/Hurence/historian/tree/master/docs/generated-docs/pdf/en/userguide.pdf)
+the user guide can be read in [https://hurence.github.io/historian/](https://hurence.github.io/historian/)
 
 ## Development
 

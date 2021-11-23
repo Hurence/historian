@@ -106,7 +106,7 @@ import org.apache.spark.ml.clustering.KMeans
 val path = "exporthisto_vloadprofil.csv"
 
 // select only interesting columns
-val colNames = List("PE300", "PE400", "PE500", "PE600", "PE301", "PE302", "PE303", "PE501", "PE502", "PE503", "P8311", "P8312", "P8313", "P8391", "P8392", "P8393", "P8023", "P8341", "P8342", "P8331", "TauxDeCharge", "S_Approximee", "Q_Approximee", "P8311_S", "P8312_S", "P8313_S", "CosPhi")
+val colNames = List("PE300", "PE400", "PE500", "PE600", "PE301", "PE302", "PE303", "PE501", "PE502", "PE503", "P8311", "P8312", "P8313", "P8391", "P8392", "P8393", "P8023", "P8341", "P8342", "P8331" /*, "TauxDeCharge", "S_Approximee", "Q_Approximee", "P8311_S", "P8312_S", "P8313_S", "CosPhi"*/)
 
 def inject(path:String, metricName:String) = {
     val measuresDS = ReaderFactory.getMeasuresReader(ReaderType.CSV)
@@ -152,11 +152,6 @@ colNames.foreach( c => inject(path, c))
 ```
 
 
-
-5622
-
-timestamp format
-Data_tstmp|Meter_No
 
 
 ## Kmeans clustering

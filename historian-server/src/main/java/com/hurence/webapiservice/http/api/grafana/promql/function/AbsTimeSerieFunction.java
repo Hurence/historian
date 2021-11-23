@@ -22,13 +22,17 @@ public class AbsTimeSerieFunction implements TimeseriesFunction {
 
         for (int i = 0; i < totalPoints; i++) {
             for (int j = 0; j < seriesCount; j++) {
-                JsonArray dataPoints = timeseries.getJsonObject(j).getJsonArray("datapoints").getJsonArray(i);
-                Double newValue = Math.abs(dataPoints.getDouble(0));
+                try {
+                    JsonArray dataPoints = timeseries.getJsonObject(j).getJsonArray("datapoints").getJsonArray(i);
+                    Double newValue = Math.abs(dataPoints.getDouble(0));
 
-                Long newTime = dataPoints.getLong(1);
-                dataPoints.clear()
-                        .add(newValue)
-                        .add(newTime);
+                    Long newTime = dataPoints.getLong(1);
+                    dataPoints.clear()
+                            .add(newValue)
+                            .add(newTime);
+                } catch (Exception ex) {
+                    // do nothing
+                }
             }
         }
 
