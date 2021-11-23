@@ -1,21 +1,25 @@
-#Build historian server
+# Historian server
 
-run :
-```shell script
+This is the main piece of software to handle REST interactions with SolR. The main purpose is to query solr and to serialize / deserialize chunks for binary values stroed into solr documents.
+
+
+## Build with maven
+
+You need a JDK 8+ and maven, just run :
+```shell
 mvn clean install
 ```
 
-require some other logisland module, if it fails try this :
-
-```shell script
-mvn -pl :logisland-server-historian -am clean install -DskipTests
+require some other historian module, if it fails try this :
+```shell
+mvn -pl :historian-server -am clean install -DskipTests
 ```
 
 ## Run server on local
 
-run :
+edit the file `historian-server.conf` starting with the one found in `historian-resources`. Pay attention to zookeeper urls for solr hosts. 
 ```shell script
-n
+java -jar target/historian-server-1.3.9-fat.jar  -conf ../historian-resources/conf/historian-server-conf.json 
 ```
 
 ## Run server with docker-compose
@@ -42,30 +46,8 @@ imagine tagging several different metric names with a same tag. For exemple 'tem
 By default no sampling is used if there is not too many measure to draw. Otherwise we calculate the bucket size depending on
 the total number of measures that is being queried with the average algorithm. At the moment only basic algorithms are available.
 
-## Run server on cluster
 
-TODO
-```shell script
-java -jar <jar_path> -cluster -conf <conf_path>
-```
 
-## RUN TEST
-
-### In terminal
-
-```shell script
-mvn clean install -Pintegration-tests
-``` 
-
-### with your IDE
-
-mark the folder ./src/integration-test/java as source test code in your IDE.
-mark the folder ./src/integration-test/resources as resources test in your IDE.
-
-Then run :
-```shell script
-mvn clean install -Pbuild-integration-tests
-``` 
 
 to build integration tests source class ! Then you can run the test in your IDE.
 
@@ -158,11 +140,3 @@ If tou are working with the old schema please specify **"schema_version": "VERSI
 by default it is using the last stable schema. At the moment there is only two different types of schemas.
 
 
-## CONTRIBUTE
-
-Please read DEVELOPMENT.md
-
-## TROUBLESHOOT
-
-When code generator fails. It may be because of hidden char ? This is really irritating.
-I fought with javadoc... Sometimes I could not succeed into making it working.

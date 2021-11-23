@@ -23,7 +23,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.hurence.historian</groupId>
     <artifactId>historian</artifactId>
-    <version>1.3.8</version>
+    <version>1.3.9</version>
     <packaging>pom</packaging>
     <description>Historian in a time series graphic tool
     </description>
@@ -107,7 +107,7 @@
         <module>logisland-timeseries</module>
         <module>integration-tests</module>
         <module>assembly</module>
-        <module>historian-scrapper</module>
+        <module>historian-scraper</module>
     </modules>
 
 

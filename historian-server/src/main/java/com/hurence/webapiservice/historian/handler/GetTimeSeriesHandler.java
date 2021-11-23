@@ -262,13 +262,13 @@ public class GetTimeSeriesHandler {
     private List<MetricRequest> getMetricRequestsWithFinalTagsAndFinalQualities(Request request) {
         return request.params.getJsonArray(NAMES).stream().map(i -> {
             try {
-                JsonObject metricObject = new JsonObject(i.toString());
-                String name = metricObject.getString(SOLR_COLUMN_NAME);
-                Float qualityValue = metricObject.getFloat(QUALITY_VALUE, request.getRootQuality().getQualityValue());
+                //JsonObject metricObject = new JsonObject(i.toString());
+                String name = i.toString();//metricObject.getString(SOLR_COLUMN_NAME);
+                Float qualityValue = request.getRootQuality().getQualityValue();//metricObject.getFloat(QUALITY_VALUE, request.getRootQuality().getQualityValue());
                 String qualityAgg = request.getRootQuality().getQualityAgg().toString();
                 Map<String, String> tagsMap = new HashMap<>();
                 request.getRootTags().forEach(tagsMap::put);
-                metricObject.getJsonObject(FIELD_TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
+               // metricObject.getJsonObject(FIELD_TAGS, new JsonObject()).getMap().forEach((key, value) -> tagsMap.put(key, value.toString()));
                 QualityConfig qualityConfig = new QualityConfig(qualityValue, qualityAgg);
                 return new MetricRequest(name, tagsMap, qualityConfig);
             } catch (Exception ex) {
@@ -309,7 +309,7 @@ public class GetTimeSeriesHandler {
                             .setRows(0)
                             .setFacet(true)
                             .setFacetMinCount(1)
-                            .setFacetLimit(100)
+                            .setFacetLimit(5000)
                             .addFacetField(SOLR_COLUMN_METRIC_KEY);
 
                     final QueryResponse response = solrHistorianConf.client

@@ -30,14 +30,17 @@ public class MaxTimeSerieFunction implements TimeseriesFunction {
 
         for (int i = 0; i < totalPoints; i++) {
             for (int j = 1; j < seriesCount; j++) {
-                Double newValue = timeseries.getJsonObject(j).getJsonArray("datapoints")
-                        .getJsonArray(i).getDouble(0);
-                if(newValue > firstEntryPoints.getJsonArray(i).getDouble(0)){
-                    Long newTime = firstEntryPoints.getJsonArray(i).getLong(1);
-                    firstEntryPoints.getJsonArray(i).clear();
-                    firstEntryPoints.getJsonArray(i).add(newValue).add(newTime);
+                try {
+                    Double newValue = timeseries.getJsonObject(j).getJsonArray("datapoints")
+                            .getJsonArray(i).getDouble(0);
+                    if (newValue > firstEntryPoints.getJsonArray(i).getDouble(0)) {
+                        Long newTime = firstEntryPoints.getJsonArray(i).getLong(1);
+                        firstEntryPoints.getJsonArray(i).clear();
+                        firstEntryPoints.getJsonArray(i).add(newValue).add(newTime);
+                    }
+                }catch (Exception ex){
+                    // do nothing
                 }
-
             }
         }
 

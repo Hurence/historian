@@ -1,0 +1,53 @@
+toc:
+  - title: Introduction
+    subfolderitems:
+      - page: Features
+        content: what do we mean by “Industrial Data Management System” ?
+        url: features
+      - page: Concepts
+        content: core entities for manipulating time series and chunks
+        url: concepts
+      - page: Architecture
+        content: all the building blocks of that framework
+        url: architecture
+      - page: Data Model
+        content: to dive deeper into the concepts and the object model.
+        url: data-model
+      - page: PromQL dialect
+        content: to interact with the data
+        url: promql
+      - page: REST api
+        content: query historian with http calls
+        url: api
+  - title: Tutorials
+    subfolderitems:
+      - page: Getting started
+        content: the first link to click if you want to play right now
+        url: tutorials/getting-started
+      - page: Big Data api with Spark
+        url: tutorials/spark-api
+        content: different ways to feed historian with data
+      - page: Timeseries clustering
+        url: tutorials/clustering
+        content: find anomalies with tie series clustering (keans over mllib)
+      - page: Data visualisation
+        url: tutorials/data-viz
+        content: how to use grafana to get visual insights
+     # - page: Alerting on prediction
+     #   url: data-prediction
+      #   content: how to generate grafana alerts based on predictions
+        # - page: Data mining with python
+        #   url: py-data-mining
+      #  content: let's play with pandas, scikit and other py toys
+  - title: Operational
+    subfolderitems:
+      - page: Run on kube
+        content: learn how to use Helm to easily deploy on Kubernetes
+        url: kube-setup
+    #  - page: Monitoring
+    #    content: how do we monitor our Smart Historian
+    #    url: monitoring
+      - page: Developer guide
+        content: everything about building, test and extending the framework
+        url: developer-guide
+
