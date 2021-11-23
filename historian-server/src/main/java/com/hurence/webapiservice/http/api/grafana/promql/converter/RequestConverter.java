@@ -26,7 +26,8 @@ public class RequestConverter {
         return new JsonObject()
                 .put(FROM, request.getStart())
                 .put(TO, request.getEnd())
-                .put(NAME, request.getName());
+                .put(NAME, request.getName())
+                .put(MATCH, request.getMatch());
     }
 
     public static JsonObject toGetSeriesParameters(SeriesRequest request) {

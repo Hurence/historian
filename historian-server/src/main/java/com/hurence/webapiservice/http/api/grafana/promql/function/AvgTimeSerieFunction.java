@@ -30,14 +30,19 @@ public class AvgTimeSerieFunction implements TimeseriesFunction {
                 .put("datapoints", firstEntryPoints);
 
         for (int i = 0; i < totalPoints; i++) {
-            Double valueSum = firstEntryPoints.getJsonArray(i).getDouble(0);
-            Long time = firstEntryPoints.getJsonArray(i).getLong(1);
-            for (int j = 1; j < seriesCount; j++) {
-                valueSum += timeseries.getJsonObject(j).getJsonArray("datapoints")
-                        .getJsonArray(i).getDouble(0);
+            try {
+                Double valueSum = firstEntryPoints.getJsonArray(i).getDouble(0);
+                Long time = firstEntryPoints.getJsonArray(i).getLong(1);
+                for (int j = 1; j < seriesCount; j++) {
+                    valueSum += timeseries.getJsonObject(j).getJsonArray("datapoints")
+                            .getJsonArray(i).getDouble(0);
+                }
+                firstEntryPoints.getJsonArray(i).clear();
+                firstEntryPoints.getJsonArray(i).add(valueSum / seriesCount).add(time);
+            } catch (Exception ex) {
+                // do nothing
             }
-            firstEntryPoints.getJsonArray(i).clear();
-            firstEntryPoints.getJsonArray(i).add(valueSum/seriesCount).add(time);
+
         }
 
         return new JsonArray().add(result);
