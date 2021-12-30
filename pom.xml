@@ -108,6 +108,7 @@
         <module>integration-tests</module>
         <module>assembly</module>
         <module>historian-scraper</module>
+        <module>greensights-server</module>
     </modules>
 
 
