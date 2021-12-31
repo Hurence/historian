@@ -13,6 +13,7 @@ import com.google.api.services.analyticsreporting.v4.AnalyticsReporting;
 import com.google.api.services.analyticsreporting.v4.AnalyticsReportingScopes;
 import com.google.api.services.analyticsreporting.v4.model.*;
 import com.hurence.historian.greensights.model.EnergyImpactMetric;
+import com.hurence.historian.greensights.model.solr.WebPageAnalysis;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
@@ -41,6 +42,12 @@ public class GoogleAnalyticsService {
     @Autowired
     private PageSizeService pageSizeService;
 
+    @Value("${analytics.dateRange.startDate:7daysAgo}" )
+    private String startDate;
+
+    @Value("${analytics.dateRange.endDate:today}")
+    private String endDate;
+
 
     /**
      * get energy impact metrics from google analytics
@@ -51,7 +58,6 @@ public class GoogleAnalyticsService {
 
         List<EnergyImpactMetric> energyImpactMetrics = new ArrayList<>();
 
-        // TODO implement here
         try {
             AnalyticsReporting analyticsReporting = initializeAnalyticsReporting();
             Analytics analytics = initializeAnalytics();
@@ -61,9 +67,9 @@ public class GoogleAnalyticsService {
                 GetReportsResponse report = getReport(analyticsReporting, viewProperty.getViewId());
                 List<EnergyImpactMetric> metrics = getMetrics(report, viewProperty);
                 metrics.forEach(energyImpactMetric -> {
-
-                    long pageSize = pageSizeService.getPageSize(energyImpactMetric.getFullUrl());
-                    energyImpactMetric.setPageSizeInBytes(pageSize);
+                    // we need page size from another service
+                    WebPageAnalysis webPageAnalysis = pageSizeService.getPageSize(energyImpactMetric.getFullUrl());
+                    energyImpactMetric.setPageSizeInBytes(webPageAnalysis.getPageSizeInBytes());
                 });
                 energyImpactMetrics.addAll(metrics);
             }
@@ -198,6 +204,8 @@ public class GoogleAnalyticsService {
 
 
 
+
+
     /**
      * Queries the Analytics Reporting API V4.
      *
@@ -209,8 +217,8 @@ public class GoogleAnalyticsService {
     private GetReportsResponse getReport(AnalyticsReporting service, String viewId) throws IOException {
         // Create the DateRange object.
         DateRange dateRange = new DateRange();
-        dateRange.setStartDate("yesterday");
-        dateRange.setEndDate("today");
+        dateRange.setStartDate(startDate);
+        dateRange.setEndDate(endDate);
 
         // Create the Metrics object.
         Metric pageViews = new Metric()
