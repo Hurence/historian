@@ -63,3 +63,4 @@ integration-tests/src/main/resources/shared-resources/add-one-time-config-histor
 historian-timeseries/src/main/generated
 historian-spark/dependency-tree-before
 historian-spark/dependency-tree-now
+/greensights-server/historian-329415-e7bd4a805872.json

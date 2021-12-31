@@ -5,6 +5,32 @@ This provides an API and a command line utility to scrape metrics from a Prometh
 ## Credits
 This tool is based on original source code from : [https://github.com/jmazzitelli/prometheus-scraper](https://github.com/jmazzitelli/prometheus-scraper)
 
+
+## setup
+
+First create a Solr collection called `greensights` to store all custom data.
+
+```bash
+curl --location --request POST 'http://localhost:8983/v2/c' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "create": {
+        "name": "greensights",
+        "config": "_default",
+        "numShards": 1,
+        "replicationFactor": 2,
+        "maxShardsPerNode": 3
+    }
+}'
+```
+
+make sure it has been created correctly 
+
+```bash
+curl --location --request GET 'http://localhost:8983/solr/admin/collections?action=COLSTATUS&collection=greensights&sizeInfo=true'
+```
+
+
 ## Configuration
 
 The following properties can be set in `application.properties` file or passed at command line or docker env 
