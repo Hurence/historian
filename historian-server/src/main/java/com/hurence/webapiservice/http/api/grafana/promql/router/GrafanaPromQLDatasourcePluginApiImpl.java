@@ -445,7 +445,7 @@ public class GrafanaPromQLDatasourcePluginApiImpl implements GrafanaPromQLDataso
             // check if we need to process timeseries function
             Optional<TimeserieFunctionType> functionType = request.getQuery().getAggregationOperator();
             if(functionType.isPresent()){
-                TimeseriesFunction function = TimeserieFunctionFactory.getInstance(functionType.get());
+                TimeseriesFunction function = TimeserieFunctionFactory.getInstance(request);
                 sampledTimeSeries = function.process(sampledTimeSeries);
             }
 

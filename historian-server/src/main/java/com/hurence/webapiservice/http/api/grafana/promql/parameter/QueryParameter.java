@@ -31,6 +31,7 @@ public class QueryParameter {
     private Boolean quality;
 
     private RangeDuration rangeDuration;
+    private GroupByParameter groupByParameter;
 
 
     public String toQueryString() {
@@ -58,7 +59,11 @@ public class QueryParameter {
 
         public QueryParameterBuilder parse(String queryStr) {
 
-            // first get and remove duration
+            // get group by params and remove them
+            groupByParameter = GroupByParameter.builder().parse(queryStr).build();
+            queryStr = groupByParameter.getQueryWithoutBy();
+
+            // get and remove duration
             rangeDuration = RangeDuration.builder().parse(queryStr).build();
             queryStr = rangeDuration.getQueryWithoutDuration();
 

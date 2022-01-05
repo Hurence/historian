@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 
-public class AbsTimeSerieFunction implements TimeseriesFunction {
+public class AbsTimeSerieFunction extends AbstractTimeseriesFunction {
     @Override
     public TimeserieFunctionType type() {
         return TimeserieFunctionType.MIN;

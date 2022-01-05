@@ -10,7 +10,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PredictArimaTimeSerieFunction implements TimeseriesFunction {
+public class PredictArimaTimeSerieFunction extends AbstractTimeseriesFunction {
 
 
     public static final int NUM_FORECASTED_POINTS = 20;

@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonArray;
 /**
  * This function does nothing on the timeseries
  */
-public class NoopTimeSerieFunction implements TimeseriesFunction {
+public class NoopTimeSerieFunction extends AbstractTimeseriesFunction {
     @Override
     public TimeserieFunctionType type() {
         return TimeserieFunctionType.NOOP;

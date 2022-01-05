@@ -215,7 +215,7 @@ class QueryParameterTest {
         assertEquals("aze", queryParameter.getTags().get("measure"));
     }
 
-        @Test
+    @Test
     void multiplePromQLQueries() {
 
         List<String> queries = Arrays.asList(
@@ -231,7 +231,7 @@ class QueryParameterTest {
                 "node_cpu_seconds_total offset 1d",
                 "sum by(job, instance) (node_cpu_seconds_total)",
                 "sum without(instance, job) (node_cpu_seconds_total)"*/
-                );
+        );
 
         List<QueryParameter> queryParameters = queries.stream()
                 .map(q -> QueryParameter.builder().parse(q).build())
@@ -244,4 +244,32 @@ class QueryParameterTest {
         }
 
     }
+
+
+    @Test
+    void testSumBy() {
+
+        List<String> queries = Arrays.asList(
+                "sum by(measure, cotation) (metric{ measure=\"aze\", cotation=\"8a\"}[1h])",
+                "sum(metric{ measure=\"aze\", cotation=\"8a\"}[1h]) by (measure, cotation)",
+                "sum( metric{measure=\"aze\", cotation=\"8a\"}[1h]) by(measure,cotation)");
+
+        for (String query : queries) {
+
+            QueryParameter queryParameter = QueryParameter.builder().parse(query).build();
+
+            assertEquals("metric", queryParameter.getName());
+            assertEquals(TimeserieFunctionType.SUM, queryParameter.getAggregationOperator().get());
+            assertEquals("aze", queryParameter.getTags().get("measure"));
+            assertEquals("8a", queryParameter.getTags().get("cotation"));
+
+            assertEquals(2, queryParameter.getGroupByParameter().getNames().size());
+            assertEquals("measure", queryParameter.getGroupByParameter().getNames().get(0));
+            assertEquals("cotation", queryParameter.getGroupByParameter().getNames().get(1));
+
+        }
+
+    }
+
+
 }

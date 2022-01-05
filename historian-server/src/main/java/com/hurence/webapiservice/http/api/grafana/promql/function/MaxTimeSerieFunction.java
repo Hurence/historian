@@ -5,7 +5,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
 
-public class MaxTimeSerieFunction implements TimeseriesFunction {
+public class MaxTimeSerieFunction extends AbstractTimeseriesFunction {
     @Override
     public TimeserieFunctionType type() {
         return TimeserieFunctionType.MAX;
