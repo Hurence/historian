@@ -62,7 +62,7 @@ public class EnergyImpactComputationService {
         if(computeRequest.getDoSaveMeasures()){
             // convert them to measures
             List<Measure> measures = energyImpactMetrics.stream()
-                    .map(EnergyImpactMetricConverter::toMeasure)
+                    .flatMap(metric -> EnergyImpactMetricConverter.toMeasures(metric).stream())
                     .collect(Collectors.toList());
 
             // add measures to queue for being indexed to historian
