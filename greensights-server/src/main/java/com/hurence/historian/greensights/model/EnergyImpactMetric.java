@@ -1,8 +1,10 @@
 package com.hurence.historian.greensights.model;
 
-import com.google.common.collect.ImmutableMap;
+
 import lombok.Data;
 
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 import static com.hurence.historian.greensights.model.OneByteModel.*;
@@ -14,11 +16,16 @@ public class EnergyImpactMetric {
     private String rootUrl;
     private String country;
     private String pagePath;
-    private String day;
     private String deviceCategory;     // loaded from GA
-    private long pageViews = 1L;            // loaded from GA
+    private int pageViews = 1;            // loaded from GA
     private long avgTimeOnPageInSec = AVERAGE_TIME_ON_PAGE_IN_SEC;    // loaded from GA
     private long pageSizeInBytes = -1L;      // loaded from web scrapping
+
+    private String dateRangeStart;
+    private String dateRangeEnd;
+
+    private Date metricDate;
+
 
 
 
@@ -42,17 +49,17 @@ public class EnergyImpactMetric {
     public double getEnergyImpactInKwh() {
 
         // let's default with a destop on a wired network
-        double deviceImpact =  ENERGY_IMPACT_DEVICE_DESKTOP  ;
+        double deviceImpact = ENERGY_IMPACT_DEVICE_DESKTOP;
         double networkImpact = ENERGY_IMPACT_FOR_FAN_WIRED;
 
         // switch to smartphone on mobile network
-        if(!deviceCategory.equalsIgnoreCase("desktop")){
-            deviceImpact = ENERGY_IMPACT_DEVICE_SMARTPHONE ;
+        if (!deviceCategory.equalsIgnoreCase("desktop")) {
+            deviceImpact = ENERGY_IMPACT_DEVICE_SMARTPHONE;
             networkImpact = ENERGY_IMPACT_FOR_MOBILE_NETWORK;
         }
 
         // convert to min
-        double timeSpentOnActionInMin = avgTimeOnPageInSec / 60.0 ;
+        double timeSpentOnActionInMin = avgTimeOnPageInSec / 60.0;
 
         double singlePageImpact = timeSpentOnActionInMin * deviceImpact + pageSizeInBytes * (ENERGY_IMPACT_DUE_TO_DATACENTERS + networkImpact);
 
@@ -62,20 +69,21 @@ public class EnergyImpactMetric {
     /**
      * @return CO2 equivalence
      */
-    public double getCo2EqInKg(){
+    public double getCo2EqInKg() {
         return getEnergyImpactInKwh() * OneByteModel.getCarbonIntensityFactor(country);
     }
 
     public Map<String, String> getLabels() {
 
-        return ImmutableMap.of(
-                "root_url", rootUrl,
-                "page_path", pagePath,
-                "country", country,
-                "device_category", deviceCategory);
+        HashMap<String, String> labels = new HashMap<>();
+        labels.put("root_url", rootUrl);
+        labels.put("page_path", pagePath);
+        labels.put("country", country);
+        labels.put("device_category", deviceCategory);
+        return labels;
     }
 
-    public String getFullUrl(){
+    public String getFullUrl() {
         return getRootUrl() + getPagePath();
     }
 }

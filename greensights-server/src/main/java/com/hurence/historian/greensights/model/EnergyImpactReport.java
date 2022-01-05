@@ -1,55 +1,47 @@
 package com.hurence.historian.greensights.model;
 
-import com.hurence.historian.greensights.util.solr.EnergyImpactMetricConverter;
-import com.hurence.timeseries.model.Measure;
+
 import lombok.Data;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
+
 
 @Data
 public class EnergyImpactReport {
 
-    private List<EnergyImpactMetric> metrics;
 
+    private final String startDate;
+    private final String endDate;
+    private final double energyImpactByPage;
+    private final double totalTransferredMegaBytes;
+    private final Double energyImpactInKwhGlobal;
+    private final Integer pageViewsGlobal;
+    private final Double co2EqInKg;
 
-    public double getTotalTransferredMegaBytes(){
+    public EnergyImpactReport(String startDate, String endDate,List<EnergyImpactMetric> metrics) {
 
-        return getPageViewsGlobal() * metrics.stream()
-                .map(EnergyImpactMetric::getPageSizeInBytes)
-                .reduce(0L, Long::sum) /1024.0 /1024.0;
-    }
+        this.startDate = startDate;
+        this.endDate = endDate;
 
-    public double getEnergyImpactByPage(){
-
-        return getEnergyImpactInKwhGlobal() / (double)getPageViewsGlobal();
-    }
-
-    public double getEnergyImpactInKwhGlobal(){
-
-        return metrics.stream()
+        energyImpactInKwhGlobal = metrics.stream()
                 .map(EnergyImpactMetric::getEnergyImpactInKwh)
                 .reduce(0.0, Double::sum);
-    }
 
-    public long getPageViewsGlobal(){
-
-        return metrics.stream()
+        pageViewsGlobal = metrics.stream()
                 .map(EnergyImpactMetric::getPageViews)
-                .reduce(0L, Long::sum);
-    }
+                .reduce(0, Integer::sum);
 
-    public double getCo2EqInKg(){
+        totalTransferredMegaBytes = pageViewsGlobal * metrics.stream()
+                .map(EnergyImpactMetric::getPageSizeInBytes)
+                .reduce(0L, Long::sum) / 1024.0 / 1024.0;
 
-        return metrics.stream()
+        co2EqInKg = metrics.stream()
                 .map(EnergyImpactMetric::getCo2EqInKg)
                 .reduce(0.0, Double::sum);
+
+        energyImpactByPage = energyImpactInKwhGlobal / (double) pageViewsGlobal;
+
     }
 
-    public List<Measure> getMeasures(){
-        return metrics.stream()
-                .map(EnergyImpactMetricConverter::toMeasure)
-                .collect(Collectors.toList());
-    }
+
 }

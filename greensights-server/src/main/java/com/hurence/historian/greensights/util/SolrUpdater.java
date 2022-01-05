@@ -1,4 +1,4 @@
-package com.hurence.historian.greensights.util.solr;
+package com.hurence.historian.greensights.util;
 
 
 import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;

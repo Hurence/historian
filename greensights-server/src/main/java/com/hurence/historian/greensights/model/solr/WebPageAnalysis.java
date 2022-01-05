@@ -14,7 +14,10 @@ public class WebPageAnalysis {
 
     @Id
     @Indexed(name = "id", type = "string")
-    private String id;
+    private String url;
+
+    @Indexed(name = "doc_type_s", type = "string" )
+    private String doc_type = "webpage_analysis";
 
     @Indexed(name = "page_size_in_bytes_l", type = "long" )
     private long pageSizeInBytes;
@@ -25,6 +28,6 @@ public class WebPageAnalysis {
     @Indexed(name = "download_duration_l", type = "long")
     private long downloadDuration;
 
-    @Indexed(name="last_crawling_date_dt")
-    private Date lastCrawlingDate = new Date();
+    @Indexed(name="computation_date_dt")
+    private Date computationDate = new Date();
 }

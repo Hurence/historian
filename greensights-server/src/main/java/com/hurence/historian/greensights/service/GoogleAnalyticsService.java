@@ -13,11 +13,16 @@ import com.google.api.services.analyticsreporting.v4.AnalyticsReporting;
 import com.google.api.services.analyticsreporting.v4.AnalyticsReportingScopes;
 import com.google.api.services.analyticsreporting.v4.model.*;
 import com.hurence.historian.greensights.model.EnergyImpactMetric;
+import com.hurence.historian.greensights.model.request.ComputeRequest;
 import com.hurence.historian.greensights.model.solr.WebPageAnalysis;
+import com.hurence.historian.greensights.util.DateUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormatter;
+import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -42,11 +47,7 @@ public class GoogleAnalyticsService {
     @Autowired
     private PageSizeService pageSizeService;
 
-    @Value("${analytics.dateRange.startDate:7daysAgo}" )
-    private String startDate;
 
-    @Value("${analytics.dateRange.endDate:today}")
-    private String endDate;
 
 
     /**
@@ -54,7 +55,7 @@ public class GoogleAnalyticsService {
      *
      * @return
      */
-    public List<EnergyImpactMetric> retrieveMetrics() {
+    public List<EnergyImpactMetric> retrieveMetrics(ComputeRequest computeRequest) {
 
         List<EnergyImpactMetric> energyImpactMetrics = new ArrayList<>();
 
@@ -64,12 +65,16 @@ public class GoogleAnalyticsService {
 
             List<ViewProperty> allViewProperties = getAllViewProperties(analytics);
             for (ViewProperty viewProperty : allViewProperties) {
-                GetReportsResponse report = getReport(analyticsReporting, viewProperty.getViewId());
+                GetReportsResponse report = getReport(analyticsReporting, viewProperty.getViewId(), computeRequest);
                 List<EnergyImpactMetric> metrics = getMetrics(report, viewProperty);
                 metrics.forEach(energyImpactMetric -> {
                     // we need page size from another service
                     WebPageAnalysis webPageAnalysis = pageSizeService.getPageSize(energyImpactMetric.getFullUrl());
                     energyImpactMetric.setPageSizeInBytes(webPageAnalysis.getPageSizeInBytes());
+                    energyImpactMetric.setDateRangeStart(computeRequest.getStartDate());
+                    energyImpactMetric.setDateRangeEnd(computeRequest.getEndDate());
+                   energyImpactMetric.setMetricDate(DateUtils.fromDateRequest(computeRequest.getEndDate()));
+
                 });
                 energyImpactMetrics.addAll(metrics);
             }
@@ -214,11 +219,11 @@ public class GoogleAnalyticsService {
      * @return GetReportResponse The Analytics Reporting API V4 response.
      * @throws IOException
      */
-    private GetReportsResponse getReport(AnalyticsReporting service, String viewId) throws IOException {
+    private GetReportsResponse getReport(AnalyticsReporting service, String viewId, ComputeRequest computeRequest) throws IOException {
         // Create the DateRange object.
         DateRange dateRange = new DateRange();
-        dateRange.setStartDate(startDate);
-        dateRange.setEndDate(endDate);
+        dateRange.setStartDate(computeRequest.getStartDate());
+        dateRange.setEndDate(computeRequest.getEndDate());
 
         // Create the Metrics object.
         Metric pageViews = new Metric()

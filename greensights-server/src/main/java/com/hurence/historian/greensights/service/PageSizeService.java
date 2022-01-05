@@ -46,7 +46,7 @@ public class PageSizeService {
 
         // else we need to make the full analysis through a web driver which can be a little slow
         WebPageAnalysis webPageAnalysis = new WebPageAnalysis();
-        webPageAnalysis.setId(url);
+        webPageAnalysis.setUrl(url);
         WebDriver driver = setupWebDriver();
 
         // Your test logic here

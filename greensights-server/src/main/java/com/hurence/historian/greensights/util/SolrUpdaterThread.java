@@ -1,10 +1,11 @@
-package com.hurence.historian.greensights.util.solr;
+package com.hurence.historian.greensights.util;
 
 
 import com.hurence.historian.converter.SolrDocumentBuilder;
 import com.hurence.timeseries.converter.MeasuresToChunkVersionCurrent;
 import com.hurence.timeseries.model.Chunk;
 import com.hurence.timeseries.model.Measure;
+import lombok.SneakyThrows;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.solr.client.solrj.SolrClient;
@@ -27,7 +28,7 @@ public class SolrUpdaterThread implements Runnable {
     private final MeasuresToChunkVersionCurrent converter;
 
     private volatile int batchedUpdates = 0;
-    private volatile long lastTS = System.currentTimeMillis() * 100; // far in the future ...
+    private volatile long lastTS = System.currentTimeMillis() + 2000; // far in the future ...
 
     private final String collection;
     private final Integer batchSize;
@@ -52,6 +53,7 @@ public class SolrUpdaterThread implements Runnable {
         this.converter = new MeasuresToChunkVersionCurrent(chunkOrigin);
     }
 
+    @SneakyThrows
     @Override
     public void run() {
 
@@ -96,6 +98,7 @@ public class SolrUpdaterThread implements Runnable {
             } catch (Exception  e) {
                 log.error("unable to send measures to solr : {}", e.getMessage());
             }
+            Thread.sleep(50);
         }
     }
 
@@ -107,6 +110,7 @@ public class SolrUpdaterThread implements Runnable {
         String name = measure.getName();
         Map<String, String> tags = measure.getTags();
         Chunk chunk = converter.buildChunk(name, measures, tags);
+        chunk.setOrigin("greensights");
         return SolrDocumentBuilder.fromChunk(chunk);
     }
 }
