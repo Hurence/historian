@@ -1,7 +1,6 @@
 package com.hurence.webapiservice.http.api.grafana.promql.parameter;
 
 
-
 import com.hurence.webapiservice.http.api.grafana.promql.converter.PromQLSynonymLookup;
 import lombok.Builder;
 import lombok.Data;
@@ -25,56 +24,70 @@ public class MatchParameter {
 
     public static class MatchParameterBuilder {
 
-        private Map<String, String> tags= new HashMap<>();
+        private Map<String, String> tags = new HashMap<>();
 
         private static final Logger LOGGER = LoggerFactory.getLogger(MatchParameterBuilder.class);
 
+
         public MatchParameterBuilder parameters(Map<String, String> parameters) {
 
-                      // parsing query
-            if(!parameters.containsKey(MATCH))
-                throw new IllegalArgumentException(MATCH + " key not found in parameters");
-
-            StringBuilder luceneQueryBuilder = new StringBuilder();
-            String matchQuery = parameters.get(MATCH);
-            int firstBracket = matchQuery.indexOf("{");
-
-            if(firstBracket!=0){
-                name = PromQLSynonymLookup.getOriginalName(matchQuery.substring(0,firstBracket));
-                luceneQueryBuilder.append(String.format("name:%s", name));
-                matchQuery = matchQuery.substring(firstBracket);
+            // parsing query
+            if (!parameters.containsKey(MATCH)) {
+                String errorMessage = MATCH + " key not found in parameters : " + parameters;
+                LOGGER.error(errorMessage);
+                throw new IllegalArgumentException(errorMessage);
             }
 
-            String[] matches = matchQuery
-                    .replaceAll("\\{", "")
-                    .replaceAll("\\}", "")
-                    .split(",");
+            try {
 
+                StringBuilder luceneQueryBuilder = new StringBuilder();
+                String matchQuery = parameters.get(MATCH);
+                int firstBracket = matchQuery.indexOf("{");
 
-            for (String m : matches) {
-                String[] arg = m.split("=");
-                String key = arg[0];
-                String value = arg[1].replaceAll("\"", "");
-                if(value.contains(" "))
-                    value = String.format("\"%s\"", value);
-
-                if(value.equals("~.*") || value.equals("~.+"))
-                    value = "*";
-
-                if(key.equals(__NAME__)){
-                    name = PromQLSynonymLookup.getOriginalName(value);
-                    if (luceneQueryBuilder.length() != 0)
-                        luceneQueryBuilder.append(" AND");
-
-                    luceneQueryBuilder.append(String.format(" name:%s", name));
-                }else {
-                    tags.put(key, value);
-                    if (luceneQueryBuilder.length() != 0)
-                        luceneQueryBuilder.append(" AND");
-                    luceneQueryBuilder.append(String.format(" %s:\"%s\"", key, value));
+                if (firstBracket != 0) {
+                    name = PromQLSynonymLookup.getOriginalName(matchQuery.substring(0, firstBracket));
+                    luceneQueryBuilder.append(String.format("name:%s", name));
+                    matchQuery = matchQuery.substring(firstBracket);
                 }
+
+                String[] matches = matchQuery
+                        .replaceAll("\\{", "")
+                        .replaceAll("\\}", "")
+                        .split(",");
+
+
+                for (String m : matches) {
+                    String[] arg = m.split("=");
+                    if (arg.length < 2)
+                        break;
+
+                    String key = arg[0].replaceAll("\\s+", "");
+                    String value = arg[1].replaceAll("\\s+", "").replaceAll("\"", "");
+                    if (value.contains(" "))
+                        value = String.format("\"%s\"", value);
+
+                    if (value.equals("~.*") || value.equals("~.+"))
+                        value = "*";
+
+                    if (key.equals(__NAME__)) {
+                        name = PromQLSynonymLookup.getOriginalName(value);
+                        if (luceneQueryBuilder.length() != 0)
+                            luceneQueryBuilder.append(" AND");
+
+                        luceneQueryBuilder.append(String.format(" name:%s", name));
+                    } else {
+                        tags.put(key, value);
+                        if (luceneQueryBuilder.length() != 0)
+                            luceneQueryBuilder.append(" AND");
+                        luceneQueryBuilder.append(String.format(" %s:\"%s\"", key, value));
+                    }
+                }
+                luceneQuery = luceneQueryBuilder.toString().trim();
+
+
+            } catch (Exception ex) {
+                LOGGER.error("something went wrong while trying to build MatchParameter with : " + parameters);
             }
-            luceneQuery = luceneQueryBuilder.toString().trim();
 
             return this;
         }

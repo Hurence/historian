@@ -10,6 +10,40 @@ import static org.junit.jupiter.api.Assertions.*;
 import static com.hurence.historian.model.HistorianServiceFields.*;
 class MatchParameterTest {
 
+
+    @Test
+    void testSimpleMatch() {
+
+        Map<String, String> query = ImmutableMap.of(
+                MATCH,
+                "U004_TC01{ sample=\"true\", sub_unit=\"reacteur1_coquille1\", type=\"temperature\"}");
+
+        MatchParameter parameter = MatchParameter.builder()
+                .parameters(query)
+                .build();
+
+        assertEquals("U004_TC01", parameter.getName());
+        assertEquals("temperature",parameter.getTags().get("type"));
+        assertEquals("reacteur1_coquille1",parameter.getTags().get("sub_unit"));
+        assertEquals("true",parameter.getTags().get("sample"));
+        assertEquals(3,parameter.getTags().size());
+    }
+
+    @Test
+    void testSimpleMatchNoTags() {
+
+        Map<String, String> query = ImmutableMap.of(
+                MATCH,
+                "U004_TC01{ }");
+
+        MatchParameter parameter = MatchParameter.builder()
+                .parameters(query)
+                .build();
+
+        assertEquals("U004_TC01", parameter.getName());
+        assertEquals(0,parameter.getTags().size());
+    }
+
     @Test
     void testMatch() {
 
