@@ -20,9 +20,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormatter;
-import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -47,8 +44,8 @@ public class GoogleAnalyticsService {
     @Autowired
     private PageSizeService pageSizeService;
 
-
-
+    @Value("${greensights.analytics.defaults.avgTimeOnPageInSec:44}")
+    private Long defaultAvgTimeOnPageInSec;
 
     /**
      * get energy impact metrics from google analytics
@@ -73,7 +70,7 @@ public class GoogleAnalyticsService {
                     energyImpactMetric.setPageSizeInBytes(webPageAnalysis.getPageSizeInBytes());
                     energyImpactMetric.setDateRangeStart(computeRequest.getStartDate());
                     energyImpactMetric.setDateRangeEnd(computeRequest.getEndDate());
-                   energyImpactMetric.setMetricDate(DateUtils.fromDateRequest(computeRequest.getEndDate()));
+                    energyImpactMetric.setMetricDate(DateUtils.fromDateRequest(computeRequest.getEndDate()));
 
                 });
                 energyImpactMetrics.addAll(metrics);
@@ -88,7 +85,7 @@ public class GoogleAnalyticsService {
     }
 
 
-    @Value("${scraper.jsonKeyFile}")
+    @Value("${greensights.scraper.jsonKeyFile}")
     private String KEY_FILE_LOCATION;
 
     private String PROPERTY_ID = "3122248625"; //"196132511";
@@ -303,8 +300,9 @@ public class GoogleAnalyticsService {
                     }
                 }
                 metric.setRootUrl(viewProperty.getWebsiteUrl());
+                // return with hard wired default if this info is not present on GA
                 if(metric.getAvgTimeOnPageInSec() == 0)
-                    metric.setAvgTimeOnPageInSec(EnergyImpactMetric.AVERAGE_TIME_ON_PAGE_IN_SEC);
+                    metric.setAvgTimeOnPageInSec(defaultAvgTimeOnPageInSec);
 
                 energyImpactMetrics.add(metric);
             }

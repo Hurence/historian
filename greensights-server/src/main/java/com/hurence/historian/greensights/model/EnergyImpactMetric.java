@@ -2,6 +2,7 @@ package com.hurence.historian.greensights.model;
 
 
 import lombok.Data;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Date;
 import java.util.HashMap;
@@ -12,13 +13,17 @@ import static com.hurence.historian.greensights.model.OneByteModel.*;
 @Data
 public class EnergyImpactMetric {
 
-    public static final long AVERAGE_TIME_ON_PAGE_IN_SEC = 44L;
+
     private String rootUrl;
     private String country;
     private String pagePath;
     private String deviceCategory;     // loaded from GA
     private int pageViews = 1;            // loaded from GA
-    private long avgTimeOnPageInSec = AVERAGE_TIME_ON_PAGE_IN_SEC;    // loaded from GA
+
+    @Value("${greensights.analytics.defaults.avgTimeOnPageInSec:44}")
+    private long avgTimeOnPageInSec;    // loaded from GA
+
+    @Value("${greensights.analytics.defaults.avgPageSizeInBytes:2000}")
     private long pageSizeInBytes = -1L;      // loaded from web scrapping
 
     private String dateRangeStart;
@@ -78,7 +83,7 @@ public class EnergyImpactMetric {
         HashMap<String, String> labels = new HashMap<>();
         labels.put("root_url", rootUrl);
         labels.put("page_path", pagePath);
-        labels.put("country", country);
+        labels.put("country", OneByteModel.getZoneFromCountry(country));
         labels.put("device_category", deviceCategory);
         return labels;
     }

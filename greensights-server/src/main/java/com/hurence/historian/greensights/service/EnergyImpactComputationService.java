@@ -13,7 +13,9 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,7 +23,7 @@ import java.util.stream.Collectors;
 public class EnergyImpactComputationService {
     private static final Logger log = LogManager.getLogger(EnergyImpactComputationService.class);
 
-    private final BlockingQueue<Measure> updateQueue;
+    private final ConcurrentLinkedQueue<Measure> updateQueue;
     private final GoogleAnalyticsService googleAnalyticsService;
     private final WebPageActivityAnalysisRepository webPageActivityAnalysisRepository;
 
@@ -31,47 +33,58 @@ public class EnergyImpactComputationService {
      * @param computeRequest
      * @return
      */
-    public EnergyImpactReport compute(ComputeRequest computeRequest){
+    public List<EnergyImpactReport> compute(ComputeRequest computeRequest){
 
         log.debug("fetching metrics");
 
         // get metrics from google analytics
         List<EnergyImpactMetric> energyImpactMetrics = googleAnalyticsService.retrieveMetrics(computeRequest);
-        EnergyImpactReport energyImpactReport = new EnergyImpactReport(
-                computeRequest.getStartDate(),
-                computeRequest.getEndDate(),
-                energyImpactMetrics);
 
-        log.info("energy impact in Kwh : " + energyImpactReport.getEnergyImpactInKwhGlobal());
-        log.info("kg co2 : " + energyImpactReport.getCo2EqInKg());
-        log.info("total page views : " + energyImpactReport.getPageViewsGlobal());
-        log.info("energy impact in Kwh / page: " + energyImpactReport.getEnergyImpactByPage());
-        log.info("total transferred MB " + energyImpactReport.getTotalTransferredMegaBytes());
-
-        // save all these metrics
-        if(computeRequest.getDoSaveMetrics()) {
-            log.info("saving metrics");
-            webPageActivityAnalysisRepository.saveAll(
-                    energyImpactMetrics.stream()
-                            .map(WebPageActivityAnalysis::fromEnergyImpactMetric)
-                            .collect(Collectors.toList())
-            );
-        }
-
-        // save all historian measures
-        if(computeRequest.getDoSaveMeasures()){
-            // convert them to measures
-            List<Measure> measures = energyImpactMetrics.stream()
-                    .flatMap(metric -> EnergyImpactMetricConverter.toMeasures(metric).stream())
-                    .collect(Collectors.toList());
-
-            // add measures to queue for being indexed to historian
-            log.info("measures are being sent to historian");
-            updateQueue.addAll(measures);
-        }
+        // compute report by sites
+        Map<String, List<EnergyImpactMetric>> metricsBySite = energyImpactMetrics.stream()
+                .collect(Collectors.groupingBy(EnergyImpactMetric::getRootUrl));
 
 
+        return metricsBySite.keySet().stream().map(rootUrl -> {
+            EnergyImpactReport energyImpactReport = new EnergyImpactReport(
+                    rootUrl, computeRequest.getStartDate(),
+                    computeRequest.getEndDate(),
+                    metricsBySite.get(rootUrl));
 
-        return energyImpactReport;
+            log.info("-----------------------------------------");
+            log.info("Report for site : " + energyImpactReport.getRootUrl() +
+                    " between " + computeRequest.getStartDate() + " and " + computeRequest.getEndDate());
+            log.info("energy impact in Kwh : " + energyImpactReport.getTotalEnergyImpactInKwh());
+            log.info("kg co2 : " + energyImpactReport.getCo2EqInKg());
+            log.info("total page views : " + energyImpactReport.getTotalPageViews());
+            log.info("energy impact in Kwh / page: " + energyImpactReport.getEnergyImpactByPage());
+            log.info("total transferred MB " + energyImpactReport.getTotalTransferredBytes() / 1024.0 / 1024.0);
+            log.info("-----------------------------------------");
+
+            // save all these metrics
+            if (computeRequest.getDoSaveMetrics()) {
+                log.info("saving metrics");
+                webPageActivityAnalysisRepository.saveAll(
+                        metricsBySite.get(rootUrl).stream()
+                                .map(WebPageActivityAnalysis::fromEnergyImpactMetric)
+                                .collect(Collectors.toList())
+                );
+            }
+
+            // save all historian measures
+            if (computeRequest.getDoSaveMeasures()) {
+                // convert them to measures
+                List<Measure> measures = metricsBySite.get(rootUrl).stream()
+                        .flatMap(metric -> EnergyImpactMetricConverter.toMeasures(metric).stream())
+                        .collect(Collectors.toList());
+
+                log.info("measures are being sent to historian");
+                updateQueue.addAll(EnergyImpactMetricConverter.toMeasures(energyImpactReport));
+                updateQueue.addAll(measures);
+            }
+
+
+            return energyImpactReport;
+        }).collect(Collectors.toList());
     }
 }

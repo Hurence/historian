@@ -15,6 +15,7 @@ import org.openqa.selenium.logging.LogEntry;
 import org.openqa.selenium.logging.LogType;
 import org.openqa.selenium.logging.LoggingPreferences;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,12 @@ public class PageSizeService {
     @Autowired
     private WebPageAnalysisRepository webPageAnalysisRepository;
 
+    @Value("${greensights.scraper.enabled:false}")
+    private Boolean isScrappingEnabled;
+
+    @Value("${greensights.analytics.defaults.avgPageSizeInBytes:2000}")
+    private Long defaultAvgPageSizeInBytes;
+
     private static final Logger log = LogManager.getLogger(PageSizeService.class);
 
     public PageSizeService() {
@@ -37,38 +44,49 @@ public class PageSizeService {
 
     @Cacheable("pagesize")
     public WebPageAnalysis getPageSize(String url) {
-        log.info("getting page size : "+ url);
 
         // get the saved version if it exists
         Optional<WebPageAnalysis> webPageAnalysisFromDB = webPageAnalysisRepository.findById(url);
-        if(webPageAnalysisFromDB.isPresent())
+        if(webPageAnalysisFromDB.isPresent()) {
+            log.debug("getting page size from cache for page : "+ url);
             return webPageAnalysisFromDB.get();
+        }
 
         // else we need to make the full analysis through a web driver which can be a little slow
         WebPageAnalysis webPageAnalysis = new WebPageAnalysis();
         webPageAnalysis.setUrl(url);
-        WebDriver driver = setupWebDriver();
 
-        // Your test logic here
-        long start = System.currentTimeMillis();
-        driver.get(url);
-        webPageAnalysis.setDownloadDuration( System.currentTimeMillis() - start);
+        // scrape wep page for accurate data
+        if(isScrappingEnabled) {
+            log.info("getting page size from scraping page : " + url);
+            WebDriver driver = setupWebDriver();
 
-        LogEntries logEntries = driver.manage().logs().get(LogType.PERFORMANCE);
-        long totalDataReceived = 0L;
-        int numRequests = 0;
-        for (LogEntry entry : logEntries) {
-            Gson gson = new Gson();
-            LogData logData = gson.fromJson(entry.getMessage(), LogData.class);
+            // Your test logic here
+            long start = System.currentTimeMillis();
+            driver.get(url);
+            webPageAnalysis.setDownloadDuration(System.currentTimeMillis() - start);
 
-            if (logData.getMessage().getMethod().equals("Network.loadingFinished")) {
-                totalDataReceived += logData.getMessage().getParams().getEncodedDataLength();
-                numRequests++;
+            LogEntries logEntries = driver.manage().logs().get(LogType.PERFORMANCE);
+            long totalDataReceived = 0L;
+            int numRequests = 0;
+            for (LogEntry entry : logEntries) {
+                Gson gson = new Gson();
+                LogData logData = gson.fromJson(entry.getMessage(), LogData.class);
+
+                if (logData.getMessage().getMethod().equals("Network.loadingFinished")) {
+                    totalDataReceived += logData.getMessage().getParams().getEncodedDataLength();
+                    numRequests++;
+                }
             }
+            webPageAnalysis.setPageSizeInBytes(totalDataReceived);
+            webPageAnalysis.setNumRequests(numRequests);
+            driver.quit();
+        }else{
+            log.info("getting page size from default settings : " + url);
+            webPageAnalysis.setPageSizeInBytes(defaultAvgPageSizeInBytes);
+            webPageAnalysis.setDownloadDuration(-1);
+            webPageAnalysis.setNumRequests(-1);
         }
-        webPageAnalysis.setPageSizeInBytes(totalDataReceived);
-        webPageAnalysis.setNumRequests(numRequests);
-        driver.quit();
 
 
         return webPageAnalysisRepository.save(webPageAnalysis);

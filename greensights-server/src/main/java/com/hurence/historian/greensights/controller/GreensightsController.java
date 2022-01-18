@@ -43,10 +43,10 @@ public class GreensightsController {
             List<ComputeRequest> requests = DateUtils.requestsBetweenDays(computeRequest);
 
             return requests.stream()
-                    .map(request -> energyImpactComputationService.compute(request))
+                    .flatMap(request -> energyImpactComputationService.compute(request).stream())
                     .collect(Collectors.toList());
         }else {
-            return Collections.singletonList(energyImpactComputationService.compute(computeRequest));
+            return energyImpactComputationService.compute(computeRequest);
         }
 
     }

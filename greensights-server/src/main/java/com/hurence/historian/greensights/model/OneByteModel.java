@@ -65,6 +65,21 @@ public class OneByteModel {
      */
     public static double getCarbonIntensityFactor(String countryName){
 
+        String zone = getZoneFromCountry(countryName);
+
+       switch (zone){
+           case "china": return CARBON_INTENSITY_FACTORS_CH;
+           case "france": return CARBON_INTENSITY_FACTORS_FR;
+           case "united_states": return CARBON_INTENSITY_FACTORS_US;
+           case "european_union": return CARBON_INTENSITY_FACTORS_EU;
+           default: return CARBON_INTENSITY_FACTORS_WORLD;
+       }
+
+
+    }
+
+    public static String getZoneFromCountry(String countryName){
+
         String lcCountryName = countryName.toLowerCase(Locale.ROOT);
 
         List<String> euCountries = new ArrayList<>();
@@ -75,18 +90,18 @@ public class OneByteModel {
 
 
         if(lcCountryName.equals("china"))
-            return CARBON_INTENSITY_FACTORS_CH;
+            return "china";
 
         else if(lcCountryName.equals("france"))
-            return CARBON_INTENSITY_FACTORS_FR;
+            return "france";
 
         else if(lcCountryName.equals("united states") || lcCountryName.equals("canada"))
-            return CARBON_INTENSITY_FACTORS_US;
+            return "united_states";
 
         else if(euCountries.contains(lcCountryName))
-            return CARBON_INTENSITY_FACTORS_EU;
+            return "european_union";
 
-        else return CARBON_INTENSITY_FACTORS_WORLD;
+        else return "world";
 
     }
 }

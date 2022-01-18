@@ -14,12 +14,12 @@ class OneByteModelTest {
 		metric.setDeviceCategory("desktop");
 		metric.setCountry("Austria");
 
-		Assertions.assertEquals( 8.976038946666668E-4, metric.getEnergyImpactInKwh());
-		Assertions.assertEquals( 2.4773867492800005E-4, metric.getCo2EqInKg());
+		Assertions.assertEquals( 8.976038946666667E-4, metric.getEnergyImpactInKwh());
+		Assertions.assertEquals( 2.47738674928E-4, metric.getCo2EqInKg());
 
 		metric.setCountry("France");
-		Assertions.assertEquals( 8.976038946666668E-4, metric.getEnergyImpactInKwh());
-		Assertions.assertEquals( 3.141613631333334E-5, metric.getCo2EqInKg());
+		Assertions.assertEquals( 8.976038946666667E-4, metric.getEnergyImpactInKwh());
+		Assertions.assertEquals( 3.1416136313333334E-5, metric.getCo2EqInKg());
 
 	}
 

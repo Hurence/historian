@@ -20,13 +20,13 @@ public class GreensightsScheduler {
     @Autowired
     private EnergyImpactComputationService energyImpactComputationService;
 
-    @Value("${analytics.dateRange.startDate:7daysAgo}")
+    @Value("${greensights.analytics.dateRange.startDate:7daysAgo}")
     private String startDate;
 
-    @Value("${analytics.dateRange.endDate:today}")
+    @Value("${greensights.analytics.dateRange.endDate:today}")
     private String endDate;
 
-    @Scheduled(fixedRateString = "${scraper.scheduledDelayMs}")
+    @Scheduled(fixedRateString = "${greensights.scraper.scheduledDelayMs}")
     public void fetchMetrics() throws IOException {
 
         ComputeRequest computeRequest = new ComputeRequest(startDate, endDate, true, true, false);
