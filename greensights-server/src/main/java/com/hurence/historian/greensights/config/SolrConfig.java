@@ -13,6 +13,7 @@ import org.springframework.data.solr.repository.config.EnableSolrRepositories;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.LinkedBlockingDeque;
 
 @Configuration
@@ -43,9 +44,14 @@ public class SolrConfig {
         return new SolrTemplate(client);
     }
 
-    @Bean
+   /* @Bean
     public BlockingQueue<Measure> updateQueue(){
         return new LinkedBlockingDeque<>(queueSize);
+    }*/
+
+    @Bean
+    public ConcurrentLinkedQueue<Measure> updateQueue(){
+        return new ConcurrentLinkedQueue<>();
     }
 
 }

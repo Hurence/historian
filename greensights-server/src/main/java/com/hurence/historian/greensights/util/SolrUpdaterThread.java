@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 
 /**
@@ -35,7 +36,8 @@ public class SolrUpdaterThread implements Runnable {
     private final Long flushIntervalMs;
     private final SolrClient solrClient;
 
-    private BlockingQueue<Measure> updateQueue;
+    //private BlockingQueue<Measure> updateQueue;
+    private ConcurrentLinkedQueue<Measure> updateQueue;
     private List<SolrInputDocument> buffer = new ArrayList<>();
 
 
@@ -43,7 +45,7 @@ public class SolrUpdaterThread implements Runnable {
                              Integer batchSize,
                              Long flushIntervalMs,
                              SolrClient solrClient,
-                             BlockingQueue<Measure> updateQueue,
+                             ConcurrentLinkedQueue<Measure> updateQueue,
                              String chunkOrigin) {
         this.collection = collection;
         this.batchSize = batchSize;
@@ -57,17 +59,16 @@ public class SolrUpdaterThread implements Runnable {
     @Override
     public void run() {
 
-        // process measures by
+
         while (true) {
+
+            // convert last measure to solr docs and add it to the indexing buffer
             Measure measure = null;
             try {
-                measure = updateQueue.take();
-                // TODO remove this
-                if (measure != null && !measure.getName().equals("solr_metrics_core_highlighter_request_total")) {
+                measure = updateQueue.poll();
+                if (measure != null) {
                     SolrInputDocument doc = measureToChunkSolrDocument(measure);
-                    //  req.add(doc);
                     batchedUpdates++;
-                  //  solrClient.add(collection, doc);
                     buffer.add(doc);
                 }
             } catch (Exception e) {
@@ -75,7 +76,7 @@ public class SolrUpdaterThread implements Runnable {
             }
 
 
-            //
+            // let's check if the batch of docs is ready to be indexed to solr
             try {
                 long currentTS = System.currentTimeMillis();
                 boolean doTimeout = (currentTS - lastTS) >= flushIntervalMs;
@@ -83,7 +84,7 @@ public class SolrUpdaterThread implements Runnable {
                 boolean hasSomethingToCommit = batchedUpdates != 0;
 
                 if (hasSomethingToCommit && (doTimeout || isBatchFull)) {
-                    solrClient.add(collection, buffer,2000 );
+                    solrClient.add(collection, buffer,500 );
                     buffer.clear();
                     //solrClient.commit(collection);
                     log.info("commit updateQueue size {}, batchedUpdates {}, doTimeout {}, isBatchFull {} ",
@@ -98,7 +99,7 @@ public class SolrUpdaterThread implements Runnable {
             } catch (Exception  e) {
                 log.error("unable to send measures to solr : {}", e.getMessage());
             }
-            Thread.sleep(50);
+            Thread.sleep(5);
         }
     }
 

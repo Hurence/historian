@@ -14,6 +14,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.Executor;
 
 
@@ -46,20 +47,23 @@ public class SolrUpdater {
     private SolrClient solrClient;
 
     @Autowired
-    private BlockingQueue<Measure> updateQueue;
+    private ConcurrentLinkedQueue<Measure> updateQueue;
 
 
     @Bean
     public Executor solrUpdaterExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(2);
-        executor.setMaxPoolSize(2);
+        executor.setCorePoolSize(8);
+        executor.setMaxPoolSize(10);
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("Greensights-");
         executor.initialize();
 
-        SolrUpdaterThread updaterThread = new SolrUpdaterThread(collection, batchSize, flushIntervalMs, solrClient, updateQueue, chunkOrigin);
-        executor.execute(updaterThread);
+        for (int i = 0; i < 8; i++) {
+            SolrUpdaterThread updaterThread = new SolrUpdaterThread(collection, batchSize, flushIntervalMs, solrClient, updateQueue, chunkOrigin);
+            executor.execute(updaterThread);
+        }
+
 
         return executor;
     }
