@@ -62,18 +62,25 @@ public class GoogleAnalyticsService {
 
             List<ViewProperty> allViewProperties = getAllViewProperties(analytics);
             for (ViewProperty viewProperty : allViewProperties) {
-                GetReportsResponse report = getReport(analyticsReporting, viewProperty.getViewId(), computeRequest);
-                List<EnergyImpactMetric> metrics = getMetrics(report, viewProperty);
-                metrics.forEach(energyImpactMetric -> {
-                    // we need page size from another service
-                    WebPageAnalysis webPageAnalysis = pageSizeService.getPageSize(energyImpactMetric.getFullUrl());
-                    energyImpactMetric.setPageSizeInBytes(webPageAnalysis.getPageSizeInBytes());
-                    energyImpactMetric.setDateRangeStart(computeRequest.getStartDate());
-                    energyImpactMetric.setDateRangeEnd(computeRequest.getEndDate());
-                    energyImpactMetric.setMetricDate(DateUtils.fromDateRequest(computeRequest.getEndDate()));
 
-                });
-                energyImpactMetrics.addAll(metrics);
+
+                // filter out unwanted rootUrl
+                if (!(computeRequest.getRootUrlFilters().contains(viewProperty.getWebsiteUrl()) ||
+                        computeRequest.getAccountFilters().contains(viewProperty.getAccountName()) ||
+                        computeRequest.getAccountFilters().contains(viewProperty.getAccountId()))) {
+
+                    GetReportsResponse report = getReport(analyticsReporting, viewProperty.getViewId(), computeRequest);
+                    List<EnergyImpactMetric> metrics = getMetrics(report, viewProperty);
+                    metrics.forEach(energyImpactMetric -> {
+                        // we need page size from another service
+                        WebPageAnalysis webPageAnalysis = pageSizeService.getPageSize(energyImpactMetric.getFullUrl());
+                        energyImpactMetric.setPageSizeInBytes(webPageAnalysis.pageSizeInBytes());
+                        energyImpactMetric.setDateRangeStart(computeRequest.getStartDate());
+                        energyImpactMetric.setDateRangeEnd(computeRequest.getEndDate());
+                        energyImpactMetric.setMetricDate(DateUtils.fromDateRequest(computeRequest.getEndDate()));
+                    });
+                    energyImpactMetrics.addAll(metrics);
+                }
             }
 
 
@@ -119,7 +126,7 @@ public class GoogleAnalyticsService {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    private  AnalyticsReporting initializeAnalyticsReporting() throws GeneralSecurityException, IOException {
+    private AnalyticsReporting initializeAnalyticsReporting() throws GeneralSecurityException, IOException {
 
         HttpTransport httpTransport = GoogleNetHttpTransport.newTrustedTransport();
         GoogleCredential credential = GoogleCredential
@@ -143,8 +150,6 @@ public class GoogleAnalyticsService {
         private String viewName;
         private String websiteUrl;
     }
-
-
 
 
     private List<ViewProperty> getAllViewProperties(Analytics analytics) throws IOException {
@@ -205,9 +210,6 @@ public class GoogleAnalyticsService {
     }
 
 
-
-
-
     /**
      * Queries the Analytics Reporting API V4.
      *
@@ -241,7 +243,7 @@ public class GoogleAnalyticsService {
         ReportRequest request = new ReportRequest()
                 .setViewId(viewId)
                 .setDateRanges(Arrays.asList(dateRange))
-                .setMetrics(Arrays.asList(pageViews,avgTimeOnPage))
+                .setMetrics(Arrays.asList(pageViews, avgTimeOnPage))
                 .setDimensions(Arrays.asList(deviceCategory, country, pagePath));
 
         ArrayList<ReportRequest> requests = new ArrayList<ReportRequest>();
@@ -259,12 +261,11 @@ public class GoogleAnalyticsService {
     }
 
 
-
-    private  List<EnergyImpactMetric> getMetrics(GetReportsResponse response, ViewProperty viewProperty) {
+    private List<EnergyImpactMetric> getMetrics(GetReportsResponse response, ViewProperty viewProperty) {
 
         List<EnergyImpactMetric> energyImpactMetrics = new ArrayList<>();
 
-        for (Report report: response.getReports()) {
+        for (Report report : response.getReports()) {
             ColumnHeader header = report.getColumnHeader();
             List<String> dimensionHeaders = header.getDimensions();
             List<MetricHeaderEntry> metricHeaders = header.getMetricHeader().getMetricHeaderEntries();
@@ -275,40 +276,40 @@ public class GoogleAnalyticsService {
                 return Collections.emptyList();
             }
 
-            for (ReportRow row: rows) {
+            for (ReportRow row : rows) {
                 EnergyImpactMetric metric = new EnergyImpactMetric();
                 List<String> dimensions = row.getDimensions();
                 List<DateRangeValues> metrics = row.getMetrics();
 
                 for (int i = 0; i < dimensionHeaders.size() && i < dimensions.size(); i++) {
-                    if(dimensionHeaders.get(i).equals("ga:deviceCategory"))
+                    if (dimensionHeaders.get(i).equals("ga:deviceCategory"))
                         metric.setDeviceCategory(dimensions.get(i));
-                    if(dimensionHeaders.get(i).equals("ga:country"))
+                    if (dimensionHeaders.get(i).equals("ga:country"))
                         metric.setCountry(dimensions.get(i));
-                    if(dimensionHeaders.get(i).equals("ga:pagePath"))
+                    if (dimensionHeaders.get(i).equals("ga:pagePath"))
                         metric.setPagePath(dimensions.get(i));
                 }
 
                 for (int j = 0; j < metrics.size(); j++) {
-                  //  log.info("Date Range (" + j + "): ");
+                    //  log.info("Date Range (" + j + "): ");
                     DateRangeValues values = metrics.get(j);
                     for (int k = 0; k < values.getValues().size() && k < metricHeaders.size(); k++) {
-                        if(metricHeaders.get(k).getName().equals("pageviews"))
+                        if (metricHeaders.get(k).getName().equals("pageviews"))
                             metric.setPageViews(Integer.parseInt(values.getValues().get(k)));
-                        if(metricHeaders.get(k).getName().equals("avgTimeOnPage"))
+                        if (metricHeaders.get(k).getName().equals("avgTimeOnPage"))
                             metric.setAvgTimeOnPageInSec((long) Float.parseFloat(values.getValues().get(k)));
                     }
                 }
                 metric.setRootUrl(viewProperty.getWebsiteUrl());
                 // return with hard wired default if this info is not present on GA
-                if(metric.getAvgTimeOnPageInSec() == 0)
+                if (metric.getAvgTimeOnPageInSec() == 0)
                     metric.setAvgTimeOnPageInSec(defaultAvgTimeOnPageInSec);
 
                 energyImpactMetrics.add(metric);
             }
 
         }
-        return  energyImpactMetrics;
+        return energyImpactMetrics;
     }
 
     /**
@@ -316,9 +317,9 @@ public class GoogleAnalyticsService {
      *
      * @param response An Analytics Reporting API V4 response.
      */
-    private  void printResponse(GetReportsResponse response) {
+    private void printResponse(GetReportsResponse response) {
 
-        for (Report report: response.getReports()) {
+        for (Report report : response.getReports()) {
             ColumnHeader header = report.getColumnHeader();
             List<String> dimensionHeaders = header.getDimensions();
             List<MetricHeaderEntry> metricHeaders = header.getMetricHeader().getMetricHeaderEntries();
@@ -329,7 +330,7 @@ public class GoogleAnalyticsService {
                 return;
             }
 
-            for (ReportRow row: rows) {
+            for (ReportRow row : rows) {
                 List<String> dimensions = row.getDimensions();
                 List<DateRangeValues> metrics = row.getMetrics();
 
@@ -347,7 +348,6 @@ public class GoogleAnalyticsService {
             }
         }
     }
-
 
 
     private GaData getResults(Analytics analytics, String profileId) throws IOException {

@@ -14,24 +14,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController()
-public class GreensightsController {
+@RequestMapping(
+        value = "/api/v1/web-analytics",
+        produces = "application/vnd.hurence.api.v1+json")
+public class WebAnalyticsController {
 
     @Autowired
     private EnergyImpactComputationService energyImpactComputationService;
-
-    @PostMapping("/crawler")
-    WebAppCrawlingSettings newCrawler(@RequestBody WebAppCrawlingSettings webAppCrawlingSettings) {
-
-        return webAppCrawlingSettings;
-       // return repository.save(newEmployee);
-    }
-
-    @GetMapping("/crawler/{id}/metrics")
-    List<EnergyImpactMetric> newCrawler(@PathVariable String crazwlerId) {
-
-        return Collections.emptyList();
-        // return repository.save(newEmployee);
-    }
 
 
 

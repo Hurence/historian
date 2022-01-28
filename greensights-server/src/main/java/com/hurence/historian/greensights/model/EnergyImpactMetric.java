@@ -85,6 +85,7 @@ public class EnergyImpactMetric {
         labels.put("page_path", pagePath);
         labels.put("country", OneByteModel.getZoneFromCountry(country));
         labels.put("device_category", deviceCategory);
+        labels.put("scope", "metric");
         return labels;
     }
 

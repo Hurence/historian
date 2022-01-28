@@ -3,6 +3,9 @@ package com.hurence.historian.greensights.model.request;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 public class ComputeRequest {
@@ -16,4 +19,8 @@ public class ComputeRequest {
     private Boolean doSaveMetrics = true;
 
     private Boolean doComputeDayByDay = false;
+
+    private List<String> rootUrlFilters = new ArrayList<>();
+
+    private List<String> accountFilters = new ArrayList<>();
 }

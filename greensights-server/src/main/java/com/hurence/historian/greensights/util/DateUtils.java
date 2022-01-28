@@ -47,7 +47,9 @@ public class DateUtils {
                     upperBoundDate,
                     rootRequest.getDoSaveMeasures(),
                     rootRequest.getDoSaveMetrics(),
-                    rootRequest.getDoComputeDayByDay()
+                    rootRequest.getDoComputeDayByDay(),
+                    rootRequest.getRootUrlFilters(),
+                    rootRequest.getAccountFilters()
             );
             requests.add(request);
         }

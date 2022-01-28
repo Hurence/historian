@@ -292,3 +292,36 @@ components
 - [greensights-server] implement energy computation endpoints
 - site crawler job as docker container
 - google analytics job 
+
+ 
+
+# Phase 2 :  IT monitoring
+
+
+We can use `turbostat`under linux to get accurate watt consumtion for both cpu and ram associated with a given workload.
+
+```bash
+sudo turbostat -q -c package --num_iterations 1 --interval 1.000000 --show PkgWatt,RAMWatt,PkgTmp
+
+# PkgTmp    PkgWatt	RAMWatt
+# 29	    25.50	6.75
+# 29	    25.51	6.75
+```
+
+
+scaphandre setup on hosts and kubernetes clusters
+
+historian that scrape all these metrics
+
+curl 'http://prometheus.monitoring.sandbox2.hurence.net/api/v1/query?query=up&time=2015-07-01T20:10:51.781Z'
+
+
+
+KPI
+
+top ten apps cpu & memory  KFlops / Wh
+categorize apps => cpu intensive / ram intensive / both
+infer app name from command line
+
+
+

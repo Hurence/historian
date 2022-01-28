@@ -1,6 +1,7 @@
 package com.hurence.historian.greensights.scheduler;
 
 import java.io.IOException;
+import java.util.List;
 
 
 import com.hurence.historian.greensights.model.request.ComputeRequest;
@@ -26,10 +27,18 @@ public class GreensightsScheduler {
     @Value("${greensights.analytics.dateRange.endDate:today}")
     private String endDate;
 
+    @Value("#{'${greensights.analytics.rootUrlFilters:}'.split(',')}")
+    private List<String> rootUrlFilters;
+
+
+    @Value("#{'${greensights.analytics.accountFilters:}'.split(',')}")
+    private List<String> accountFilters;
+
+
     @Scheduled(fixedRateString = "${greensights.scraper.scheduledDelayMs}")
     public void fetchMetrics() throws IOException {
 
-        ComputeRequest computeRequest = new ComputeRequest(startDate, endDate, true, true, false);
+        ComputeRequest computeRequest = new ComputeRequest(startDate, endDate, true, true, false, rootUrlFilters, accountFilters);
         energyImpactComputationService.compute(computeRequest);
     }
 

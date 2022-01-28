@@ -14,9 +14,10 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.BlockingQueue;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +34,7 @@ public class EnergyImpactComputationService {
      * @param computeRequest
      * @return
      */
-    public List<EnergyImpactReport> compute(ComputeRequest computeRequest){
+    public List<EnergyImpactReport> compute(ComputeRequest computeRequest) {
 
         log.debug("fetching metrics");
 
@@ -46,26 +47,34 @@ public class EnergyImpactComputationService {
 
 
         return metricsBySite.keySet().stream().map(rootUrl -> {
-            EnergyImpactReport energyImpactReport = new EnergyImpactReport(
-                    rootUrl, computeRequest.getStartDate(),
+
+            EnergyImpactReport siteReport = new EnergyImpactReport(
+                    rootUrl,
+                    null,
+                    computeRequest.getStartDate(),
                     computeRequest.getEndDate(),
                     metricsBySite.get(rootUrl));
 
             log.info("-----------------------------------------");
-            log.info("Report for site : " + energyImpactReport.getRootUrl() +
+            log.info("Report for site : " + siteReport.getRootUrl() +
                     " between " + computeRequest.getStartDate() + " and " + computeRequest.getEndDate());
-            log.info("energy impact in Kwh : " + energyImpactReport.getTotalEnergyImpactInKwh());
-            log.info("kg co2 : " + energyImpactReport.getCo2EqInKg());
-            log.info("total page views : " + energyImpactReport.getTotalPageViews());
-            log.info("energy impact in Kwh / page: " + energyImpactReport.getEnergyImpactByPage());
-            log.info("total transferred MB " + energyImpactReport.getTotalTransferredBytes() / 1024.0 / 1024.0);
+            log.info("page views       :              " + siteReport.getPageViews());
+            log.info("transferred data in Mb :        " + siteReport.getTransferredBytes() / 1024.0 / 1024.0);
+            log.info("energy impact in Kwh :          " + siteReport.getEnergyImpactInKwh());
+            log.info("co2 equivalence in Kg :         " + siteReport.getCo2EqInKg());
+            log.info("---");
+            log.info("average page size in Mb :       " + siteReport.getAvgPageSizeInBytes() / 1024.0 / 1024.0);
+            log.info("energy impact / page in Kwh :   " + siteReport.getEnergyImpactByPageInKwh());
+            log.info("co2 equivalence / page in Kg :  " + siteReport.getCo2EqByPageInKg());
+            log.info("average time on page in sec :   " + siteReport.getAvgTimeOnPageInSec());
             log.info("-----------------------------------------");
 
             // save all these metrics
             if (computeRequest.getDoSaveMetrics()) {
                 log.info("saving metrics");
                 webPageActivityAnalysisRepository.saveAll(
-                        metricsBySite.get(rootUrl).stream()
+                        metricsBySite.get(rootUrl)
+                                .stream()
                                 .map(WebPageActivityAnalysis::fromEnergyImpactMetric)
                                 .collect(Collectors.toList())
                 );
@@ -74,17 +83,34 @@ public class EnergyImpactComputationService {
             // save all historian measures
             if (computeRequest.getDoSaveMeasures()) {
                 // convert them to measures
-                List<Measure> measures = metricsBySite.get(rootUrl).stream()
+                List<Measure> measures = metricsBySite.get(rootUrl)
+                        .stream()
                         .flatMap(metric -> EnergyImpactMetricConverter.toMeasures(metric).stream())
                         .collect(Collectors.toList());
 
+                // compute report by site and by Page
+                Map<String, List<EnergyImpactMetric>> metricBySiteAndByPage = metricsBySite.get(rootUrl)
+                        .stream()
+                        .collect(Collectors.groupingBy(EnergyImpactMetric::getPagePath));
+
+                List<Measure> pageReportMeasures = metricBySiteAndByPage.keySet()
+                        .stream()
+                        .flatMap(pagePath -> EnergyImpactMetricConverter.toMeasures(
+                                new EnergyImpactReport(
+                                        rootUrl,
+                                        pagePath,
+                                        computeRequest.getStartDate(),
+                                        computeRequest.getEndDate(),
+                                        metricBySiteAndByPage.get(pagePath))
+                        ).stream())
+                        .collect(Collectors.toList());
+
                 log.info("measures are being sent to historian");
-                updateQueue.addAll(EnergyImpactMetricConverter.toMeasures(energyImpactReport));
+                updateQueue.addAll(EnergyImpactMetricConverter.toMeasures(siteReport));
+                updateQueue.addAll(pageReportMeasures);
                 updateQueue.addAll(measures);
             }
-
-
-            return energyImpactReport;
-        }).collect(Collectors.toList());
+            return siteReport;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }

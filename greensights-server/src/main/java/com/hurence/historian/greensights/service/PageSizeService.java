@@ -7,6 +7,8 @@ import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.Data;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -19,7 +21,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -28,6 +29,10 @@ public class PageSizeService {
 
     @Autowired
     private WebPageAnalysisRepository webPageAnalysisRepository;
+
+    @Autowired
+    private EcoIndexService ecoIndexService;
+
 
     @Value("${greensights.scraper.enabled:false}")
     private Boolean isScrappingEnabled;
@@ -39,6 +44,10 @@ public class PageSizeService {
 
     public PageSizeService() {
         WebDriverManager.chromedriver().setup();
+
+
+        // TODO remove GA footprint
+        // maybe use also this https://github.com/ultrafunkamsterdam/undetected-chromedriver
     }
 
 
@@ -47,27 +56,29 @@ public class PageSizeService {
 
         // get the saved version if it exists
         Optional<WebPageAnalysis> webPageAnalysisFromDB = webPageAnalysisRepository.findById(url);
-        if(webPageAnalysisFromDB.isPresent()) {
-            log.debug("getting page size from cache for page : "+ url);
+        if (webPageAnalysisFromDB.isPresent()) {
+            log.debug("getting page size from cache for page : " + url);
             return webPageAnalysisFromDB.get();
         }
 
         // else we need to make the full analysis through a web driver which can be a little slow
         WebPageAnalysis webPageAnalysis = new WebPageAnalysis();
-        webPageAnalysis.setUrl(url);
+        webPageAnalysis.url(url);
 
         // scrape wep page for accurate data
-        if(isScrappingEnabled) {
+        if (isScrappingEnabled) {
             log.info("getting page size from scraping page : " + url);
             WebDriver driver = setupWebDriver();
 
             // Your test logic here
             long start = System.currentTimeMillis();
             driver.get(url);
-            webPageAnalysis.setDownloadDuration(System.currentTimeMillis() - start);
+            webPageAnalysis.downloadDuration(System.currentTimeMillis() - start);
+
 
             LogEntries logEntries = driver.manage().logs().get(LogType.PERFORMANCE);
-            long totalDataReceived = 0L;
+            String bodyHTML = ((JavascriptExecutor) driver).executeScript("return document.documentElement.outerHTML;").toString();
+            long totalDataReceived = bodyHTML.getBytes().length;
             int numRequests = 0;
             for (LogEntry entry : logEntries) {
                 Gson gson = new Gson();
@@ -78,14 +89,28 @@ public class PageSizeService {
                     numRequests++;
                 }
             }
-            webPageAnalysis.setPageSizeInBytes(totalDataReceived);
-            webPageAnalysis.setNumRequests(numRequests);
+            webPageAnalysis.pageSizeInBytes(totalDataReceived);
+            webPageAnalysis.numRequests(numRequests);
+
+            int nodesCount = driver.findElements(new By.ByXPath("//*")).size();
+            webPageAnalysis.pageNodes(nodesCount);
+
+
+            /* //TODO fix here when no type found
+            String pageType = driver.findElement(new By.ByXPath("//meta[@property='og:type']"))
+                    .getAttribute("content");
+            webPageAnalysis.pageType(pageType);
+*/
+
+            // compute ecoIndex score
+            ecoIndexService.computeEcoIndex(webPageAnalysis);
+
             driver.quit();
-        }else{
+        } else {
             log.info("getting page size from default settings : " + url);
-            webPageAnalysis.setPageSizeInBytes(defaultAvgPageSizeInBytes);
-            webPageAnalysis.setDownloadDuration(-1);
-            webPageAnalysis.setNumRequests(-1);
+            webPageAnalysis.pageSizeInBytes(defaultAvgPageSizeInBytes);
+            webPageAnalysis.downloadDuration(-1);
+            webPageAnalysis.numRequests(-1);
         }
 
 
@@ -125,6 +150,7 @@ public class PageSizeService {
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1400,800");
         options.addArguments("--whitelisted-ips=");
+        options.addArguments("--host-resolver-rules=MAP www.google-analytics.com 127.0.0.1");
 
         LoggingPreferences logPrefs = new LoggingPreferences();
         logPrefs.enable(LogType.BROWSER, Level.ALL);
@@ -132,9 +158,6 @@ public class PageSizeService {
         options.setCapability("goog:loggingPrefs", logPrefs);
         return new ChromeDriver(options);
     }
-
-
-
 
 
 }
