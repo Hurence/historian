@@ -3,23 +3,23 @@ layout: page
 title: Greensights
 ---
 
-the platform is currently freely available for early adopters. please [Contact Us](mailto:thomas.bailet@hurence.com) if you're interested in contributing or being a beta tester.
+the platform is currently freely available for early adopters as a SAAS tool. please [contact us](mailto:thomas.bailet@hurence.com) if you're interested in contributing or being a beta tester.
+
+## Measure digital environmental footprint
 
 If you (still) wonder why we need such a platform, just take the time to read [the lean ICT manifest for digital sobriety](lean-ict) or even [The worrying trajectory of energy consumption by digital technology](https://imtech.wp.imt.fr/en/2020/05/28/the-worrying-trajectory-of-energy-consumption-by-digital-technology/)
 
-This was the warmup, now you're ready to take the first step to the digital sobriety : know where you are before even thinking to fix yourself some quantifiable goals to be more sustainable. You won't be able to reduce your organization's digital footprint if you are not actually capable of measuring it. Before going any further we need to see and understand what are the sources of impact in our organization.
+Now you're ready to take the first step to the digital sobriety : know where you are before even thinking to fix yourself some quantifiable goals to be more sustainable. You won't be able to reduce your organization's digital footprint if you are not actually capable of measuring it. Before going any further we need to see and understand what are the sources of impact in our organization.
 
     This is the first feature of Greensights : measure your digital footprint across time.
-
-## measure digital environmental footprint
 
 There are 2 main aspects of environmental impacts : production and use of devices. To reduce the first one, our organization needs to make better (and longer) use of hardware it already has, as well as trying to reduce it. To reduce the second one, we need to avoid resource waste at all costs and to optimize software execution over those hardware resources.
 
 Greensights will help your organization to track the hardware footprint and also to estimate the software consumption too.
 
-### Measure personal web energy consumption
+### Personal web energy consumption
 
-The first way to measure things, may be a little anecdotal (surely not accurate but really informative) is to monitor personal web browsing impact through a small browser extension that shows you (and only you) what is your top ten consumming web source. You can then see for example, that your favorite music stream is really eager in bytes and that you'd better listen to your mp3 playlist (even if it's going to be challenging to listen to music whithout any request to a streaming platform)
+The first way to measure things, may be a little anecdotal (surely not accurate but really informative) is to monitor personal web browsing impact through a small browser extension that shows you (and only you) what are your top ten consumming web sources. You can then see for example, that your favorite music stream is really eager in bytes and that you'd better listen to your mp3 playlist (even if it's going to be challenging to listen to music whithout any request to a streaming platform)
 
 ![IT monitoring](../assets/images/web-browsing-personnal.png)
 
@@ -33,11 +33,11 @@ this will be used to compute user browsing patterns and to generate monthly repo
 
 ![IT monitoring](../assets/images/web-browsing.png)
 
-### measure web app energy consumption through Google Analytics
+### Web app energy consumption through Google Analytics
 
 Now we'll have a look to which insights we could gain from web trafic analytics gathered through Google Analytics API. By the simple fact of authorizing a service email (personal to each organization), greensights server instance will be able to query Google Analytics in your name and to get all trafic data for the requested period (can be scheduled as a cron task). Greensights server will then compute the corresponding energy impact in KWh (inferred from the [oneByteModel](https://theshiftproject.org/wp-content/uploads/2018/10/Lean-ICT-Materials-1byte-Model-2018.xlsx)).
 
-The energy impact of one action will be computed with the following formula :
+The energy impact of one action for one website will be computed with the following formula :
 
     EnergyImpactInKwh = timeSpentOnActionInMin * deviceImpact + dataSizeInByte * (dataCenterImpact + networkImpact)
 
@@ -49,10 +49,10 @@ So we need to query Google Analytics to get :
 
 ![IT monitoring](../assets/images/web-analytics.png)
 
+The data is then stored into data historian for long term storage and further analytics. It can be easily queried through grafana to build custom dashboards. You can then gain time-based insights of all your web app energy impact. Again the OneByteModel can be questioned as it certainly over-estimates energy impact. But the interesting things with this approach are that :
 
-the data is then stored into data historian for long term storage and further analytics. It can be easily queried through grafana to build custom dashboards. You can then gain time-based insights of your web app energy impact. Again the OneByteModel can be questioned as it certainly over-estimates energy impact. But the interesting things with this approach are the fact that :
-
-- you can track global energy impact evolution in time
+- you can compare one site to another
+- you can track global energy impact evolution in time for one site
 - you can see what a new release or code change does to energy consumption
 - you can set alarms on consumption thresholds and give your dev teams objectives to remain under those thresholds.
 
@@ -68,7 +68,7 @@ You can then monitor what is going on at process level for the whole architectur
 
 This is where ou development team is focusing the most to add features
 
-## make the link between hardware and software
+## Make the link between hardware and software services
 
 For now, we've got a tool that enables us to monitor some levels of IT impacts (mostly energy and carbon equivalency).
 
@@ -77,3 +77,5 @@ For now, we've got a tool that enables us to monitor some levels of IT impacts (
 ## Set reduction goals
 
 ...
+
+the platform is currently freely available for early adopters as a SAAS tool. please [contact us](mailto:thomas.bailet@hurence.com) if you're interested in contributing or being a beta tester.
