@@ -3,16 +3,17 @@ layout: page
 title: Greensights
 ---
 
+the platform is currently freely available for early adopters. please [Contact Us](mailto:thomas.bailet@hurence.com) if you're interested in contributing or being a beta tester.
 
-## measure digital environmental footprint
+If you (still) wonder why we need such a platform, just take the time to read [the lean ICT manifest for digital sobriety](lean-ict) or even [The worrying trajectory of energy consumption by digital technology](https://imtech.wp.imt.fr/en/2020/05/28/the-worrying-trajectory-of-energy-consumption-by-digital-technology/)
 
-If you still wonder why we need such a platform, just take the time to read [the lean ICT manifest for digital sobriety](lean-ict) or even [The worrying trajectory of energy consumption by digital technology](https://imtech.wp.imt.fr/en/2020/05/28/the-worrying-trajectory-of-energy-consumption-by-digital-technology/)
-
-This was the warmup, now you're ready to take the first step to the digital sobriety : know where you are before even thinking to fix yourself some quantifiable goals to be more sustainable. You won't be able to reduce your organization's digital footprint if you are not actually capable of measuring it. Before going any further we need to see and understand what are the sources of impact in our organization. 
+This was the warmup, now you're ready to take the first step to the digital sobriety : know where you are before even thinking to fix yourself some quantifiable goals to be more sustainable. You won't be able to reduce your organization's digital footprint if you are not actually capable of measuring it. Before going any further we need to see and understand what are the sources of impact in our organization.
 
     This is the first feature of Greensights : measure your digital footprint across time.
 
-there are 2 main aspects of environmental impacts : production and use of devices. To reduce the first one, our organization needs to make better (and longer) use of hardware it already has, as well as trying to reduce it. To reduce the second one, we need to avoid resource waste at all costs and to optimize software execution over those hardware resources.
+## measure digital environmental footprint
+
+There are 2 main aspects of environmental impacts : production and use of devices. To reduce the first one, our organization needs to make better (and longer) use of hardware it already has, as well as trying to reduce it. To reduce the second one, we need to avoid resource waste at all costs and to optimize software execution over those hardware resources.
 
 Greensights will help your organization to track the hardware footprint and also to estimate the software consumption too.
 
