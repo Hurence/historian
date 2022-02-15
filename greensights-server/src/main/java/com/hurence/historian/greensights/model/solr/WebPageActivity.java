@@ -1,6 +1,6 @@
 package com.hurence.historian.greensights.model.solr;
 
-import com.hurence.historian.greensights.model.EnergyImpactMetric;
+import com.hurence.historian.greensights.model.WebPageEnergyImpactMetric;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.solr.core.mapping.Indexed;
@@ -10,7 +10,7 @@ import java.util.Date;
 
 @Data
 @SolrDocument(collection = "greensights")
-public class WebPageActivityAnalysis {
+public class WebPageActivity {
 
     @Id
     @Indexed(name = "id", type = "string")
@@ -61,8 +61,8 @@ public class WebPageActivityAnalysis {
      * @param metric
      * @return
      */
-    public static WebPageActivityAnalysis fromEnergyImpactMetric(EnergyImpactMetric metric){
-        WebPageActivityAnalysis analysis = new WebPageActivityAnalysis();
+    public static WebPageActivity fromEnergyImpactMetric(WebPageEnergyImpactMetric metric){
+        WebPageActivity analysis = new WebPageActivity();
         analysis.setPagePath(metric.getPagePath());
         analysis.setAvgTimeOnPageInSec(metric.getAvgTimeOnPageInSec());
         analysis.setPageViews(metric.getPageViews());

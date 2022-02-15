@@ -1,4 +1,4 @@
-package com.hurence.historian.greensights.model;
+package com.hurence.historian.greensights.model.request;
 
 import lombok.Data;
 
@@ -10,4 +10,5 @@ import lombok.Data;
 public class WebAppCrawlingSettings {
     private String webAppName;
     private String jsonKeyFile;
+    private String accountId;
 }

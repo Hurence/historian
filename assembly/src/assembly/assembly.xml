@@ -96,6 +96,15 @@
         <fileSet>
             <directoryMode>0770</directoryMode>
             <fileMode>0660</fileMode>
+            <directory>../greensights-server/target</directory>
+            <outputDirectory>./lib</outputDirectory>
+            <includes>
+                <include>*.jar</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directoryMode>0770</directoryMode>
+            <fileMode>0660</fileMode>
             <directory>..</directory>
             <outputDirectory>.</outputDirectory>
             <includes>

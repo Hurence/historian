@@ -325,3 +325,6 @@ infer app name from command line
 
 
 
+
+
+sudo useradd historian -m

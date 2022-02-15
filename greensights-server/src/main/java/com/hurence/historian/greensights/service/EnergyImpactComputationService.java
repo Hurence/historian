@@ -1,9 +1,9 @@
 package com.hurence.historian.greensights.service;
 
-import com.hurence.historian.greensights.model.EnergyImpactMetric;
+import com.hurence.historian.greensights.model.WebPageEnergyImpactMetric;
 import com.hurence.historian.greensights.model.EnergyImpactReport;
 import com.hurence.historian.greensights.model.request.ComputeRequest;
-import com.hurence.historian.greensights.model.solr.WebPageActivityAnalysis;
+import com.hurence.historian.greensights.model.solr.WebPageActivity;
 import com.hurence.historian.greensights.repository.WebPageActivityAnalysisRepository;
 import com.hurence.historian.greensights.util.EnergyImpactMetricConverter;
 import com.hurence.timeseries.model.Measure;
@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Service
 @RequiredArgsConstructor
@@ -39,11 +38,11 @@ public class EnergyImpactComputationService {
         log.debug("fetching metrics");
 
         // get metrics from google analytics
-        List<EnergyImpactMetric> energyImpactMetrics = googleAnalyticsService.retrieveMetrics(computeRequest);
+        List<WebPageEnergyImpactMetric> webPageEnergyImpactMetrics = googleAnalyticsService.retrieveMetrics(computeRequest);
 
         // compute report by sites
-        Map<String, List<EnergyImpactMetric>> metricsBySite = energyImpactMetrics.stream()
-                .collect(Collectors.groupingBy(EnergyImpactMetric::getRootUrl));
+        Map<String, List<WebPageEnergyImpactMetric>> metricsBySite = webPageEnergyImpactMetrics.stream()
+                .collect(Collectors.groupingBy(WebPageEnergyImpactMetric::getRootUrl));
 
 
         return metricsBySite.keySet().stream().map(rootUrl -> {
@@ -75,7 +74,7 @@ public class EnergyImpactComputationService {
                 webPageActivityAnalysisRepository.saveAll(
                         metricsBySite.get(rootUrl)
                                 .stream()
-                                .map(WebPageActivityAnalysis::fromEnergyImpactMetric)
+                                .map(WebPageActivity::fromEnergyImpactMetric)
                                 .collect(Collectors.toList())
                 );
             }
@@ -89,9 +88,9 @@ public class EnergyImpactComputationService {
                         .collect(Collectors.toList());
 
                 // compute report by site and by Page
-                Map<String, List<EnergyImpactMetric>> metricBySiteAndByPage = metricsBySite.get(rootUrl)
+                Map<String, List<WebPageEnergyImpactMetric>> metricBySiteAndByPage = metricsBySite.get(rootUrl)
                         .stream()
-                        .collect(Collectors.groupingBy(EnergyImpactMetric::getPagePath));
+                        .collect(Collectors.groupingBy(WebPageEnergyImpactMetric::getPagePath));
 
                 List<Measure> pageReportMeasures = metricBySiteAndByPage.keySet()
                         .stream()

@@ -1,5 +1,6 @@
 package com.hurence.historian.greensights.model;
 
+import com.hurence.historian.greensights.model.referential.OneByteModel;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -8,7 +9,7 @@ class OneByteModelTest {
 	@Test
 	public void kwhComputationTest(){
 
-		EnergyImpactMetric metric = new EnergyImpactMetric();
+		WebPageEnergyImpactMetric metric = new WebPageEnergyImpactMetric();
 
 		metric.setPageSizeInBytes(1323228);
 		metric.setDeviceCategory("desktop");

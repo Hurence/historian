@@ -27,7 +27,7 @@ public class EnergyImpactReport {
     private final Double co2EqByPageInKg;
 
 
-    public EnergyImpactReport(String rootUrl, String pagePath, String startDate, String endDate, List<EnergyImpactMetric> metrics, String... labels) {
+    public EnergyImpactReport(String rootUrl, String pagePath, String startDate, String endDate, List<WebPageEnergyImpactMetric> metrics, String... labels) {
         this.rootUrl = rootUrl;
         this.pagePath = pagePath;
 
@@ -35,23 +35,23 @@ public class EnergyImpactReport {
         this.endDate = endDate;
 
         energyImpactInKwh = metrics.stream()
-                .map(EnergyImpactMetric::getEnergyImpactInKwh)
+                .map(WebPageEnergyImpactMetric::getEnergyImpactInKwh)
                 .reduce(0.0, Double::sum);
 
         pageViews = metrics.stream()
-                .map(EnergyImpactMetric::getPageViews)
+                .map(WebPageEnergyImpactMetric::getPageViews)
                 .reduce(0, Integer::sum);
 
         avgTimeOnPageInSec = metrics.stream()
-                .map(EnergyImpactMetric::getAvgTimeOnPageInSec)
+                .map(WebPageEnergyImpactMetric::getAvgTimeOnPageInSec)
                 .reduce(0L, Long::sum) / metrics.size();
 
         transferredBytes = pageViews * metrics.stream()
-                .map(EnergyImpactMetric::getPageSizeInBytes)
+                .map(WebPageEnergyImpactMetric::getPageSizeInBytes)
                 .reduce(0L, Long::sum);
 
         co2EqInKg = metrics.stream()
-                .map(EnergyImpactMetric::getCo2EqInKg)
+                .map(WebPageEnergyImpactMetric::getCo2EqInKg)
                 .reduce(0.0, Double::sum);
 
         avgPageSizeInBytes = (long) (transferredBytes / (double) pageViews);

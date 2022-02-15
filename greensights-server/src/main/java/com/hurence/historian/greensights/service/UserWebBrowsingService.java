@@ -1,6 +1,6 @@
 package com.hurence.historian.greensights.service;
 
-import com.hurence.historian.greensights.model.UserLastHourWebBrowsingMetric;
+import com.hurence.historian.greensights.model.UserWebBrowsingMetric;
 import com.hurence.historian.greensights.util.EnergyImpactMetricConverter;
 import com.hurence.timeseries.model.Measure;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ public class UserWebBrowsingService {
      * @param metric
      * @return
      */
-    public UserLastHourWebBrowsingMetric save(UserLastHourWebBrowsingMetric metric){
+    public UserWebBrowsingMetric save(UserWebBrowsingMetric metric){
 
         log.info("putting user browsing metrics to update queue");
         updateQueue.addAll(EnergyImpactMetricConverter.toMeasures(metric) );

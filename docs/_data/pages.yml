@@ -19,6 +19,14 @@ toc:
       - page: REST api
         content: query historian with http calls
         url: api
+  - title: Greensights
+    subfolderitems:
+      - page: Lean ICT
+        content: Why do we need to look for Digital Sobriety ?
+        url: greensights/lean-ict
+      - page: Greensights
+        content: A platform to measure and optimize digital environmental footprint
+        url: greensights/greensights
   - title: Tutorials
     subfolderitems:
       - page: Getting started

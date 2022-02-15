@@ -1,8 +1,8 @@
 package com.hurence.historian.greensights.util;
 
-import com.hurence.historian.greensights.model.EnergyImpactMetric;
+import com.hurence.historian.greensights.model.WebPageEnergyImpactMetric;
 import com.hurence.historian.greensights.model.EnergyImpactReport;
-import com.hurence.historian.greensights.model.UserLastHourWebBrowsingMetric;
+import com.hurence.historian.greensights.model.UserWebBrowsingMetric;
 import com.hurence.timeseries.model.Measure;
 
 import java.util.ArrayList;
@@ -76,52 +76,66 @@ public class EnergyImpactMetricConverter {
         return measures;
     }
 
-    public static List<Measure> toMeasures(EnergyImpactMetric energyImpactMetric) {
+    public static List<Measure> toMeasures(WebPageEnergyImpactMetric webPageEnergyImpactMetric) {
 
         List<Measure> measures = new ArrayList<>();
 
         measures.add(Measure.builder()
-                .timestamp(energyImpactMetric.getMetricDate().getTime())
+                .timestamp(webPageEnergyImpactMetric.getMetricDate().getTime())
                 .name("energy_impact_kwh")
-                .tags(energyImpactMetric.getLabels())
-                .value(energyImpactMetric.getEnergyImpactInKwh())
+                .tags(webPageEnergyImpactMetric.getLabels())
+                .value(webPageEnergyImpactMetric.getEnergyImpactInKwh())
                 .build());
 
         measures.add(Measure.builder()
-                .timestamp(energyImpactMetric.getMetricDate().getTime())
+                .timestamp(webPageEnergyImpactMetric.getMetricDate().getTime())
                 .name("co2_eq_kg")
-                .tags(energyImpactMetric.getLabels())
-                .value(energyImpactMetric.getCo2EqInKg())
+                .tags(webPageEnergyImpactMetric.getLabels())
+                .value(webPageEnergyImpactMetric.getCo2EqInKg())
                 .build());
 
         measures.add(Measure.builder()
-                .timestamp(energyImpactMetric.getMetricDate().getTime())
+                .timestamp(webPageEnergyImpactMetric.getMetricDate().getTime())
                 .name("page_size_bytes")
-                .tags(energyImpactMetric.getLabels())
-                .value(energyImpactMetric.getPageSizeInBytes())
+                .tags(webPageEnergyImpactMetric.getLabels())
+                .value(webPageEnergyImpactMetric.getPageSizeInBytes())
                 .build());
 
         measures.add(Measure.builder()
-                .timestamp(energyImpactMetric.getMetricDate().getTime())
+                .timestamp(webPageEnergyImpactMetric.getMetricDate().getTime())
                 .name("page_views")
-                .tags(energyImpactMetric.getLabels())
-                .value(energyImpactMetric.getPageViews())
+                .tags(webPageEnergyImpactMetric.getLabels())
+                .value(webPageEnergyImpactMetric.getPageViews())
                 .build());
 
         measures.add(Measure.builder()
-                .timestamp(energyImpactMetric.getMetricDate().getTime())
+                .timestamp(webPageEnergyImpactMetric.getMetricDate().getTime())
                 .name("avg_time_on_page_sec")
-                .tags(energyImpactMetric.getLabels())
-                .value(energyImpactMetric.getAvgTimeOnPageInSec())
+                .tags(webPageEnergyImpactMetric.getLabels())
+                .value(webPageEnergyImpactMetric.getAvgTimeOnPageInSec())
                 .build());
 
         return measures;
     }
 
 
-    public static List<Measure> toMeasures(UserLastHourWebBrowsingMetric metric) {
+    public static List<Measure> toMeasures(UserWebBrowsingMetric metric) {
 
         List<Measure> measures = new ArrayList<>();
+
+        measures.add(Measure.builder()
+                .timestamp(metric.getMetricDate().getTime())
+                .name("transferred_data_bytes")
+                .tags(metric.getLabels())
+                .value(metric.getTransferredDataInBytes())
+                .build());
+
+        measures.add(Measure.builder()
+                .timestamp(metric.getMetricDate().getTime())
+                .name("time_spent_browsing_sec")
+                .tags(metric.getLabels())
+                .value(metric.getTimeSpentBrowsingInSec())
+                .build());
 
         measures.add(Measure.builder()
                 .timestamp(metric.getMetricDate().getTime())
@@ -139,45 +153,12 @@ public class EnergyImpactMetricConverter {
 
         measures.add(Measure.builder()
                 .timestamp(metric.getMetricDate().getTime())
-                .name("needed_trees_eq")
+                .name("domain_views")
                 .tags(metric.getLabels())
-                .value(metric.getNeededTreesEq())
+                .value(metric.getDomainViews())
                 .build());
 
-        measures.add(Measure.builder()
-                .timestamp(metric.getMetricDate().getTime())
-                .name("charged_smartphones_eq")
-                .tags(metric.getLabels())
-                .value(metric.getNumberOfChargedSmartphonesEq())
-                .build());
 
-        measures.add(Measure.builder()
-                .timestamp(metric.getMetricDate().getTime())
-                .name("kms_by_car_eq")
-                .tags(metric.getLabels())
-                .value(metric.getKmsByCarEq())
-                .build());
-
-        measures.add(Measure.builder()
-                .timestamp(metric.getMetricDate().getTime())
-                .name("avg_page_size_bytes")
-                .tags(metric.getLabels())
-                .value(metric.getAvgPageSizeInBytes())
-                .build());
-
-        measures.add(Measure.builder()
-                .timestamp(metric.getMetricDate().getTime())
-                .name("page_views")
-                .tags(metric.getLabels())
-                .value(metric.getPageViews())
-                .build());
-
-        measures.add(Measure.builder()
-                .timestamp(metric.getMetricDate().getTime())
-                .name("avg_time_on_page_sec")
-                .tags(metric.getLabels())
-                .value(metric.getAvgTimeOnPageInSec())
-                .build());
 
         return measures;
     }

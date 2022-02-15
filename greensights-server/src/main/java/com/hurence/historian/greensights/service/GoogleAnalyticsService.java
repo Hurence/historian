@@ -12,7 +12,7 @@ import com.google.api.services.analytics.model.*;
 import com.google.api.services.analyticsreporting.v4.AnalyticsReporting;
 import com.google.api.services.analyticsreporting.v4.AnalyticsReportingScopes;
 import com.google.api.services.analyticsreporting.v4.model.*;
-import com.hurence.historian.greensights.model.EnergyImpactMetric;
+import com.hurence.historian.greensights.model.WebPageEnergyImpactMetric;
 import com.hurence.historian.greensights.model.request.ComputeRequest;
 import com.hurence.historian.greensights.model.solr.WebPageAnalysis;
 import com.hurence.historian.greensights.util.DateUtils;
@@ -52,9 +52,9 @@ public class GoogleAnalyticsService {
      *
      * @return
      */
-    public List<EnergyImpactMetric> retrieveMetrics(ComputeRequest computeRequest) {
+    public List<WebPageEnergyImpactMetric> retrieveMetrics(ComputeRequest computeRequest) {
 
-        List<EnergyImpactMetric> energyImpactMetrics = new ArrayList<>();
+        List<WebPageEnergyImpactMetric> webPageEnergyImpactMetrics = new ArrayList<>();
 
         try {
             AnalyticsReporting analyticsReporting = initializeAnalyticsReporting();
@@ -70,7 +70,7 @@ public class GoogleAnalyticsService {
                         computeRequest.getAccountFilters().contains(viewProperty.getAccountId()))) {
 
                     GetReportsResponse report = getReport(analyticsReporting, viewProperty.getViewId(), computeRequest);
-                    List<EnergyImpactMetric> metrics = getMetrics(report, viewProperty);
+                    List<WebPageEnergyImpactMetric> metrics = getMetrics(report, viewProperty);
                     metrics.forEach(energyImpactMetric -> {
                         // we need page size from another service
                         WebPageAnalysis webPageAnalysis = pageSizeService.getPageSize(energyImpactMetric.getFullUrl());
@@ -79,7 +79,7 @@ public class GoogleAnalyticsService {
                         energyImpactMetric.setDateRangeEnd(computeRequest.getEndDate());
                         energyImpactMetric.setMetricDate(DateUtils.fromDateRequest(computeRequest.getEndDate()));
                     });
-                    energyImpactMetrics.addAll(metrics);
+                    webPageEnergyImpactMetrics.addAll(metrics);
                 }
             }
 
@@ -88,7 +88,7 @@ public class GoogleAnalyticsService {
             log.error(e.getMessage());
         }
 
-        return energyImpactMetrics;
+        return webPageEnergyImpactMetrics;
     }
 
 
@@ -261,9 +261,9 @@ public class GoogleAnalyticsService {
     }
 
 
-    private List<EnergyImpactMetric> getMetrics(GetReportsResponse response, ViewProperty viewProperty) {
+    private List<WebPageEnergyImpactMetric> getMetrics(GetReportsResponse response, ViewProperty viewProperty) {
 
-        List<EnergyImpactMetric> energyImpactMetrics = new ArrayList<>();
+        List<WebPageEnergyImpactMetric> webPageEnergyImpactMetrics = new ArrayList<>();
 
         for (Report report : response.getReports()) {
             ColumnHeader header = report.getColumnHeader();
@@ -277,7 +277,7 @@ public class GoogleAnalyticsService {
             }
 
             for (ReportRow row : rows) {
-                EnergyImpactMetric metric = new EnergyImpactMetric();
+                WebPageEnergyImpactMetric metric = new WebPageEnergyImpactMetric();
                 List<String> dimensions = row.getDimensions();
                 List<DateRangeValues> metrics = row.getMetrics();
 
@@ -305,11 +305,11 @@ public class GoogleAnalyticsService {
                 if (metric.getAvgTimeOnPageInSec() == 0)
                     metric.setAvgTimeOnPageInSec(defaultAvgTimeOnPageInSec);
 
-                energyImpactMetrics.add(metric);
+                webPageEnergyImpactMetrics.add(metric);
             }
 
         }
-        return energyImpactMetrics;
+        return webPageEnergyImpactMetrics;
     }
 
     /**

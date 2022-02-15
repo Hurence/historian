@@ -5,6 +5,7 @@ import com.hurence.historian.greensights.repository.WebPageAnalysisRepository;
 import com.hurence.historian.greensights.model.solr.WebPageAnalysis;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.Data;
+import org.apache.commons.lang3.SystemUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openqa.selenium.By;
@@ -43,7 +44,12 @@ public class PageSizeService {
     private static final Logger log = LogManager.getLogger(PageSizeService.class);
 
     public PageSizeService() {
-        WebDriverManager.chromedriver().setup();
+
+        if(SystemUtils.IS_OS_MAC_OSX){
+            log.info("setting up crhome driver for MacOS");
+            WebDriverManager.chromedriver().setup();
+        }
+
 
 
         // TODO remove GA footprint
@@ -146,7 +152,10 @@ public class PageSizeService {
     public WebDriver setupWebDriver() {
 
         ChromeOptions options = new ChromeOptions();
-        options.addArguments("--headless");
+        options.addArguments("headless");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--disable-dev-shm-usage");
+
         options.addArguments("--disable-gpu");
         options.addArguments("--window-size=1400,800");
         options.addArguments("--whitelisted-ips=");
@@ -156,7 +165,7 @@ public class PageSizeService {
         logPrefs.enable(LogType.BROWSER, Level.ALL);
         logPrefs.enable(LogType.PERFORMANCE, Level.ALL);
         options.setCapability("goog:loggingPrefs", logPrefs);
-        return new ChromeDriver(options);
+        return new ChromeDriver(options );
     }
 
 

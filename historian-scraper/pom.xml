@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.hurence.historian</groupId>
-	<artifactId>historian-scrapper</artifactId>
+	<artifactId>historian-scraper</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>historian-scrapper</name>
 	<description>Scrape prometheus metrics to historian</description>

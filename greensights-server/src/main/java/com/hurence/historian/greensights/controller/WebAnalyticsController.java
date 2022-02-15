@@ -1,15 +1,12 @@
 package com.hurence.historian.greensights.controller;
 
-import com.hurence.historian.greensights.model.EnergyImpactMetric;
 import com.hurence.historian.greensights.model.EnergyImpactReport;
-import com.hurence.historian.greensights.model.WebAppCrawlingSettings;
 import com.hurence.historian.greensights.model.request.ComputeRequest;
 import com.hurence.historian.greensights.service.EnergyImpactComputationService;
 import com.hurence.historian.greensights.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
