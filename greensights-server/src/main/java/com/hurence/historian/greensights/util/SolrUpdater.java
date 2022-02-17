@@ -53,7 +53,7 @@ public class SolrUpdater {
     @Bean
     public Executor solrUpdaterExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(8);
+        executor.setCorePoolSize(4);
         executor.setMaxPoolSize(10);
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("Greensights-");
@@ -62,6 +62,11 @@ public class SolrUpdater {
         for (int i = 0; i < 8; i++) {
             SolrUpdaterThread updaterThread = new SolrUpdaterThread(collection, batchSize, flushIntervalMs, solrClient, updateQueue, chunkOrigin);
             executor.execute(updaterThread);
+            try {
+                Thread.sleep(200);
+            } catch (InterruptedException e) {
+                log.error(e.getMessage());
+            }
         }
 
 

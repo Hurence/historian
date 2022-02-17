@@ -94,12 +94,13 @@ public class SolrUpdaterThread implements Runnable {
                             isBatchFull);
                     lastTS = currentTS;
                     batchedUpdates = 0;
+
                 }
 
             } catch (Exception  e) {
                 log.error("unable to send measures to solr : {}", e.getMessage());
             }
-            Thread.sleep(5);
+            Thread.sleep(50);
         }
     }
 
