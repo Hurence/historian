@@ -21,7 +21,7 @@ public class EcoIndexService {
 
 
     double getQuantile(List<Double> quantiles, int value) {
-        for (int i = 1; i < quantiles.size() + 1; i++) {
+        for (int i = 1; i < quantiles.size(); i++) {
             if (value < quantiles.get(i))
                 return i + (value - quantiles.get(i - 1)) / (quantiles.get(i) - quantiles.get(i - 1));
         }
