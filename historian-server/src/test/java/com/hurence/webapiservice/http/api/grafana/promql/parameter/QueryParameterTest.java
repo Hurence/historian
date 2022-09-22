@@ -215,7 +215,22 @@ class QueryParameterTest {
         assertEquals("aze", queryParameter.getTags().get("measure"));
     }
 
-        @Test
+
+    @Test
+    void testSumBy(){
+        String query = "sum(energy_impact_kwh{account_id=\"93090364\"})";
+
+        QueryParameter queryParameter = QueryParameter.builder().parse(query).build();
+
+        assertEquals(TimeserieFunctionType.SUM, queryParameter.getAggregationOperator().get());
+        assertEquals("93090364", queryParameter.getTags().get("account_id"));
+
+
+        //String query = "sum(energy_impact_kwh{account_id=\"93090364\"}) by (country_code)";
+
+    }
+
+    @Test
     void multiplePromQLQueries() {
 
         List<String> queries = Arrays.asList(

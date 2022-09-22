@@ -6,11 +6,11 @@ import io.vertx.core.json.JsonObject;
 import java.util.HashMap;
 import java.util.TreeSet;
 
-public class AvgTimeSerieFunction implements TimeseriesFunction {
+public class CountTimeSerieFunction implements TimeseriesFunction {
 
     @Override
     public TimeserieFunctionType type() {
-        return TimeserieFunctionType.AVG;
+        return TimeserieFunctionType.COUNT;
     }
 
     @Override
@@ -39,9 +39,9 @@ public class AvgTimeSerieFunction implements TimeseriesFunction {
                 .put("total_points", totalPoints)
                 .put("datapoints", aggregatedValues);
 
-        int i=0;
+        int i = 0;
         for (Long currentTimestamp : allTimestamps) {
-            double valueSum = 0.0;
+
             int count = 0;
             JsonArray dataPoints = new JsonArray();
 
@@ -49,10 +49,9 @@ public class AvgTimeSerieFunction implements TimeseriesFunction {
                 try {
                     final JsonArray currentDataPoints = timeseries.getJsonObject(j).getJsonArray("datapoints");
                     for (int k = 0; k < currentDataPoints.size(); k++) {
-                        if (currentDataPoints.getJsonArray(k).getLong(1).equals(currentTimestamp)){
+                        if (currentDataPoints.getJsonArray(k).getLong(1).equals(currentTimestamp)) {
                             final Double currentValue = currentDataPoints.getJsonArray(k).getDouble(0);
-                            if(!Double.isNaN(currentValue)) {
-                                valueSum += currentValue;
+                            if (!Double.isNaN(currentValue)) {
                                 count++;
                                 break;
                             }
@@ -63,7 +62,7 @@ public class AvgTimeSerieFunction implements TimeseriesFunction {
                     // do nothing
                 }
             }
-            dataPoints.add(valueSum/count).add(currentTimestamp);
+            dataPoints.add(count).add(currentTimestamp);
             aggregatedValues.add(dataPoints);
             i++;
         }
