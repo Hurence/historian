@@ -4,6 +4,7 @@ import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
 import java.util.HashMap;
+import java.util.TreeSet;
 
 public class MaxTimeSerieFunction implements TimeseriesFunction {
     @Override
@@ -11,39 +12,61 @@ public class MaxTimeSerieFunction implements TimeseriesFunction {
         return TimeserieFunctionType.MAX;
     }
 
+
     @Override
     public JsonArray process(JsonArray timeseries) {
 
-        int seriesCount = timeseries.size();
-        if (seriesCount < 1)
+        if (timeseries.size() < 1)
             return timeseries;
 
-        JsonObject firstEntry = timeseries.getJsonObject(0);
-        JsonArray firstEntryPoints = firstEntry.getJsonArray("datapoints");
+        // first compute an array of all the timestamps of all series
+        TreeSet<Long> allTimestamps = new TreeSet<>();
+        for (int i = 0; i < timeseries.size(); i++) {
+            JsonObject currentEntry = timeseries.getJsonObject(i);
+            JsonArray currentEntryPoints = currentEntry.getJsonArray("datapoints");
+            for (int j = 0; j < currentEntryPoints.size(); j++) {
+                allTimestamps.add(currentEntryPoints.getJsonArray(j).getLong(1));
+            }
+        }
 
-        Integer totalPoints = firstEntry.getInteger("total_points");
+        // this will give te total number of points we will aggregate
+        int totalPoints = allTimestamps.size();
+        JsonArray aggregatedValues = new JsonArray();
+
         JsonObject result = new JsonObject()
-                .put("name", firstEntry.getString("name"))
+                .put("name", timeseries.getJsonObject(0).getString("name"))
                 .put("tags", new HashMap<>())
                 .put("total_points", totalPoints)
-                .put("datapoints",  firstEntryPoints);
+                .put("datapoints", aggregatedValues);
 
-        for (int i = 0; i < totalPoints; i++) {
-            for (int j = 1; j < seriesCount; j++) {
+        int i=0;
+        for (Long currentTimestamp : allTimestamps) {
+            double maxValue = Double.MIN_VALUE;
+            JsonArray dataPoints = new JsonArray();
+
+            for (int j = 0; j < timeseries.size(); j++) {
                 try {
-                    Double newValue = timeseries.getJsonObject(j).getJsonArray("datapoints")
-                            .getJsonArray(i).getDouble(0);
-                    if (newValue > firstEntryPoints.getJsonArray(i).getDouble(0)) {
-                        Long newTime = firstEntryPoints.getJsonArray(i).getLong(1);
-                        firstEntryPoints.getJsonArray(i).clear();
-                        firstEntryPoints.getJsonArray(i).add(newValue).add(newTime);
+                    final JsonArray currentDataPoints = timeseries.getJsonObject(j).getJsonArray("datapoints");
+                    for (int k = 0; k < currentDataPoints.size(); k++) {
+                        if (currentDataPoints.getJsonArray(k).getLong(1).equals(currentTimestamp)){
+                            final Double currentValue = currentDataPoints.getJsonArray(k).getDouble(0);
+                            if(!Double.isNaN(currentValue) && currentValue > maxValue ) {
+                                maxValue = currentValue;
+                                break;
+                            }
+                        }
                     }
-                }catch (Exception ex){
+
+                } catch (Exception ex) {
                     // do nothing
                 }
             }
+            dataPoints.add(maxValue).add(currentTimestamp);
+            aggregatedValues.add(dataPoints);
+            i++;
         }
 
         return new JsonArray().add(result);
     }
+
 }

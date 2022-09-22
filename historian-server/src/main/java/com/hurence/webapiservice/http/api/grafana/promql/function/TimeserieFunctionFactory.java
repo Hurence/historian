@@ -9,6 +9,7 @@ public class TimeserieFunctionFactory {
             case ABS: return new AbsTimeSerieFunction();
             case AVG: return new AvgTimeSerieFunction();
             case SUM: return new SumTimeSerieFunction();
+            case COUNT: return new CountTimeSerieFunction();
             case PREDICT_ARIMA: return new PredictArimaTimeSerieFunction();
             default: return new NoopTimeSerieFunction();
         }
